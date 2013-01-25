@@ -1,0 +1,31 @@
+History
+-------
+
+The following sections outline Oracle Tools project changes in
+reverse chronological order.
+
+<h3>Version ${project.version}: ${timestamp} </h3>
+
+<h4>Source and Documentation Contributors</h4>
+
+*   Jonathan Knight and Brian Oliver
+
+<h4>Global and Cross-Module Changes</h4>
+
+*   Initial Release based on initial work from The Oracle Coherence Incubator.
+
+<h4>oracle-tools-core</h4>
+
+*   Defines Core and Shared Interfaces, Classes and Resources.
+
+<h4>oracle-tools-runtime</h4>
+
+*   Defines Runtime Process Management infrastructure.
+
+<h4>oracle-tools-testing-support</h4>
+
+*   Defines Testing Extensions for Deferred Resources.
+
+<h4>oracle-tools-coherence</h4>
+
+*   Defines Extensions to manage Oracle Coherence Runtimes.

@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: com.oracle.tools.runtime.java.process.VirtualProcessTest
+-------------------------------------------------------------------------------
+Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.031 sec

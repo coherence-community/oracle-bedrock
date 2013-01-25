@@ -1,0 +1,65 @@
+Oracle Tools
+=============================
+![Oracle Tools](images/oracletools-logo.png)
+
+Version: ${project.version} on ${timestamp}
+
+>   **WORK IN PROGRESS**
+>   
+>   This site is currently under construction.  Parts may be incomplete and 
+>   inaccurate.
+
+The Oracle Tools project consists of a collection of runtime tools, typically
+for managing and testing runtime processes, like those used by Java (and Oracle
+Coherence).
+
+The Oracle Tools consists of several modules, each themselves consisting of a
+collection of common utilities that of which may use be used as-is or for
+inclusion into applications.
+  
+Complete source code together with documentation is provided to aid in your 
+adoption, use and understanding.
+
+What's New?
+-----------
+
+For the most part the Oracle Tools project was spawned from earlier work in the
+Oracle Coherence Incubator, specifically focused on providing infrastructure to
+create, manage and test distributed applications.
+
+For more detailed information concerning changes in this release please consult the 
+project [history](history.html).
+
+Project Modules
+---------------
+
+The following [Apache Maven](http://maven.apache.org/) modules are defined
+by Oracle Tools.
+
+[**The Core Module:**](core/index.html)
+
+Defines the core interfaces, classes and resources for the Oracle Tools.
+
+[**The Runtime Module:**](runtime/index.html)
+
+Defines the interfaces, classes and resources for creating, managing, monitoring
+and controlling application processes, in particular, Java processes.
+
+[**The Testing Support Module:**](testing-support/index.html)
+
+Defines extensions to JUnit for the purposes of testing processes and deferred
+results.
+
+[**The Coherence Module:**](coherence/index.html)
+
+Defines extensions to Runtime Module for the purposes of testing Coherence-based
+applications.   (Requires Oracle Coherence)
+
+Contributions
+-------------
+
+If you are interested in making contributions to the Oracle Tools,
+including defect fixes, documentation, new classes/interfaces/methods/packages 
+or tests, you should read the section on 
+[Contributing to the Oracle Tools](contributions.html).
+

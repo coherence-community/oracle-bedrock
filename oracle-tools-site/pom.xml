@@ -1,0 +1,82 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.oracle.tools</groupId>
+        <artifactId>oracle-tools</artifactId>
+        <relativePath>..</relativePath>
+        <version>0.0.7-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>oracle-tools-site</artifactId>
+
+    <name>Oracle Tools Site</name>
+
+    <description>
+        The Oracle Tools Site
+    </description>
+
+    <properties>
+        <maven.build.timestamp.format>yyyy-MM-dd HH:mm</maven.build.timestamp.format>
+        <timestamp>${maven.build.timestamp}</timestamp>
+
+        <github.global.server>github</github.global.server>
+    </properties>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-deploy-plugin</artifactId>
+                <version>${maven.deploy.plugin.version}</version>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-site-plugin</artifactId>
+                <version>${maven.site.plugin.version}</version>
+                <configuration>
+                    <skipDeploy>true</skipDeploy>
+                    <generateReports>false</generateReports>
+                </configuration>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.kohsuke</groupId>
+                        <artifactId>doxia-module-markdown</artifactId>
+                        <version>${doxia.module.markdown.version}</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
+
+            <plugin>
+                <groupId>com.github.github</groupId>
+                <artifactId>site-maven-plugin</artifactId>
+                <version>0.7</version>
+                <configuration>
+                    <message>Creating site for ${project.version}</message>
+                    <path>${project.version}</path>
+                    <merge>false</merge>
+                    <repositoryName>oracle-tools</repositoryName>
+                    <repositoryOwner>coherence-community</repositoryOwner>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>site</goal>
+                        </goals>
+                        <phase>site-deploy</phase>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+    <scm>
+        <url>https://github.com/coherence-community/oracle-tools</url>
+        <connection>scm:git:git@github.com:coherence-community/oracle-tools.git</connection>
+        <developerConnection>scm:git:git@github.com:coherence-community/oracle-tools.git</developerConnection>
+    </scm>
+</project>

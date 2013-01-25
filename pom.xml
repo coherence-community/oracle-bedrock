@@ -1,0 +1,187 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>net.java</groupId>
+        <artifactId>jvnet-parent</artifactId>
+        <version>3</version>
+    </parent>
+
+    <groupId>com.oracle.tools</groupId>
+    <artifactId>oracle-tools</artifactId>
+    <version>0.0.7-SNAPSHOT</version>
+    <packaging>pom</packaging>
+
+    <name>Oracle Tools</name>
+
+    <description>
+        A set of open source runtime tools and utilities for use with
+        products developed by, with or in part Oracle Corporation.
+
+        Developed as part of the Oracle Coherence Community, though Oracle
+        Coherence is not really required.
+    </description>
+
+    <url>http://java.net/projects/oracletools</url>
+
+    <licenses>
+        <license>
+            <name>Common Development and Distribution License 1.0 ("CDDL")</name>
+            <url>http://opensource.org/licenses/CDDL-1.0</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <name>Brian Oliver</name>
+            <organization>Oracle Corporation</organization>
+        </developer>
+    </developers>
+
+    <scm>
+        <connection>scm:git:git@github.com:coherence-community/oracle-tools.git</connection>
+        <developerConnection>scm:git:git@github.com:coherence-community/oracle-tools.git</developerConnection>
+        <url>https://github.com/coherence-community/oracle-tools.git</url>
+    </scm>
+
+    <modules>
+        <module>oracle-tools-core</module>
+        <module>oracle-tools-runtime</module>
+        <module>oracle-tools-testing-support</module>
+        <module>oracle-tools-runtime-tests</module>
+        <module>oracle-tools-coherence</module>
+
+        <module>oracle-tools-site</module>
+    </modules>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+        <!-- plugin dependency versions -->
+        <doxia.module.markdown.version>1.0</doxia.module.markdown.version>
+
+        <github.site.maven.plugin.version>0.7</github.site.maven.plugin.version>
+
+        <maven.compiler.plugin.version>2.3.2</maven.compiler.plugin.version>
+        <maven.deploy.plugin.version>2.7</maven.deploy.plugin.version>
+        <maven.enforcer.plugin.version>1.0.1</maven.enforcer.plugin.version>
+        <maven.javadoc.plugin.version>2.8.1</maven.javadoc.plugin.version>
+        <maven.release.plugin.version>2.2.1</maven.release.plugin.version>
+        <maven.site.plugin.version>3.2</maven.site.plugin.version>
+        <maven.source.plugin.version>2.1.2</maven.source.plugin.version>
+
+        <!-- dependency versions -->
+        <cglib.version>2.2.2</cglib.version>
+        <coherence.version>3.7.1.5</coherence.version>
+        <hamcrest.version>1.2</hamcrest.version>
+        <junit.version>4.10</junit.version>
+        <mockito.version>1.9.0</mockito.version>
+        <objenesis.version>1.2</objenesis.version>
+    </properties>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-deploy-plugin</artifactId>
+                    <version>${maven.deploy.plugin.version}</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>${maven.source.plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>${maven.javadoc.plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>attach-javadocs</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>${maven.compiler.plugin.version}</version>
+                <configuration>
+                    <source>1.6</source>
+                    <target>1.6</target>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <version>${maven.enforcer.plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>enforce-plugin-versions</id>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <requireMavenVersion>
+                                    <version>3.0.4</version>
+                                </requireMavenVersion>
+                                <requireJavaVersion>
+                                    <version>1.6.0</version>
+                                </requireJavaVersion>
+                            </rules>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+			<plugin>
+            	<artifactId>maven-surefire-plugin</artifactId>
+                	<version>2.11</version>
+                    <configuration>
+                    	<argLine>-Xms800m -Xmx800m -XX:MaxPermSize=500m</argLine>
+                    	<includes>
+                    		<include>**/*IT.java</include>
+                    		<include>**/*Test.java</include>
+                    		<include>**/*Tests.java</include>
+                    	</includes>
+                    </configuration>
+			</plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-deploy-plugin</artifactId>
+                <version>${maven.deploy.plugin.version}</version>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-release-plugin</artifactId>
+                <version>${maven.release.plugin.version}</version>
+                <configuration>
+                    <autoVersionSubmodules>true</autoVersionSubmodules>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

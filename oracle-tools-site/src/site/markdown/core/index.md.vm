@@ -1,0 +1,11 @@
+The Core Module
+-------------------
+
+<h4>Overview</h4>
+
+
+<h4>Distribution</h4>
+
+The Oracle Tools Core Module is distributed as a single jar
+called: `oracle-tools-core-${project.version}.jar`
+

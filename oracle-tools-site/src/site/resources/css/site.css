@@ -1,0 +1,89 @@
+/*
+ * Copyright 2009 Aleksandar Seovic
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+/* clean up header styles*/
+h2 {
+    border-bottom: 1px solid #ccc;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    margin: 20px 0 10px;
+}
+
+:first-child {
+    margin-top: 0 !important;
+}
+
+/* override column widths */
+#leftColumn {
+    width: 250px;
+}
+
+#bodyColumn {
+    width: 670px;
+}
+
+/* change code color */
+code {
+    color: #333333;
+}
+
+/* remove 'powered by Maven' */
+.poweredBy {
+    display: none;
+}
+
+/* allow 'Fork me on Github' to show properly */
+.navbar-fixed-top {
+    z-index: 0;
+}
+
+/* remove banner and drop down menu*/
+#banner, #breadcrumbs, div.nav-collapse, a.btn-navbar {
+    display: none;
+}
+
+/* add Twitter icon and fix breaks */
+#twitter {
+    clear: both;
+    background: url('../images/twitter-icon.png') no-repeat 5px 0;
+    height: 40px;
+    padding-left: 45px;
+    padding-top: 10px;
+}
+
+div.clear {
+    clear: none;
+    display: none;
+}
+
+/* fix footer */
+footer div.span12 {
+    display: none;
+}
+
+footer div.copyright {
+    float: left;
+    font-size: 11px;
+    margin-left: 253px;
+}
+
+footer div.version {
+    text-align: right;
+    font-size: 11px;
+    width: 920px;
+}
