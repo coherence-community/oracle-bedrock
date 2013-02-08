@@ -5,5 +5,13 @@
 *.war
 *.ear
 
-# Maven Files #
+
+# Build Folders #
+.settings/
 target/
+*/target/**
+
+# IDE-specific Files #
+.classpath
+.project
+
