@@ -40,8 +40,8 @@
     </developers>
 
     <scm>
-        <connection>scm:git:git@github.com:coherence-community/oracle-tools.git</connection>
-        <developerConnection>scm:git:git@github.com:coherence-community/oracle-tools.git</developerConnection>
+        <connection>scm:git:https://github.com/coherence-community/oracle-tools.git</connection>
+        <developerConnection>scm:git:https://github.com/coherence-community/oracle-tools.git</developerConnection>
         <url>https://github.com/coherence-community/oracle-tools.git</url>
     </scm>
 

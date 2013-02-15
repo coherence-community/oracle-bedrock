@@ -73,10 +73,4 @@
             </plugin>
         </plugins>
     </build>
-
-    <scm>
-        <url>https://github.com/coherence-community/oracle-tools</url>
-        <connection>scm:git:git@github.com:coherence-community/oracle-tools.git</connection>
-        <developerConnection>scm:git:git@github.com:coherence-community/oracle-tools.git</developerConnection>
-    </scm>
 </project>
