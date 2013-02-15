@@ -9,7 +9,7 @@
 
     <groupId>com.oracle.tools</groupId>
     <artifactId>oracle-tools</artifactId>
-    <version>0.0.7</version>
+    <version>0.0.7-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>Oracle Tools</name>
@@ -43,8 +43,7 @@
         <connection>scm:git:git@github.com:coherence-community/oracle-tools.git</connection>
         <developerConnection>scm:git:git@github.com:coherence-community/oracle-tools.git</developerConnection>
         <url>https://github.com/coherence-community/oracle-tools.git</url>
-      <tag>oracle-tools-0.0.7</tag>
-  </scm>
+    </scm>
 
     <modules>
         <module>oracle-tools-core</module>
