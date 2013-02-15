@@ -1,6 +1,0 @@
-com.oracle.tools.runtime
-com.oracle.tools.runtime.console
-com.oracle.tools.runtime.java
-com.oracle.tools.runtime.java.process
-com.oracle.tools.runtime.java.virtualization
-com.oracle.tools.runtime.network
