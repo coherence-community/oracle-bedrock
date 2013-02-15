@@ -9,8 +9,7 @@
  * You may not use this file except in compliance with the License.
  *
  * You can obtain a copy of the License by consulting the LICENSE.txt file
- * distributed with this file, or by consulting
- * or https://oss.oracle.com/licenses/CDDL
+ * distributed with this file, or by consulting https://oss.oracle.com/licenses/CDDL
  *
  * See the License for the specific language governing permissions
  * and limitations under the License.
@@ -27,7 +26,6 @@
 package com.oracle.tools.runtime;
 
 import java.util.Properties;
-
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -54,12 +52,12 @@ public class SimpleApplication extends AbstractApplication<SimpleApplication>
      * @param defaultTimeoutUnits   the default timeout duration {@link TimeUnit}
      * @param interceptors          the {@link LifecycleEventInterceptor}s
      */
-    public SimpleApplication(Process process,
-                             String name,
-                             ApplicationConsole console,
-                             Properties environmentVariables,
-                             long defaultTimeout,
-                             TimeUnit defaultTimeoutUnits,
+    public SimpleApplication(Process                                                process,
+                             String                                                 name,
+                             ApplicationConsole                                     console,
+                             Properties                                             environmentVariables,
+                             long                                                   defaultTimeout,
+                             TimeUnit                                               defaultTimeoutUnits,
                              Iterable<LifecycleEventInterceptor<SimpleApplication>> interceptors)
     {
         super(process, name, console, environmentVariables, defaultTimeout, defaultTimeoutUnits, interceptors);

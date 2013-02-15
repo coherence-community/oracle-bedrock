@@ -9,8 +9,7 @@
  * You may not use this file except in compliance with the License.
  *
  * You can obtain a copy of the License by consulting the LICENSE.txt file
- * distributed with this file, or by consulting
- * or https://oss.oracle.com/licenses/CDDL
+ * distributed with this file, or by consulting https://oss.oracle.com/licenses/CDDL
  *
  * See the License for the specific language governing permissions
  * and limitations under the License.
@@ -30,35 +29,28 @@ import com.oracle.tools.deferred.Cached;
 import com.oracle.tools.deferred.Deferred;
 import com.oracle.tools.deferred.NeverAvailable;
 import com.oracle.tools.deferred.ObjectNotAvailableException;
-
 import com.oracle.tools.deferred.jmx.DeferredJMXConnector;
 import com.oracle.tools.deferred.jmx.DeferredMBeanAttribute;
 import com.oracle.tools.deferred.jmx.DeferredMBeanInfo;
 import com.oracle.tools.deferred.jmx.DeferredMBeanProxy;
-
 import com.oracle.tools.runtime.AbstractApplication;
 import com.oracle.tools.runtime.Application;
 import com.oracle.tools.runtime.ApplicationConsole;
 import com.oracle.tools.runtime.LifecycleEventInterceptor;
-
 import com.oracle.tools.runtime.java.process.VirtualProcess;
-
-import static com.oracle.tools.deferred.DeferredHelper.cached;
-import static com.oracle.tools.deferred.DeferredHelper.ensured;
-
-import java.io.IOException;
-
-import java.util.Properties;
-import java.util.Set;
-
-import java.util.concurrent.TimeUnit;
 
 import javax.management.MBeanInfo;
 import javax.management.ObjectInstance;
 import javax.management.ObjectName;
 import javax.management.QueryExp;
-
 import javax.management.remote.JMXConnector;
+import java.io.IOException;
+import java.util.Properties;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+
+import static com.oracle.tools.deferred.DeferredHelper.cached;
+import static com.oracle.tools.deferred.DeferredHelper.ensured;
 
 /**
  * A {@link AbstractJavaApplication} is a base implementation of a {@link JavaApplication} that has
@@ -97,13 +89,13 @@ public abstract class AbstractJavaApplication<A extends JavaApplication<A>> exte
      * @param defaultTimeoutUnits   the default timeout duration {@link TimeUnit}
      * @param interceptors          the {@link LifecycleEventInterceptor}s
      */
-    public AbstractJavaApplication(Process process,
-                                   String name,
-                                   ApplicationConsole console,
-                                   Properties environmentVariables,
-                                   Properties systemProperties,
-                                   long defaultTimeout,
-                                   TimeUnit defaultTimeoutUnits,
+    public AbstractJavaApplication(Process                                process,
+                                   String                                 name,
+                                   ApplicationConsole                     console,
+                                   Properties                             environmentVariables,
+                                   Properties                             systemProperties,
+                                   long                                   defaultTimeout,
+                                   TimeUnit                               defaultTimeoutUnits,
                                    Iterable<LifecycleEventInterceptor<A>> interceptors)
     {
         super(process, name, console, environmentVariables, defaultTimeout, defaultTimeoutUnits, interceptors);
@@ -206,7 +198,7 @@ public abstract class AbstractJavaApplication<A extends JavaApplication<A>> exte
      */
     @Override
     public <T> Deferred<T> getDeferredMBeanProxy(ObjectName objectName,
-                                                 Class<T> proxyClass)
+                                                 Class<T>   proxyClass)
     {
         return new Cached<T>(new DeferredMBeanProxy<T>(m_cachedJMXConnector, objectName, proxyClass));
     }
@@ -217,7 +209,7 @@ public abstract class AbstractJavaApplication<A extends JavaApplication<A>> exte
      */
     @Override
     public <T> T getMBeanProxy(ObjectName objectName,
-                               Class<T> proxyClass)
+                               Class<T>   proxyClass)
     {
         return ensured(getDeferredMBeanProxy(objectName, proxyClass),
                        getDefaultTimeout(),
@@ -250,8 +242,8 @@ public abstract class AbstractJavaApplication<A extends JavaApplication<A>> exte
      */
     @Override
     public <T> Deferred<T> getDeferredMBeanAttribute(ObjectName objectName,
-                                                     String attributeName,
-                                                     Class<T> attributeClass)
+                                                     String     attributeName,
+                                                     Class<T>   attributeClass)
     {
         return new DeferredMBeanAttribute<T>(m_cachedJMXConnector, objectName, attributeName, attributeClass);
     }
@@ -262,8 +254,8 @@ public abstract class AbstractJavaApplication<A extends JavaApplication<A>> exte
      */
     @Override
     public <T> T getMBeanAttribute(ObjectName objectName,
-                                   String attributeName,
-                                   Class<T> attributeClass)
+                                   String     attributeName,
+                                   Class<T>   attributeClass)
     {
         return ensured(getDeferredMBeanAttribute(objectName, attributeName, attributeClass),
                        getDefaultTimeout(),
@@ -276,7 +268,7 @@ public abstract class AbstractJavaApplication<A extends JavaApplication<A>> exte
      */
     @Override
     public Set<ObjectInstance> queryMBeans(ObjectName name,
-                                           QueryExp query)
+                                           QueryExp   query)
     {
         try
         {

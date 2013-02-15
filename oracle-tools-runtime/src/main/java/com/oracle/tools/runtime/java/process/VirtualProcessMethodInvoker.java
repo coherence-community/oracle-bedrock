@@ -9,8 +9,7 @@
  * You may not use this file except in compliance with the License.
  *
  * You can obtain a copy of the License by consulting the LICENSE.txt file
- * distributed with this file, or by consulting
- * or https://oss.oracle.com/licenses/CDDL
+ * distributed with this file, or by consulting https://oss.oracle.com/licenses/CDDL
  *
  * See the License for the specific language governing permissions
  * and limitations under the License.
@@ -32,9 +31,7 @@ import com.oracle.tools.runtime.java.virtualization.VirtualizedSystemClassLoader
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-
 import java.util.List;
-
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -76,9 +73,9 @@ public class VirtualProcessMethodInvoker implements Runnable
      * @param arguments        - the arguments to pass to the start method
      */
     public VirtualProcessMethodInvoker(VirtualizedSystemClassLoader classLoader,
-                                       String className,
-                                       String methodName,
-                                       List<String> arguments)
+                                       String                       className,
+                                       String                       methodName,
+                                       List<String>                 arguments)
     {
         this(classLoader, className, methodName, arguments, null);
     }
@@ -98,10 +95,10 @@ public class VirtualProcessMethodInvoker implements Runnable
      * @param instance    - the instance of the class to use to invoke the method if the method is not static
      */
     public VirtualProcessMethodInvoker(VirtualizedSystemClassLoader classLoader,
-                                       String className,
-                                       String methodName,
-                                       List<String> args,
-                                       Object instance)
+                                       String                       className,
+                                       String                       methodName,
+                                       List<String>                 args,
+                                       Object                       instance)
     {
         m_classLoader = classLoader;
         m_className   = className;

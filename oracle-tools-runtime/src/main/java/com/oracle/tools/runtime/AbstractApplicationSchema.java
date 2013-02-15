@@ -9,8 +9,7 @@
  * You may not use this file except in compliance with the License.
  *
  * You can obtain a copy of the License by consulting the LICENSE.txt file
- * distributed with this file, or by consulting
- * or https://oss.oracle.com/licenses/CDDL
+ * distributed with this file, or by consulting https://oss.oracle.com/licenses/CDDL
  *
  * See the License for the specific language governing permissions
  * and limitations under the License.
@@ -27,12 +26,10 @@
 package com.oracle.tools.runtime;
 
 import java.io.File;
-
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -165,7 +162,7 @@ public abstract class AbstractApplicationSchema<A extends Application<A>, S exte
      * @return the {@link ApplicationSchema} (so that we can perform method chaining)
      */
     @SuppressWarnings("unchecked")
-    public S setEnvironmentVariable(String name,
+    public S setEnvironmentVariable(String      name,
                                     Iterator<?> iterator)
     {
         m_propertiesBuilder.setProperty(name, iterator);
@@ -287,7 +284,7 @@ public abstract class AbstractApplicationSchema<A extends Application<A>, S exte
      * @return  the {@link ApplicationSchema} (so that we can perform method chaining)
      */
     @SuppressWarnings({"unchecked"})
-    public S setDefaultTimout(long defaultTimeout,
+    public S setDefaultTimout(long     defaultTimeout,
                               TimeUnit defaultTimeoutUnit)
     {
         m_defaultTimeout      = defaultTimeout;

@@ -9,8 +9,7 @@
  * You may not use this file except in compliance with the License.
  *
  * You can obtain a copy of the License by consulting the LICENSE.txt file
- * distributed with this file, or by consulting
- * or https://oss.oracle.com/licenses/CDDL
+ * distributed with this file, or by consulting https://oss.oracle.com/licenses/CDDL
  *
  * See the License for the specific language governing permissions
  * and limitations under the License.
@@ -28,18 +27,14 @@ package com.oracle.tools.runtime.java;
 
 import com.oracle.tools.runtime.AbstractApplicationBuilder;
 import com.oracle.tools.runtime.Application;
-
 import com.oracle.tools.runtime.Application.EventKind;
-
 import com.oracle.tools.runtime.ApplicationConsole;
 import com.oracle.tools.runtime.LifecycleEvent;
 import com.oracle.tools.runtime.LifecycleEventInterceptor;
-
 import com.oracle.tools.runtime.java.process.AbstractJavaProcessBuilder;
 import com.oracle.tools.runtime.java.process.JavaProcessBuilder;
 
 import java.io.IOException;
-
 import java.util.Properties;
 
 /**
@@ -68,8 +63,8 @@ public abstract class AbstractJavaApplicationBuilder<A extends JavaApplication<A
      */
     @SuppressWarnings("unchecked")
     @Override
-    public A realize(S schema,
-                     String applicationName,
+    public A realize(S                  schema,
+                     String             applicationName,
                      ApplicationConsole console) throws IOException
     {
         // construct an appropriate JavaProcessBuilder for the specified schema
@@ -153,7 +148,7 @@ public abstract class AbstractJavaApplicationBuilder<A extends JavaApplication<A
      * @param console          the {@link ApplicationConsole} for output
      * @return
      */
-    protected abstract JavaProcessBuilder createJavaProcessBuilder(S schema,
-                                                                   String applicationName,
+    protected abstract JavaProcessBuilder createJavaProcessBuilder(S                  schema,
+                                                                   String             applicationName,
                                                                    ApplicationConsole console);
 }

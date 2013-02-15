@@ -9,8 +9,7 @@
  * You may not use this file except in compliance with the License.
  *
  * You can obtain a copy of the License by consulting the LICENSE.txt file
- * distributed with this file, or by consulting
- * or https://oss.oracle.com/licenses/CDDL
+ * distributed with this file, or by consulting https://oss.oracle.com/licenses/CDDL
  *
  * See the License for the specific language governing permissions
  * and limitations under the License.
@@ -28,41 +27,26 @@ package com.oracle.tools.runtime.java.virtualization;
 
 import com.oracle.tools.runtime.network.AvailablePortIterator;
 
-import static com.oracle.tools.runtime.java.JavaApplication.JAVA_HOME;
-import static com.oracle.tools.runtime.java.JavaApplication.JAVA_RMI_SERVER_HOSTNAME;
-import static com.oracle.tools.runtime.java.JavaApplication.SUN_MANAGEMENT_JMXREMOTE;
-import static com.oracle.tools.runtime.java.JavaApplication.SUN_MANAGEMENT_JMXREMOTE_ACCESS_FILE;
-import static com.oracle.tools.runtime.java.JavaApplication.SUN_MANAGEMENT_JMXREMOTE_AUTHENTICATE;
-import static com.oracle.tools.runtime.java.JavaApplication.SUN_MANAGEMENT_JMXREMOTE_PASSWORD_FILE;
-import static com.oracle.tools.runtime.java.JavaApplication.SUN_MANAGEMENT_JMXREMOTE_PORT;
-import static com.oracle.tools.runtime.java.JavaApplication.SUN_MANAGEMENT_JMXREMOTE_SSL;
-import static com.oracle.tools.runtime.java.JavaApplication.SUN_MANAGEMENT_JMXREMOTE_URL;
-
-import java.io.IOException;
-
-import java.net.InetAddress;
-import java.net.URL;
-
-import java.rmi.RemoteException;
-
-import java.rmi.registry.LocateRegistry;
-import java.rmi.registry.Registry;
-
-import java.rmi.server.ExportException;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
-
 import javax.management.MBeanServer;
 import javax.management.MBeanServerBuilder;
 import javax.management.MBeanServerDelegate;
-
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXConnectorServer;
 import javax.management.remote.JMXConnectorServerFactory;
 import javax.management.remote.JMXServiceURL;
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.URL;
+import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
+import java.rmi.server.ExportException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
+
+import static com.oracle.tools.runtime.java.JavaApplication.*;
 
 /**
  * A {@link VirtualizedMBeanServerBuilder} is an {@link MBeanServerBuilder}
@@ -181,8 +165,8 @@ public class VirtualizedMBeanServerBuilder extends MBeanServerBuilder
      * @param availablePortIterator  the {@link AvailablePortIterator} to use for
      *                               acquiring ports for server connectors
      */
-    public VirtualizedMBeanServerBuilder(ConnectorFactory jmxConnectorFactory,
-                                         RmiRegistryFactory rmiRegistryFactory,
+    public VirtualizedMBeanServerBuilder(ConnectorFactory      jmxConnectorFactory,
+                                         RmiRegistryFactory    rmiRegistryFactory,
                                          AvailablePortIterator availablePortIterator)
     {
         m_mBeanServerBuilderClassName = System.getProperties().containsKey(PROPERTY_JMX_MBEAN_SERVER_BUILDER)
@@ -248,8 +232,8 @@ public class VirtualizedMBeanServerBuilder extends MBeanServerBuilder
      * {@inheritDoc}
      */
     @Override
-    public synchronized MBeanServer newMBeanServer(String domain,
-                                                   MBeanServer outer,
+    public synchronized MBeanServer newMBeanServer(String              domain,
+                                                   MBeanServer         outer,
                                                    MBeanServerDelegate delegate)
     {
         // attempt to locate the mbean server locally
@@ -298,7 +282,7 @@ public class VirtualizedMBeanServerBuilder extends MBeanServerBuilder
      * @return a {@link JMXConnectorServer}
      */
     JMXConnectorServer createJMXConnectorServer(MBeanServer mBeanServer,
-                                                Properties properties)
+                                                Properties  properties)
     {
         try
         {
@@ -415,9 +399,9 @@ public class VirtualizedMBeanServerBuilder extends MBeanServerBuilder
          *
          * @throws IOException
          */
-        public JMXConnectorServer createJMXConnectorServer(JMXServiceURL url,
+        public JMXConnectorServer createJMXConnectorServer(JMXServiceURL  url,
                                                            Map<String, ?> environment,
-                                                           MBeanServer mBeanServer) throws IOException;
+                                                           MBeanServer    mBeanServer) throws IOException;
 
 
         /**
@@ -430,7 +414,7 @@ public class VirtualizedMBeanServerBuilder extends MBeanServerBuilder
          *
          * @throws IOException
          */
-        public JMXConnector createJMXConnector(JMXServiceURL url,
+        public JMXConnector createJMXConnector(JMXServiceURL  url,
                                                Map<String, ?> environment) throws IOException;
     }
 
@@ -460,9 +444,9 @@ public class VirtualizedMBeanServerBuilder extends MBeanServerBuilder
          * {@inheritDoc}
          */
         @Override
-        public JMXConnectorServer createJMXConnectorServer(JMXServiceURL url,
+        public JMXConnectorServer createJMXConnectorServer(JMXServiceURL  url,
                                                            Map<String, ?> environment,
-                                                           MBeanServer mBeanServer) throws IOException
+                                                           MBeanServer    mBeanServer) throws IOException
         {
             return JMXConnectorServerFactory.newJMXConnectorServer(url, environment, mBeanServer);
         }
@@ -472,7 +456,7 @@ public class VirtualizedMBeanServerBuilder extends MBeanServerBuilder
          * {@inheritDoc}
          */
         @Override
-        public JMXConnector createJMXConnector(JMXServiceURL url,
+        public JMXConnector createJMXConnector(JMXServiceURL  url,
                                                Map<String, ?> environment) throws IOException
         {
             return JMXConnectorFactory.newJMXConnector(url, environment);

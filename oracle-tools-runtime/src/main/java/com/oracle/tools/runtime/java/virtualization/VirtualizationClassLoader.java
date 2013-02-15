@@ -9,8 +9,7 @@
  * You may not use this file except in compliance with the License.
  *
  * You can obtain a copy of the License by consulting the LICENSE.txt file
- * distributed with this file, or by consulting
- * or https://oss.oracle.com/licenses/CDDL
+ * distributed with this file, or by consulting https://oss.oracle.com/licenses/CDDL
  *
  * See the License for the specific language governing permissions
  * and limitations under the License.
@@ -27,14 +26,11 @@
 package com.oracle.tools.runtime.java.virtualization;
 
 import java.io.File;
-
 import java.net.URL;
-
 import java.security.AllPermission;
 import java.security.CodeSource;
 import java.security.PermissionCollection;
 import java.security.Permissions;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -121,8 +117,8 @@ public class VirtualizationClassLoader extends VirtualizedSystemClassLoader
      * @param parent         the parent {@link ClassLoader}
      * @param system         the {@link VirtualizedSystem} for the {@link VirtualizationClassLoader}
      */
-    private VirtualizationClassLoader(URL[] classPathURLs,
-                                      ClassLoader parent,
+    private VirtualizationClassLoader(URL[]             classPathURLs,
+                                      ClassLoader       parent,
                                       VirtualizedSystem system)
     {
         super(classPathURLs, null, system);
@@ -148,8 +144,8 @@ public class VirtualizationClassLoader extends VirtualizedSystemClassLoader
      *
      * @throws Exception  if some exception occurs
      */
-    public static VirtualizationClassLoader newInstance(String applicationName,
-                                                        String classpath,
+    public static VirtualizationClassLoader newInstance(String     applicationName,
+                                                        String     classpath,
                                                         Properties localProperties) throws Exception
     {
         if (classpath == null || classpath.length() == 0)
@@ -189,10 +185,10 @@ public class VirtualizationClassLoader extends VirtualizedSystemClassLoader
         // add local properties to the virtualized system
         virtualSystem.getProperties().putAll(localProperties);
 
-        ClassLoader               parentLoader = VirtualizationClassLoader.class.getClassLoader();
-        VirtualizationClassLoader loader       = new VirtualizationClassLoader(urls.toArray(new URL[urls.size()]),
-                                                                               parentLoader,
-                                                                               virtualSystem);
+        ClassLoader parentLoader = VirtualizationClassLoader.class.getClassLoader();
+        VirtualizationClassLoader loader = new VirtualizationClassLoader(urls.toArray(new URL[urls.size()]),
+                                                                         parentLoader,
+                                                                         virtualSystem);
 
         String excludedPackageList = localProperties.getProperty(PROPERTY_EXCLUDED_PACKAGES);
 

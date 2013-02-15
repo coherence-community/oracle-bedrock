@@ -9,8 +9,7 @@
  * You may not use this file except in compliance with the License.
  *
  * You can obtain a copy of the License by consulting the LICENSE.txt file
- * distributed with this file, or by consulting
- * or https://oss.oracle.com/licenses/CDDL
+ * distributed with this file, or by consulting https://oss.oracle.com/licenses/CDDL
  *
  * See the License for the specific language governing permissions
  * and limitations under the License.
@@ -27,7 +26,6 @@
 package com.oracle.tools.runtime;
 
 import com.oracle.tools.runtime.console.SystemApplicationConsole;
-
 import com.oracle.tools.runtime.java.process.VirtualProcess;
 
 import java.io.BufferedInputStream;
@@ -35,16 +33,12 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
-
 import java.lang.reflect.Field;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
-
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -131,10 +125,10 @@ public abstract class AbstractApplication<A> implements Application<A>
      * @param console               the {@link ApplicationConsole} that will be used for I/O by the {@link Application}
      * @param environmentVariables  the environment variables used when establishing the {@link Application}
      */
-    public AbstractApplication(Process process,
-                               String name,
+    public AbstractApplication(Process            process,
+                               String             name,
                                ApplicationConsole console,
-                               Properties environmentVariables)
+                               Properties         environmentVariables)
     {
         this(process, name, console, environmentVariables, DEFAULT_TIMEOUT, DEFAULT_TIMEOUT_UNIT, null);
     }
@@ -151,12 +145,12 @@ public abstract class AbstractApplication<A> implements Application<A>
      * @param defaultTimeoutUnits   the default timeout duration {@link TimeUnit}
      * @param interceptors          the {@link LifecycleEventInterceptor}s
      */
-    public AbstractApplication(Process process,
-                               String name,
-                               ApplicationConsole console,
-                               Properties environmentVariables,
-                               long defaultTimeout,
-                               TimeUnit defaultTimeoutUnits,
+    public AbstractApplication(Process                                process,
+                               String                                 name,
+                               ApplicationConsole                     console,
+                               Properties                             environmentVariables,
+                               long                                   defaultTimeout,
+                               TimeUnit                               defaultTimeoutUnits,
                                Iterable<LifecycleEventInterceptor<A>> interceptors)
     {
         m_process              = process;
@@ -491,7 +485,7 @@ public abstract class AbstractApplication<A> implements Application<A>
          * @param stream   the {@link InputStream} from which to read the content
          * @param console  the {@link ApplicationConsole} to output the content
          */
-        private OutputRedirector(String prefix,
+        private OutputRedirector(String      prefix,
                                  InputStream stream)
         {
             m_prefix = prefix;

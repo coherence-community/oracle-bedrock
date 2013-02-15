@@ -9,8 +9,7 @@
  * You may not use this file except in compliance with the License.
  *
  * You can obtain a copy of the License by consulting the LICENSE.txt file
- * distributed with this file, or by consulting
- * or https://oss.oracle.com/licenses/CDDL
+ * distributed with this file, or by consulting https://oss.oracle.com/licenses/CDDL
  *
  * See the License for the specific language governing permissions
  * and limitations under the License.
@@ -27,27 +26,18 @@
 package com.oracle.tools.runtime.java.virtualization;
 
 import com.oracle.tools.DummyClass;
-
 import com.oracle.tools.junit.AbstractTest;
-
 import org.junit.Test;
-
 import org.mockito.Mockito;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.CoreMatchers.sameInstance;
-
-import static org.junit.Assert.assertThat;
-
 import java.io.File;
-
 import java.lang.reflect.Method;
-
 import java.net.URI;
 import java.net.URL;
-
 import java.util.Enumeration;
+
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.assertThat;
 
 /**
  * Unit tests for the {@link VirtualizationClassLoader}.
@@ -89,11 +79,11 @@ public class VirtualizationClassLoaderTest extends AbstractTest
     @Test
     public void shouldUseSpecifiedClassPath() throws Exception
     {
-        String                    classpath = "test1.jar" + File.pathSeparator + "test2.jar";
+        String classpath = "test1.jar" + File.pathSeparator + "test2.jar";
 
-        VirtualizationClassLoader loader    = VirtualizationClassLoader.newInstance("Test",
-                                                                                    classpath,
-                                                                                    System.getProperties());
+        VirtualizationClassLoader loader = VirtualizationClassLoader.newInstance("Test",
+                                                                                 classpath,
+                                                                                 System.getProperties());
         URL[] path = loader.getClassPath();
 
         assertThat(path[0].toExternalForm(), is("file://test1.jar"));

@@ -9,8 +9,7 @@
  * You may not use this file except in compliance with the License.
  *
  * You can obtain a copy of the License by consulting the LICENSE.txt file
- * distributed with this file, or by consulting
- * or https://oss.oracle.com/licenses/CDDL
+ * distributed with this file, or by consulting https://oss.oracle.com/licenses/CDDL
  *
  * See the License for the specific language governing permissions
  * and limitations under the License.
@@ -27,25 +26,20 @@
 package com.oracle.tools.runtime.java.virtualization;
 
 import com.oracle.tools.junit.AbstractTest;
-
 import org.junit.Test;
-
-import static com.oracle.tools.runtime.java.JavaApplication.SUN_MANAGEMENT_JMXREMOTE;
-
-import static org.hamcrest.CoreMatchers.is;
-
-import static org.junit.Assert.assertThat;
-
-import java.util.Collections;
 
 import javax.management.MBeanInfo;
 import javax.management.MBeanServer;
 import javax.management.MBeanServerConnection;
 import javax.management.MBeanServerFactory;
 import javax.management.ObjectName;
-
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorServer;
+import java.util.Collections;
+
+import static com.oracle.tools.runtime.java.JavaApplication.SUN_MANAGEMENT_JMXREMOTE;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
 
 /**
  * Functional tests for the {@link VirtualizedMBeanServerBuilder}.

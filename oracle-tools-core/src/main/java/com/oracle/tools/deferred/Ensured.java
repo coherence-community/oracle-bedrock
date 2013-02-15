@@ -9,8 +9,7 @@
  * You may not use this file except in compliance with the License.
  *
  * You can obtain a copy of the License by consulting the LICENSE.txt file
- * distributed with this file, or by consulting
- * or https://oss.oracle.com/licenses/CDDL
+ * distributed with this file, or by consulting https://oss.oracle.com/licenses/CDDL
  *
  * See the License for the specific language governing permissions
  * and limitations under the License.
@@ -118,8 +117,8 @@ public class Ensured<T> implements Deferred<T>
      * @param totalDurationUnits  the {@link TimeUnit}s for the duration
      */
     public Ensured(Deferred<T> deferred,
-                   long totalDuration,
-                   TimeUnit totalDurationUnits)
+                   long        totalDuration,
+                   TimeUnit    totalDurationUnits)
     {
         this(deferred, DEFAULT_RETRY_DURATION_MS, TimeUnit.MILLISECONDS, totalDuration, totalDurationUnits);
     }
@@ -136,10 +135,10 @@ public class Ensured<T> implements Deferred<T>
      * @param totalDurationUnits       the {@link TimeUnit}s for the total duration
      */
     public Ensured(Deferred<T> deferred,
-                   long retryDelayDuration,
-                   TimeUnit retryDelayDurationUnits,
-                   long totalDuration,
-                   TimeUnit totalDurationUnits)
+                   long        retryDelayDuration,
+                   TimeUnit    retryDelayDurationUnits,
+                   long        totalDuration,
+                   TimeUnit    totalDurationUnits)
     {
         // when we're ensuring an ensured, use the adapted deferred
         // (this is to ensure that we don't attempt to over ensure a deferred)

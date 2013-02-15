@@ -9,8 +9,7 @@
  * You may not use this file except in compliance with the License.
  *
  * You can obtain a copy of the License by consulting the LICENSE.txt file
- * distributed with this file, or by consulting
- * or https://oss.oracle.com/licenses/CDDL
+ * distributed with this file, or by consulting https://oss.oracle.com/licenses/CDDL
  *
  * See the License for the specific language governing permissions
  * and limitations under the License.
@@ -29,14 +28,12 @@ package com.oracle.tools.deferred.jmx;
 import com.oracle.tools.deferred.Deferred;
 import com.oracle.tools.deferred.ObjectNotAvailableException;
 
-import java.io.IOException;
-
-import java.util.HashMap;
-import java.util.Map;
-
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * A {@link DeferredJMXConnector} is a {@link Deferred} for a
@@ -82,7 +79,7 @@ public class DeferredJMXConnector implements Deferred<JMXConnector>
      * @param builder           the {@link JMXConnectorBuilder} to realize
      *                          {@link JMXConnector}s
      */
-    public DeferredJMXConnector(String jmxConnectionURL,
+    public DeferredJMXConnector(String              jmxConnectionURL,
                                 JMXConnectorBuilder builder)
     {
         m_jmxConnectionURL    = jmxConnectionURL;
@@ -174,7 +171,7 @@ public class DeferredJMXConnector implements Deferred<JMXConnector>
          *
          * @throws IOException  should the {@link JMXConnector} fail to be realized
          */
-        public JMXConnector realize(JMXServiceURL url,
+        public JMXConnector realize(JMXServiceURL  url,
                                     Map<String, ?> env) throws IOException;
     }
 
@@ -189,7 +186,7 @@ public class DeferredJMXConnector implements Deferred<JMXConnector>
          * {@inheritDoc}
          */
         @Override
-        public JMXConnector realize(JMXServiceURL url,
+        public JMXConnector realize(JMXServiceURL  url,
                                     Map<String, ?> env) throws IOException
         {
             return JMXConnectorFactory.newJMXConnector(url, env);

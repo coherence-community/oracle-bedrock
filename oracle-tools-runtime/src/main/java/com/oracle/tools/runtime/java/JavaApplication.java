@@ -9,8 +9,7 @@
  * You may not use this file except in compliance with the License.
  *
  * You can obtain a copy of the License by consulting the LICENSE.txt file
- * distributed with this file, or by consulting
- * or https://oss.oracle.com/licenses/CDDL
+ * distributed with this file, or by consulting https://oss.oracle.com/licenses/CDDL
  *
  * See the License for the specific language governing permissions
  * and limitations under the License.
@@ -28,18 +27,15 @@ package com.oracle.tools.runtime.java;
 
 import com.oracle.tools.deferred.Deferred;
 import com.oracle.tools.deferred.ObjectNotAvailableException;
-
 import com.oracle.tools.runtime.Application;
-
-import java.util.Properties;
-import java.util.Set;
 
 import javax.management.MBeanInfo;
 import javax.management.ObjectInstance;
 import javax.management.ObjectName;
 import javax.management.QueryExp;
-
 import javax.management.remote.JMXConnector;
+import java.util.Properties;
+import java.util.Set;
 
 /**
  * A {@link JavaApplication} is an {@link Application} for Java-based
@@ -171,8 +167,8 @@ public interface JavaApplication<A> extends Application<A>
      * @return a {@link Deferred} of type T for the attribute value
      */
     public <T> Deferred<T> getDeferredMBeanAttribute(ObjectName objectName,
-                                                     String attributeName,
-                                                     Class<T> attributeClass);
+                                                     String     attributeName,
+                                                     Class<T>   attributeClass);
 
 
     /**
@@ -194,8 +190,8 @@ public interface JavaApplication<A> extends Application<A>
      *                                      or JMX server is not available
      */
     public <T> T getMBeanAttribute(ObjectName objectName,
-                                   String attributeName,
-                                   Class<T> attributeClass);
+                                   String     attributeName,
+                                   Class<T>   attributeClass);
 
 
     /**
@@ -209,7 +205,7 @@ public interface JavaApplication<A> extends Application<A>
      * @return a {@link Deferred} of type T
      */
     public <T> Deferred<T> getDeferredMBeanProxy(ObjectName objectName,
-                                                 Class<T> proxyClass);
+                                                 Class<T>   proxyClass);
 
 
     /**
@@ -232,7 +228,7 @@ public interface JavaApplication<A> extends Application<A>
      *                                        {@link JavaApplication}
      */
     public <T> T getMBeanProxy(ObjectName objectName,
-                               Class<T> clazz);
+                               Class<T>   clazz);
 
 
     /**
@@ -280,7 +276,7 @@ public interface JavaApplication<A> extends Application<A>
      * @return a {@link Set} of {@link ObjectInstance}s
      */
     public Set<ObjectInstance> queryMBeans(ObjectName name,
-                                           QueryExp query);
+                                           QueryExp   query);
 
 
     /**

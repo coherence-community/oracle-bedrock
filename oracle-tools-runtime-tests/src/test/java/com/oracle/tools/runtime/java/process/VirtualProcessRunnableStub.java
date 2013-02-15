@@ -1,34 +1,26 @@
 /*
  * File: VirtualProcessRunnableStub.java
  *
- * Copyright (c) 2012 Oracle and/or its affiliates. All rights reserved.
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- * 
- * - Redistributions of source code must retain the above copyright
- * notice, this list of conditions and the following disclaimer.
- * 
- * - Redistributions in binary form must reproduce the above copyright
- * notice, this list of conditions and the following disclaimer in the
- * documentation and/or other materials provided with the distribution.
+ * The contents of this file are subject to the terms and conditions of 
+ * the Common Development and Distribution License 1.0 (the "License").
  *
- * - Neither the name of Oracle nor the names of its
- * contributors may be used to endorse or promote products derived
- * from this software without specific prior written permission.
+ * You may not use this file except in compliance with the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
- * IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
- * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
- * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT OWNER OR
- * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
- * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
- * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
- * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
- * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
- * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * You can obtain a copy of the License by consulting the LICENSE.txt file
+ * distributed with this file, or by consulting https://oss.oracle.com/licenses/CDDL
+ *
+ * See the License for the specific language governing permissions
+ * and limitations under the License.
+ *
+ * When distributing the software, include this License Header Notice in each
+ * file and include the License file LICENSE.txt.
+ *
+ * MODIFICATIONS:
+ * If applicable, add the following below the License Header, with the fields
+ * enclosed by brackets [] replaced by your own identifying information:
+ * "Portions Copyright [year] [name of copyright owner]"
  */
 
 package com.oracle.tools.runtime.java.process;
@@ -41,53 +33,53 @@ import java.util.List;
  * <p>
  * Copyright (c) 2011. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
- * 
+ *
  * @author Jonathan Knight
  */
 public class VirtualProcessRunnableStub
 {
-    /** 
-     *Field description 
+    /**
+     * Field description
      */
     public static final String METHOD_STATIC_START = "staticStart";
 
-    /** 
-     *Field description 
+    /**
+     * Field description
      */
     public static final String METHOD_STATIC_START_NO_ARGS = "staticStartNoArgs";
 
-    /** 
-     *Field description 
+    /**
+     * Field description
      */
     public static final String METHOD_STATIC_STOP = "staticStop";
 
-    /** 
-     *Field description 
+    /**
+     * Field description
      */
     public static final String METHOD_START = "start";
 
-    /** 
-     *Field description 
+    /**
+     * Field description
      */
     public static final String METHOD_START_NO_ARGS = "startNoArgs";
 
-    /** 
-     *Field description 
+    /**
+     * Field description
      */
     public static final String METHOD_STOP = "stop";
 
-    /** 
-     *Field description 
+    /**
+     * Field description
      */
     public static final List<String> methodsCalled = new ArrayList<String>();
 
-    /** 
-     *Field description 
+    /**
+     * Field description
      */
     public static Object result;
 
-    /** 
-     *Field description 
+    /**
+     * Field description
      */
     public static String[] argsUsed;
 

@@ -9,8 +9,7 @@
  * You may not use this file except in compliance with the License.
  *
  * You can obtain a copy of the License by consulting the LICENSE.txt file
- * distributed with this file, or by consulting
- * or https://oss.oracle.com/licenses/CDDL
+ * distributed with this file, or by consulting https://oss.oracle.com/licenses/CDDL
  *
  * See the License for the specific language governing permissions
  * and limitations under the License.
@@ -25,10 +24,6 @@
  */
 
 package com.oracle.tools.runtime.java.virtualization;
-
-import java.io.ObjectInputStream;
-
-import java.util.Set;
 
 import javax.management.Attribute;
 import javax.management.AttributeList;
@@ -50,8 +45,9 @@ import javax.management.ObjectName;
 import javax.management.OperationsException;
 import javax.management.QueryExp;
 import javax.management.ReflectionException;
-
 import javax.management.loading.ClassLoaderRepository;
+import java.io.ObjectInputStream;
+import java.util.Set;
 
 /**
  * A {@link DelegatingMBeanServer} is an {@link MBeanServer} implementation
@@ -117,10 +113,10 @@ public class DelegatingMBeanServer implements MBeanServer
      * {@inheritDoc}
      */
     @Override
-    public void addNotificationListener(ObjectName paramObjectName,
+    public void addNotificationListener(ObjectName           paramObjectName,
                                         NotificationListener paramNotificationListener,
-                                        NotificationFilter paramNotificationFilter,
-                                        Object paramObject) throws InstanceNotFoundException
+                                        NotificationFilter   paramNotificationFilter,
+                                        Object               paramObject) throws InstanceNotFoundException
     {
         getDelegate().addNotificationListener(paramObjectName,
                                               paramNotificationListener,
@@ -133,10 +129,10 @@ public class DelegatingMBeanServer implements MBeanServer
      * {@inheritDoc}
      */
     @Override
-    public void addNotificationListener(ObjectName paramObjectName1,
-                                        ObjectName paramObjectName2,
+    public void addNotificationListener(ObjectName         paramObjectName1,
+                                        ObjectName         paramObjectName2,
                                         NotificationFilter paramNotificationFilter,
-                                        Object paramObject) throws InstanceNotFoundException
+                                        Object             paramObject) throws InstanceNotFoundException
     {
         getDelegate().addNotificationListener(paramObjectName1, paramObjectName2, paramNotificationFilter, paramObject);
     }
@@ -146,7 +142,7 @@ public class DelegatingMBeanServer implements MBeanServer
      * {@inheritDoc}
      */
     @Override
-    public ObjectInstance createMBean(String paramString,
+    public ObjectInstance createMBean(String     paramString,
                                       ObjectName paramObjectName)
                                           throws ReflectionException, InstanceAlreadyExistsException,
                                                  MBeanRegistrationException, MBeanException, NotCompliantMBeanException
@@ -159,10 +155,10 @@ public class DelegatingMBeanServer implements MBeanServer
      * {@inheritDoc}
      */
     @Override
-    public ObjectInstance createMBean(String paramString,
+    public ObjectInstance createMBean(String     paramString,
                                       ObjectName paramObjectName,
-                                      Object[] paramArrayOfObject,
-                                      String[] paramArrayOfString)
+                                      Object[]   paramArrayOfObject,
+                                      String[]   paramArrayOfString)
                                           throws ReflectionException, InstanceAlreadyExistsException,
                                                  MBeanRegistrationException, MBeanException, NotCompliantMBeanException
     {
@@ -174,7 +170,7 @@ public class DelegatingMBeanServer implements MBeanServer
      * {@inheritDoc}
      */
     @Override
-    public ObjectInstance createMBean(String paramString,
+    public ObjectInstance createMBean(String     paramString,
                                       ObjectName paramObjectName1,
                                       ObjectName paramObjectName2)
                                           throws ReflectionException, InstanceAlreadyExistsException,
@@ -189,11 +185,11 @@ public class DelegatingMBeanServer implements MBeanServer
      * {@inheritDoc}
      */
     @Override
-    public ObjectInstance createMBean(String paramString,
+    public ObjectInstance createMBean(String     paramString,
                                       ObjectName paramObjectName1,
                                       ObjectName paramObjectName2,
-                                      Object[] paramArrayOfObject,
-                                      String[] paramArrayOfString)
+                                      Object[]   paramArrayOfObject,
+                                      String[]   paramArrayOfString)
                                           throws ReflectionException, InstanceAlreadyExistsException,
                                                  MBeanRegistrationException, MBeanException,
                                                  NotCompliantMBeanException, InstanceNotFoundException
@@ -212,7 +208,7 @@ public class DelegatingMBeanServer implements MBeanServer
     @SuppressWarnings("deprecation")
     @Override
     public ObjectInputStream deserialize(ObjectName paramObjectName,
-                                         byte[] paramArrayOfByte) throws InstanceNotFoundException, OperationsException
+                                         byte[]     paramArrayOfByte) throws InstanceNotFoundException, OperationsException
     {
         return getDelegate().deserialize(paramObjectName, paramArrayOfByte);
     }
@@ -235,9 +231,9 @@ public class DelegatingMBeanServer implements MBeanServer
      */
     @SuppressWarnings("deprecation")
     @Override
-    public ObjectInputStream deserialize(String paramString,
+    public ObjectInputStream deserialize(String     paramString,
                                          ObjectName paramObjectName,
-                                         byte[] paramArrayOfByte)
+                                         byte[]     paramArrayOfByte)
                                              throws InstanceNotFoundException, OperationsException, ReflectionException
     {
         return getDelegate().deserialize(paramString, paramObjectName, paramArrayOfByte);
@@ -249,7 +245,7 @@ public class DelegatingMBeanServer implements MBeanServer
      */
     @Override
     public Object getAttribute(ObjectName paramObjectName,
-                               String paramString)
+                               String     paramString)
                                    throws MBeanException, AttributeNotFoundException, InstanceNotFoundException,
                                           ReflectionException
     {
@@ -262,7 +258,7 @@ public class DelegatingMBeanServer implements MBeanServer
      */
     @Override
     public AttributeList getAttributes(ObjectName paramObjectName,
-                                       String[] paramArrayOfString)
+                                       String[]   paramArrayOfString)
                                            throws InstanceNotFoundException, ReflectionException
     {
         return getDelegate().getAttributes(paramObjectName, paramArrayOfString);
@@ -364,7 +360,7 @@ public class DelegatingMBeanServer implements MBeanServer
      * {@inheritDoc}
      */
     @Override
-    public Object instantiate(String paramString,
+    public Object instantiate(String   paramString,
                               Object[] paramArrayOfObject,
                               String[] paramArrayOfString) throws ReflectionException, MBeanException
     {
@@ -376,7 +372,7 @@ public class DelegatingMBeanServer implements MBeanServer
      * {@inheritDoc}
      */
     @Override
-    public Object instantiate(String paramString,
+    public Object instantiate(String     paramString,
                               ObjectName paramObjectName)
                                   throws ReflectionException, MBeanException, InstanceNotFoundException
     {
@@ -388,10 +384,10 @@ public class DelegatingMBeanServer implements MBeanServer
      * {@inheritDoc}
      */
     @Override
-    public Object instantiate(String paramString,
+    public Object instantiate(String     paramString,
                               ObjectName paramObjectName,
-                              Object[] paramArrayOfObject,
-                              String[] paramArrayOfString)
+                              Object[]   paramArrayOfObject,
+                              String[]   paramArrayOfString)
                                   throws ReflectionException, MBeanException, InstanceNotFoundException
     {
         return getDelegate().instantiate(paramString, paramObjectName, paramArrayOfObject, paramArrayOfString);
@@ -403,9 +399,9 @@ public class DelegatingMBeanServer implements MBeanServer
      */
     @Override
     public Object invoke(ObjectName paramObjectName,
-                         String paramString,
-                         Object[] paramArrayOfObject,
-                         String[] paramArrayOfString)
+                         String     paramString,
+                         Object[]   paramArrayOfObject,
+                         String[]   paramArrayOfString)
                              throws InstanceNotFoundException, MBeanException, ReflectionException
     {
         return getDelegate().invoke(paramObjectName, paramString, paramArrayOfObject, paramArrayOfString);
@@ -417,7 +413,7 @@ public class DelegatingMBeanServer implements MBeanServer
      */
     @Override
     public boolean isInstanceOf(ObjectName paramObjectName,
-                                String paramString) throws InstanceNotFoundException
+                                String     paramString) throws InstanceNotFoundException
     {
         return getDelegate().isInstanceOf(paramObjectName, paramString);
     }
@@ -438,7 +434,7 @@ public class DelegatingMBeanServer implements MBeanServer
      */
     @Override
     public Set<ObjectInstance> queryMBeans(ObjectName paramObjectName,
-                                           QueryExp paramQueryExp)
+                                           QueryExp   paramQueryExp)
     {
         return getDelegate().queryMBeans(paramObjectName, paramQueryExp);
     }
@@ -449,7 +445,7 @@ public class DelegatingMBeanServer implements MBeanServer
      */
     @Override
     public Set<ObjectName> queryNames(ObjectName paramObjectName,
-                                      QueryExp paramQueryExp)
+                                      QueryExp   paramQueryExp)
     {
         return getDelegate().queryNames(paramObjectName, paramQueryExp);
     }
@@ -459,7 +455,7 @@ public class DelegatingMBeanServer implements MBeanServer
      * {@inheritDoc}
      */
     @Override
-    public ObjectInstance registerMBean(Object paramObject,
+    public ObjectInstance registerMBean(Object     paramObject,
                                         ObjectName paramObjectName)
                                             throws InstanceAlreadyExistsException, MBeanRegistrationException,
                                                    NotCompliantMBeanException
@@ -472,7 +468,7 @@ public class DelegatingMBeanServer implements MBeanServer
      * {@inheritDoc}
      */
     @Override
-    public void removeNotificationListener(ObjectName paramObjectName,
+    public void removeNotificationListener(ObjectName           paramObjectName,
                                            NotificationListener paramNotificationListener)
                                                throws InstanceNotFoundException, ListenerNotFoundException
     {
@@ -484,10 +480,10 @@ public class DelegatingMBeanServer implements MBeanServer
      * {@inheritDoc}
      */
     @Override
-    public void removeNotificationListener(ObjectName paramObjectName,
+    public void removeNotificationListener(ObjectName           paramObjectName,
                                            NotificationListener paramNotificationListener,
-                                           NotificationFilter paramNotificationFilter,
-                                           Object paramObject)
+                                           NotificationFilter   paramNotificationFilter,
+                                           Object               paramObject)
                                                throws InstanceNotFoundException, ListenerNotFoundException
     {
         getDelegate().removeNotificationListener(paramObjectName,
@@ -513,10 +509,10 @@ public class DelegatingMBeanServer implements MBeanServer
      * {@inheritDoc}
      */
     @Override
-    public void removeNotificationListener(ObjectName paramObjectName1,
-                                           ObjectName paramObjectName2,
+    public void removeNotificationListener(ObjectName         paramObjectName1,
+                                           ObjectName         paramObjectName2,
                                            NotificationFilter paramNotificationFilter,
-                                           Object paramObject)
+                                           Object             paramObject)
                                                throws InstanceNotFoundException, ListenerNotFoundException
     {
         getDelegate().removeNotificationListener(paramObjectName1,
@@ -531,7 +527,7 @@ public class DelegatingMBeanServer implements MBeanServer
      */
     @Override
     public void setAttribute(ObjectName paramObjectName,
-                             Attribute paramAttribute)
+                             Attribute  paramAttribute)
                                  throws InstanceNotFoundException, AttributeNotFoundException,
                                         InvalidAttributeValueException, MBeanException, ReflectionException
     {
@@ -543,7 +539,7 @@ public class DelegatingMBeanServer implements MBeanServer
      * {@inheritDoc}
      */
     @Override
-    public AttributeList setAttributes(ObjectName paramObjectName,
+    public AttributeList setAttributes(ObjectName    paramObjectName,
                                        AttributeList paramAttributeList)
                                            throws InstanceNotFoundException, ReflectionException
     {

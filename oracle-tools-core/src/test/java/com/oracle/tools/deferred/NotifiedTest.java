@@ -9,8 +9,7 @@
  * You may not use this file except in compliance with the License.
  *
  * You can obtain a copy of the License by consulting the LICENSE.txt file
- * distributed with this file, or by consulting
- * or https://oss.oracle.com/licenses/CDDL
+ * distributed with this file, or by consulting https://oss.oracle.com/licenses/CDDL
  *
  * See the License for the specific language governing permissions
  * and limitations under the License.
@@ -29,12 +28,11 @@ package com.oracle.tools.deferred;
 import org.junit.Assert;
 import org.junit.Test;
 
-import static com.oracle.tools.deferred.DeferredHelper.notified;
+import java.util.concurrent.TimeUnit;
 
+import static com.oracle.tools.deferred.DeferredHelper.notified;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
-
-import java.util.concurrent.TimeUnit;
 
 /**
  * Unit tests for {@link Notified}s.
@@ -144,7 +142,7 @@ public class NotifiedTest
          * @param waitDuration
          * @param waitDurationUnit
          */
-        public void notifyLater(long waitDuration,
+        public void notifyLater(long     waitDuration,
                                 TimeUnit waitDurationUnit)
         {
             Thread thread = new Thread(new Runner(waitDuration, waitDurationUnit));
@@ -197,7 +195,7 @@ public class NotifiedTest
              * @param waitDuration      the duration to wait
              * @param waitDurationUnit  the {@link TimeUnit} of the duration
              */
-            public Runner(long waitDuration,
+            public Runner(long     waitDuration,
                           TimeUnit waitDurationUnit)
             {
                 m_waitDuration     = waitDuration;

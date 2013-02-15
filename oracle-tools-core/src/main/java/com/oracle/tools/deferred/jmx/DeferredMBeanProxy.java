@@ -9,8 +9,7 @@
  * You may not use this file except in compliance with the License.
  *
  * You can obtain a copy of the License by consulting the LICENSE.txt file
- * distributed with this file, or by consulting
- * or https://oss.oracle.com/licenses/CDDL
+ * distributed with this file, or by consulting https://oss.oracle.com/licenses/CDDL
  *
  * See the License for the specific language governing permissions
  * and limitations under the License.
@@ -29,13 +28,11 @@ package com.oracle.tools.deferred.jmx;
 import com.oracle.tools.deferred.Deferred;
 import com.oracle.tools.deferred.ObjectNotAvailableException;
 
-import java.io.IOException;
-
 import javax.management.JMX;
 import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
-
 import javax.management.remote.JMXConnector;
+import java.io.IOException;
 
 /**
  * A {@link DeferredMBeanProxy} is a {@link Deferred} for a local
@@ -77,8 +74,8 @@ public class DeferredMBeanProxy<T> implements Deferred<T>
      * @param proxyClass            the proxy class
      */
     public DeferredMBeanProxy(Deferred<JMXConnector> deferredJMXConnector,
-                              ObjectName objectName,
-                              Class<T> proxyClass)
+                              ObjectName             objectName,
+                              Class<T>               proxyClass)
     {
         m_deferredJMXConnector = deferredJMXConnector;
         m_objectName           = objectName;

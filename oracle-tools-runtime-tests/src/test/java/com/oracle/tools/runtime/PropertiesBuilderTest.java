@@ -9,8 +9,7 @@
  * You may not use this file except in compliance with the License.
  *
  * You can obtain a copy of the License by consulting the LICENSE.txt file
- * distributed with this file, or by consulting
- * or https://oss.oracle.com/licenses/CDDL
+ * distributed with this file, or by consulting https://oss.oracle.com/licenses/CDDL
  *
  * See the License for the specific language governing permissions
  * and limitations under the License.
@@ -27,18 +26,16 @@
 package com.oracle.tools.runtime;
 
 import com.oracle.tools.junit.AbstractTest;
-
 import org.junit.Test;
-
-import static org.hamcrest.CoreMatchers.is;
-
-import static org.junit.Assert.assertThat;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
 
 /**
  * Unit and Functional tests for {@link ProcessBuilder}s.

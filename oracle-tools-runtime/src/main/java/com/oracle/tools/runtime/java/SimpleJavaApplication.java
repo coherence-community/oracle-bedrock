@@ -9,8 +9,7 @@
  * You may not use this file except in compliance with the License.
  *
  * You can obtain a copy of the License by consulting the LICENSE.txt file
- * distributed with this file, or by consulting
- * or https://oss.oracle.com/licenses/CDDL
+ * distributed with this file, or by consulting https://oss.oracle.com/licenses/CDDL
  *
  * See the License for the specific language governing permissions
  * and limitations under the License.
@@ -31,7 +30,6 @@ import com.oracle.tools.runtime.ApplicationConsole;
 import com.oracle.tools.runtime.LifecycleEventInterceptor;
 
 import java.util.Properties;
-
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -57,13 +55,13 @@ public class SimpleJavaApplication extends AbstractJavaApplication<SimpleJavaApp
      * @param defaultTimeoutUnits   the default timeout duration {@link TimeUnit}
      * @param interceptors          the {@link LifecycleEventInterceptor}s
      */
-    public SimpleJavaApplication(Process process,
-                                 String name,
-                                 ApplicationConsole console,
-                                 Properties environmentVariables,
-                                 Properties systemProperties,
-                                 long defaultTimeout,
-                                 TimeUnit defaultTimeoutUnits,
+    public SimpleJavaApplication(Process                                                    process,
+                                 String                                                     name,
+                                 ApplicationConsole                                         console,
+                                 Properties                                                 environmentVariables,
+                                 Properties                                                 systemProperties,
+                                 long                                                       defaultTimeout,
+                                 TimeUnit                                                   defaultTimeoutUnits,
                                  Iterable<LifecycleEventInterceptor<SimpleJavaApplication>> interceptors)
     {
         super(process,

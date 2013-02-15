@@ -9,8 +9,7 @@
  * You may not use this file except in compliance with the License.
  *
  * You can obtain a copy of the License by consulting the LICENSE.txt file
- * distributed with this file, or by consulting
- * or https://oss.oracle.com/licenses/CDDL
+ * distributed with this file, or by consulting https://oss.oracle.com/licenses/CDDL
  *
  * See the License for the specific language governing permissions
  * and limitations under the License.
@@ -28,7 +27,6 @@ package com.oracle.tools.runtime.java.virtualization;
 
 import java.net.URL;
 import java.net.URLClassLoader;
-
 import java.util.Properties;
 
 /**
@@ -88,7 +86,7 @@ public class VirtualizedSystemClassLoader extends URLClassLoader
      *
      * @param parent  the parent {@link ClassLoader}
      */
-    public VirtualizedSystemClassLoader(ClassLoader parent,
+    public VirtualizedSystemClassLoader(ClassLoader       parent,
                                         VirtualizedSystem system)
     {
         this(new URL[0], parent, system);
@@ -106,8 +104,8 @@ public class VirtualizedSystemClassLoader extends URLClassLoader
      * @param urls    the {@link URL}s to be loaded by this {@link ClassLoader}
      * @param parent  the parent {@link ClassLoader}
      */
-    public VirtualizedSystemClassLoader(URL[] urls,
-                                        ClassLoader parent,
+    public VirtualizedSystemClassLoader(URL[]             urls,
+                                        ClassLoader       parent,
                                         VirtualizedSystem system)
     {
         super(urls, parent);

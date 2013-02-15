@@ -9,8 +9,7 @@
  * You may not use this file except in compliance with the License.
  *
  * You can obtain a copy of the License by consulting the LICENSE.txt file
- * distributed with this file, or by consulting
- * or https://oss.oracle.com/licenses/CDDL
+ * distributed with this file, or by consulting https://oss.oracle.com/licenses/CDDL
  *
  * See the License for the specific language governing permissions
  * and limitations under the License.
@@ -79,11 +78,11 @@ public class ClusterMemberVirtualizationFunctionalTest extends AbstractTest
     @Before
     public void startCluster() throws Exception
     {
-        AvailablePortIterator jmxPorts      = Virtualization.getAvailablePorts();
+        AvailablePortIterator jmxPorts    = Virtualization.getAvailablePorts();
 
-        int                   clusterPort   = jmxPorts.next();
+        int                   clusterPort = jmxPorts.next();
 
-        ClusterMemberSchema   storageSchema =
+        ClusterMemberSchema storageSchema =
             new ClusterMemberSchema().setClusterPort(clusterPort).setStorageEnabled(true)
                 .setCacheConfigURI("test-cache-config.xml").setJMXSupport(true).setRemoteJMXManagement(true)
                 .setJMXManagementMode(ClusterMemberSchema.JMXManagementMode.LOCAL_ONLY).setJMXPort(jmxPorts)
@@ -96,7 +95,7 @@ public class ClusterMemberVirtualizationFunctionalTest extends AbstractTest
                                    jmxPorts).setJMXManagementMode(ClusterMemberSchema.JMXManagementMode.LOCAL_ONLY)
                                        .setJMXPort(jmxPorts).setSingleServerMode();
 
-        SystemApplicationConsole                                   console = new SystemApplicationConsole();
+        SystemApplicationConsole console = new SystemApplicationConsole();
 
         JavaApplicationBuilder<ClusterMember, ClusterMemberSchema> builder =
             new VirtualizedJavaApplicationBuilder<ClusterMember, ClusterMemberSchema>();

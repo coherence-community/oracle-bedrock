@@ -9,8 +9,7 @@
  * You may not use this file except in compliance with the License.
  *
  * You can obtain a copy of the License by consulting the LICENSE.txt file
- * distributed with this file, or by consulting
- * or https://oss.oracle.com/licenses/CDDL
+ * distributed with this file, or by consulting https://oss.oracle.com/licenses/CDDL
  *
  * See the License for the specific language governing permissions
  * and limitations under the License.
@@ -30,7 +29,6 @@ import com.oracle.tools.runtime.java.virtualization.VirtualizedSystemClassLoader
 
 import java.io.InputStream;
 import java.io.OutputStream;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -66,11 +64,11 @@ public class VirtualProcess extends Process
      * @param stopMethodName        the method to stop the application
      * @param arguments             the command-line arguments for the application
      */
-    public VirtualProcess(String applicationClassName,
+    public VirtualProcess(String                       applicationClassName,
                           VirtualizedSystemClassLoader classLoader,
-                          String startMethodName,
-                          String stopMethodName,
-                          List<String> arguments)
+                          String                       startMethodName,
+                          String                       stopMethodName,
+                          List<String>                 arguments)
     {
         m_applicationClassName = applicationClassName;
         m_startMethodName      = startMethodName;

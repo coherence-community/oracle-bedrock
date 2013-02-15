@@ -9,8 +9,7 @@
  * You may not use this file except in compliance with the License.
  *
  * You can obtain a copy of the License by consulting the LICENSE.txt file
- * distributed with this file, or by consulting
- * or https://oss.oracle.com/licenses/CDDL
+ * distributed with this file, or by consulting https://oss.oracle.com/licenses/CDDL
  *
  * See the License for the specific language governing permissions
  * and limitations under the License.
@@ -27,25 +26,17 @@
 package com.oracle.tools.runtime.java.process;
 
 import com.oracle.tools.junit.AbstractTest;
-
 import com.oracle.tools.runtime.java.virtualization.VirtualizedSystemClassLoader;
-
 import org.hamcrest.CoreMatchers;
-
 import org.junit.Before;
 import org.junit.Test;
-
-import static org.hamcrest.Matchers.arrayContaining;
-import static org.hamcrest.Matchers.instanceOf;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.nullValue;
-import static org.hamcrest.Matchers.sameInstance;
-
-import static org.junit.Assert.assertThat;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.assertThat;
 
 /**
  * Unit and Functional Tests for the VirtualProcessRunner.

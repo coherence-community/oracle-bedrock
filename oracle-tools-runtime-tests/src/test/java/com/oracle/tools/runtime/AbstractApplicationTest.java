@@ -9,8 +9,7 @@
  * You may not use this file except in compliance with the License.
  *
  * You can obtain a copy of the License by consulting the LICENSE.txt file
- * distributed with this file, or by consulting
- * or https://oss.oracle.com/licenses/CDDL
+ * distributed with this file, or by consulting https://oss.oracle.com/licenses/CDDL
  *
  * See the License for the specific language governing permissions
  * and limitations under the License.
@@ -27,32 +26,21 @@
 package com.oracle.tools.runtime;
 
 import com.oracle.tools.junit.AbstractTest;
-
 import com.oracle.tools.runtime.java.process.VirtualProcess;
-
 import com.oracle.tools.util.Pair;
-
 import org.junit.Test;
-
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.sameInstance;
-
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
-
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.*;
 
 /**
  * Unit and Functional tests for {@link AbstractApplication}s.
@@ -77,7 +65,10 @@ public class AbstractApplicationTest extends AbstractTest
         Process             process         = mock(Process.class);
         ApplicationConsole  console         = mock(ApplicationConsole.class);
 
-        AbstractApplication application     = new AbstractApplicationStub(process, applicationName, console, properties);
+        AbstractApplication application     = new AbstractApplicationStub(process,
+                                                                          applicationName,
+                                                                          console,
+                                                                          properties);
 
         assertThat(application.getProcess(), is(sameInstance(process)));
     }
@@ -96,7 +87,10 @@ public class AbstractApplicationTest extends AbstractTest
         Process             process         = mock(Process.class);
         ApplicationConsole  console         = mock(ApplicationConsole.class);
 
-        AbstractApplication application     = new AbstractApplicationStub(process, applicationName, console, properties);
+        AbstractApplication application     = new AbstractApplicationStub(process,
+                                                                          applicationName,
+                                                                          console,
+                                                                          properties);
 
         assertThat(application.getName(), is(applicationName));
     }
@@ -168,7 +162,10 @@ public class AbstractApplicationTest extends AbstractTest
         Process             process         = mock(Process.class);
         ApplicationConsole  console         = mock(ApplicationConsole.class);
 
-        AbstractApplication application     = new AbstractApplicationStub(process, applicationName, console, properties);
+        AbstractApplication application     = new AbstractApplicationStub(process,
+                                                                          applicationName,
+                                                                          console,
+                                                                          properties);
 
         application.waitFor();
 
@@ -210,7 +207,10 @@ public class AbstractApplicationTest extends AbstractTest
         VirtualProcess      process         = mock(VirtualProcess.class);
         ApplicationConsole  console         = mock(ApplicationConsole.class);
 
-        AbstractApplication application     = new AbstractApplicationStub(process, applicationName, console, properties);
+        AbstractApplication application     = new AbstractApplicationStub(process,
+                                                                          applicationName,
+                                                                          console,
+                                                                          properties);
 
         assertThat(application.getPid(), is(-1L));
     }
@@ -335,10 +335,10 @@ public class AbstractApplicationTest extends AbstractTest
 
     private class AbstractApplicationStub extends AbstractApplication
     {
-        private AbstractApplicationStub(Process process,
-                                        String name,
+        private AbstractApplicationStub(Process            process,
+                                        String             name,
                                         ApplicationConsole console,
-                                        Properties environmentVariables)
+                                        Properties         environmentVariables)
         {
             super(process, name, console, environmentVariables);
         }
@@ -359,7 +359,7 @@ public class AbstractApplicationTest extends AbstractTest
          * @param args
          */
         @Override
-        public void printf(String format,
+        public void printf(String    format,
                            Object... args)
         {
             synchronized (WAITER)
@@ -382,7 +382,7 @@ public class AbstractApplicationTest extends AbstractTest
          *
          * @throws InterruptedException
          */
-        public void waitForLineCount(int count,
+        public void waitForLineCount(int  count,
                                      long time) throws InterruptedException
         {
             synchronized (WAITER)

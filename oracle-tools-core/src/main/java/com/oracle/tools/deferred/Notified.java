@@ -9,8 +9,7 @@
  * You may not use this file except in compliance with the License.
  *
  * You can obtain a copy of the License by consulting the LICENSE.txt file
- * distributed with this file, or by consulting
- * or https://oss.oracle.com/licenses/CDDL
+ * distributed with this file, or by consulting https://oss.oracle.com/licenses/CDDL
  *
  * See the License for the specific language governing permissions
  * and limitations under the License.
@@ -27,7 +26,6 @@
 package com.oracle.tools.deferred;
 
 import java.util.concurrent.TimeUnit;
-
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -99,8 +97,8 @@ public class Notified<T> implements Deferred<T>
      * @param totalDuration       the maximum duration to wait to be notified
      * @param totalDurationUnits  the {@link TimeUnit}s for the duration
      */
-    public Notified(T object,
-                    long totalDuration,
+    public Notified(T        object,
+                    long     totalDuration,
                     TimeUnit totalDurationUnits)
     {
         m_object             = object;

@@ -9,8 +9,7 @@
  * You may not use this file except in compliance with the License.
  *
  * You can obtain a copy of the License by consulting the LICENSE.txt file
- * distributed with this file, or by consulting
- * or https://oss.oracle.com/licenses/CDDL
+ * distributed with this file, or by consulting https://oss.oracle.com/licenses/CDDL
  *
  * See the License for the specific language governing permissions
  * and limitations under the License.
@@ -27,32 +26,23 @@
 package com.oracle.tools.runtime.java;
 
 import com.oracle.tools.junit.AbstractTest;
-
 import com.oracle.tools.runtime.CapturingApplicationConsole;
 import com.oracle.tools.runtime.DummyApp;
 import com.oracle.tools.runtime.DummyClassPathApp;
-
 import com.oracle.tools.runtime.console.NullApplicationConsole;
-
 import com.oracle.tools.runtime.java.virtualization.VirtualizationClassLoader;
-
 import org.junit.Test;
-
 import org.mockito.Mock;
 
-import static org.hamcrest.CoreMatchers.is;
-
-import static org.hamcrest.core.StringContains.containsString;
-
-import static org.junit.Assert.assertThat;
-
 import java.io.File;
-
 import java.net.URI;
 import java.net.URL;
-
 import java.util.Enumeration;
 import java.util.Properties;
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.core.StringContains.containsString;
+import static org.junit.Assert.assertThat;
 
 /**
  * Functional tests for {@link JavaApplication}s.
@@ -141,14 +131,14 @@ public class JavaApplicationFunctionalTest extends AbstractTest
     @Test
     public void shouldRunOutOfProcessApplicationWithRestrictedClasspath() throws Exception
     {
-        String                      knownJarClassPath = findKnownJarWithoutDependeniesOnClassPath();
-        Class<Mock>                 knownClass        = Mock.class;
+        String      knownJarClassPath = findKnownJarWithoutDependeniesOnClassPath();
+        Class<Mock> knownClass        = Mock.class;
 
-        String                      path1             = findLocationOnClassPath(DummyClassPathApp.class);
-        String                      path2             = findLocationOnClassPath(VirtualizationClassLoader.class);
-        String classPath = knownJarClassPath + File.pathSeparator + path1 + File.pathSeparator + path2;
+        String      path1             = findLocationOnClassPath(DummyClassPathApp.class);
+        String      path2             = findLocationOnClassPath(VirtualizationClassLoader.class);
+        String classPath              = knownJarClassPath + File.pathSeparator + path1 + File.pathSeparator + path2;
 
-        SimpleJavaApplicationSchema schema            =
+        SimpleJavaApplicationSchema schema =
             new SimpleJavaApplicationSchema(DummyClassPathApp.class.getCanonicalName()).setClassPath(classPath)
                 .setArgument(knownClass.getCanonicalName());
 
@@ -173,14 +163,14 @@ public class JavaApplicationFunctionalTest extends AbstractTest
     @Test
     public void shouldRunInProcessApplicationWithRestrictedClasspath() throws Exception
     {
-        String                      knownJarClassPath = findKnownJarWithoutDependeniesOnClassPath();
-        Class<Mock>                 knownClass        = Mock.class;
+        String      knownJarClassPath = findKnownJarWithoutDependeniesOnClassPath();
+        Class<Mock> knownClass        = Mock.class;
 
-        String                      path1             = findLocationOnClassPath(DummyClassPathApp.class);
-        String                      path2             = findLocationOnClassPath(VirtualizationClassLoader.class);
-        String classPath = knownJarClassPath + File.pathSeparator + path1 + File.pathSeparator + path2;
+        String      path1             = findLocationOnClassPath(DummyClassPathApp.class);
+        String      path2             = findLocationOnClassPath(VirtualizationClassLoader.class);
+        String classPath              = knownJarClassPath + File.pathSeparator + path1 + File.pathSeparator + path2;
 
-        SimpleJavaApplicationSchema schema            =
+        SimpleJavaApplicationSchema schema =
             new SimpleJavaApplicationSchema(DummyClassPathApp.class.getCanonicalName()).setClassPath(classPath)
                 .setArgument(knownClass.getCanonicalName());
 

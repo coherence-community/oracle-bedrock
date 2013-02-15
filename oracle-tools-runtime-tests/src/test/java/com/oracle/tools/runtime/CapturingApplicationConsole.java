@@ -9,8 +9,7 @@
  * You may not use this file except in compliance with the License.
  *
  * You can obtain a copy of the License by consulting the LICENSE.txt file
- * distributed with this file, or by consulting
- * or https://oss.oracle.com/licenses/CDDL
+ * distributed with this file, or by consulting https://oss.oracle.com/licenses/CDDL
  *
  * See the License for the specific language governing permissions
  * and limitations under the License.
@@ -56,7 +55,7 @@ public class CapturingApplicationConsole implements ApplicationConsole
      *               The number of arguments is variable and may be zero.
      */
     @Override
-    public synchronized void printf(String format,
+    public synchronized void printf(String    format,
                                     Object... args)
     {
         String key = String.valueOf(args[1]);
@@ -89,7 +88,7 @@ public class CapturingApplicationConsole implements ApplicationConsole
      * @return
      */
     public String getConsoleOutputLine(String key,
-                                       int lineNum)
+                                       int    lineNum)
     {
         String line = "";
 

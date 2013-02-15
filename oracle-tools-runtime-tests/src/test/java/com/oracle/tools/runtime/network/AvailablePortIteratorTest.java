@@ -9,8 +9,7 @@
  * You may not use this file except in compliance with the License.
  *
  * You can obtain a copy of the License by consulting the LICENSE.txt file
- * distributed with this file, or by consulting
- * or https://oss.oracle.com/licenses/CDDL
+ * distributed with this file, or by consulting https://oss.oracle.com/licenses/CDDL
  *
  * See the License for the specific language governing permissions
  * and limitations under the License.
@@ -28,14 +27,12 @@ package com.oracle.tools.runtime.network;
 
 import org.junit.Test;
 
-import static com.oracle.tools.deferred.DeferredAssert.assertThat;
+import java.net.UnknownHostException;
 
+import static com.oracle.tools.deferred.DeferredAssert.assertThat;
 import static com.oracle.tools.deferred.DeferredHelper.eventually;
 import static com.oracle.tools.deferred.DeferredHelper.invoking;
-
 import static org.hamcrest.Matchers.is;
-
-import java.net.UnknownHostException;
 
 /**
  * Unit tests for the {@link AvailablePortIterator}.

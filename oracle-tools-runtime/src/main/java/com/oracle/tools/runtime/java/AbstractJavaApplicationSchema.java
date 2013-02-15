@@ -9,8 +9,7 @@
  * You may not use this file except in compliance with the License.
  *
  * You can obtain a copy of the License by consulting the LICENSE.txt file
- * distributed with this file, or by consulting
- * or https://oss.oracle.com/licenses/CDDL
+ * distributed with this file, or by consulting https://oss.oracle.com/licenses/CDDL
  *
  * See the License for the specific language governing permissions
  * and limitations under the License.
@@ -28,19 +27,13 @@ package com.oracle.tools.runtime.java;
 
 import com.oracle.tools.runtime.AbstractApplicationSchema;
 import com.oracle.tools.runtime.PropertiesBuilder;
-
 import com.oracle.tools.runtime.network.AvailablePortIterator;
 import com.oracle.tools.runtime.network.Constants;
 
-import static com.oracle.tools.runtime.java.JavaApplication.JAVA_NET_PREFER_IPV4_STACK;
-import static com.oracle.tools.runtime.java.JavaApplication.JAVA_RMI_SERVER_HOSTNAME;
-import static com.oracle.tools.runtime.java.JavaApplication.SUN_MANAGEMENT_JMXREMOTE;
-import static com.oracle.tools.runtime.java.JavaApplication.SUN_MANAGEMENT_JMXREMOTE_AUTHENTICATE;
-import static com.oracle.tools.runtime.java.JavaApplication.SUN_MANAGEMENT_JMXREMOTE_PORT;
-import static com.oracle.tools.runtime.java.JavaApplication.SUN_MANAGEMENT_JMXREMOTE_SSL;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.oracle.tools.runtime.java.JavaApplication.*;
 
 /**
  * An {@link AbstractJavaApplicationSchema} is a base implementation of a {@link JavaApplicationSchema}.

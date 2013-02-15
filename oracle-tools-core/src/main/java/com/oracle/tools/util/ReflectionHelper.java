@@ -9,8 +9,7 @@
  * You may not use this file except in compliance with the License.
  *
  * You can obtain a copy of the License by consulting the LICENSE.txt file
- * distributed with this file, or by consulting
- * or https://oss.oracle.com/licenses/CDDL
+ * distributed with this file, or by consulting https://oss.oracle.com/licenses/CDDL
  *
  * See the License for the specific language governing permissions
  * and limitations under the License.
@@ -29,7 +28,6 @@ package com.oracle.tools.util;
 import net.sf.cglib.proxy.Callback;
 import net.sf.cglib.proxy.Enhancer;
 import net.sf.cglib.proxy.MethodInterceptor;
-
 import org.objenesis.Objenesis;
 import org.objenesis.ObjenesisStd;
 
@@ -56,7 +54,7 @@ public class ReflectionHelper
      *
      * @return a compatible constructor or null if none exists
      */
-    public static Constructor<?> getCompatibleConstructor(Class<?> clazz,
+    public static Constructor<?> getCompatibleConstructor(Class<?>   clazz,
                                                           Class<?>[] parameterTypes)
     {
         Constructor<?>[] constructors = clazz.getConstructors();
@@ -128,8 +126,8 @@ public class ReflectionHelper
      *
      * @return a compatible {@link Method} or <code>null</code> if one can't be found
      */
-    public static Method getCompatibleMethod(Class<?> clazz,
-                                             String methodName,
+    public static Method getCompatibleMethod(Class<?>  clazz,
+                                             String    methodName,
                                              Object... arguments)
     {
         // determine the types of the arguments
@@ -173,7 +171,7 @@ public class ReflectionHelper
      * @throws IllegalAccessException if security doesn't allow the call
      * @throws InvocationTargetException if the constructor failed
      */
-    public static Object createObject(String className,
+    public static Object createObject(String      className,
                                       ClassLoader classLoader)
                                           throws ClassNotFoundException, NoSuchMethodException, InstantiationException,
                                                  IllegalAccessException, InvocationTargetException
@@ -200,9 +198,9 @@ public class ReflectionHelper
      * @throws IllegalAccessException if security doesn't allow the call
      * @throws InvocationTargetException if the constructor failed
      */
-    public static Object createObject(String className,
+    public static Object createObject(String      className,
                                       ClassLoader classLoader,
-                                      Object... constructorParameterList)
+                                      Object...   constructorParameterList)
                                           throws ClassNotFoundException, NoSuchMethodException, InstantiationException,
                                                  IllegalAccessException, InvocationTargetException
     {
@@ -249,7 +247,7 @@ public class ReflectionHelper
      * @return a dynamic proxy of the specified {@link Object}
      */
     @SuppressWarnings("unchecked")
-    public static <T> T createProxyOf(T object,
+    public static <T> T createProxyOf(T                 object,
                                       MethodInterceptor interceptor)
     {
         return (T) createProxyOf(object.getClass(), interceptor);
@@ -266,7 +264,7 @@ public class ReflectionHelper
      * @return a dynamic proxy of the specified {@link Class}
      */
     @SuppressWarnings("unchecked")
-    public static <T> T createProxyOf(Class<T> clazz,
+    public static <T> T createProxyOf(Class<T>          clazz,
                                       MethodInterceptor interceptor)
     {
         // use a cglib enhancer to create the proxy

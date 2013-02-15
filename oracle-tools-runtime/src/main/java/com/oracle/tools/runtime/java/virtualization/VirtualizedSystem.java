@@ -9,8 +9,7 @@
  * You may not use this file except in compliance with the License.
  *
  * You can obtain a copy of the License by consulting the LICENSE.txt file
- * distributed with this file, or by consulting
- * or https://oss.oracle.com/licenses/CDDL
+ * distributed with this file, or by consulting https://oss.oracle.com/licenses/CDDL
  *
  * See the License for the specific language governing permissions
  * and limitations under the License.
@@ -28,11 +27,9 @@ package com.oracle.tools.runtime.java.virtualization;
 
 import com.oracle.tools.runtime.network.AvailablePortIterator;
 
-import java.io.PrintStream;
-
-import java.util.Properties;
-
 import javax.management.MBeanServerBuilder;
+import java.io.PrintStream;
+import java.util.Properties;
 
 /**
  * A {@link VirtualizedSystem} encapsulates state and functionality typically
@@ -104,7 +101,7 @@ public class VirtualizedSystem
      * @param system  the {@link VirtualizedSystem} from which to inherit
      *                system resources
      */
-    public VirtualizedSystem(String name,
+    public VirtualizedSystem(String            name,
                              VirtualizedSystem system)
     {
         this(name,
@@ -126,8 +123,8 @@ public class VirtualizedSystem
      * @param mBeanServerBuilder  the {@link VirtualizedMBeanServerBuilder} for
      *                            the {@link VirtualizedSystem}
      */
-    public VirtualizedSystem(String name,
-                             VirtualizedSystem system,
+    public VirtualizedSystem(String                        name,
+                             VirtualizedSystem             system,
                              VirtualizedMBeanServerBuilder mBeanServerBuilder)
     {
         this(name,
@@ -148,10 +145,10 @@ public class VirtualizedSystem
      * @param stderr              the standard err
      * @param mBeanServerBuilder  the {@link VirtualizedMBeanServerBuilder}
      */
-    public VirtualizedSystem(String name,
-                             Properties properties,
-                             PrintStream stdout,
-                             PrintStream stderr,
+    public VirtualizedSystem(String                        name,
+                             Properties                    properties,
+                             PrintStream                   stdout,
+                             PrintStream                   stderr,
                              VirtualizedMBeanServerBuilder mBeanServerBuilder)
     {
         m_name       = name;
