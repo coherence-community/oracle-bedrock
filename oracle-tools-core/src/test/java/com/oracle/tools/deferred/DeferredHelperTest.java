@@ -30,6 +30,8 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import static com.oracle.tools.deferred.DeferredHelper.deferred;
+import static com.oracle.tools.deferred.DeferredHelper.eventually;
+import static com.oracle.tools.deferred.DeferredHelper.invoking;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -84,5 +86,50 @@ public class DeferredHelperTest
         Deferred<Boolean> deferred = deferred(a);
 
         Assert.assertEquals(Boolean.TRUE, deferred.get());
+    }
+
+
+    /**
+     * Ensure that we can use DeferredAssert with Strings.
+     */
+    @Test
+    public void thatCanUseDeferredAssertWithString()
+    {
+        StringContainer  container = new StringContainer("Gudday");
+
+        Deferred<String> defString = eventually(invoking(container).getString());
+
+        Assert.assertEquals("Gudday", defString.get());
+    }
+
+
+    /**
+     * A simple container for a String.
+     */
+    public static class StringContainer
+    {
+        private String m_String;
+
+
+        /**
+         * Constructs an StringContainer.
+         *
+         * @param string
+         */
+        public StringContainer(String string)
+        {
+            m_String = string;
+        }
+
+
+        /**
+         * Obtain the String
+         *
+         * @return
+         */
+        public String getString()
+        {
+            return m_String;
+        }
     }
 }

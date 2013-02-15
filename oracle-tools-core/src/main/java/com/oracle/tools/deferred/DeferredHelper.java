@@ -128,8 +128,8 @@ public class DeferredHelper
      * @return an {@link Ensured} of the {@link Deferred}
      */
     public static <T> Deferred<T> ensured(Deferred<T> deferred,
-                                          long totalRetryDuration,
-                                          TimeUnit totalRetryDurationUnits)
+                                          long        totalRetryDuration,
+                                          TimeUnit    totalRetryDurationUnits)
     {
         return deferred instanceof Notified || deferred instanceof Ensured ? deferred : new Ensured<T>(deferred,
                                                                                                        totalRetryDuration,
@@ -149,10 +149,10 @@ public class DeferredHelper
      * @return an {@link Ensured} of the {@link Deferred}
      */
     public static <T> Deferred<T> ensured(Deferred<T> deferred,
-                                          long retryDelayDuration,
-                                          TimeUnit retryDelayDurationUnits,
-                                          long totalRetryDuration,
-                                          TimeUnit totalRetryDurationUnits)
+                                          long        retryDelayDuration,
+                                          TimeUnit    retryDelayDurationUnits,
+                                          long        totalRetryDuration,
+                                          TimeUnit    totalRetryDurationUnits)
     {
         return deferred instanceof Notified || deferred instanceof Ensured ? deferred : new Ensured<T>(deferred,
                                                                                                        retryDelayDuration,
@@ -171,7 +171,7 @@ public class DeferredHelper
      * @return an {@link Ensured} of the {@link Deferred}
      */
     public static <T> Deferred<T> ensured(Deferred<T> deferred,
-                                          long totalRetryDurationMS)
+                                          long        totalRetryDurationMS)
     {
         return deferred instanceof Ensured ? (Ensured<T>) deferred : new Ensured<T>(deferred,
                                                                                     totalRetryDurationMS,
@@ -223,8 +223,8 @@ public class DeferredHelper
      * @return the value of the {@link Deferred}
      */
     public static <T> T ensure(Deferred<T> deferred,
-                               long totalRetryDuration,
-                               TimeUnit totalRetryDurationUnits)
+                               long        totalRetryDuration,
+                               TimeUnit    totalRetryDurationUnits)
     {
         return ensured(deferred, totalRetryDuration, totalRetryDurationUnits).get();
     }
@@ -245,10 +245,10 @@ public class DeferredHelper
      * @return the value of the {@link Deferred}
      */
     public static <T> T ensure(Deferred<T> deferred,
-                               long retryDelayDuration,
-                               TimeUnit retryDelayDurationUnits,
-                               long totalRetryDuration,
-                               TimeUnit totalRetryDurationUnits)
+                               long        retryDelayDuration,
+                               TimeUnit    retryDelayDurationUnits,
+                               long        totalRetryDuration,
+                               TimeUnit    totalRetryDurationUnits)
     {
         return ensured(deferred,
                        retryDelayDuration,
@@ -270,7 +270,7 @@ public class DeferredHelper
      * @return an {@link Ensured} of the {@link Deferred}
      */
     public static <T> T ensure(Deferred<T> deferred,
-                               long totalRetryDurationMS)
+                               long        totalRetryDurationMS)
     {
         return ensured(deferred, totalRetryDurationMS).get();
     }
@@ -312,8 +312,8 @@ public class DeferredHelper
      *
      * @return a {@link Notified}
      */
-    public static <T> Deferred<T> notified(T object,
-                                           long totalRetryDuration,
+    public static <T> Deferred<T> notified(T        object,
+                                           long     totalRetryDuration,
                                            TimeUnit totalRetryDurationUnits)
     {
         return new Notified<T>(object, totalRetryDuration, totalRetryDurationUnits);
@@ -329,7 +329,7 @@ public class DeferredHelper
      *
      * @return a {@link Deferred}
      */
-    public static <T> Deferred<T> future(Class<T> clzOfResult,
+    public static <T> Deferred<T> future(Class<T>                       clzOfResult,
                                          java.util.concurrent.Future<T> future)
     {
         return new Future<T>(clzOfResult, future);
@@ -469,8 +469,8 @@ public class DeferredHelper
      * {@link #invoking(Object)}
      */
     @SuppressWarnings("unchecked")
-    public static <T> Deferred<T> eventually(T t,
-                                             long totalRetryDuration,
+    public static <T> Deferred<T> eventually(T        t,
+                                             long     totalRetryDuration,
                                              TimeUnit totalRetryDurationUnits)
     {
         // get the last deferred value from invoking
@@ -506,8 +506,8 @@ public class DeferredHelper
      */
     @SuppressWarnings("unchecked")
     public static <T> Deferred<T> eventually(Deferred<T> t,
-                                             long totalRetryDuration,
-                                             TimeUnit totalRetryDurationUnits)
+                                             long        totalRetryDuration,
+                                             TimeUnit    totalRetryDurationUnits)
     {
         // get the last deferred value from invoking
         Deferred<T> deferred = (Deferred<T>) m_deferred.get();
@@ -537,9 +537,9 @@ public class DeferredHelper
          */
         @SuppressWarnings({"rawtypes", "unchecked"})
         @Override
-        public Object intercept(Object self,
-                                Method method,
-                                Object[] args,
+        public Object intercept(Object      self,
+                                Method      method,
+                                Object[]    args,
                                 MethodProxy methodProxy) throws Throwable
         {
             // get the underlying deferred object on which this invocation really occurred
@@ -601,6 +601,10 @@ public class DeferredHelper
             else if (resultType.isArray())
             {
                 return Array.newInstance(resultType, 0);
+            }
+            else if (resultType.equals(String.class))
+            {
+                return "";
             }
             else
             {
