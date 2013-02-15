@@ -41,7 +41,7 @@
 
     <scm>
         <connection>scm:git:git@github.com:coherence-community/oracle-tools.git</connection>
-        <developerConnection>scm:git:https://git@github.com:coherence-community/oracle-tools.git</developerConnection>
+        <developerConnection>scm:git:git@github.com:coherence-community/oracle-tools.git</developerConnection>
         <url>https://github.com/coherence-community/oracle-tools.git</url>
     </scm>
 
