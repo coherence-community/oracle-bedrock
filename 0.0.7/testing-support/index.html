@@ -10,12 +10,12 @@
     <meta name="Date-Revision-yyyymmdd" content="20130215" />
     <meta http-equiv="Content-Language" content="en" />
     <title>Oracle Tools - </title>
-    <link rel="stylesheet" href="./css/apache-maven-fluido-1.3.0.min.css" />
-    <link rel="stylesheet" href="./css/site.css" />
-    <link rel="stylesheet" href="./css/print.css" media="print" />
+    <link rel="stylesheet" href="../css/apache-maven-fluido-1.3.0.min.css" />
+    <link rel="stylesheet" href="../css/site.css" />
+    <link rel="stylesheet" href="../css/print.css" media="print" />
 
       
-    <script type="text/javascript" src="./js/apache-maven-fluido-1.3.0.min.js"></script>
+    <script type="text/javascript" src="../js/apache-maven-fluido-1.3.0.min.js"></script>
 
                           
         
@@ -54,7 +54,7 @@
                 
             
                   <li id="publishDate">Last Published: 2013-02-15</li>
-                  <li class="divider">|</li> <li id="projectVersion">Version: 0.0.7-SNAPSHOT</li>
+                  <li class="divider">|</li> <li id="projectVersion">Version: 0.0.7</li>
                       
                 
             
@@ -73,14 +73,14 @@
                                 
       <li>
     
-                          <a href="index.html" title="Welcome">
+                          <a href="../index.html" title="Welcome">
           <i class="none"></i>
         Welcome</a>
             </li>
                   
       <li>
     
-                          <a href="history.html" title="History">
+                          <a href="../history.html" title="History">
           <i class="none"></i>
         History</a>
             </li>
@@ -88,28 +88,26 @@
                                 
       <li>
     
-                          <a href="core/index.html" title="Core Module">
+                          <a href="../core/index.html" title="Core Module">
           <i class="none"></i>
         Core Module</a>
             </li>
                   
       <li>
     
-                          <a href="runtime/index.html" title="Runtime Module">
+                          <a href="../runtime/index.html" title="Runtime Module">
           <i class="none"></i>
         Runtime Module</a>
             </li>
                   
-      <li>
+      <li class="active">
     
-                          <a href="testing-support/index.html" title="Testing Support Module">
-          <i class="none"></i>
-        Testing Support Module</a>
-            </li>
+            <a href="#"><i class="none"></i>Testing Support Module</a>
+          </li>
                   
       <li>
     
-                          <a href="coherence/index.html" title="Coherence Module">
+                          <a href="../coherence/index.html" title="Coherence Module">
           <i class="none"></i>
         Coherence Module</a>
             </li>
@@ -117,47 +115,49 @@
                                 
       <li>
     
-                          <a href="issue-tracking.html" title="Issue Tracking">
+                          <a href="../issue-tracking.html" title="Issue Tracking">
           <i class="none"></i>
         Issue Tracking</a>
             </li>
                   
       <li>
     
-                          <a href="source-code.html" title="Source Code">
+                          <a href="../source-code.html" title="Source Code">
           <i class="none"></i>
         Source Code</a>
             </li>
                   
       <li>
     
-                          <a href="license.html" title="License">
+                          <a href="../license.html" title="License">
           <i class="none"></i>
         License</a>
             </li>
                   
       <li>
     
-                          <a href="contributions.html" title="Contributions">
+                          <a href="../contributions.html" title="Contributions">
           <i class="none"></i>
         Contributions</a>
             </li>
                   
-      <li class="active">
+      <li>
     
-            <a href="#"><i class="none"></i>Release Numbers</a>
-          </li>
+                          <a href="../release-numbers.html" title="Release Numbers">
+          <i class="none"></i>
+        Release Numbers</a>
+            </li>
                   
       <li>
     
-                          <a href="building.html" title="Build Instructions">
+                          <a href="../building.html" title="Build Instructions">
           <i class="none"></i>
         Build Instructions</a>
             </li>
                   
       <li>
     
-                          <a href="logging.html" title="Logging">
+                          <a href="../logging.html" title="Logging">
           <i class="none"></i>
         Logging</a>
             </li>
@@ -172,7 +172,7 @@
                             <div class="clear"></div>
                             <div class="clear"></div>
                              <a href="http://maven.apache.org/" title="Built by Maven" class="poweredBy">
-        <img class="builtBy" alt="Built by Maven" src="./images/logos/maven-feather.png" />
+        <img class="builtBy" alt="Built by Maven" src="../images/logos/maven-feather.png" />
       </a>
                   </div>
           </div>
@@ -181,25 +181,14 @@
                 
         <div id="bodyColumn"  class="span9" >
                                   
-            <h2>Release Numbers</h2>
+            <h2>The Testing Support Module</h2>
 
-<p>Release numbers for the Oracle Tools are represented as three
-separate numbers, each separated by a full-stop in the form <code>x.y.z</code> where by
-the meaning of the individual numbers in the release number is as follows:</p>
+<h4>Overview</h4>
 
-<p><strong>x</strong>:  Represents a major or new generation of the Oracle Tools that of which
-introduces new functionality or removing existing functionality.  In most cases
-this means maintaining complete backwards compatibility between releases is impossible.</p>
+<h4>Distribution</h4>
 
-<p><strong>y</strong>:  Represents a minor upgrade of the Oracle Tools.
-Such releases typically introduce some new functionality, perform some refactoring
-and/or deprecate (but not remove) existing functionality.</p>
-
-<p>Sometimes these changes may break some backwards compatibility. </p>
-
-<p><strong>z</strong>:  Represents a patch or fix release of the Oracle Tools.
-Such releases rarely break backwards compatibility.  Typically these are used
-for documentation and non-breaking dependency upgrades.    </p>
+<p>The Oracle Tools Testing Support Module is distributed as a single jar
+called: <code>oracle-tools-testing-support-0.0.7.jar</code></p>
 
                   </div>
             </div>
@@ -217,7 +206,7 @@ for documentation and non-breaking dependency upgrades.    </p>
                                                                   <?xml version="1.0" encoding="UTF-8"?>
 <div class="copyright">Copyright © 2008-2013 Oracle Corporation. All rights reserved.</div>
                                                           <?xml version="1.0" encoding="UTF-8"?>
-<div class="version">Version 0.0.7-SNAPSHOT: 2013-02-15 14:01</div>
+<div class="version">Version 0.0.7: 2013-02-15 17:20</div>
                   
         
                 </div>

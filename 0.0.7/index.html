@@ -54,7 +54,7 @@
                 
             
                   <li id="publishDate">Last Published: 2013-02-15</li>
-                  <li class="divider">|</li> <li id="projectVersion">Version: 0.0.7-SNAPSHOT</li>
+                  <li class="divider">|</li> <li id="projectVersion">Version: 0.0.7</li>
                       
                 
             
@@ -71,12 +71,10 @@
                 <ul class="nav nav-list">
                     <li class="nav-header">Oracle Tools</li>
                                 
-      <li>
+      <li class="active">
     
-                          <a href="index.html" title="Welcome">
-          <i class="none"></i>
-        Welcome</a>
-            </li>
+            <a href="#"><i class="none"></i>Welcome</a>
+          </li>
                   
       <li>
     
@@ -122,10 +120,12 @@
         Issue Tracking</a>
             </li>
                   
-      <li class="active">
+      <li>
     
-            <a href="#"><i class="none"></i>Source Code</a>
-          </li>
+                          <a href="source-code.html" title="Source Code">
+          <i class="none"></i>
+        Source Code</a>
+            </li>
                   
       <li>
     
@@ -181,20 +181,69 @@
                 
         <div id="bodyColumn"  class="span9" >
                                   
-            <h2>Source Code</h2>
+            <h1>Oracle Tools</h1>
 
-<p>The Source Code for the Oracle Tools is hosted by github.com.
-It can be found here: 
-<a href="https://github.com/coherence-community/oracle-tools">https://github.com/coherence-community/oracle-tools</a></p>
+<p><img src="images/oracletools-logo.png" alt="Oracle Tools" /></p>
 
-<h4>Important:</h4>
+<p>Version: 0.0.7 on 2013-02-15 17:20</p>
 
-<ol>
-<li><p>Source Code and Documentation is licensed under <a href="license.html">CDDL-1.0</a>.</p></li>
-<li><p><strong>Read-Only Access</strong> is provided to the public.</p></li>
-<li><p><strong>Pull Requests</strong> are never accepted.  </p></li>
-<li><p>Only submissions by official <a href="contributions.html">contributors</a> are accepted.</p></li>
-</ol>
+<blockquote>
+  <p>  <strong>WORK IN PROGRESS</strong></p>
+  
+  <p>  This site is currently under construction.  Parts may be incomplete and 
+    inaccurate.</p>
+</blockquote>
+
+<p>The Oracle Tools project consists of a collection of runtime tools, typically
+for managing and testing runtime processes, like those used by Java (and Oracle
+Coherence).</p>
+
+<p>The Oracle Tools consists of several modules, each themselves consisting of a
+collection of common utilities that of which may use be used as-is or for
+inclusion into applications.</p>
+
+<p>Complete source code together with documentation is provided to aid in your 
+adoption, use and understanding.</p>
+
+<h2>What's New?</h2>
+
+<p>For the most part the Oracle Tools project was spawned from earlier work in the
+Oracle Coherence Incubator, specifically focused on providing infrastructure to
+create, manage and test distributed applications.</p>
+
+<p>For more detailed information concerning changes in this release please consult the 
+project <a href="history.html">history</a>.</p>
+
+<h2>Project Modules</h2>
+
+<p>The following <a href="http://maven.apache.org/">Apache Maven</a> modules are defined
+by Oracle Tools.</p>
+
+<p><a href="core/index.html"><strong>The Core Module:</strong></a></p>
+
+<p>Defines the core interfaces, classes and resources for the Oracle Tools.</p>
+
+<p><a href="runtime/index.html"><strong>The Runtime Module:</strong></a></p>
+
+<p>Defines the interfaces, classes and resources for creating, managing, monitoring
+and controlling application processes, in particular, Java processes.</p>
+
+<p><a href="testing-support/index.html"><strong>The Testing Support Module:</strong></a></p>
+
+<p>Defines extensions to JUnit for the purposes of testing processes and deferred
+results.</p>
+
+<p><a href="coherence/index.html"><strong>The Coherence Module:</strong></a></p>
+
+<p>Defines extensions to Runtime Module for the purposes of testing Coherence-based
+applications.   (Requires Oracle Coherence)</p>
+
+<h2>Contributions</h2>
+
+<p>If you are interested in making contributions to the Oracle Tools,
+including defect fixes, documentation, new classes/interfaces/methods/packages 
+or tests, you should read the section on 
+<a href="contributions.html">Contributing to the Oracle Tools</a>.</p>
 
                   </div>
             </div>
@@ -212,7 +261,7 @@ It can be found here:
                                                                   <?xml version="1.0" encoding="UTF-8"?>
 <div class="copyright">Copyright © 2008-2013 Oracle Corporation. All rights reserved.</div>
                                                           <?xml version="1.0" encoding="UTF-8"?>
-<div class="version">Version 0.0.7-SNAPSHOT: 2013-02-15 14:01</div>
+<div class="version">Version 0.0.7: 2013-02-15 17:20</div>
                   
         
                 </div>
