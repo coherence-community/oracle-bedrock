@@ -1,17 +1,9 @@
-*.class
-*.log
-*.swp
-
-# Package Files #
-*.jar
-*.war
-*.ear
-
-# Build Folders #
-.settings/
-target/
-
-# IDE-specific Files #
-.classpath
-.project
-
+*.iml
+*.ipr
+*.iws
+.idea
+target
+/.settings
+/.project
+/.classpath
+/.checkstyle
