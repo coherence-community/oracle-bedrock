@@ -334,7 +334,7 @@ public class ClusterMemberSchemaTest extends AbstractTest
 
         assertThat(schema.setSingleServerMode(), is(sameInstance(schema)));
         assertThat(schema.getSystemPropertiesBuilder().getProperty(ClusterMemberSchema.PROPERTY_LOCALHOST_ADDRESS),
-                   is((Object) Constants.LOCAL_HOST));
+                   is((Object) Constants.getLocalHost()));
     }
 
 

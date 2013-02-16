@@ -108,7 +108,7 @@ public class AvailablePortIterator implements Iterator<Integer>, Iterable<Intege
      */
     public AvailablePortIterator() throws UnknownHostException
     {
-        this(InetAddress.getByName(Constants.LOCAL_HOST), MINIMUM_PORT, MAXIMUM_PORT);
+        this(InetAddress.getByName(Constants.getLocalHost()), MINIMUM_PORT, MAXIMUM_PORT);
     }
 
 
@@ -123,7 +123,7 @@ public class AvailablePortIterator implements Iterator<Integer>, Iterable<Intege
      */
     public AvailablePortIterator(int portRangeStart) throws UnknownHostException
     {
-        this(InetAddress.getByName(Constants.LOCAL_HOST), portRangeStart, MAXIMUM_PORT);
+        this(InetAddress.getByName(Constants.getLocalHost()), portRangeStart, MAXIMUM_PORT);
     }
 
 
@@ -140,7 +140,7 @@ public class AvailablePortIterator implements Iterator<Integer>, Iterable<Intege
     public AvailablePortIterator(int portRangeStart,
                                  int portRangeEnd) throws UnknownHostException
     {
-        this(InetAddress.getByName(Constants.LOCAL_HOST), portRangeStart, portRangeEnd);
+        this(InetAddress.getByName(Constants.getLocalHost()), portRangeStart, portRangeEnd);
     }
 
 

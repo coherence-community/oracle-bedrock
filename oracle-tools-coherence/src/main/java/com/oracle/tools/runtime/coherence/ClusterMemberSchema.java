@@ -470,7 +470,7 @@ public class ClusterMemberSchema extends AbstractJavaApplicationSchema<ClusterMe
      */
     public ClusterMemberSchema setSingleServerMode()
     {
-        setLocalHostAddress(Constants.LOCAL_HOST);
+        setLocalHostAddress(Constants.getLocalHost());
         setMulticastTTL(0);
 
         return this;

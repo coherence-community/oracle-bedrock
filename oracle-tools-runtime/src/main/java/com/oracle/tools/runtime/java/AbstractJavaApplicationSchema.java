@@ -271,7 +271,7 @@ public abstract class AbstractJavaApplicationSchema<A extends JavaApplication<A>
      * You can override this setting by calling {@link #setJMXPort(int)} or
      * {@link #setJMXPort(AvailablePortIterator)}.
      * <p/>
-     * <li>The java.rmi.server.hostname to be {@link #LOCAL_HOST}
+     * <li>The java.rmi.server.hostname to be {@link com.oracle.tools.runtime.network.Constants#getLocalHost()}
      * You can override this setting by calling {@link #setRMIServerHostName(String)}.
      * <p/>
      * <li>The sun.management.jmxremote.ssl to false (off)
@@ -292,7 +292,7 @@ public abstract class AbstractJavaApplicationSchema<A extends JavaApplication<A>
             setDefaultSystemProperty(SUN_MANAGEMENT_JMXREMOTE, "");
             setDefaultSystemProperty(SUN_MANAGEMENT_JMXREMOTE_AUTHENTICATE, false);
             setDefaultSystemProperty(SUN_MANAGEMENT_JMXREMOTE_SSL, false);
-            setDefaultSystemProperty(JAVA_RMI_SERVER_HOSTNAME, Constants.LOCAL_HOST);
+            setDefaultSystemProperty(JAVA_RMI_SERVER_HOSTNAME, Constants.getLocalHost());
         }
         else
         {
