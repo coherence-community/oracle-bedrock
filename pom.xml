@@ -57,6 +57,9 @@
     </modules>
 
     <properties>
+        <!-- project options -->
+        <skip-sign-artifacts>true</skip-sign-artifacts>
+
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <!-- plugin dependency versions -->
@@ -191,6 +194,9 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-gpg-plugin</artifactId>
                 <version>${maven.gpg.plugin.version}</version>
+                <configuration>
+                    <skip>${skip-sign-artifacts}</skip>
+                </configuration>
                 <executions>
                     <execution>
                         <id>sign-artifacts</id>
