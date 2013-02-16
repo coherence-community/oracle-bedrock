@@ -60,6 +60,7 @@
         <!-- project options -->
         <skip-sign-artifacts>true</skip-sign-artifacts>
 
+        <!-- source encoding definition -->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <!-- plugin dependency versions -->
