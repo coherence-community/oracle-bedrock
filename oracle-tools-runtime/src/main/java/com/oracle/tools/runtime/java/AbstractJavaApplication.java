@@ -3,7 +3,7 @@
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * The contents of this file are subject to the terms and conditions of 
+ * The contents of this file are subject to the terms and conditions of
  * the Common Development and Distribution License 1.0 (the "License").
  *
  * You may not use this file except in compliance with the License.
@@ -38,6 +38,7 @@ import com.oracle.tools.runtime.Application;
 import com.oracle.tools.runtime.ApplicationConsole;
 import com.oracle.tools.runtime.LifecycleEventInterceptor;
 import com.oracle.tools.runtime.java.process.VirtualProcess;
+import com.oracle.tools.runtime.network.Constants;
 
 import javax.management.MBeanInfo;
 import javax.management.ObjectInstance;
@@ -179,7 +180,9 @@ public abstract class AbstractJavaApplication<A extends JavaApplication<A>> exte
     @Override
     public String getRMIServerHostName()
     {
-        return m_systemProperties.getProperty(JAVA_RMI_SERVER_HOSTNAME);
+        String hostname = m_systemProperties.getProperty(JAVA_RMI_SERVER_HOSTNAME);
+
+        return hostname == null ? Constants.getLocalHost() : hostname;
     }
 
 
