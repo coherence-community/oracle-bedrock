@@ -3,13 +3,14 @@
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * The contents of this file are subject to the terms and conditions of 
+ * The contents of this file are subject to the terms and conditions of
  * the Common Development and Distribution License 1.0 (the "License").
  *
  * You may not use this file except in compliance with the License.
  *
  * You can obtain a copy of the License by consulting the LICENSE.txt file
- * distributed with this file, or by consulting https://oss.oracle.com/licenses/CDDL
+ * distributed with this file, or by consulting
+ * or https://oss.oracle.com/licenses/CDDL
  *
  * See the License for the specific language governing permissions
  * and limitations under the License.
@@ -27,11 +28,15 @@ package com.oracle.tools.runtime.java.process;
 
 import java.io.File;
 import java.io.IOException;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * A {@link AbstractJavaProcessBuilder} is a base implementation of a
@@ -45,6 +50,11 @@ import java.util.Properties;
  */
 public abstract class AbstractJavaProcessBuilder implements JavaProcessBuilder
 {
+    /**
+     * Logger for the class
+     */
+    private static Logger logger = Logger.getLogger(AbstractJavaProcessBuilder.class.getName());
+
     /**
      * We delegate most of the {@link JavaProcessBuilder} onto a regular
      * Java {@link ProcessBuilder}.
@@ -280,6 +290,36 @@ public abstract class AbstractJavaProcessBuilder implements JavaProcessBuilder
     @Override
     public Process realize() throws IOException
     {
-        return m_delegateProcessBuilder.start();
+        try
+        {
+            if (logger.isLoggable(Level.CONFIG))
+            {
+                StringBuffer buffer = new StringBuffer();
+
+                for (String cmd : m_delegateProcessBuilder.command())
+                {
+                    if (cmd.contains("="))
+                    {
+                        int idx = cmd.indexOf('=');
+
+                        buffer.append(cmd.substring(0, idx + 1));
+                        buffer.append("\"" + cmd.substring(idx + 1) + "\" ");
+                    }
+                    else
+                    {
+                        buffer.append(cmd + " ");
+                    }
+                }
+
+                logger.log(Level.CONFIG, buffer.toString());
+            }
+
+            return m_delegateProcessBuilder.start();
+        }
+        catch (IOException e)
+        {
+            logger.log(Level.SEVERE, "Failed to realize process", e);
+            throw e;
+        }
     }
 }
