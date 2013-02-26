@@ -25,6 +25,7 @@
 
 package com.oracle.tools.runtime.java.virtualization;
 
+import java.io.File;
 import java.net.URL;
 import java.security.AllPermission;
 import java.security.CodeSource;
@@ -196,8 +197,7 @@ public class VirtualizationClassLoader extends VirtualizedSystemClassLoader
         for (String val : vals)
         {
             String end = val.endsWith(".jar") ? "" : fileSeparator;
-            String start = val.startsWith("/") ? "" : "/";
-            urls.add(new URL("file://" + start + val + end));
+            urls.add(new File(val + end).toURI().toURL());
         }
 
         // acquire the actual system (as a virtualized system)

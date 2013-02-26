@@ -36,7 +36,9 @@ import java.net.URI;
 import java.net.URL;
 import java.util.Enumeration;
 
-import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.CoreMatchers.sameInstance;
 import static org.junit.Assert.assertThat;
 
 /**
@@ -62,11 +64,11 @@ public class VirtualizationClassLoaderTest extends AbstractTest
 
         VirtualizationClassLoader loader = VirtualizationClassLoader.newInstance("Test", null, System.getProperties());
 
-        URL[]                     path                = loader.getClassPath();
+        URL[]                     path = loader.getClassPath();
 
         for (int i = 0; i < path.length; i++)
         {
-            assertThat(path[i].toExternalForm(), is(systemClasspathURLs[i].toExternalForm()));
+            assertThat(path[i], is(systemClasspathURLs[i]));
         }
     }
 
@@ -79,15 +81,15 @@ public class VirtualizationClassLoaderTest extends AbstractTest
     @Test
     public void shouldUseSpecifiedClassPath() throws Exception
     {
-        String classpath = "test1.jar" + File.pathSeparator + "test2.jar";
+        String classpath = "/test1.jar" + File.pathSeparator + "/test2.jar";
 
         VirtualizationClassLoader loader = VirtualizationClassLoader.newInstance("Test",
                                                                                  classpath,
                                                                                  System.getProperties());
         URL[] path = loader.getClassPath();
 
-        assertThat(path[0].toExternalForm(), is("file://test1.jar"));
-        assertThat(path[1].toExternalForm(), is("file://test2.jar"));
+        assertThat(path[0].toExternalForm(), is("file:/test1.jar"));
+        assertThat(path[1].toExternalForm(), is("file:/test2.jar"));
     }
 
 
@@ -301,7 +303,7 @@ public class VirtualizationClassLoaderTest extends AbstractTest
         {
             String end = (systemClassPathElements[i].endsWith(".jar")) ? "" : File.separator;
 
-            systemClasspathURLs[i] = new URL("file://" + systemClassPathElements[i] + end);
+            systemClasspathURLs[i] = new File(systemClassPathElements[i] + end).toURI().toURL();
         }
 
         return systemClasspathURLs;
