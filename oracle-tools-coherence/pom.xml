@@ -4,7 +4,7 @@
     <parent>
         <artifactId>oracle-tools</artifactId>
         <groupId>com.oracle.tools</groupId>
-        <version>0.0.8-SNAPSHOT</version>
+        <version>0.0.8</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
