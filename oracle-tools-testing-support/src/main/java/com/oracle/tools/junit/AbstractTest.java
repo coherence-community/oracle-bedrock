@@ -43,7 +43,7 @@ public abstract class AbstractTest
 {
     /**
      * Before tests we ask the {@link Virtualization} framework for
-     * the physical {@link System}.  This ensure we can reset it after the
+     * the physical {@link System}.  This ensures we can reset it after the
      * tests.
      */
     @Before
@@ -54,7 +54,7 @@ public abstract class AbstractTest
 
 
     /**
-     * After tests we stop ensure that the {@link Virtualization} has been
+     * After tests we ensure that the {@link Virtualization} has been
      * stopped.  This ensures that physical system resources are returned
      * to normal.
      */

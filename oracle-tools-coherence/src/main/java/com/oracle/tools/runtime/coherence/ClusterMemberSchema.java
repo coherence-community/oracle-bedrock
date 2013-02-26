@@ -3,7 +3,7 @@
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * The contents of this file are subject to the terms and conditions of
+ * The contents of this file are subject to the terms and conditions of 
  * the Common Development and Distribution License 1.0 (the "License").
  *
  * You may not use this file except in compliance with the License.
@@ -112,6 +112,11 @@ public class ClusterMemberSchema extends AbstractJavaApplicationSchema<ClusterMe
      * The tangosol.coherence.localhost property.
      */
     public static final String PROPERTY_LOCALHOST_ADDRESS = "tangosol.coherence.localhost";
+
+    /**
+     * The tangosol.coherence.log property.
+     */
+    public static final String PROPERTY_LOG = "tangosol.coherence.log";
 
     /**
      * The tangosol.coherence.log.level property.
@@ -426,6 +431,24 @@ public class ClusterMemberSchema extends AbstractJavaApplicationSchema<ClusterMe
     public ClusterMemberSchema setLogLevel(int level)
     {
         setSystemProperty(PROPERTY_LOG_LEVEL, level);
+
+        return this;
+    }
+
+
+    /**
+     * Sets the log for {@link ClusterMember}s created with this {@link ClusterMemberSchema}.
+     * <p/>
+     * Log destinations typically include: "jdk", "log4j", "stdout", "stderr" or
+     * a file name.
+     *
+     * @param destination the destination for logs
+     *
+     * @return The {@link ClusterMemberSchema}.
+     */
+    public ClusterMemberSchema setLog(String destination)
+    {
+        setSystemProperty(PROPERTY_LOG, destination);
 
         return this;
     }
