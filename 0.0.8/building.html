@@ -54,7 +54,7 @@
                 
             
                   <li id="publishDate">Last Published: 2013-02-26</li>
-                  <li class="divider">|</li> <li id="projectVersion">Version: 0.0.9-SNAPSHOT</li>
+                  <li class="divider">|</li> <li id="projectVersion">Version: 0.0.8</li>
                       
                 
             
@@ -143,17 +143,17 @@
         Contributions</a>
             </li>
                   
-      <li class="active">
-    
-            <a href="#"><i class="none"></i>Release Numbers</a>
-          </li>
-                  
       <li>
     
-                          <a href="building.html" title="Build Instructions">
+                          <a href="release-numbers.html" title="Release Numbers">
           <i class="none"></i>
-        Build Instructions</a>
+        Release Numbers</a>
             </li>
+                  
+      <li class="active">
+    
+            <a href="#"><i class="none"></i>Build Instructions</a>
+          </li>
                   
       <li>
     
@@ -181,25 +181,45 @@
                 
         <div id="bodyColumn"  class="span9" >
                                   
-            <h2>Release Numbers</h2>
+            <h2>Building Instructions</h2>
 
-<p>Release numbers for the Oracle Tools are represented as three
-separate numbers, each separated by a full-stop in the form <code>x.y.z</code> where by
-the meaning of the individual numbers in the release number is as follows:</p>
+<p>As the Oracle Tools use <a href="http://maven.apache.org/">Apache Maven</a>
+(Version 3.0.4) as a build technology for the most part building from source
+tree is as simple as:</p>
 
-<p><strong>x</strong>:  Represents a major or new generation of the Oracle Tools that of which
-introduces new functionality or removing existing functionality.  In most cases
-this means maintaining complete backwards compatibility between releases is impossible.</p>
+<pre><code>$ mvn clean install
+</code></pre>
 
-<p><strong>y</strong>:  Represents a minor upgrade of the Oracle Tools.
-Such releases typically introduce some new functionality, perform some refactoring
-and/or deprecate (but not remove) existing functionality.</p>
+<p>However the fact that the Oracle Tools (for Coherence) depends on a commercial product,
+namely <a href="http://www.oracle.com/technology/products/coherence/index.html">Oracle Coherence</a> 
+that of which is not available in a public Maven Repository, means that your 
+first build is highly likely to fail because of a missing dependency on 
+<code>coherence.jar</code>.</p>
 
-<p>Sometimes these changes may break some backwards compatibility. </p>
+<p>Should this problem occur you will need to manually install a suitable 
+<code>coherence.jar</code> into your local repository or your organization's repository 
+manager.</p>
 
-<p><strong>z</strong>:  Represents a patch or fix release of the Oracle Tools.
-Such releases rarely break backwards compatibility.  Typically these are used
-for documentation and non-breaking dependency upgrades.    </p>
+<p>To install <code>coherence.jar</code> into a local repository change to <code>$COHERENCE_HOME/lib</code> 
+directory and run the following command:</p>
+
+<pre><code>$ mvn install:install-file  \
+      -DgroupId=com.oracle.coherence  \
+      -DartifactId=coherence  \
+      -Dversion=3.7.1.5  \
+      -Dfile=coherence.jar  \
+      -Dpackaging=jar \
+      -DgeneratePom=true
+</code></pre>
+
+<p><strong>Note:</strong> The <code>groupId</code>, <code>artifactId</code> and <code>version</code> are critically important. </p>
+
+<p>Of course the above assumes that you are installing the Coherence 3.7.1.5 <code>jar</code> 
+file. If you want to install one of the more recent releases, change the version 
+number in the command above accordingly.</p>
+
+<p>Once the <code>coherence.jar</code> is properly installed into your Maven repository, 
+you should be able to build the Oracle Tools.</p>
 
                   </div>
             </div>
@@ -217,7 +237,7 @@ for documentation and non-breaking dependency upgrades.    </p>
                                                                   <?xml version="1.0" encoding="UTF-8"?>
 <div class="copyright">Copyright © 2008-2013 Oracle Corporation. All rights reserved.</div>
                                                           <?xml version="1.0" encoding="UTF-8"?>
-<div class="version">Version 0.0.9-SNAPSHOT: 2013-02-26 13:19</div>
+<div class="version">Version 0.0.8: 2013-02-26 13:21</div>
                   
         
                 </div>

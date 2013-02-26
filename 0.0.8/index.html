@@ -54,7 +54,7 @@
                 
             
                   <li id="publishDate">Last Published: 2013-02-26</li>
-                  <li class="divider">|</li> <li id="projectVersion">Version: 0.0.9-SNAPSHOT</li>
+                  <li class="divider">|</li> <li id="projectVersion">Version: 0.0.8</li>
                       
                 
             
@@ -71,12 +71,10 @@
                 <ul class="nav nav-list">
                     <li class="nav-header">Oracle Tools</li>
                                 
-      <li>
+      <li class="active">
     
-                          <a href="index.html" title="Welcome">
-          <i class="none"></i>
-        Welcome</a>
-            </li>
+            <a href="#"><i class="none"></i>Welcome</a>
+          </li>
                   
       <li>
     
@@ -150,10 +148,12 @@
         Release Numbers</a>
             </li>
                   
-      <li class="active">
+      <li>
     
-            <a href="#"><i class="none"></i>Build Instructions</a>
-          </li>
+                          <a href="building.html" title="Build Instructions">
+          <i class="none"></i>
+        Build Instructions</a>
+            </li>
                   
       <li>
     
@@ -181,45 +181,69 @@
                 
         <div id="bodyColumn"  class="span9" >
                                   
-            <h2>Building Instructions</h2>
+            <h1>Oracle Tools</h1>
 
-<p>As the Oracle Tools use <a href="http://maven.apache.org/">Apache Maven</a>
-(Version 3.0.4) as a build technology for the most part building from source
-tree is as simple as:</p>
+<p><img src="images/oracletools-logo.png" alt="Oracle Tools" /></p>
 
-<pre><code>$ mvn clean install
-</code></pre>
+<p>Version: 0.0.8 on 2013-02-26 13:21</p>
 
-<p>However the fact that the Oracle Tools (for Coherence) depends on a commercial product,
-namely <a href="http://www.oracle.com/technology/products/coherence/index.html">Oracle Coherence</a> 
-that of which is not available in a public Maven Repository, means that your 
-first build is highly likely to fail because of a missing dependency on 
-<code>coherence.jar</code>.</p>
+<blockquote>
+  <p>  <strong>WORK IN PROGRESS</strong></p>
+  
+  <p>  This site is currently under construction.  Parts may be incomplete and 
+    inaccurate.</p>
+</blockquote>
 
-<p>Should this problem occur you will need to manually install a suitable 
-<code>coherence.jar</code> into your local repository or your organization's repository 
-manager.</p>
+<p>The Oracle Tools project consists of a collection of runtime tools, typically
+for managing and testing runtime processes, like those used by Java (and Oracle
+Coherence).</p>
 
-<p>To install <code>coherence.jar</code> into a local repository change to <code>$COHERENCE_HOME/lib</code> 
-directory and run the following command:</p>
+<p>The Oracle Tools consists of several modules, each themselves consisting of a
+collection of common utilities that of which may use be used as-is or for
+inclusion into applications.</p>
 
-<pre><code>$ mvn install:install-file  \
-      -DgroupId=com.oracle.coherence  \
-      -DartifactId=coherence  \
-      -Dversion=3.7.1.5  \
-      -Dfile=coherence.jar  \
-      -Dpackaging=jar \
-      -DgeneratePom=true
-</code></pre>
+<p>Complete source code together with documentation is provided to aid in your 
+adoption, use and understanding.</p>
 
-<p><strong>Note:</strong> The <code>groupId</code>, <code>artifactId</code> and <code>version</code> are critically important. </p>
+<h2>What's New?</h2>
 
-<p>Of course the above assumes that you are installing the Coherence 3.7.1.5 <code>jar</code> 
-file. If you want to install one of the more recent releases, change the version 
-number in the command above accordingly.</p>
+<p>For the most part the Oracle Tools project was spawned from earlier work in the
+Oracle Coherence Incubator, specifically focused on providing infrastructure to
+create, manage and test distributed applications.</p>
 
-<p>Once the <code>coherence.jar</code> is properly installed into your Maven repository, 
-you should be able to build the Oracle Tools.</p>
+<p>For more detailed information concerning changes in this release please consult the 
+project <a href="history.html">history</a>.</p>
+
+<h2>Project Modules</h2>
+
+<p>The following <a href="http://maven.apache.org/">Apache Maven</a> modules are defined
+by Oracle Tools.</p>
+
+<p><a href="core/index.html"><strong>The Core Module:</strong></a></p>
+
+<p>Defines the core interfaces, classes and resources for the Oracle Tools.</p>
+
+<p><a href="runtime/index.html"><strong>The Runtime Module:</strong></a></p>
+
+<p>Defines the interfaces, classes and resources for creating, managing, monitoring
+and controlling application processes, in particular, Java processes.</p>
+
+<p><a href="testing-support/index.html"><strong>The Testing Support Module:</strong></a></p>
+
+<p>Defines extensions to JUnit for the purposes of testing processes and deferred
+results.</p>
+
+<p><a href="coherence/index.html"><strong>The Coherence Module:</strong></a></p>
+
+<p>Defines extensions to Runtime Module for the purposes of testing Coherence-based
+applications.   (Requires Oracle Coherence)</p>
+
+<h2>Contributions</h2>
+
+<p>If you are interested in making contributions to the Oracle Tools,
+including defect fixes, documentation, new classes/interfaces/methods/packages 
+or tests, you should read the section on 
+<a href="contributions.html">Contributing to the Oracle Tools</a>.</p>
 
                   </div>
             </div>
@@ -237,7 +261,7 @@ you should be able to build the Oracle Tools.</p>
                                                                   <?xml version="1.0" encoding="UTF-8"?>
 <div class="copyright">Copyright © 2008-2013 Oracle Corporation. All rights reserved.</div>
                                                           <?xml version="1.0" encoding="UTF-8"?>
-<div class="version">Version 0.0.9-SNAPSHOT: 2013-02-26 13:19</div>
+<div class="version">Version 0.0.8: 2013-02-26 13:21</div>
                   
         
                 </div>
