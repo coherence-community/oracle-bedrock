@@ -37,6 +37,7 @@ import org.mockito.Mock;
 import java.io.File;
 import java.net.URI;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.util.Enumeration;
 import java.util.Properties;
 
@@ -183,9 +184,9 @@ public class JavaApplicationFunctionalTest extends AbstractTest
         URL[] actualClassPath = (URL[]) application.invoke(DummyClassPathApp.class.getCanonicalName(), "getClassPath");
 
         assertThat(actualClassPath.length, is(3));
-        assertThat(actualClassPath[0].toExternalForm(), containsString(knownJarClassPath));    // .endsWith(knownJarClassPath), is(true));
-        assertThat(actualClassPath[1].toExternalForm(), containsString(path1));    // .endsWith(path1 + "/"), is(true));
-        assertThat(actualClassPath[2].toExternalForm(), containsString(path2));    // .endsWith(path2), is(true));
+        assertThat(actualClassPath[0].toExternalForm(), is(new File(knownJarClassPath).toURI().toURL().toExternalForm()));    // .endsWith(knownJarClassPath), is(true));
+        assertThat(actualClassPath[1].toExternalForm(), is(new File(path1).toURI().toURL().toExternalForm()));    // .endsWith(path1 + "/"), is(true));
+        assertThat(actualClassPath[2].toExternalForm(), is(new File(path2).toURI().toURL().toExternalForm()));    // .endsWith(path2), is(true));
     }
 
 
@@ -213,7 +214,7 @@ public class JavaApplicationFunctionalTest extends AbstractTest
      */
     public String findLocationOnClassPath(Class<?> resource) throws Exception
     {
-        return findLocationOnClassPath(resource.getCanonicalName().replace(".", File.separator) + ".class");
+        return findLocationOnClassPath(resource.getCanonicalName().replace(".", "/") + ".class", resource.getClassLoader());
     }
 
 
@@ -227,12 +228,25 @@ public class JavaApplicationFunctionalTest extends AbstractTest
      */
     public String findLocationOnClassPath(String resourceName) throws Exception
     {
-        Enumeration<URL> resources = getClass().getClassLoader().getResources(resourceName);
+        return findLocationOnClassPath(resourceName, getClass().getClassLoader());
+    }
+
+    /**
+     * Finds the location of a Jar or directory on the classpath.
+     * This is done by looking for the specified resource.
+     * Once the URL for this is located we can work out the Jar or directory location.
+     *
+     * @return The location of the Coherence Jar file.
+     * @throws Exception if anything goes wrong
+     */
+    public String findLocationOnClassPath(String resourceName, ClassLoader classLoader) throws Exception
+    {
+        Enumeration<URL> resources = classLoader.getResources(resourceName);
 
         if (resources.hasMoreElements())
         {
             URL    url      = resources.nextElement();
-            String location = url.toExternalForm();
+            String location = URLDecoder.decode(url.toExternalForm(), "UTF-8");
 
             location = location.substring(0, location.length() - resourceName.length() - 1);
 

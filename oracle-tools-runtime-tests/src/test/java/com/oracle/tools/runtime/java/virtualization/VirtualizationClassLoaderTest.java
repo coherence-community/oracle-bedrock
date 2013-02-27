@@ -34,6 +34,7 @@ import java.io.File;
 import java.lang.reflect.Method;
 import java.net.URI;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.util.Enumeration;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -81,15 +82,17 @@ public class VirtualizationClassLoaderTest extends AbstractTest
     @Test
     public void shouldUseSpecifiedClassPath() throws Exception
     {
-        String classpath = "/test1.jar" + File.pathSeparator + "/test2.jar";
+        String pathElement1 = "/test1.jar";
+        String pathElement2 = "/test2.jar";
+        String classpath = pathElement1 + File.pathSeparator + pathElement2;
 
         VirtualizationClassLoader loader = VirtualizationClassLoader.newInstance("Test",
                                                                                  classpath,
                                                                                  System.getProperties());
         URL[] path = loader.getClassPath();
 
-        assertThat(path[0].toExternalForm(), is("file:/test1.jar"));
-        assertThat(path[1].toExternalForm(), is("file:/test2.jar"));
+        assertThat(path[0].toExternalForm(), is(new File(pathElement1).toURI().toURL().toExternalForm()));
+        assertThat(path[1].toExternalForm(), is(new File(pathElement2).toURI().toURL().toExternalForm()));
     }
 
 
@@ -357,7 +360,7 @@ public class VirtualizationClassLoaderTest extends AbstractTest
         if (resources.hasMoreElements())
         {
             URL    url      = resources.nextElement();
-            String location = url.toExternalForm();
+            String location = URLDecoder.decode(url.toExternalForm(), "UTF-8");
 
             location = location.substring(0, location.length() - resourceName.length() - 1);
 
