@@ -26,15 +26,11 @@
 package com.oracle.tools.runtime.coherence;
 
 import com.oracle.tools.runtime.ApplicationConsole;
-
 import com.oracle.tools.runtime.java.AbstractJavaApplicationSchema;
 import com.oracle.tools.runtime.java.JavaApplicationBuilder;
 import com.oracle.tools.runtime.java.JavaApplicationSchema;
-
 import com.oracle.tools.runtime.network.Constants;
-
 import com.tangosol.coherence.component.net.Management;
-
 import com.tangosol.net.DefaultCacheServer;
 
 import java.util.Iterator;
@@ -227,8 +223,8 @@ public class ClusterMemberSchema extends AbstractJavaApplicationSchema<ClusterMe
      */
     protected void configureClusterMemberSchemaDefaults()
     {
-        m_startMethodName = DEFAULT_START_METHOD;
-        m_stopMethodName  = DEFAULT_STOP_METHOD;
+        setStartMethodName(DEFAULT_START_METHOD);
+        setStopMethodName(DEFAULT_STOP_METHOD);
 
         setPreferIPv4(true);
     }
