@@ -184,9 +184,9 @@ public class JavaApplicationFunctionalTest extends AbstractTest
         URL[] actualClassPath = (URL[]) application.invoke(DummyClassPathApp.class.getCanonicalName(), "getClassPath");
 
         assertThat(actualClassPath.length, is(3));
-        assertThat(actualClassPath[0].toExternalForm(), is(new File(knownJarClassPath).toURI().toURL().toExternalForm()));    // .endsWith(knownJarClassPath), is(true));
-        assertThat(actualClassPath[1].toExternalForm(), is(new File(path1).toURI().toURL().toExternalForm()));    // .endsWith(path1 + "/"), is(true));
-        assertThat(actualClassPath[2].toExternalForm(), is(new File(path2).toURI().toURL().toExternalForm()));    // .endsWith(path2), is(true));
+        assertThat(actualClassPath[0].toExternalForm(), is(new File(knownJarClassPath).toURI().toURL().toExternalForm()));
+        assertThat(actualClassPath[1].toExternalForm(), is(new File(path1).toURI().toURL().toExternalForm()));
+        assertThat(actualClassPath[2].toExternalForm(), is(new File(path2).toURI().toURL().toExternalForm()));
     }
 
 
