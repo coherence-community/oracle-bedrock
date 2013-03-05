@@ -181,7 +181,7 @@ public abstract class AbstractApplication<A> implements Application<A>
         // start a thread to redirect standard err to the console
         m_errThread = new Thread(new OutputRedirector("err", m_process.getErrorStream()));
         m_errThread.setDaemon(true);
-        m_outThread.setName(name + " StdErr Thread");
+        m_errThread.setName(name + " StdErr Thread");
         m_errThread.start();
     }
 
@@ -213,6 +213,16 @@ public abstract class AbstractApplication<A> implements Application<A>
     @Override
     public int destroy()
     {
+        // terminate the process
+        try
+        {
+            m_process.destroy();
+        }
+        catch (Exception e)
+        {
+            // nothing to do here as we don't care
+        }
+
         // terminate the thread that is reading from the process standard out
         try
         {
@@ -257,16 +267,6 @@ public abstract class AbstractApplication<A> implements Application<A>
             m_process.getErrorStream().close();
         }
         catch (IOException e)
-        {
-            // nothing to do here as we don't care
-        }
-
-        // terminate the process
-        try
-        {
-            m_process.destroy();
-        }
-        catch (Exception e)
         {
             // nothing to do here as we don't care
         }
@@ -483,7 +483,6 @@ public abstract class AbstractApplication<A> implements Application<A>
          *
          * @param prefix   the prefix to output on each console line
          * @param stream   the {@link InputStream} from which to read the content
-         * @param console  the {@link ApplicationConsole} to output the content
          */
         private OutputRedirector(String      prefix,
                                  InputStream stream)

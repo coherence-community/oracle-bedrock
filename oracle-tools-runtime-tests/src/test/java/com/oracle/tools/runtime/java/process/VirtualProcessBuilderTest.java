@@ -128,16 +128,20 @@ public class VirtualProcessBuilderTest extends AbstractTest
     @Test
     public void shouldUseCreateClassLoaderWithCorrectClassPath() throws Exception
     {
-        String                classpath = "coherence.jar" + File.pathSeparatorChar + "coherence-common.jar";
+        String                coherenceJar = "/coherence.jar";
+        URL                   coherenceURL = new File(coherenceJar).toURI().toURL();
+        String                incubatorJar = "/coherence-common.jar";
+        URL                   incubatorURL = new File(incubatorJar).toURI().toURL();
+        String                classpath    = coherenceJar + File.pathSeparatorChar + incubatorJar;
 
-        VirtualProcessBuilder builder   = new VirtualProcessBuilder("Test", className, startMethod, stopMethod);
+        VirtualProcessBuilder builder      = new VirtualProcessBuilder("Test", className, startMethod, stopMethod);
 
         builder.getEnvironment().put("CLASSPATH", classpath);
 
         VirtualizationClassLoader classLoader = (VirtualizationClassLoader) builder.createClassLoader();
 
         assertThat(classLoader.getURLs(),
-                   arrayContainingInAnyOrder(new URL("file://coherence.jar"), new URL("file://coherence-common.jar")));
+                   arrayContainingInAnyOrder(coherenceURL, incubatorURL));
     }
 
 
