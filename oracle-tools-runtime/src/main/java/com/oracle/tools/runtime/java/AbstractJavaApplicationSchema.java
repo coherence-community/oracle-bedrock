@@ -28,12 +28,16 @@ package com.oracle.tools.runtime.java;
 import com.oracle.tools.runtime.AbstractApplicationSchema;
 import com.oracle.tools.runtime.PropertiesBuilder;
 import com.oracle.tools.runtime.network.AvailablePortIterator;
-import com.oracle.tools.runtime.network.Constants;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.oracle.tools.runtime.java.JavaApplication.*;
+import static com.oracle.tools.runtime.java.JavaApplication.JAVA_NET_PREFER_IPV4_STACK;
+import static com.oracle.tools.runtime.java.JavaApplication.JAVA_RMI_SERVER_HOSTNAME;
+import static com.oracle.tools.runtime.java.JavaApplication.SUN_MANAGEMENT_JMXREMOTE;
+import static com.oracle.tools.runtime.java.JavaApplication.SUN_MANAGEMENT_JMXREMOTE_AUTHENTICATE;
+import static com.oracle.tools.runtime.java.JavaApplication.SUN_MANAGEMENT_JMXREMOTE_PORT;
+import static com.oracle.tools.runtime.java.JavaApplication.SUN_MANAGEMENT_JMXREMOTE_SSL;
 
 /**
  * An {@link AbstractJavaApplicationSchema} is a base implementation of a {@link JavaApplicationSchema}.
@@ -70,12 +74,12 @@ public abstract class AbstractJavaApplicationSchema<A extends JavaApplication<A>
     /**
      * This is the method that will be called to start the Java {@link Process}.
      */
-    protected String m_startMethodName;
+    private String m_startMethodName;
 
     /**
      * This is the method that will be called to stop the Java {@link Process}.
      */
-    protected String m_stopMethodName;
+    private String m_stopMethodName;
 
 
     /**
@@ -378,6 +382,17 @@ public abstract class AbstractJavaApplicationSchema<A extends JavaApplication<A>
         return m_startMethodName;
     }
 
+    /**
+     * Specifies the name of the method to call to start the Java {@link Process}.
+     *
+     * @param methodName - the name of the method to use to start the Java {@link Process}
+     * @return This {@link JavaApplicationSchema} to allow method chaining.
+     */
+    public S setStartMethodName(String methodName)
+    {
+        m_startMethodName = methodName;
+        return (S) this;
+    }
 
     /**
      * {@inheritDoc}
@@ -386,5 +401,17 @@ public abstract class AbstractJavaApplicationSchema<A extends JavaApplication<A>
     public String getStopMethodName()
     {
         return m_stopMethodName;
+    }
+
+    /**
+     * Specifies the name of the method to call to stop the Java {@link Process}.
+     *
+     * @param methodName - the name of the method to use to stop the Java {@link Process}
+     * @return This {@link JavaApplicationSchema} to allow method chaining.
+     */
+    public S setStopMethodName(String methodName)
+    {
+        m_stopMethodName = methodName;
+        return (S) this;
     }
 }

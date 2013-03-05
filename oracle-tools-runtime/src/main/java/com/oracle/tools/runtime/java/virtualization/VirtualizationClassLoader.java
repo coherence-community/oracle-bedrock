@@ -74,6 +74,16 @@ public class VirtualizationClassLoader extends VirtualizedSystemClassLoader
     public static final String PROPERTY_JAVA_CLASS_PATH = "java.class.path";
 
     /**
+     * The path separator property.
+     */
+    public static final String PROPERTY_PATH_SEPARATOR = "path.separator";
+
+    /**
+     * The file separator property.
+     */
+    public static final String PROPERTY_FILE_SEPARATOR = "file.separator";
+
+    /**
      * The virtualization.exclude.packages property.
      */
     public static final String PROPERTY_EXCLUDED_PACKAGES = "virtualization.exclude.packages";
@@ -138,7 +148,7 @@ public class VirtualizationClassLoader extends VirtualizedSystemClassLoader
      *
      * @param applicationName  the name of the application
      * @param classpath        the class path of the application
-     * @param localProperties  the local systen properties for the application
+     * @param localProperties  the local system properties for the application
      *
      * @return  a {@link VirtualizationClassLoader} for the application
      *
@@ -148,9 +158,30 @@ public class VirtualizationClassLoader extends VirtualizedSystemClassLoader
                                                         String     classpath,
                                                         Properties localProperties) throws Exception
     {
+        return newInstance(applicationName, classpath, localProperties, System.getProperties());
+    }
+
+    /**
+     * A helper method to instantiate a new {@link VirtualizationClassLoader}.
+     *
+     * @param applicationName  the name of the application
+     * @param classpath        the class path of the application
+     * @param localProperties  the local system properties for the application
+     * @param systemProperties the System properties to use to get the default class path
+     *
+     * @return  a {@link VirtualizationClassLoader} for the application
+     *
+     * @throws Exception  if some exception occurs
+     */
+    @SuppressWarnings("ConstantConditions")
+    protected static VirtualizationClassLoader newInstance(String     applicationName,
+                                                           String     classpath,
+                                                           Properties localProperties,
+                                                           Properties systemProperties) throws Exception
+    {
         if (classpath == null || classpath.length() == 0)
         {
-            classpath = System.getProperty(PROPERTY_JAVA_CLASS_PATH);
+            classpath = systemProperties.getProperty(PROPERTY_JAVA_CLASS_PATH);
 
             if (classpath == null)
             {
@@ -158,25 +189,26 @@ public class VirtualizationClassLoader extends VirtualizedSystemClassLoader
             }
         }
 
-        String[]  vals = classpath.split(File.pathSeparator);
+        String pathSeparator = systemProperties.getProperty(PROPERTY_PATH_SEPARATOR);
+        String[]  vals = classpath.split(pathSeparator);
         List<URL> urls = new ArrayList<URL>();
 
+        String fileSeparator = systemProperties.getProperty(PROPERTY_FILE_SEPARATOR);
         for (String val : vals)
         {
-            String end = val.endsWith(".jar") ? "" : File.separator;
-
-            urls.add(new URL("file://" + val + end));
+            String end = val.endsWith(".jar") ? "" : fileSeparator;
+            urls.add(new File(val + end).toURI().toURL());
         }
 
         // acquire the actual system (as a virtualized system)
-        VirtualizedSystem physcialSystem = Virtualization.getPhysicalSystem();
+        VirtualizedSystem physicalSystem = Virtualization.getPhysicalSystem();
 
         // establish an MBeanServerBuilder
         VirtualizedMBeanServerBuilder mBeanServerBuilder =
             new VirtualizedMBeanServerBuilder(Virtualization.getAvailablePorts());
 
         // establish the virtualized system for the application
-        VirtualizedSystem virtualSystem = new VirtualizedSystem(applicationName, physcialSystem, mBeanServerBuilder);
+        VirtualizedSystem virtualSystem = new VirtualizedSystem(applicationName, physicalSystem, mBeanServerBuilder);
 
         // override the MBeanServerBuilder for the virtualized system
         localProperties.put(VirtualizedMBeanServerBuilder.PROPERTY_JMX_MBEAN_SERVER_BUILDER,

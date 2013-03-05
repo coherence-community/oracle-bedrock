@@ -128,7 +128,9 @@ public class Notified<T> implements Deferred<T>
 
                         // did we wait for "around" the totalDuration
                         // note: this is just a best guess/estimate.
-                        long durationWaited = endTime - startTime;
+                        // JK: Added and extra 500000 nanos as Windows seems to wait
+                        // slightly less than the specified time!!!
+                        long durationWaited = endTime - startTime + 500000;
 
                         // note: we may have been woken up due to a spurious
                         // operating system request.  we assume this is never the
