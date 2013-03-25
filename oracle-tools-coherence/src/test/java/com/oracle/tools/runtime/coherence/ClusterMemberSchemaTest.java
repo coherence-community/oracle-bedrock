@@ -89,7 +89,7 @@ public class ClusterMemberSchemaTest extends AbstractTest
         ClusterMemberSchema schema    = new ClusterMemberSchema(className, classPath);
 
         assertThat(schema.getApplicationClassName(), is(className));
-        assertThat(schema.getClassPath(), is(classPath));
+        assertThat(schema.getClassPath().toString(), is(classPath));
     }
 
 

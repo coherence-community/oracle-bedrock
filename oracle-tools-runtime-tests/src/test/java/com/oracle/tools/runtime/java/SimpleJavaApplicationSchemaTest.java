@@ -66,6 +66,6 @@ public class SimpleJavaApplicationSchemaTest extends AbstractTest
         SimpleJavaApplicationSchema schema = new SimpleJavaApplicationSchema("Main", "one.jar");
 
         assertThat(schema.getApplicationClassName(), is("Main"));
-        assertThat(schema.getClassPath(), is("one.jar"));
+        assertThat(schema.getClassPath().toString(), is("one.jar"));
     }
 }

@@ -3,13 +3,14 @@
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * The contents of this file are subject to the terms and conditions of
+ * The contents of this file are subject to the terms and conditions of 
  * the Common Development and Distribution License 1.0 (the "License").
  *
  * You may not use this file except in compliance with the License.
  *
  * You can obtain a copy of the License by consulting the LICENSE.txt file
- * distributed with this file, or by consulting https://oss.oracle.com/licenses/CDDL
+ * distributed with this file, or by consulting
+ * or https://oss.oracle.com/licenses/CDDL
  *
  * See the License for the specific language governing permissions
  * and limitations under the License.
@@ -27,10 +28,8 @@ package com.oracle.tools.runtime.java;
 
 import com.oracle.tools.runtime.AbstractApplicationSchema;
 import com.oracle.tools.runtime.PropertiesBuilder;
-import com.oracle.tools.runtime.network.AvailablePortIterator;
 
-import java.util.ArrayList;
-import java.util.List;
+import com.oracle.tools.runtime.network.AvailablePortIterator;
 
 import static com.oracle.tools.runtime.java.JavaApplication.JAVA_NET_PREFER_IPV4_STACK;
 import static com.oracle.tools.runtime.java.JavaApplication.JAVA_RMI_SERVER_HOSTNAME;
@@ -38,6 +37,9 @@ import static com.oracle.tools.runtime.java.JavaApplication.SUN_MANAGEMENT_JMXRE
 import static com.oracle.tools.runtime.java.JavaApplication.SUN_MANAGEMENT_JMXREMOTE_AUTHENTICATE;
 import static com.oracle.tools.runtime.java.JavaApplication.SUN_MANAGEMENT_JMXREMOTE_PORT;
 import static com.oracle.tools.runtime.java.JavaApplication.SUN_MANAGEMENT_JMXREMOTE_SSL;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * An {@link AbstractJavaApplicationSchema} is a base implementation of a {@link JavaApplicationSchema}.
@@ -57,9 +59,9 @@ public abstract class AbstractJavaApplicationSchema<A extends JavaApplication<A>
     private String m_applicationClassName;
 
     /**
-     * The class path for the {@link JavaApplication}.
+     * The {@link ClassPath} for the {@link JavaApplication}.
      */
-    private String m_classPath;
+    private ClassPath m_classPath;
 
     /**
      * The JVM options for the {@link JavaApplication}.
@@ -122,7 +124,7 @@ public abstract class AbstractJavaApplicationSchema<A extends JavaApplication<A>
         super(executableName);
 
         m_applicationClassName    = applicationClassName;
-        m_classPath               = classPath;
+        m_classPath               = new ClassPath(classPath);
         m_jvmOptions              = new ArrayList<String>();
         m_systemPropertiesBuilder = new PropertiesBuilder();
         m_startMethodName         = "main";
@@ -144,7 +146,7 @@ public abstract class AbstractJavaApplicationSchema<A extends JavaApplication<A>
      * {@inheritDoc}
      */
     @Override
-    public String getClassPath()
+    public ClassPath getClassPath()
     {
         return m_classPath;
     }
@@ -163,13 +165,28 @@ public abstract class AbstractJavaApplicationSchema<A extends JavaApplication<A>
     /**
      * Sets the class path for the Java application.
      *
-     * @param classPath The classPath of the {@link JavaApplication}.
+     * @param classPath The class-path of the {@link JavaApplication}.
      * @return The {@link JavaApplicationSchema}.
      */
     @SuppressWarnings("unchecked")
     public S setClassPath(String classPath)
     {
-        this.m_classPath = classPath;
+        m_classPath = new ClassPath(classPath);
+
+        return (S) this;
+    }
+
+
+    /**
+     * Sets the class path for the Java application.
+     *
+     * @param classPath The {@link ClassPath} of the {@link JavaApplication}.
+     * @return The {@link JavaApplicationSchema}.
+     */
+    @SuppressWarnings("unchecked")
+    public S setClassPath(ClassPath classPath)
+    {
+        m_classPath = classPath;
 
         return (S) this;
     }
@@ -382,6 +399,7 @@ public abstract class AbstractJavaApplicationSchema<A extends JavaApplication<A>
         return m_startMethodName;
     }
 
+
     /**
      * Specifies the name of the method to call to start the Java {@link Process}.
      *
@@ -391,8 +409,10 @@ public abstract class AbstractJavaApplicationSchema<A extends JavaApplication<A>
     public S setStartMethodName(String methodName)
     {
         m_startMethodName = methodName;
+
         return (S) this;
     }
+
 
     /**
      * {@inheritDoc}
@@ -403,6 +423,7 @@ public abstract class AbstractJavaApplicationSchema<A extends JavaApplication<A>
         return m_stopMethodName;
     }
 
+
     /**
      * Specifies the name of the method to call to stop the Java {@link Process}.
      *
@@ -412,6 +433,7 @@ public abstract class AbstractJavaApplicationSchema<A extends JavaApplication<A>
     public S setStopMethodName(String methodName)
     {
         m_stopMethodName = methodName;
+
         return (S) this;
     }
 }

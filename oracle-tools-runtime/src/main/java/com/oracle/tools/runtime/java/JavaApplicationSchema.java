@@ -62,11 +62,11 @@ public interface JavaApplicationSchema<A extends JavaApplication<A>, S extends J
 
 
     /**
-     * Obtains the class path to be used for the {@link JavaApplication}
+     * Obtains the {@link ClassPath} to be used for the {@link JavaApplication}.
      *
-     * @return {@link String}
+     * @return {@link ClassPath}
      */
-    public String getClassPath();
+    public ClassPath getClassPath();
 
 
     /**
