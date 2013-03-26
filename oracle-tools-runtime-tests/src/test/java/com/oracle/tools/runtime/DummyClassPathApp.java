@@ -25,6 +25,7 @@
 
 package com.oracle.tools.runtime;
 
+import com.oracle.tools.runtime.java.ClassPath;
 import com.oracle.tools.runtime.java.virtualization.VirtualizationClassLoader;
 
 import java.io.File;
@@ -42,7 +43,7 @@ import java.net.URL;
  */
 public class DummyClassPathApp
 {
-    private static URL[] classPath;
+    private static ClassPath classPath;
 
 
     /**
@@ -60,10 +61,7 @@ public class DummyClassPathApp
             {
                 classPath = ((VirtualizationClassLoader) classLoader).getClassPath();
 
-                for (URL url : classPath)
-                {
-                    System.out.println(url.toExternalForm());
-                }
+                System.out.println(classPath.toString());
             }
             else
             {
@@ -89,7 +87,7 @@ public class DummyClassPathApp
      *
      * @return
      */
-    public static URL[] getClassPath()
+    public static ClassPath getClassPath()
     {
         return classPath;
     }

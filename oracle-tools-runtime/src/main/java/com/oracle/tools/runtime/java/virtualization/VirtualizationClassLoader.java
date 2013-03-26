@@ -9,7 +9,8 @@
  * You may not use this file except in compliance with the License.
  *
  * You can obtain a copy of the License by consulting the LICENSE.txt file
- * distributed with this file, or by consulting https://oss.oracle.com/licenses/CDDL
+ * distributed with this file, or by consulting
+ * or https://oss.oracle.com/licenses/CDDL
  *
  * See the License for the specific language governing permissions
  * and limitations under the License.
@@ -25,12 +26,17 @@
 
 package com.oracle.tools.runtime.java.virtualization;
 
+import com.oracle.tools.runtime.java.ClassPath;
+
 import java.io.File;
+
 import java.net.URL;
+
 import java.security.AllPermission;
 import java.security.CodeSource;
 import java.security.PermissionCollection;
 import java.security.Permissions;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -115,25 +121,25 @@ public class VirtualizationClassLoader extends VirtualizedSystemClassLoader
     private ClassLoader m_parentClassLoader;
 
     /**
-     * The classpath of the {@link VirtualizationClassLoader}.
+     * The {@link ClassPath} of the {@link VirtualizationClassLoader}.
      */
-    private URL[] m_classPathURLs;
+    private ClassPath m_classPath;
 
 
     /**
      * Constructs a {@link VirtualizationClassLoader}.
      *
-     * @param classPathURLs  the {@link URL}s of the class path for the {@link ClassLoader}
-     * @param parent         the parent {@link ClassLoader}
-     * @param system         the {@link VirtualizedSystem} for the {@link VirtualizationClassLoader}
+     * @param classPath  the {@link ClassPath}s for the {@link ClassLoader}
+     * @param parent     the parent {@link ClassLoader}
+     * @param system     the {@link VirtualizedSystem} for the {@link VirtualizationClassLoader}
      */
-    private VirtualizationClassLoader(URL[]             classPathURLs,
+    private VirtualizationClassLoader(ClassPath         classPath,
                                       ClassLoader       parent,
                                       VirtualizedSystem system)
     {
-        super(classPathURLs, null, system);
+        super(classPath, null, system);
         m_parentClassLoader = parent;
-        m_classPathURLs     = classPathURLs;
+        m_classPath = classPath;
 
         while (parent.getParent() != null)
         {
@@ -147,26 +153,27 @@ public class VirtualizationClassLoader extends VirtualizedSystemClassLoader
      * A helper method to instantiate a new {@link VirtualizationClassLoader}.
      *
      * @param applicationName  the name of the application
-     * @param classpath        the class path of the application
-     * @param localProperties  the local system properties for the application
+     * @param classPath        the {@link ClassPath} for the {@link ClassLoader}
+     * @param localProperties  the local system properties for the {@link ClassLoader}
      *
      * @return  a {@link VirtualizationClassLoader} for the application
      *
      * @throws Exception  if some exception occurs
      */
     public static VirtualizationClassLoader newInstance(String     applicationName,
-                                                        String     classpath,
+                                                        ClassPath  classPath,
                                                         Properties localProperties) throws Exception
     {
-        return newInstance(applicationName, classpath, localProperties, System.getProperties());
+        return newInstance(applicationName, classPath, localProperties, System.getProperties());
     }
+
 
     /**
      * A helper method to instantiate a new {@link VirtualizationClassLoader}.
      *
      * @param applicationName  the name of the application
-     * @param classpath        the class path of the application
-     * @param localProperties  the local system properties for the application
+     * @param classPath        the {@link ClassPath} of the application
+     * @param localProperties  the local system properties for the {@link ClassLoader}
      * @param systemProperties the System properties to use to get the default class path
      *
      * @return  a {@link VirtualizationClassLoader} for the application
@@ -175,29 +182,18 @@ public class VirtualizationClassLoader extends VirtualizedSystemClassLoader
      */
     @SuppressWarnings("ConstantConditions")
     protected static VirtualizationClassLoader newInstance(String     applicationName,
-                                                           String     classpath,
+                                                           ClassPath  classPath,
                                                            Properties localProperties,
                                                            Properties systemProperties) throws Exception
     {
-        if (classpath == null || classpath.length() == 0)
+        if (classPath == null || classPath.isEmpty())
         {
-            classpath = systemProperties.getProperty(PROPERTY_JAVA_CLASS_PATH);
+            classPath = new ClassPath(systemProperties.getProperty(PROPERTY_JAVA_CLASS_PATH));
 
-            if (classpath == null)
+            if (classPath == null)
             {
                 System.out.println("Classpath should not be null!");
             }
-        }
-
-        String pathSeparator = systemProperties.getProperty(PROPERTY_PATH_SEPARATOR);
-        String[]  vals = classpath.split(pathSeparator);
-        List<URL> urls = new ArrayList<URL>();
-
-        String fileSeparator = systemProperties.getProperty(PROPERTY_FILE_SEPARATOR);
-        for (String val : vals)
-        {
-            String end = val.endsWith(".jar") ? "" : fileSeparator;
-            urls.add(new File(val + end).toURI().toURL());
         }
 
         // acquire the actual system (as a virtualized system)
@@ -217,12 +213,10 @@ public class VirtualizationClassLoader extends VirtualizedSystemClassLoader
         // add local properties to the virtualized system
         virtualSystem.getProperties().putAll(localProperties);
 
-        ClassLoader parentLoader = VirtualizationClassLoader.class.getClassLoader();
-        VirtualizationClassLoader loader = new VirtualizationClassLoader(urls.toArray(new URL[urls.size()]),
-                                                                         parentLoader,
-                                                                         virtualSystem);
+        ClassLoader               parentLoader        = VirtualizationClassLoader.class.getClassLoader();
+        VirtualizationClassLoader loader = new VirtualizationClassLoader(classPath, parentLoader, virtualSystem);
 
-        String excludedPackageList = localProperties.getProperty(PROPERTY_EXCLUDED_PACKAGES);
+        String                    excludedPackageList = localProperties.getProperty(PROPERTY_EXCLUDED_PACKAGES);
 
         if (excludedPackageList != null && excludedPackageList.trim().length() > 0)
         {
@@ -237,21 +231,22 @@ public class VirtualizationClassLoader extends VirtualizedSystemClassLoader
             }
         }
 
-        // we don't need to virtualize the virtualization package
+        // we won't virtualize the com.oracle.tools.runtime.java.* package
         loader.addPackageToLoadFromParent("com.oracle.tools.runtime.java.virtualization");
+        loader.addPackageToLoadFromParent("com.oracle.tools.runtime.java");
 
         return loader;
     }
 
 
     /**
-     * Obtain the class path of the {@link VirtualizationClassLoader}.
+     * Obtain the {@link ClassPath} of the {@link VirtualizationClassLoader}.
      *
-     * @return  an array of {@link URL}s representing the class path
+     * @return  the {@link ClassPath}
      */
-    public URL[] getClassPath()
+    public ClassPath getClassPath()
     {
-        return m_classPathURLs;
+        return m_classPath;
     }
 
 
@@ -330,7 +325,7 @@ public class VirtualizationClassLoader extends VirtualizedSystemClassLoader
      * {@inheritDoc}
      */
     @Override
-    protected PermissionCollection getPermissions(CodeSource codesource)
+    protected PermissionCollection getPermissions(CodeSource codeSource)
     {
         Permissions permissions = new Permissions();
 

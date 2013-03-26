@@ -9,7 +9,8 @@
  * You may not use this file except in compliance with the License.
  *
  * You can obtain a copy of the License by consulting the LICENSE.txt file
- * distributed with this file, or by consulting https://oss.oracle.com/licenses/CDDL
+ * distributed with this file, or by consulting
+ * or https://oss.oracle.com/licenses/CDDL
  *
  * See the License for the specific language governing permissions
  * and limitations under the License.
@@ -26,21 +27,32 @@
 package com.oracle.tools.runtime.java.virtualization;
 
 import com.oracle.tools.DummyClass;
-import com.oracle.tools.junit.AbstractTest;
-import org.junit.Test;
-import org.mockito.Mockito;
 
-import java.io.File;
-import java.lang.reflect.Method;
-import java.net.URI;
-import java.net.URL;
-import java.net.URLDecoder;
-import java.util.Enumeration;
+import com.oracle.tools.junit.AbstractTest;
+
+import com.oracle.tools.runtime.java.ClassPath;
+
+import org.junit.Assert;
+import org.junit.Test;
+
+import org.mockito.Mockito;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.sameInstance;
+
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+
+import java.io.File;
+
+import java.lang.reflect.Method;
+
+import java.net.URI;
+import java.net.URL;
+import java.net.URLDecoder;
+
+import java.util.Enumeration;
 
 /**
  * Unit tests for the {@link VirtualizationClassLoader}.
@@ -54,50 +66,47 @@ import static org.junit.Assert.assertThat;
 public class VirtualizationClassLoaderTest extends AbstractTest
 {
     /**
-     * Method description
+     * Ensure that we can create VirtualizationClassLoader that uses
+     * the System ClassPath.
      *
      * @throws Exception
      */
     @Test
     public void shouldUseDefaultClassPath() throws Exception
     {
-        URL[]                     systemClasspathURLs = getDefaultClassPath();
-
+        ClassPath                 systemClassPath = ClassPath.ofSystem();
         VirtualizationClassLoader loader = VirtualizationClassLoader.newInstance("Test", null, System.getProperties());
+        ClassPath                 classPath       = loader.getClassPath();
 
-        URL[]                     path = loader.getClassPath();
-
-        for (int i = 0; i < path.length; i++)
-        {
-            assertThat(path[i], is(systemClasspathURLs[i]));
-        }
+        Assert.assertThat(classPath, is(systemClassPath));
     }
 
 
     /**
-     * Method description
+     * Ensure that we can create a VirtualizationClassLoader using a
+     * custom ClassPath.
      *
      * @throws Exception
      */
     @Test
     public void shouldUseSpecifiedClassPath() throws Exception
     {
-        String pathElement1 = "/test1.jar";
-        String pathElement2 = "/test2.jar";
-        String classpath = pathElement1 + File.pathSeparator + pathElement2;
+        String    pathElement1 = File.separator + "test1.jar";
+        String    pathElement2 = "test2.jar";
+        ClassPath classPath    = new ClassPath(pathElement1 + File.pathSeparator + pathElement2);
 
         VirtualizationClassLoader loader = VirtualizationClassLoader.newInstance("Test",
-                                                                                 classpath,
+                                                                                 classPath,
                                                                                  System.getProperties());
-        URL[] path = loader.getClassPath();
+        ClassPath loaderClassPath = loader.getClassPath();
 
-        assertThat(path[0].toExternalForm(), is(new File(pathElement1).toURI().toURL().toExternalForm()));
-        assertThat(path[1].toExternalForm(), is(new File(pathElement2).toURI().toURL().toExternalForm()));
+        assertTrue(classPath.contains(pathElement1));
+        assertTrue(classPath.contains(pathElement2));
     }
 
 
     /**
-     * Method description
+     * Ensure that the VirtualizationClassLoader can load a Class.
      *
      * @throws Exception
      */
@@ -114,7 +123,7 @@ public class VirtualizationClassLoaderTest extends AbstractTest
 
 
     /**
-     * Method description
+     * Ensure that the VirtualizationClassLoader can load a resource
      *
      * @throws Exception
      */
@@ -132,14 +141,16 @@ public class VirtualizationClassLoaderTest extends AbstractTest
 
 
     /**
-     * Method description
+     * Ensure that the VirtualizationClassLoader won't load a Class
+     * from a ClassPath that doesn't contain the said Class, but the said Class
+     * is available (ie: Class isolation)
      *
      * @throws Exception
      */
     @Test(expected = ClassNotFoundException.class)
     public void shouldNotBeAbleToLoadClassNotOnClassPath() throws Exception
     {
-        String      classPath = "test.jar";
+        ClassPath   classPath = new ClassPath("test.jar");
         ClassLoader loader    = VirtualizationClassLoader.newInstance("Test", classPath, System.getProperties());
 
         loader.loadClass(DummyClass.class.getCanonicalName());
@@ -147,14 +158,16 @@ public class VirtualizationClassLoaderTest extends AbstractTest
 
 
     /**
-     * Method description
+     * Ensure that the VirtualizationClassLoader can load a Class from a
+     * Jar.
      *
      * @throws Exception
      */
     @Test
     public void shouldLoadClassFromJarInCustomClassPath() throws Exception
     {
-        String      classPath = findMockitoJarOnClassPath();
+        // NOTE: the Mockito class in the Mockito jar contains the asm-license.txt
+        ClassPath   classPath = ClassPath.ofResource("asm-license.txt");
         ClassLoader loader    = VirtualizationClassLoader.newInstance("Test", classPath, System.getProperties());
         Class<?>    result    = loader.loadClass(Mockito.class.getCanonicalName());
 
@@ -165,15 +178,15 @@ public class VirtualizationClassLoaderTest extends AbstractTest
 
 
     /**
-     * Method description
+     * Ensure that the VirtualizationClassLoader can load a Class from a
+     * custom ClassPath (based on a Java Class).
      *
      * @throws Exception
      */
     @Test
     public void shouldLoadClassFromDirectoryInCustomClassPath() throws Exception
     {
-        String      classPath = findLocationOnClassPath(DummyClass.class);
-
+        ClassPath   classPath = ClassPath.ofClass(DummyClass.class);
         ClassLoader loader    = VirtualizationClassLoader.newInstance("Test", classPath, System.getProperties());
         Class<?>    result    = loader.loadClass(DummyClass.class.getCanonicalName());
 
@@ -184,14 +197,15 @@ public class VirtualizationClassLoaderTest extends AbstractTest
 
 
     /**
-     * Method description
+     * Ensure that the VirtualizationClassLoader can exclude packages when
+     * loading classes.
      *
      * @throws Exception
      */
     @Test
     public void shouldLoadClassFromParentClassLoaderIfPackageIsInExcludedList() throws Exception
     {
-        String classPath = findLocationOnClassPath(DummyClass.class);
+        ClassPath classPath = ClassPath.ofClass(DummyClass.class);
 
         System.setProperty(VirtualizationClassLoader.PROPERTY_EXCLUDED_PACKAGES, "com.oracle.tools");
 
@@ -205,7 +219,7 @@ public class VirtualizationClassLoaderTest extends AbstractTest
 
 
     /**
-     * Method description
+     * Ensure that the VirtualizationClassLoader inherits System Properties.
      *
      * @throws Exception
      */
@@ -228,7 +242,8 @@ public class VirtualizationClassLoaderTest extends AbstractTest
 
 
     /**
-     * Method description
+     * Ensure that the VirtualizationClassLoader protects and isolates
+     * System properties from changes with in the scope of the loader.
      *
      * @throws Exception
      */
@@ -271,12 +286,13 @@ public class VirtualizationClassLoaderTest extends AbstractTest
 
 
     /**
-     * Method description
+     * Ensure that we can correctly determine the VirtualizedSystem instance
+     * from the VirtualizationClassLoader.
      *
      * @throws Exception
      */
     @Test
-    public void testCorrectlyDetermineVirtualizedSystemFromThread() throws Exception
+    public void shouldCorrectlyDetermineVirtualizedSystemFromThread() throws Exception
     {
         VirtualizationClassLoader loader = VirtualizationClassLoader.newInstance("Test", null, System.getProperties());
 
@@ -292,89 +308,6 @@ public class VirtualizationClassLoaderTest extends AbstractTest
         finally
         {
             thread.setContextClassLoader(saved);
-        }
-    }
-
-
-    private URL[] getDefaultClassPath() throws Exception
-    {
-        String   systemClassPath         = System.getProperty("java.class.path");
-        String[] systemClassPathElements = systemClassPath.split(File.pathSeparator);
-        URL[]    systemClasspathURLs     = new URL[systemClassPathElements.length];
-
-        for (int i = 0; i < systemClassPathElements.length; i++)
-        {
-            String end = (systemClassPathElements[i].endsWith(".jar")) ? "" : File.separator;
-
-            systemClasspathURLs[i] = new File(systemClassPathElements[i] + end).toURI().toURL();
-        }
-
-        return systemClasspathURLs;
-    }
-
-
-    /**
-     * Finds the location of Mockito Jar file on the classpath.
-     * This is done by looking for the resource asm-license.txt which is contained in
-     * the Mockito jar. Once the URL for this is located we can work out the Jar location.
-     *
-     * @return The location of the Mockito Jar file.
-     * @throws Exception if anything goes wrong
-     */
-    public String findMockitoJarOnClassPath() throws Exception
-    {
-        String resourceName = "asm-license.txt";
-
-        return findLocationOnClassPath(resourceName);
-    }
-
-
-    /**
-     * Finds the location of a Jar or directory on the classpath.
-     * This is done by looking for the specified Class file.
-     * Once the URL for this is located we can work out the Jar or directory location.
-     *
-     * @param resource the resource to use to locate the class path
-     * @return The location of the Jar
-     * @throws Exception if anything goes wrong
-     */
-    public String findLocationOnClassPath(Class<?> resource) throws Exception
-    {
-        return findLocationOnClassPath(resource.getCanonicalName().replace(".", File.separator) + ".class");
-    }
-
-
-    /**
-     * Finds the location of a Jar or directory on the classpath.
-     * This is done by looking for the specified resource.
-     * Once the URL for this is located we can work out the Jar or directory location.
-     *
-     * @param resourceName the resource to use to locate the class path
-     * @return The location of the Coherence Jar file.
-     * @throws Exception if anything goes wrong
-     */
-    public String findLocationOnClassPath(String resourceName) throws Exception
-    {
-        Enumeration<URL> resources = getClass().getClassLoader().getResources(resourceName);
-
-        if (resources.hasMoreElements())
-        {
-            URL    url      = resources.nextElement();
-            String location = URLDecoder.decode(url.toExternalForm(), "UTF-8");
-
-            location = location.substring(0, location.length() - resourceName.length() - 1);
-
-            if (location.startsWith("jar:"))
-            {
-                location = location.substring(4, location.length() - 1);
-            }
-
-            return new File(new URI(location)).getAbsolutePath();
-        }
-        else
-        {
-            throw new IllegalStateException("Cannot find Coherence Jar - unable to locate " + resourceName
-                                            + " on Class Path");
         }
     }
 }

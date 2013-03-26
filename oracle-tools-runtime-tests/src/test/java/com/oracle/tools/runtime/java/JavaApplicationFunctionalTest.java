@@ -9,7 +9,8 @@
  * You may not use this file except in compliance with the License.
  *
  * You can obtain a copy of the License by consulting the LICENSE.txt file
- * distributed with this file, or by consulting https://oss.oracle.com/licenses/CDDL
+ * distributed with this file, or by consulting
+ * or https://oss.oracle.com/licenses/CDDL
  *
  * See the License for the specific language governing permissions
  * and limitations under the License.
@@ -26,24 +27,34 @@
 package com.oracle.tools.runtime.java;
 
 import com.oracle.tools.junit.AbstractTest;
+
 import com.oracle.tools.runtime.CapturingApplicationConsole;
 import com.oracle.tools.runtime.DummyApp;
 import com.oracle.tools.runtime.DummyClassPathApp;
+
 import com.oracle.tools.runtime.console.NullApplicationConsole;
+
 import com.oracle.tools.runtime.java.virtualization.VirtualizationClassLoader;
+
+import org.junit.Assert;
 import org.junit.Test;
+
 import org.mockito.Mock;
 
+import static org.hamcrest.CoreMatchers.is;
+
+import static org.hamcrest.core.StringContains.containsString;
+
+import static org.junit.Assert.assertThat;
+
 import java.io.File;
+
 import java.net.URI;
 import java.net.URL;
 import java.net.URLDecoder;
+
 import java.util.Enumeration;
 import java.util.Properties;
-
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.core.StringContains.containsString;
-import static org.junit.Assert.assertThat;
 
 /**
  * Functional tests for {@link JavaApplication}s.
@@ -56,7 +67,7 @@ import static org.junit.Assert.assertThat;
 public class JavaApplicationFunctionalTest extends AbstractTest
 {
     /**
-     * Method description
+     * Ensure that we can start and terminate an external Java-based application.
      *
      * @throws Exception
      */
@@ -88,7 +99,8 @@ public class JavaApplicationFunctionalTest extends AbstractTest
 
 
     /**
-     * Method description
+     * Ensure that we can start and terminate a Virtualized Application
+     * (in process).
      *
      * @throws Exception
      */
@@ -125,18 +137,19 @@ public class JavaApplicationFunctionalTest extends AbstractTest
 
 
     /**
-     * Method description
+     * Ensure that we can start and terminate an external Java-based
+     * Application with a customized ClassPath.
      *
      * @throws Exception
      */
     @Test
     public void shouldRunOutOfProcessApplicationWithRestrictedClasspath() throws Exception
     {
-        String      knownJarClassPath = findKnownJarWithoutDependeniesOnClassPath();
+        ClassPath   knownJarClassPath = ClassPath.ofResource("asm-license.txt");
         Class<Mock> knownClass        = Mock.class;
 
-        String      path1             = findLocationOnClassPath(DummyClassPathApp.class);
-        String      path2             = findLocationOnClassPath(VirtualizationClassLoader.class);
+        ClassPath   path1             = ClassPath.ofClass(DummyClassPathApp.class);
+        ClassPath   path2             = ClassPath.ofClass(VirtualizationClassLoader.class);
         String classPath              = knownJarClassPath + File.pathSeparator + path1 + File.pathSeparator + path2;
 
         SimpleJavaApplicationSchema schema =
@@ -150,25 +163,26 @@ public class JavaApplicationFunctionalTest extends AbstractTest
         JavaApplication<?>          application = builder.realize(schema, "java-app", console);
 
         application.waitFor();
-        assertThat(console.getConsoleOutputLine("out", 0), containsString(knownJarClassPath));
-        assertThat(console.getConsoleOutputLine("out", 1), containsString(path1));
-        assertThat(console.getConsoleOutputLine("out", 2), containsString(path2));
+        assertThat(console.getConsoleOutputLine("out", 0), containsString(knownJarClassPath.toString()));
+        assertThat(console.getConsoleOutputLine("out", 1), containsString(path1.toString()));
+        assertThat(console.getConsoleOutputLine("out", 2), containsString(path2.toString()));
     }
 
 
     /**
-     * Method description
+     * Ensure that we can start and terminate a Virtualized Java-based
+     * Application with a customized ClassPath.
      *
      * @throws Exception
      */
     @Test
     public void shouldRunInProcessApplicationWithRestrictedClasspath() throws Exception
     {
-        String      knownJarClassPath = findKnownJarWithoutDependeniesOnClassPath();
+        ClassPath   knownJarClassPath = ClassPath.ofResource("asm-license.txt");
         Class<Mock> knownClass        = Mock.class;
 
-        String      path1             = findLocationOnClassPath(DummyClassPathApp.class);
-        String      path2             = findLocationOnClassPath(VirtualizationClassLoader.class);
+        ClassPath   path1             = ClassPath.ofClass(DummyClassPathApp.class);
+        ClassPath   path2             = ClassPath.ofClass(VirtualizationClassLoader.class);
         String classPath              = knownJarClassPath + File.pathSeparator + path1 + File.pathSeparator + path2;
 
         SimpleJavaApplicationSchema schema =
@@ -181,86 +195,12 @@ public class JavaApplicationFunctionalTest extends AbstractTest
         CapturingApplicationConsole console     = new CapturingApplicationConsole();
         JavaApplication<?>          application = builder.realize(schema, "java-app", console);
 
-        URL[] actualClassPath = (URL[]) application.invoke(DummyClassPathApp.class.getCanonicalName(), "getClassPath");
+        ClassPath actualClassPath = (ClassPath) application.invoke(DummyClassPathApp.class.getCanonicalName(),
+                                                                   "getClassPath");
 
-        assertThat(actualClassPath.length, is(3));
-        assertThat(actualClassPath[0].toExternalForm(), is(new File(knownJarClassPath).toURI().toURL().toExternalForm()));
-        assertThat(actualClassPath[1].toExternalForm(), is(new File(path1).toURI().toURL().toExternalForm()));
-        assertThat(actualClassPath[2].toExternalForm(), is(new File(path2).toURI().toURL().toExternalForm()));
-    }
-
-
-    /**
-     * Locates a known jar on the classpath that doesn't have any dependencies
-     *
-     * @return the location of the jar
-     * @throws Exception if anything goes wrong
-     */
-    public String findKnownJarWithoutDependeniesOnClassPath() throws Exception
-    {
-        String resourceName = "asm-license.txt";
-
-        return findLocationOnClassPath(resourceName);
-    }
-
-
-    /**
-     * Finds the location of a Jar or directory on the classpath.
-     * This is done by looking for the specified Class file.
-     * Once the URL for this is located we can work out the Jar or directory location.
-     *
-     * @return The location of the Coherence Jar file.
-     * @throws Exception if anything goes wrong
-     */
-    public String findLocationOnClassPath(Class<?> resource) throws Exception
-    {
-        return findLocationOnClassPath(resource.getCanonicalName().replace(".", "/") + ".class", resource.getClassLoader());
-    }
-
-
-    /**
-     * Finds the location of a Jar or directory on the classpath.
-     * This is done by looking for the specified resource.
-     * Once the URL for this is located we can work out the Jar or directory location.
-     *
-     * @return The location of the Coherence Jar file.
-     * @throws Exception if anything goes wrong
-     */
-    public String findLocationOnClassPath(String resourceName) throws Exception
-    {
-        return findLocationOnClassPath(resourceName, getClass().getClassLoader());
-    }
-
-    /**
-     * Finds the location of a Jar or directory on the classpath.
-     * This is done by looking for the specified resource.
-     * Once the URL for this is located we can work out the Jar or directory location.
-     *
-     * @return The location of the Coherence Jar file.
-     * @throws Exception if anything goes wrong
-     */
-    public String findLocationOnClassPath(String resourceName, ClassLoader classLoader) throws Exception
-    {
-        Enumeration<URL> resources = classLoader.getResources(resourceName);
-
-        if (resources.hasMoreElements())
-        {
-            URL    url      = resources.nextElement();
-            String location = URLDecoder.decode(url.toExternalForm(), "UTF-8");
-
-            location = location.substring(0, location.length() - resourceName.length() - 1);
-
-            if (location.startsWith("jar:"))
-            {
-                location = location.substring(4, location.length() - 1);
-            }
-
-            return new File(new URI(location)).getAbsolutePath();
-        }
-        else
-        {
-            throw new IllegalStateException("Cannot find Coherence Jar - unable to locate " + resourceName
-                                            + " on Class Path");
-        }
+        assertThat(actualClassPath.size(), is(3));
+        Assert.assertTrue(actualClassPath.contains(knownJarClassPath));
+        Assert.assertTrue(actualClassPath.contains(path1));
+        Assert.assertTrue(actualClassPath.contains(path2));
     }
 }

@@ -25,6 +25,7 @@
 
 package com.oracle.tools.runtime.java.process;
 
+import com.oracle.tools.runtime.java.ClassPath;
 import com.oracle.tools.runtime.java.virtualization.Virtualization;
 import com.oracle.tools.runtime.java.virtualization.VirtualizationClassLoader;
 import com.oracle.tools.runtime.java.virtualization.VirtualizedSystemClassLoader;
@@ -137,7 +138,7 @@ public class VirtualProcessBuilder extends AbstractJavaProcessBuilder
     VirtualizedSystemClassLoader createClassLoader() throws Exception
     {
         // create a new classloader for the application
-        String classPath = getEnvironment().get("CLASSPATH");
+        ClassPath classPath = new ClassPath(getEnvironment().get("CLASSPATH"));
 
         VirtualizedSystemClassLoader classLoader = VirtualizationClassLoader.newInstance(getApplicationName(),
                                                                                          classPath,
