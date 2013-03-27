@@ -105,7 +105,6 @@ public class ClassPath implements Iterable<String>
      */
     public ClassPath(String... classPaths)
     {
-        String fileSeparator = File.separator;
         String pathSeparator = File.pathSeparator;
 
         m_paths = new ArrayList<String>();
@@ -474,12 +473,19 @@ public class ClassPath implements Iterable<String>
 
             if (resources.hasMoreElements())
             {
-                URL    url      = resources.nextElement();
+                URL url = resources.nextElement();
+
+                // decode the URL to remove possible encoded characters
                 String location = URLDecoder.decode(url.toExternalForm(), "UTF-8");
 
+                // encode spaces as %20 so we can create a valid URI
+                location = location.replace(" ", "%20");
+
+                // remove the resource from the location
+                // (as we want the location of the resource not the resource)
                 location = location.substring(0, location.length() - resourceName.length() - 1);
 
-                // strip the archive type from the front of the location (if it's an archive)
+                // determine the archive type
                 String archiveType = getResourceArchiveType(location);
 
                 if (archiveType != null && location.startsWith(archiveType + ":"))

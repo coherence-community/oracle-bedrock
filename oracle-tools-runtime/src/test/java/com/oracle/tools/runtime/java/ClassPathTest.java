@@ -28,12 +28,10 @@ package com.oracle.tools.runtime.java;
 
 import com.oracle.tools.io.FileHelper;
 
-import org.hamcrest.CoreMatchers;
-
 import org.junit.Assert;
 import org.junit.Test;
 
-import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.CoreMatchers.is;
 
 import java.io.File;
 
