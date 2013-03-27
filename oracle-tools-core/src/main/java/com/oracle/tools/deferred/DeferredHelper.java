@@ -109,7 +109,7 @@ public class DeferredHelper
      */
     public static <T> Deferred<T> ensured(Deferred<T> deferred)
     {
-        return deferred instanceof Notified || deferred instanceof Ensured ? deferred : new Ensured<T>(deferred);
+        return deferred instanceof Ensured ? deferred : new Ensured<T>(deferred);
     }
 
 
@@ -126,7 +126,7 @@ public class DeferredHelper
                                           long        totalRetryDuration,
                                           TimeUnit    totalRetryDurationUnits)
     {
-        return deferred instanceof Notified || deferred instanceof Ensured ? deferred : new Ensured<T>(deferred,
+        return deferred instanceof Ensured ? deferred : new Ensured<T>(deferred,
                                                                                                        totalRetryDuration,
                                                                                                        totalRetryDurationUnits);
     }
@@ -149,7 +149,7 @@ public class DeferredHelper
                                           long        totalRetryDuration,
                                           TimeUnit    totalRetryDurationUnits)
     {
-        return deferred instanceof Notified || deferred instanceof Ensured ? deferred : new Ensured<T>(deferred,
+        return deferred instanceof Ensured ? deferred : new Ensured<T>(deferred,
                                                                                                        retryDelayDuration,
                                                                                                        retryDelayDurationUnits,
                                                                                                        totalRetryDuration,
@@ -281,37 +281,6 @@ public class DeferredHelper
     public static <T> Cached<T> cached(Deferred<T> deferred)
     {
         return deferred instanceof Cached ? (Cached<T>) deferred : new Cached<T>(deferred);
-    }
-
-
-    /**
-     * Obtains a {@link Notified} for the specified object.
-     *
-     * @param object  the object that must be notified before it is available
-     *
-     * @return a {@link Notified}
-     */
-    public static <T> Deferred<T> notified(T object)
-    {
-        return new Notified<T>(object);
-    }
-
-
-    /**
-     * Obtains a {@link Notified} for the specified object.
-     *
-     * @param object                   the object that must be notified before
-     *                                 it is available
-     * @param totalRetryDuration       the maximum duration to wait to notification
-     * @param totalRetryDurationUnits  the {@link TimeUnit}s for the duration
-     *
-     * @return a {@link Notified}
-     */
-    public static <T> Deferred<T> notified(T        object,
-                                           long     totalRetryDuration,
-                                           TimeUnit totalRetryDurationUnits)
-    {
-        return new Notified<T>(object, totalRetryDuration, totalRetryDurationUnits);
     }
 
 
