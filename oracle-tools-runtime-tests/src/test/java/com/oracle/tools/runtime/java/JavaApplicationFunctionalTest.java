@@ -86,12 +86,8 @@ public class JavaApplicationFunctionalTest extends AbstractTest
         JavaApplication<?>          application = builder.realize(schema, "java-app", console);
 
         application.waitFor();
-
-        int exitCode = application.exitValue();
-
-        assertThat(exitCode, is(0));
-
         application.destroy();
+
         assertThat(console.getConsoleOutputLine("out", 0).startsWith("[java-app:out:"), is(true));
         assertThat(console.getConsoleOutputLine("out", 0), containsString("arg1,arg2"));
         assertThat(console.getConsoleOutputLine("out", 1), containsString("test.prop.1=value.1"));
@@ -163,9 +159,9 @@ public class JavaApplicationFunctionalTest extends AbstractTest
         JavaApplication<?>          application = builder.realize(schema, "java-app", console);
 
         application.waitFor();
-        assertThat(console.getConsoleOutputLine("out", 0), containsString(knownJarClassPath.toString()));
-        assertThat(console.getConsoleOutputLine("out", 1), containsString(path1.toString()));
-        assertThat(console.getConsoleOutputLine("out", 2), containsString(path2.toString()));
+        assertThat(console.getConsoleOutputLine("out", 0), containsString(knownJarClassPath.iterator().next()));
+        assertThat(console.getConsoleOutputLine("out", 1), containsString(path1.iterator().next()));
+        assertThat(console.getConsoleOutputLine("out", 2), containsString(path2.iterator().next()));
     }
 
 

@@ -65,8 +65,6 @@ public class DummyApp
      */
     public static void main(String[] args) throws Exception
     {
-        String lineSeparator = System.getProperty("line.separator");
-
         stopCalled    = false;
         DummyApp.args = args;
 

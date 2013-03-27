@@ -260,7 +260,8 @@ public class AbstractApplicationTest extends AbstractTest
 
         new AbstractApplicationStub(process, applicationName, console, properties);
 
-        console.waitForLineCount(3, 10000);
+        //TODO: we should replace this with a deferred wait
+        console.waitForLineCount(3, 50000);
 
         Object[] args = console.lines.get(0).getY();
 

@@ -76,6 +76,8 @@ public abstract class AbstractJavaApplicationBuilder<A extends JavaApplication<A
             processBuilder.getCommands().add("-" + option);
         }
 
+        String classPath = schema.getClassPath().toString();
+
         // determine the environment variables for the process (based on the Environment Variables Builder)
         Properties environmentVariables = schema.getEnvironmentVariablesBuilder().realize();
 
@@ -93,7 +95,7 @@ public abstract class AbstractJavaApplicationBuilder<A extends JavaApplication<A
         }
 
         // add the class path (it's an environment variable)
-        processBuilder.getEnvironment().put("CLASSPATH", schema.getClassPath().toString());
+        processBuilder.getEnvironment().put("CLASSPATH", classPath);
 
         // realize the system properties for the process
         Properties systemProperties = schema.getSystemPropertiesBuilder().realize();

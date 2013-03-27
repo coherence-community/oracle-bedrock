@@ -161,23 +161,6 @@ public class ClassPathTest
 
 
     /**
-     * Ensure that we can create a ClassPath containing a simple jar
-     * (containing white space).
-     */
-    @Test
-    public void shouldCreateSingleFileClassPathWithWhiteSpace()
-    {
-        String    path      = "this is my simple.jar";
-        ClassPath classPath = new ClassPath(path);
-
-        Assert.assertThat(classPath.toString(), is("\"" + path + "\""));
-        Assert.assertTrue(classPath.contains(path));
-        Assert.assertFalse(classPath.isEmpty());
-        Assert.assertThat(classPath.size(), is(1));
-    }
-
-
-    /**
      * Ensure that we can create a ClassPath containing an absolute path.
      */
     @Test
@@ -209,23 +192,6 @@ public class ClassPathTest
         Assert.assertTrue(classPath.contains(path2));
         Assert.assertFalse(classPath.isEmpty());
         Assert.assertThat(classPath.size(), is(2));
-    }
-
-
-    /**
-     * Ensure that we can create a ClassPath containing an absolute path
-     * (containing white space).
-     */
-    @Test
-    public void shouldCreateSingleAbsolutePathWithWhiteSpace()
-    {
-        String    path      = File.separator + "one two" + File.separator + "three four";
-        ClassPath classPath = new ClassPath(path);
-
-        Assert.assertThat(classPath.toString(), is("\"" + path + File.separator + "\""));
-        Assert.assertTrue(classPath.contains(path));
-        Assert.assertFalse(classPath.isEmpty());
-        Assert.assertThat(classPath.size(), is(1));
     }
 
 

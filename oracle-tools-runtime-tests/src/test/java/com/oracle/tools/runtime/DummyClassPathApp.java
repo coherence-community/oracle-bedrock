@@ -65,11 +65,11 @@ public class DummyClassPathApp
             }
             else
             {
-                String cp = System.getProperty("java.class.path");
+                classPath = ClassPath.ofSystem();
 
-                for (String element : cp.split(File.pathSeparator))
+                for (String path : classPath)
                 {
-                    System.out.println(element);
+                    System.out.println(path);
                 }
             }
 

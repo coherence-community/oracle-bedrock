@@ -88,8 +88,7 @@ public class ClassPath implements Iterable<String>
             {
                 for (String path : classPath)
                 {
-                    // no need to sanitize the path here as it's already
-                    // part of a sanitized ClassPath
+                    path = sanitizePath(path);
                     m_paths.add(path);
                 }
             }
@@ -113,8 +112,11 @@ public class ClassPath implements Iterable<String>
         {
             for (String classPath : classPaths)
             {
-                // remove unnecessary white space
+                // sanitize the entire classpath
                 classPath = classPath == null ? "" : classPath.trim();
+
+                // remove quotes
+                classPath = unquote(classPath);
 
                 if (!classPath.isEmpty())
                 {
@@ -123,7 +125,7 @@ public class ClassPath implements Iterable<String>
 
                     for (String path : paths)
                     {
-                        // sanitize the path
+                        // sanitize the each path as well
                         path = sanitizePath(path);
 
                         if (!path.isEmpty())
@@ -277,19 +279,7 @@ public class ClassPath implements Iterable<String>
                 builder.append(pathSeparator);
             }
 
-            boolean containsSpace = path.contains(" ");
-
-            if (containsSpace)
-            {
-                builder.append("\"");
-            }
-
             builder.append(path);
-
-            if (containsSpace)
-            {
-                builder.append("\"");
-            }
         }
 
         return builder.toString();
@@ -334,6 +324,36 @@ public class ClassPath implements Iterable<String>
 
 
     /**
+     * Remove any ending double or single quotes from a String.
+     *
+     * @param string  the input String
+     *
+     * @return an unquoted String
+     */
+    private static String unquote(String string)
+    {
+        if (string == null)
+        {
+            return null;
+        }
+        else
+        {
+            StringBuilder builder = new StringBuilder();
+            for(int i = 0; i < string.length(); i++)
+            {
+                char c = string.charAt(i);
+                if (c != '\"' && c != '\''&& c != '`')
+                {
+                    builder.append(c);
+                }
+            }
+
+            return builder.toString();
+        }
+    }
+
+
+    /**
      * Sanitizes a class-path element (a single path) by removing unnecesary
      * pre and post fix spaces, together with single and double quotes.
      *
@@ -352,17 +372,8 @@ public class ClassPath implements Iterable<String>
             // remove unnecessary white space
             path = path.trim();
 
-            // remove double-quotes from the path
-            if (path.startsWith("\"") && path.endsWith("\""))
-            {
-                path = path.substring(1, path.length() - 2);
-            }
-
-            // remove single-quotes from the path
-            if (path.startsWith("'") && path.endsWith("'"))
-            {
-                path = path.substring(1, path.length() - 2);
-            }
+            // remove quotes
+            path = unquote(path);
 
             if (!path.isEmpty())
             {
@@ -500,13 +511,13 @@ public class ClassPath implements Iterable<String>
                 catch (URISyntaxException e)
                 {
                     throw new IOException("Unable to create a ClassPath for [" + location
-                                          + "] as an illegal URI was encountered",
+                                          + "] using ClassLoader [" + classLoader + "] as an illegal URI was encountered",
                                           e);
                 }
             }
             else
             {
-                throw new IOException("Unabled to locate the specified resource [" + resourceName + "]");
+                throw new IOException("Unable to locate the specified resource [" + resourceName + "] using ClassLoader [" + classLoader + "] with ClassPath [" + ClassPath.ofSystem() + "]");
             }
         }
     }
@@ -546,8 +557,8 @@ public class ClassPath implements Iterable<String>
         }
         else
         {
-            // create a resource name for the class
-            String resourceName = clazz.getCanonicalName().replace(".", File.separator) + ".class";
+            // create a resource name for the class (must use a / here)
+            String resourceName = clazz.getCanonicalName().replace(".", "/") + ".class";
 
             // determine the location as a resource
             return ofResource(resourceName, clazz.getClassLoader());
