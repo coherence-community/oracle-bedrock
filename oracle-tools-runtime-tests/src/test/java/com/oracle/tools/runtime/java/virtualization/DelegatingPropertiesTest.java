@@ -26,12 +26,14 @@
 package com.oracle.tools.runtime.java.virtualization;
 
 import com.oracle.tools.junit.AbstractTest;
+
 import org.junit.Test;
 
-import java.util.Properties;
-
 import static org.hamcrest.CoreMatchers.*;
+
 import static org.junit.Assert.assertThat;
+
+import java.util.Properties;
 
 /**
  * Unit tests for {@link DelegatingProperties}.
@@ -116,6 +118,8 @@ public class DelegatingPropertiesTest extends AbstractTest
     @Test
     public void testAccessingVirtualizedSystemProperties() throws Exception
     {
+        System.getProperties().remove("key-1");
+
         assertThat(System.getProperties().containsKey("key-1"), is(false));
 
         Properties properties = new Properties();

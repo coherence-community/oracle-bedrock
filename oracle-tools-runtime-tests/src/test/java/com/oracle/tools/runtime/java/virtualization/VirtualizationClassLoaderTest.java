@@ -9,8 +9,7 @@
  * You may not use this file except in compliance with the License.
  *
  * You can obtain a copy of the License by consulting the LICENSE.txt file
- * distributed with this file, or by consulting
- * or https://oss.oracle.com/licenses/CDDL
+ * distributed with this file, or by consulting https://oss.oracle.com/licenses/CDDL
  *
  * See the License for the specific language governing permissions
  * and limitations under the License.
@@ -26,7 +25,9 @@
 
 package com.oracle.tools.runtime.java.virtualization;
 
-import com.oracle.tools.DummyClass;
+import classloader.child.DummyClass;
+
+import classloader.parent.DummyParentLoadedClass;
 
 import com.oracle.tools.junit.AbstractTest;
 
@@ -37,9 +38,7 @@ import org.junit.Test;
 
 import org.mockito.Mockito;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.CoreMatchers.sameInstance;
+import static org.hamcrest.CoreMatchers.*;
 
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
@@ -48,11 +47,7 @@ import java.io.File;
 
 import java.lang.reflect.Method;
 
-import java.net.URI;
 import java.net.URL;
-import java.net.URLDecoder;
-
-import java.util.Enumeration;
 
 /**
  * Unit tests for the {@link VirtualizationClassLoader}.
@@ -205,16 +200,16 @@ public class VirtualizationClassLoaderTest extends AbstractTest
     @Test
     public void shouldLoadClassFromParentClassLoaderIfPackageIsInExcludedList() throws Exception
     {
-        ClassPath classPath = ClassPath.ofClass(DummyClass.class);
+        ClassPath classPath = ClassPath.ofClass(DummyParentLoadedClass.class);
 
-        System.setProperty(VirtualizationClassLoader.PROPERTY_EXCLUDED_PACKAGES, "com.oracle.tools");
+        System.setProperty(VirtualizationClassLoader.PROPERTY_EXCLUDED_PACKAGES, "classloader.parent");
 
         ClassLoader loader = VirtualizationClassLoader.newInstance("Test", classPath, System.getProperties());
-        Class<?>    result = loader.loadClass(DummyClass.class.getCanonicalName());
+        Class<?>    result = loader.loadClass(DummyParentLoadedClass.class.getCanonicalName());
 
         assertThat(result.getClassLoader(), not(sameInstance(loader)));
-        assertThat(result.getCanonicalName(), is(DummyClass.class.getCanonicalName()));
-        assertThat(result.equals(DummyClass.class), is(true));
+        assertThat(result.getCanonicalName(), is(DummyParentLoadedClass.class.getCanonicalName()));
+        assertThat(result.equals(DummyParentLoadedClass.class), is(true));
     }
 
 

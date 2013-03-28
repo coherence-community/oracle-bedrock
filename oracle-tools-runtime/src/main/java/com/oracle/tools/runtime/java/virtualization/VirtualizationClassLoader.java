@@ -9,8 +9,7 @@
  * You may not use this file except in compliance with the License.
  *
  * You can obtain a copy of the License by consulting the LICENSE.txt file
- * distributed with this file, or by consulting
- * or https://oss.oracle.com/licenses/CDDL
+ * distributed with this file, or by consulting https://oss.oracle.com/licenses/CDDL
  *
  * See the License for the specific language governing permissions
  * and limitations under the License.
@@ -28,8 +27,6 @@ package com.oracle.tools.runtime.java.virtualization;
 
 import com.oracle.tools.runtime.java.ClassPath;
 
-import java.io.File;
-
 import java.net.URL;
 
 import java.security.AllPermission;
@@ -37,10 +34,8 @@ import java.security.CodeSource;
 import java.security.PermissionCollection;
 import java.security.Permissions;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -78,16 +73,6 @@ public class VirtualizationClassLoader extends VirtualizedSystemClassLoader
      * The java.class.path property.
      */
     public static final String PROPERTY_JAVA_CLASS_PATH = "java.class.path";
-
-    /**
-     * The path separator property.
-     */
-    public static final String PROPERTY_PATH_SEPARATOR = "path.separator";
-
-    /**
-     * The file separator property.
-     */
-    public static final String PROPERTY_FILE_SEPARATOR = "file.separator";
 
     /**
      * The virtualization.exclude.packages property.
@@ -139,7 +124,7 @@ public class VirtualizationClassLoader extends VirtualizedSystemClassLoader
     {
         super(classPath, null, system);
         m_parentClassLoader = parent;
-        m_classPath = classPath;
+        m_classPath         = classPath;
 
         while (parent.getParent() != null)
         {

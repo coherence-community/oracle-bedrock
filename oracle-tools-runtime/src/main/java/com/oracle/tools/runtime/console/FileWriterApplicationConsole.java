@@ -88,7 +88,7 @@ public class FileWriterApplicationConsole implements ApplicationConsole
         catch (IOException e)
         {
             // failing to log is serious, but we have no outlet but to log the occurrence to stdout
-            System.out.println("Exception occured while writing to " + m_fileWriter + " the exception was " + e);
+            System.out.println("Exception occurred while writing to " + m_fileWriter + " the exception was " + e);
             e.printStackTrace();
         }
     }

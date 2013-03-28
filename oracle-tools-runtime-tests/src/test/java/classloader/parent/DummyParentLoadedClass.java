@@ -23,18 +23,17 @@
  * "Portions Copyright [year] [name of copyright owner]"
  */
 
-package com.oracle.tools;
+package classloader.parent;
 
 /**
- * A simple test class for setting and getting properties that should
- * be isolated by a Virtual Process.
+ * A simple test class that will be used for tests that want a parent loaded class.
  * <p>
- * Copyright (c) 2011. All Rights Reserved. Oracle Corporation.<br>
+ * Copyright (c) 2013. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
- * @author Jonathan Knight
+ * @author Brian Oliver
  */
-public class DummyClass
+public class DummyParentLoadedClass
 {
     /**
      * Sets the a System property
