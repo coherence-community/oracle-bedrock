@@ -52,6 +52,7 @@
         <module>oracle-tools-testing-support</module>
         <module>oracle-tools-runtime-tests</module>
         <module>oracle-tools-coherence</module>
+        <module>oracle-tools-coherence-testing-support</module>
 
         <module>oracle-tools-site</module>
     </modules>
