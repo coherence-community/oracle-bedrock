@@ -44,7 +44,7 @@ import java.util.Properties;
  * @author Jonathan Knight
  * @author Brian Oliver
  */
-public class DelegatingPropertiesTest extends AbstractTest
+public class DelegatingPropertiesTest
 {
     /**
      * Ensure that when we start and stop {@link Virtualization} that the

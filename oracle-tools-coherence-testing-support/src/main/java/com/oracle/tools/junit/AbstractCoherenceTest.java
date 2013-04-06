@@ -51,11 +51,14 @@ import org.junit.Before;
 public abstract class AbstractCoherenceTest extends AbstractTest
 {
     /**
-     * Setup for each test.
+     * {@inheritDoc}
      */
     @Before
-    public void setup()
+    @Override
+    public void onBeforeEachTest()
     {
+        super.onBeforeEachTest();
+
         // we only want to run locally
         System.setProperty("tangosol.coherence.clusterport",
                            Integer.toString(Virtualization.getAvailablePorts().next()));
@@ -65,11 +68,15 @@ public abstract class AbstractCoherenceTest extends AbstractTest
 
 
     /**
-     * Cleanup after each test.
+     * {@inheritDoc}
      */
     @After
-    public void cleanup()
+    @Override
+    public void onAfterEachTest()
     {
+        // shutdown the cluster after each test
         CacheFactory.shutdown();
+
+        super.onAfterEachTest();
     }
 }

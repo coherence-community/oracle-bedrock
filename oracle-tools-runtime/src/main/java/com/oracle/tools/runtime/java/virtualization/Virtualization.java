@@ -91,7 +91,9 @@ public class Virtualization
             // establish the default VirtualizedSystem to use in place of the
             // physical system when a thread isn't part of a VirtualizedSystem
             s_defaultSystem = new VirtualizedSystem("(Default Virtual System)",
-                                                    PHYSICAL_SYSTEM,
+                                                    PHYSICAL_SYSTEM.getProperties(),
+                                                    PHYSICAL_SYSTEM.getStdOut(),
+                                                    PHYSICAL_SYSTEM.getStdErr(),
                                                     new VirtualizedMBeanServerBuilder(s_availablePortIterator));
 
             // ensure that the JMX MBean Server for the default system is the

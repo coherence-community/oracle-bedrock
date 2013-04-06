@@ -58,7 +58,7 @@ import java.net.URL;
  * @author Jonathan Knight
  * @author Brian Oliver
  */
-public class VirtualizationClassLoaderTest extends AbstractTest
+public class VirtualizationClassLoaderTest
 {
     /**
      * Ensure that we can create VirtualizationClassLoader that uses

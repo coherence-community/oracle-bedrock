@@ -27,7 +27,9 @@ package com.oracle.tools.junit;
 
 import com.oracle.tools.runtime.java.virtualization.Virtualization;
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 
 /**
  * An {@link AbstractTest} defined base test functionality for both unit
@@ -41,25 +43,49 @@ import org.junit.Before;
  */
 public abstract class AbstractTest
 {
+
     /**
-     * Before tests we ask the {@link Virtualization} framework for
-     * the physical {@link System}.  This ensures we can reset it after the
-     * tests.
+     * Before running any tests we ask the {@link Virtualization} framework
+     * for the physical {@link System}.  This ensures that we can restore
+     * the physical System after the tests have run thus preventing any
+     * System-level side-effects occurring between or after the tests.
      */
-    @Before
-    public void prepareForVirtualization()
+    @BeforeClass
+    public static void onBeforeTestsInClass()
     {
         Virtualization.getPhysicalSystem();
     }
 
+    /**
+     * After running tests we ensure that the {@link Virtualization} has been
+     * stopped.  This ensures that physical system resources are returned
+     * to normal, thus preventing any System-level side-effects from the tests
+     * in the class.
+     */
+    @AfterClass
+    public static void onAfterTestsInClass()
+    {
+        Virtualization.stop();
+    }
+
 
     /**
-     * After tests we ensure that the {@link Virtualization} has been
-     * stopped.  This ensures that physical system resources are returned
-     * to normal.
+     * Before each test in the class we start the {@link Virtualization} to
+     * protect System-level resources.
+     */
+    @Before
+    public void onBeforeEachTest()
+    {
+        Virtualization.start();
+    }
+
+
+    /**
+     * After each test in the class we restore the {@link Virtualization} to
+     * return System-level resources back to normal.
      */
     @After
-    public void cleanupAfterVirtualization()
+    public void onAfterEachTest()
     {
         Virtualization.stop();
     }
