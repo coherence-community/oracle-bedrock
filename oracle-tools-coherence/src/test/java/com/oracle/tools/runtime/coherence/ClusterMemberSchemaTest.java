@@ -99,34 +99,6 @@ public class ClusterMemberSchemaTest extends AbstractTest
      * @throws Exception
      */
     @Test
-    public void shouldHaveCorrectStartMethodWhenRunInProcess() throws Exception
-    {
-        ClusterMemberSchema schema = new ClusterMemberSchema();
-
-        assertThat(schema.getStartMethodName(), is(ClusterMemberSchema.DEFAULT_START_METHOD));
-    }
-
-
-    /**
-     * Method description
-     *
-     * @throws Exception
-     */
-    @Test
-    public void shouldHaveCorrectStopMethodWhenRunInProcess() throws Exception
-    {
-        ClusterMemberSchema schema = new ClusterMemberSchema();
-
-        assertThat(schema.getStopMethodName(), is(ClusterMemberSchema.DEFAULT_STOP_METHOD));
-    }
-
-
-    /**
-     * Method description
-     *
-     * @throws Exception
-     */
-    @Test
     public void shouldSetCacheConfigURI() throws Exception
     {
         String              value  = "TestValue";

@@ -26,23 +26,74 @@
 package com.oracle.tools.runtime.console;
 
 import com.oracle.tools.runtime.ApplicationConsole;
+import com.oracle.tools.runtime.java.container.Container;
+
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.io.Reader;
 
 /**
- * A {@link SystemApplicationConsole} is an implementation of an
- * {@link ApplicationConsole} that writes output to the {@link System#out}.
+ * An {@link ApplicationConsole} that delegates i/o to the System.
  * <p>
- * Copyright (c) 2011. All Rights Reserved. Oracle Corporation.<br>
+ * Copyright (c) 2013. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Brian Oliver
  */
-public class SystemApplicationConsole extends PrintStreamApplicationConsole
+public class SystemApplicationConsole implements ApplicationConsole
 {
+    private PrintWriter m_outputWriter;
+    private PrintWriter m_errorWriter;
+    private Reader      m_inputReader;
+
+
     /**
-     * Construct a {@link SystemApplicationConsole}
+     * Constructs a SystemApplicationConsole.
      */
     public SystemApplicationConsole()
     {
-        super(System.out);
+        m_outputWriter = new PrintWriter(Container.getPlatformScope().getStandardOutput());
+        m_errorWriter  = new PrintWriter(Container.getPlatformScope().getStandardError());
+        m_inputReader  = new InputStreamReader(Container.getPlatformScope().getStandardInput());
+    }
+
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void close()
+    {
+        // SKIP: we don't close the System streams
+    }
+
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public PrintWriter getOutputWriter()
+    {
+        return m_outputWriter;
+    }
+
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public PrintWriter getErrorWriter()
+    {
+        return m_errorWriter;
+    }
+
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Reader getInputReader()
+    {
+        return m_inputReader;
     }
 }

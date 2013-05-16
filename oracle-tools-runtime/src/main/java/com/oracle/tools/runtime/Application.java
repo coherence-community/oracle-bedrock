@@ -30,7 +30,7 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * An {@link Application} provides a mechanism to represent, access and control
- * an executing application process, typically managed by an operating system.
+ * an {@link ApplicationProcess}.
  *
  * @param <A> the concrete type of {@link Application}
  * <p>
@@ -72,7 +72,8 @@ public interface Application<A>
     /**
      * Terminates and destroys the running {@link Application}.  Upon returning
      * from this method you can safely assume the {@link Application} is no longer
-     * running.
+     * running.  All resources, including input / output streams will no longer
+     * be available or valid.
      *
      * @return the exit value of the {@link Application}
      *         (by convention <code>0</code> indicates normal termination)
@@ -110,18 +111,21 @@ public interface Application<A>
 
 
     /**
-     * Obtain the operating system process id for the {@link Application}.
+     * Obtain the identity for the {@link Application}.  This is typically
+     * the underlying process id (pid), but in some circumstances this may be
+     * an environment specific identifier.  eg: in a cloud/container/multi-tenant
+     * environment this may not be an operating system pid.
      *
-     * @return The process id or -1 if it can't be determined.
+     * @return The unique identity or -1 if it can't be determined.
      */
-    public long getPid();
+    public long getId();
 
 
     /**
      * Obtains the default duration to used by the {@link Application}
      * for timeout values that have not been specified.
      *
-     * @return the timeout duration (measured in {@link #getTimeoutUnits()})
+     * @return the timeout duration (measured in {@link #getDefaultTimeoutUnits()})
      */
     public long getDefaultTimeout();
 

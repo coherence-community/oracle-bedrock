@@ -71,7 +71,7 @@ public class SimpleJavaApplicationSchema
      * {@inheritDoc}
      */
     @Override
-    public SimpleJavaApplication createJavaApplication(Process            process,
+    public SimpleJavaApplication createJavaApplication(JavaProcess        process,
                                                        String             name,
                                                        ApplicationConsole console,
                                                        Properties         environmentVariables,
@@ -82,6 +82,7 @@ public class SimpleJavaApplicationSchema
                                          console,
                                          environmentVariables,
                                          systemProperties,
+                                         this.isDiagnosticsEnabled(),
                                          this.getDefaultTimeout(),
                                          this.getDefaultTimeoutUnits(),
                                          this.getLifecycleInterceptors());

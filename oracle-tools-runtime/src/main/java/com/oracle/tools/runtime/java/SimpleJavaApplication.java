@@ -30,6 +30,7 @@ import com.oracle.tools.runtime.ApplicationConsole;
 import com.oracle.tools.runtime.LifecycleEventInterceptor;
 
 import java.util.Properties;
+
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -40,26 +41,28 @@ import java.util.concurrent.TimeUnit;
  *
  * @author Brian Oliver
  */
-public class SimpleJavaApplication extends AbstractJavaApplication<SimpleJavaApplication>
+public class SimpleJavaApplication extends AbstractJavaApplication<SimpleJavaApplication, JavaProcess>
 {
     /**
      * Construct a {@link SimpleJavaApplication}.
      *
-     * @param process               the {@link Process} representing the {@link JavaApplication}
+     * @param process               the {@link JavaProcess} representing the {@link SimpleJavaApplication}
      * @param name                  the name of the {@link JavaApplication}
      * @param console               the {@link ApplicationConsole} that will be used for I/O by the
      *                              realized {@link Application}. This may be <code>null</code> if not required
      * @param environmentVariables  the environment variables used when starting the {@link JavaApplication}
      * @param systemProperties      the system properties provided to the {@link JavaApplication}
+     * @param isDiagnosticsEnabled  should diagnostic information be logged/output
      * @param defaultTimeout        the default timeout duration
      * @param defaultTimeoutUnits   the default timeout duration {@link TimeUnit}
      * @param interceptors          the {@link LifecycleEventInterceptor}s
      */
-    public SimpleJavaApplication(Process                                                    process,
+    public SimpleJavaApplication(JavaProcess                                                process,
                                  String                                                     name,
                                  ApplicationConsole                                         console,
                                  Properties                                                 environmentVariables,
                                  Properties                                                 systemProperties,
+                                 boolean                                                    isDiagnosticsEnabled,
                                  long                                                       defaultTimeout,
                                  TimeUnit                                                   defaultTimeoutUnits,
                                  Iterable<LifecycleEventInterceptor<SimpleJavaApplication>> interceptors)
@@ -69,6 +72,7 @@ public class SimpleJavaApplication extends AbstractJavaApplication<SimpleJavaApp
               console,
               environmentVariables,
               systemProperties,
+              isDiagnosticsEnabled,
               defaultTimeout,
               defaultTimeoutUnits,
               interceptors);

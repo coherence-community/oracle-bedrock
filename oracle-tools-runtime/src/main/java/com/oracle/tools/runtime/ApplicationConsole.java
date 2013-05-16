@@ -25,13 +25,15 @@
 
 package com.oracle.tools.runtime;
 
-import java.util.Formatter;
+import java.io.BufferedReader;
+import java.io.PrintWriter;
+import java.io.Reader;
 
 /**
- * An {@link ApplicationConsole} provides standard out and err output facilities
- * to an executing application.
+ * Provides a mechanism to interact with the console of an {@link Application}
+ * including stdout, stderr and stdin.
  * <p>
- * Copyright (c) 2011. All Rights Reserved. Oracle Corporation.<br>
+ * Copyright (c) 2013. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Brian Oliver
@@ -39,16 +41,29 @@ import java.util.Formatter;
 public interface ApplicationConsole
 {
     /**
-     * A convenience method to write a formatted string to a console using
-     * the specified format string and arguments.
-     *
-     * @param format  a format string as described in {@link Formatter} string
-     *                syntax
-     * @param args    arguments referenced by the format specifiers in the
-     *                format string. If there are more arguments than format
-     *                specifiers, the extra arguments are ignored.
-     *                The number of arguments is variable and may be zero.
+     * Obtains the {@link PrintWriter} that an {@link Application} will use
+     * for stdout.
      */
-    public void printf(String    format,
-                       Object... args);
+    public PrintWriter getOutputWriter();
+
+
+    /**
+     * Obtains the {@link PrintWriter} that an {@link Application} will use
+     * for stderr.
+     */
+    public PrintWriter getErrorWriter();
+
+
+    /**
+     * Obtains the {@link Reader} that an {@link Application} will use
+     * for stdin.
+     */
+    public Reader getInputReader();
+
+
+    /**
+     * Closes the {@link ApplicationConsole}, after with the console may not
+     * be used.
+     */
+    public void close();
 }

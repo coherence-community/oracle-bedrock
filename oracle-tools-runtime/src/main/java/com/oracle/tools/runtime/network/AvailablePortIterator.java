@@ -133,7 +133,7 @@ public class AvailablePortIterator implements Iterator<Integer>, Iterable<Intege
      * Defaults to using the loop back address but the specified port range.
      *
      * @param portRangeStart  the port at which to start scanning (inclusive)
-     * @param portRangeEnd    the port at which to stop scanning (inclusive)
+     * @param portRangeEnd    the port at which to destroy scanning (inclusive)
      *
      * @throws UnknownHostException  when the loop back address can not be determined
      */
@@ -149,7 +149,7 @@ public class AvailablePortIterator implements Iterator<Integer>, Iterable<Intege
      *
      * @param inetAddress     the {@link InetAddress} on which to scan ports (typically loopback or localhost)
      * @param portRangeStart  the port at which to start scanning (inclusive)
-     * @param portRangeEnd    the port at which to stop scanning (inclusive)
+     * @param portRangeEnd    the port at which to destroy scanning (inclusive)
      */
     public AvailablePortIterator(InetAddress inetAddress,
                                  int         portRangeStart,
@@ -170,7 +170,7 @@ public class AvailablePortIterator implements Iterator<Integer>, Iterable<Intege
      *
      * @param host            the host name or IP address on which to scan (as a String)
      * @param portRangeStart  the port at which to start scanning (inclusive)
-     * @param portRangeEnd    the port at which to stop scanning (inclusive)
+     * @param portRangeEnd    the port at which to destroy scanning (inclusive)
      */
     public AvailablePortIterator(String host,
                                  int    portRangeStart,

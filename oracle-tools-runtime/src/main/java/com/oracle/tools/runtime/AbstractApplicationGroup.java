@@ -25,6 +25,7 @@
 
 package com.oracle.tools.runtime;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -50,7 +51,7 @@ public abstract class AbstractApplicationGroup<A extends Application<A>> impleme
     /**
      * Constructs an {@link AbstractApplicationGroup} given a list of {@link Application}s.
      *
-     * @param applications The list of {@link Application}s in the {@link ApplicationGroup}.
+     * @param applications  the list of {@link Application}s in the {@link ApplicationGroup}.
      */
     public AbstractApplicationGroup(List<A> applications)
     {
@@ -64,16 +65,41 @@ public abstract class AbstractApplicationGroup<A extends Application<A>> impleme
 
 
     /**
-     * Obtains the application in this group with the given name or null
-     * if no application has been realized with the given name.
+     * Obtains the {@link Application} in this group with the given name.  If
+     * no such {@link Application} exists in the group, <code>null</code> will
+     * be returned.
      *
-     * @param name - the name of the application to get
+     * @param name  the name of the application to get
      * @return the application in this group with the given name or null
      *         if no application has been realized with the given name.
      */
     public A getApplication(String name)
     {
         return m_applications.get(name);
+    }
+
+
+    /**
+     * Obtains the {@link Application}s in this group starting with the specified
+     * prefix.
+     *
+     * @param prefix  the prefix of application names to return
+     * @return the application in this group with the given name or null
+     *         if no application has been realized with the given name.
+     */
+    public Iterable<A> getApplications(String prefix)
+    {
+        ArrayList<A> applications = new ArrayList<A>();
+
+        for (String name : m_applications.keySet())
+        {
+            if (name.startsWith(prefix))
+            {
+                applications.add(m_applications.get(name));
+            }
+        }
+
+        return applications;
     }
 
 

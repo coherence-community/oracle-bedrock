@@ -296,18 +296,4 @@ public interface JavaApplication<A> extends Application<A>
      * @return {@link String} (<code>null</code> if not defined).
      */
     public String getRMIServerHostName();
-
-
-    /**
-     * Method description
-     *
-     * @param className
-     * @param methodName
-     * @param <T>
-     *
-     * @return
-     */
-    @Deprecated
-    public <T> T invoke(String className,
-                        String methodName);
 }

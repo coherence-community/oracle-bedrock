@@ -27,12 +27,14 @@ package com.oracle.tools.runtime.network;
 
 import org.junit.Test;
 
-import java.net.UnknownHostException;
-
 import static com.oracle.tools.deferred.DeferredAssert.assertThat;
+
 import static com.oracle.tools.deferred.DeferredHelper.eventually;
 import static com.oracle.tools.deferred.DeferredHelper.invoking;
+
 import static org.hamcrest.Matchers.is;
+
+import java.net.UnknownHostException;
 
 /**
  * Unit tests for the {@link AvailablePortIterator}.
@@ -50,7 +52,7 @@ public class AvailablePortIteratorTest
      * @throws UnknownHostException
      */
     @Test
-    public void testHasAvailablePort() throws UnknownHostException
+    public void shouldFindAvailablePort() throws UnknownHostException
     {
         AvailablePortIterator iterator = new AvailablePortIterator(40000, 40100);
 

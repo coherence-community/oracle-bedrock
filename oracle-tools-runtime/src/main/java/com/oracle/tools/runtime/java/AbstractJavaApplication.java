@@ -3,7 +3,7 @@
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * The contents of this file are subject to the terms and conditions of
+ * The contents of this file are subject to the terms and conditions of 
  * the Common Development and Distribution License 1.0 (the "License").
  *
  * You may not use this file except in compliance with the License.
@@ -29,29 +29,35 @@ import com.oracle.tools.deferred.Cached;
 import com.oracle.tools.deferred.Deferred;
 import com.oracle.tools.deferred.NeverAvailable;
 import com.oracle.tools.deferred.ObjectNotAvailableException;
+
 import com.oracle.tools.deferred.jmx.DeferredJMXConnector;
 import com.oracle.tools.deferred.jmx.DeferredMBeanAttribute;
 import com.oracle.tools.deferred.jmx.DeferredMBeanInfo;
 import com.oracle.tools.deferred.jmx.DeferredMBeanProxy;
+
 import com.oracle.tools.runtime.AbstractApplication;
 import com.oracle.tools.runtime.Application;
 import com.oracle.tools.runtime.ApplicationConsole;
 import com.oracle.tools.runtime.LifecycleEventInterceptor;
-import com.oracle.tools.runtime.java.process.VirtualProcess;
+
 import com.oracle.tools.runtime.network.Constants;
+
+import static com.oracle.tools.deferred.DeferredHelper.cached;
+import static com.oracle.tools.deferred.DeferredHelper.ensured;
+
+import java.io.IOException;
+
+import java.util.Properties;
+import java.util.Set;
+
+import java.util.concurrent.TimeUnit;
 
 import javax.management.MBeanInfo;
 import javax.management.ObjectInstance;
 import javax.management.ObjectName;
 import javax.management.QueryExp;
-import javax.management.remote.JMXConnector;
-import java.io.IOException;
-import java.util.Properties;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
-import static com.oracle.tools.deferred.DeferredHelper.cached;
-import static com.oracle.tools.deferred.DeferredHelper.ensured;
+import javax.management.remote.JMXConnector;
 
 /**
  * A {@link AbstractJavaApplication} is a base implementation of a {@link JavaApplication} that has
@@ -62,8 +68,8 @@ import static com.oracle.tools.deferred.DeferredHelper.ensured;
  *
  * @author Brian Oliver
  */
-public abstract class AbstractJavaApplication<A extends JavaApplication<A>> extends AbstractApplication<A>
-    implements JavaApplication<A>
+public abstract class AbstractJavaApplication<A extends JavaApplication<A>, P extends JavaProcess>
+    extends AbstractApplication<A, P> implements JavaApplication<A>
 {
     /**
      * The System Properties used to create the underlying {@link Process} represented by
@@ -86,20 +92,29 @@ public abstract class AbstractJavaApplication<A extends JavaApplication<A>> exte
      *                              realized {@link Application}. This may be <code>null</code> if not required
      * @param environmentVariables  the environment variables used when starting the {@link JavaApplication}
      * @param systemProperties      the system properties provided to the {@link JavaApplication}
+     * @param isDiagnosticsEnabled  should diagnostic information be logged/output
      * @param defaultTimeout        the default timeout duration
      * @param defaultTimeoutUnits   the default timeout duration {@link TimeUnit}
      * @param interceptors          the {@link LifecycleEventInterceptor}s
      */
-    public AbstractJavaApplication(Process                                process,
+    public AbstractJavaApplication(P                                      process,
                                    String                                 name,
                                    ApplicationConsole                     console,
                                    Properties                             environmentVariables,
                                    Properties                             systemProperties,
+                                   boolean                                isDiagnosticsEnabled,
                                    long                                   defaultTimeout,
                                    TimeUnit                               defaultTimeoutUnits,
                                    Iterable<LifecycleEventInterceptor<A>> interceptors)
     {
-        super(process, name, console, environmentVariables, defaultTimeout, defaultTimeoutUnits, interceptors);
+        super(process,
+              name,
+              console,
+              environmentVariables,
+              isDiagnosticsEnabled,
+              defaultTimeout,
+              defaultTimeoutUnits,
+              interceptors);
 
         m_systemProperties = systemProperties;
 
@@ -124,6 +139,18 @@ public abstract class AbstractJavaApplication<A extends JavaApplication<A>> exte
         {
             m_cachedJMXConnector = cached(new NeverAvailable<JMXConnector>(JMXConnector.class));
         }
+    }
+
+
+    /**
+     * Obtains the underlying {@link com.oracle.tools.runtime.ApplicationProcess} that controls the
+     * {@link Application}.
+     *
+     * @return the {@link com.oracle.tools.runtime.ApplicationProcess} for the {@link Application}
+     */
+    P getJavaProcess()
+    {
+        return super.getApplicationProcess();
     }
 
 
@@ -308,24 +335,5 @@ public abstract class AbstractJavaApplication<A extends JavaApplication<A>> exte
         }
 
         return super.destroy();
-    }
-
-
-    /**
-     * {@inheritDoc}
-     */
-    @SuppressWarnings({"unchecked"})
-    @Deprecated
-    public <T> T invoke(String className,
-                        String methodName)
-    {
-        Process process = getProcess();
-
-        if (!(process instanceof VirtualProcess))
-        {
-            throw new UnsupportedOperationException("Invoke is only available for Internal Processes");
-        }
-
-        return (T) ((VirtualProcess) process).invoke(className, methodName);
     }
 }

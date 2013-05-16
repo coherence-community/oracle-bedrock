@@ -25,7 +25,7 @@
 
 package com.oracle.tools.junit;
 
-import com.oracle.tools.runtime.java.virtualization.Virtualization;
+import com.oracle.tools.runtime.java.container.Container;
 
 import com.oracle.tools.runtime.network.Constants;
 
@@ -61,7 +61,7 @@ public abstract class AbstractCoherenceTest extends AbstractTest
 
         // we only want to run locally
         System.setProperty("tangosol.coherence.clusterport",
-                           Integer.toString(Virtualization.getAvailablePorts().next()));
+                           Integer.toString(Container.getAvailablePorts().next()));
         System.setProperty("tangosol.coherence.localhost", Constants.getLocalHost());
         System.setProperty("tangosol.coherence.ttl", Integer.toString(0));
     }

@@ -8,11 +8,83 @@ reverse chronological order.
 
 <h4>Source and Documentation Contributors</h4>
 
-*   Jonathan Knight and Brian Oliver
+*   Jonathan Knight, Paul Makin, Brian Oliver
 
 <h4>Global and Cross-Module Changes</h4>
 
-*   Initial Release based on initial work from The Oracle Coherence Incubator.
+*   No Changes.
+
+<h4>oracle-tools-core</h4>
+
+*   [ORACLETOOLS-14](https://java.net/jira/browse/ORACLETOOLS-14): Removed Notified
+    Deferred implementation as by nature they are unreliable.
+
+<h4>oracle-tools-runtime</h4>
+
+*   [ORACLETOOLS-12](https://java.net/jira/browse/ORACLETOOLS-12): Resolved issue
+    when Native processes would fail to execute due to timing and class-path
+    issues (on Windows Platforms).
+
+*   [ORACLETOOLS-13](https://java.net/jira/browse/ORACLETOOLS-13): Resolved issue
+    Oracle Tools virtualization would fail to run when classpaths contain
+    whitespace (on Windows Platforms).
+
+*   [ORACLETOOLS-21](https://java.net/jira/browse/ORACLETOOLS-21): Refactored
+    and renamed Virtualization package and associated Virtualizeed Application,
+    Virtualized Process and Virtualize Builders to be themed as being
+    "ContainerBased".   This was to clear up possible confusion when running
+    Native applications on Virtualized infrastructure.  As part of this work we
+    also renamed ExternalJavaApplicationBuilder to be a NativeJavaApplicationBuilder.
+
+*   [ORACLETOOLS-26](https://java.net/jira/browse/ORACLETOOLS-26): Refactored
+    the ApplicationConsole interfaces and implementations to allow separate
+    control of stdout, stderr and stdin.
+
+*   [ORACLETOOLS-27](https://java.net/jira/browse/ORACLETOOLS-27): Introduced
+    the concept of "diagnostics" to provide application life-cycle information
+    without requiring redirection of ApplicationConsoles.
+
+*   [ORACLETOOLS-28](https://java.net/jira/browse/ORACLETOOLS-28): Introduced
+    the ability to enable remote Java debugging (when using Java-based Application
+    Schemas) for Native Java Applications.
+
+*   [ORACLETOOLS-29](https://java.net/jira/browse/ORACLETOOLS-29): Resolved issue
+    where the names of Applications created as part of an Group start at 0 instead
+    of 1.
+
+*   [ORACLETOOLS-30](https://java.net/jira/browse/ORACLETOOLS-30): Resolves an
+    issue were by Native Windows NT / XP processes may hang when being destroyed.
+
+<h4>oracle-tools-runtime-tests</h4>
+
+*   Introduced to encapsulate Functional and Integration Tests.
+
+<h4>oracle-tools-testing-support</h4>
+
+*   No Changes.
+
+<h4>oracle-tools-coherence</h4>
+
+*   [ORACLETOOLS-10](https://java.net/jira/browse/ORACLETOOLS-10): Add support for
+    specifying a log destination for Coherence when using a Coherence-based MemeberSchema.
+
+<h4>oracle-tools-coherence-tests</h4>
+
+*   Introduced to encapsulate Functional and Integration Tests.
+
+<h4>oracle-tools-coherence-testing-support</h4>
+
+*   [ORACLETOOLS-19](https://java.net/jira/browse/ORACLETOOLS-19): Introduced
+    an AbtractCoherenceTest to support Coherence Test isolation.
+
+
+--------------------------------------------------------------------------------
+
+<h3>Version 0.0.8 @ 2013-02-26 13:12 </h3>
+
+<h4>Global and Cross-Module Changes</h4>
+
+*   Initial Release based on work from The Oracle Coherence Incubator.
 
 <h4>oracle-tools-core</h4>
 
@@ -24,7 +96,7 @@ reverse chronological order.
 
 <h4>oracle-tools-testing-support</h4>
 
-*   Defines Testing Extensions for Deferred Resources.
+*   Defines JUnit Testing Extensions for Deferred Resources.
 
 <h4>oracle-tools-coherence</h4>
 

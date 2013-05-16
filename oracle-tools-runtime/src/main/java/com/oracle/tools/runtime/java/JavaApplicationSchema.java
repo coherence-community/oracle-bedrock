@@ -78,31 +78,11 @@ public interface JavaApplicationSchema<A extends JavaApplication<A>, S extends J
 
 
     /**
-     * Obtains the name of the method to start {@link JavaApplication}s
-     * built using this {@link JavaApplicationSchema}, when running
-     * {@link ExecutionMode#InternalProcess} mode.
-     *
-     * @return the name of the start method
-     */
-    public String getStartMethodName();
-
-
-    /**
-     * Obtains the name of the method to stop {@link JavaApplication}s
-     * built using this {@link JavaApplicationSchema}, when running
-     * {@link ExecutionMode#InternalProcess} mode.
-     *
-     * @return the name of the stop method
-     */
-    public String getStopMethodName();
-
-
-    /**
-     * Instantiates a {@link JavaApplication} to represent the specified
-     * Java {@link Process} and properties.  It's through this {@link JavaApplication}
+     * Instantiates a suitable {@link JavaApplication} to control the underlying
+     * {@link JavaProcess}.  It's through this {@link JavaApplication}
      * that developers will interact with the underlying Java {@link Process}.
      *
-     * @param process               the {@link Process} representing the {@link JavaApplication}
+     * @param process               the {@link JavaProcess} representing the {@link JavaApplication}
      * @param name                  the name of the {@link JavaApplication}
      * @param console               the {@link ApplicationConsole} that will be used for I/O by the
      *                              realized {@link Application}. This may be <code>null</code> if not required
@@ -111,7 +91,7 @@ public interface JavaApplicationSchema<A extends JavaApplication<A>, S extends J
      *
      * @return a {@link JavaApplication}
      */
-    public A createJavaApplication(Process            process,
+    public A createJavaApplication(JavaProcess        process,
                                    String             name,
                                    ApplicationConsole console,
                                    Properties         environmentVariables,

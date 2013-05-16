@@ -27,7 +27,7 @@ package com.oracle.tools.runtime;
 
 /**
  * A {@link LifecycleEventInterceptor} provides the ability to intercept
- * and process {@link LifecycleEvent}s that occur during the life-cycle of
+ * and application {@link LifecycleEvent}s that occur during the life-cycle of
  * an object.
  *
  * @param <T> the type of object on which the event occurred

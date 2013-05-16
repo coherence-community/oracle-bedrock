@@ -26,7 +26,9 @@
 package com.oracle.tools.runtime;
 
 import java.io.File;
+
 import java.util.List;
+
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -76,13 +78,31 @@ public interface ApplicationSchema<A extends Application<A>, S extends Applicati
 
 
     /**
-     * Determines if the settings and environment variables for the
-     * {@link ApplicationSchema} should be inherited from the process in which
-     * the {@link ApplicationSchema} was created.
+     * Determines the standard error stream will be redirected to the standard
+     * output stream.
      *
-     * @return true if the settings are inherited
+     * @return <code>true</code> if the standard error stream is redirected
      */
-    public boolean isInherited();
+    public boolean isErrorStreamRedirected();
+
+
+    /**
+     * Determines if the environment variables for the {@link ApplicationSchema}
+     * should be inherited from the process in which the {@link ApplicationSchema}
+     * was created.
+     *
+     * @return true if the environment variables are inherited
+     */
+    public boolean isEnvironmentInherited();
+
+
+    /**
+     * Determines if diagnostic information will be logged for {@link Application}s
+     * produced using the {@link ApplicationSchema}.
+     *
+     * @return <code>true</code> to enable diagnostic logging
+     */
+    public boolean isDiagnosticsEnabled();
 
 
     /**
@@ -101,7 +121,7 @@ public interface ApplicationSchema<A extends Application<A>, S extends Applicati
      * In those circumstances, the default timeout is used, unless of course
      * an explicit timeout is specified.
      *
-     * @return the timeout duration (measured in {@link #getTimeoutUnits()})
+     * @return the timeout duration (measured in {@link #getDefaultTimeoutUnits()})
      */
     public long getDefaultTimeout();
 

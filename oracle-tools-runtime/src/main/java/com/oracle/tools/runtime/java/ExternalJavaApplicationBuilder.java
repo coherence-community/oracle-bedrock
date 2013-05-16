@@ -25,40 +25,27 @@
 
 package com.oracle.tools.runtime.java;
 
-import com.oracle.tools.runtime.ApplicationConsole;
-import com.oracle.tools.runtime.java.process.ExternalProcessBuilder;
-import com.oracle.tools.runtime.java.process.JavaProcessBuilder;
-
 /**
- * An {@link ExternalJavaApplicationBuilder} is a {@link JavaApplicationBuilder}
- * that realizes {@link JavaApplication}s as external, non-child
- * operating system processes.
+ * A {@link JavaApplicationBuilder} that realizes {@link JavaApplication}s as
+ * external, native non-child operating system processes.
  * <p>
- * Copyright (c) 2011. All Rights Reserved. Oracle Corporation.<br>
+ * WARNING: This class is now deprecated.  All implementations using this class
+ * should migrate to use the new {@link NativeJavaApplicationBuilder}.
+ * <p>
+ * Copyright (c) 2013. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Brian Oliver
  */
+@Deprecated
 public class ExternalJavaApplicationBuilder<A extends JavaApplication<A>, S extends JavaApplicationSchema<A, S>>
-    extends AbstractJavaApplicationBuilder<A, S> implements JavaApplicationBuilder<A, S>
+    extends NativeJavaApplicationBuilder<A, S>
 {
     /**
-     * Constructs a {@link ExternalJavaApplicationBuilder}.
+     * Constructs a {@link com.oracle.tools.runtime.java.ExternalJavaApplicationBuilder}.
      */
     public ExternalJavaApplicationBuilder()
     {
         super();
-    }
-
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected JavaProcessBuilder createJavaProcessBuilder(S                  schema,
-                                                          String             applicationName,
-                                                          ApplicationConsole console)
-    {
-        return new ExternalProcessBuilder(schema.getExecutableName(), schema.getApplicationClassName());
     }
 }

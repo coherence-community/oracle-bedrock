@@ -9,8 +9,7 @@
  * You may not use this file except in compliance with the License.
  *
  * You can obtain a copy of the License by consulting the LICENSE.txt file
- * distributed with this file, or by consulting
- * or https://oss.oracle.com/licenses/CDDL
+ * distributed with this file, or by consulting https://oss.oracle.com/licenses/CDDL
  *
  * See the License for the specific language governing permissions
  * and limitations under the License.
@@ -28,13 +27,11 @@ package com.oracle.tools.runtime.java;
 
 import java.io.File;
 import java.io.IOException;
-
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
@@ -339,10 +336,12 @@ public class ClassPath implements Iterable<String>
         else
         {
             StringBuilder builder = new StringBuilder();
-            for(int i = 0; i < string.length(); i++)
+
+            for (int i = 0; i < string.length(); i++)
             {
                 char c = string.charAt(i);
-                if (c != '\"' && c != '\''&& c != '`')
+
+                if (c != '\"' && c != '\'' && c != '`')
                 {
                     builder.append(c);
                 }
@@ -510,14 +509,16 @@ public class ClassPath implements Iterable<String>
                 }
                 catch (URISyntaxException e)
                 {
-                    throw new IOException("Unable to create a ClassPath for [" + location
-                                          + "] using ClassLoader [" + classLoader + "] as an illegal URI was encountered",
+                    throw new IOException("Unable to create a ClassPath for [" + location + "] using ClassLoader ["
+                                          + classLoader + "] as an illegal URI was encountered",
                                           e);
                 }
             }
             else
             {
-                throw new IOException("Unable to locate the specified resource [" + resourceName + "] using ClassLoader [" + classLoader + "] with ClassPath [" + ClassPath.ofSystem() + "]");
+                throw new IOException("Unable to locate the specified resource [" + resourceName
+                                      + "] using ClassLoader [" + classLoader + "] with ClassPath ["
+                                      + ClassPath.ofSystem() + "]");
             }
         }
     }

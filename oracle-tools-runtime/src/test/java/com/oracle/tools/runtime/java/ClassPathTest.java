@@ -38,7 +38,7 @@ import java.io.File;
 import java.net.URL;
 
 /**
- * Unit tests for {@link ClassPath}s.
+ * Unit Tests for {@link ClassPath}s.
  * <p>
  * Copyright (c) 2013. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.

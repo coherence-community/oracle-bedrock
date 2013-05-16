@@ -33,7 +33,7 @@ import com.oracle.tools.runtime.LifecycleEventInterceptor;
 
 import com.oracle.tools.runtime.java.AbstractJavaApplication;
 import com.oracle.tools.runtime.java.JavaApplication;
-import com.oracle.tools.runtime.java.SimpleJavaApplication;
+import com.oracle.tools.runtime.java.JavaProcess;
 
 import java.util.Properties;
 
@@ -43,7 +43,7 @@ import javax.management.MBeanInfo;
 import javax.management.ObjectName;
 
 /**
- * A {@link ClusterMember} is a specialized {@link SimpleJavaApplication} to
+ * A {@link ClusterMember} is a specialized {@link com.oracle.tools.runtime.java.SimpleJavaApplication} to
  * represent Coherence-based Cluster Members at runtime.
  * <p>
  * Copyright (c) 2010. All Rights Reserved. Oracle Corporation.<br>
@@ -51,7 +51,7 @@ import javax.management.ObjectName;
  *
  * @author Brian Oliver
  */
-public class ClusterMember extends AbstractJavaApplication<ClusterMember>
+public class ClusterMember extends AbstractJavaApplication<ClusterMember, JavaProcess>
 {
     /**
      * The MBean name of the Coherence Cluster MBean.
@@ -88,15 +88,17 @@ public class ClusterMember extends AbstractJavaApplication<ClusterMember>
      *                              realized {@link Application}. This may be <code>null</code> if not required
      * @param environmentVariables  the environment variables used when starting the {@link ClusterMember}
      * @param systemProperties      the system properties provided to the {@link ClusterMember}
+     * @param isDiagnosticsEnabled  should diagnostic information be logged/output
      * @param defaultTimeout        the default timeout duration
      * @param defaultTimeoutUnits   the default timeout duration {@link TimeUnit}
      * @param interceptors          the {@link LifecycleEventInterceptor}s
      */
-    ClusterMember(Process                                            process,
+    ClusterMember(JavaProcess                                        process,
                   String                                             name,
                   ApplicationConsole                                 console,
                   Properties                                         environmentVariables,
                   Properties                                         systemProperties,
+                  boolean                                            isDiagnosticsEnabled,
                   long                                               defaultTimeout,
                   TimeUnit                                           defaultTimeoutUnits,
                   Iterable<LifecycleEventInterceptor<ClusterMember>> interceptors)
@@ -106,6 +108,7 @@ public class ClusterMember extends AbstractJavaApplication<ClusterMember>
               console,
               environmentVariables,
               systemProperties,
+              isDiagnosticsEnabled,
               defaultTimeout,
               defaultTimeoutUnits,
               interceptors);

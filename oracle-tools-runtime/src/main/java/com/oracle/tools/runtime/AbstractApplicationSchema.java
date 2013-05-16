@@ -26,10 +26,12 @@
 package com.oracle.tools.runtime;
 
 import java.io.File;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -50,7 +52,7 @@ public abstract class AbstractApplicationSchema<A extends Application<A>, S exte
     private String m_executableName;
 
     /**
-     * The working directory for the process
+     * The working directory for the application
      */
     private File m_workingDirectory;
 
@@ -59,6 +61,17 @@ public abstract class AbstractApplicationSchema<A extends Application<A>, S exte
      * be used when realizing the {@link Application}.
      */
     private PropertiesBuilder m_propertiesBuilder;
+
+    /**
+     * Should the Error Stream be redirected to the Standard Output stream?
+     */
+    private boolean m_isErrorStreamRedirected;
+
+    /**
+     * Should diagnostic information be enabled for the {@link Application}s
+     * produced by this {@link ApplicationSchema}.
+     */
+    private boolean m_isDiagnosticsEnabled;
 
     /**
      * The default {@link Application} timeout duration.
@@ -71,11 +84,10 @@ public abstract class AbstractApplicationSchema<A extends Application<A>, S exte
     private TimeUnit m_defaultTimeoutUnits;
 
     /**
-     * Should the settings and environment be inherited from the
-     * current executing process for the {@link Application}s
-     * produced from this {@link ApplicationSchema}.
+     * Should environment variables be inherited from the current executing process
+     * for the {@link Application}s produced from this {@link ApplicationSchema}.
      */
-    private boolean m_isInherited;
+    private boolean m_isEnvironmentInherited;
 
     /**
      * The arguments for the {@link Application}.
@@ -97,13 +109,15 @@ public abstract class AbstractApplicationSchema<A extends Application<A>, S exte
      */
     public AbstractApplicationSchema(String executableName)
     {
-        m_executableName        = executableName;
-        m_propertiesBuilder     = new PropertiesBuilder();
-        m_applicationArguments  = new ArrayList<String>();
-        m_defaultTimeout        = 1;
-        m_defaultTimeoutUnits   = TimeUnit.MINUTES;
-        m_isInherited           = false;
-        m_lifecycleInterceptors = new LinkedList<LifecycleEventInterceptor<A>>();
+        m_executableName          = executableName;
+        m_propertiesBuilder       = new PropertiesBuilder();
+        m_applicationArguments    = new ArrayList<String>();
+        m_isErrorStreamRedirected = false;
+        m_isDiagnosticsEnabled    = false;
+        m_defaultTimeout          = 1;
+        m_defaultTimeoutUnits     = TimeUnit.MINUTES;
+        m_isEnvironmentInherited  = false;
+        m_lifecycleInterceptors   = new LinkedList<LifecycleEventInterceptor<A>>();
     }
 
 
@@ -223,23 +237,23 @@ public abstract class AbstractApplicationSchema<A extends Application<A>, S exte
 
 
     /**
-     * Sets whether the environment and settings from the currently executing
-     * process should be inherited when producing the {@link Application}
-     * from this {@link ApplicationSchema}.
+     * Sets whether the environment variables from the currently executing
+     * process should be inherited and used as the base environment variables
+     * when realizing the {@link Application} from this {@link ApplicationSchema}.
      *
      * @param isInherited  <code>true</code> if the {@link ApplicationSchema}
-     *                     should inherit the environment and settings from the
+     *                     should inherit the environment variables from the
      *                     currently executing process or <code>false</code>
      *                     if a clean/empty environment should be used
-     *                     (containing only those settings defined by this
+     *                     (containing only those variables defined by this
      *                     {@link ApplicationSchema})
      *
      * @return  the {@link ApplicationSchema} (so that we can perform method chaining)
      */
     @SuppressWarnings({"unchecked"})
-    public S setIsInherited(boolean isInherited)
+    public S setEnvironmentInherited(boolean isInherited)
     {
-        this.m_isInherited = isInherited;
+        this.m_isEnvironmentInherited = isInherited;
 
         return (S) this;
     }
@@ -248,9 +262,62 @@ public abstract class AbstractApplicationSchema<A extends Application<A>, S exte
     /**
      * {@inheritDoc}
      */
-    public boolean isInherited()
+    public boolean isEnvironmentInherited()
     {
-        return m_isInherited;
+        return m_isEnvironmentInherited;
+    }
+
+
+    /**
+     * Sets if diagnostic information should be logged/output for {@link Application}s
+     * produced by this {@link ApplicationSchema}.
+     *
+     * @param isDiagnosticsEnabled  should diagnostics for the {@link Application}
+     *                              be enabled
+     *
+     * @return  the {@link ApplicationSchema} (so that we can perform method chaining)
+     */
+    public S setDiagnosticsEnabled(boolean isDiagnosticsEnabled)
+    {
+        m_isDiagnosticsEnabled = isDiagnosticsEnabled;
+
+        return (S) this;
+    }
+
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean isDiagnosticsEnabled()
+    {
+        return m_isDiagnosticsEnabled;
+    }
+
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean isErrorStreamRedirected()
+    {
+        return m_isErrorStreamRedirected;
+    }
+
+
+    /**
+     * Sets whether the Standard Error Stream will be redirected to
+     * Standard Out for {@link Application}s produced by this schema.
+     *
+     * @param isErrorStreamRedirected  <code>true</code> means redirect stderr to stdout
+     *
+     * @return  the {@link ApplicationSchema} (so that we can perform method chaining)
+     */
+    public S setErrorStreamRedirected(boolean isErrorStreamRedirected)
+    {
+        m_isErrorStreamRedirected = isErrorStreamRedirected;
+
+        return (S) this;
     }
 
 

@@ -28,6 +28,7 @@ package com.oracle.tools.runtime;
 import com.oracle.tools.runtime.console.NullApplicationConsole;
 
 import java.io.IOException;
+
 import java.util.UUID;
 
 /**
@@ -40,10 +41,31 @@ public abstract class AbstractApplicationBuilder<A extends Application<A>, S ext
     implements ApplicationBuilder<A, S>
 {
     /**
+     * Should diagnostic information be enabled for the {@link Application}s
+     * produced by this {@link ApplicationBuilder}.
+     */
+    protected boolean m_isDiagnosticsEnabled;
+
+
+    /**
      * Constructs an {@link AbstractApplicationBuilder} with default {@link ApplicationSchema}.
      */
     public AbstractApplicationBuilder()
     {
+        m_isDiagnosticsEnabled = false;
+    }
+
+
+    /**
+     * Determines if diagnostics are enabled for the {@link ApplicationBuilder},
+     * meaning that information concerning the construction of {@link Application}s
+     * will be output/logged.
+     *
+     * @return <code>true</code> if diagnostics are enabled.
+     */
+    public boolean isDiagnosticsEnabled()
+    {
+        return m_isDiagnosticsEnabled;
     }
 
 
@@ -63,5 +85,39 @@ public abstract class AbstractApplicationBuilder<A extends Application<A>, S ext
                      String applicationName) throws IOException
     {
         return realize(schema, applicationName, new NullApplicationConsole());
+    }
+
+
+    /**
+     * Raises a specific type of {@link Application} {@link LifecycleEvent} for
+     * the specified application.
+     *
+     * @param application  the application on which the event occurred
+     * @param eventKind    the event type
+     */
+    protected void raiseApplicationLifecycleEvent(final A                     application,
+                                                  final Application.EventKind eventKind)
+    {
+        // construct the LifecycleEvent
+        @SuppressWarnings("rawtypes") LifecycleEvent event = new LifecycleEvent<A>()
+        {
+            @Override
+            public Application.EventKind getType()
+            {
+                return eventKind;
+            }
+
+            @Override
+            public A getObject()
+            {
+                return application;
+            }
+        };
+
+        // raise the event
+        for (LifecycleEventInterceptor<A> interceptor : application.getLifecycleInterceptors())
+        {
+            interceptor.onEvent(event);
+        }
     }
 }

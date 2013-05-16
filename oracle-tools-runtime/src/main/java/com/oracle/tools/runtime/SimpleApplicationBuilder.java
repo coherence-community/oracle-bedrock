@@ -27,6 +27,7 @@ package com.oracle.tools.runtime;
 
 import java.io.File;
 import java.io.IOException;
+
 import java.util.List;
 import java.util.Properties;
 
@@ -41,6 +42,31 @@ import java.util.Properties;
  */
 public class SimpleApplicationBuilder extends AbstractApplicationBuilder<SimpleApplication, SimpleApplicationSchema>
 {
+    /**
+     * Constructs a {@link SimpleApplicationBuilder}.
+     */
+    public SimpleApplicationBuilder()
+    {
+        super();
+    }
+
+
+    /**
+     * Sets if diagnostic information should be logged/output for {@link Application}s
+     * produced by this builder.
+     *
+     * @param isDiagnosticsEnabled  should diagnostics be output
+     *
+     * @return  the builder (so that we can perform method chaining)
+     */
+    public SimpleApplicationBuilder setDiagnosticsEnabled(boolean isDiagnosticsEnabled)
+    {
+        m_isDiagnosticsEnabled = isDiagnosticsEnabled;
+
+        return this;
+    }
+
+
     /**
      * {@inheritDoc}
      */
@@ -57,12 +83,14 @@ public class SimpleApplicationBuilder extends AbstractApplicationBuilder<SimpleA
             processBuilder.directory(directory);
         }
 
-        // determine the environment variables for the process (based on the Environment Variables Builder)
+        // determine the environment variables for the process (based on the
+        // Environment Variables Builder)
         Properties environmentVariables = schema.getEnvironmentVariablesBuilder().realize();
 
-        // we always clear down the process environment variables as by default they are inherited from
-        // the current process, which is not what we want as it doesn't allow us to create a clean environment
-        if (!schema.isInherited())
+        // we always clear down the process environment variables as by default
+        // they are inherited from the current process, which is not what we
+        // want as it doesn't allow us to create a clean environment
+        if (!schema.isEnvironmentInherited())
         {
             processBuilder.environment().clear();
         }
@@ -81,35 +109,22 @@ public class SimpleApplicationBuilder extends AbstractApplicationBuilder<SimpleA
             command.add(argument);
         }
 
+        // should the standard error be redirected to the standard out?
+        processBuilder.redirectErrorStream(schema.isErrorStreamRedirected());
+
         // start the process
-        final SimpleApplication application = new SimpleApplication(processBuilder.start(),
-                                                                    name,
-                                                                    console,
-                                                                    environmentVariables,
-                                                                    schema.getDefaultTimeout(),
-                                                                    schema.getDefaultTimeoutUnits(),
-                                                                    schema.getLifecycleInterceptors());
+        final SimpleApplication application =
+            new SimpleApplication(new NativeApplicationProcess(processBuilder.start()),
+                                  name,
+                                  console,
+                                  environmentVariables,
+                                  schema.isDiagnosticsEnabled(),
+                                  schema.getDefaultTimeout(),
+                                  schema.getDefaultTimeoutUnits(),
+                                  schema.getLifecycleInterceptors());
 
-        // raise the starting / realized event for the application
-        LifecycleEvent<SimpleApplication> event = new LifecycleEvent<SimpleApplication>()
-        {
-            @Override
-            public Enum<?> getType()
-            {
-                return Application.EventKind.REALIZED;
-            }
-
-            @Override
-            public SimpleApplication getObject()
-            {
-                return application;
-            }
-        };
-
-        for (LifecycleEventInterceptor<SimpleApplication> interceptor : application.getLifecycleInterceptors())
-        {
-            interceptor.onEvent(event);
-        }
+        // let interceptors know that the application has been realized
+        raiseApplicationLifecycleEvent(application, Application.EventKind.REALIZED);
 
         return application;
     }

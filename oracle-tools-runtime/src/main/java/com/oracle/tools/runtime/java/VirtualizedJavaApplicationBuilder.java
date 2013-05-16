@@ -25,31 +25,22 @@
 
 package com.oracle.tools.runtime.java;
 
-import com.oracle.tools.runtime.ApplicationConsole;
-import com.oracle.tools.runtime.java.process.JavaProcessBuilder;
-import com.oracle.tools.runtime.java.process.VirtualProcessBuilder;
-
 /**
- * An {@link VirtualizedJavaApplicationBuilder} is a {@link JavaApplicationBuilder}
- * that realizes {@link JavaApplication}s as pseudo virtual processes, in that
- * they are run in the Java Virtual Machine hosting said builder.
+ * A {@link JavaApplicationBuilder} that realizes {@link JavaApplication}s as
+ * pseudo processes, in that they are managed in the Java Virtual Machine
+ * hosting said builder.
  * <p>
- * Isolation of the pseudo process occurs through the use of a
- * {@link VirtualProcessBuilder} that of which uses a specializes child-first
- * class loading technique.
+ * WARNING: This class is now deprecated.  All implementations using this class
+ * should migrate to use the new {@link ContainerBasedJavaApplicationBuilder}.
  * <p>
- * <strong>Caution:</strong> Care should be taken using this
- * {@link JavaApplicationBuilder} as all classes are re-loaded in the Perm
- * Generation.  Without a large Perm Generation, out-of-memory exceptions may be
- * thrown.
- * <p>
- * Copyright (c) 2011. All Rights Reserved. Oracle Corporation.<br>
+ * Copyright (c) 2013. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Brian Oliver
  */
+@Deprecated
 public class VirtualizedJavaApplicationBuilder<A extends JavaApplication<A>, S extends JavaApplicationSchema<A, S>>
-    extends AbstractJavaApplicationBuilder<A, S> implements JavaApplicationBuilder<A, S>
+    extends ContainerBasedJavaApplicationBuilder<A, S>
 {
     /**
      * Constructs a {@link VirtualizedJavaApplicationBuilder}.
@@ -57,20 +48,5 @@ public class VirtualizedJavaApplicationBuilder<A extends JavaApplication<A>, S e
     public VirtualizedJavaApplicationBuilder()
     {
         super();
-    }
-
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected JavaProcessBuilder createJavaProcessBuilder(S                  schema,
-                                                          String             applicationName,
-                                                          ApplicationConsole console)
-    {
-        return new VirtualProcessBuilder(applicationName,
-                                         schema.getApplicationClassName(),
-                                         schema.getStartMethodName(),
-                                         schema.getStopMethodName());
     }
 }

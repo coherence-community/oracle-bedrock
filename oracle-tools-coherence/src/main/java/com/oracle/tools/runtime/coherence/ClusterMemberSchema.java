@@ -26,25 +26,36 @@
 package com.oracle.tools.runtime.coherence;
 
 import com.oracle.tools.runtime.ApplicationConsole;
+
 import com.oracle.tools.runtime.java.AbstractJavaApplicationSchema;
+import com.oracle.tools.runtime.java.ContainerBasedJavaApplicationBuilder;
 import com.oracle.tools.runtime.java.JavaApplicationBuilder;
 import com.oracle.tools.runtime.java.JavaApplicationSchema;
+import com.oracle.tools.runtime.java.JavaProcess;
+import com.oracle.tools.runtime.java.util.CallableStaticMethod;
+
 import com.oracle.tools.runtime.network.Constants;
+
 import com.tangosol.coherence.component.net.Management;
+
 import com.tangosol.net.DefaultCacheServer;
 
 import java.util.Iterator;
 import java.util.Properties;
 
+import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
+
 /**
  * A {@link ClusterMemberSchema} is a Coherence-based specific {@link JavaApplicationSchema}.
  * <p>
- * Copyright (c) 2010. All Rights Reserved. Oracle Corporation.<br>
+ * Copyright (c) 2013. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Brian Oliver
  */
 public class ClusterMemberSchema extends AbstractJavaApplicationSchema<ClusterMember, ClusterMemberSchema>
+    implements ContainerBasedJavaApplicationBuilder.ApplicationController
 {
     /**
      * The {@link Management} enumeration specifies the valid JMX Management Modes for a cluster node.
@@ -174,16 +185,6 @@ public class ClusterMemberSchema extends AbstractJavaApplicationSchema<ClusterMe
      */
     public static final String DEFAULT_CACHE_SERVER_CLASSNAME = "com.tangosol.net.DefaultCacheServer";
 
-    /**
-     * The default start method for running in-process
-     */
-    public static final String DEFAULT_START_METHOD = "startDaemon";
-
-    /**
-     * The default stop method for running in-process
-     */
-    public static final String DEFAULT_STOP_METHOD = "shutdown";
-
 
     /**
      * Constructs a {@link ClusterMemberSchema} for the {@link DefaultCacheServer}
@@ -228,9 +229,6 @@ public class ClusterMemberSchema extends AbstractJavaApplicationSchema<ClusterMe
      */
     protected void configureClusterMemberSchemaDefaults()
     {
-        setStartMethodName(DEFAULT_START_METHOD);
-        setStopMethodName(DEFAULT_STOP_METHOD);
-
         setPreferIPv4(true);
     }
 
@@ -526,7 +524,7 @@ public class ClusterMemberSchema extends AbstractJavaApplicationSchema<ClusterMe
      * {@inheritDoc}
      */
     @Override
-    public ClusterMember createJavaApplication(Process            process,
+    public ClusterMember createJavaApplication(JavaProcess        process,
                                                String             name,
                                                ApplicationConsole console,
                                                Properties         environmentVariables,
@@ -537,8 +535,36 @@ public class ClusterMemberSchema extends AbstractJavaApplicationSchema<ClusterMe
                                  console,
                                  environmentVariables,
                                  systemProperties,
+                                 isDiagnosticsEnabled(),
                                  getDefaultTimeout(),
                                  getDefaultTimeoutUnits(),
                                  getLifecycleInterceptors());
+    }
+
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Future<?> start(ContainerBasedJavaApplicationBuilder.ControllableApplication application)
+    {
+        Callable<Void> callable = new CallableStaticMethod<Void>("com.tangosol.net.DefaultCacheServer", "startDaemon");
+        Future<Void>   future   = application.submit(callable);
+
+        return future;
+    }
+
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Future<?> destroy(ContainerBasedJavaApplicationBuilder.ControllableApplication application)
+    {
+        Callable<Void> callable = new CallableStaticMethod<Void>("com.tangosol.net.DefaultCacheServer",
+                                                                 "shutdownServer");
+        Future<Void> future = application.submit(callable);
+
+        return future;
     }
 }

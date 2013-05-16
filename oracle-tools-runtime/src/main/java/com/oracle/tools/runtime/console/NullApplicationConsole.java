@@ -27,11 +27,18 @@ package com.oracle.tools.runtime.console;
 
 import com.oracle.tools.runtime.ApplicationConsole;
 
+import com.oracle.tools.runtime.java.io.NullReader;
+import com.oracle.tools.runtime.java.io.NullWriter;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.Reader;
+
 /**
  * A {@link NullApplicationConsole} is an implementation of an
  * {@link ApplicationConsole} that silently ignores attempts to output.
  * <p>
- * Copyright (c) 2011. All Rights Reserved. Oracle Corporation.<br>
+ * Copyright (c) 2013. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Brian Oliver
@@ -39,18 +46,78 @@ import com.oracle.tools.runtime.ApplicationConsole;
 public class NullApplicationConsole implements ApplicationConsole
 {
     /**
-     * An instance of a {@link NullApplicationConsole}.
+     * The Reader for the {@link ApplicationConsole}.
      */
-    public static final NullApplicationConsole INSTANCE = new NullApplicationConsole();
+    private NullReader m_inputReader;
+
+    /**
+     * The Writer for the {@link ApplicationConsole} (stdout).
+     */
+    private PrintWriter m_outputWriter;
+
+    /**
+     * The Writer for the {@link ApplicationConsole} (stderr).
+     */
+    private PrintWriter m_errorWriter;
+
+
+    /**
+     * Constructs a {@link NullApplicationConsole}.
+     */
+    public NullApplicationConsole()
+    {
+        m_inputReader  = new NullReader();
+        m_outputWriter = new PrintWriter(new NullWriter());
+        m_errorWriter  = new PrintWriter(new NullWriter());
+    }
 
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void printf(String    format,
-                       Object... args)
+    public void close()
     {
-        // deliberately empty
+        m_outputWriter.close();
+        m_errorWriter.close();
+
+        try
+        {
+            m_inputReader.close();
+        }
+        catch (IOException e)
+        {
+            // SKIP: we ignore exceptions when closing
+        }
+    }
+
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public PrintWriter getOutputWriter()
+    {
+        return m_outputWriter;
+    }
+
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public PrintWriter getErrorWriter()
+    {
+        return m_errorWriter;
+    }
+
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Reader getInputReader()
+    {
+        return m_inputReader;
     }
 }

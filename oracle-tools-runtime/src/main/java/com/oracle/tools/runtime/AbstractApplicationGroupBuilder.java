@@ -88,7 +88,7 @@ public abstract class AbstractApplicationGroupBuilder<A extends Application<A>, 
             S                     schema             = triple.getY();
             int                   cRequiredInstances = triple.getZ();
 
-            for (int i = 0; i < cRequiredInstances; i++)
+            for (int i = 1; i <= cRequiredInstances; i++)
             {
                 String applicationName = String.format("%s-%d", prefix, i);
 

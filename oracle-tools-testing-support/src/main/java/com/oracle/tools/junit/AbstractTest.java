@@ -25,7 +25,8 @@
 
 package com.oracle.tools.junit;
 
-import com.oracle.tools.runtime.java.virtualization.Virtualization;
+import com.oracle.tools.runtime.java.container.Container;
+
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -43,9 +44,8 @@ import org.junit.BeforeClass;
  */
 public abstract class AbstractTest
 {
-
     /**
-     * Before running any tests we ask the {@link Virtualization} framework
+     * Before running any tests we ask the {@link com.oracle.tools.runtime.java.container.Container} framework
      * for the physical {@link System}.  This ensures that we can restore
      * the physical System after the tests have run thus preventing any
      * System-level side-effects occurring between or after the tests.
@@ -53,11 +53,12 @@ public abstract class AbstractTest
     @BeforeClass
     public static void onBeforeTestsInClass()
     {
-        Virtualization.getPhysicalSystem();
+        Container.getPlatformScope();
     }
 
+
     /**
-     * After running tests we ensure that the {@link Virtualization} has been
+     * After running tests we ensure that the {@link com.oracle.tools.runtime.java.container.Container} has been
      * stopped.  This ensures that physical system resources are returned
      * to normal, thus preventing any System-level side-effects from the tests
      * in the class.
@@ -65,28 +66,28 @@ public abstract class AbstractTest
     @AfterClass
     public static void onAfterTestsInClass()
     {
-        Virtualization.stop();
+        Container.stop();
     }
 
 
     /**
-     * Before each test in the class we start the {@link Virtualization} to
+     * Before each test in the class we start the {@link com.oracle.tools.runtime.java.container.Container} to
      * protect System-level resources.
      */
     @Before
     public void onBeforeEachTest()
     {
-        Virtualization.start();
+        Container.start();
     }
 
 
     /**
-     * After each test in the class we restore the {@link Virtualization} to
+     * After each test in the class we restore the {@link com.oracle.tools.runtime.java.container.Container} to
      * return System-level resources back to normal.
      */
     @After
     public void onAfterEachTest()
     {
-        Virtualization.stop();
+        Container.stop();
     }
 }

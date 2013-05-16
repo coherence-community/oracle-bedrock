@@ -26,10 +26,7 @@
 package com.oracle.tools.runtime;
 
 import com.oracle.tools.runtime.java.ClassPath;
-import com.oracle.tools.runtime.java.virtualization.VirtualizationClassLoader;
-
-import java.io.File;
-import java.net.URL;
+import com.oracle.tools.runtime.java.container.ContainerClassLoader;
 
 /**
  * A dummy application class that is started by various tests
@@ -43,11 +40,8 @@ import java.net.URL;
  */
 public class DummyClassPathApp
 {
-    private static ClassPath classPath;
-
-
     /**
-     * Method description
+     * The Main Method.
      *
      * @param args
      */
@@ -57,20 +51,19 @@ public class DummyClassPathApp
         {
             ClassLoader classLoader = DummyClassPathApp.class.getClassLoader();
 
-            if (classLoader instanceof VirtualizationClassLoader)
+            ClassPath classPath;
+            if (classLoader instanceof ContainerClassLoader)
             {
-                classPath = ((VirtualizationClassLoader) classLoader).getClassPath();
-
-                System.out.println(classPath.toString());
+                classPath = ((ContainerClassLoader) classLoader).getClassPath();
             }
             else
             {
                 classPath = ClassPath.ofSystem();
+            }
 
-                for (String path : classPath)
-                {
-                    System.out.println(path);
-                }
+            for (String path : classPath)
+            {
+                System.out.println(path);
             }
 
             Class.forName(args[0]);
@@ -79,16 +72,5 @@ public class DummyClassPathApp
         {
             e.printStackTrace();
         }
-    }
-
-
-    /**
-     * Method description
-     *
-     * @return
-     */
-    public static ClassPath getClassPath()
-    {
-        return classPath;
     }
 }

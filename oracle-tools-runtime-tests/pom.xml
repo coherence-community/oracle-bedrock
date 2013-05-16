@@ -10,7 +10,7 @@
 
     <artifactId>oracle-tools-runtime-tests</artifactId>
 
-    <name>Oracle Tools for Runtime Management (Tests)</name>
+    <name>Oracle Tools for Runtime Management (Functional Tests)</name>
 
     <description>
         Functional and Integration tests for the Runtime Management module.
