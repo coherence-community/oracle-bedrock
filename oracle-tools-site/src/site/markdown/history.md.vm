@@ -12,7 +12,8 @@ reverse chronological order.
 
 <h4>Global and Cross-Module Changes</h4>
 
-*   No Changes.
+*   [ORACLETOOLS-25](https://java.net/jira/browse/ORACLETOOLS-25): Upgrade Project
+    Parent POM to Version 4.
 
 <h4>oracle-tools-core</h4>
 

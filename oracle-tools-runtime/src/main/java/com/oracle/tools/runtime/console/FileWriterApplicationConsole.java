@@ -1,5 +1,5 @@
 /*
- * File: SystemApplicationConsole.java
+ * File: FileWriterApplicationConsole.java
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
@@ -29,20 +29,28 @@ import com.oracle.tools.runtime.ApplicationConsole;
 
 import com.oracle.tools.runtime.java.container.Container;
 
+import java.io.FileWriter;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.Reader;
 
 /**
- * An {@link ApplicationConsole} that delegates i/o to the System.
+ * An {@link ApplicationConsole} that writes standard output and error streams
+ * to a specified file, and uses the platform standard input for an input stream.
  * <p>
  * Copyright (c) 2013. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Brian Oliver
  */
-public class SystemApplicationConsole implements ApplicationConsole
+public class FileWriterApplicationConsole implements ApplicationConsole
 {
+    /**
+     * The {@link FileWriter} used to write to a file.
+     */
+    private FileWriter m_fileWriter;
+
     /**
      * The Standard Output {@link PrintWriter}.
      */
@@ -60,13 +68,31 @@ public class SystemApplicationConsole implements ApplicationConsole
 
 
     /**
-     * Constructs a SystemApplicationConsole.
+     * Constructs a {@link FileWriterApplicationConsole}.
+     *
+     * @param fileWriter  the {@link FileWriter} to use for the console
      */
-    public SystemApplicationConsole()
+    public FileWriterApplicationConsole(FileWriter fileWriter)
     {
-        m_outputWriter = new PrintWriter(Container.getPlatformScope().getStandardOutput());
-        m_errorWriter  = new PrintWriter(Container.getPlatformScope().getStandardError());
+        m_fileWriter   = fileWriter;
+
+        m_outputWriter = new PrintWriter(fileWriter);
+        m_errorWriter  = new PrintWriter(fileWriter);
         m_inputReader  = new InputStreamReader(Container.getPlatformScope().getStandardInput());
+
+    }
+
+
+    /**
+     * Constructs a {@link FileWriterApplicationConsole}.
+     *
+     * @param fileName  the file name of the log file
+     *
+     * @throws IOException if opening the file fails
+     */
+    public FileWriterApplicationConsole(String fileName) throws IOException
+    {
+        this(new FileWriter(fileName, true));
     }
 
 
@@ -76,7 +102,21 @@ public class SystemApplicationConsole implements ApplicationConsole
     @Override
     public void close()
     {
-        // SKIP: we don't close the System streams
+        try
+        {
+            m_fileWriter.close();
+        }
+        catch (IOException e)
+        {
+            // SKIP: we don't care if an exception occurs - we're closing
+        }
+        finally
+        {
+            m_fileWriter   = null;
+            m_outputWriter = null;
+            m_errorWriter  = null;
+            m_inputReader  = null;
+        }
     }
 
 

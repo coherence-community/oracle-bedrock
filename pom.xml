@@ -4,7 +4,7 @@
     <parent>
         <groupId>net.java</groupId>
         <artifactId>jvnet-parent</artifactId>
-        <version>3</version>
+        <version>4</version>
     </parent>
 
     <groupId>com.oracle.tools</groupId>
@@ -71,7 +71,7 @@
         <!-- plugin dependency versions -->
         <doxia.module.markdown.version>1.0</doxia.module.markdown.version>
 
-        <github.site.maven.plugin.version>0.7</github.site.maven.plugin.version>
+        <github.site.maven.plugin.version>0.8</github.site.maven.plugin.version>
 
         <maven.compiler.plugin.version>2.3.2</maven.compiler.plugin.version>
         <maven.deploy.plugin.version>2.7</maven.deploy.plugin.version>
