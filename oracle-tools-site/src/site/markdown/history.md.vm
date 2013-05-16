@@ -15,6 +15,9 @@ reverse chronological order.
 *   [ORACLETOOLS-25](https://java.net/jira/browse/ORACLETOOLS-25): Upgrade Project
     Parent POM to Version 4.
 
+*   [ORACLETOOLS-31](https://java.net/jira/browse/ORACLETOOLS-31): Upgrade GitHub
+    Maven Site Plugin to Version 0.8.
+
 <h4>oracle-tools-core</h4>
 
 *   [ORACLETOOLS-14](https://java.net/jira/browse/ORACLETOOLS-14): Removed Notified
