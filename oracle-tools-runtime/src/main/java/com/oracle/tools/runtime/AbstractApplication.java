@@ -225,6 +225,16 @@ public abstract class AbstractApplication<A, P extends ApplicationProcess> imple
     @Override
     public int destroy()
     {
+        // terminate the process
+        try
+        {
+            m_process.destroy();
+        }
+        catch (Exception e)
+        {
+            // nothing to do here as we don't care
+        }
+
         // close the console
         m_console.close();
 
@@ -270,16 +280,6 @@ public abstract class AbstractApplication<A, P extends ApplicationProcess> imple
         try
         {
             m_errThread.interrupt();
-        }
-        catch (Exception e)
-        {
-            // nothing to do here as we don't care
-        }
-
-        // terminate the process
-        try
-        {
-            m_process.destroy();
         }
         catch (Exception e)
         {
