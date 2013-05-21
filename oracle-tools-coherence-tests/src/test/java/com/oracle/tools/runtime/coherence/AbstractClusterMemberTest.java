@@ -80,9 +80,9 @@ public abstract class AbstractClusterMemberTest extends AbstractTest
         AvailablePortIterator portIterator = Container.getAvailablePorts();
 
         ClusterMemberSchema schema =
-            new ClusterMemberSchema().setEnvironmentInherited(true).setClusterPort(portIterator).setJMXSupport(true)
-                .setSingleServerMode().setJMXPort(portIterator).setJMXManagementMode(JMXManagementMode.LOCAL_ONLY)
-                .setRoleName("test-role").setSiteName("test-site");
+            new ClusterMemberSchema().setClusterPort(portIterator).setJMXSupport(true).setSingleServerMode()
+                .setJMXPort(portIterator).setJMXManagementMode(JMXManagementMode.LOCAL_ONLY).setRoleName("test-role")
+                .setSiteName("test-site");
 
         ClusterMember member = null;
 
@@ -122,9 +122,9 @@ public abstract class AbstractClusterMemberTest extends AbstractTest
         int                   jmxPort      = portIterator.next();
 
         ClusterMemberSchema schema =
-            new ClusterMemberSchema().setEnvironmentInherited(true).setClusterPort(portIterator).setJMXSupport(true)
-                .setSingleServerMode().setJMXPort(portIterator).setJMXManagementMode(JMXManagementMode.LOCAL_ONLY)
-                .setRoleName("test-role").setSiteName("test-site").setDiagnosticsEnabled(true);
+            new ClusterMemberSchema().setClusterPort(portIterator).setJMXSupport(true).setSingleServerMode()
+                .setJMXPort(portIterator).setJMXManagementMode(JMXManagementMode.LOCAL_ONLY).setRoleName("test-role")
+                .setSiteName("test-site").setDiagnosticsEnabled(true);
 
         ClusterMember                                              member  = null;
 

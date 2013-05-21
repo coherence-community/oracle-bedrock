@@ -8,7 +8,7 @@ reverse chronological order.
 
 <h4>Source and Documentation Contributors</h4>
 
-*   Jonathan Knight, Paul Makin, Brian Oliver
+*   Jonathan Knight, Paul Makin, Brian Oliver, Patrick Peralta
 
 <h4>Global and Cross-Module Changes</h4>
 
@@ -58,6 +58,9 @@ reverse chronological order.
 
 *   [ORACLETOOLS-30](https://java.net/jira/browse/ORACLETOOLS-30): Resolves an
     issue were by Native Windows NT / XP processes may hang when being destroyed.
+
+*   [ORACLETOOLS-32](https://java.net/jira/browse/ORACLETOOLS-32): ApplicationSchemas
+    now *default* to inheriting environment variables from the underlying process.
 
 <h4>oracle-tools-runtime-tests</h4>
 

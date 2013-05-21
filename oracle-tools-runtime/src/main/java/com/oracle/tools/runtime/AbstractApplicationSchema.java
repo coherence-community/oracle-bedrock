@@ -116,7 +116,7 @@ public abstract class AbstractApplicationSchema<A extends Application<A>, S exte
         m_isDiagnosticsEnabled    = false;
         m_defaultTimeout          = 1;
         m_defaultTimeoutUnits     = TimeUnit.MINUTES;
-        m_isEnvironmentInherited  = false;
+        m_isEnvironmentInherited  = true;
         m_lifecycleInterceptors   = new LinkedList<LifecycleEventInterceptor<A>>();
     }
 

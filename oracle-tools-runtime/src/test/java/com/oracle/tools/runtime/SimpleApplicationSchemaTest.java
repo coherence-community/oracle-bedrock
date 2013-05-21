@@ -152,7 +152,7 @@ public class SimpleApplicationSchemaTest
     @Test
     public void shouldInheritEnvironmentVariables() throws Exception
     {
-        SimpleApplicationSchema schema = new SimpleApplicationSchema("test.sh").setEnvironmentInherited(true);
+        SimpleApplicationSchema schema = new SimpleApplicationSchema("test.sh");
 
         assertThat(schema.isEnvironmentInherited(), Matchers.is(true));
     }
@@ -164,7 +164,7 @@ public class SimpleApplicationSchemaTest
      * @throws Exception
      */
     @Test
-    public void shouldSetCloneEnvironmentFlagToFalse() throws Exception
+    public void shouldNotInheritEnvironmentVariables() throws Exception
     {
         SimpleApplicationSchema schema = new SimpleApplicationSchema("test.sh").setEnvironmentInherited(false);
 
@@ -182,7 +182,7 @@ public class SimpleApplicationSchemaTest
     {
         SimpleApplicationSchema schema = new SimpleApplicationSchema("test.sh");
 
-        assertThat(schema.isEnvironmentInherited(), Matchers.is(false));
+        assertThat(schema.isEnvironmentInherited(), Matchers.is(true));
     }
 
 
