@@ -64,7 +64,7 @@ public abstract class AbstractDelegatingOutputStream extends FilterOutputStream
 
         if (scope == null)
         {
-            super.write(value);
+            super.out.write(value);
         }
         else
         {

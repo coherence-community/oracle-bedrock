@@ -26,6 +26,7 @@
 package com.oracle.tools.runtime.java.util;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 
 import java.util.ArrayList;
 
@@ -115,8 +116,15 @@ public class CallableStaticMethod<T> implements Callable<T>
             hasArgs = false;
         }
 
-        //TODO: ensure that the method is declared as a static
-
-        return hasArgs ? (T) method.invoke(null, (Object) m_args) : (T) method.invoke(null);
+        // ensure that the method is declared as a static
+        if (Modifier.isStatic(method.getModifiers()))
+        {
+            return hasArgs ? (T) method.invoke(null, (Object) m_args) : (T) method.invoke(null);
+        }
+        else
+        {
+            throw new IllegalArgumentException("The specified method [" + m_className + "." + m_methodName
+                                               + "] is not static");
+        }
     }
 }

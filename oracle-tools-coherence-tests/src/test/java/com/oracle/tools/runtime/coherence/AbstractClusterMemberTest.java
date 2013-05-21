@@ -105,4 +105,50 @@ public abstract class AbstractClusterMemberTest extends AbstractTest
             }
         }
     }
+
+
+    /**
+     * Ensure that we can start and stop Coherence Members on the same port
+     * continuously (quickly) and there is only ever one member.
+     *
+     * @throws Exception
+     */
+    @Test
+    public void shouldStartStopMultipleTimes() throws Exception
+    {
+        AvailablePortIterator portIterator = Container.getAvailablePorts();
+
+        int                   clusterPort  = portIterator.next();
+        int                   jmxPort      = portIterator.next();
+
+        ClusterMemberSchema schema =
+            new ClusterMemberSchema().setEnvironmentInherited(true).setClusterPort(portIterator).setJMXSupport(true)
+                .setSingleServerMode().setJMXPort(portIterator).setJMXManagementMode(JMXManagementMode.LOCAL_ONLY)
+                .setRoleName("test-role").setSiteName("test-site").setDiagnosticsEnabled(true);
+
+        ClusterMember                                              member  = null;
+
+        JavaApplicationBuilder<ClusterMember, ClusterMemberSchema> builder = newJavaApplicationBuilder();
+
+        for (int i = 1; i <= 10; i++)
+        {
+            try
+            {
+                System.out.println("Building Instance: " + i);
+                member = builder.realize(schema, "TEST");
+
+                assertThat(eventually(invoking(member).getClusterSize()), is(1));
+
+                Assert.assertEquals("test-role", member.getRoleName());
+                Assert.assertEquals("test-site", member.getSiteName());
+            }
+            finally
+            {
+                if (member != null)
+                {
+                    member.destroy();
+                }
+            }
+        }
+    }
 }

@@ -92,7 +92,7 @@ public class DelegatingPropertiesTest
 
         Container.start();
 
-        Scope      scope      = Container.getContainerScope();
+        Scope      scope      = Container.getDefaultScope();
         Properties properties = scope.getProperties();
 
         properties.clear();

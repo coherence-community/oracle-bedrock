@@ -95,7 +95,13 @@ public class ContainerMBeanServerBuilderTest extends AbstractTest
             dummyMBean.setAttributeOne(2);
             assertThat((Integer) mBeanServer.getAttribute(objectName, "AttributeOne"), is(2));
 
-            jmxConnectorServer = Container.getContainerScope().getMBeanServerBuilder().getJMXConnectorServer(mBeanServer);
+            ContainerScope scope = Container.getContainerScope();
+
+            ContainerMBeanServerBuilder builder = scope == null
+                                                  ? Container.getDefaultScope().getMBeanServerBuilder()
+                                                  : scope.getMBeanServerBuilder();
+
+            jmxConnectorServer = builder.getJMXConnectorServer(mBeanServer);
 
             jmxConnector       = jmxConnectorServer.toJMXConnector(Collections.EMPTY_MAP);
             jmxConnector.connect();

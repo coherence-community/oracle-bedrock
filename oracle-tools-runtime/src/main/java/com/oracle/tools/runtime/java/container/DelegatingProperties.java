@@ -32,6 +32,7 @@ import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.Writer;
+
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.Map;
@@ -41,7 +42,7 @@ import java.util.Set;
 /**
  * A {@link DelegatingProperties} is a {@link Properties} implementation
  * that delegates {@link Properties} method calls onto appropriate
- * {@link Scope#getProperties()} methods.
+ * {@link ContainerScope#getProperties()} methods.
  * <p>
  * Copyright (c) 2013. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
@@ -53,6 +54,24 @@ import java.util.Set;
 public class DelegatingProperties extends Properties
 {
     /**
+     * The default {@link Properties} to use when it's not possible to determine
+     * {@link ContainerScope} for {@link Properties}.
+     */
+    private Properties m_defaultProperties;
+
+
+    /**
+     * Constructs a {@link DelegatingProperties}
+     *
+     * @param properties  the default {@link Properties}
+     */
+    public DelegatingProperties(Properties properties)
+    {
+        m_defaultProperties = properties;
+    }
+
+
+    /**
      * Obtains the {@link Properties} on which to delegate calls.
      *
      * @return  the {@link Properties} delegate.
@@ -61,7 +80,7 @@ public class DelegatingProperties extends Properties
     {
         ContainerScope scope = Container.getContainerScope();
 
-        return scope.getProperties();
+        return scope == null ? m_defaultProperties : scope.getProperties();
     }
 
 

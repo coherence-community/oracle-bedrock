@@ -562,7 +562,7 @@ public class ClusterMemberSchema extends AbstractJavaApplicationSchema<ClusterMe
     public Future<?> destroy(ContainerBasedJavaApplicationBuilder.ControllableApplication application)
     {
         Callable<Void> callable = new CallableStaticMethod<Void>("com.tangosol.net.DefaultCacheServer",
-                                                                 "shutdownServer");
+                                                                 "shutdown");
         Future<Void> future = application.submit(callable);
 
         return future;

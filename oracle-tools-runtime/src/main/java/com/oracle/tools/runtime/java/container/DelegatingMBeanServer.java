@@ -99,9 +99,11 @@ public class DelegatingMBeanServer implements MBeanServer
      */
     private MBeanServer getDelegate()
     {
-        ContainerScope              scope       = Container.getContainerScope();
-        ContainerMBeanServerBuilder builder     = (ContainerMBeanServerBuilder) scope.getMBeanServerBuilder();
-        MBeanServer                 mBeanServer = builder.getMBeanServer(m_domain);
+        ContainerScope scope = Container.getContainerScope();
+        ContainerMBeanServerBuilder builder = scope == null
+                                              ? Container.getDefaultScope().getMBeanServerBuilder()
+                                              : scope.getMBeanServerBuilder();
+        MBeanServer mBeanServer = builder.getMBeanServer(m_domain);
 
         if (mBeanServer == null)
         {

@@ -397,6 +397,7 @@ public class ContainerBasedJavaApplicationBuilder<A extends JavaApplication<A>, 
         {
             if (m_controller != null)
             {
+                // now try to stop
                 try
                 {
                     Future<?> future = m_controller.destroy(this);

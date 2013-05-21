@@ -36,17 +36,16 @@ import java.io.PrintStream;
 
 import java.util.Properties;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-
 /**
- * A {@link Scope} that provides isolation of Container-based application resources.
+ * A {@link Scope} specifically designed for use by Container-based applications
+ * that provides the ability to pipe Standard Input, Output and Error to other streams.
  * <p>
  * Copyright (c) 2013. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Brian Oliver
  */
-public class ContainerScope extends Scope
+public class ContainerScope extends AbstractContainerScope
 {
     /**
      * The {@link java.io.PipedOutputStream} to which Standard Output will be written when
@@ -115,23 +114,21 @@ public class ContainerScope extends Scope
 
 
     /**
-     * Constructs a {@link ContainerScope} using appropriate defaults for
-     * the underlying resources.
+     * Constructs a {@link ContainerScope}.
      *
      * @param name  the name of the scope
      */
     public ContainerScope(String name)
     {
-        this(name, null, Container.getAvailablePorts(), null, false, Container.PIPE_BUFFER_SIZE_BYTES);
+        this(name, new Properties(), Container.getAvailablePorts(), null, false, Container.PIPE_BUFFER_SIZE_BYTES);
     }
 
 
     /**
-     * Constructs a {@link ContainerScope} using appropriate defaults for
-     * the underlying resources.
+     * Constructs a {@link ContainerScope}.
      *
-     * @param name        the name of the scope
-     * @param properties  the System {@link Properties} for the scope
+     * @param name                 the name of the scope
+     * @param properties           the System {@link java.util.Properties} for the scope
      */
     public ContainerScope(String     name,
                           Properties properties)
@@ -145,7 +142,7 @@ public class ContainerScope extends Scope
      *
      * @param name                 the name of the scope
      * @param properties           the System {@link java.util.Properties} for the scope
-     * @param availablePorts       the {@link AvailablePortIterator} for the scope
+     * @param availablePorts       the {@link com.oracle.tools.runtime.network.AvailablePortIterator} for the scope
      * @param mBeanServerBuilder   the {@link ContainerMBeanServerBuilder}
      *                             (if null a default will be created)
      * @param redirectErrorStream  should the stderr stream be redirected to stdout
@@ -158,13 +155,7 @@ public class ContainerScope extends Scope
                           boolean                     redirectErrorStream,
                           int                         pipeBufferSizeBytes)
     {
-        super(name, new Properties(), availablePorts);
-
-        // add/overrider the specified properties with in the scope
-        if (properties != null)
-        {
-            m_properties.putAll(properties);
-        }
+        super(name, properties, availablePorts, mBeanServerBuilder);
 
         m_isErrorStreamRedirected = redirectErrorStream;
 
@@ -245,22 +236,11 @@ public class ContainerScope extends Scope
 
 
     /**
-     * Obtains the {@link javax.management.MBeanServerBuilder} for this {@link ContainerScope}.
-     *
-     * @return the {@link javax.management.MBeanServerBuilder}
+     * {@inheritDoc}
      */
-    public ContainerMBeanServerBuilder getMBeanServerBuilder()
+    public boolean close()
     {
-        return m_mBeanServerBuilder;
-    }
-
-
-    /**
-     * Closes the {@link ContainerScope}, after which the resources can't be used.
-     */
-    public void close()
-    {
-        if (m_isClosed.compareAndSet(false, true))
+        if (super.close())
         {
             try
             {
@@ -345,6 +325,12 @@ public class ContainerScope extends Scope
             {
                 // SKIP: we ignore exceptions
             }
+
+            return true;
+        }
+        else
+        {
+            return false;
         }
     }
 }

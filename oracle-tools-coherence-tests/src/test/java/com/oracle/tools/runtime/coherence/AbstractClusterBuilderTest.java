@@ -91,7 +91,7 @@ public abstract class AbstractClusterBuilderTest extends AbstractTest
         AvailablePortIterator portIterator = Container.getAvailablePorts();
 
         ClusterMemberSchema schema =
-            new ClusterMemberSchema().setEnvironmentVariables(PropertiesBuilder.fromCurrentEnvironmentVariables())
+            new ClusterMemberSchema().setEnvironmentInherited(false)
                 .setSingleServerMode().setClusterPort(portIterator.next()).setJMXPort(portIterator)
                 .setJMXManagementMode(JMXManagementMode.LOCAL_ONLY);
 
@@ -138,7 +138,7 @@ public abstract class AbstractClusterBuilderTest extends AbstractTest
         int                   clusterPort = jmxPorts.next();
 
         ClusterMemberSchema storageSchema =
-            new ClusterMemberSchema().setClusterPort(clusterPort).setStorageEnabled(true)
+            new ClusterMemberSchema().setEnvironmentInherited(false).setClusterPort(clusterPort).setStorageEnabled(true)
                 .setCacheConfigURI("test-cache-config.xml").setJMXSupport(true).setRemoteJMXManagement(true)
                 .setJMXManagementMode(ClusterMemberSchema.JMXManagementMode.LOCAL_ONLY).setJMXPort(jmxPorts)
                 .setSingleServerMode();
@@ -146,7 +146,7 @@ public abstract class AbstractClusterBuilderTest extends AbstractTest
         storageSchema.setEnvironmentInherited(true);
 
         ClusterMemberSchema extendSchema =
-            new ClusterMemberSchema().setStorageEnabled(false).setClusterPort(clusterPort)
+            new ClusterMemberSchema().setEnvironmentInherited(false).setStorageEnabled(false).setClusterPort(clusterPort)
                 .setCacheConfigURI("test-extend-proxy-config.xml").setJMXSupport(true).setRemoteJMXManagement(true)
                 .setSystemProperty("coherence.extend.port",
                                    jmxPorts).setJMXManagementMode(ClusterMemberSchema.JMXManagementMode.LOCAL_ONLY)

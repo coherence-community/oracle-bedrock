@@ -57,7 +57,9 @@ public class DelegatingMBeanServerBuilder extends MBeanServerBuilder
      */
     private MBeanServerBuilder getDelegate()
     {
-        return Container.getContainerScope().getMBeanServerBuilder();
+        ContainerScope scope = Container.getContainerScope();
+
+        return scope == null ? Container.getDefaultScope().getMBeanServerBuilder() : scope.getMBeanServerBuilder();
     }
 
 

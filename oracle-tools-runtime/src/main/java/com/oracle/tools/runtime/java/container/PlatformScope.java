@@ -41,17 +41,18 @@ import java.util.concurrent.atomic.AtomicBoolean;
 /**
  * A {@link Scope} that encapsulates the native platform resources.
  * <p>
- * This is {@link Scope} is useful to make a snapshot of the typical Java Virtual
- * Machine resources so that then may then be mutated and later returned to their
- * original state.
- * </p>
- *
+ * This is {@link Scope} is useful to make a snapshot of the underlying Java
+ * Virtual Machine resources so that then may then be mutated and later returned
+ * to their original state.  Additionally instance of this {@link Scope} may be
+ * used at runtime to directly access the Java Virtual Machine platform resources,
+ * especially when running applications "in container" mode.
+ * <p>
  * Copyright (c) 2013. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Brian Oliver
  */
-public class PlatformScope extends Scope
+public class PlatformScope extends AbstractScope
 {
     /**
      * (strictly package level only) Constructs a {@link PlatformScope} based on the
@@ -70,14 +71,5 @@ public class PlatformScope extends Scope
         m_stdout = System.out;
         m_stderr = System.err;
         m_stdin  = System.in;
-    }
-
-
-    /**
-     * {@inheritDoc}
-     */
-    public void close()
-    {
-        m_isClosed.set(true);
     }
 }

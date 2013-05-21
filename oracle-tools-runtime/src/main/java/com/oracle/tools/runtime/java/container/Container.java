@@ -57,11 +57,11 @@ public class Container
     private static PlatformScope s_platformScope;
 
     /**
-     * The {@link ContainerScope} to use when a suitable {@link ContainerScope}
+     * The {@link DefaultScope} to use when a suitable {@link ContainerScope}
      * can't be located.   This is primarily when a ClassLoader and/or Thread is
      * not associated with an {@link Scope}.
      */
-    private static ContainerScope s_defaultScope;
+    private static DefaultScope s_defaultScope;
 
     /**
      * The {@link ContainerScope} associated with the current {@link Thread}.
@@ -93,20 +93,15 @@ public class Container
         }
         else
         {
-            // establish the default ContainerScope to use when a thread isn't isolated
-            s_defaultScope = new ContainerScope("(Default)",
-                                                s_platformScope.getProperties(),
-                                                s_availablePortIterator,
-                                                new ContainerMBeanServerBuilder(s_availablePortIterator),
-                                                false,
-                                                PIPE_BUFFER_SIZE_BYTES);
+            // establish the default scope to use when a thread isn't isolated
+            s_defaultScope = new DefaultScope(s_platformScope);
 
             // ensure that the JMX MBean Server for the default Scope is the
             // DelegatingMBeanServerBuilder so that we can isolate MBeanServers
             s_defaultScope.getProperties().setProperty(ContainerMBeanServerBuilder.PROPERTY_JMX_MBEAN_SERVER_BUILDER,
                                                        DelegatingMBeanServerBuilder.class.getCanonicalName());
 
-            System.setProperties(new DelegatingProperties());
+            System.setProperties(new DelegatingProperties(s_defaultScope.getProperties()));
             System.setOut(new PrintStream(new DelegatingStdOutOutputStream(s_platformScope.getStandardOutput()), true));
             System.setErr(new PrintStream(new DelegatingStdErrOutputStream(s_platformScope.getStandardError()), true));
         }
@@ -124,6 +119,10 @@ public class Container
             System.setProperties(s_platformScope.getProperties());
             System.setOut(s_platformScope.getStandardOutput());
             System.setErr(s_platformScope.getStandardError());
+
+            // close and clear the default scope as we are no longer running in a container
+            s_defaultScope.close();
+            s_defaultScope = null;
         }
         else
         {
@@ -142,7 +141,7 @@ public class Container
      *
      * @return  the {@link ContainerScope} or <code>null</code>
      */
-    public static ContainerScope determineContainerScope()
+    public static ContainerScope getContainerScope()
     {
         // attempt to determine the scope based on the calling Thread
         ContainerScope scope = s_threadScope.get();
@@ -171,23 +170,6 @@ public class Container
 
 
     /**
-     * Obtains the {@link Scope} for the calling {@link Thread}.
-     * <p>
-     * If the {@link Thread} is not currently scoped, the default {@link Scope}
-     * is returned.  That is, unlike the {@link #determineContainerScope()} method, this
-     * method never returns <code>null</code>.
-     *
-     * @return  a {@link Scope}
-     */
-    public static ContainerScope getContainerScope()
-    {
-        ContainerScope scope = determineContainerScope();
-
-        return scope == null ? s_defaultScope : scope;
-    }
-
-
-    /**
      * Obtains a {@link PlatformScope} that represents the underlying Java
      * Virtual Machine Platform itself.
      *
@@ -196,6 +178,20 @@ public class Container
     public static PlatformScope getPlatformScope()
     {
         return s_platformScope;
+    }
+
+
+    /**
+     * Obtains a {@link DefaultScope} to use when running in container-mode
+     * but a {@link ContainerScope} can't be determined when calling
+     * {@link #getContainerScope()}.
+     *
+     * @return  the {@link DefaultScope} or <code>null</code> if not running
+     *          in container-mode.
+     */
+    public static DefaultScope getDefaultScope()
+    {
+        return s_defaultScope;
     }
 
 

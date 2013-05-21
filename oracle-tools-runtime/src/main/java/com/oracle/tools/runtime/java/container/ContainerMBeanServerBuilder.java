@@ -27,26 +27,33 @@ package com.oracle.tools.runtime.java.container;
 
 import com.oracle.tools.runtime.network.AvailablePortIterator;
 
+import static com.oracle.tools.runtime.java.JavaApplication.*;
+
+import java.io.IOException;
+
+import java.net.InetAddress;
+import java.net.URL;
+
+import java.rmi.RemoteException;
+
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
+
+import java.rmi.server.ExportException;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
+
 import javax.management.MBeanServer;
 import javax.management.MBeanServerBuilder;
 import javax.management.MBeanServerDelegate;
+
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXConnectorServer;
 import javax.management.remote.JMXConnectorServerFactory;
 import javax.management.remote.JMXServiceURL;
-import java.io.IOException;
-import java.net.InetAddress;
-import java.net.URL;
-import java.rmi.RemoteException;
-import java.rmi.registry.LocateRegistry;
-import java.rmi.registry.Registry;
-import java.rmi.server.ExportException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
-
-import static com.oracle.tools.runtime.java.JavaApplication.*;
 
 /**
  * A {@link ContainerMBeanServerBuilder} is an {@link MBeanServerBuilder}
@@ -379,6 +386,27 @@ public class ContainerMBeanServerBuilder extends MBeanServerBuilder
         {
             throw new RuntimeException("Could not start JMXConnectorServer", e);
         }
+    }
+
+
+    /**
+     * Closes the JMXConnectorServers created for this ContainerMBeanServerBuilder.
+     */
+    public void close()
+    {
+        for (JMXConnectorServer connector : m_jmxConnectorServers.values())
+        {
+            try
+            {
+                connector.stop();
+            }
+            catch (IOException e)
+            {
+                // TODO: don't worry if we fail to shutdown the connector
+            }
+        }
+
+        m_jmxConnectorServers.clear();
     }
 
 

@@ -294,7 +294,7 @@ public class ContainerClassLoaderTest
 
         try
         {
-            assertThat(loader.getContainerScope(), sameInstance(Container.determineContainerScope()));
+            assertThat(loader.getContainerScope(), sameInstance(Container.getContainerScope()));
         }
         finally
         {
