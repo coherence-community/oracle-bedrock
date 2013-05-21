@@ -95,6 +95,8 @@ public abstract class AbstractClusterBuilderTest extends AbstractTest
                 .setSingleServerMode().setClusterPort(portIterator.next()).setJMXPort(portIterator)
                 .setJMXManagementMode(JMXManagementMode.LOCAL_ONLY);
 
+        schema.setEnvironmentInherited(true);
+        
         Cluster cluster = null;
 
         try
@@ -141,12 +143,16 @@ public abstract class AbstractClusterBuilderTest extends AbstractTest
                 .setJMXManagementMode(ClusterMemberSchema.JMXManagementMode.LOCAL_ONLY).setJMXPort(jmxPorts)
                 .setSingleServerMode();
 
+        storageSchema.setEnvironmentInherited(true);
+
         ClusterMemberSchema extendSchema =
             new ClusterMemberSchema().setStorageEnabled(false).setClusterPort(clusterPort)
                 .setCacheConfigURI("test-extend-proxy-config.xml").setJMXSupport(true).setRemoteJMXManagement(true)
                 .setSystemProperty("coherence.extend.port",
                                    jmxPorts).setJMXManagementMode(ClusterMemberSchema.JMXManagementMode.LOCAL_ONLY)
                                        .setJMXPort(jmxPorts).setSingleServerMode();
+
+        extendSchema.setEnvironmentInherited(true);
 
         SystemApplicationConsole console = new SystemApplicationConsole();
 
