@@ -18,6 +18,11 @@ reverse chronological order.
 *   [ORACLETOOLS-31](https://java.net/jira/browse/ORACLETOOLS-31): Upgrade GitHub
     Maven Site Plugin to Version 0.8.
 
+<h4>oracle-tools-all</h4>
+
+*   [ORACLETOOLS-34](https://java.net/jira/browse/ORACLETOOLS-34): Introduced to
+    provide a single distribution of Oracle Tools.
+
 <h4>oracle-tools-core</h4>
 
 *   [ORACLETOOLS-14](https://java.net/jira/browse/ORACLETOOLS-14): Removed Notified
