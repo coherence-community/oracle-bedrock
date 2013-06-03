@@ -77,6 +77,14 @@ reverse chronological order.
 
 <h4>oracle-tools-coherence</h4>
 
+*   [ORACLETOOLS-2](https://java.net/jira/browse/ORACLETOOLS-2): Resolved issue
+    when DeferredAssert would hang (wait for a long time) when querying an MBean
+    for a crashed server.
+
+*   [ORACLETOOLS-4](https://java.net/jira/browse/ORACLETOOLS-2): Resolved issue
+    when calling "eventually" on a non existent MBean would hang forever
+    (wait for a long time).
+
 *   [ORACLETOOLS-10](https://java.net/jira/browse/ORACLETOOLS-10): Add support for
     specifying a log destination for Coherence when using a Coherence-based MemeberSchema.
 
