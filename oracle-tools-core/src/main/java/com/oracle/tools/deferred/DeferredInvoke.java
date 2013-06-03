@@ -127,9 +127,16 @@ public class DeferredInvoke<T> implements Deferred<T>
             }
             catch (InvocationTargetException e)
             {
-                // when the method throws an exception, we may be able to retry
-                // so re-throw as a runtime exception
-                throw new RuntimeException(e);
+                // re-throw runtime exceptions (there's no need to wrap them)
+                if (e.getTargetException() instanceof RuntimeException)
+                {
+                    throw(RuntimeException) e.getTargetException();
+                }
+                else
+                {
+                    // wrap other exceptions as runtime exceptions
+                    throw new RuntimeException(e);
+                }
             }
         }
     }

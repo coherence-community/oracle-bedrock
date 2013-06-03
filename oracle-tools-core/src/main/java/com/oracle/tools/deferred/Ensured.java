@@ -188,10 +188,15 @@ public class Ensured<T> implements Deferred<T>
                 // give up immediately and throw an ObjectNotAvailableException
                 throw e;
             }
+            catch (UnsupportedOperationException e)
+            {
+                // give up immediately when an operation is not supported
+                throw new ObjectNotAvailableException(this, e);
+            }
             catch (RuntimeException e)
             {
-                // SKIP: we ignore all other runtime exceptions until
-                // we've completely done retrying
+                // SKIP: we assume all other exceptions means
+                // that we can retry
             }
 
             // as no object was produced we should wait before retrying

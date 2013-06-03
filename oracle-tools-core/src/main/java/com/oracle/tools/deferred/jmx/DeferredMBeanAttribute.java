@@ -28,11 +28,13 @@ package com.oracle.tools.deferred.jmx;
 import com.oracle.tools.deferred.Deferred;
 import com.oracle.tools.deferred.ObjectNotAvailableException;
 
+import java.io.IOException;
+
 import javax.management.InstanceNotFoundException;
 import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
+
 import javax.management.remote.JMXConnector;
-import java.io.IOException;
 
 /**
  * A {@link DeferredMBeanAttribute} is a {@link Deferred} for an
@@ -107,7 +109,6 @@ public class DeferredMBeanAttribute<T> implements Deferred<T>
             else
             {
                 MBeanServerConnection connection = connector.getMBeanServerConnection();
-
                 Object                attribute  = connection.getAttribute(m_objectName, m_attributeName);
 
                 return m_attributeClass.cast(attribute);
@@ -115,17 +116,20 @@ public class DeferredMBeanAttribute<T> implements Deferred<T>
         }
         catch (IOException e)
         {
-            // an IOException represents a failed connection attempt
-            return null;
+            // when an IOException occurs it represents a failed attempt to use a
+            // connector that was previously available, which inevitably means that
+            // the previous connection has now failed and so must this mbean
+            throw new ObjectNotAvailableException(this, e);
         }
         catch (NullPointerException e)
         {
             // an NPE would only occur when the server connection isn't available
+            // (we can retry with the connector though)
             return null;
         }
         catch (ClassCastException e)
         {
-            // if we can't cast to the required type, we can't acquire the result
+            // when we can't cast to the required type, we can't acquire the result
             throw new ObjectNotAvailableException(this, e);
         }
         catch (InstanceNotFoundException e)
@@ -136,6 +140,13 @@ public class DeferredMBeanAttribute<T> implements Deferred<T>
         }
         catch (ObjectNotAvailableException e)
         {
+            // when the connection is not available, this MBean won't be available
+            // either (so re-throw)
+            throw e;
+        }
+        catch (RuntimeException e)
+        {
+            // we'll simply re-throw other runtime exceptions
             throw e;
         }
         catch (Exception e)

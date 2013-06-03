@@ -134,6 +134,10 @@ public class ClusterMember extends AbstractJavaApplication<ClusterMember, JavaPr
         {
             return getMBeanInfo(new ObjectName(MBEAN_NAME_CLUSTER));
         }
+        catch (RuntimeException e)
+        {
+            throw e;
+        }
         catch (Exception e)
         {
             throw new UnsupportedOperationException("Could not retrieve the Coherence Cluster MBean", e);
@@ -160,6 +164,10 @@ public class ClusterMember extends AbstractJavaApplication<ClusterMember, JavaPr
         {
             return getMBeanAttribute(new ObjectName(MBEAN_NAME_CLUSTER), MBEAN_ATTRIBUTE_CLUSTER_SIZE, Integer.class);
         }
+        catch (RuntimeException e)
+        {
+            throw e;
+        }
         catch (Exception e)
         {
             throw new UnsupportedOperationException("Could not retrieve the Coherence Cluster MBean Attribute", e);
@@ -180,6 +188,10 @@ public class ClusterMember extends AbstractJavaApplication<ClusterMember, JavaPr
             return getMBeanAttribute(new ObjectName(MBEAN_NAME_CLUSTER),
                                      MBEAN_ATTRIBUTE_LOCAL_MEMBER_ID,
                                      Integer.class);
+        }
+        catch (RuntimeException e)
+        {
+            throw e;
         }
         catch (Exception e)
         {
@@ -212,6 +224,10 @@ public class ClusterMember extends AbstractJavaApplication<ClusterMember, JavaPr
             return getMBeanInfo(new ObjectName(String.format("Coherence:type=Service,name=%s,nodeId=%d", serviceName,
                                                              nodeId)));
         }
+        catch (RuntimeException e)
+        {
+            throw e;
+        }
         catch (Exception e)
         {
             throw new UnsupportedOperationException(String
@@ -238,6 +254,10 @@ public class ClusterMember extends AbstractJavaApplication<ClusterMember, JavaPr
                                      MBEAN_ATTRIBUTE_ROLE_NAME,
                                      String.class);
         }
+        catch (RuntimeException e)
+        {
+            throw e;
+        }
         catch (Exception e)
         {
             throw new UnsupportedOperationException("Could not retrieve the Coherence Cluster Node MBean", e);
@@ -261,6 +281,10 @@ public class ClusterMember extends AbstractJavaApplication<ClusterMember, JavaPr
             return getMBeanAttribute(new ObjectName(String.format("Coherence:type=Node,nodeId=%d", getLocalMemberId())),
                                      MBEAN_ATTRIBUTE_SITE_NAME,
                                      String.class);
+        }
+        catch (RuntimeException e)
+        {
+            throw e;
         }
         catch (Exception e)
         {
