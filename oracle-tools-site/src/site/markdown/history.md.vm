@@ -88,6 +88,10 @@ reverse chronological order.
 *   [ORACLETOOLS-10](https://java.net/jira/browse/ORACLETOOLS-10): Add support for
     specifying a log destination for Coherence when using a Coherence-based MemeberSchema.
 
+*   [ORACLETOOLS-35](https://java.net/jira/browse/ORACLETOOLS-35): Add automatic support
+    enabling file-base XSD loading with Coherence using Java 8 (b91+) that includes
+    JAXP 1.5 changes.
+
 <h4>oracle-tools-coherence-tests</h4>
 
 *   Introduced to encapsulate Functional and Integration Tests.

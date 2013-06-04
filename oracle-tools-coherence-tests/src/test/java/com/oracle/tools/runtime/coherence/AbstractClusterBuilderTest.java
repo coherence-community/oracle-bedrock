@@ -92,7 +92,7 @@ public abstract class AbstractClusterBuilderTest extends AbstractTest
 
         ClusterMemberSchema schema =
             new ClusterMemberSchema().setSingleServerMode().setClusterPort(portIterator.next()).setJMXPort(portIterator)
-                .setJMXManagementMode(JMXManagementMode.LOCAL_ONLY).setSystemProperty("javax.xml.accessExternalSchema", "all");
+                .setJMXManagementMode(JMXManagementMode.LOCAL_ONLY);
 
         Cluster cluster = null;
 
@@ -138,14 +138,14 @@ public abstract class AbstractClusterBuilderTest extends AbstractTest
             new ClusterMemberSchema().setClusterPort(clusterPort).setStorageEnabled(true)
                 .setCacheConfigURI("test-cache-config.xml").setJMXSupport(true).setRemoteJMXManagement(true)
                 .setJMXManagementMode(ClusterMemberSchema.JMXManagementMode.LOCAL_ONLY).setJMXPort(jmxPorts)
-                .setSingleServerMode().setSystemProperty("javax.xml.accessExternalSchema", "all");
+                .setSingleServerMode();
 
         ClusterMemberSchema extendSchema =
             new ClusterMemberSchema().setStorageEnabled(false).setClusterPort(clusterPort)
                 .setCacheConfigURI("test-extend-proxy-config.xml").setJMXSupport(true).setRemoteJMXManagement(true)
                 .setSystemProperty("coherence.extend.port",
                                    jmxPorts).setJMXManagementMode(ClusterMemberSchema.JMXManagementMode.LOCAL_ONLY)
-                                       .setJMXPort(jmxPorts).setSingleServerMode().setSystemProperty("javax.xml.accessExternalSchema", "all");
+                                       .setJMXPort(jmxPorts).setSingleServerMode();
 
         SystemApplicationConsole console = new SystemApplicationConsole();
 

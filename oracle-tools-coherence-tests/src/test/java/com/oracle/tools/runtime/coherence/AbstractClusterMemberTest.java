@@ -82,7 +82,7 @@ public abstract class AbstractClusterMemberTest extends AbstractTest
         ClusterMemberSchema schema =
             new ClusterMemberSchema().setClusterPort(portIterator).setJMXSupport(true).setSingleServerMode()
                 .setJMXPort(portIterator).setJMXManagementMode(JMXManagementMode.LOCAL_ONLY).setRoleName("test-role")
-                .setSiteName("test-site").setSystemProperty("javax.xml.accessExternalSchema", "all");
+                .setSiteName("test-site");
 
         ClusterMember member = null;
 
@@ -124,7 +124,7 @@ public abstract class AbstractClusterMemberTest extends AbstractTest
         ClusterMemberSchema schema =
             new ClusterMemberSchema().setClusterPort(portIterator).setJMXSupport(true).setSingleServerMode()
                 .setJMXPort(portIterator).setJMXManagementMode(JMXManagementMode.LOCAL_ONLY).setRoleName("test-role")
-                .setSiteName("test-site").setDiagnosticsEnabled(true).setSystemProperty("javax.xml.accessExternalSchema", "all");
+                .setSiteName("test-site").setDiagnosticsEnabled(true);
 
         ClusterMember                                              member  = null;
 

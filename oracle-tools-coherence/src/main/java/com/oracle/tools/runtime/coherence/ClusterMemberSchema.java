@@ -230,6 +230,9 @@ public class ClusterMemberSchema extends AbstractJavaApplicationSchema<ClusterMe
     protected void configureClusterMemberSchemaDefaults()
     {
         setPreferIPv4(true);
+
+        //the following is to ensure Coherence will work with Java 1.8.0 b91
+        setSystemProperty("javax.xml.accessExternalSchema", "file");
     }
 
 
