@@ -27,12 +27,13 @@ package com.oracle.tools.runtime.java;
 
 import com.oracle.tools.runtime.AbstractApplicationSchema;
 import com.oracle.tools.runtime.PropertiesBuilder;
+
 import com.oracle.tools.runtime.network.AvailablePortIterator;
+
+import static com.oracle.tools.runtime.java.JavaApplication.*;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static com.oracle.tools.runtime.java.JavaApplication.*;
 
 /**
  * An {@link AbstractJavaApplicationSchema} is a base implementation of a {@link JavaApplicationSchema}.
@@ -110,7 +111,15 @@ public abstract class AbstractJavaApplicationSchema<A extends JavaApplication<A>
         m_classPath               = new ClassPath(classPath);
         m_jvmOptions              = new ArrayList<String>();
         m_systemPropertiesBuilder = new PropertiesBuilder();
+
+        configureDefaults();
     }
+
+
+    /**
+     * Configures the default settings for the {@link JavaApplicationSchema}.
+     */
+    protected abstract void configureDefaults();
 
 
     /**
@@ -147,7 +156,7 @@ public abstract class AbstractJavaApplicationSchema<A extends JavaApplication<A>
      * Sets the class path for the Java application.
      *
      * @param classPath The class-path of the {@link JavaApplication}.
-     * @return The {@link JavaApplicationSchema}.
+     * @return the {@link JavaApplicationSchema}
      */
     @SuppressWarnings("unchecked")
     public S setClassPath(String classPath)
@@ -161,8 +170,8 @@ public abstract class AbstractJavaApplicationSchema<A extends JavaApplication<A>
     /**
      * Sets the class path for the Java application.
      *
-     * @param classPath The {@link ClassPath} of the {@link JavaApplication}.
-     * @return The {@link JavaApplicationSchema}.
+     * @param classPath The {@link ClassPath} of the {@link JavaApplication}
+     * @return the {@link JavaApplicationSchema}
      */
     @SuppressWarnings("unchecked")
     public S setClassPath(ClassPath classPath)
@@ -176,9 +185,9 @@ public abstract class AbstractJavaApplicationSchema<A extends JavaApplication<A>
     /**
      * Sets the specified system property.
      *
-     * @param name  The name of the system property.
-     * @param value The value for the system property.
-     * @return The {@link JavaApplicationSchema}.
+     * @param name  The name of the system property
+     * @param value The value for the system property
+     * @return the {@link JavaApplicationSchema}
      */
     @SuppressWarnings("unchecked")
     public S setSystemProperty(String name,
@@ -193,9 +202,9 @@ public abstract class AbstractJavaApplicationSchema<A extends JavaApplication<A>
     /**
      * Sets a default value for specified system property (to be used if it's not defined)
      *
-     * @param name  The name of the system property.
-     * @param value The value for the system property.
-     * @return The {@link JavaApplicationSchema}.
+     * @param name  The name of the system property
+     * @param value The value for the system property
+     * @return the {@link JavaApplicationSchema}
      */
     @SuppressWarnings("unchecked")
     public S setDefaultSystemProperty(String name,
@@ -210,8 +219,8 @@ public abstract class AbstractJavaApplicationSchema<A extends JavaApplication<A>
     /**
      * Adds the properties defined by the {@link PropertiesBuilder} to this {@link JavaApplicationSchema}.
      *
-     * @param systemProperties The system {@link PropertiesBuilder}.
-     * @return The {@link JavaApplicationSchema}.
+     * @param systemProperties The system {@link PropertiesBuilder}
+     * @return the {@link JavaApplicationSchema}
      */
     @SuppressWarnings("unchecked")
     public S setSystemProperties(PropertiesBuilder systemProperties)
@@ -226,7 +235,7 @@ public abstract class AbstractJavaApplicationSchema<A extends JavaApplication<A>
      * Adds a JVM Option to use when starting the Java application.
      *
      * @param option The JVM option
-     * @return The {@link JavaApplicationSchema}
+     * @return the {@link JavaApplicationSchema}
      */
     @SuppressWarnings("unchecked")
     public S addOption(String option)
@@ -241,8 +250,8 @@ public abstract class AbstractJavaApplicationSchema<A extends JavaApplication<A>
     /**
      * Adds a JVM Option to use when starting the Java application.
      *
-     * @param option The JVM option.
-     * @return The {@link JavaApplicationSchema}
+     * @param option The JVM option
+     * @return the {@link JavaApplicationSchema}
      */
     @SuppressWarnings("unchecked")
     public S setOption(String option)
@@ -282,8 +291,7 @@ public abstract class AbstractJavaApplicationSchema<A extends JavaApplication<A>
      * You can override this setting by calling {@link #setJMXAuthentication(boolean)}.
      *
      * @param enabled Should JMX support be enabled
-     *
-     * @return The {@link JavaApplicationSchema}
+     * @return the {@link JavaApplicationSchema}
      */
     @SuppressWarnings("unchecked")
     public S setJMXSupport(boolean enabled)
@@ -312,7 +320,7 @@ public abstract class AbstractJavaApplicationSchema<A extends JavaApplication<A>
      * Specifies if IPv4 is required.
      *
      * @param enabled
-     * @return
+     * @return the {@link JavaApplicationSchema}
      */
     public S setPreferIPv4(boolean enabled)
     {
@@ -323,8 +331,8 @@ public abstract class AbstractJavaApplicationSchema<A extends JavaApplication<A>
     /**
      * Specifies if JMX authentication is enabled.
      *
-     * @param enabled Is JMX Authentication required.
-     * @return The {@link JavaApplication}.
+     * @param enabled Is JMX Authentication required
+     * @return the {@link JavaApplicationSchema}
      */
     public S setJMXAuthentication(boolean enabled)
     {
@@ -336,7 +344,7 @@ public abstract class AbstractJavaApplicationSchema<A extends JavaApplication<A>
      * Specifies the JMX remote port.
      *
      * @param port The port on which remote JMX should be enabled.
-     * @return The {@link JavaApplication}.
+     * @return the {@link JavaApplicationSchema}
      */
     public S setJMXPort(int port)
     {
@@ -347,8 +355,8 @@ public abstract class AbstractJavaApplicationSchema<A extends JavaApplication<A>
     /**
      * Specifies the JMX remote port using an AvailablePortIterator.
      *
-     * @param portIterator The {@link AvailablePortIterator} that will be used to determine the JMX remote port.
-     * @return The {@link JavaApplication}.
+     * @param portIterator The {@link AvailablePortIterator} that will be used to determine the JMX remote port
+     * @return the {@link JavaApplicationSchema}
      */
     public S setJMXPort(AvailablePortIterator portIterator)
     {
@@ -360,7 +368,7 @@ public abstract class AbstractJavaApplicationSchema<A extends JavaApplication<A>
      * Specifies the RMI Server Host Name.  By default this is typically "localhost".
      *
      * @param rmiServerHostName The hostname
-     * @return The {@link JavaApplication}.
+     * @return the {@link JavaApplicationSchema}
      */
     @SuppressWarnings("unchecked")
     public S setRMIServerHostName(String rmiServerHostName)
@@ -368,5 +376,36 @@ public abstract class AbstractJavaApplicationSchema<A extends JavaApplication<A>
         setDefaultSystemProperty(JAVA_RMI_SERVER_HOSTNAME, rmiServerHostName);
 
         return (S) this;
+    }
+
+
+    /**
+     * Specifies if a {@link JavaApplication} will run in a "headless" mode.
+     *
+     * @param isHeadless  should the {@link JavaApplication} run in "headless" mode.
+     * @return the {@link JavaApplicationSchema}
+     *
+     * @see JavaApplication#JAVA_AWT_HEADLESS
+     */
+    public S setHeadless(boolean isHeadless)
+    {
+        setSystemProperty(JAVA_AWT_HEADLESS, isHeadless);
+
+        return (S) this;
+    }
+
+
+    /**
+     * Determines if a {@link JavaApplication} will run in a "headless" mode.
+     *
+     * @return the {@link JavaApplicationSchema}
+     *
+     * @see JavaApplication#JAVA_AWT_HEADLESS
+     */
+    public boolean isHeadless()
+    {
+        Object value = m_systemPropertiesBuilder.getProperty(JAVA_AWT_HEADLESS);
+
+        return value instanceof Boolean && ((Boolean) value);
     }
 }

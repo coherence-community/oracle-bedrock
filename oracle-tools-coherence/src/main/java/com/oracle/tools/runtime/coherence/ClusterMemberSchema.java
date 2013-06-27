@@ -204,8 +204,6 @@ public class ClusterMemberSchema extends AbstractJavaApplicationSchema<ClusterMe
     public ClusterMemberSchema(String applicationClassName)
     {
         super(applicationClassName);
-
-        configureClusterMemberSchemaDefaults();
     }
 
 
@@ -219,20 +217,22 @@ public class ClusterMemberSchema extends AbstractJavaApplicationSchema<ClusterMe
                                String classPath)
     {
         super(applicationClassName, classPath);
-
-        configureClusterMemberSchemaDefaults();
     }
 
 
     /**
-     * Configures the {@link ClusterMemberSchema} defaults;
+     * {@inheritDoc}
      */
-    protected void configureClusterMemberSchemaDefaults()
+    @Override
+    protected void configureDefaults()
     {
         setPreferIPv4(true);
 
-        //the following is to ensure Coherence will work with Java 1.8.0 b91
+        // the following is to ensure Coherence will work with Java 1.8.0 b91
         setSystemProperty("javax.xml.accessExternalSchema", "file");
+
+        // ensure we're running in headless mode
+        setHeadless(true);
     }
 
 
@@ -564,9 +564,8 @@ public class ClusterMemberSchema extends AbstractJavaApplicationSchema<ClusterMe
     @Override
     public Future<?> destroy(ContainerBasedJavaApplicationBuilder.ControllableApplication application)
     {
-        Callable<Void> callable = new CallableStaticMethod<Void>("com.tangosol.net.DefaultCacheServer",
-                                                                 "shutdown");
-        Future<Void> future = application.submit(callable);
+        Callable<Void> callable = new CallableStaticMethod<Void>("com.tangosol.net.DefaultCacheServer", "shutdown");
+        Future<Void>   future   = application.submit(callable);
 
         return future;
     }

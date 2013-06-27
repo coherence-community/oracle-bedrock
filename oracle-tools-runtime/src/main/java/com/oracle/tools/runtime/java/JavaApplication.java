@@ -98,6 +98,11 @@ public interface JavaApplication<A> extends Application<A>
     public static final String SUN_MANAGEMENT_JMXREMOTE_ACCESS_FILE = "com.sun.management.jmxremote.access.file";
 
     /**
+     * The java.awt.headless JVM property.
+     */
+    public static final String JAVA_AWT_HEADLESS = "java.awt.headless";
+
+    /**
      * The java.home JVM property.
      */
     public static final String JAVA_HOME = "java.home";

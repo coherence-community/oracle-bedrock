@@ -100,6 +100,9 @@ reverse chronological order.
     enabling file-base XSD loading with Coherence using Java 8 (b91+) that includes
     JAXP 1.5 changes.
 
+*   [ORACLETOOLS-38](https://java.net/jira/browse/ORACLETOOLS-38): Add automatic support
+    for running in "java.awt.headless" mode.
+
 <h4>oracle-tools-coherence-tests</h4>
 
 *   Introduced to encapsulate Functional and Integration Tests.

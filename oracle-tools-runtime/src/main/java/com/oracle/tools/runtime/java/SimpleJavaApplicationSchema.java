@@ -87,4 +87,14 @@ public class SimpleJavaApplicationSchema
                                          this.getDefaultTimeoutUnits(),
                                          this.getLifecycleInterceptors());
     }
+
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void configureDefaults()
+    {
+        // we don't establish any defaults
+    }
 }
