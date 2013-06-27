@@ -25,6 +25,8 @@
 
 package com.oracle.tools.runtime.java;
 
+import com.oracle.tools.lang.Strings;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -113,7 +115,7 @@ public class ClassPath implements Iterable<String>
                 classPath = classPath == null ? "" : classPath.trim();
 
                 // remove quotes
-                classPath = unquote(classPath);
+                classPath = Strings.dequote(classPath);
 
                 if (!classPath.isEmpty())
                 {
@@ -301,12 +303,7 @@ public class ClassPath implements Iterable<String>
 
         ClassPath classPath = (ClassPath) other;
 
-        if (!m_paths.equals(classPath.m_paths))
-        {
-            return false;
-        }
-
-        return true;
+        return m_paths.equals(classPath.m_paths);
     }
 
 
@@ -321,39 +318,7 @@ public class ClassPath implements Iterable<String>
 
 
     /**
-     * Remove any ending double or single quotes from a String.
-     *
-     * @param string  the input String
-     *
-     * @return an unquoted String
-     */
-    private static String unquote(String string)
-    {
-        if (string == null)
-        {
-            return null;
-        }
-        else
-        {
-            StringBuilder builder = new StringBuilder();
-
-            for (int i = 0; i < string.length(); i++)
-            {
-                char c = string.charAt(i);
-
-                if (c != '\"' && c != '\'' && c != '`')
-                {
-                    builder.append(c);
-                }
-            }
-
-            return builder.toString();
-        }
-    }
-
-
-    /**
-     * Sanitizes a class-path element (a single path) by removing unnecesary
+     * Sanitizes a class-path element (a single path) by removing unnecessary
      * pre and post fix spaces, together with single and double quotes.
      *
      * @param path  the path element to sanitize
@@ -372,7 +337,7 @@ public class ClassPath implements Iterable<String>
             path = path.trim();
 
             // remove quotes
-            path = unquote(path);
+            path = Strings.unquote(path);
 
             if (!path.isEmpty())
             {

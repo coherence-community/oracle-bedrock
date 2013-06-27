@@ -205,10 +205,45 @@ public class PropertiesBuilderTest
 
         expected.putAll(System.getProperties());
 
-        PropertiesBuilder builder    = PropertiesBuilder.fromCurrentSystemProperties();
+        PropertiesBuilder builder    = new PropertiesBuilder(System.getProperties());
         Properties        properties = builder.realize();
 
         assertThat(properties, is(expected));
+    }
+
+
+    /**
+     * Ensure non-standard system variables are only copied into a builder.
+     */
+    @Test
+    public void shouldCopyNonStandardSystemProperties()
+    {
+        //ensure we have one non-standard property
+        int count = 0;
+        String propertyName = "com.oracle.tools.custom.property." + count;
+        String propertyValue = "hello world";
+        while (System.getProperty(propertyName) != null) {
+            count++;
+            propertyName = "com.oracle.tools.custom.property." + count;
+        }
+        System.setProperty(propertyName, propertyValue);
+
+        Properties expected = new Properties();
+
+        Properties systemProperties = System.getProperties();
+        for (String name : systemProperties.stringPropertyNames()) {
+            if (!PropertiesBuilder.STANDARD_SYSTEM_PROPERTIES.contains(name)) {
+                expected.put(name, systemProperties.get(name));
+            }
+        }
+
+        PropertiesBuilder builder    = PropertiesBuilder.fromCurrentNonStandardSystemProperties();
+        Properties        properties = builder.realize();
+
+        assertThat(properties, is(expected));
+
+        //remove the property we added
+        System.getProperties().remove(propertyName);
     }
 
 

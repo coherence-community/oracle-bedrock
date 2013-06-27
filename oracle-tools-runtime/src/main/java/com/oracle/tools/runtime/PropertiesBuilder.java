@@ -26,11 +26,10 @@
 package com.oracle.tools.runtime;
 
 import java.io.IOException;
+
 import java.net.URL;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Properties;
+
+import java.util.*;
 
 /**
  * A {@link PropertiesBuilder} defines a set of property definitions that when
@@ -48,6 +47,43 @@ import java.util.Properties;
  */
 public class PropertiesBuilder
 {
+    /**
+     * The standard Java System properties.
+     */
+    public static final HashSet<String> STANDARD_SYSTEM_PROPERTIES = new HashSet<String>()
+    {
+        {
+            add("java.version");
+            add("java.vendor");
+            add("java.vendor.url");
+            add("java.home");
+            add("java.vm.specification.version");
+            add("java.vm.specification.vendor");
+            add("java.vm.specification.name");
+            add("java.vm.version");
+            add("java.vm.vendor");
+            add("java.vm.name");
+            add("java.specification.version");
+            add("java.specification.vendor");
+            add("java.specification.name");
+            add("java.class.version");
+            add("java.class.path");
+            add("java.library.path");
+            add("java.io.tmpdir");
+            add("java.compiler");
+            add("java.ext.dirs");
+            add("os.name");
+            add("os.arch");
+            add("os.version");
+            add("file.separator");
+            add("path.separator");
+            add("line.separator");
+            add("user.name");
+            add("user.home");
+            add("user.dir");
+        }
+    };
+
     /**
      * The properties defined by the {@link PropertiesBuilder}.
      */
@@ -457,7 +493,7 @@ public class PropertiesBuilder
 
 
     /**
-     * A helper to constructs a {@link PropertiesBuilder} based on the
+     * A helper to construct a {@link PropertiesBuilder} based on the
      * properties defined in the specified Java properties file.
      *
      * @param fileName  the name of the file (including path if required) from
@@ -479,8 +515,9 @@ public class PropertiesBuilder
 
 
     /**
-     * A helper to construct a {@link PropertiesBuilder} based on the operating
-     * system environment variables of the currently executing process.
+     * A helper to construct a {@link PropertiesBuilder} based on the
+     * operating system environment variables defined for the
+     * currently executing process.
      *
      * @return  a {@link PropertiesBuilder}
      */
@@ -491,14 +528,33 @@ public class PropertiesBuilder
 
 
     /**
-     * A helper to constructs a {@link PropertiesBuilder} based on the
-     * system properties the currently executing process.
+     * A helper to construct a {@link PropertiesBuilder} based on the
+     * non-standard Java system properties, ie: those that aren't in the set
+     * {@link #STANDARD_SYSTEM_PROPERTIES}, defined by the currently
+     * executing process.
      *
      * @return  a {@link PropertiesBuilder}
+     *
+     * @see #STANDARD_SYSTEM_PROPERTIES
      */
-    public static PropertiesBuilder fromCurrentSystemProperties()
+    public static PropertiesBuilder fromCurrentNonStandardSystemProperties()
     {
-        return new PropertiesBuilder(System.getProperties());
+        // grab a copy of the current system properties
+        Properties systemProperties = System.getProperties();
+
+        // filter out the standard system properties
+        Properties properties = new Properties();
+
+        for (String propertyName : systemProperties.stringPropertyNames())
+        {
+            if (!STANDARD_SYSTEM_PROPERTIES.contains(propertyName))
+            {
+                properties.put(propertyName, systemProperties.get(propertyName));
+            }
+        }
+
+        // return a builder of the filtered properties
+        return new PropertiesBuilder(properties);
     }
 
 

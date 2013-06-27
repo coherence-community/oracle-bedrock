@@ -25,6 +25,8 @@
 
 package com.oracle.tools.runtime.java;
 
+import com.oracle.tools.lang.Strings;
+
 import com.oracle.tools.runtime.Application;
 import com.oracle.tools.runtime.ApplicationConsole;
 import com.oracle.tools.runtime.NativeApplicationProcess;
@@ -187,7 +189,9 @@ public class NativeJavaApplicationBuilder<A extends JavaApplication<A>, S extend
         {
             String propertyValue = systemProperties.getProperty(propertyName);
 
-            builder.command().add("-D" + propertyName + (propertyValue.isEmpty() ? "" : "=" + propertyValue));
+            builder.command().add("-D" + propertyName
+                                  + (propertyValue.isEmpty()
+                                     ? "" : "=" + Strings.doubleQuoteIfNecessary(propertyValue)));
         }
 
         // set the JVM options for the Process

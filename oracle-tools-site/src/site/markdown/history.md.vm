@@ -61,11 +61,19 @@ reverse chronological order.
     where the names of Applications created as part of an Group start at 0 instead
     of 1.
 
-*   [ORACLETOOLS-30](https://java.net/jira/browse/ORACLETOOLS-30): Resolves an
-    issue were by Native Windows NT / XP processes may hang when being destroyed.
+*   [ORACLETOOLS-30](https://java.net/jira/browse/ORACLETOOLS-30): Resolves issue
+    where Native Windows NT / XP processes may hang when being destroyed.
 
 *   [ORACLETOOLS-32](https://java.net/jira/browse/ORACLETOOLS-32): ApplicationSchemas
     now *default* to inheriting environment variables from the underlying process.
+
+*   [ORACLETOOLS-36](https://java.net/jira/browse/ORACLETOOLS-36): Resolves issues
+    where having spaces in a System Property may cause a Native Java application not
+    to start.
+
+*   [ORACLETOOLS-37](https://java.net/jira/browse/ORACLETOOLS-37): Renamed and refactored
+    PropertiesBuilder.fromCurrentSystemProperties to return only custom properties.
+    The new method is called PropertiesBuilder.fromCurrentNonStandardSystemProperties.
 
 <h4>oracle-tools-runtime-tests</h4>
 

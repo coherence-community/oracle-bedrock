@@ -27,6 +27,7 @@ package com.oracle.tools.runtime.java;
 
 import com.oracle.tools.junit.AbstractTest;
 
+import com.oracle.tools.lang.Strings;
 import com.oracle.tools.runtime.DummyApp;
 import com.oracle.tools.runtime.DummyClassPathApp;
 
@@ -127,7 +128,8 @@ public abstract class AbstractJavaApplicationBuilderTest extends AbstractTest
 
         ClassPath   path1             = ClassPath.ofClass(DummyClassPathApp.class);
         ClassPath   path2             = ClassPath.ofClass(ContainerClassLoader.class);
-        ClassPath   classPath         = new ClassPath(knownJarClassPath, path1, path2);
+        ClassPath   path3             = ClassPath.ofClass(Strings.class);
+        ClassPath   classPath         = new ClassPath(knownJarClassPath, path1, path2, path3);
 
         SimpleJavaApplicationSchema schema =
             new SimpleJavaApplicationSchema(DummyClassPathApp.class.getCanonicalName()).setClassPath(classPath)

@@ -149,7 +149,7 @@ public class ContainerClassLoader extends ContainerScopeClassLoader
      */
     public static ContainerClassLoader newInstance(String applicationName) throws Exception
     {
-        PropertiesBuilder builder = PropertiesBuilder.fromCurrentSystemProperties();
+        PropertiesBuilder builder = PropertiesBuilder.fromCurrentNonStandardSystemProperties();
 
         return newInstance(applicationName,
                            ClassPath.ofSystem(),
