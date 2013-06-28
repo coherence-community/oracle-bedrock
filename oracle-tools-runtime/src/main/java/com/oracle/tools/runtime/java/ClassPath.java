@@ -25,7 +25,7 @@
 
 package com.oracle.tools.runtime.java;
 
-import com.oracle.tools.lang.Strings;
+import com.oracle.tools.lang.StringHelper;
 
 import java.io.File;
 import java.io.IOException;
@@ -115,7 +115,7 @@ public class ClassPath implements Iterable<String>
                 classPath = classPath == null ? "" : classPath.trim();
 
                 // remove quotes
-                classPath = Strings.dequote(classPath);
+                classPath = StringHelper.dequote(classPath);
 
                 if (!classPath.isEmpty())
                 {
@@ -337,7 +337,7 @@ public class ClassPath implements Iterable<String>
             path = path.trim();
 
             // remove quotes
-            path = Strings.unquote(path);
+            path = StringHelper.unquote(path);
 
             if (!path.isEmpty())
             {

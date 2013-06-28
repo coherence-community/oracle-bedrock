@@ -33,7 +33,7 @@ package com.oracle.tools.lang;
  *
  * @author Brian Oliver
  */
-public final class Strings
+public final class StringHelper
 {
     /**
      * Remove quotes from the specified {@link String}, including

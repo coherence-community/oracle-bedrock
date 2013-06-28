@@ -34,270 +34,270 @@ import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 
 /**
- * Unit Tests for {@link Strings}.
+ * Unit Tests for {@link StringHelper}.
  * <p>
  * Copyright (c) 2013. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Brian Oliver
  */
-public class StringsTest
+public class StringHelperTest
 {
     /**
-     * Ensure {@link Strings#unquote(String)} doesn't fail for
+     * Ensure {@link StringHelper#unquote(String)} doesn't fail for
      * <code>null</code> {@link String}s.
      */
     @Test
     public void shouldUnquoteNullString()
     {
-        String string = Strings.unquote(null);
+        String string = StringHelper.unquote(null);
 
         assertThat(string, is(nullValue()));
     }
 
 
     /**
-     * Ensure {@link Strings#unquote(String)} doesn't fail for
+     * Ensure {@link StringHelper#unquote(String)} doesn't fail for
      * {@link String}s without quotes.
      */
     @Test
     public void shouldUnquoteStringWithoutQuotes()
     {
-        String string1 = Strings.unquote("");
+        String string1 = StringHelper.unquote("");
 
         assertThat(string1, is(""));
 
-        String string2 = Strings.unquote("hello");
+        String string2 = StringHelper.unquote("hello");
 
         assertThat(string2, is("hello"));
 
-        String string3 = Strings.unquote("hello world");
+        String string3 = StringHelper.unquote("hello world");
 
         assertThat(string3, is("hello world"));
     }
 
 
     /**
-     * Ensure {@link Strings#unquote(String)} removes single-quotes
+     * Ensure {@link StringHelper#unquote(String)} removes single-quotes
      * from {@link String}s.
      */
     @Test
     public void shouldUnquoteSingleQuotedStrings()
     {
-        String string1 = Strings.unquote("\'\'");
+        String string1 = StringHelper.unquote("\'\'");
 
         assertThat(string1, is(""));
 
-        String string2 = Strings.unquote(" \'\' ");
+        String string2 = StringHelper.unquote(" \'\' ");
 
         assertThat(string2, is(""));
 
-        String string3 = Strings.unquote("\'hello\'");
+        String string3 = StringHelper.unquote("\'hello\'");
 
         assertThat(string3, is("hello"));
 
-        String string4 = Strings.unquote("\'hello world\'");
+        String string4 = StringHelper.unquote("\'hello world\'");
 
         assertThat(string4, is("hello world"));
 
-        String string5 = Strings.unquote(" \'hello world\' ");
+        String string5 = StringHelper.unquote(" \'hello world\' ");
 
         assertThat(string5, is("hello world"));
     }
 
 
     /**
-     * Ensure {@link Strings#unquote(String)} removes double-quotes
+     * Ensure {@link StringHelper#unquote(String)} removes double-quotes
      * from {@link String}s.
      */
     @Test
     public void shouldUnquoteDoubleQuotedStrings()
     {
-        String string1 = Strings.unquote("\"\"");
+        String string1 = StringHelper.unquote("\"\"");
 
         assertThat(string1, is(""));
 
-        String string2 = Strings.unquote(" \"\" ");
+        String string2 = StringHelper.unquote(" \"\" ");
 
         assertThat(string2, is(""));
 
-        String string3 = Strings.unquote("\"hello\"");
+        String string3 = StringHelper.unquote("\"hello\"");
 
         assertThat(string3, is("hello"));
 
-        String string4 = Strings.unquote("\"hello world\"");
+        String string4 = StringHelper.unquote("\"hello world\"");
 
         assertThat(string4, is("hello world"));
 
-        String string5 = Strings.unquote(" \"hello world\" ");
+        String string5 = StringHelper.unquote(" \"hello world\" ");
 
         assertThat(string5, is("hello world"));
     }
 
 
     /**
-     * Ensure {@link Strings#dequote(String)} doesn't fail for
+     * Ensure {@link StringHelper#dequote(String)} doesn't fail for
      * <code>null</code> {@link String}s.
      */
     @Test
     public void shouldDequoteNullString()
     {
-        String string = Strings.dequote(null);
+        String string = StringHelper.dequote(null);
 
         assertThat(string, is(nullValue()));
     }
 
 
     /**
-     * Ensure {@link Strings#dequote(String)} doesn't fail for
+     * Ensure {@link StringHelper#dequote(String)} doesn't fail for
      * {@link String}s without quotes.
      */
     @Test
     public void shouldDequoteStringWithoutQuotes()
     {
-        String string1 = Strings.dequote("");
+        String string1 = StringHelper.dequote("");
 
         assertThat(string1, is(""));
 
-        String string2 = Strings.dequote("hello");
+        String string2 = StringHelper.dequote("hello");
 
         assertThat(string2, is("hello"));
 
-        String string3 = Strings.dequote("hello world");
+        String string3 = StringHelper.dequote("hello world");
 
         assertThat(string3, is("hello world"));
     }
 
 
     /**
-     * Ensure {@link Strings#dequote(String)} removes single-quotes
+     * Ensure {@link StringHelper#dequote(String)} removes single-quotes
      * from {@link String}s.
      */
     @Test
     public void shouldDequoteSingleQuotedStrings()
     {
-        String string1 = Strings.dequote("\'\'");
+        String string1 = StringHelper.dequote("\'\'");
 
         assertThat(string1, is(""));
 
-        String string2 = Strings.dequote(" \'\' ");
+        String string2 = StringHelper.dequote(" \'\' ");
 
         assertThat(string2, is(""));
 
-        String string3 = Strings.dequote("\'hello\'");
+        String string3 = StringHelper.dequote("\'hello\'");
 
         assertThat(string3, is("hello"));
 
-        String string4 = Strings.dequote("\'hello world\'");
+        String string4 = StringHelper.dequote("\'hello world\'");
 
         assertThat(string4, is("hello world"));
 
-        String string5 = Strings.dequote(" \'hello world\' ");
+        String string5 = StringHelper.dequote(" \'hello world\' ");
 
         assertThat(string5, is("hello world"));
 
-        String string6 = Strings.dequote("\"\'hello\'\" world\"\' ");
+        String string6 = StringHelper.dequote("\"\'hello\'\" world\"\' ");
 
         assertThat(string6, is("hello world"));
     }
 
 
     /**
-     * Ensure {@link Strings#dequote(String)} removes double-quotes
+     * Ensure {@link StringHelper#dequote(String)} removes double-quotes
      * from {@link String}s.
      */
     @Test
     public void shouldDequoteDoubleQuotedStrings()
     {
-        String string1 = Strings.dequote("\"\"");
+        String string1 = StringHelper.dequote("\"\"");
 
         assertThat(string1, is(""));
 
-        String string2 = Strings.dequote(" \"\" ");
+        String string2 = StringHelper.dequote(" \"\" ");
 
         assertThat(string2, is(""));
 
-        String string3 = Strings.dequote("\"hello\"");
+        String string3 = StringHelper.dequote("\"hello\"");
 
         assertThat(string3, is("hello"));
 
-        String string4 = Strings.dequote("\"hello world\"");
+        String string4 = StringHelper.dequote("\"hello world\"");
 
         assertThat(string4, is("hello world"));
 
-        String string5 = Strings.dequote(" \"hello world\" ");
+        String string5 = StringHelper.dequote(" \"hello world\" ");
 
         assertThat(string5, is("hello world"));
 
-        String string6 = Strings.dequote("\"\'hello\'\" world\"\' ");
+        String string6 = StringHelper.dequote("\"\'hello\'\" world\"\' ");
 
         assertThat(string6, is("hello world"));
     }
 
 
     /**
-     * Ensure {@link Strings#doubleQuoteIfNecessary(String)} does
+     * Ensure {@link StringHelper#doubleQuoteIfNecessary(String)} does
      * not double quote a <code>null</code>.
      */
     @Test
     public void shouldNotDoubleQuoteNullString()
     {
-        String string = Strings.doubleQuoteIfNecessary(null);
+        String string = StringHelper.doubleQuoteIfNecessary(null);
 
         assertThat(string, is(nullValue()));
     }
 
 
     /**
-     * Ensure {@link Strings#doubleQuoteIfNecessary(String)} does
+     * Ensure {@link StringHelper#doubleQuoteIfNecessary(String)} does
      * not double quote an empty {@link String}
      */
     @Test
     public void shouldNotDoubleQuoteEmptyString()
     {
-        String string = Strings.doubleQuoteIfNecessary("");
+        String string = StringHelper.doubleQuoteIfNecessary("");
 
         assertThat(string, is(""));
     }
 
 
     /**
-     * Ensure {@link Strings#doubleQuoteIfNecessary(String)} does
+     * Ensure {@link StringHelper#doubleQuoteIfNecessary(String)} does
      * not double quote a {@link String} that is already double-quoted.
      */
     @Test
     public void shouldNotDoubleQuoteDoubleQuotedString()
     {
-        String string1 = Strings.doubleQuoteIfNecessary("\"\"");
+        String string1 = StringHelper.doubleQuoteIfNecessary("\"\"");
 
         assertThat(string1, is("\"\""));
 
-        String string2 = Strings.doubleQuoteIfNecessary("\"hello\"");
+        String string2 = StringHelper.doubleQuoteIfNecessary("\"hello\"");
 
         assertThat(string2, is("\"hello\""));
 
-        String string3 = Strings.doubleQuoteIfNecessary("\"hello world\"");
+        String string3 = StringHelper.doubleQuoteIfNecessary("\"hello world\"");
 
         assertThat(string3, is("\"hello world\""));
     }
 
 
     /**
-     * Ensure {@link Strings#doubleQuoteIfNecessary(String)} does
+     * Ensure {@link StringHelper#doubleQuoteIfNecessary(String)} does
      * not double quote a {@link String} that is already double-quoted.
      */
     @Test
     public void shouldDoubleQuoteString()
     {
-        String string1 = Strings.doubleQuoteIfNecessary(" ");
+        String string1 = StringHelper.doubleQuoteIfNecessary(" ");
 
         assertThat(string1, is("\" \""));
 
-        String string2 = Strings.doubleQuoteIfNecessary("hello");
+        String string2 = StringHelper.doubleQuoteIfNecessary("hello");
 
         assertThat(string2, is("hello"));
 
-        String string3 = Strings.doubleQuoteIfNecessary("hello world");
+        String string3 = StringHelper.doubleQuoteIfNecessary("hello world");
 
         assertThat(string3, is("\"hello world\""));
     }

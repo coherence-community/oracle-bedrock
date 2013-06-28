@@ -66,7 +66,11 @@ import java.util.concurrent.Future;
  * calling {@link Thread}s to block, {@link Deferred}s don't.  This difference
  * is significant as it allows {@link Deferred}s to present numerous types of
  * lazily evaluation (eg: deferred method invocation on deferred objects), that
- * of which is not easily possible with {@link Future}s.
+ * of which is not easily possible with {@link Future}s.  Lastly {@link Future}
+ * provides mechanisms to both {@link Future#cancel(boolean)} and determine
+ * cancellation state.  This is because a {@link Future} represents some
+ * background operation, where as a {@link Deferred} is simply a reference to
+ * an object that may be available at a later point in time.
  * <p>
  * As there are many types of {@link Deferred}s, each with their own strategies
  * for dealing with object acquisition, recovering from acquisition failure and
