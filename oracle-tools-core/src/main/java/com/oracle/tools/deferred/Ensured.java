@@ -25,6 +25,10 @@
 
 package com.oracle.tools.deferred;
 
+import com.oracle.tools.util.ConstantIterator;
+
+import java.util.Iterator;
+
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -74,81 +78,40 @@ public class Ensured<T> implements Deferred<T>
     private Deferred<T> m_deferred;
 
     /**
-     * The (poll wait) duration between attempts to acquire the {@link Deferred}.
+     * The total duration (in milliseconds) allowed possibly wait when
+     * attempting to acquire the {@link Deferred}.
      */
-    private long m_retryDelayDuration;
+    private long m_totalDurationMS;
 
     /**
-     * The unit of time for the {@link #m_retryDelayDuration}.
+     * An {@link Iterator} that provides the next retry duration
+     * to use (in milliseconds).  Each of these are the
+     * represent the duration to wait between attempts to acquire
+     * the {@link Deferred}.
      */
-    private TimeUnit m_retryDelayDurationUnits;
-
-    /**
-     * The total duration allowed to invest in acquiring the {@link Deferred}.
-     */
-    private long m_totalDuration;
-
-    /**
-     * The unit of time for the {@link #m_totalDuration}.
-     */
-    private TimeUnit m_totalDurationUnits;
+    private Iterator<Long> m_retryDurationsMS;
 
 
     /**
      * Construct an {@link Ensured} adapting the specified {@link Deferred}.
      *
-     * @param deferred  the {@link Deferred} to adapt.
+     * @param deferred          the {@link Deferred} to adapt
+     * @param retryDurationsMS  an {@link Iterator} providing individual retry
+     *                          durations (in milliseconds) for each time the
+     *                          {@link Ensured} needs to wait
+     * @param totalDurationMS   the maximum duration (in milliseconds) to wait
+     *                          for the {@link Deferred} to become available
      */
-    public Ensured(Deferred<T> deferred)
-    {
-        this(deferred,
-             DEFAULT_RETRY_DURATION_MS,
-             TimeUnit.MILLISECONDS,
-             DEFAULT_TOTAL_RETRY_DURATION_SECS,
-             TimeUnit.SECONDS);
-    }
-
-
-    /**
-     * Construct an {@link Ensured} adapting the specified {@link Deferred}.
-     *
-     * @param deferred            the {@link Deferred} to adapt
-     * @param totalDuration       the maximum duration for retrying
-     * @param totalDurationUnits  the {@link TimeUnit}s for the duration
-     */
-    public Ensured(Deferred<T> deferred,
-                   long        totalDuration,
-                   TimeUnit    totalDurationUnits)
-    {
-        this(deferred, DEFAULT_RETRY_DURATION_MS, TimeUnit.MILLISECONDS, totalDuration, totalDurationUnits);
-    }
-
-
-    /**
-     * Construct an {@link Ensured} adapting the specified {@link Deferred}.
-     *
-     * @param deferred                 the {@link Deferred} to adapt
-     * @param retryDelayDuration       the delay between attempting to retry
-     *                                 acquiring the object
-     * @param retryDelayDurationUnits  the {@link TimeUnit}s for the retry duration
-     * @param totalDuration            the maximum duration for retrying
-     * @param totalDurationUnits       the {@link TimeUnit}s for the total duration
-     */
-    public Ensured(Deferred<T> deferred,
-                   long        retryDelayDuration,
-                   TimeUnit    retryDelayDurationUnits,
-                   long        totalDuration,
-                   TimeUnit    totalDurationUnits)
+    public Ensured(Deferred<T>    deferred,
+                   Iterator<Long> retryDurationsMS,
+                   long           totalDurationMS)
     {
         // when we're ensuring an ensured, use the adapted deferred
-        // (this is to ensure that we don't attempt to over ensure a deferred)
-        m_deferred                = deferred instanceof Ensured ? ((Ensured<T>) deferred).getDeferred() : deferred;
+        // (this is to ensure that we don't attempt to ensure another ensured)
+        m_deferred         = deferred instanceof Ensured ? ((Ensured<T>) deferred).getDeferred() : deferred;
 
-        m_retryDelayDuration      = retryDelayDuration < 0 ? 0 : retryDelayDuration;
-        m_retryDelayDurationUnits = retryDelayDurationUnits;
-
-        m_totalDuration           = totalDuration;
-        m_totalDurationUnits      = totalDurationUnits;
+        m_retryDurationsMS = retryDurationsMS;
+        m_totalDurationMS  = totalDurationMS < 0 ? 0 : totalDurationMS;
     }
 
 
@@ -169,14 +132,26 @@ public class Ensured<T> implements Deferred<T>
     @Override
     public T get() throws ObjectNotAvailableException
     {
-        // determine how much longer we can perform retries
-        long remainingRetryDurationMS = m_totalDurationUnits.toMillis(m_totalDuration);
+        // determine the maximum time we can wait
+        long remainingRetryDurationMS = m_totalDurationMS;
 
         do
         {
+            // the time the most recent acquisition took
+            long acquisitionDurationMS = 0;
+
             try
             {
-                T object = m_deferred.get();
+                long started = System.currentTimeMillis();
+
+                T    object  = m_deferred.get();
+
+                long stopped = System.currentTimeMillis();
+
+                // the time spent trying to access the resource
+                // is considered as part of the remaining time
+                acquisitionDurationMS    = stopped - started;
+                remainingRetryDurationMS -= acquisitionDurationMS < 0 ? 0 : acquisitionDurationMS;
 
                 if (object != null)
                 {
@@ -200,22 +175,39 @@ public class Ensured<T> implements Deferred<T>
             }
 
             // as no object was produced we should wait before retrying
-            if (m_totalDuration < 0 || remainingRetryDurationMS > 0)
+            if (m_totalDurationMS < 0 || remainingRetryDurationMS > 0)
             {
-                try
+                // we can only retry while we have retry durations
+                if (m_retryDurationsMS.hasNext())
                 {
-                    m_retryDelayDurationUnits.sleep(m_retryDelayDuration);
+                    try
+                    {
+                        long durationMS = m_retryDurationsMS.next();
 
-                    remainingRetryDurationMS -= m_retryDelayDurationUnits.toMillis(m_retryDelayDuration);
+                        if (remainingRetryDurationMS - durationMS < 0)
+                        {
+                            durationMS = remainingRetryDurationMS;
+                        }
+
+                        if (durationMS > 0)
+                        {
+                            TimeUnit.MILLISECONDS.sleep(durationMS);
+                        }
+
+                        remainingRetryDurationMS -= durationMS;
+                    }
+                    catch (InterruptedException e)
+                    {
+                        throw new ObjectNotAvailableException(m_deferred, e);
+                    }
                 }
-                catch (InterruptedException e)
+                else
                 {
-                    throw new ObjectNotAvailableException(m_deferred, e);
+                    throw new ObjectNotAvailableException(m_deferred);
                 }
             }
-
         }
-        while (m_totalDuration < 0 || remainingRetryDurationMS > 0);
+        while (m_totalDurationMS < 0 || remainingRetryDurationMS > 0);
 
         throw new ObjectNotAvailableException(m_deferred);
     }

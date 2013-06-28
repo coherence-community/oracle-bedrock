@@ -82,8 +82,6 @@ public class DeferredAssert
         assertThat(message,
                    deferred,
                    matcher,
-                   Ensured.DEFAULT_RETRY_DURATION_MS,
-                   TimeUnit.MILLISECONDS,
                    Ensured.DEFAULT_TOTAL_RETRY_DURATION_SECS,
                    TimeUnit.SECONDS);
     }
@@ -103,16 +101,14 @@ public class DeferredAssert
      *
      * @throws AssertionError if the assertion fails
      */
-    public static <T> void assertThat(Deferred<T>        deferred,
-                                      Matcher<? super T> matcher,
-                                      long               totalRetryDuration,
-                                      TimeUnit           totalRetryDurationUnits) throws AssertionError
+    public static <T> void assertThat(Deferred<T> deferred,
+                                      Matcher<?>  matcher,
+                                      long        totalRetryDuration,
+                                      TimeUnit    totalRetryDurationUnits) throws AssertionError
     {
         assertThat(null,
                    deferred,
                    matcher,
-                   Ensured.DEFAULT_RETRY_DURATION_MS,
-                   TimeUnit.MILLISECONDS,
                    totalRetryDuration,
                    totalRetryDurationUnits);
     }
@@ -128,71 +124,6 @@ public class DeferredAssert
      * @param message                  the message for the AssertionError (<code>null</code> ok)
      * @param deferred                 the {@link Deferred}
      * @param matcher                  the {@link Matcher}
-     * @param totalRetryDuration       the maximum duration for retrying
-     * @param totalRetryDurationUnits  the {@link TimeUnit}s for the duration
-     *
-     * @throws AssertionError if the assertion fails
-     */
-    public static <T> void assertThat(String             message,
-                                      Deferred<T>        deferred,
-                                      Matcher<? super T> matcher,
-                                      long               totalRetryDuration,
-                                      TimeUnit           totalRetryDurationUnits) throws AssertionError
-    {
-        assertThat(message,
-                   deferred,
-                   matcher,
-                   Ensured.DEFAULT_RETRY_DURATION_MS,
-                   TimeUnit.MILLISECONDS,
-                   totalRetryDuration,
-                   totalRetryDurationUnits);
-    }
-
-
-    /**
-     * Asserts that a {@link Deferred}, when it becomes available,
-     * will eventually (after the specified amount of time) satisfy the
-     * specified {@link Matcher}.
-     *
-     * @param <T>       the type of value produced by the {@link Deferred}
-     *
-     * @param deferred                 the {@link Deferred}
-     * @param matcher                  the {@link Matcher}
-     * @param retryDelayDuration       the time to wait between retrying
-     * @param retryDelayDurationUnits  the {@link TimeUnit}s for the retry delay duration
-     * @param totalRetryDuration       the maximum duration for retrying
-     * @param totalRetryDurationUnits  the {@link TimeUnit}s for the duration
-     *
-     * @throws AssertionError if the assertion fails
-     */
-    public static <T> void assertThat(Deferred<T> deferred,
-                                      Matcher<?>  matcher,
-                                      long        retryDelayDuration,
-                                      TimeUnit    retryDelayDurationUnits,
-                                      long        totalRetryDuration,
-                                      TimeUnit    totalRetryDurationUnits) throws AssertionError
-    {
-        assertThat(deferred,
-                   matcher,
-                   retryDelayDuration,
-                   retryDelayDurationUnits,
-                   totalRetryDuration,
-                   totalRetryDurationUnits);
-    }
-
-
-    /**
-     * Asserts that a {@link Deferred}, when it becomes available,
-     * will eventually (after the specified amount of time) satisfy the
-     * specified {@link Matcher}.
-     *
-     * @param <T>       the type of value produced by the {@link Deferred}
-     *
-     * @param message                  the message for the AssertionError (<code>null</code> ok)
-     * @param deferred                 the {@link Deferred}
-     * @param matcher                  the {@link Matcher}
-     * @param retryDelayDuration       the time to wait between retrying
-     * @param retryDelayDurationUnits  the {@link TimeUnit}s for the retry delay duration
      * @param totalRetryDuration       the maximum duration for retrying
      * @param totalRetryDurationUnits  the {@link TimeUnit}s for the duration
      *
@@ -201,8 +132,6 @@ public class DeferredAssert
     public static <T> void assertThat(String      message,
                                       Deferred<T> deferred,
                                       Matcher<?>  matcher,
-                                      long        retryDelayDuration,
-                                      TimeUnit    retryDelayDurationUnits,
                                       long        totalRetryDuration,
                                       TimeUnit    totalRetryDurationUnits) throws AssertionError
     {
@@ -212,8 +141,6 @@ public class DeferredAssert
         try
         {
             ensure(deferredMatch,
-                   retryDelayDuration,
-                   retryDelayDurationUnits,
                    totalRetryDuration,
                    totalRetryDurationUnits);
         }

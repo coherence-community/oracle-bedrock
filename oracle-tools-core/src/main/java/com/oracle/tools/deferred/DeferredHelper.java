@@ -28,13 +28,19 @@ package com.oracle.tools.deferred;
 import com.oracle.tools.deferred.atomic.DeferredAtomicBoolean;
 import com.oracle.tools.deferred.atomic.DeferredAtomicInteger;
 import com.oracle.tools.deferred.atomic.DeferredAtomicLong;
-import com.oracle.tools.util.ReflectionHelper;
+
+import com.oracle.tools.util.*;
+
 import net.sf.cglib.proxy.MethodInterceptor;
 import net.sf.cglib.proxy.MethodProxy;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
+
+import java.util.Iterator;
+
 import java.util.concurrent.TimeUnit;
+
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -50,6 +56,37 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public class DeferredHelper
 {
+    /**
+     * The retry strategy that will be used for {@link Ensured}s.
+     * <p/>
+     * Legal Values are:
+     * <ol>
+     *     <li>constant            = polling every 250ms</li>
+     *     <li>fibonacci           = polling based on values taken in order from
+     *                               the fibonacci sequence</li>
+     *     <li>exponential         = polling based on values taken in order from
+     *                               an exponential sequence (a rate of 50%)</li>
+     *     <li>random.fibonacci    = polling based on randomized values taken in
+     *                               order from the fibonacci sequence</li>
+     *     <li>randomo.exponential = polling based on randomized values taken in
+     *                               order from an exponential sequence
+     *                               (a rate of 50%)</li>
+     * </ol>
+     * <p/>
+     * The default strategy is "random.fibonacci"
+     */
+    public static final String ORACLETOOLS_DEFERRED_RETRY_STRATEGY = "oracletools.deferred.retry.strategy";
+
+    /**
+     * The maximum retry (timeout) that will be used for {@link Ensured}s.
+     * <p/>
+     * By default values are measured in milliseconds, however when
+     * time units are specified after the amounts eg:
+     * (ms = milliseconds, m = minutes, s = seconds, h = hours),
+     * conversions are automatically made to milliseconds.
+     */
+    public static final String ORACLETOOLS_DEFERRED_RETRY_TIMEOUT = "oracletools.deferred.retry.timeout";
+
     /**
      * A {@link ThreadLocal} to capture the most recent {@link Deferred}
      * method call on a proxy created by {@link #invoking(Deferred)}.
@@ -100,6 +137,100 @@ public class DeferredHelper
 
 
     /**
+     * Obtains the default configured retry durations {@link Iterator}
+     * (each value measured in milliseconds) that can be used with
+     * {@link Ensured}s.
+     *
+     * @return a new instance of the default configured retry durations
+     *         {@link Iterator}
+     */
+    public static Iterator<Long> getDefaultEnsuredRetryDurationsMS()
+    {
+        String strategy = System.getProperty(ORACLETOOLS_DEFERRED_RETRY_STRATEGY);
+
+        if (strategy == null)
+        {
+            strategy = "random.fibonacci";
+        }
+
+        strategy = strategy.trim().toLowerCase();
+
+        if (strategy.equals("random.fibonacci"))
+        {
+            return new RandomIterator(new FibonacciIterator());
+        }
+        else if (strategy.equals("random.exponential"))
+        {
+            return new RandomIterator(new ExponentialIterator(0, 50));
+        }
+        else if (strategy.equals("fibonacci"))
+        {
+            return new FibonacciIterator();
+        }
+        else if (strategy.equals("exponential"))
+        {
+            return new ExponentialIterator(0, 50);
+        }
+        else
+        {
+            // default to constant polling
+            return new ConstantIterator<Long>(250L);
+        }
+    }
+
+
+    /**
+     * Obtains the default timeout/maximum wait duration (in milliseconds)
+     * for {@link Ensured}s.
+     *
+     * @return the default timeout (in milliseconds)
+     */
+    public static long getDefaultEnsuredTimeoutMS()
+    {
+        String timeOut = System.getProperty(ORACLETOOLS_DEFERRED_RETRY_TIMEOUT);
+
+        if (timeOut == null)
+        {
+            return TimeUnit.SECONDS.toMillis(30);
+        }
+        else
+        {
+            timeOut = timeOut.trim().toLowerCase();
+
+            TimeUnit timeUnit;
+
+            if (timeOut.endsWith("ms"))
+            {
+                timeUnit = TimeUnit.MILLISECONDS;
+                timeOut  = timeOut.substring(timeOut.length() - 2).trim();
+            }
+            else if (timeOut.endsWith("s"))
+            {
+                timeUnit = TimeUnit.SECONDS;
+                timeOut  = timeOut.substring(timeOut.length() - 1).trim();
+            }
+            else if (timeOut.endsWith("m"))
+            {
+                timeUnit = TimeUnit.MINUTES;
+                timeOut  = timeOut.substring(timeOut.length() - 1).trim();
+            }
+            else if (timeOut.endsWith("h"))
+            {
+                timeUnit = TimeUnit.HOURS;
+                timeOut  = timeOut.substring(timeOut.length() - 1).trim();
+            }
+            else
+            {
+                // assume milliseconds when there's no timeout unit
+                timeUnit = TimeUnit.MILLISECONDS;
+            }
+
+            return timeUnit.toMillis(Long.valueOf(timeOut));
+        }
+    }
+
+
+    /**
      * Obtains an ensured of the specified {@link Deferred}
      * (configured using default {@link Ensured} timeouts)
      *
@@ -109,7 +240,9 @@ public class DeferredHelper
      */
     public static <T> Deferred<T> ensured(Deferred<T> deferred)
     {
-        return deferred instanceof Ensured ? deferred : new Ensured<T>(deferred);
+        return deferred instanceof Ensured ? deferred : new Ensured<T>(deferred,
+                                                                       getDefaultEnsuredRetryDurationsMS(),
+                                                                       getDefaultEnsuredTimeoutMS());
     }
 
 
@@ -127,8 +260,9 @@ public class DeferredHelper
                                           TimeUnit    totalRetryDurationUnits)
     {
         return deferred instanceof Ensured ? deferred : new Ensured<T>(deferred,
-                                                                                                       totalRetryDuration,
-                                                                                                       totalRetryDurationUnits);
+                                                                       getDefaultEnsuredRetryDurationsMS(),
+                                                                       totalRetryDurationUnits
+                                                                           .toMillis(totalRetryDuration));
     }
 
 
@@ -149,11 +283,14 @@ public class DeferredHelper
                                           long        totalRetryDuration,
                                           TimeUnit    totalRetryDurationUnits)
     {
+        Iterator<Long> retryDurationsMS =
+            new ConstantIterator<Long>(retryDelayDurationUnits.toMillis(retryDelayDuration < 0
+                                                                        ? 0 : retryDelayDuration));
+
         return deferred instanceof Ensured ? deferred : new Ensured<T>(deferred,
-                                                                                                       retryDelayDuration,
-                                                                                                       retryDelayDurationUnits,
-                                                                                                       totalRetryDuration,
-                                                                                                       totalRetryDurationUnits);
+                                                                       retryDurationsMS,
+                                                                       totalRetryDurationUnits
+                                                                           .toMillis(totalRetryDuration));
     }
 
 
@@ -169,8 +306,8 @@ public class DeferredHelper
                                           long        totalRetryDurationMS)
     {
         return deferred instanceof Ensured ? (Ensured<T>) deferred : new Ensured<T>(deferred,
-                                                                                    totalRetryDurationMS,
-                                                                                    TimeUnit.MILLISECONDS);
+                                                                                    getDefaultEnsuredRetryDurationsMS(),
+                                                                                    totalRetryDurationMS);
     }
 
 

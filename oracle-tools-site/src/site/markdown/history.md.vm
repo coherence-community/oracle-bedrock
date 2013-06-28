@@ -28,6 +28,21 @@ reverse chronological order.
 *   [ORACLETOOLS-14](https://java.net/jira/browse/ORACLETOOLS-14): Removed Notified
     Deferred implementation as by nature they are unreliable.
 
+*   [ORACLETOOLS-39](https://java.net/jira/browse/ORACLETOOLS-14): Introduced
+    numerous configurable strategies for waiting for Deferreds to become available
+    (as implemented by the Ensured class).  These include:  constant (polling),
+    fibonacci (random and uniform), exponential (random and uniform).
+
+    Configuring these options occurs by setting the
+    "oracletools.deferred.retry.strategy" system property with the values:
+    constant, fibonacci, random.fibonacci, exponential or random.exponential.
+    The default is now random.fibonacci (instead of constant polling)
+
+    Also introduced the ability to use a system property to set the default
+    retry timeout (which is 30 seconds).   The property is:
+    "oracletools.defered.retry.timeout".  Units of measure include: ms, s, m and h
+    meaning milliseconds, seconds, minutes and hours respectively.
+
 <h4>oracle-tools-runtime</h4>
 
 *   [ORACLETOOLS-12](https://java.net/jira/browse/ORACLETOOLS-12): Resolved issue
