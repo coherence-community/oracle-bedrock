@@ -95,18 +95,14 @@ public class DeferredInvoke<T> implements Deferred<T>
      */
     @SuppressWarnings("unchecked")
     @Override
-    public T get() throws ObjectNotAvailableException
+    public T get() throws UnresolvableInstanceException, InstanceUnavailableException
     {
         // first try to get the object on which to perform the invocation
         Object object = m_deferred.get();
 
         if (object == null)
         {
-            // no object means we're not ready to invoke
-            // (this does not mean we should throw a NullPointerException
-            // as we simply may need to wait for the deferred to become
-            // available)
-            return null;
+            throw new UnresolvableInstanceException(this, new NullPointerException("The underlying deferred was null"));
         }
         else
         {
@@ -118,12 +114,12 @@ public class DeferredInvoke<T> implements Deferred<T>
             catch (IllegalAccessException e)
             {
                 // when we can't access the method, we're doomed
-                throw new ObjectNotAvailableException(this, e);
+                throw new UnresolvableInstanceException(this, e);
             }
             catch (IllegalArgumentException e)
             {
                 // when the method arguments are incorrect, we're doomed
-                throw new ObjectNotAvailableException(this, e);
+                throw new UnresolvableInstanceException(this, e);
             }
             catch (InvocationTargetException e)
             {
@@ -135,7 +131,7 @@ public class DeferredInvoke<T> implements Deferred<T>
                 else
                 {
                     // wrap other exceptions as runtime exceptions
-                    throw new RuntimeException(e);
+                    throw new InstanceUnavailableException(this, e);
                 }
             }
         }

@@ -28,7 +28,7 @@ reverse chronological order.
 *   [ORACLETOOLS-14](https://java.net/jira/browse/ORACLETOOLS-14): Removed Notified
     Deferred implementation as by nature they are unreliable.
 
-*   [ORACLETOOLS-39](https://java.net/jira/browse/ORACLETOOLS-14): Introduced
+*   [ORACLETOOLS-39](https://java.net/jira/browse/ORACLETOOLS-39): Introduced
     numerous configurable strategies for waiting for Deferreds to become available
     (as implemented by the Ensured class).  These include:  constant (polling),
     fibonacci (random and uniform), exponential (random and uniform).
@@ -42,6 +42,24 @@ reverse chronological order.
     retry timeout (which is 30 seconds).   The property is:
     "oracletools.defered.retry.timeout".  Units of measure include: ms, s, m and h
     meaning milliseconds, seconds, minutes and hours respectively.
+
+    *Breaking Change:*  While this is a breaking change, the chance of an
+    application being impacted is very minimal, if at all.  Only applications
+    making customize time-out calls, which is rare, will be affected.
+
+
+*   [ORACLETOOLS-40](https://java.net/jira/browse/ORACLETOOLS-40): Refactored
+    Deferred.get() semantics to allow returning null as a valid reference.
+
+    Introduced InstanceUnavailableException to represent the concept that a
+    Deferred instance is currently unavailable, but may become available in
+    the future. ie: this is thrown instead of null being returned.
+
+    Replaced the ObjectNotAvailableException with the UnresolveableInstanceException.
+
+    *Breaking Change:*  While this is a breaking change, the chance of an
+    application being impacted is very minimal, if at all.  Only applications
+    creating customized Deferred implementations, which is rare, will be affected.
 
 <h4>oracle-tools-runtime</h4>
 
@@ -90,6 +108,11 @@ reverse chronological order.
     PropertiesBuilder.fromCurrentSystemProperties to return only custom properties.
     The new method is called PropertiesBuilder.fromCurrentNonStandardSystemProperties.
 
+    *Breaking Change:*  While this is a breaking change, the chance of an
+    application being impacted is very minimal, if at all.  Applications using the
+    previous method would not support cross-platform deployment.  Changing to
+    the new method resolves this.
+
 <h4>oracle-tools-runtime-tests</h4>
 
 *   Introduced to encapsulate Functional and Integration Tests.
@@ -112,7 +135,7 @@ reverse chronological order.
     specifying a log destination for Coherence when using a Coherence-based MemeberSchema.
 
 *   [ORACLETOOLS-35](https://java.net/jira/browse/ORACLETOOLS-35): Add automatic support
-    enabling file-base XSD loading with Coherence using Java 8 (b91+) that includes
+    enabling file-base XSD loading with Coherence using Java 8 (b91) that includes
     JAXP 1.5 changes.
 
 *   [ORACLETOOLS-38](https://java.net/jira/browse/ORACLETOOLS-38): Add automatic support

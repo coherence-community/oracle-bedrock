@@ -26,12 +26,14 @@
 package com.oracle.tools.deferred;
 
 import com.oracle.tools.util.StopWatch;
+
 import junit.framework.Assert;
+
 import org.junit.Test;
 
-import java.util.concurrent.TimeUnit;
-
 import static org.hamcrest.core.Is.is;
+
+import java.util.concurrent.TimeUnit;
 
 /**
  * Unit tests for {@link DeferredAssert}.
@@ -49,7 +51,7 @@ public class DeferredAssertTest
      * the {@link Deferred} returns <code>null</code>.
      */
     @Test
-    public void thatAssertThatWaitsDefaultTimeout()
+    public void shouldWaitDefaultTimeout()
     {
         StopWatch stopWatch = new StopWatch();
 
@@ -60,16 +62,17 @@ public class DeferredAssertTest
         }
         catch (AssertionError e)
         {
-            Assert.assertTrue("Failed to throw an ObjectNotAvailableException as expected",
-                              e.getCause() instanceof ObjectNotAvailableException);
+            Assert.assertTrue("Failed to throw an UnresolvableInstanceException as expected",
+                              e.getCause() instanceof UnresolvableInstanceException);
 
             stopWatch.stop();
 
             Assert.assertTrue(String
                 .format("Failed to wait for the default duration of %d seconds.  Waited %s seconds",
-                        Ensured.DEFAULT_TOTAL_RETRY_DURATION_SECS, stopWatch.getElapsedTimeIn(TimeUnit.SECONDS)),
+                        DeferredHelper.ORACLETOOLS_DEFERRED_RETRY_TIMEOUT_SECS,
+                        stopWatch.getElapsedTimeIn(TimeUnit.SECONDS)),
                               stopWatch.getElapsedTimeIn(TimeUnit.SECONDS)
-                              >= Ensured.DEFAULT_TOTAL_RETRY_DURATION_SECS);
+                              >= DeferredHelper.ORACLETOOLS_DEFERRED_RETRY_TIMEOUT_SECS);
         }
         catch (Exception e)
         {
@@ -84,7 +87,7 @@ public class DeferredAssertTest
      * the {@link Deferred} returns <code>null</code>.
      */
     @Test
-    public void thatAssertThatWaitsSpecifiedTimeBeforeTimeout()
+    public void shouldWaitSpecifiedTimeBeforeTimeout()
     {
         StopWatch stopWatch         = new StopWatch();
         long      retryDurationSECS = 5;
@@ -99,8 +102,8 @@ public class DeferredAssertTest
         }
         catch (AssertionError e)
         {
-            Assert.assertTrue("Failed to throw an ObjectNotAvailableException as expected",
-                              e.getCause() instanceof ObjectNotAvailableException);
+            Assert.assertTrue("Failed to throw an UnresolvableInstanceException as expected",
+                              e.getCause() instanceof UnresolvableInstanceException);
 
             stopWatch.stop();
 
@@ -118,10 +121,10 @@ public class DeferredAssertTest
 
     /**
      * Ensure that a {@link DeferredAssert#assertThat(Deferred, org.hamcrest.Matcher)}
-     * fails fast when the {@link Deferred} throws an {@link ObjectNotAvailableException}.
+     * fails fast when the {@link Deferred} throws an {@link UnresolvableInstanceException}.
      */
     @Test
-    public void thatAssertThatFailsFast()
+    public void shouldFailFast()
     {
         StopWatch stopWatch = new StopWatch();
 
@@ -132,14 +135,15 @@ public class DeferredAssertTest
         }
         catch (AssertionError e)
         {
-            Assert.assertTrue("Failed to throw an ObjectNotAvailableException as expected",
-                              e.getCause() instanceof ObjectNotAvailableException);
+            Assert.assertTrue("Failed to throw an UnresolvableInstanceException as expected",
+                              e.getCause() instanceof UnresolvableInstanceException);
 
             stopWatch.stop();
 
             Assert.assertTrue(String.format("Failed to fail fast.  Instead waited for Waited %s seconds",
                                             stopWatch.getElapsedTimeIn(TimeUnit.SECONDS)),
-                              stopWatch.getElapsedTimeIn(TimeUnit.SECONDS) < Ensured.DEFAULT_TOTAL_RETRY_DURATION_SECS);
+                              stopWatch.getElapsedTimeIn(TimeUnit.SECONDS)
+                              < DeferredHelper.ORACLETOOLS_DEFERRED_RETRY_TIMEOUT_SECS);
         }
         catch (Exception e)
         {
@@ -153,7 +157,7 @@ public class DeferredAssertTest
      * contains the last used value with the matcher.
      */
     @Test
-    public void thatAssertThatUsesLastEvaluateValueWithMatcher()
+    public void shouldUseLastEvaluatedValueWithMatcher()
     {
         Deferred<String> deferred = new Existing<String>("Hello World");
 
@@ -163,8 +167,8 @@ public class DeferredAssertTest
         }
         catch (AssertionError e)
         {
-            Assert.assertTrue("Failed to throw an ObjectNotAvailableException as expected",
-                              e.getCause() instanceof ObjectNotAvailableException);
+            Assert.assertTrue("Failed to throw an UnresolvableInstanceException as expected",
+                              e.getCause() instanceof UnresolvableInstanceException);
 
             Assert.assertTrue(e.getMessage().contains("Hello World"));
         }

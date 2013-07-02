@@ -26,7 +26,8 @@
 package com.oracle.tools.deferred.jmx;
 
 import com.oracle.tools.deferred.Deferred;
-import com.oracle.tools.deferred.ObjectNotAvailableException;
+import com.oracle.tools.deferred.InstanceUnavailableException;
+import com.oracle.tools.deferred.UnresolvableInstanceException;
 
 import java.io.IOException;
 
@@ -96,7 +97,7 @@ public class DeferredMBeanAttribute<T> implements Deferred<T>
      * {@inheritDoc}
      */
     @Override
-    public T get() throws ObjectNotAvailableException
+    public T get() throws UnresolvableInstanceException, InstanceUnavailableException
     {
         try
         {
@@ -104,7 +105,7 @@ public class DeferredMBeanAttribute<T> implements Deferred<T>
 
             if (connector == null)
             {
-                return null;
+                throw new InstanceUnavailableException(this);
             }
             else
             {
@@ -119,39 +120,43 @@ public class DeferredMBeanAttribute<T> implements Deferred<T>
             // when an IOException occurs it represents a failed attempt to use a
             // connector that was previously available, which inevitably means that
             // the previous connection has now failed and so must this mbean
-            throw new ObjectNotAvailableException(this, e);
+            throw new UnresolvableInstanceException(this, e);
         }
         catch (NullPointerException e)
         {
-            // an NPE would only occur when the server connection isn't available
-            // (we can retry with the connector though)
-            return null;
+            // when an NPE occurs it means the server isn't available, but
+            // we can retry
+            throw new InstanceUnavailableException(this, e);
         }
         catch (ClassCastException e)
         {
-            // when we can't cast to the required type, we can't acquire the result
-            throw new ObjectNotAvailableException(this, e);
+            // when we can't cast to the required type, we can't ever acquire
+            // the result
+            throw new UnresolvableInstanceException(this, e);
         }
         catch (InstanceNotFoundException e)
         {
-            // although the mbean isn't currently registered by the server,
-            // it may be registered in the future
-            return null;
+            // when the instance is not found, it may be found later,
+            // so we should be able to retry
+            throw new InstanceUnavailableException(this, e);
         }
-        catch (ObjectNotAvailableException e)
+        catch (InstanceUnavailableException e)
         {
-            // when the connection is not available, this MBean won't be available
-            // either (so re-throw)
+            // when the connector is unavailable, so is the attribute
+            throw e;
+        }
+        catch (UnresolvableInstanceException e)
+        {
+            // when the connection is unresolvable, so is the attribute
             throw e;
         }
         catch (RuntimeException e)
         {
-            // we'll simply re-throw other runtime exceptions
-            throw e;
+            throw new InstanceUnavailableException(this, e);
         }
         catch (Exception e)
         {
-            throw new RuntimeException(e);
+            throw new InstanceUnavailableException(this, e);
         }
     }
 

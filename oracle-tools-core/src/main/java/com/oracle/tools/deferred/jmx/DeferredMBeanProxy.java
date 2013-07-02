@@ -26,13 +26,16 @@
 package com.oracle.tools.deferred.jmx;
 
 import com.oracle.tools.deferred.Deferred;
-import com.oracle.tools.deferred.ObjectNotAvailableException;
+import com.oracle.tools.deferred.InstanceUnavailableException;
+import com.oracle.tools.deferred.UnresolvableInstanceException;
+
+import java.io.IOException;
 
 import javax.management.JMX;
 import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
+
 import javax.management.remote.JMXConnector;
-import java.io.IOException;
 
 /**
  * A {@link DeferredMBeanProxy} is a {@link Deferred} for a local
@@ -87,7 +90,7 @@ public class DeferredMBeanProxy<T> implements Deferred<T>
      * {@inheritDoc}
      */
     @Override
-    public T get() throws ObjectNotAvailableException
+    public T get() throws UnresolvableInstanceException, InstanceUnavailableException
     {
         try
         {
@@ -95,7 +98,7 @@ public class DeferredMBeanProxy<T> implements Deferred<T>
 
             if (connector == null)
             {
-                return null;
+                throw new InstanceUnavailableException(this);
             }
             else
             {
@@ -107,20 +110,24 @@ public class DeferredMBeanProxy<T> implements Deferred<T>
         catch (IOException e)
         {
             // an IOException represents a failed connection attempt
-            return null;
+            throw new InstanceUnavailableException(this, e);
         }
         catch (NullPointerException e)
         {
             // an NPE would only occur when the server connection isn't available
-            return null;
+            throw new InstanceUnavailableException(this, e);
         }
-        catch (ObjectNotAvailableException e)
+        catch (InstanceUnavailableException e)
+        {
+            throw e;
+        }
+        catch (UnresolvableInstanceException e)
         {
             throw e;
         }
         catch (Exception e)
         {
-            throw new ObjectNotAvailableException(this, e);
+            throw new UnresolvableInstanceException(this, e);
         }
     }
 

@@ -26,7 +26,8 @@
 package com.oracle.tools.deferred.atomic;
 
 import com.oracle.tools.deferred.Deferred;
-import com.oracle.tools.deferred.ObjectNotAvailableException;
+import com.oracle.tools.deferred.InstanceUnavailableException;
+import com.oracle.tools.deferred.UnresolvableInstanceException;
 
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -62,7 +63,7 @@ public class DeferredAtomicLong implements Deferred<Long>
      * {@inheritDoc}
      */
     @Override
-    public Long get() throws ObjectNotAvailableException
+    public Long get() throws UnresolvableInstanceException, InstanceUnavailableException
     {
         return m_atomic.get();
     }

@@ -26,14 +26,17 @@
 package com.oracle.tools.deferred.jmx;
 
 import com.oracle.tools.deferred.Deferred;
-import com.oracle.tools.deferred.ObjectNotAvailableException;
+import com.oracle.tools.deferred.InstanceUnavailableException;
+import com.oracle.tools.deferred.UnresolvableInstanceException;
+
+import java.io.IOException;
 
 import javax.management.InstanceNotFoundException;
 import javax.management.MBeanInfo;
 import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
+
 import javax.management.remote.JMXConnector;
-import java.io.IOException;
 
 /**
  * A {@link DeferredMBeanInfo} is a {@link Deferred} for an {@link MBeanInfo}.
@@ -78,7 +81,7 @@ public class DeferredMBeanInfo implements Deferred<MBeanInfo>
      * {@inheritDoc}
      */
     @Override
-    public MBeanInfo get() throws ObjectNotAvailableException
+    public MBeanInfo get() throws UnresolvableInstanceException, InstanceUnavailableException
     {
         try
         {
@@ -86,7 +89,7 @@ public class DeferredMBeanInfo implements Deferred<MBeanInfo>
 
             if (connector == null)
             {
-                return null;
+                throw new InstanceUnavailableException(this);
             }
             else
             {
@@ -98,26 +101,30 @@ public class DeferredMBeanInfo implements Deferred<MBeanInfo>
         catch (IOException e)
         {
             // an IOException represents a failed connection attempt
-            return null;
+            throw new InstanceUnavailableException(this, e);
         }
         catch (NullPointerException e)
         {
             // an NPE would only occur when the server connection isn't available
-            return null;
+            throw new InstanceUnavailableException(this, e);
         }
         catch (InstanceNotFoundException e)
         {
             // although the mbean isn't currently registered by the server,
             // it may be registered in the future
-            return null;
+            throw new InstanceUnavailableException(this, e);
         }
-        catch (ObjectNotAvailableException e)
+        catch (InstanceUnavailableException e)
+        {
+            throw e;
+        }
+        catch (UnresolvableInstanceException e)
         {
             throw e;
         }
         catch (Exception e)
         {
-            throw new ObjectNotAvailableException(this, e);
+            throw new UnresolvableInstanceException(this, e);
         }
     }
 

@@ -57,9 +57,9 @@ public class NotAvailable<T> implements Deferred<T>
      * {@inheritDoc}
      */
     @Override
-    public T get() throws ObjectNotAvailableException
+    public T get() throws UnresolvableInstanceException, InstanceUnavailableException
     {
-        return null;
+        throw new InstanceUnavailableException(this);
     }
 
 

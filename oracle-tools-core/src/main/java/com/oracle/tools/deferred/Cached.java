@@ -25,6 +25,8 @@
 
 package com.oracle.tools.deferred;
 
+import java.util.concurrent.atomic.AtomicReference;
+
 /**
  * A {@link Cached} object is a specialized {@link Deferred} that holds
  * a reference to (ie: caches) an object that was successfully returned by
@@ -47,7 +49,7 @@ public class Cached<T> implements Deferred<T>
     /**
      * The last successfully resolved object from the {@link #m_deferred}.
      */
-    private T m_object;
+    private AtomicReference<T> m_object;
 
 
     /**
@@ -77,7 +79,7 @@ public class Cached<T> implements Deferred<T>
      * {@inheritDoc}
      */
     @Override
-    public T get() throws ObjectNotAvailableException
+    public T get() throws UnresolvableInstanceException, InstanceUnavailableException
     {
         if (m_object == null)
         {
@@ -85,12 +87,29 @@ public class Cached<T> implements Deferred<T>
             {
                 if (m_object == null)
                 {
-                    m_object = m_deferred.get();
+                    try
+                    {
+                        T deferred = m_deferred.get();
+
+                        m_object = new AtomicReference<T>(deferred);
+                    }
+                    catch (InstanceUnavailableException e)
+                    {
+                        throw e;
+                    }
+                    catch (UnresolvableInstanceException e)
+                    {
+                        throw e;
+                    }
+                    catch (RuntimeException e)
+                    {
+                        throw new InstanceUnavailableException(this, e);
+                    }
                 }
             }
         }
 
-        return m_object;
+        return m_object.get();
     }
 
 
@@ -107,12 +126,11 @@ public class Cached<T> implements Deferred<T>
     /**
      * Release the currently cached object.
      *
-     * @return  the currently cached object or <code>null</code> if nothing
-     *          is currently cached
+     * @return  the currently cached object
      */
     public synchronized T release()
     {
-        T object = m_object;
+        T object = m_object == null ? null : m_object.get();
 
         m_object = null;
 

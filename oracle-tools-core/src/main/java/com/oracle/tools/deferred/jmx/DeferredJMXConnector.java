@@ -26,14 +26,17 @@
 package com.oracle.tools.deferred.jmx;
 
 import com.oracle.tools.deferred.Deferred;
-import com.oracle.tools.deferred.ObjectNotAvailableException;
+import com.oracle.tools.deferred.InstanceUnavailableException;
+import com.oracle.tools.deferred.UnresolvableInstanceException;
+
+import java.io.IOException;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * A {@link DeferredJMXConnector} is a {@link Deferred} for a
@@ -102,7 +105,7 @@ public class DeferredJMXConnector implements Deferred<JMXConnector>
      * {@inheritDoc}
      */
     @Override
-    public JMXConnector get() throws ObjectNotAvailableException
+    public JMXConnector get() throws UnresolvableInstanceException, InstanceUnavailableException
     {
         String              username    = "";
         String              password    = "";
@@ -123,13 +126,12 @@ public class DeferredJMXConnector implements Deferred<JMXConnector>
         }
         catch (IOException e)
         {
-            return null;
+            throw new InstanceUnavailableException(this, e);
         }
         catch (Exception e)
         {
-            // it's important to re-throw as a runtime as it allows
-            // Ensured and Supervised resources to re-try.
-            throw new RuntimeException(e);
+            // we assume any exception means we should retry
+            throw new InstanceUnavailableException(this, e);
         }
     }
 

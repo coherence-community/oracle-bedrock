@@ -88,23 +88,22 @@ public interface Deferred<T>
     /**
      * Attempts to obtain the underlying object.
      *
-     * @return the object of type T or <code>null</code> if it's not ready to
-     *         be acquired (but may become available at some time in the future)
+     * @return the object of type T including <code>null</code>.
      *
-     * @throws ObjectNotAvailableException  when the {@link Deferred}
-     *         implementation can't produce the requested resource.  When this
-     *         exception is thrown a program may safely assume that the
-     *         required object <strong>will never</strong> be become available
+     * @throws UnresolvableInstanceException  when the {@link Deferred}
+     *         implementation can't and will never produce an instance of the
+     *         underlying object.  When this exception is thrown a program
+     *         may safely assume that the required object <strong>will never</strong>
+     *         become available
      *
-     * @throws RuntimeException  when some other problem occurred attempting
-     *         to acquire the object.  When this exception is thrown a
-     *         program may safely assume that the object <strong>will
-     *         eventually</strong> become available, and thus re-issuing
-     *         a call to {@link #get()}, after some reasonable delay, is ok.
-     *         Throwing a {@link RuntimeException} is semantically equivalent
-     *         to returning <code>null</code> from this method
+     * @throws InstanceUnavailableException   when the {@link Deferred}
+     *         implementation encountered some other project, but it is recoverable
+     *         by retrying.  When this exception is thrown a program may
+     *         safely assume that the object <strong>may eventually</strong>
+     *         become available, and thus re-issuing a call to {@link #get()},
+     *         after some reasonable delay, is ok.
      */
-    public T get() throws ObjectNotAvailableException;
+    public T get() throws UnresolvableInstanceException, InstanceUnavailableException;
 
 
     /**

@@ -88,6 +88,12 @@ public class DeferredHelper
     public static final String ORACLETOOLS_DEFERRED_RETRY_TIMEOUT = "oracletools.deferred.retry.timeout";
 
     /**
+     * The default maximum retry timeout to use (in seconds) when a timeout
+     * is not configured or specified.
+     */
+    public static final long ORACLETOOLS_DEFERRED_RETRY_TIMEOUT_SECS = 30;
+
+    /**
      * A {@link ThreadLocal} to capture the most recent {@link Deferred}
      * method call on a proxy created by {@link #invoking(Deferred)}.
      * <p>
@@ -191,7 +197,7 @@ public class DeferredHelper
 
         if (timeOut == null)
         {
-            return TimeUnit.SECONDS.toMillis(30);
+            return TimeUnit.SECONDS.toMillis(ORACLETOOLS_DEFERRED_RETRY_TIMEOUT_SECS);
         }
         else
         {

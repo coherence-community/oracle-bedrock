@@ -26,7 +26,8 @@
 package com.oracle.tools.deferred.atomic;
 
 import com.oracle.tools.deferred.Deferred;
-import com.oracle.tools.deferred.ObjectNotAvailableException;
+import com.oracle.tools.deferred.InstanceUnavailableException;
+import com.oracle.tools.deferred.UnresolvableInstanceException;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -63,7 +64,7 @@ public class DeferredAtomicInteger implements Deferred<Integer>
      * {@inheritDoc}
      */
     @Override
-    public Integer get() throws ObjectNotAvailableException
+    public Integer get() throws UnresolvableInstanceException, InstanceUnavailableException
     {
         return m_atomic.get();
     }

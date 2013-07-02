@@ -68,7 +68,7 @@ public class Future<T> implements Deferred<T>
      * {@inheritDoc}
      */
     @Override
-    public T get() throws ObjectNotAvailableException
+    public T get() throws UnresolvableInstanceException, InstanceUnavailableException
     {
         try
         {
@@ -76,15 +76,15 @@ public class Future<T> implements Deferred<T>
         }
         catch (InterruptedException e)
         {
-            throw new ObjectNotAvailableException(this, e);
+            throw new UnresolvableInstanceException(this, e);
         }
         catch (ExecutionException e)
         {
-            throw new ObjectNotAvailableException(this, e);
+            throw new UnresolvableInstanceException(this, e);
         }
         catch (TimeoutException e)
         {
-            throw new ObjectNotAvailableException(this, e);
+            throw new UnresolvableInstanceException(this, e);
         }
     }
 

@@ -116,21 +116,32 @@ public class DeferredMatch<T> implements Deferred<Boolean>
      * {@inheritDoc}
      */
     @Override
-    public Boolean get() throws ObjectNotAvailableException
+    public Boolean get() throws UnresolvableInstanceException, InstanceUnavailableException
     {
         try
         {
             m_lastUsedMatchValue = m_deferred.get();
 
-            return m_matcher.matches(m_lastUsedMatchValue) ? Boolean.TRUE : null;
+            if (m_matcher.matches(m_lastUsedMatchValue))
+            {
+                return true;
+            }
+            else
+            {
+                throw new InstanceUnavailableException(this);
+            }
         }
-        catch (ObjectNotAvailableException e)
+        catch (InstanceUnavailableException e)
+        {
+            throw e;
+        }
+        catch (UnresolvableInstanceException e)
         {
             throw e;
         }
         catch (Exception e)
         {
-            throw new RuntimeException(e);
+            throw new UnresolvableInstanceException(this, e);
         }
     }
 

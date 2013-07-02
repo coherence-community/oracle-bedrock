@@ -26,7 +26,6 @@
 package com.oracle.tools.runtime.java;
 
 import com.oracle.tools.deferred.Deferred;
-import com.oracle.tools.deferred.ObjectNotAvailableException;
 import com.oracle.tools.runtime.Application;
 
 import javax.management.MBeanInfo;
@@ -191,8 +190,8 @@ public interface JavaApplication<A> extends Application<A>
      *
      * @return the MBean attribute value
      *
-     * @throws ObjectNotAvailableException  when the specified MBean attribute
-     *                                      or JMX server is not available
+     * @throws com.oracle.tools.deferred.UnresolvableInstanceException
+     *                         when resource is unavailable
      */
     public <T> T getMBeanAttribute(ObjectName objectName,
                                    String     attributeName,
@@ -227,8 +226,8 @@ public interface JavaApplication<A> extends Application<A>
      *
      * @return a proxy of type T
      *
-     * @throws ObjectNotAvailableException    when the specified MBean or JMX
-     *                                        server is not available
+     * @throws com.oracle.tools.deferred.UnresolvableInstanceException
+     *                                        when resource is unavailable
      * @throws UnsupportedOperationException  when JMX is not enabled for the
      *                                        {@link JavaApplication}
      */
@@ -259,8 +258,8 @@ public interface JavaApplication<A> extends Application<A>
      *
      * @return an {@link MBeanInfo}
      *
-     * @throws ObjectNotAvailableException    when the specified MBean is not
-     *                                        available
+     * @throws com.oracle.tools.deferred.UnresolvableInstanceException
+     *                                        when resource is unavailable
      * @throws UnsupportedOperationException  when JMX is not enabled for the
      *                                        {@link JavaApplication}
      */

@@ -82,7 +82,7 @@ public class DeferredAssert
         assertThat(message,
                    deferred,
                    matcher,
-                   Ensured.DEFAULT_TOTAL_RETRY_DURATION_SECS,
+                   DeferredHelper.ORACLETOOLS_DEFERRED_RETRY_TIMEOUT_SECS,
                    TimeUnit.SECONDS);
     }
 
@@ -144,7 +144,7 @@ public class DeferredAssert
                    totalRetryDuration,
                    totalRetryDurationUnits);
         }
-        catch (ObjectNotAvailableException e)
+        catch (UnresolvableInstanceException e)
         {
             AssertionError error;
 

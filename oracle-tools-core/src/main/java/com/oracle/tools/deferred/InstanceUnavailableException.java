@@ -1,5 +1,5 @@
 /*
- * File: ObjectNotAvailableException.java
+ * File: InstanceUnavailableException.java
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
@@ -26,21 +26,17 @@
 package com.oracle.tools.deferred;
 
 /**
- * A {@link ObjectNotAvailableException} is thrown by a {@link Deferred}
- * when an attempt to acquire an underlying object fails due to it not being
- * available and for intensive purposes, will never become available, regardless
- * of the number of retries.
+ * An {@link InstanceUnavailableException} is thrown by a {@link Deferred}
+ * when an attempt to resolve and acquire an underlying object was unsuccessful
+ * however it may be retried at some point in the future.
  * <p>
- * When this happens all attempts to acquire the object from the
- * {@link Deferred} should be abandoned.
- * <p>
- * Copyright (c) 2012. All Rights Reserved. Oracle Corporation.<br>
+ * Copyright (c) 2013. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Brian Oliver
  */
 @SuppressWarnings("serial")
-public class ObjectNotAvailableException extends RuntimeException
+public class InstanceUnavailableException extends RuntimeException
 {
     /**
      * The {@link Deferred} that was not available to provide a object.
@@ -49,12 +45,12 @@ public class ObjectNotAvailableException extends RuntimeException
 
 
     /**
-     * Constructs a {@link ObjectNotAvailableException} for the
-     * specified {@link Deferred}.
+     * Constructs a {@link InstanceUnavailableException} for the specified
+     * {@link Deferred}.
      *
      * @param deferred  the {@link Deferred}
      */
-    public ObjectNotAvailableException(Deferred<?> deferred)
+    public InstanceUnavailableException(Deferred<?> deferred)
     {
         super(deferred.toString());
 
@@ -63,16 +59,15 @@ public class ObjectNotAvailableException extends RuntimeException
 
 
     /**
-     * Constructs a {@link ObjectNotAvailableException} for the
-     * specified {@link Deferred}, with the specified causing
-     * {@link Throwable}.
+     * Constructs a {@link InstanceUnavailableException} for the specified
+     * {@link Deferred}, with the specified causing {@link Throwable}.
      *
      * @param deferred  the {@link Deferred}
      * @param cause     the {@link Throwable} that may have caused the
      *                  object to be unavailable
      */
-    public ObjectNotAvailableException(Deferred<?> deferred,
-                                       Throwable   cause)
+    public InstanceUnavailableException(Deferred<?> deferred,
+                                        Throwable   cause)
     {
         super(deferred.toString(), cause);
         m_deferred = deferred;
@@ -80,11 +75,10 @@ public class ObjectNotAvailableException extends RuntimeException
 
 
     /**
-     * Obtain the {@link Deferred}, that of which the underlying
-     * object is not available.
+     * Obtain the {@link Deferred}, for which the underlying object was not available.
      * <p>
      * Note: It is possible that this method will return <code>null</code>
-     * if the {@link ObjectNotAvailableException} was serialized.   A {@link String}
+     * if the {@link InstanceUnavailableException} was serialized.   A {@link String}
      * representation of the {@link Deferred} is always available by
      * calling {@link #getMessage()}.
      *
@@ -102,6 +96,6 @@ public class ObjectNotAvailableException extends RuntimeException
     @Override
     public String toString()
     {
-        return String.format("ObjectNotAvailableException: %s\n%s", getMessage(), super.toString());
+        return String.format("InstanceUnavailableException: %s\n%s", getMessage(), super.toString());
     }
 }

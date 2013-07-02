@@ -26,9 +26,12 @@
 package com.oracle.tools.deferred;
 
 import junit.framework.Assert;
+
 import org.junit.Test;
 
 import static org.hamcrest.core.Is.is;
+
+import static org.junit.Assert.fail;
 
 /**
  * Unit tests for {@link DeferredMatch}.
@@ -45,13 +48,20 @@ public class DeferredMatchTest
      * retained.
      */
     @Test
-    public void thatLastEvaluatedValueIsRetained()
+    public void shouldRetainLastEvaluatedValue()
     {
         Deferred<String>      deferred      = new Existing<String>("Hello World");
         DeferredMatch<String> deferredMatch = new DeferredMatch<String>(deferred, is("Gudday"));
 
-        Assert.assertEquals(null, deferredMatch.get());
+        try
+        {
+            deferredMatch.get();
+            fail("Match should have thrown an InstanceUnavailableException");
+        }
+        catch (InstanceUnavailableException e)
+        {
+            Assert.assertEquals("Hello World", deferredMatch.getLastUsedMatchValue());
+        }
 
-        Assert.assertEquals("Hello World", deferredMatch.getLastUsedMatchValue());
     }
 }

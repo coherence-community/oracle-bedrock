@@ -81,7 +81,7 @@ public class Supervised<T> implements Deferred<T>
         m_deferred             = deferred;
 
         m_instantOfLastFailure = -1;
-        m_retryDelayDuration   = Ensured.DEFAULT_RETRY_DURATION_MS;
+        m_retryDelayDuration   = 250L;
         m_retryDelayTimeUnit   = TimeUnit.MILLISECONDS;
     }
 
@@ -130,7 +130,7 @@ public class Supervised<T> implements Deferred<T>
      * {@inheritDoc}
      */
     @Override
-    public T get() throws ObjectNotAvailableException
+    public T get() throws UnresolvableInstanceException, InstanceUnavailableException
     {
         if (isAccessible())
         {
@@ -147,7 +147,7 @@ public class Supervised<T> implements Deferred<T>
                         // attempt to get the object
                         return m_deferred.get();
                     }
-                    catch (ObjectNotAvailableException e)
+                    catch (UnresolvableInstanceException e)
                     {
                         // when a object is unavailable, we must re-throw it
                         resourceNoLongerAvailable();

@@ -25,8 +25,6 @@
 
 package com.oracle.tools.runtime.coherence;
 
-import com.oracle.tools.deferred.ObjectNotAvailableException;
-
 import com.oracle.tools.runtime.Application;
 import com.oracle.tools.runtime.ApplicationConsole;
 import com.oracle.tools.runtime.LifecycleEventInterceptor;
@@ -124,7 +122,8 @@ public class ClusterMember extends AbstractJavaApplication<ClusterMember, JavaPr
      *
      * @return a {@link MBeanInfo}
      *
-     * @throws ObjectNotAvailableException    when the Cluster MBean is not available
+     * @throws com.oracle.tools.deferred.UnresolvableInstanceException
+     *                                        when the resource is not available
      * @throws UnsupportedOperationException  when JMX is not enabled for the
      *                                        {@link JavaApplication}
      */
@@ -154,7 +153,8 @@ public class ClusterMember extends AbstractJavaApplication<ClusterMember, JavaPr
      *
      * @return the number of {@link ClusterMember}s in the {@link Cluster}
      *
-     * @throws ObjectNotAvailableException    when the Cluster MBean is not available
+     * @throws com.oracle.tools.deferred.UnresolvableInstanceException
+     *                                        when the resource is not available
      * @throws UnsupportedOperationException  when JMX is not enabled for the
      *                                        {@link JavaApplication}
      */
@@ -212,7 +212,8 @@ public class ClusterMember extends AbstractJavaApplication<ClusterMember, JavaPr
      *
      * @return a {@link MBeanInfo}
      *
-     * @throws ObjectNotAvailableException    when the Cluster MBean is not available
+     * @throws com.oracle.tools.deferred.UnresolvableInstanceException
+     *                                        when the resource is not available
      * @throws UnsupportedOperationException  when JMX is not enabled for the
      *                                        {@link JavaApplication}
      */
@@ -242,7 +243,8 @@ public class ClusterMember extends AbstractJavaApplication<ClusterMember, JavaPr
      *
      * @return the site name for the local member
      *
-     * @throws ObjectNotAvailableException    when the Cluster Node MBean is not available
+     * @throws com.oracle.tools.deferred.UnresolvableInstanceException
+     *                                        when the resource is not available
      * @throws UnsupportedOperationException  when JMX is not enabled for the
      *                                        {@link JavaApplication}
      */
@@ -270,7 +272,8 @@ public class ClusterMember extends AbstractJavaApplication<ClusterMember, JavaPr
      *
      * @return the site name for the local member
      *
-     * @throws ObjectNotAvailableException    when the Cluster Node MBean is not available
+     * @throws com.oracle.tools.deferred.UnresolvableInstanceException
+     *                                        when the resource is not available
      * @throws UnsupportedOperationException  when JMX is not enabled for the
      *                                        {@link JavaApplication}
      */

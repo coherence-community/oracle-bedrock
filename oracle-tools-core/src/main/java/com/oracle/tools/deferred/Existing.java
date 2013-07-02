@@ -50,11 +50,6 @@ public class Existing<T> implements Deferred<T>
      */
     public Existing(T object)
     {
-        if (object == null)
-        {
-            throw new IllegalArgumentException("Existing(...) can't take null as an parameter");
-        }
-
         m_object = object;
     }
 
@@ -63,7 +58,7 @@ public class Existing<T> implements Deferred<T>
      * {@inheritDoc}
      */
     @Override
-    public T get() throws ObjectNotAvailableException
+    public T get() throws UnresolvableInstanceException, InstanceUnavailableException
     {
         return m_object;
     }

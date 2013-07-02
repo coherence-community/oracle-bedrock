@@ -33,8 +33,9 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * An {@link Ensured} is a specialized {@link Deferred} implementation that
- * does it's best to guarantee a <strong>non-<code>null</code></strong>
- * reference will be returned when a call to {@link Ensured#get()} is made.
+ * does it's best to guarantee a non-<code>null</code> object will be
+ * returned when a call to {@link Ensured#get()} is made.
+ * <p>
  * {@link Ensured} will suitably wait and retry until the object becomes
  * available, for some maximum amount of time.
  * <p>
@@ -42,36 +43,22 @@ import java.util.concurrent.TimeUnit;
  * <p>
  * If a non-<code>null</code> reference can not be acquired with in a specified
  * period of time, or the adapted {@link Deferred} throws an
- * {@link ObjectNotAvailableException}, a {@link ObjectNotAvailableException}
+ * {@link UnresolvableInstanceException}, the {@link UnresolvableInstanceException}
  * is immediately (re-)thrown.
  * <p>
  * The default behavior of {@link #get()} is to attempt to acquire the
- * underlying resource from the specified {@link Deferred},
- * waiting for at most the {@link #DEFAULT_TOTAL_RETRY_DURATION_SECS} seconds
- * (not including the time the adapted {@link Deferred} takes to perform
- * {@link #get()}).  If the adapted {@link Deferred} fails to provide the
- * required object, the {@link Ensured} will wait a default "poll" period of
- * {@link #DEFAULT_RETRY_DURATION_MS}.
+ * underlying resource from the specified {@link Deferred}, retrying a number
+ * of times, waiting for at most the configured duration.   The delay
+ * between each successful failure and retry is specified by an
+ * {@link Iterator}.
  * <p>
- * Copyright (c) 2012. All Rights Reserved. Oracle Corporation.<br>
+ * Copyright (c) 2013. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Brian Oliver
  */
 public class Ensured<T> implements Deferred<T>
 {
-    /**
-     * The total number of seconds to retry acquiring the object
-     * from the specified {@link Deferred} before giving up.
-     */
-    public static final long DEFAULT_TOTAL_RETRY_DURATION_SECS = 30;
-
-    /**
-     * The number of milliseconds to wait between attempting to acquire
-     * the object from the specified {@link Deferred}.
-     */
-    public static final long DEFAULT_RETRY_DURATION_MS = 250;
-
     /**
      * The {@link Deferred} being adapted.
      */
@@ -130,7 +117,7 @@ public class Ensured<T> implements Deferred<T>
      * {@inheritDoc}
      */
     @Override
-    public T get() throws ObjectNotAvailableException
+    public T get() throws UnresolvableInstanceException, InstanceUnavailableException
     {
         // determine the maximum time we can wait
         long remainingRetryDurationMS = m_totalDurationMS;
@@ -153,25 +140,33 @@ public class Ensured<T> implements Deferred<T>
                 acquisitionDurationMS    = stopped - started;
                 remainingRetryDurationMS -= acquisitionDurationMS < 0 ? 0 : acquisitionDurationMS;
 
-                if (object != null)
+                if (object == null)
+                {
+                    throw new InstanceUnavailableException(this);
+                }
+                else
                 {
                     return object;
                 }
             }
-            catch (ObjectNotAvailableException e)
+            catch (UnresolvableInstanceException e)
             {
-                // give up immediately and throw an ObjectNotAvailableException
+                // give up immediately and rethrow an UnresolvableInstanceException
                 throw e;
             }
             catch (UnsupportedOperationException e)
             {
                 // give up immediately when an operation is not supported
-                throw new ObjectNotAvailableException(this, e);
+                throw new UnresolvableInstanceException(this, e);
+            }
+            catch (InstanceUnavailableException e)
+            {
+                // SKIP: we will retry if the instance was unavailable
             }
             catch (RuntimeException e)
             {
-                // SKIP: we assume all other exceptions means
-                // that we can retry
+                // SKIP: we assume all other runtime exceptions
+                // simply means that we should retry
             }
 
             // as no object was produced we should wait before retrying
@@ -198,18 +193,18 @@ public class Ensured<T> implements Deferred<T>
                     }
                     catch (InterruptedException e)
                     {
-                        throw new ObjectNotAvailableException(m_deferred, e);
+                        throw new UnresolvableInstanceException(m_deferred, e);
                     }
                 }
                 else
                 {
-                    throw new ObjectNotAvailableException(m_deferred);
+                    throw new UnresolvableInstanceException(m_deferred);
                 }
             }
         }
         while (m_totalDurationMS < 0 || remainingRetryDurationMS > 0);
 
-        throw new ObjectNotAvailableException(m_deferred);
+        throw new UnresolvableInstanceException(m_deferred);
     }
 
 

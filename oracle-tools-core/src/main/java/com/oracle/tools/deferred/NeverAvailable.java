@@ -27,7 +27,7 @@ package com.oracle.tools.deferred;
 
 /**
  * A {@link NeverAvailable} is a specialized {@link Deferred} that always
- * throws an {@link ObjectNotAvailableException} when attempting to call
+ * throws an {@link UnresolvableInstanceException} when attempting to call
  * {@link #get()}.
  * <p>
  * Copyright (c) 2012. All Rights Reserved. Oracle Corporation.<br>
@@ -58,9 +58,9 @@ public class NeverAvailable<T> implements Deferred<T>
      * {@inheritDoc}
      */
     @Override
-    public T get() throws ObjectNotAvailableException
+    public T get() throws UnresolvableInstanceException, InstanceUnavailableException
     {
-        throw new ObjectNotAvailableException(this);
+        throw new UnresolvableInstanceException(this);
     }
 
 
