@@ -54,6 +54,7 @@
     <body>
         <head>
             <script type="text/javascript" src="js/site.js"></script>
+            <link rel="shortcut icon" href="images/oracletools-logo.ico"/>
         </head>
 
         <menu name="Oracle Tools">
