@@ -20,6 +20,9 @@
                           
         
 <script src="js/site.js" type="text/javascript"></script>
+                      
+        
+<link rel="shortcut icon" href="images/oracletools-logo.ico"/>
           
             </head>
         <body class="topBarDisabled">
@@ -54,7 +57,7 @@
                 
             
                   <li id="publishDate">Last Published: 2013-07-30</li>
-                  <li class="divider">|</li> <li id="projectVersion">Version: 1.0.0-SNAPSHOT</li>
+                  <li class="divider">|</li> <li id="projectVersion">Version: 1.0.0</li>
                       
                 
             
@@ -172,17 +175,17 @@
         Release Numbers</a>
             </li>
                   
-      <li class="active">
-    
-            <a href="#"><i class="none"></i>Build Instructions</a>
-          </li>
-                  
       <li>
     
-                          <a href="logging.html" title="Logging">
+                          <a href="building.html" title="Build Instructions">
           <i class="none"></i>
-        Logging</a>
+        Build Instructions</a>
             </li>
+                  
+      <li class="active">
+    
+            <a href="#"><i class="none"></i>Logging</a>
+          </li>
             </ul>
                 
             
@@ -203,45 +206,176 @@
                 
         <div id="bodyColumn"  class="span9" >
                                   
-            <h2>Building Instructions</h2>
+            <h2>Logging</h2>
 
-<p>As the Oracle Tools use <a href="http://maven.apache.org/">Apache Maven</a>
-(Version 3.0.4) as a build technology for the most part building from source
-tree is as simple as:</p>
+<p>The Oracle Tools Project uses standard <code>java.util.logging</code> for all Logging.</p>
 
-<pre><code>$ mvn clean install
+<p>The following links further information about logging frameworks and Java.</p>
+
+<p>http://www.crazysquirrel.com/computing/java/logging.jspx 
+http://www.vogella.de/articles/Logging/article.html</p>
+
+<h4>How to log messages</h4>
+
+<p>Logging is quite easy.  Simply acquire a <code>Logger</code> for your class and log use it 
+as follows:</p>
+
+<pre><code>package com.wombat;
+
+import java.util.logging.*;
+
+public class Nose
+{
+    // obtain a suitable logger.
+    private static Logger logger = Logger.getLogger(Nose.class.getName());
+
+    public static void main(String args[])
+    {
+        // Log a FINE tracing message
+        if (logger.isLoggable(Level.FINE))
+        {
+            logger.log(Level.FINE, "doing stuff");
+        }
+
+        try 
+        {
+            Wombat.sneeze();
+        }
+        catch (Exception e)
+        {
+            if (logger.isLoggable(Level.SEVERE)) 
+            {
+                logger.log(Level.SEVERE, "trouble sneezing", e);
+            }
+
+            if (logger.isLoggable(Level.FINE)) 
+            {
+                logger.log(Level.FINE, "doing stuff");
+            }
+        }
+    }
+}
 </code></pre>
 
-<p>However the fact that the Oracle Tools (for Coherence) depends on a commercial product,
-namely <a href="http://www.oracle.com/technology/products/coherence/index.html">Oracle Coherence</a> 
-that of which is not available in a public Maven Repository, means that your 
-first build is highly likely to fail because of a missing dependency on 
-<code>coherence.jar</code>.</p>
+<h4>When to use guards around logging?</h4>
 
-<p>Should this problem occur you will need to manually install a suitable 
-<code>coherence.jar</code> into your local repository or your organization's repository 
-manager.</p>
+<p>As the construction of the strings and getting values for log messages can be 
+expensive, we recommend that you always guard the generation of log messages 
+like this:</p>
 
-<p>To install <code>coherence.jar</code> into a local repository change to <code>$COHERENCE_HOME/lib</code> 
-directory and run the following command:</p>
-
-<pre><code>$ mvn install:install-file  \
-      -DgroupId=com.oracle.coherence  \
-      -DartifactId=coherence  \
-      -Dversion=3.7.1.5  \
-      -Dfile=coherence.jar  \
-      -Dpackaging=jar \
-      -DgeneratePom=true
+<pre><code>if (logger.isLoggable(INFO))
+{
+    logger.info(getExpensiveString());
+}
 </code></pre>
 
-<p><strong>Note:</strong> The <code>groupId</code>, <code>artifactId</code> and <code>version</code> are critically important. </p>
+<h4>What levels should I use?</h4> 
 
-<p>Of course the above assumes that you are installing the Coherence 3.7.1.5 <code>jar</code> 
-file. If you want to install one of the more recent releases, change the version 
-number in the command above accordingly.</p>
+<p>One of the most important decisions to be made when logging is to choose the
+correct logging level.  The following section outlines our recommendations
+for choosing the correct logging level when developing for the Oracle Tools.</p>
 
-<p>Once the <code>coherence.jar</code> is properly installed into your Maven repository, 
-you should be able to build the Oracle Tools.</p>
+<h2></h2>
+
+<p><strong>The Severe Level:</strong></p>
+
+<p>The <code>Level.SEVERE</code> level should be used for logging errors, exceptions and 
+messages  prior to a process terminating. The method <code>logger.severe(...)</code> should 
+be used for logging at the severe level.</p>
+
+<p>In general, there's never a requirement to use a guard when using this level,
+simply because you want the end-user to see as much logging as possible prior
+to process termination.</p>
+
+<h2></h2>
+
+<p><strong>The Warning Level:</strong></p>
+
+<p>The <code>Level.WARNING</code> level should be used for logging unhandled exceptions and 
+messages:</p>
+
+<ol>
+<li><p>prior to a part of a system/service/feature going unexpectedly going offline, 
+deteriorating or becoming unavailable (without a process terminating).</p></li>
+<li><p>when using a deprecated feature.</p></li>
+<li><p>for recommending a better use of a feature.</p></li>
+<li><p>when experiencing unexpected unhandled / unknown exception conditions (that 
+won't lead to system instability).  This does not include exceptions due to 
+user error. ie: file not found, but does include exceptions due to 
+configuration/developer error.</p></li>
+</ol>
+
+<p>The method <code>logger.warning(...)</code> should be used for logging warnings.</p>
+
+<h2></h2>
+
+<p><strong>The Information Level:</strong></p>
+
+<p>The <code>Level.INFO</code> level should be used for logging:</p>
+
+<ol>
+<li><p>High-level feature functional activity in a system. eg: life-cycles</p></li>
+<li><p>Information about the dynamic configuration of a sub-system/component/service/feature</p></li>
+<li><p>Dynamic information/dependencies/configuration changes that have a material 
+effect on a sub-system/component/feature's future behaviour.</p>
+
+<p>For example when a feature becomes available/starting/stopping with a 
+certain configuration. </p></li>
+</ol>
+
+<p>The method logger.info(...) should be used for logging at the info level</p>
+
+<h2></h2>
+
+<p><strong>The Configuration Level:</strong></p>
+
+<p>The <code>Level.CONFIG</code> level should be used for logging static configuration 
+information. </p>
+
+<p>The method logger.config(...) should be used for logging at the config level.</p>
+
+<h2></h2>
+
+<p><strong>The Fine Level:</strong></p>
+
+<p>The <code>Level.FINE</code> level should be used for logging top-level implementation details, 
+but not lifecycles or entry-exit. Examples include:</p>
+
+<ol>
+<li><p>The successful (or unsuccessful) creation of a messaging session.</p></li>
+<li><p>A request for some action to be performed.</p></li>
+<li><p>An exception has occurred (like file not found).</p></li>
+<li><p>A message that has been published / consumed.</p></li>
+<li><p>A task that has been created/submitted</p></li>
+<li><p>A namespace handler that has been created
+￼￼
+In most cases, <code>Level.FINE</code> will be the most common level of logging seen.</p></li>
+</ol>
+
+<p>The method logger.fine(...) should be used for logging at the fine level</p>
+
+<h2></h2>
+
+<p><strong>The Finer Level</strong></p>
+
+<p>The <code>Level.FINER</code> level should be used for logging method/feature implementation 
+entry-exit and exceptions.</p>
+
+<p>The methods logger.entering(...)/exiting(...) and throwing(...) should be used 
+for logging entry, exit and exceptions at the finer level.</p>
+
+<h2></h2>
+
+<p><strong>The Finest Level</strong></p>
+
+<p>The <code>Level.FINEST</code> should be used for logging the internal execution of algorithms. 
+This is by far the noisiest level of logging. You'd typically see this logging 
+within a loop or method showing the progress of execution.</p>
+
+<p>Use this level for where you'd be tempted to uses a System.out.print to 
+debug/trace an implementation. </p>
+
+<p>The method logger.finest(...) should be used for logging at this level.</p>
 
                   </div>
             </div>
@@ -259,7 +393,7 @@ you should be able to build the Oracle Tools.</p>
                                                                   <?xml version="1.0" encoding="UTF-8"?>
 <div class="copyright">Copyright © 2008-2013 Oracle Corporation. All rights reserved.</div>
                                                           <?xml version="1.0" encoding="UTF-8"?>
-<div class="version">Version 1.0.0-SNAPSHOT: 2013-07-30 10:32</div>
+<div class="version">Version 1.0.0: 2013-07-30 13:38</div>
                   
         
                 </div>
