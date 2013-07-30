@@ -5,7 +5,7 @@
         <artifactId>oracle-tools</artifactId>
         <groupId>com.oracle.tools</groupId>
         <relativePath>../pom.xml</relativePath>
-        <version>1.0.1-SNAPSHOT</version>
+        <version>1.0.0</version>
     </parent>
 
     <artifactId>oracle-tools-runtime-tests</artifactId>
