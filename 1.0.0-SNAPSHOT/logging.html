@@ -54,7 +54,7 @@
                 
             
                   <li id="publishDate">Last Published: 2013-07-30</li>
-                  <li class="divider">|</li> <li id="projectVersion">Version: 0.0.9-SNAPSHOT</li>
+                  <li class="divider">|</li> <li id="projectVersion">Version: 1.0.0-SNAPSHOT</li>
                       
                 
             
@@ -78,10 +78,12 @@
         Welcome</a>
             </li>
                   
-      <li class="active">
+      <li>
     
-            <a href="#"><i class="none"></i>Adoption</a>
-          </li>
+                          <a href="adoption.html" title="Adoption">
+          <i class="none"></i>
+        Adoption</a>
+            </li>
                   
       <li>
     
@@ -177,12 +179,10 @@
         Build Instructions</a>
             </li>
                   
-      <li>
+      <li class="active">
     
-                          <a href="logging.html" title="Logging">
-          <i class="none"></i>
-        Logging</a>
-            </li>
+            <a href="#"><i class="none"></i>Logging</a>
+          </li>
             </ul>
                 
             
@@ -203,33 +203,176 @@
                 
         <div id="bodyColumn"  class="span9" >
                                   
-            <h2>Adoption</h2>
+            <h2>Logging</h2>
 
-<p>The following companies and open-source/community projects are known to
-use Oracle Tools.</p>
+<p>The Oracle Tools Project uses standard <code>java.util.logging</code> for all Logging.</p>
 
-<blockquote>
-  <p>  Please email or raise an issue in the issue tracker if you'd like
-    to be added to this list.</p>
-</blockquote>
+<p>The following links further information about logging frameworks and Java.</p>
 
-<h4>Companies:</h4>
+<p>http://www.crazysquirrel.com/computing/java/logging.jspx 
+http://www.vogella.de/articles/Logging/article.html</p>
 
-<p><a href="http://www.oracle.com">Oracle Corporation</a></p>
+<h4>How to log messages</h4>
 
-<h4>Products:</h4>
+<p>Logging is quite easy.  Simply acquire a <code>Logger</code> for your class and log use it 
+as follows:</p>
 
-<p><a href="http://www.oracle.com/technetwork/middleware/coherence/overview/index.html">Oracle Coherence</a></p>
+<pre><code>package com.wombat;
 
-<h4>Community Projects:</h4>
+import java.util.logging.*;
 
-<p><a href="https://java.net/projects/cohinc/">Oracle Coherence Incubator</a></p>
+public class Nose
+{
+    // obtain a suitable logger.
+    private static Logger logger = Logger.getLogger(Nose.class.getName());
 
-<p><a href="https://java.net/projects/cohhib/">Oracle Coherence Hibernate Integration</a></p>
+    public static void main(String args[])
+    {
+        // Log a FINE tracing message
+        if (logger.isLoggable(Level.FINE))
+        {
+            logger.log(Level.FINE, "doing stuff");
+        }
 
-<h4>Specifications:</h4>
+        try 
+        {
+            Wombat.sneeze();
+        }
+        catch (Exception e)
+        {
+            if (logger.isLoggable(Level.SEVERE)) 
+            {
+                logger.log(Level.SEVERE, "trouble sneezing", e);
+            }
 
-<p><a href="http://jcp.org/en/jsr/detail?id=107">JSR-107: Java Caching Standard</a></p>
+            if (logger.isLoggable(Level.FINE)) 
+            {
+                logger.log(Level.FINE, "doing stuff");
+            }
+        }
+    }
+}
+</code></pre>
+
+<h4>When to use guards around logging?</h4>
+
+<p>As the construction of the strings and getting values for log messages can be 
+expensive, we recommend that you always guard the generation of log messages 
+like this:</p>
+
+<pre><code>if (logger.isLoggable(INFO))
+{
+    logger.info(getExpensiveString());
+}
+</code></pre>
+
+<h4>What levels should I use?</h4> 
+
+<p>One of the most important decisions to be made when logging is to choose the
+correct logging level.  The following section outlines our recommendations
+for choosing the correct logging level when developing for the Oracle Tools.</p>
+
+<h2></h2>
+
+<p><strong>The Severe Level:</strong></p>
+
+<p>The <code>Level.SEVERE</code> level should be used for logging errors, exceptions and 
+messages  prior to a process terminating. The method <code>logger.severe(...)</code> should 
+be used for logging at the severe level.</p>
+
+<p>In general, there's never a requirement to use a guard when using this level,
+simply because you want the end-user to see as much logging as possible prior
+to process termination.</p>
+
+<h2></h2>
+
+<p><strong>The Warning Level:</strong></p>
+
+<p>The <code>Level.WARNING</code> level should be used for logging unhandled exceptions and 
+messages:</p>
+
+<ol>
+<li><p>prior to a part of a system/service/feature going unexpectedly going offline, 
+deteriorating or becoming unavailable (without a process terminating).</p></li>
+<li><p>when using a deprecated feature.</p></li>
+<li><p>for recommending a better use of a feature.</p></li>
+<li><p>when experiencing unexpected unhandled / unknown exception conditions (that 
+won't lead to system instability).  This does not include exceptions due to 
+user error. ie: file not found, but does include exceptions due to 
+configuration/developer error.</p></li>
+</ol>
+
+<p>The method <code>logger.warning(...)</code> should be used for logging warnings.</p>
+
+<h2></h2>
+
+<p><strong>The Information Level:</strong></p>
+
+<p>The <code>Level.INFO</code> level should be used for logging:</p>
+
+<ol>
+<li><p>High-level feature functional activity in a system. eg: life-cycles</p></li>
+<li><p>Information about the dynamic configuration of a sub-system/component/service/feature</p></li>
+<li><p>Dynamic information/dependencies/configuration changes that have a material 
+effect on a sub-system/component/feature's future behaviour.</p>
+
+<p>For example when a feature becomes available/starting/stopping with a 
+certain configuration. </p></li>
+</ol>
+
+<p>The method logger.info(...) should be used for logging at the info level</p>
+
+<h2></h2>
+
+<p><strong>The Configuration Level:</strong></p>
+
+<p>The <code>Level.CONFIG</code> level should be used for logging static configuration 
+information. </p>
+
+<p>The method logger.config(...) should be used for logging at the config level.</p>
+
+<h2></h2>
+
+<p><strong>The Fine Level:</strong></p>
+
+<p>The <code>Level.FINE</code> level should be used for logging top-level implementation details, 
+but not lifecycles or entry-exit. Examples include:</p>
+
+<ol>
+<li><p>The successful (or unsuccessful) creation of a messaging session.</p></li>
+<li><p>A request for some action to be performed.</p></li>
+<li><p>An exception has occurred (like file not found).</p></li>
+<li><p>A message that has been published / consumed.</p></li>
+<li><p>A task that has been created/submitted</p></li>
+<li><p>A namespace handler that has been created
+￼￼
+In most cases, <code>Level.FINE</code> will be the most common level of logging seen.</p></li>
+</ol>
+
+<p>The method logger.fine(...) should be used for logging at the fine level</p>
+
+<h2></h2>
+
+<p><strong>The Finer Level</strong></p>
+
+<p>The <code>Level.FINER</code> level should be used for logging method/feature implementation 
+entry-exit and exceptions.</p>
+
+<p>The methods logger.entering(...)/exiting(...) and throwing(...) should be used 
+for logging entry, exit and exceptions at the finer level.</p>
+
+<h2></h2>
+
+<p><strong>The Finest Level</strong></p>
+
+<p>The <code>Level.FINEST</code> should be used for logging the internal execution of algorithms. 
+This is by far the noisiest level of logging. You'd typically see this logging 
+within a loop or method showing the progress of execution.</p>
+
+<p>Use this level for where you'd be tempted to uses a System.out.print to 
+debug/trace an implementation. </p>
+
+<p>The method logger.finest(...) should be used for logging at this level.</p>
 
                   </div>
             </div>
@@ -247,7 +390,7 @@ use Oracle Tools.</p>
                                                                   <?xml version="1.0" encoding="UTF-8"?>
 <div class="copyright">Copyright © 2008-2013 Oracle Corporation. All rights reserved.</div>
                                                           <?xml version="1.0" encoding="UTF-8"?>
-<div class="version">Version 0.0.9-SNAPSHOT: 2013-07-30 10:03</div>
+<div class="version">Version 1.0.0-SNAPSHOT: 2013-07-30 10:32</div>
                   
         
                 </div>
