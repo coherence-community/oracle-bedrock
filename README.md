@@ -1,8 +1,8 @@
 Welcome to Oracle Tools
 =======================
 
-[Oracle Tools](http://coherence-community.github.com/oracle-tools/1.0.0-SNAPSHOT/)
-provides a set of runtime process management tools typically used to simplify the
+[Oracle Tools](http://java.net/projects/oracletools) provides a set of runtime
+application and process management tools typically used to simplify the
 testing of multi-process and distributed applications.
 
 Official information about this project including the definition, licensing,
