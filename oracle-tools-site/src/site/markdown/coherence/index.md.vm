@@ -14,4 +14,9 @@ initial examples and background information.
 The Oracle Tools Coherence module is distributed as a single jar
 called: `oracle-tools-coherence-${project.version}.jar`
 
+<h4>Source Code</h4>
+
+Source code for this and other Oracle Tools modules can be found here:
+[https://github.com/coherence-community/oracle-tools](https://github.com/coherence-community/oracle-tools)
+
 [COH]: http://www.oracle.com/technetwork/middleware/coherence/overview/index.html "Oracle Coherence"
