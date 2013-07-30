@@ -3,9 +3,14 @@ The Core Module
 
 <h4>Overview</h4>
 
+The Oracle Tools Core module provides shared interfaces and helper classes for the Oracle Tools and
+other projects, one of the most important being the concept of [Deferred References](deferreds.html).
 
 <h4>Distribution</h4>
 
-The Oracle Tools Core Module is distributed as a single jar
-called: `oracle-tools-core-${project.version}.jar`
+The Oracle Tools Core module is distributed as a single jar called: `oracle-tools-core-${project.version}.jar`
 
+<h4>Source Code</h4>
+
+Source code for this and other Oracle Tools modules can be found here:
+[https://github.com/coherence-community/oracle-tools](https://github.com/coherence-community/oracle-tools)

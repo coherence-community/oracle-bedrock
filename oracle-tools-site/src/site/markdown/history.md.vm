@@ -1,14 +1,21 @@
-History
--------
+Change History
+--------------
 
 The following sections outline Oracle Tools project changes in
 reverse chronological order.
 
 <h3>Version ${project.version}: ${timestamp} </h3>
 
+<h4>Acknowledgements</h4>
+
+Huge thanks to everyone that contributed feedback, suggestions, documentation
+and ideas for this release.  It's great to see broader application adoption,
+especially outside Oracle Coherence environments.  We're looking forward to
+an even greater release soon, simplifying the testing process even further!
+
 <h4>Source and Documentation Contributors</h4>
 
-*   Jonathan Knight, Paul Makin, Brian Oliver, Patrick Peralta
+*   Noah Arliss, Jonathan Knight, Paul Makin, Brian Oliver and Patrick Peralta
 
 <h4>Global and Cross-Module Changes</h4>
 

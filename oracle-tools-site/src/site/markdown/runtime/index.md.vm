@@ -2,10 +2,18 @@ The Runtime Module
 ------------------
 
 <h4>Overview</h4>
+The Oracle Tools Runtime module provides a high-level framework that allows
+developers to define, create, monitor and manage other applications and
+associated processes at runtime.
 
+An introduction to these concepts is covered by the
+[Introduction to Application Runtime Management](applications.html).
 
 <h4>Distribution</h4>
 
-The Oracle Tools Runtime Module is distributed as a single jar
-called: `oracle-tools-runtime-${project.version}.jar`
+The Oracle Tools Runtime module is distributed as a single jar called: `oracle-tools-runtime-${project.version}.jar`
 
+<h4>Source Code</h4>
+
+Source code for this and other Oracle Tools modules can be found here:
+[https://github.com/coherence-community/oracle-tools](https://github.com/coherence-community/oracle-tools)

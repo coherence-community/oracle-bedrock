@@ -2,10 +2,16 @@ The Coherence Module
 --------------------
 
 <h4>Overview</h4>
+The Oracle Tools for Coherence module provides extensions to the Oracle Tools Runtime module
+for the purpose of managing [Oracle Coherence][COH]-based Applications.
 
+As this module is an extension to the Oracle Tools Runtime module, we recommend reading
+the [Introduction to Application Management](../runtime/applications.html) document for
+initial examples and background information.
 
 <h4>Distribution</h4>
 
-The Oracle Tools Coherence Module is distributed as a single jar
+The Oracle Tools Coherence module is distributed as a single jar
 called: `oracle-tools-coherence-${project.version}.jar`
 
+[COH]: http://www.oracle.com/technetwork/middleware/coherence/overview/index.html "Oracle Coherence"

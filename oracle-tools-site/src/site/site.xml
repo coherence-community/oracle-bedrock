@@ -58,7 +58,13 @@
 
         <menu name="Oracle Tools">
             <item name="Welcome" href="index.html"/>
-            <item name="History" href="history.html"/>
+            <item name="Adoption" href="adoption.html"/>
+            <item name="Change History" href="history.html"/>
+        </menu>
+
+        <menu name="Recommended Reading">
+            <item name="Deferred References" href="core/deferreds.html"/>
+            <item name="Application Management" href="runtime/applications.html"/>
         </menu>
 
         <menu name="Modules">

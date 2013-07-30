@@ -1,10 +1,23 @@
 Issue Tracking
 --------------
 
-The [Issue Tracking](http://java.net/jira/browse/ORACLETOOLS) system for Oracle Tools
-is hosted by java.net.  It can be found here:
-[http://java.net/jira/browse/ORACLETOOLS](http://java.net/jira/browse/ORACLETOOLS)
+The [Issue Tracking][ISSUES] system for Oracle Tools
+is hosted by [java.net][JAVANET].
 
->   To raise, update and close issues with the Issue Tracking system you will 
->   need to be a [contributor](contributions.html) with a java.net account or 
->   have a contributor raise the issue on your behalf.
+It can be found here: [http://java.net/jira/browse/ORACLETOOLS][ISSUES]
+
+<h4>Raising Issues:</h4>
+
+To raise an issue representing a defect or feature request in the issue tracking
+system you need to have a [java.net][JAVANET] account.  These are free.  They
+don't require any personal information beyond that of an email address to confirm
+registration.
+
+<h4>Modifying and Closing Issues:</h4>
+
+To modify and close issues with the issue tracking system you will
+need to be a [contributor](contributions.html).
+
+[ISSUES]:       http://java.net/jira/browse/ORACLETOOLS "Issue Tracking"
+[JAVANET]:      http://java.net "java.net"
+[ORACLETOOLS]:  https://java.net/projects/oracletools "Oracle Tools"

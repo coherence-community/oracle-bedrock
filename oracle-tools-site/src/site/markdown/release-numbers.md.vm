@@ -5,16 +5,21 @@ Release numbers for the Oracle Tools are represented as three
 separate numbers, each separated by a full-stop in the form `x.y.z` where by
 the meaning of the individual numbers in the release number is as follows:
 
-**x**:  Represents a major or new generation of the Oracle Tools that of which
-introduces new functionality or removing existing functionality.  In most cases
-this means maintaining complete backwards compatibility between releases is impossible.
+**x**:  Changes in this number represents a major or new generation of the that
+of which introduces new functionality or removing existing functionality.
 
-**y**:  Represents a minor upgrade of the Oracle Tools.
+In most cases, especially those where functionality is removed, this means
+maintaining complete backwards compatibility between releases is unlikely or
+impossible.
+
+**y**:  Changes in this number represents a minor upgrade.
+
 Such releases typically introduce some new functionality, perform some refactoring
 and/or deprecate (but not remove) existing functionality.
 
 Sometimes these changes may break some backwards compatibility. 
 
-**z**:  Represents a patch or fix release of the Oracle Tools.
-Such releases rarely break backwards compatibility.  Typically these are used
+**z**:  Changes in this number represents a patch or fix release.
+
+Such releases should never break backwards compatibility.  Typically these are used
 for documentation and non-breaking dependency upgrades.    

@@ -2,10 +2,19 @@ The Testing Support Module
 --------------------------
 
 <h4>Overview</h4>
+The Oracle Tools Testing Support module provides a number of extensions to simplify
+testing concurrent and distributed applications.
 
+As this module makes significant use of the concept of Deferred References, we recommend
+reading the [Introduction to Deferred References](../core/deferreds.html) for initial
+examples and background information.
 
 <h4>Distribution</h4>
 
-The Oracle Tools Testing Support Module is distributed as a single jar
+The Oracle Tools Testing Support module is distributed as a single jar
 called: `oracle-tools-testing-support-${project.version}.jar`
 
+<h4>Source Code</h4>
+
+Source code for this and other Oracle Tools modules can be found here:
+[https://github.com/coherence-community/oracle-tools](https://github.com/coherence-community/oracle-tools)

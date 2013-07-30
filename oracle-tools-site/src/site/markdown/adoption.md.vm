@@ -1,0 +1,26 @@
+Adoption
+--------
+
+The following companies and open-source/community projects are known to
+use Oracle Tools.
+
+>   Please email or raise an issue in the issue tracker if you'd like
+>   to be added to this list.
+
+<h4>Companies:</h4>
+
+[Oracle Corporation](http://www.oracle.com)
+
+<h4>Products:</h4>
+
+[Oracle Coherence](http://www.oracle.com/technetwork/middleware/coherence/overview/index.html)
+
+<h4>Community Projects:</h4>
+
+[Oracle Coherence Incubator](https://java.net/projects/cohinc/)
+
+[Oracle Coherence Hibernate Integration](https://java.net/projects/cohhib/)
+
+<h4>Specifications:</h4>
+
+[JSR-107: Java Caching Standard](http://jcp.org/en/jsr/detail?id=107)
