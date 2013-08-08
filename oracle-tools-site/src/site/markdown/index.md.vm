@@ -1,6 +1,6 @@
 <h1><img src="images/oracletools-logo.png" alt="Oracle Tools" height="42" width="42" align="top"/> Oracle Tools</h1>
 
-Version: ${project.version} on ${timestamp}
+**Version: ${project.version} on ${timestamp}**
 
 <h4>Overview</h4>
 
