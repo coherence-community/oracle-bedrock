@@ -36,6 +36,8 @@ import com.oracle.tools.runtime.java.util.CallableStaticMethod;
 
 import com.oracle.tools.runtime.network.Constants;
 
+import com.oracle.tools.util.CompletionListener;
+
 import com.tangosol.coherence.component.net.Management;
 
 import com.tangosol.net.DefaultCacheServer;
@@ -119,6 +121,11 @@ public class ClusterMemberSchema extends AbstractJavaApplicationSchema<ClusterMe
      * The tangosol.coherence.localhost property.
      */
     public static final String PROPERTY_LOCALHOST_ADDRESS = "tangosol.coherence.localhost";
+
+    /**
+     * The tangosol.coherence.localport property.
+     */
+    public static final String PROPERTY_LOCALHOST_PORT = "tangosol.coherence.localport";
 
     /**
      * The tangosol.coherence.log property.
@@ -419,6 +426,21 @@ public class ClusterMemberSchema extends AbstractJavaApplicationSchema<ClusterMe
 
 
     /**
+     * Sets the localhost port for {@link ClusterMember}s created with this {@link ClusterMemberSchema}.
+     *
+     * @param localHostPort
+     *
+     * @return The {@link ClusterMemberSchema}.
+     */
+    public ClusterMemberSchema setLocalHostPort(int localHostPort)
+    {
+        setSystemProperty(PROPERTY_LOCALHOST_PORT, localHostPort);
+
+        return this;
+    }
+
+
+    /**
      * Sets the log level for {@link ClusterMember}s created with this {@link ClusterMemberSchema}.
      *
      * @param level
@@ -549,12 +571,12 @@ public class ClusterMemberSchema extends AbstractJavaApplicationSchema<ClusterMe
      * {@inheritDoc}
      */
     @Override
-    public Future<?> start(ContainerBasedJavaApplicationBuilder.ControllableApplication application)
+    public void start(ContainerBasedJavaApplicationBuilder.ControllableApplication application,
+                      CompletionListener<Void>                                     listener)
     {
         Callable<Void> callable = new CallableStaticMethod<Void>("com.tangosol.net.DefaultCacheServer", "startDaemon");
-        Future<Void>   future   = application.submit(callable);
 
-        return future;
+        application.submit(callable, listener);
     }
 
 
@@ -562,11 +584,11 @@ public class ClusterMemberSchema extends AbstractJavaApplicationSchema<ClusterMe
      * {@inheritDoc}
      */
     @Override
-    public Future<?> destroy(ContainerBasedJavaApplicationBuilder.ControllableApplication application)
+    public void destroy(ContainerBasedJavaApplicationBuilder.ControllableApplication application,
+                        CompletionListener<Void>                                     listener)
     {
         Callable<Void> callable = new CallableStaticMethod<Void>("com.tangosol.net.DefaultCacheServer", "shutdown");
-        Future<Void>   future   = application.submit(callable);
 
-        return future;
+        application.submit(callable, listener);
     }
 }

@@ -40,6 +40,7 @@ import com.oracle.tools.runtime.java.SimpleJavaApplicationSchema;
 import com.oracle.tools.runtime.java.container.Container;
 
 import com.oracle.tools.runtime.network.AvailablePortIterator;
+import com.oracle.tools.runtime.network.Constants;
 
 import junit.framework.Assert;
 
@@ -100,7 +101,7 @@ public abstract class AbstractClusterBuilderTest extends AbstractTest
         {
             ClusterBuilder builder = new ClusterBuilder();
 
-            builder.addBuilder(newJavaApplicationBuilder(), schema, "DCCF", CLUSTER_SIZE);
+            builder.addBuilder(newJavaApplicationBuilder(), schema, "DCS", CLUSTER_SIZE);
 
             cluster = builder.realize(new SystemApplicationConsole());
 
@@ -131,7 +132,6 @@ public abstract class AbstractClusterBuilderTest extends AbstractTest
     public void shouldBuildStorageAndProxyCluster() throws Exception
     {
         AvailablePortIterator jmxPorts    = Container.getAvailablePorts();
-
         int                   clusterPort = jmxPorts.next();
 
         ClusterMemberSchema storageSchema =
@@ -185,6 +185,53 @@ public abstract class AbstractClusterBuilderTest extends AbstractTest
             {
                 assertThat(eventually(invoking(storageMember).queryMBeans(objectName, null).size()), Matchers.is(0));
             }
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            Assert.fail();
+        }
+        finally
+        {
+            if (cluster != null)
+            {
+                cluster.destroy();
+            }
+        }
+    }
+
+
+    /**
+     * Ensure that we can build a cluster using WKA.
+     *
+     * @throws Exception
+     */
+    @Test
+    public void shouldBuilderWKABasedStorageCluster() throws Exception
+    {
+        AvailablePortIterator jmxPorts  = Container.getAvailablePorts();
+        int                   wkaPort   = Container.getAvailablePorts().next();
+        String                localHost = Constants.getLocalHost();
+
+        ClusterMemberSchema memberSchema =
+            new ClusterMemberSchema().setJMXManagementMode(JMXManagementMode.ALL).setRemoteJMXManagement(true)
+                .setJMXAuthentication(false).setStorageEnabled(true).setJMXPort(jmxPorts).setWellKnownAddress(localHost)
+                .setWellKnownAddressPort(wkaPort).setLocalHostAddress(localHost).setLocalHostPort(wkaPort);
+
+        SystemApplicationConsole console            = new SystemApplicationConsole();
+
+        Cluster                  cluster            = null;
+        int                      desiredClusterSize = 4;
+
+        try
+        {
+            ClusterBuilder clusterBuilder = new ClusterBuilder();
+
+            clusterBuilder.addBuilder(newJavaApplicationBuilder(), memberSchema, "storage", desiredClusterSize);
+
+            cluster = clusterBuilder.realize(console);
+
+            assertThat(eventually(invoking(cluster).getClusterSize()), is(desiredClusterSize));
         }
         catch (Exception e)
         {

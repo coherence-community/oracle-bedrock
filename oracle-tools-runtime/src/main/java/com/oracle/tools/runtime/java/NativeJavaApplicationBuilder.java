@@ -25,17 +25,36 @@
 
 package com.oracle.tools.runtime.java;
 
+import com.oracle.tools.deferred.Deferred;
+import com.oracle.tools.deferred.DeferredHelper;
+import com.oracle.tools.deferred.InstanceUnavailableException;
+import com.oracle.tools.deferred.UnresolvableInstanceException;
+
 import com.oracle.tools.lang.StringHelper;
 
 import com.oracle.tools.runtime.Application;
 import com.oracle.tools.runtime.ApplicationConsole;
 import com.oracle.tools.runtime.NativeApplicationProcess;
+import com.oracle.tools.runtime.Settings;
+
+import com.oracle.tools.runtime.concurrent.ControllableRemoteExecutor;
+import com.oracle.tools.runtime.concurrent.RemoteExecutor;
+import com.oracle.tools.runtime.concurrent.socket.RemoteExecutorServer;
 
 import com.oracle.tools.runtime.java.container.Container;
 
+import com.oracle.tools.util.CompletionListener;
+
 import java.io.IOException;
 
+import java.net.InetAddress;
+
 import java.util.Properties;
+
+import java.util.concurrent.Callable;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * A {@link JavaApplicationBuilder} that realizes {@link JavaApplication}s as
@@ -50,14 +69,31 @@ public class NativeJavaApplicationBuilder<A extends JavaApplication<A>, S extend
     extends AbstractJavaApplicationBuilder<A, S> implements JavaApplicationBuilder<A, S>
 {
     /**
+     * The {@link Logger} for this class.
+     */
+    private static Logger LOGGER = Logger.getLogger(NativeJavaApplicationBuilder.class.getName());
+
+    /**
      * Should processes be started in remote debug mode?
+     * <p/>
+     * The default is <code>false</code>.
      */
     private boolean m_isRemoteDebuggingEnabled;
 
     /**
      * Should remote debugging processes be started in suspended mode?
+     * <p/>
+     * The default is <code>false</code>.
      */
     private boolean m_isRemoteStartSuspended;
+
+    /**
+     * Should {@link JavaApplication}s produced by this builder allowed
+     * to become orphans (when their parent application process is destroyed/killed)?
+     * <p/>
+     * The default is <code>false</code>.
+     */
+    private boolean m_areOrphansPermitted;
 
 
     /**
@@ -72,6 +108,9 @@ public class NativeJavaApplicationBuilder<A extends JavaApplication<A>, S extend
 
         // don't suspend when in remote debug mode
         m_isRemoteStartSuspended = false;
+
+        // don't permit orphaned applications
+        m_areOrphansPermitted = false;
     }
 
 
@@ -147,6 +186,35 @@ public class NativeJavaApplicationBuilder<A extends JavaApplication<A>, S extend
 
 
     /**
+     * Sets if {@link JavaApplication}s produced by this {@link JavaApplicationBuilder}
+     * can be orphaned (left running without their parent running).  The default
+     * is <code>false</code>.
+     *
+     * @param areOrphansPermitted  <code>true</code> to allow for orphaned applications
+     *
+     * @return  the {@link NativeJavaApplicationBuilder} to allow fluent-method calls
+     */
+    public NativeJavaApplicationBuilder setOrphansPermitted(boolean areOrphansPermitted)
+    {
+        m_areOrphansPermitted = areOrphansPermitted;
+
+        return this;
+    }
+
+
+    /**
+     * Determines if {@link JavaApplication}s produced by this {@link JavaApplicationBuilder}
+     * are allowed to be orphaned (to keep running if their parent is not running).
+     *
+     * @return  <code>true</code> if applications can be orphaned, <code>false</code> otherwise
+     */
+    public boolean areOrphansPermitted()
+    {
+        return m_areOrphansPermitted;
+    }
+
+
+    /**
      * {@inheritDoc}
      */
     @Override
@@ -189,10 +257,25 @@ public class NativeJavaApplicationBuilder<A extends JavaApplication<A>, S extend
         {
             String propertyValue = systemProperties.getProperty(propertyName);
 
-            builder.command().add("-D" + propertyName
-                                  + (propertyValue.isEmpty()
-                                     ? "" : "=" + StringHelper.doubleQuoteIfNecessary(propertyValue)));
+            // filter out (don't set) system properties that start with "oracletools"
+            // (we don't want to have "parents" applications effect child applications
+            if (!propertyName.startsWith("oracletools"))
+            {
+                builder.command().add("-D" + propertyName
+                                      + (propertyValue.isEmpty()
+                                         ? "" : "=" + StringHelper.doubleQuoteIfNecessary(propertyValue)));
+            }
         }
+
+        // configure a server channel to communicate with the native process
+        final RemoteExecutorServer server        = new RemoteExecutorServer(Container.getAvailablePorts().next());
+        InetAddress                serverAddress = server.open();
+        InetAddress                localAddress  = InetAddress.getLocalHost();
+
+        // add Oracle Tools specific System Properties
+        builder.command().add("-D" + Settings.PARENT_ADDRESS + "=" + localAddress.getHostAddress());
+        builder.command().add("-D" + Settings.PARENT_PORT + "=" + server.getPort());
+        builder.command().add("-D" + Settings.ORPHANABLE + "=" + areOrphansPermitted());
 
         // set the JVM options for the Process
         for (String option : schema.getJVMOptions())
@@ -214,7 +297,11 @@ public class NativeJavaApplicationBuilder<A extends JavaApplication<A>, S extend
             builder.command().add(option);
         }
 
-        // set the Java application class name we'll be running
+        // use the launcher to launch the application
+        // (we don't start the application directly itself)
+        builder.command().add("com.oracle.tools.runtime.java.JavaApplicationLauncher");
+
+        // set the Java application class name we need to launch
         builder.command().add(schema.getApplicationClassName());
 
         // add the arguments to the command for the process
@@ -226,11 +313,24 @@ public class NativeJavaApplicationBuilder<A extends JavaApplication<A>, S extend
         // should the standard error be redirected to the standard out?
         builder.redirectErrorStream(schema.isErrorStreamRedirected());
 
+        if (LOGGER.isLoggable(Level.INFO))
+        {
+            StringBuilder commandBuilder = new StringBuilder();
+
+            for (String command : builder.command())
+            {
+                commandBuilder.append(command);
+                commandBuilder.append(" ");
+            }
+
+            LOGGER.log(Level.INFO, "Starting Native Process: " + commandBuilder.toString());
+        }
+
         // create and start the process
         Process process = builder.start();
 
         // establish a NativeJavaProcess to represent the underlying Process
-        NativeJavaProcess nativeJavaProcess = new NativeJavaProcess(process);
+        NativeJavaProcess nativeJavaProcess = new NativeJavaProcess(process, server);
 
         // delegate Application creation to the Schema
         final A application = schema.createJavaApplication(nativeJavaProcess,
@@ -238,6 +338,29 @@ public class NativeJavaApplicationBuilder<A extends JavaApplication<A>, S extend
                                                            console,
                                                            environmentVariables,
                                                            systemProperties);
+
+        // ensure that the process connects back
+        DeferredHelper.ensure(new Deferred<Boolean>()
+        {
+            @Override
+            public Boolean get() throws UnresolvableInstanceException, InstanceUnavailableException
+            {
+                if (!server.getRemoteExecutors().iterator().hasNext())
+                {
+                    throw new InstanceUnavailableException(this);
+                }
+                else
+                {
+                    return true;
+                }
+            }
+
+            @Override
+            public Class<Boolean> getDeferredClass()
+            {
+                return Boolean.TYPE;
+            }
+        });
 
         // let interceptors know that the application has been realized
         raiseApplicationLifecycleEvent(application, Application.EventKind.REALIZED);
@@ -249,19 +372,61 @@ public class NativeJavaApplicationBuilder<A extends JavaApplication<A>, S extend
     /**
      * A {@link com.oracle.tools.runtime.NativeApplicationProcess} specifically
      * for Java-based applications.
-     *
-     * @author Brian Oliver
      */
     public static class NativeJavaProcess extends NativeApplicationProcess implements JavaProcess
     {
         /**
+         * The {@link RemoteExecutor} for the {@link NativeJavaProcess}.
+         */
+        private ControllableRemoteExecutor remoteExecutor;
+
+
+        /**
          * Constructs a NativeJavaProcess.
          *
-         * @param process  the underlying operating system {@link Process}
+         * @param process         the underlying operating system {@link Process}
+         * @param remoteExecutor  the {@link ControllableRemoteExecutor} that may be used
+         *                        to submit and control the process remotely
          */
-        public NativeJavaProcess(Process process)
+        public NativeJavaProcess(Process                    process,
+                                 ControllableRemoteExecutor remoteExecutor)
         {
             super(process);
+
+            this.remoteExecutor = remoteExecutor;
+        }
+
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public <T> void submit(Callable<T>           callable,
+                               CompletionListener<T> listener)
+        {
+            remoteExecutor.submit(callable, listener);
+        }
+
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public void submit(Runnable runnable) throws IllegalStateException
+        {
+            remoteExecutor.submit(runnable);
+        }
+
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public void destroy()
+        {
+            super.destroy();
+
+            remoteExecutor.close();
         }
     }
 }

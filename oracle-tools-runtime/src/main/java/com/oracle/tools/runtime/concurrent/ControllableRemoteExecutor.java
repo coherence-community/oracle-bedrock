@@ -1,5 +1,5 @@
 /*
- * File: JavaProcess.java
+ * File: ControllableRemoteExecutor.java
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
@@ -23,25 +23,34 @@
  * "Portions Copyright [year] [name of copyright owner]"
  */
 
-package com.oracle.tools.runtime.java;
-
-import com.oracle.tools.runtime.ApplicationProcess;
-
-import com.oracle.tools.runtime.concurrent.RemoteExecutor;
-
-import com.oracle.tools.util.CompletionListener;
-
-import java.util.concurrent.Callable;
+package com.oracle.tools.runtime.concurrent;
 
 /**
- * A specialized [@link ApplicationProcess}, suitable for managing Java-based
- * Applications at runtime.
+ * A {@link RemoteExecutor} that may have its lifecycle controlled and observed.
  * <p>
  * Copyright (c) 2013. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Brian Oliver
+ *
+ * @see RemoteExecutor
  */
-public interface JavaProcess extends ApplicationProcess, RemoteExecutor
+public interface ControllableRemoteExecutor extends RemoteExecutor
 {
+    /**
+     * Closes the {@link ControllableRemoteExecutor}.
+     * <p>
+     * After being closed attempts to make submissions to the {@link ControllableRemoteExecutor}
+     * will throw an {@link IllegalStateException}.  Should the {@link ControllableRemoteExecutor}
+     * already be closed, nothing happens.
+     */
+    public void close();
+
+
+    /**
+     * Registers the specified {@link RemoteExecutorListener} on the {@link ControllableRemoteExecutor}.
+     *
+     * @param listener  the {@link RemoteExecutorListener}
+     */
+    public void addListener(RemoteExecutorListener listener);
 }

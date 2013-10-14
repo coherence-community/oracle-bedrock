@@ -1,5 +1,5 @@
 /*
- * File: JavaProcess.java
+ * File: RemoteExecutorListener.java
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
@@ -23,25 +23,31 @@
  * "Portions Copyright [year] [name of copyright owner]"
  */
 
-package com.oracle.tools.runtime.java;
-
-import com.oracle.tools.runtime.ApplicationProcess;
-
-import com.oracle.tools.runtime.concurrent.RemoteExecutor;
-
-import com.oracle.tools.util.CompletionListener;
-
-import java.util.concurrent.Callable;
+package com.oracle.tools.runtime.concurrent;
 
 /**
- * A specialized [@link ApplicationProcess}, suitable for managing Java-based
- * Applications at runtime.
+ * Provides the ability to receive callbacks when certain events
+ * occur on a {@link com.oracle.tools.runtime.concurrent.RemoteExecutor}.
  * <p>
  * Copyright (c) 2013. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Brian Oliver
  */
-public interface JavaProcess extends ApplicationProcess, RemoteExecutor
+public interface RemoteExecutorListener
 {
+    /**
+     * Called when a {@link com.oracle.tools.runtime.concurrent.RemoteExecutor} is opened.
+     *
+     * @param executor  the {@link com.oracle.tools.runtime.concurrent.RemoteExecutor}
+     */
+    public void onOpened(RemoteExecutor executor);
+
+
+    /**
+     * Called when a {@link RemoteExecutor} is closed.
+     *
+     * @param executor  the {@link RemoteExecutor}
+     */
+    public void onClosed(RemoteExecutor executor);
 }

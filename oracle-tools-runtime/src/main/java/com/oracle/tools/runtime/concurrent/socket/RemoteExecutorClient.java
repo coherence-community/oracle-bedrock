@@ -1,5 +1,5 @@
 /*
- * File: JavaProcess.java
+ * File: RemoteExecutorClient.java
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
@@ -23,25 +23,33 @@
  * "Portions Copyright [year] [name of copyright owner]"
  */
 
-package com.oracle.tools.runtime.java;
+package com.oracle.tools.runtime.concurrent.socket;
 
-import com.oracle.tools.runtime.ApplicationProcess;
+import java.io.IOException;
 
-import com.oracle.tools.runtime.concurrent.RemoteExecutor;
-
-import com.oracle.tools.util.CompletionListener;
-
-import java.util.concurrent.Callable;
+import java.net.InetAddress;
+import java.net.Socket;
 
 /**
- * A specialized [@link ApplicationProcess}, suitable for managing Java-based
- * Applications at runtime.
- * <p>
- * Copyright (c) 2013. All Rights Reserved. Oracle Corporation.<br>
- * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
- *
- * @author Brian Oliver
+ * Created with IntelliJ IDEA.
+ * User: brianoliver
+ * Date: 9/3/13
+ * Time: 2:39 AM
+ * To change this template use File | Settings | File Templates.
  */
-public interface JavaProcess extends ApplicationProcess, RemoteExecutor
+public class RemoteExecutorClient extends SocketBasedRemoteExecutor
 {
+    /**
+     * Constructs a {@link RemoteExecutorClient}.
+     *
+     * @param address
+     * @param port
+     *
+     * @throws IOException
+     */
+    public RemoteExecutorClient(InetAddress address,
+                                int         port) throws IOException
+    {
+        super(-1, new Socket(address, port));
+    }
 }

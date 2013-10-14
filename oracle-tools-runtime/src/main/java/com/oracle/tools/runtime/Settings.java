@@ -43,7 +43,25 @@ public class Settings
     /**
      * The Java System (boolean) Property to override the ability to output diagnostics.
      */
-    public static final String IS_DIAGNOSTICS_ENABLED = "oracle.tools.runtime.diagnostics";
+    public static final String IS_DIAGNOSTICS_ENABLED = "oracletools.runtime.diagnostics";
+
+    /**
+     * The Java System (boolean) Property determine if a runtime process can be left
+     * running (ie: orphaned) when the process that started it terminates (for any reason).
+     */
+    public static final String ORPHANABLE = "oracletools.runtime.orphanable";
+
+    /**
+     * The Java System (String) Property that defines the server address of the process
+     * that started a process (ie: the parent address).
+     */
+    public static final String PARENT_ADDRESS = "oracletools.runtime.parent.address";
+
+    /**
+     * The Java System (Integer) Property that defines the server port of the process
+     * that started a process (ie: the parent port).
+     */
+    public static final String PARENT_PORT = "oracletools.runtime.parent.port";
 
 
     /**

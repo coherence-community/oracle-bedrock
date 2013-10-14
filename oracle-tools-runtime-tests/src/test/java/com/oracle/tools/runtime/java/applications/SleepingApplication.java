@@ -1,5 +1,5 @@
 /*
- * File: JavaProcess.java
+ * File: SleepingApplication.java
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
@@ -23,25 +23,37 @@
  * "Portions Copyright [year] [name of copyright owner]"
  */
 
-package com.oracle.tools.runtime.java;
+package com.oracle.tools.runtime.java.applications;
 
-import com.oracle.tools.runtime.ApplicationProcess;
+import java.io.IOException;
 
-import com.oracle.tools.runtime.concurrent.RemoteExecutor;
+import java.net.UnknownHostException;
 
-import com.oracle.tools.util.CompletionListener;
-
-import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
 
 /**
- * A specialized [@link ApplicationProcess}, suitable for managing Java-based
- * Applications at runtime.
+ * A simple application that sleeps and then terminates.
  * <p>
  * Copyright (c) 2013. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Brian Oliver
  */
-public interface JavaProcess extends ApplicationProcess, RemoteExecutor
+public class SleepingApplication
 {
+    /**
+     * Entry Point of the Application
+     *
+     * @param arguments
+     */
+    public static void main(String[] arguments) throws UnknownHostException, IOException, InterruptedException
+    {
+        System.out.printf("%s started\n", SleepingApplication.class.getName());
+
+        System.out.println("Now sleeping");
+
+        Thread.sleep(TimeUnit.MINUTES.toMillis(1));
+
+        System.out.println("Finished sleeping... now terminating");
+    }
 }

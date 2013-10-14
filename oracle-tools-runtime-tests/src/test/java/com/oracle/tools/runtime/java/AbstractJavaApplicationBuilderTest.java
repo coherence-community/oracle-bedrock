@@ -25,14 +25,22 @@
 
 package com.oracle.tools.runtime.java;
 
+import com.oracle.tools.deferred.DeferredAssert;
+
+import com.oracle.tools.deferred.listener.DeferredCompletionListener;
+
 import com.oracle.tools.junit.AbstractTest;
 
 import com.oracle.tools.lang.StringHelper;
+
+import com.oracle.tools.runtime.ApplicationConsole;
 import com.oracle.tools.runtime.DummyApp;
 import com.oracle.tools.runtime.DummyClassPathApp;
 
 import com.oracle.tools.runtime.console.PipedApplicationConsole;
+import com.oracle.tools.runtime.console.SystemApplicationConsole;
 
+import com.oracle.tools.runtime.java.applications.SleepingApplication;
 import com.oracle.tools.runtime.java.container.ContainerClassLoader;
 
 import org.junit.Test;
@@ -44,6 +52,13 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.core.StringContains.containsString;
 
 import static org.junit.Assert.assertThat;
+
+import java.io.IOException;
+import java.io.Serializable;
+
+import java.util.UUID;
+
+import java.util.concurrent.Callable;
 
 /**
  * Functional Tests for {@link JavaApplicationBuilder}s.
@@ -156,5 +171,89 @@ public abstract class AbstractJavaApplicationBuilderTest extends AbstractTest
         assertThat(application.getId(), is(getProcessIdFor(application)));
 
         application.destroy();
+    }
+
+
+    /**
+     * Ensure that {@link NativeJavaApplicationBuilder}s create applications that
+     * can have {@link java.util.concurrent.Callable}s submitted to them and executed.
+     */
+    @Test
+    public void shouldExecuteCallable() throws InterruptedException
+    {
+        SimpleJavaApplication application = null;
+
+        try
+        {
+            // define and start the SleepingApplication
+            SimpleJavaApplicationSchema schema = new SimpleJavaApplicationSchema(SleepingApplication.class.getName());
+
+            // set a System-Property for the SleepingApplication (we'll request it back)
+            String uuid = UUID.randomUUID().toString();
+
+            schema.setSystemProperty("uuid", uuid);
+
+            JavaApplicationBuilder<SimpleJavaApplication, SimpleJavaApplicationSchema> builder =
+                newJavaApplicationBuilder();
+
+            ApplicationConsole console = new SystemApplicationConsole();
+
+            application = builder.realize(schema, "sleeping", console);
+
+            DeferredAssert.assertThat(application, new GetSystemProperty("uuid"), is(uuid));
+        }
+        catch (IOException e)
+        {
+        }
+        finally
+        {
+            if (application != null)
+            {
+                application.destroy();
+            }
+        }
+    }
+
+
+    /**
+     * A {@link java.util.concurrent.Callable} that returns a {@link System#getProperty(String)}.
+     */
+    public static class GetSystemProperty implements Callable<String>, Serializable
+    {
+        /**
+         * The name of the {@link System#getProperty(String)} to return.
+         */
+        private String propertyName;
+
+
+        /**
+         * Constructs a {@link GetSystemProperty}.
+         *
+         * (for serialization)
+         */
+        public GetSystemProperty()
+        {
+        }
+
+
+        /**
+         * Constructs a {@link GetSystemProperty}.
+         *
+         * @param propertyName the name of the system property
+         */
+        public GetSystemProperty(String propertyName)
+        {
+            this.propertyName = propertyName;
+        }
+
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public String call() throws Exception
+        {
+            return System.getProperty(propertyName);
+        }
     }
 }

@@ -82,7 +82,7 @@ Futures are typically used to provide a mechanism to:
 a). represent and acquire the "future" result of some computation that has
 been submitted or is occurring asynchronously, and
 
-b). cancel the computation request before or during asynchronous computation.
+b). cancel the computation callable before or during asynchronous computation.
 
 From an application developer perspective, calling either the `Future.get()`
 or `Future.get(long, java.util.concurrent.TimeUnit)` always blocks the calling

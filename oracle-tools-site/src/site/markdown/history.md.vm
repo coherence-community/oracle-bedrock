@@ -4,7 +4,81 @@ Change History
 The following sections outline Oracle Tools project changes in
 reverse chronological order.
 
+
 <h3>Version ${project.version}: ${timestamp} </h3>
+
+<h4>Source and Documentation Contributors</h4>
+
+*  Brian Oliver
+
+<h4>Global and Cross-Module Changes</h4>
+
+*   No Changes.
+
+<h4>oracle-tools-all</h4>
+
+*   No Changes.
+
+<h4>oracle-tools-core</h4>
+
+*   [ORACLETOOLS-51](https://java.net/jira/browse/ORACLETOOLS-51): Introduced
+    RemoteExecutors Framework support interfaces and implementations.
+
+    Introduced the CompletionListener and ExceptionListener interfaces together
+    with FutureCompletionListener and DeferredCompletionListener implementations
+    for the RemoteExecutor Framework.
+
+<h4>oracle-tools-runtime</h4>
+
+*   [ORACLETOOLS-51](https://java.net/jira/browse/ORACLETOOLS-51): Introduced
+    RemoteExecutors Framework to support remote execution of Callable and Runnables
+    in Java-based Applications.
+
+    Introduced com.oracle.tools.runtime.concurrent RemoteExecution framework
+    and Socket-based implementation.
+
+*   [ORACLETOOLS-52](https://java.net/jira/browse/ORACLETOOLS-52): Implemented
+    "Orphan Protection" for Java-based Applications.
+
+    Refactored how Native Java Applications are started so that they may optionally
+    be "orphaned" if the starting process terminates (deliberately or accidentally).
+
+    Added new options to the NativeJavaApplicationBuilder to selectively enable
+    orphan protection (on by default) - if a parent process terminates, child
+    processes terminate.
+
+<h4>oracle-tools-runtime-tests</h4>
+
+*   [ORACLETOOLS-51](https://java.net/jira/browse/ORACLETOOLS-51): Introduced
+    RemoteExecutors Framework tests.
+
+*   [ORACLETOOLS-52](https://java.net/jira/browse/ORACLETOOLS-52): Introduced
+    "Orphan Protection" tests.
+
+<h4>oracle-tools-testing-support</h4>
+
+*   [ORACLETOOLS-51](https://java.net/jira/browse/ORACLETOOLS-51): Introduced
+    the ability to use Deferreds to represent Remote Callables together with
+    a new deferred assertThat method to allow deferred asserts based on
+    remotely executed callables.
+
+    eg:  assertThat(application, callable, matcher);
+
+<h4>oracle-tools-coherence</h4>
+
+*   No Changes.
+
+<h4>oracle-tools-coherence-tests</h4>
+
+*   No Changes.
+
+<h4>oracle-tools-coherence-testing-support</h4>
+
+*   No Changes.
+
+--------------------------------------------------------------------------------
+
+<h3>Version 1.0.0: 2013-07-30 13:38 </h3>
 
 <h4>Acknowledgements</h4>
 

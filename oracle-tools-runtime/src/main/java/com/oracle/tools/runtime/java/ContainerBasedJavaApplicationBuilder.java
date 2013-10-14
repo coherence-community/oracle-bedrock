@@ -29,9 +29,14 @@ import com.oracle.tools.runtime.Application;
 import com.oracle.tools.runtime.ApplicationConsole;
 import com.oracle.tools.runtime.PropertiesBuilder;
 
+import com.oracle.tools.runtime.concurrent.RemoteExecutor;
+
 import com.oracle.tools.runtime.java.container.Container;
 import com.oracle.tools.runtime.java.container.ContainerClassLoader;
 import com.oracle.tools.runtime.java.util.CallableStaticMethod;
+
+import com.oracle.tools.util.CompletionListener;
+import com.oracle.tools.util.FutureCompletionListener;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -41,10 +46,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.concurrent.*;
 
 /**
  * An {@link ContainerBasedJavaApplicationBuilder} is a {@link com.oracle.tools.runtime.java.JavaApplicationBuilder}
@@ -170,12 +172,12 @@ public class ContainerBasedJavaApplicationBuilder<A extends JavaApplication<A>, 
          * application is assumed unusable and in an unknown state, including
          * that of being destroyed.
          *
-         * @param application the {@link ControllableApplication} to start
-         *
-         * @return a {@link Future} that may be used to determine the status of
-         *         or wait for the application to start
+         * @param application  the {@link ControllableApplication} to start
+         * @param listener     the {@link CompletionListener} to notify when the
+         *                     application is started (or an exception occurs)
          */
-        public Future<?> start(ControllableApplication application);
+        public void start(ControllableApplication  application,
+                          CompletionListener<Void> listener);
 
 
         /**
@@ -185,20 +187,20 @@ public class ContainerBasedJavaApplicationBuilder<A extends JavaApplication<A>, 
          * application is assumed unusable and in an unknown state, including
          * that of being destroyed.
          *
-         * @param application the {@link ControllableApplication} to destroy
-         *
-         * @return a {@link Future} that may be used to determine the status of
-         *         or wait for the application to be destroyed
+         * @param application  the {@link ControllableApplication} to destroy
+         * @param listener     the {@link CompletionListener} to notify when the
+         *                     application has been destroyed (or an exception occurs)
          */
-        public Future<?> destroy(ControllableApplication application);
+        public void destroy(ControllableApplication  application,
+                            CompletionListener<Void> listener);
     }
 
 
     /**
-     * A representation of a container-based application to allow it to be controlled
-     * outside of the {@link ContainerClassLoader} in which they are scoped.
+     * A representation of a container-based application that may be controlled
+     * outside of the {@link ContainerClassLoader} which started the said application.
      */
-    public static interface ControllableApplication
+    public static interface ControllableApplication extends RemoteExecutor
     {
         /**
          * Obtains the {@link ClassLoader} used to load and start the application.
@@ -206,23 +208,6 @@ public class ContainerBasedJavaApplicationBuilder<A extends JavaApplication<A>, 
          * @return the application {@link ClassLoader}
          */
         public ClassLoader getClassLoader();
-
-
-        /**
-         * Submits the specified {@link Callable} for asynchronous execution with
-         * in the context of the {@link #getClassLoader()} of the application,
-         * returning a Future representing the result.
-         * <p>
-         * Note: When the {@link java.util.concurrent.Callable#call()} method is
-         * invoked, the {@link Thread#getContextClassLoader()} will be that of
-         * the {@link com.oracle.tools.runtime.java.ContainerBasedJavaApplicationBuilder.ControllableApplication#getClassLoader()}s
-         *
-         * @param callable  the {@link Callable} to submit
-         * @param <T>       the return type of the {@link Callable}
-         * @return          a Future providing a means to access the asynchronous
-         *                  result of the invocation
-         */
-        public <T> Future<T> submit(Callable<T> callable);
     }
 
 
@@ -253,18 +238,16 @@ public class ContainerBasedJavaApplicationBuilder<A extends JavaApplication<A>, 
         private ApplicationController m_controller;
 
         /**
-         * The {@link Future} that represents the result of starting the
-         * application.  (may be null if the {@link ApplicationController}
-         * didn't produce a {@link Future}).
+         * The {@link CompletionListener} to be called back when an application
+         * is being started.
          */
-        private Future<?> m_startFuture;
+        private FutureCompletionListener<Void> m_startListener;
 
         /**
-         * The {@link Future} that represents the result of starting the
-         * application.  (may be null if the {@link ApplicationController}
-         * didn't produce a {@link Future}).
+         * The {@link CompletionListener} to be called back when an application
+         * is being destroyed.
          */
-        private Future<?> m_destroyFuture;
+        private FutureCompletionListener<Void> m_destroyListener;
 
 
         /**
@@ -345,18 +328,27 @@ public class ContainerBasedJavaApplicationBuilder<A extends JavaApplication<A>, 
         @Override
         public int waitFor() throws InterruptedException
         {
-            // here we simply try to wait for the application's start future
-            // to complete executing.
-            try
+            // when there's no application controller we don't have to wait to terminate
+            // (as we've already been terminated)
+            if (m_controller != null)
             {
-                if (m_startFuture != null)
+                // here we simply try to wait for the application's start future
+                // to complete executing.
+                try
                 {
-                    m_startFuture.get();
+                    if (m_startListener != null)
+                    {
+                        m_startListener.get();
+                    }
                 }
-            }
-            catch (Exception e)
-            {
-                throw new RuntimeException(e);
+                catch (InterruptedException e)
+                {
+                    throw e;
+                }
+                catch (ExecutionException e)
+                {
+                    throw new RuntimeException(e.getCause());
+                }
             }
 
             return 0;
@@ -380,11 +372,12 @@ public class ContainerBasedJavaApplicationBuilder<A extends JavaApplication<A>, 
         {
             if (m_controller == null)
             {
-                m_startFuture = null;
+                m_startListener = null;
             }
             else
             {
-                m_startFuture = m_controller.start(this);
+                m_startListener = new FutureCompletionListener<Void>();
+                m_controller.start(this, m_startListener);
             }
         }
 
@@ -400,12 +393,10 @@ public class ContainerBasedJavaApplicationBuilder<A extends JavaApplication<A>, 
                 // now try to stop
                 try
                 {
-                    Future<?> future = m_controller.destroy(this);
+                    m_destroyListener = new FutureCompletionListener<Void>();
+                    m_controller.destroy(this, m_destroyListener);
 
-                    if (future != null)
-                    {
-                        future.get();
-                    }
+                    m_destroyListener.get();
                 }
                 catch (Exception e)
                 {
@@ -425,19 +416,27 @@ public class ContainerBasedJavaApplicationBuilder<A extends JavaApplication<A>, 
          * {@inheritDoc}
          */
         @Override
-        public <T> Future<T> submit(final Callable<T> callable)
+        public <T> void submit(final Callable<T>           callable,
+                               final CompletionListener<T> listener)
         {
             if (m_controller == null)
             {
-                throw new IllegalStateException("Attempting to submit to a ContainerBasedJavaProcess that has been destroyed");
+                IllegalStateException e =
+                    new IllegalStateException("Attempting to submit to a ContainerBasedJavaProcess that has been destroyed");
+
+                if (listener != null)
+                {
+                    listener.onException(e);
+                }
+
+                throw e;
             }
             else
             {
-                final ClassLoader classLoader     = m_classLoader;
-                Callable<T>       scopingCallable = new Callable<T>()
+                Runnable scopedRunnable = new Runnable()
                 {
                     @Override
-                    public T call() throws Exception
+                    public void run()
                     {
                         // remember the current context ClassLoader of the thread
                         // (so that we can return it back to normal when we're finished executing)
@@ -452,8 +451,22 @@ public class ContainerBasedJavaApplicationBuilder<A extends JavaApplication<A>, 
                             // and associate the Thread with the Scope in the Container
                             Container.associateThreadWith(m_classLoader.getContainerScope());
 
-                            // then execute the Callable as usual
-                            return callable.call();
+                            // then call the Callable as usual
+                            T result = callable.call();
+
+                            // notify the listener (if there is one) of the result
+                            if (listener != null)
+                            {
+                                listener.onCompletion(result);
+                            }
+                        }
+                        catch (Exception e)
+                        {
+                            // notify the listener (if there is one) of the exception
+                            if (listener != null)
+                            {
+                                listener.onException(e);
+                            }
                         }
                         finally
                         {
@@ -466,7 +479,56 @@ public class ContainerBasedJavaApplicationBuilder<A extends JavaApplication<A>, 
                     }
                 };
 
-                return m_executorService.submit(scopingCallable);
+                m_executorService.submit(scopedRunnable);
+            }
+        }
+
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public void submit(final Runnable runnable) throws IllegalStateException
+        {
+            if (m_controller == null)
+            {
+                throw new IllegalStateException("Attempting to submit to a ContainerBasedJavaProcess that has been destroyed");
+            }
+            else
+            {
+                Runnable scopedRunnable = new Runnable()
+                {
+                    @Override
+                    public void run()
+                    {
+                        // remember the current context ClassLoader of the thread
+                        // (so that we can return it back to normal when we're finished executing)
+                        ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
+
+                        try
+                        {
+                            // set the context ClassLoader of the Thread to be that of the
+                            // ContainerClassLoader
+                            Thread.currentThread().setContextClassLoader(m_classLoader);
+
+                            // and associate the Thread with the Scope in the Container
+                            Container.associateThreadWith(m_classLoader.getContainerScope());
+
+                            // then call the Callable as usual
+                            runnable.run();
+                        }
+                        finally
+                        {
+                            // afterwards dissociate the Thread from the Scope in the Container
+                            Container.dissociateThread();
+
+                            // and return the current context ClassLoader back to normal
+                            Thread.currentThread().setContextClassLoader(originalClassLoader);
+                        }
+                    }
+                };
+
+                m_executorService.submit(scopedRunnable);
             }
         }
     }
@@ -481,12 +543,12 @@ public class ContainerBasedJavaApplicationBuilder<A extends JavaApplication<A>, 
         /**
          * The {@link CallableStaticMethod} to start the application.
          */
-        private CallableStaticMethod<?> m_callableStartStaticMethod;
+        private CallableStaticMethod<Void> m_callableStartStaticMethod;
 
         /**
          * The {@link CallableStaticMethod} to destroy the application.
          */
-        private CallableStaticMethod<?> m_callableDestroyStaticMethod;
+        private CallableStaticMethod<Void> m_callableDestroyStaticMethod;
 
 
         /**
@@ -495,7 +557,7 @@ public class ContainerBasedJavaApplicationBuilder<A extends JavaApplication<A>, 
          * @param callableStartStaticMethod    the {@link CallableStaticMethod} to
          *                                     start the application (may be null)
          */
-        public CustomController(CallableStaticMethod<?> callableStartStaticMethod)
+        public CustomController(CallableStaticMethod<Void> callableStartStaticMethod)
         {
             this(callableStartStaticMethod, null);
         }
@@ -510,8 +572,8 @@ public class ContainerBasedJavaApplicationBuilder<A extends JavaApplication<A>, 
          *                                     destroy the application (may be null)
          *
          */
-        public CustomController(CallableStaticMethod<?> callableStartStaticMethod,
-                                CallableStaticMethod<?> callableDestroyStaticMethod)
+        public CustomController(CallableStaticMethod<Void> callableStartStaticMethod,
+                                CallableStaticMethod<Void> callableDestroyStaticMethod)
         {
             m_callableStartStaticMethod   = callableStartStaticMethod;
             m_callableDestroyStaticMethod = callableDestroyStaticMethod;
@@ -522,9 +584,20 @@ public class ContainerBasedJavaApplicationBuilder<A extends JavaApplication<A>, 
          * {@inheritDoc}
          */
         @Override
-        public Future<?> start(ControllableApplication application)
+        public void start(ControllableApplication  application,
+                          CompletionListener<Void> listener)
         {
-            return m_callableStartStaticMethod == null ? null : application.submit(m_callableStartStaticMethod);
+            if (m_callableStartStaticMethod == null)
+            {
+                if (listener != null)
+                {
+                    listener.onCompletion(null);
+                }
+            }
+            else
+            {
+                application.submit(m_callableStartStaticMethod, listener);
+            }
         }
 
 
@@ -532,9 +605,20 @@ public class ContainerBasedJavaApplicationBuilder<A extends JavaApplication<A>, 
          * {@inheritDoc}
          */
         @Override
-        public Future<?> destroy(ControllableApplication application)
+        public void destroy(ControllableApplication  application,
+                            CompletionListener<Void> listener)
         {
-            return m_callableDestroyStaticMethod == null ? null : application.submit(m_callableDestroyStaticMethod);
+            if (m_callableDestroyStaticMethod == null)
+            {
+                if (listener != null)
+                {
+                    listener.onCompletion(null);
+                }
+            }
+            else
+            {
+                application.submit(m_callableDestroyStaticMethod, listener);
+            }
         }
     }
 
@@ -549,10 +633,13 @@ public class ContainerBasedJavaApplicationBuilder<A extends JavaApplication<A>, 
          * {@inheritDoc}
          */
         @Override
-        public Future<?> start(ControllableApplication application)
+        public void start(ControllableApplication  application,
+                          CompletionListener<Void> listener)
         {
-            // SKIP: there's nothing to do to the application
-            return null;
+            if (listener != null)
+            {
+                listener.onCompletion(null);
+            }
         }
 
 
@@ -560,10 +647,13 @@ public class ContainerBasedJavaApplicationBuilder<A extends JavaApplication<A>, 
          * {@inheritDoc}
          */
         @Override
-        public Future<?> destroy(ControllableApplication application)
+        public void destroy(ControllableApplication  application,
+                            CompletionListener<Void> listener)
         {
-            // SKIP: there's nothing to do to the application
-            return null;
+            if (listener != null)
+            {
+                listener.onCompletion(null);
+            }
         }
     }
 
@@ -624,12 +714,12 @@ public class ContainerBasedJavaApplicationBuilder<A extends JavaApplication<A>, 
          * {@inheritDoc}
          */
         @Override
-        public Future<?> start(ControllableApplication application)
+        public void start(ControllableApplication  application,
+                          CompletionListener<Void> listener)
         {
             Callable<Void> callable = new CallableStaticMethod<Void>(m_applicationClassName, "main", m_arguments);
-            Future<Void>   future   = application.submit(callable);
 
-            return future;
+            application.submit(callable, listener);
         }
 
 
@@ -637,11 +727,15 @@ public class ContainerBasedJavaApplicationBuilder<A extends JavaApplication<A>, 
          * {@inheritDoc}
          */
         @Override
-        public Future<?> destroy(ControllableApplication application)
+        public void destroy(ControllableApplication  application,
+                            CompletionListener<Void> listener)
         {
             // SKIP: there's no standard method to stop and destroy a
             // regular Java console application running in a container
-            return null;
+            if (listener != null)
+            {
+                listener.onCompletion(null);
+            }
         }
     }
 }

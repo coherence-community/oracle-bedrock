@@ -26,15 +26,24 @@
 package com.oracle.tools.runtime.java;
 
 import com.oracle.tools.deferred.Deferred;
+
 import com.oracle.tools.runtime.Application;
+
+import com.oracle.tools.runtime.concurrent.RemoteExecutor;
+
+import com.oracle.tools.util.CompletionListener;
+
+import java.util.Properties;
+import java.util.Set;
+
+import java.util.concurrent.Callable;
 
 import javax.management.MBeanInfo;
 import javax.management.ObjectInstance;
 import javax.management.ObjectName;
 import javax.management.QueryExp;
+
 import javax.management.remote.JMXConnector;
-import java.util.Properties;
-import java.util.Set;
 
 /**
  * A {@link JavaApplication} is an {@link Application} for Java-based
@@ -49,7 +58,7 @@ import java.util.Set;
  *
  * @author Brian Oliver
  */
-public interface JavaApplication<A> extends Application<A>
+public interface JavaApplication<A> extends Application<A>, RemoteExecutor
 {
     /**
      * The com.sun.management.jmxremote JVM property.

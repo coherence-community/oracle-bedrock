@@ -39,6 +39,8 @@ import com.oracle.tools.runtime.LifecycleEventInterceptor;
 
 import com.oracle.tools.runtime.network.Constants;
 
+import com.oracle.tools.util.CompletionListener;
+
 import static com.oracle.tools.deferred.DeferredHelper.cached;
 import static com.oracle.tools.deferred.DeferredHelper.ensured;
 
@@ -47,6 +49,7 @@ import java.io.IOException;
 import java.util.Properties;
 import java.util.Set;
 
+import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
 import javax.management.MBeanInfo;
@@ -307,6 +310,27 @@ public abstract class AbstractJavaApplication<A extends JavaApplication<A>, P ex
         {
             throw new UnresolvableInstanceException(getDeferredJMXConnector(), e);
         }
+    }
+
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public <T> void submit(Callable<T>           callable,
+                           CompletionListener<T> listener)
+    {
+        getJavaProcess().submit(callable, listener);
+    }
+
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void submit(Runnable runnable) throws IllegalStateException
+    {
+        getJavaProcess().submit(runnable);
     }
 
 

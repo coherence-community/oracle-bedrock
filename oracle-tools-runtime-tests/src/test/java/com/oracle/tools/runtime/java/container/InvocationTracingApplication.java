@@ -65,12 +65,6 @@ public class InvocationTracingApplication
      */
     private static ArrayList<MethodInvocation> m_methodInvocations;
 
-    /**
-     * The next value to be returned when calling a static method on this
-     * class that requires a return value.
-     */
-    private static Object m_nextReturnValue;
-
 
     /**
      * Initialize the InvocationTracingApplication.
@@ -78,19 +72,6 @@ public class InvocationTracingApplication
     public static void initialize()
     {
         m_methodInvocations = new ArrayList<MethodInvocation>();
-        m_nextReturnValue   = null;
-    }
-
-
-    /**
-     * Sets the value to return when a static method is next called on this
-     * class that returns a value
-     *
-     * @param nextReturnValue  the next value to return
-     */
-    public static void setNextReturnValue(Object nextReturnValue)
-    {
-        m_nextReturnValue = nextReturnValue;
     }
 
 
@@ -112,7 +93,7 @@ public class InvocationTracingApplication
      */
     public static void main(String[] args)
     {
-        m_methodInvocations.add(new MethodInvocation(METHOD_STATIC_MAIN, args, Void.class));
+        m_methodInvocations.add(new MethodInvocation(METHOD_STATIC_MAIN, args));
     }
 
 
@@ -120,27 +101,19 @@ public class InvocationTracingApplication
      * A custom application start method.
      *
      * @param args  application arguments
-     *
-     * @return the pre-defined result
      */
-    public static Object staticStart(String[] args)
+    public static void staticStart(String[] args)
     {
-        m_methodInvocations.add(new MethodInvocation(METHOD_STATIC_START, args, m_nextReturnValue));
-
-        return m_nextReturnValue;
+        m_methodInvocations.add(new MethodInvocation(METHOD_STATIC_START, args));
     }
 
 
     /**
      * A custom application start method.
-     *
-     * @return the pre-defined result
      */
-    public static Object staticStartNoArgs()
+    public static void staticStartNoArgs()
     {
-        m_methodInvocations.add(new MethodInvocation(METHOD_STATIC_START_NO_ARGS, null, m_nextReturnValue));
-
-        return m_nextReturnValue;
+        m_methodInvocations.add(new MethodInvocation(METHOD_STATIC_START_NO_ARGS, null));
     }
 
 
@@ -149,11 +122,9 @@ public class InvocationTracingApplication
      *
      * @return the pre-defined result
      */
-    public static Object staticStopNoArgs()
+    public static void staticStopNoArgs()
     {
-        m_methodInvocations.add(new MethodInvocation(METHOD_STATIC_STOP_NO_ARGS, null, m_nextReturnValue));
-
-        return m_nextReturnValue;
+        m_methodInvocations.add(new MethodInvocation(METHOD_STATIC_STOP_NO_ARGS, null));
     }
 
 
@@ -172,26 +143,18 @@ public class InvocationTracingApplication
          */
         private Object[] m_arguments;
 
-        /**
-         * The result of the method or a Void.class if void.
-         */
-        private Object m_result;
-
 
         /**
          * Constructs a {@link MethodInvocation}.
          *
          * @param methodName  the name of the method invoked
          * @param arguments   the arguments used for the invocation
-         * @param result      the result of the invocation (a Void.class if void)
          */
         public MethodInvocation(String   methodName,
-                                Object[] arguments,
-                                Object   result)
+                                Object[] arguments)
         {
             m_methodName = methodName;
             m_arguments  = arguments;
-            m_result     = result;
         }
 
 
@@ -215,18 +178,6 @@ public class InvocationTracingApplication
         public Object[] getArguments()
         {
             return m_arguments;
-        }
-
-
-        /**
-         * Obtains the result of the method invocation
-         * (Void.class if the invocation was of a void method).
-         *
-         * @return  the result
-         */
-        public Object getResult()
-        {
-            return m_result;
         }
     }
 }

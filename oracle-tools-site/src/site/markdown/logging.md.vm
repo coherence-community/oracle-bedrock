@@ -135,7 +135,7 @@ but not lifecycles or entry-exit. Examples include:
 
 1.  The successful (or unsuccessful) creation of a messaging session.
  
-2.  A request for some action to be performed.
+2.  A callable for some action to be performed.
 
 3.  An exception has occurred (like file not found).
 

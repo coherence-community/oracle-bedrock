@@ -1,5 +1,5 @@
 /*
- * File: JavaProcess.java
+ * File: DeferredRemoteExecutionTest.java
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
@@ -23,25 +23,44 @@
  * "Portions Copyright [year] [name of copyright owner]"
  */
 
-package com.oracle.tools.runtime.java;
+package com.oracle.tools.deferred;
 
-import com.oracle.tools.runtime.ApplicationProcess;
+import junit.framework.Assert;
 
-import com.oracle.tools.runtime.concurrent.RemoteExecutor;
+import org.junit.Test;
 
-import com.oracle.tools.util.CompletionListener;
+import static org.hamcrest.core.Is.is;
+
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
 import java.util.concurrent.Callable;
 
 /**
- * A specialized [@link ApplicationProcess}, suitable for managing Java-based
- * Applications at runtime.
+ * Unit tests for {@link DeferredRemoteExecution}.
  * <p>
  * Copyright (c) 2013. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Brian Oliver
  */
-public interface JavaProcess extends ApplicationProcess, RemoteExecutor
+public class DeferredRemoteExecutionTest
 {
+    /**
+     * Ensure that we can correctly determine the type of a Callable.
+     */
+    @Test
+    public void shouldReturnCorrectCallableType()
+    {
+        Deferred<String> deferred = new DeferredRemoteExecution<String>(null, new Callable<String>()
+        {
+            @Override
+            public String call() throws Exception
+            {
+                return "hello world";
+            }
+        });
+
+        Assert.assertEquals(String.class, deferred.getDeferredClass());
+    }
 }

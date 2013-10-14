@@ -25,11 +25,14 @@
 
 package com.oracle.tools.deferred;
 
+import com.oracle.tools.runtime.java.JavaApplication;
+
 import org.hamcrest.Matcher;
 
-import java.util.concurrent.TimeUnit;
-
 import static com.oracle.tools.deferred.DeferredHelper.ensure;
+
+import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
 
 /**
  * The {@link DeferredAssert} is a helper class that defines commonly used
@@ -106,11 +109,7 @@ public class DeferredAssert
                                       long        totalRetryDuration,
                                       TimeUnit    totalRetryDurationUnits) throws AssertionError
     {
-        assertThat(null,
-                   deferred,
-                   matcher,
-                   totalRetryDuration,
-                   totalRetryDurationUnits);
+        assertThat(null, deferred, matcher, totalRetryDuration, totalRetryDurationUnits);
     }
 
 
@@ -140,9 +139,7 @@ public class DeferredAssert
 
         try
         {
-            ensure(deferredMatch,
-                   totalRetryDuration,
-                   totalRetryDurationUnits);
+            ensure(deferredMatch, totalRetryDuration, totalRetryDurationUnits);
         }
         catch (UnresolvableInstanceException e)
         {
@@ -177,5 +174,24 @@ public class DeferredAssert
 
             throw error;
         }
+    }
+
+
+    /**
+     * Asserts that the specified {@link Callable} submitted to the {@link JavaApplication}
+     * will eventually match the specified matcher.
+     *
+     * @param application
+     * @param callable
+     * @param matcher
+     * @param <T>
+     *
+     * @throws AssertionError
+     */
+    public static <T> void assertThat(JavaApplication<?> application,
+                                      Callable<T>        callable,
+                                      Matcher<?>         matcher) throws AssertionError
+    {
+        assertThat(new DeferredRemoteExecution<T>(application, callable), matcher);
     }
 }

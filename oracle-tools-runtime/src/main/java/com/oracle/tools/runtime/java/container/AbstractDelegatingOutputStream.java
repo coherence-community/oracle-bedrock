@@ -44,7 +44,7 @@ public abstract class AbstractDelegatingOutputStream extends FilterOutputStream
     /**
      * Constructs a {@link AbstractDelegatingOutputStream}
      *
-     * @param outputStream  the {@link OutputStream} to which to send output
+     * @param outputStream  the {@link OutputStream} to which to submit output
      *                      when a {@link Scope} can't be acquired
      *                      for a calling {@link Thread}
      */
