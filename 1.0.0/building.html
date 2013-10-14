@@ -57,7 +57,7 @@
                 
             
                   <li id="publishDate">Last Published: 2013-10-14</li>
-                  <li class="divider">|</li> <li id="projectVersion">Version: 1.1.0-SNAPSHOT</li>
+                  <li class="divider">|</li> <li id="projectVersion">Version: 1.0.0</li>
                       
                 
             
@@ -81,10 +81,12 @@
         Welcome</a>
             </li>
                   
-      <li class="active">
+      <li>
     
-            <a href="#"><i class="none"></i>Adoption</a>
-          </li>
+                          <a href="adoption.html" title="Adoption">
+          <i class="none"></i>
+        Adoption</a>
+            </li>
                   
       <li>
     
@@ -140,16 +142,9 @@
                                 
       <li>
     
-                          <a href="license.html" title="License">
+                          <a href="issue-tracking.html" title="Issue Tracking">
           <i class="none"></i>
-        License</a>
-            </li>
-                  
-      <li>
-    
-                          <a href="release-numbers.html" title="Release Numbers">
-          <i class="none"></i>
-        Release Numbers</a>
+        Issue Tracking</a>
             </li>
                   
       <li>
@@ -161,16 +156,9 @@
                   
       <li>
     
-                          <a href="building.html" title="Build Instructions">
+                          <a href="license.html" title="License">
           <i class="none"></i>
-        Build Instructions</a>
-            </li>
-                  
-      <li>
-    
-                          <a href="issue-tracking.html" title="Issue Tracking">
-          <i class="none"></i>
-        Issue Tracking</a>
+        License</a>
             </li>
                   
       <li>
@@ -179,6 +167,18 @@
           <i class="none"></i>
         Contributions</a>
             </li>
+                  
+      <li>
+    
+                          <a href="release-numbers.html" title="Release Numbers">
+          <i class="none"></i>
+        Release Numbers</a>
+            </li>
+                  
+      <li class="active">
+    
+            <a href="#"><i class="none"></i>Build Instructions</a>
+          </li>
                   
       <li>
     
@@ -206,33 +206,45 @@
                 
         <div id="bodyColumn"  class="span9" >
                                   
-            <h2>Adoption</h2>
+            <h2>Building Instructions</h2>
 
-<p>The following companies and open-source/community projects are known to
-use Oracle Tools.</p>
+<p>As the Oracle Tools use <a href="http://maven.apache.org/">Apache Maven</a>
+(Version 3.0.4) as a build technology for the most part building from source
+tree is as simple as:</p>
 
-<blockquote>
-  <p>  Please email or raise an issue in the issue tracker if you'd like
-    to be added to this list.</p>
-</blockquote>
+<pre><code>$ mvn clean install
+</code></pre>
 
-<h4>Companies:</h4>
+<p>However the fact that the Oracle Tools (for Coherence) depends on a commercial product,
+namely <a href="http://www.oracle.com/technology/products/coherence/index.html">Oracle Coherence</a> 
+that of which is not available in a public Maven Repository, means that your 
+first build is highly likely to fail because of a missing dependency on 
+<code>coherence.jar</code>.</p>
 
-<p><a href="http://www.oracle.com">Oracle Corporation</a></p>
+<p>Should this problem occur you will need to manually install a suitable 
+<code>coherence.jar</code> into your local repository or your organization's repository 
+manager.</p>
 
-<h4>Products:</h4>
+<p>To install <code>coherence.jar</code> into a local repository change to <code>$COHERENCE_HOME/lib</code> 
+directory and run the following command:</p>
 
-<p><a href="http://www.oracle.com/technetwork/middleware/coherence/overview/index.html">Oracle Coherence</a></p>
+<pre><code>$ mvn install:install-file  \
+      -DgroupId=com.oracle.coherence  \
+      -DartifactId=coherence  \
+      -Dversion=3.7.1.9  \
+      -Dfile=coherence.jar  \
+      -Dpackaging=jar \
+      -DgeneratePom=true
+</code></pre>
 
-<h4>Community Projects:</h4>
+<p><strong>Note:</strong> The <code>groupId</code>, <code>artifactId</code> and <code>version</code> are critically important. </p>
 
-<p><a href="https://java.net/projects/cohinc/">Oracle Coherence Incubator</a></p>
+<p>Of course the above assumes that you are installing the Coherence 3.7.1.5 <code>jar</code> 
+file. If you want to install one of the more recent releases, change the version 
+number in the command above accordingly.</p>
 
-<p><a href="https://java.net/projects/cohhib/">Oracle Coherence Hibernate Integration</a></p>
-
-<h4>Specifications:</h4>
-
-<p><a href="http://jcp.org/en/jsr/detail?id=107">JSR-107: Java Caching Standard</a></p>
+<p>Once the <code>coherence.jar</code> is properly installed into your Maven repository, 
+you should be able to build the Oracle Tools.</p>
 
                   </div>
             </div>
@@ -250,7 +262,7 @@ use Oracle Tools.</p>
                                                                   <?xml version="1.0" encoding="UTF-8"?>
 <div class="copyright">Copyright © 2008-2013 Oracle Corporation. All rights reserved.</div>
                                                           <?xml version="1.0" encoding="UTF-8"?>
-<div class="version">Version 1.1.0-SNAPSHOT: 2013-10-14 07:38</div>
+<div class="version">Version 1.0.0: 2013-10-14 07:41</div>
                   
         
                 </div>
