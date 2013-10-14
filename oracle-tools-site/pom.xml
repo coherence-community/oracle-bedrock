@@ -58,7 +58,7 @@
                 <configuration>
                     <message>Creating site for ${project.version}</message>
                     <path>${project.version}</path>
-                    <merge>false</merge>
+                    <merge>true</merge>
                     <repositoryName>oracle-tools</repositoryName>
                     <repositoryOwner>coherence-community</repositoryOwner>
                 </configuration>
