@@ -42,11 +42,13 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * Created with IntelliJ IDEA.
- * User: brianoliver
- * Date: 9/3/13
- * Time: 2:37 AM
- * To change this template use File | Settings | File Templates.
+ * A {@link com.oracle.tools.runtime.concurrent.ControllableRemoteExecutor} that accepts and processes requests
+ * from {@link RemoteExecutorClient}s.
+ * <p>
+ * Copyright (c) 2013. All Rights Reserved. Oracle Corporation.<br>
+ * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
+ *
+ * @author Brian Oliver
  */
 public class RemoteExecutorServer extends AbstractControllableRemoteExecutor
 {

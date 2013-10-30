@@ -30,6 +30,8 @@ import com.oracle.tools.runtime.concurrent.RemoteExecutorListener;
 
 import com.oracle.tools.util.CompletionListener;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -192,22 +194,40 @@ public class SocketBasedRemoteExecutor extends AbstractControllableRemoteExecuto
                             // read the allocated sequence number for the operation
                             long sequence = input.readLong();
 
-                            // instantiate the operation and initialize its state
-                            Class<? extends Operation> operationClass = protocol.get(operationType);
+                            // read the serialized operation from the stream
+                            int    length = input.readInt();
+                            byte[] bytes  = new byte[length];
 
-                            Constructor<? extends SocketBasedRemoteExecutor.Operation> constructor =
-                                operationClass.getConstructor(SocketBasedRemoteExecutor.class);
+                            input.read(bytes);
 
-                            Operation operation = constructor.newInstance(SocketBasedRemoteExecutor.this);
+                            // attempt to instantiate, deserialize and schedule the operation for execution
+                            try
+                            {
+                                ByteArrayInputStream buffer = new ByteArrayInputStream(bytes);
+                                ObjectInputStream    stream = new ObjectInputStream(buffer);
 
-                            operation.read(input);
+                                // instantiate the operation and initialize its state
+                                Class<? extends Operation> operationClass = protocol.get(operationType);
 
-                            // submit the operation for asynchronous execution
-                            executorService.submit(new Executor(sequence, operation));
+                                Constructor<? extends SocketBasedRemoteExecutor.Operation> constructor =
+                                    operationClass.getConstructor(SocketBasedRemoteExecutor.class);
+
+                                Operation operation = constructor.newInstance(SocketBasedRemoteExecutor.this);
+
+                                operation.read(stream);
+
+                                // submit the operation for asynchronous execution
+                                executorService.submit(new Executor(sequence, operation));
+                            }
+                            catch (Exception e)
+                            {
+                                // when we can't execute the operation we notify the sender of the exception
+                                executorService.submit(new Sender(sequence, new ResponseOperation(e)));
+                            }
                         }
                         catch (Exception e)
                         {
-                            // the callable is unknown
+                            // the stream has become corrupted
                             isReadable.set(false);
                         }
                     }
@@ -835,9 +855,28 @@ public class SocketBasedRemoteExecutor extends AbstractControllableRemoteExecuto
         {
             try
             {
+                // create a temporary buffer in which to write serialize the operation
+                // (so we can't corrupt the actual output stream if an operation fails to serialize)
+                ByteArrayOutputStream buffer = new ByteArrayOutputStream(1024);
+                ObjectOutputStream    stream = new ObjectOutputStream(buffer);
+
+                // serialize the operation
+                operation.write(stream);
+
+                // we're done writing (to the buffer)
+                stream.close();
+
+                // serialize the operation type and operation sequence number (for responses)
+                // (to the actual output stream)
                 output.writeUTF(operation.getType());
                 output.writeLong(sequence);
-                operation.write(output);
+
+                // now send the buffer (to the actual output stream)
+                output.writeInt(buffer.size());
+                output.write(buffer.toByteArray());
+
+                // ensure the buffer is flushed so that the server can read it
+                output.flush();
             }
             catch (IOException e)
             {

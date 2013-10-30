@@ -31,11 +31,13 @@ import java.net.InetAddress;
 import java.net.Socket;
 
 /**
- * Created with IntelliJ IDEA.
- * User: brianoliver
- * Date: 9/3/13
- * Time: 2:39 AM
- * To change this template use File | Settings | File Templates.
+ * A {@link com.oracle.tools.runtime.concurrent.RemoteExecutor} that sends requests to
+ * {@link RemoteExecutorServer}s for processing.
+ * <p>
+ * Copyright (c) 2013. All Rights Reserved. Oracle Corporation.<br>
+ * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
+ *
+ * @author Brian Oliver
  */
 public class RemoteExecutorClient extends SocketBasedRemoteExecutor
 {
