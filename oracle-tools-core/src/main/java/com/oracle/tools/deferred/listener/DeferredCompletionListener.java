@@ -158,4 +158,20 @@ public class DeferredCompletionListener<T> implements Deferred<T>, CompletionLis
     {
         return deferredClass;
     }
+
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String toString()
+    {
+        StringBuilder builder = new StringBuilder();
+
+        builder.append("DeferredCompletionListener<" + deferredClass + ">{");
+        builder.append(hasResult ? (exception == null ? result : exception) : "(no result)");
+        builder.append("}");
+
+        return builder.toString();
+    }
 }
