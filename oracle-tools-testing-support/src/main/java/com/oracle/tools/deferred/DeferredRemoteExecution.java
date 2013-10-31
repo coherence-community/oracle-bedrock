@@ -151,15 +151,16 @@ public class DeferredRemoteExecution<T> implements Deferred<T>, CompletionListen
         {
             if (hasResult)
             {
-                hasResult = false;
+                hasResult            = false;
+                hasSubmittedCallable = false;
 
-                if (exception != null)
+                if (exception == null)
                 {
-                    throw new InstanceUnavailableException(this, exception);
+                    return result;
                 }
                 else
                 {
-                    return result;
+                    throw new InstanceUnavailableException(this, exception);
                 }
             }
             else
