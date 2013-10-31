@@ -53,7 +53,7 @@ public class SocketBasedRemoteExecutorTests
      * {@link Callable}.
      */
     @Test
-    public void shouldProcessPingPong() throws InterruptedException
+    public void shouldSubmitStaticPingPongRequest() throws InterruptedException
     {
         RemoteExecutorServer server = null;
         RemoteExecutorClient client = null;
@@ -83,6 +83,62 @@ public class SocketBasedRemoteExecutorTests
         catch (IOException e)
         {
             Assert.fail("Failed to process the request due to:\n" + e);
+        }
+        finally
+        {
+            if (client != null)
+            {
+                client.close();
+            }
+
+            if (server != null)
+            {
+                server.close();
+            }
+        }
+    }
+
+
+    /**
+     * Ensure a {@link com.oracle.tools.runtime.concurrent.socket.RemoteExecutorServer} can submit and receive a
+     * {@link Callable}.
+     */
+    @Test
+    public void shouldNotPermitInnerClassSubmissions() throws InterruptedException
+    {
+        RemoteExecutorServer server = null;
+        RemoteExecutorClient client = null;
+
+        try
+        {
+            server = new RemoteExecutorServer(Container.getAvailablePorts().next());
+
+            InetAddress address = server.open();
+
+            client = new RemoteExecutorClient(address, server.getPort());
+
+            client.open();
+
+            DeferredCompletionListener<String> serverResponse = new DeferredCompletionListener<String>(String.class);
+
+            client.submit(new Callable<String>()
+            {
+                @Override
+                public String call() throws Exception
+                {
+                    return "PONG";
+                }
+            }, serverResponse);
+
+            Assert.fail("Anonymous Inner-Classes Can't be used");
+        }
+        catch (IOException e)
+        {
+            Assert.fail("Failed to process the request due to:\n" + e);
+        }
+        catch (IllegalArgumentException e)
+        {
+            // success!
         }
         finally
         {

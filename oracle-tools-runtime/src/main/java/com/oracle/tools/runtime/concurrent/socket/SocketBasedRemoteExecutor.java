@@ -227,7 +227,7 @@ public class SocketBasedRemoteExecutor extends AbstractControllableRemoteExecuto
                         }
                         catch (Exception e)
                         {
-                            // the stream has become corrupted
+                            // the stream has become corrupted / closed
                             isReadable.set(false);
                         }
                     }
@@ -450,12 +450,26 @@ public class SocketBasedRemoteExecutor extends AbstractControllableRemoteExecuto
          *
          * @param isResponseRequired
          * @param callable
+         *
+         * @throws NullPointerException      should the {@link Callable} be <code>null</code>
+         * @throws IllegalArgumentException  should the {@link Callable} be an anonymous inner class
          */
         public CallableOperation(boolean     isResponseRequired,
                                  Callable<?> callable)
         {
-            this.isResponseRequired = isResponseRequired;
-            this.callable           = callable;
+            if (callable == null)
+            {
+                throw new NullPointerException("Callable can't be null");
+            }
+            else if (callable.getClass().isAnonymousClass())
+            {
+                throw new IllegalArgumentException("Callable can't be an anonymous inner-class");
+            }
+            else
+            {
+                this.isResponseRequired = isResponseRequired;
+                this.callable           = callable;
+            }
         }
 
 
@@ -514,9 +528,10 @@ public class SocketBasedRemoteExecutor extends AbstractControllableRemoteExecuto
 
                 if (object instanceof String)
                 {
-                    String className = (String) object;
+                    String   className     = (String) object;
+                    Class<?> callableClass = Class.forName(className);
 
-                    callable = (Callable) Class.forName(className).newInstance();
+                    callable = (Callable) callableClass.newInstance();
                 }
                 else
                 {
@@ -697,6 +712,16 @@ public class SocketBasedRemoteExecutor extends AbstractControllableRemoteExecuto
         {
             output.writeObject(response);
         }
+
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public String toString()
+        {
+            return "ResponseOperation{response=" + response + "}";
+        }
     }
 
 
@@ -724,10 +749,24 @@ public class SocketBasedRemoteExecutor extends AbstractControllableRemoteExecuto
          * Constructs a {@link RunnableOperation}
          *
          * @param runnable  the {@link Runnable} to run remotely
+         *
+         * @throws NullPointerException      should the {@link Runnable} be <code>null</code>
+         * @throws IllegalArgumentException  should the {@link Runnable} be an anonymous inner class
          */
         public RunnableOperation(Runnable runnable)
         {
-            this.runnable = runnable;
+            if (runnable == null)
+            {
+                throw new NullPointerException("Runnable can't be null");
+            }
+            else if (runnable.getClass().isAnonymousClass())
+            {
+                throw new IllegalArgumentException("Runnable can't be an anonymous inner-class");
+            }
+            else
+            {
+                this.runnable = runnable;
+            }
         }
 
 
