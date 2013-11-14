@@ -33,6 +33,7 @@ import com.oracle.tools.runtime.concurrent.RemoteExecutor;
 
 import com.oracle.tools.runtime.java.container.Container;
 import com.oracle.tools.runtime.java.container.ContainerClassLoader;
+import com.oracle.tools.runtime.java.io.Serialization;
 import com.oracle.tools.runtime.java.util.CallableStaticMethod;
 
 import com.oracle.tools.util.CompletionListener;
@@ -90,7 +91,7 @@ public class ContainerBasedJavaApplicationBuilder<A extends JavaApplication<A>, 
      */
     public ContainerBasedJavaApplicationBuilder setDiagnosticsEnabled(boolean isDiagnosticsEnabled)
     {
-        m_isDiagnosticsEnabled = isDiagnosticsEnabled;
+        this.m_isDiagnosticsEnabled = isDiagnosticsEnabled;
 
         return this;
     }
@@ -416,7 +417,7 @@ public class ContainerBasedJavaApplicationBuilder<A extends JavaApplication<A>, 
          * {@inheritDoc}
          */
         @Override
-        public <T> void submit(final Callable<T>           callable,
+        public <T> void submit(Callable<T>                 callable,
                                final CompletionListener<T> listener)
         {
             if (m_controller == null)
@@ -433,53 +434,71 @@ public class ContainerBasedJavaApplicationBuilder<A extends JavaApplication<A>, 
             }
             else
             {
-                Runnable scopedRunnable = new Runnable()
+                try
                 {
-                    @Override
-                    public void run()
+                    // serialize the Callable so that we can deserialize it in the container
+                    // to use the correct ClassLoader
+                    final byte[] serializedCallable = Serialization.toByteArray(callable);
+
+                    Runnable     scopedRunnable     = new Runnable()
                     {
-                        // remember the current context ClassLoader of the thread
-                        // (so that we can return it back to normal when we're finished executing)
-                        ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
-
-                        try
+                        @Override
+                        public void run()
                         {
-                            // set the context ClassLoader of the Thread to be that of the
-                            // ContainerClassLoader
-                            Thread.currentThread().setContextClassLoader(m_classLoader);
+                            // remember the current context ClassLoader of the thread
+                            // (so that we can return it back to normal when we're finished executing)
+                            ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
 
-                            // and associate the Thread with the Scope in the Container
-                            Container.associateThreadWith(m_classLoader.getContainerScope());
-
-                            // then call the Callable as usual
-                            T result = callable.call();
-
-                            // notify the listener (if there is one) of the result
-                            if (listener != null)
+                            try
                             {
-                                listener.onCompletion(result);
+                                // set the context ClassLoader of the Thread to be that of the
+                                // ContainerClassLoader
+                                Thread.currentThread().setContextClassLoader(m_classLoader);
+
+                                // and associate the Thread with the Scope in the Container
+                                Container.associateThreadWith(m_classLoader.getContainerScope());
+
+                                // deserialize the callable (so that we can use the container-based class loader)
+                                Callable<T> callable = Serialization.fromByteArray(serializedCallable,
+                                                                                   Callable.class,
+                                                                                   m_classLoader);
+
+                                // then call the Callable as usual
+                                T result = callable.call();
+
+                                // notify the listener (if there is one) of the result
+                                if (listener != null)
+                                {
+                                    listener.onCompletion(result);
+                                }
+                            }
+                            catch (Exception e)
+                            {
+                                // TODO: write the exception to the platform (if diagnostics are on?)
+
+                                // notify the listener (if there is one) of the exception
+                                if (listener != null)
+                                {
+                                    listener.onException(e);
+                                }
+                            }
+                            finally
+                            {
+                                // afterwards dissociate the Thread from the Scope in the Container
+                                Container.dissociateThread();
+
+                                // and return the current context ClassLoader back to normal
+                                Thread.currentThread().setContextClassLoader(originalClassLoader);
                             }
                         }
-                        catch (Exception e)
-                        {
-                            // notify the listener (if there is one) of the exception
-                            if (listener != null)
-                            {
-                                listener.onException(e);
-                            }
-                        }
-                        finally
-                        {
-                            // afterwards dissociate the Thread from the Scope in the Container
-                            Container.dissociateThread();
+                    };
 
-                            // and return the current context ClassLoader back to normal
-                            Thread.currentThread().setContextClassLoader(originalClassLoader);
-                        }
-                    }
-                };
-
-                m_executorService.submit(scopedRunnable);
+                    m_executorService.submit(scopedRunnable);
+                }
+                catch (IOException e)
+                {
+                    throw new RuntimeException("Failed to serialize the Callable: " + callable, e);
+                }
             }
         }
 
@@ -488,7 +507,7 @@ public class ContainerBasedJavaApplicationBuilder<A extends JavaApplication<A>, 
          * {@inheritDoc}
          */
         @Override
-        public void submit(final Runnable runnable) throws IllegalStateException
+        public void submit(Runnable runnable) throws IllegalStateException
         {
             if (m_controller == null)
             {
@@ -496,39 +515,59 @@ public class ContainerBasedJavaApplicationBuilder<A extends JavaApplication<A>, 
             }
             else
             {
-                Runnable scopedRunnable = new Runnable()
+                try
                 {
-                    @Override
-                    public void run()
+                    // serialize the Runnable so that we can deserialize it in the container
+                    // to use the correct ClassLoader
+                    final byte[] serializedRunnable = Serialization.toByteArray(runnable);
+
+                    Runnable     scopedRunnable     = new Runnable()
                     {
-                        // remember the current context ClassLoader of the thread
-                        // (so that we can return it back to normal when we're finished executing)
-                        ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
-
-                        try
+                        @Override
+                        public void run()
                         {
-                            // set the context ClassLoader of the Thread to be that of the
-                            // ContainerClassLoader
-                            Thread.currentThread().setContextClassLoader(m_classLoader);
+                            // remember the current context ClassLoader of the thread
+                            // (so that we can return it back to normal when we're finished executing)
+                            ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
 
-                            // and associate the Thread with the Scope in the Container
-                            Container.associateThreadWith(m_classLoader.getContainerScope());
+                            try
+                            {
+                                // set the context ClassLoader of the Thread to be that of the
+                                // ContainerClassLoader
+                                Thread.currentThread().setContextClassLoader(m_classLoader);
 
-                            // then call the Callable as usual
-                            runnable.run();
+                                // and associate the Thread with the Scope in the Container
+                                Container.associateThreadWith(m_classLoader.getContainerScope());
+
+                                // deserialize the runnable (so that we can use the container-based class loader)
+                                Runnable runnable = Serialization.fromByteArray(serializedRunnable,
+                                                                                Runnable.class,
+                                                                                m_classLoader);
+
+                                // then call the Callable as usual
+                                runnable.run();
+                            }
+                            catch (IOException e)
+                            {
+                                // TODO: write the exception to the platform (if diagnostics are on?)
+                            }
+                            finally
+                            {
+                                // afterwards dissociate the Thread from the Scope in the Container
+                                Container.dissociateThread();
+
+                                // and return the current context ClassLoader back to normal
+                                Thread.currentThread().setContextClassLoader(originalClassLoader);
+                            }
                         }
-                        finally
-                        {
-                            // afterwards dissociate the Thread from the Scope in the Container
-                            Container.dissociateThread();
+                    };
 
-                            // and return the current context ClassLoader back to normal
-                            Thread.currentThread().setContextClassLoader(originalClassLoader);
-                        }
-                    }
-                };
-
-                m_executorService.submit(scopedRunnable);
+                    m_executorService.submit(scopedRunnable);
+                }
+                catch (IOException e)
+                {
+                    throw new RuntimeException("Failed to serialize the Runnable: " + runnable, e);
+                }
             }
         }
     }
@@ -667,12 +706,12 @@ public class ContainerBasedJavaApplicationBuilder<A extends JavaApplication<A>, 
         /**
          * The name of the Application class that contains the main method.
          */
-        private String m_applicationClassName;
+        private String applicationClassName;
 
         /**
          * The arguments for the main method.
          */
-        private List<String> m_arguments;
+        private List<String> arguments;
 
 
         /**
@@ -683,8 +722,8 @@ public class ContainerBasedJavaApplicationBuilder<A extends JavaApplication<A>, 
         public StandardController(String       applicationClassName,
                                   List<String> arguments)
         {
-            m_applicationClassName = applicationClassName;
-            m_arguments            = arguments == null ? new ArrayList<String>(0) : new ArrayList<String>(arguments);
+            this.applicationClassName = applicationClassName;
+            this.arguments            = arguments == null ? new ArrayList<String>(0) : new ArrayList<String>(arguments);
         }
 
 
@@ -695,7 +734,7 @@ public class ContainerBasedJavaApplicationBuilder<A extends JavaApplication<A>, 
          */
         public String getApplicationClassName()
         {
-            return m_applicationClassName;
+            return applicationClassName;
         }
 
 
@@ -706,7 +745,7 @@ public class ContainerBasedJavaApplicationBuilder<A extends JavaApplication<A>, 
          */
         public List<String> getArguments()
         {
-            return new ArrayList<String>(m_arguments);
+            return new ArrayList<String>(arguments);
         }
 
 
@@ -717,7 +756,7 @@ public class ContainerBasedJavaApplicationBuilder<A extends JavaApplication<A>, 
         public void start(ControllableApplication  application,
                           CompletionListener<Void> listener)
         {
-            Callable<Void> callable = new CallableStaticMethod<Void>(m_applicationClassName, "main", m_arguments);
+            Callable<Void> callable = new CallableStaticMethod<Void>(applicationClassName, "main", arguments);
 
             application.submit(callable, listener);
         }

@@ -25,10 +25,13 @@
 
 package com.oracle.tools.runtime.java.util;
 
+import java.io.Serializable;
+
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import java.util.concurrent.Callable;
 
@@ -40,11 +43,22 @@ import java.util.concurrent.Callable;
  *
  * @author Brian Oliver
  */
-public class CallableStaticMethod<T> implements Callable<T>
+public class CallableStaticMethod<T> implements Callable<T>, Serializable
 {
+    /**
+     * The name of the {@link Class} on which the static method is defined.
+     */
     private final String m_className;
+
+    /**
+     * The name of the static method.
+     */
     private final String m_methodName;
-    private String[]     m_args;
+
+    /**
+     * The arguments for the method.
+     */
+    private String[] m_args;
 
 
     /**
@@ -126,5 +140,18 @@ public class CallableStaticMethod<T> implements Callable<T>
             throw new IllegalArgumentException("The specified method [" + m_className + "." + m_methodName
                                                + "] is not static");
         }
+    }
+
+
+    /**
+     * Method description
+     *
+     * @return
+     */
+    @Override
+    public String toString()
+    {
+        return "CallableStaticMethod{ClassName=\'" + m_className + '\'' + ", Method='" + m_methodName + '\''
+               + ", Arguments=" + Arrays.toString(m_args) + '}';
     }
 }

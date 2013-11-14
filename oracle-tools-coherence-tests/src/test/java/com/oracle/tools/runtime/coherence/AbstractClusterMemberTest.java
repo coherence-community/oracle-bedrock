@@ -39,6 +39,8 @@ import com.oracle.tools.runtime.java.container.Container;
 
 import com.oracle.tools.runtime.network.AvailablePortIterator;
 
+import com.tangosol.net.CacheFactory;
+
 import junit.framework.Assert;
 
 import org.junit.Test;
@@ -49,6 +51,11 @@ import static com.oracle.tools.deferred.DeferredHelper.eventually;
 import static com.oracle.tools.deferred.DeferredHelper.invoking;
 
 import static org.hamcrest.CoreMatchers.is;
+
+import java.io.PrintStream;
+import java.io.Serializable;
+
+import java.util.concurrent.Callable;
 
 /**
  * Functional Tests for {@link com.oracle.tools.runtime.coherence.ClusterMember}s.
@@ -149,6 +156,61 @@ public abstract class AbstractClusterMemberTest extends AbstractTest
                     member.destroy();
                 }
             }
+        }
+    }
+
+
+    /**
+     * Ensure that we can start and stop a single Coherence Cluster Member.
+     *
+     * @throws Exception
+     */
+    @Test
+    public void shouldStartSingletonCluster() throws Exception
+    {
+        AvailablePortIterator portIterator = Container.getAvailablePorts();
+
+        int                   clusterPort  = portIterator.next();
+        int                   jmxPort      = portIterator.next();
+
+        ClusterMemberSchema schema =
+            new ClusterMemberSchema().setClusterPort(portIterator).setSingleServerMode().setDiagnosticsEnabled(true);
+
+        JavaApplicationBuilder<ClusterMember, ClusterMemberSchema> builder = newJavaApplicationBuilder();
+        ClusterMember                                              member  = null;
+
+        try
+        {
+            member = builder.realize(schema, "TEST");
+
+            assertThat(member, new GetClusterMemberId(), is(1));
+        }
+        finally
+        {
+            if (member != null)
+            {
+                member.destroy();
+            }
+        }
+    }
+
+
+    /**
+     * A {@link java.util.concurrent.Callable} to return the Member ID of a Cluster Member.
+     */
+    public static class GetClusterMemberId implements Callable<Integer>, Serializable
+    {
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public Integer call() throws Exception
+        {
+            com.tangosol.net.Cluster cluster  = CacheFactory.getCluster();
+
+            int                      memberId = cluster == null ? -1 : cluster.getLocalMember().getId();
+
+            return memberId;
         }
     }
 }

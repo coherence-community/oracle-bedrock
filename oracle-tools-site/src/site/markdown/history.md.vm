@@ -57,7 +57,7 @@ reverse chronological order.
 
 <h4>oracle-tools-testing-support</h4>
 
-*   [ORACLETOOLS-51](https://java.net/jira/browse/ORACLETOOLS-51): Introduced
+*   [ORACLETOOLS-54](https://java.net/jira/browse/ORACLETOOLS-54): Introduced
     the ability to use Deferreds to represent Remote Callables together with
     a new deferred assertThat method to allow deferred asserts based on
     remotely executed callables.
@@ -70,7 +70,8 @@ reverse chronological order.
 
 <h4>oracle-tools-coherence-tests</h4>
 
-*   No Changes.
+*   [ORACLETOOLS-54](https://java.net/jira/browse/ORACLETOOLS-54): Introduced
+    a new test using Remote Callables to assert singleton cluster creation.
 
 <h4>oracle-tools-coherence-testing-support</h4>
 
