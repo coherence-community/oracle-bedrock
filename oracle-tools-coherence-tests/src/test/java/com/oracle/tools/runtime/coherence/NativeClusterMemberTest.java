@@ -25,9 +25,26 @@
 
 package com.oracle.tools.runtime.coherence;
 
+import com.oracle.tools.runtime.console.SystemApplicationConsole;
+
 import com.oracle.tools.runtime.java.ContainerBasedJavaApplicationBuilder;
 import com.oracle.tools.runtime.java.JavaApplicationBuilder;
 import com.oracle.tools.runtime.java.NativeJavaApplicationBuilder;
+import com.oracle.tools.runtime.java.container.Container;
+
+import com.oracle.tools.runtime.network.AvailablePortIterator;
+
+import com.tangosol.net.*;
+
+import org.junit.Test;
+
+import static com.oracle.tools.deferred.DeferredAssert.assertThat;
+
+import static org.hamcrest.CoreMatchers.is;
+
+import java.io.Serializable;
+
+import java.util.concurrent.Callable;
 
 /**
  * Functional Test for {@link com.oracle.tools.runtime.coherence.ClusterMember}
@@ -47,5 +64,59 @@ public class NativeClusterMemberTest extends AbstractClusterMemberTest
     public JavaApplicationBuilder<ClusterMember, ClusterMemberSchema> newJavaApplicationBuilder()
     {
         return new NativeJavaApplicationBuilder<ClusterMember, ClusterMemberSchema>();
+    }
+
+
+    /**
+     * Ensure that we can start and stop a single Coherence Cluster Member.
+     *
+     * @throws Exception
+     */
+    @Test
+    public void shouldStartSingletonCluster() throws Exception
+    {
+        AvailablePortIterator                                      portIterator = Container.getAvailablePorts();
+
+        int                                                        clusterPort  = portIterator.next();
+        int                                                        jmxPort      = portIterator.next();
+
+        ClusterMemberSchema schema = new ClusterMemberSchema().setClusterPort(portIterator).setSingleServerMode();
+
+        JavaApplicationBuilder<ClusterMember, ClusterMemberSchema> builder      = newJavaApplicationBuilder();
+        ClusterMember                                              member       = null;
+
+        try
+        {
+            member = builder.realize(schema, "TEST", new SystemApplicationConsole());
+
+            assertThat(member, new GetClusterMemberId(), is(1));
+        }
+        finally
+        {
+            if (member != null)
+            {
+                member.destroy();
+            }
+        }
+    }
+
+
+    /**
+     * A {@link java.util.concurrent.Callable} to return the Member ID of a Cluster Member.
+     */
+    public static class GetClusterMemberId implements Callable<Integer>, Serializable
+    {
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public Integer call() throws Exception
+        {
+            com.tangosol.net.Cluster cluster  = CacheFactory.getCluster();
+
+            int                      memberId = cluster == null ? -1 : cluster.getLocalMember().getId();
+
+            return memberId;
+        }
     }
 }

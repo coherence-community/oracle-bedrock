@@ -574,7 +574,7 @@ public class ClusterMemberSchema extends AbstractJavaApplicationSchema<ClusterMe
     public void start(ContainerBasedJavaApplicationBuilder.ControllableApplication application,
                       CompletionListener<Void>                                     listener)
     {
-        Callable<Void> callable = new CallableStaticMethod<Void>("com.tangosol.net.DefaultCacheServer", "startDaemon");
+        Callable<Void> callable = new CallableStaticMethod<Void>("com.tangosol.net.DefaultCacheServer", "start");
 
         application.submit(callable, listener);
     }
