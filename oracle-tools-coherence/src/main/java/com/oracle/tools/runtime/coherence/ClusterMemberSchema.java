@@ -541,6 +541,8 @@ public class ClusterMemberSchema extends AbstractJavaApplicationSchema<ClusterMe
      */
     public ClusterMemberSchema setWellKnownAddressPort(int port)
     {
+        setLocalHostPort(port);
+
         return setSystemProperty(PROPERTY_WELL_KNOWN_ADDRESS_PORT, port);
     }
 
