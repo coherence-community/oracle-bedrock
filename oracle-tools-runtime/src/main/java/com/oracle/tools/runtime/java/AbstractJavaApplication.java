@@ -40,6 +40,7 @@ import com.oracle.tools.runtime.LifecycleEventInterceptor;
 import com.oracle.tools.runtime.network.Constants;
 
 import com.oracle.tools.util.CompletionListener;
+import com.oracle.tools.util.FutureCompletionListener;
 
 import static com.oracle.tools.deferred.DeferredHelper.cached;
 import static com.oracle.tools.deferred.DeferredHelper.ensured;
@@ -139,6 +140,35 @@ public abstract class AbstractJavaApplication<A extends JavaApplication<A>, P ex
         {
             m_cachedJMXConnector = cached(new NeverAvailable<JMXConnector>(JMXConnector.class));
         }
+    }
+
+
+    /**
+     * Submits a {@link Callable} for remote execution by the
+     * {@link Application} and blocks waiting for the result.
+     *
+     * @param callable  the {@link Callable} to execute
+     * @param <T>       the type of the result
+     */
+    public <T> T submit(Callable<T> callable)
+    {
+        FutureCompletionListener<T> future = new FutureCompletionListener<T>();
+
+        submit(callable, future);
+
+        try
+        {
+            return future.get();
+        }
+        catch (RuntimeException e)
+        {
+            throw e;
+        }
+        catch (Exception e)
+        {
+            throw new RuntimeException("Failed to execute the Callable: " + callable, e);
+        }
+
     }
 
 

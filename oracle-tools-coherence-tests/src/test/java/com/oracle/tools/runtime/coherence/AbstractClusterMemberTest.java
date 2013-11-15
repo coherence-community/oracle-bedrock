@@ -27,19 +27,16 @@ package com.oracle.tools.runtime.coherence;
 
 import com.oracle.tools.junit.AbstractTest;
 
-import com.oracle.tools.runtime.Application;
-
 import com.oracle.tools.runtime.coherence.ClusterMemberSchema.JMXManagementMode;
+import com.oracle.tools.runtime.coherence.callables.GetClusterSize;
+import com.oracle.tools.runtime.coherence.callables.GetLocalMemberId;
 
 import com.oracle.tools.runtime.console.SystemApplicationConsole;
 
 import com.oracle.tools.runtime.java.JavaApplicationBuilder;
-import com.oracle.tools.runtime.java.NativeJavaApplicationBuilder;
 import com.oracle.tools.runtime.java.container.Container;
 
 import com.oracle.tools.runtime.network.AvailablePortIterator;
-
-import com.tangosol.net.CacheFactory;
 
 import junit.framework.Assert;
 
@@ -51,11 +48,6 @@ import static com.oracle.tools.deferred.DeferredHelper.eventually;
 import static com.oracle.tools.deferred.DeferredHelper.invoking;
 
 import static org.hamcrest.CoreMatchers.is;
-
-import java.io.PrintStream;
-import java.io.Serializable;
-
-import java.util.concurrent.Callable;
 
 /**
  * Functional Tests for {@link com.oracle.tools.runtime.coherence.ClusterMember}s.
@@ -84,12 +76,12 @@ public abstract class AbstractClusterMemberTest extends AbstractTest
     @Test
     public void shouldStartJMXConnection() throws Exception
     {
-        AvailablePortIterator portIterator = Container.getAvailablePorts();
+        AvailablePortIterator availablePorts = Container.getAvailablePorts();
 
         ClusterMemberSchema schema =
-            new ClusterMemberSchema().setClusterPort(portIterator).setJMXSupport(true).setSingleServerMode()
-                .setJMXPort(portIterator).setJMXManagementMode(JMXManagementMode.LOCAL_ONLY).setRoleName("test-role")
-                .setSiteName("test-site");
+            new ClusterMemberSchema().setClusterPort(availablePorts).setSingleServerMode().setRoleName("test-role")
+                .setSiteName("test-site").setJMXSupport(false).setJMXPort(availablePorts)
+                .setJMXManagementMode(JMXManagementMode.LOCAL_ONLY);
 
         ClusterMember member = null;
 
@@ -123,18 +115,13 @@ public abstract class AbstractClusterMemberTest extends AbstractTest
     @Test
     public void shouldStartStopMultipleTimes() throws Exception
     {
-        AvailablePortIterator portIterator = Container.getAvailablePorts();
-
-        int                   clusterPort  = portIterator.next();
-        int                   jmxPort      = portIterator.next();
+        AvailablePortIterator availablePorts = Container.getAvailablePorts();
 
         ClusterMemberSchema schema =
-            new ClusterMemberSchema().setClusterPort(portIterator).setJMXSupport(true).setSingleServerMode()
-                .setJMXPort(portIterator).setJMXManagementMode(JMXManagementMode.LOCAL_ONLY).setRoleName("test-role")
+            new ClusterMemberSchema().setClusterPort(availablePorts).setSingleServerMode().setRoleName("test-role")
                 .setSiteName("test-site").setDiagnosticsEnabled(true);
 
         ClusterMember                                              member  = null;
-
         JavaApplicationBuilder<ClusterMember, ClusterMemberSchema> builder = newJavaApplicationBuilder();
 
         for (int i = 1; i <= 10; i++)
@@ -168,13 +155,10 @@ public abstract class AbstractClusterMemberTest extends AbstractTest
     @Test
     public void shouldStartSingletonCluster() throws Exception
     {
-        AvailablePortIterator portIterator = Container.getAvailablePorts();
-
-        int                   clusterPort  = portIterator.next();
-        int                   jmxPort      = portIterator.next();
+        AvailablePortIterator availablePorts = Container.getAvailablePorts();
 
         ClusterMemberSchema schema =
-            new ClusterMemberSchema().setClusterPort(portIterator).setSingleServerMode().setDiagnosticsEnabled(true);
+            new ClusterMemberSchema().setClusterPort(availablePorts).setSingleServerMode().setDiagnosticsEnabled(true);
 
         JavaApplicationBuilder<ClusterMember, ClusterMemberSchema> builder = newJavaApplicationBuilder();
         ClusterMember                                              member  = null;
@@ -183,7 +167,8 @@ public abstract class AbstractClusterMemberTest extends AbstractTest
         {
             member = builder.realize(schema, "TEST");
 
-            assertThat(member, new GetClusterMemberId(), is(1));
+            assertThat(member, new GetLocalMemberId(), is(1));
+            assertThat(member, new GetClusterSize(), is(1));
         }
         finally
         {
@@ -191,26 +176,6 @@ public abstract class AbstractClusterMemberTest extends AbstractTest
             {
                 member.destroy();
             }
-        }
-    }
-
-
-    /**
-     * A {@link java.util.concurrent.Callable} to return the Member ID of a Cluster Member.
-     */
-    public static class GetClusterMemberId implements Callable<Integer>, Serializable
-    {
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public Integer call() throws Exception
-        {
-            com.tangosol.net.Cluster cluster  = CacheFactory.getCluster();
-
-            int                      memberId = cluster == null ? -1 : cluster.getLocalMember().getId();
-
-            return memberId;
         }
     }
 }

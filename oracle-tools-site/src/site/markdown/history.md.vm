@@ -66,7 +66,9 @@ reverse chronological order.
 
 <h4>oracle-tools-coherence</h4>
 
-*   No Changes.
+*   [ORACLETOOLS-53](https://java.net/jira/browse/ORACLETOOLS-53): Refactor
+    Coherence-based Tools to use RemoteExecutors to determine Member state
+    instead of relying on JMX/MBeans.
 
 <h4>oracle-tools-coherence-tests</h4>
 

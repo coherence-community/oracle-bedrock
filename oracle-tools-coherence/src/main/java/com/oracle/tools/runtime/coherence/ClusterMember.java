@@ -29,6 +29,11 @@ import com.oracle.tools.runtime.Application;
 import com.oracle.tools.runtime.ApplicationConsole;
 import com.oracle.tools.runtime.LifecycleEventInterceptor;
 
+import com.oracle.tools.runtime.coherence.callables.GetClusterSize;
+import com.oracle.tools.runtime.coherence.callables.GetLocalMemberId;
+import com.oracle.tools.runtime.coherence.callables.GetLocalMemberRoleName;
+import com.oracle.tools.runtime.coherence.callables.GetLocalMemberSiteName;
+
 import com.oracle.tools.runtime.java.AbstractJavaApplication;
 import com.oracle.tools.runtime.java.JavaApplication;
 import com.oracle.tools.runtime.java.JavaProcess;
@@ -145,58 +150,24 @@ public class ClusterMember extends AbstractJavaApplication<ClusterMember, JavaPr
 
 
     /**
-     * Obtains the {@link Cluster} size based on the reported JMX ClusterSize.
-     * <p>
-     * If the JMX infrastructure in the {@link JavaApplication} is not yet
-     * available, it will block at wait for the default application timeout
-     * until it becomes available.
+     * Obtains the {@link Cluster} size.
      *
-     * @return the number of {@link ClusterMember}s in the {@link Cluster}
-     *
-     * @throws com.oracle.tools.deferred.UnresolvableInstanceException
-     *                                        when the resource is not available
-     * @throws UnsupportedOperationException  when JMX is not enabled for the
-     *                                        {@link JavaApplication}
+     * @return the number of members in the {@link Cluster}
      */
     public int getClusterSize()
     {
-        try
-        {
-            return getMBeanAttribute(new ObjectName(MBEAN_NAME_CLUSTER), MBEAN_ATTRIBUTE_CLUSTER_SIZE, Integer.class);
-        }
-        catch (RuntimeException e)
-        {
-            throw e;
-        }
-        catch (Exception e)
-        {
-            throw new UnsupportedOperationException("Could not retrieve the Coherence Cluster MBean Attribute", e);
-        }
+        return submit(new GetClusterSize());
     }
 
 
     /**
-     * Obtains the local member id for the {@link ClusterMember} (from the
-     * ClusterMBean).
+     * Obtains the local member id for the {@link ClusterMember}.
      * <p>
-     * @return the LocalMemberId
+     * @return the local member id
      */
     public int getLocalMemberId()
     {
-        try
-        {
-            return getMBeanAttribute(new ObjectName(MBEAN_NAME_CLUSTER),
-                                     MBEAN_ATTRIBUTE_LOCAL_MEMBER_ID,
-                                     Integer.class);
-        }
-        catch (RuntimeException e)
-        {
-            throw e;
-        }
-        catch (Exception e)
-        {
-            throw new UnsupportedOperationException("Could not retrieve the Coherence Cluster MBean Attribute", e);
-        }
+        return submit(new GetLocalMemberId());
     }
 
 
@@ -241,57 +212,21 @@ public class ClusterMember extends AbstractJavaApplication<ClusterMember, JavaPr
     /**
      * Obtains the role name for the local member.
      *
-     * @return the site name for the local member
-     *
-     * @throws com.oracle.tools.deferred.UnresolvableInstanceException
-     *                                        when the resource is not available
-     * @throws UnsupportedOperationException  when JMX is not enabled for the
-     *                                        {@link JavaApplication}
+     * @return the role name
      */
     public String getRoleName()
     {
-        try
-        {
-            return getMBeanAttribute(new ObjectName(String.format("Coherence:type=Node,nodeId=%d", getLocalMemberId())),
-                                     MBEAN_ATTRIBUTE_ROLE_NAME,
-                                     String.class);
-        }
-        catch (RuntimeException e)
-        {
-            throw e;
-        }
-        catch (Exception e)
-        {
-            throw new UnsupportedOperationException("Could not retrieve the Coherence Cluster Node MBean", e);
-        }
+        return submit(new GetLocalMemberRoleName());
     }
 
 
     /**
      * Obtains the site name for the local member.
      *
-     * @return the site name for the local member
-     *
-     * @throws com.oracle.tools.deferred.UnresolvableInstanceException
-     *                                        when the resource is not available
-     * @throws UnsupportedOperationException  when JMX is not enabled for the
-     *                                        {@link JavaApplication}
+     * @return the site name
      */
     public String getSiteName()
     {
-        try
-        {
-            return getMBeanAttribute(new ObjectName(String.format("Coherence:type=Node,nodeId=%d", getLocalMemberId())),
-                                     MBEAN_ATTRIBUTE_SITE_NAME,
-                                     String.class);
-        }
-        catch (RuntimeException e)
-        {
-            throw e;
-        }
-        catch (Exception e)
-        {
-            throw new UnsupportedOperationException("Could not retrieve the Coherence Cluster Node MBean", e);
-        }
+        return submit(new GetLocalMemberSiteName());
     }
 }

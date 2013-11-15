@@ -30,6 +30,7 @@ import com.oracle.tools.junit.AbstractTest;
 import com.oracle.tools.runtime.PropertiesBuilder;
 
 import com.oracle.tools.runtime.coherence.ClusterMemberSchema.JMXManagementMode;
+import com.oracle.tools.runtime.coherence.callables.IsServiceRunning;
 
 import com.oracle.tools.runtime.console.SystemApplicationConsole;
 
@@ -87,15 +88,14 @@ public abstract class AbstractClusterBuilderTest extends AbstractTest
     @Test
     public void shouldBuildStorageEnabledCluster() throws Exception
     {
-        final int             CLUSTER_SIZE = 3;
+        final int             CLUSTER_SIZE   = 3;
 
-        AvailablePortIterator portIterator = Container.getAvailablePorts();
+        AvailablePortIterator availablePorts = Container.getAvailablePorts();
+        int                   clusterPort    = availablePorts.next();
 
-        ClusterMemberSchema schema =
-            new ClusterMemberSchema().setSingleServerMode().setClusterPort(portIterator.next()).setJMXPort(portIterator)
-                .setJMXManagementMode(JMXManagementMode.LOCAL_ONLY);
+        ClusterMemberSchema   schema = new ClusterMemberSchema().setSingleServerMode().setClusterPort(clusterPort);
 
-        Cluster cluster = null;
+        Cluster               cluster        = null;
 
         try
         {
@@ -131,25 +131,20 @@ public abstract class AbstractClusterBuilderTest extends AbstractTest
     @Test
     public void shouldBuildStorageAndProxyCluster() throws Exception
     {
-        AvailablePortIterator jmxPorts    = Container.getAvailablePorts();
-        int                   clusterPort = jmxPorts.next();
+        AvailablePortIterator availablePorts = Container.getAvailablePorts();
+        int                   clusterPort    = availablePorts.next();
 
         ClusterMemberSchema storageSchema =
             new ClusterMemberSchema().setClusterPort(clusterPort).setStorageEnabled(true)
-                .setCacheConfigURI("test-cache-config.xml").setJMXSupport(true).setRemoteJMXManagement(true)
-                .setJMXManagementMode(ClusterMemberSchema.JMXManagementMode.LOCAL_ONLY).setJMXPort(jmxPorts)
-                .setSingleServerMode();
+                .setCacheConfigURI("test-cache-config.xml").setSingleServerMode();
 
         ClusterMemberSchema extendSchema =
             new ClusterMemberSchema().setStorageEnabled(false).setClusterPort(clusterPort)
-                .setCacheConfigURI("test-extend-proxy-config.xml").setJMXSupport(true).setRemoteJMXManagement(true)
-                .setSystemProperty("coherence.extend.port",
-                                   jmxPorts).setJMXManagementMode(ClusterMemberSchema.JMXManagementMode.LOCAL_ONLY)
-                                       .setJMXPort(jmxPorts).setSingleServerMode();
+                .setCacheConfigURI("test-extend-proxy-config.xml").setSystemProperty("coherence.extend.port",
+                                                                                     availablePorts)
+                                                                                         .setSingleServerMode();
 
-        SystemApplicationConsole console = new SystemApplicationConsole();
-
-        Cluster                  cluster = null;
+        Cluster cluster = null;
 
         try
         {
@@ -173,17 +168,13 @@ public abstract class AbstractClusterBuilderTest extends AbstractTest
 
             Assert.assertEquals(3, memberIds.size());
 
-            // ensure the there's only one extend service instance
-            ObjectName objectName =
-                new ObjectName("Coherence:type=ConnectionManager,name=ExtendTcpProxyService,nodeId=*");
-
             ClusterMember extendMember = cluster.getApplication("extend-1");
 
-            assertThat(eventually(invoking(extendMember).queryMBeans(objectName, null).size()), Matchers.is(1));
+            assertThat(extendMember, new IsServiceRunning("ExtendTcpProxyService"), is(true));
 
             for (ClusterMember storageMember : cluster.getApplications("storage"))
             {
-                assertThat(eventually(invoking(storageMember).queryMBeans(objectName, null).size()), Matchers.is(0));
+                assertThat(storageMember, new IsServiceRunning("ExtendTcpProxyService"), is(false));
             }
         }
         catch (Exception e)
@@ -209,13 +200,11 @@ public abstract class AbstractClusterBuilderTest extends AbstractTest
     @Test
     public void shouldBuilderWKABasedStorageCluster() throws Exception
     {
-        AvailablePortIterator jmxPorts  = Container.getAvailablePorts();
-        int                   wkaPort   = Container.getAvailablePorts().next();
-        String                localHost = Constants.getLocalHost();
+        int    wkaPort   = Container.getAvailablePorts().next();
+        String localHost = Constants.getLocalHost();
 
         ClusterMemberSchema memberSchema =
-            new ClusterMemberSchema().setJMXManagementMode(JMXManagementMode.ALL).setRemoteJMXManagement(true)
-                .setJMXAuthentication(false).setStorageEnabled(true).setJMXPort(jmxPorts).setWellKnownAddress(localHost)
+            new ClusterMemberSchema().setStorageEnabled(true).setWellKnownAddress(localHost)
                 .setWellKnownAddressPort(wkaPort).setLocalHostAddress(localHost).setLocalHostPort(wkaPort);
 
         SystemApplicationConsole console            = new SystemApplicationConsole();
