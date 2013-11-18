@@ -238,34 +238,6 @@ public abstract class AbstractApplication<A, P extends ApplicationProcess> imple
         // close the console
         m_console.close();
 
-        // close the streams being used by the process
-        try
-        {
-            m_process.getInputStream().close();
-        }
-        catch (IOException e)
-        {
-            // nothing to do here as we don't care
-        }
-
-        try
-        {
-            m_process.getOutputStream().close();
-        }
-        catch (IOException e)
-        {
-            // nothing to do here as we don't care
-        }
-
-        try
-        {
-            m_process.getErrorStream().close();
-        }
-        catch (IOException e)
-        {
-            // nothing to do here as we don't care
-        }
-
         // terminate the thread that is reading from the process standard out
         try
         {

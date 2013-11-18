@@ -120,7 +120,7 @@ public class NativeJavaApplicationBuilderTest extends AbstractJavaApplicationBui
             // define and start the ParentApplication (this will start a ChildApplication)
             SimpleJavaApplicationSchema schema = new SimpleJavaApplicationSchema(ParentApplication.class.getName());
 
-            schema.setSystemProperty("server.address", localAddress.getCanonicalHostName());
+            schema.setSystemProperty("server.address", localAddress.getHostAddress());
             schema.setSystemProperty("server.port", server.getPort());
             schema.setSystemProperty("orphan.children", true);
 
@@ -197,7 +197,7 @@ public class NativeJavaApplicationBuilderTest extends AbstractJavaApplicationBui
             // define and start the ParentApplication (this will start a ChildApplication)
             SimpleJavaApplicationSchema schema = new SimpleJavaApplicationSchema(ParentApplication.class.getName());
 
-            schema.setSystemProperty("server.address", localAddress.getCanonicalHostName());
+            schema.setSystemProperty("server.address", localAddress.getHostAddress());
             schema.setSystemProperty("server.port", server.getPort());
             schema.setSystemProperty("orphan.children", false);
 

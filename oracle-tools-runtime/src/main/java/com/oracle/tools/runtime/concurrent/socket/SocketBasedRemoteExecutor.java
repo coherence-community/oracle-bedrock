@@ -151,6 +151,9 @@ public class SocketBasedRemoteExecutor extends AbstractControllableRemoteExecuto
         this.pendingListeners      = new ConcurrentHashMap<Long, CompletionListener<?>>();
         this.nextSequenceNumber    = new AtomicLong(0);
 
+        // we'll always attempt to reuse addresses
+        this.socket.setReuseAddress(true);
+
         // establish the operations that are part of the protocol
         protocol.put("CALLABLE", CallableOperation.class);
         protocol.put("RESPONSE", ResponseOperation.class);

@@ -33,6 +33,7 @@ import com.oracle.tools.util.CompletionListener;
 import java.io.IOException;
 
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 
@@ -114,7 +115,9 @@ public class RemoteExecutorServer extends AbstractControllableRemoteExecutor
     {
         if (!isOpen())
         {
-            serverSocket = new ServerSocket(port);
+            serverSocket = new ServerSocket();
+            serverSocket.setReuseAddress(true);
+            serverSocket.bind(new InetSocketAddress(port));
 
             serverThread = new Thread(new Runnable()
             {

@@ -139,35 +139,35 @@ public class JavaApplicationLauncher
                 catch (ClassNotFoundException e)
                 {
                     System.out.println("JavaApplicationLauncher: Could not load the class " + applicationClassName);
-                    System.out.println(e);
+                    e.printStackTrace(System.out);
                 }
                 catch (NoSuchMethodException e)
                 {
                     System.out.println("JavaApplicationLauncher: Could not locate a main method for "
                                        + applicationClassName);
-                    System.out.println(e);
+                    e.printStackTrace(System.out);
                 }
                 catch (IllegalAccessException e)
                 {
                     System.out.println("JavaApplicationLauncher: Could not access the main method for "
                                        + applicationClassName);
-                    System.out.println(e);
+                    e.printStackTrace(System.out);
                 }
                 catch (InvocationTargetException e)
                 {
                     System.out.println("JavaApplicationLauncher: Failed to invoke the main method for "
                                        + applicationClassName);
-                    System.out.println(e);
+                    e.printStackTrace(System.out);
                 }
                 catch (UnknownHostException e)
                 {
                     System.out.println("JavaApplicationLauncher: The specified parent address is unknown");
-                    System.out.println(e);
+                    e.printStackTrace(System.out);
                 }
                 catch (IOException e)
                 {
                     System.out.println("JavaApplicationLauncher: Failed to open a connection to parent");
-                    System.out.println(e);
+                    e.printStackTrace(System.out);
                 }
             }
         }
