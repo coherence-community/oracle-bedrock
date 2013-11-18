@@ -60,7 +60,8 @@ import java.util.Properties;
 public class AbstractApplicationTest
 {
     /**
-     * Method description
+     * Ensure that the {@link ApplicationProcess} set on an {@link AbstractApplication}
+     * is retained by an {@link AbstractApplication}.
      *
      * @throws Exception
      */
@@ -82,7 +83,8 @@ public class AbstractApplicationTest
 
 
     /**
-     * Method description
+     * Ensures that the name set on an {@link AbstractApplication} is
+     * retained by the {@link AbstractApplication}.
      *
      * @throws Exception
      */
@@ -104,7 +106,9 @@ public class AbstractApplicationTest
 
 
     /**
-     * Method description
+     * Ensures that the underlying {@link ApplicationProcess} for
+     * an {@link AbstractApplication} is destroyed when the
+     * {@link AbstractApplication} is destroyed.
      *
      * @throws Exception
      */
@@ -129,14 +133,11 @@ public class AbstractApplicationTest
         application.destroy();
 
         verify(process).destroy();
-//        verify(inputStream).close();
-//        verify(errorStream).close();
-//        verify(outputStream).close();
     }
 
 
     /**
-     * Method description
+     * Ensure that the exit value of an {@link AbstractApplication} is returned.
      *
      * @throws Exception
      */
@@ -157,7 +158,8 @@ public class AbstractApplicationTest
 
 
     /**
-     * Method description
+     * Ensure that waiting for an {@link AbstractApplication} causes
+     * the underlying {@link ApplicationProcess} to wait.
      *
      * @throws Exception
      */
@@ -181,7 +183,7 @@ public class AbstractApplicationTest
 
 
     /**
-     * Method description
+     * Ensure waiting for an {@link AbstractApplication} can be interrupted.
      *
      * @throws Exception
      */
@@ -202,7 +204,7 @@ public class AbstractApplicationTest
 
 
     /**
-     * Method description
+     * Ensure that an {@link AbstractApplication} can return environment variables.
      *
      * @throws Exception
      */
@@ -222,102 +224,6 @@ public class AbstractApplicationTest
 
         assertThat(application.getEnvironmentVariables(), is(properties));
     }
-
-
-    /**
-     * Method description
-     *
-     * @throws Exception
-     */
-    @Test
-    public void shouldCaptureStandardOut() throws Exception
-    {
-        String             applicationName = "Test-App";
-        Properties         properties      = new Properties();
-        ApplicationProcess process         = mock(ApplicationProcess.class);
-
-        InputStream        inputStream     = new ByteArrayInputStream("Out Test...".getBytes());
-        InputStream        errorStream     = mock(InputStream.class);
-
-        when(process.getInputStream()).thenReturn(inputStream);
-        when(process.getErrorStream()).thenReturn(errorStream);
-
-        PipedApplicationConsole console = new PipedApplicationConsole();
-
-        new AbstractApplicationStub(process, applicationName, console, properties);
-
-        String output = console.getOutputReader().readLine();
-
-//      Object[] args = console.lines.get(0).getY();
-//
-//      assertThat(args[0], is((Object) applicationName));
-//      assertThat(args[1], is((Object) "out"));
-//      assertThat(args[3], is((Object) 1L));
-//      assertThat(args[4], is((Object) "Out Test..."));
-    }
-
-//
-//
-//  /**
-//   * Method description
-//   *
-//   * @throws Exception
-//   */
-//  @Test
-//  public void shouldTerminateStandardOut() throws Exception
-//  {
-//      String             applicationName = "Test-App";
-//      Properties         properties      = new Properties();
-//      ApplicationProcess process         = mock(ApplicationProcess.class);
-//
-//      InputStream        inputStream     = mock(InputStream.class);
-//      InputStream        errorStream     = mock(InputStream.class);
-//
-//      when(process.getInputStream()).thenReturn(inputStream);
-//      when(process.getErrorStream()).thenReturn(errorStream);
-//
-//      ApplicationConsoleStub console = new ApplicationConsoleStub();
-//
-//      new AbstractApplicationStub(process, applicationName, console, properties);
-//
-//      console.waitForLineCount(2, 10000);
-//
-//      String format = console.lines.get(0).getX();
-//
-//      assertThat(format, is(containsString("(terminated)")));
-//  }
-//
-//
-//  /**
-//   * Method description
-//   *
-//   * @throws Exception
-//   */
-//  @Test
-//  public void shouldCaptureStandardErr() throws Exception
-//  {
-//      String             applicationName = "Test-App";
-//      Properties         properties      = new Properties();
-//      ApplicationProcess process         = mock(ApplicationProcess.class);
-//
-//      InputStream        errorStream     = new ByteArrayInputStream("Err Test...".getBytes());
-//      InputStream        inputStream     = mock(InputStream.class);
-//
-//      when(process.getInputStream()).thenReturn(inputStream);
-//      when(process.getErrorStream()).thenReturn(errorStream);
-//
-//      PipedApplicationConsole console = new PipedApplicationConsole();
-//
-//      new AbstractApplicationStub(process, applicationName, console, properties);
-//
-//      console.waitForLineCount(3, 10000);
-//
-//      Object[] args = console.lines.get(1).getY();
-//
-//      assertThat(args[0], is((Object) applicationName));
-//      assertThat(args[1], is((Object) "err"));
-//      assertThat(args[3], is(not((Object) 0L)));
-//  }
 
 
     private class AbstractApplicationStub extends AbstractApplication
