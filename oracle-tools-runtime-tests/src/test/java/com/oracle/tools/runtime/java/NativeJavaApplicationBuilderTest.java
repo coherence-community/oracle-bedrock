@@ -25,7 +25,7 @@
 
 package com.oracle.tools.runtime.java;
 
-import com.oracle.tools.deferred.DeferredAssert;
+import com.oracle.tools.deferred.Eventually;
 
 import com.oracle.tools.deferred.listener.DeferredCompletionListener;
 
@@ -134,7 +134,7 @@ public class NativeJavaApplicationBuilderTest extends AbstractJavaApplicationBui
             parentApplication = builder.realize(schema, "parent", console);
 
             // wait for the ChildApplication to connect back to the ServerChannel
-            DeferredAssert.assertThat(eventually(invoking(listener).isOpened()), is(true));
+            Eventually.assertThat(invoking(listener).isOpened(), is(true));
 
             // destroy the ParentApplication
             parentApplication.destroy();
@@ -145,13 +145,13 @@ public class NativeJavaApplicationBuilderTest extends AbstractJavaApplicationBui
 
             child.submit(new SocketBasedRemoteExecutorTests.PingPong(), response);
 
-            DeferredAssert.assertThat(response, is("PONG"));
+            Eventually.assertThat(response, is("PONG"));
 
             // shutdown the client
             child.submit(new SystemExitRequest(), null);
 
             // wait for the ChildApplication to disconnect from the ServerChannel
-            DeferredAssert.assertThat(eventually(invoking(listener).isClosed()), is(true));
+            Eventually.assertThat(invoking(listener).isClosed(), is(true));
         }
         catch (IOException e)
         {
@@ -211,13 +211,13 @@ public class NativeJavaApplicationBuilderTest extends AbstractJavaApplicationBui
             parentApplication = builder.realize(schema, "parent", console);
 
             // wait for the ChildApplication to connect back to the ServerChannel
-            DeferredAssert.assertThat(eventually(invoking(listener).isOpened()), is(true));
+            Eventually.assertThat(invoking(listener).isOpened(), is(true));
 
             // destroy the ParentApplication
             parentApplication.destroy();
 
             // wait for the ChildApplication to disconnect from the ServerChannel
-            DeferredAssert.assertThat(eventually(invoking(listener).isClosed()), is(true));
+            Eventually.assertThat(invoking(listener).isClosed(), is(true));
         }
         catch (IOException e)
         {
@@ -269,7 +269,7 @@ public class NativeJavaApplicationBuilderTest extends AbstractJavaApplicationBui
 
             application.submit(new GetSystemProperty("uuid"), deferred);
 
-            DeferredAssert.assertThat(deferred, is(uuid));
+            Eventually.assertThat(deferred, is(uuid));
         }
         catch (IOException e)
         {

@@ -27,38 +27,27 @@ package com.oracle.tools.runtime.coherence;
 
 import com.oracle.tools.junit.AbstractTest;
 
-import com.oracle.tools.runtime.PropertiesBuilder;
-
-import com.oracle.tools.runtime.coherence.ClusterMemberSchema.JMXManagementMode;
-import com.oracle.tools.runtime.coherence.callables.IsServiceRunning;
-
 import com.oracle.tools.runtime.console.SystemApplicationConsole;
 
-import com.oracle.tools.runtime.java.ContainerBasedJavaApplicationBuilder;
 import com.oracle.tools.runtime.java.JavaApplicationBuilder;
-import com.oracle.tools.runtime.java.SimpleJavaApplication;
-import com.oracle.tools.runtime.java.SimpleJavaApplicationSchema;
 import com.oracle.tools.runtime.java.container.Container;
 
 import com.oracle.tools.runtime.network.AvailablePortIterator;
 import com.oracle.tools.runtime.network.Constants;
 
-import junit.framework.Assert;
+import com.oracle.tools.util.Capture;
 
-import org.hamcrest.Matchers;
+import junit.framework.Assert;
 
 import org.junit.Test;
 
-import static com.oracle.tools.deferred.DeferredAssert.assertThat;
-
-import static com.oracle.tools.deferred.DeferredHelper.eventually;
 import static com.oracle.tools.deferred.DeferredHelper.invoking;
+
+import static com.oracle.tools.deferred.Eventually.assertThat;
 
 import static org.hamcrest.CoreMatchers.is;
 
 import java.util.HashSet;
-
-import javax.management.ObjectName;
 
 /**
  * Functional Tests for the {@link com.oracle.tools.runtime.coherence.ClusterBuilder} class.
@@ -91,9 +80,9 @@ public abstract class AbstractClusterBuilderTest extends AbstractTest
         final int             CLUSTER_SIZE   = 3;
 
         AvailablePortIterator availablePorts = Container.getAvailablePorts();
-        int                   clusterPort    = availablePorts.next();
+        Capture<Integer>      clusterPort    = new Capture<Integer>(availablePorts);
 
-        ClusterMemberSchema   schema = new ClusterMemberSchema().setSingleServerMode().setClusterPort(clusterPort);
+        ClusterMemberSchema   schema         = new ClusterMemberSchema().useLocalHostMode().setClusterPort(clusterPort);
 
         Cluster               cluster        = null;
 
@@ -105,7 +94,7 @@ public abstract class AbstractClusterBuilderTest extends AbstractTest
 
             cluster = builder.realize(new SystemApplicationConsole());
 
-            assertThat(eventually(invoking(cluster).getClusterSize()), is(CLUSTER_SIZE));
+            assertThat(invoking(cluster).getClusterSize(), is(CLUSTER_SIZE));
         }
         catch (Exception e)
         {
@@ -132,17 +121,16 @@ public abstract class AbstractClusterBuilderTest extends AbstractTest
     public void shouldBuildStorageAndProxyCluster() throws Exception
     {
         AvailablePortIterator availablePorts = Container.getAvailablePorts();
-        int                   clusterPort    = availablePorts.next();
+        Capture<Integer>      clusterPort    = new Capture<Integer>(availablePorts);
 
         ClusterMemberSchema storageSchema =
             new ClusterMemberSchema().setClusterPort(clusterPort).setStorageEnabled(true)
-                .setCacheConfigURI("test-cache-config.xml").setSingleServerMode();
+                .setCacheConfigURI("test-cache-config.xml").useLocalHostMode();
 
         ClusterMemberSchema extendSchema =
             new ClusterMemberSchema().setStorageEnabled(false).setClusterPort(clusterPort)
                 .setCacheConfigURI("test-extend-proxy-config.xml").setSystemProperty("coherence.extend.port",
-                                                                                     availablePorts)
-                                                                                         .setSingleServerMode();
+                                                                                     availablePorts).useLocalHostMode();
 
         Cluster cluster = null;
 
@@ -156,7 +144,7 @@ public abstract class AbstractClusterBuilderTest extends AbstractTest
             cluster = builder.realize(new SystemApplicationConsole());
 
             // ensure the cluster size is as expected
-            assertThat(eventually(invoking(cluster).getClusterSize()), is(3));
+            assertThat(invoking(cluster).getClusterSize(), is(3));
 
             // ensure the member id's are different
             HashSet<Integer> memberIds = new HashSet<Integer>();
@@ -170,11 +158,11 @@ public abstract class AbstractClusterBuilderTest extends AbstractTest
 
             ClusterMember extendMember = cluster.getApplication("extend-1");
 
-            assertThat(extendMember, new IsServiceRunning("ExtendTcpProxyService"), is(true));
+            assertThat(invoking(extendMember).isServiceRunning("ExtendTcpProxyService"), is(true));
 
             for (ClusterMember storageMember : cluster.getApplications("storage"))
             {
-                assertThat(storageMember, new IsServiceRunning("ExtendTcpProxyService"), is(false));
+                assertThat(invoking(storageMember).isServiceRunning("ExtendTcpProxyService"), is(false));
             }
         }
         catch (Exception e)
@@ -200,8 +188,8 @@ public abstract class AbstractClusterBuilderTest extends AbstractTest
     @Test
     public void shouldBuilderWKABasedStorageCluster() throws Exception
     {
-        int    wkaPort   = Container.getAvailablePorts().next();
-        String localHost = Constants.getLocalHost();
+        Capture<Integer> wkaPort   = new Capture<Integer>(Container.getAvailablePorts());
+        String           localHost = Constants.getLocalHost();
 
         ClusterMemberSchema memberSchema =
             new ClusterMemberSchema().setStorageEnabled(true).setWellKnownAddress(localHost)
@@ -220,7 +208,7 @@ public abstract class AbstractClusterBuilderTest extends AbstractTest
 
             cluster = clusterBuilder.realize(console);
 
-            assertThat(eventually(invoking(cluster).getClusterSize()), is(desiredClusterSize));
+            assertThat(invoking(cluster).getClusterSize(), is(desiredClusterSize));
         }
         catch (Exception e)
         {

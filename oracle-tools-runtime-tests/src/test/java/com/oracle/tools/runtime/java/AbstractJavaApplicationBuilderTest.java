@@ -25,7 +25,7 @@
 
 package com.oracle.tools.runtime.java;
 
-import com.oracle.tools.deferred.DeferredAssert;
+import com.oracle.tools.deferred.Eventually;
 
 import com.oracle.tools.deferred.listener.DeferredCompletionListener;
 
@@ -200,7 +200,7 @@ public abstract class AbstractJavaApplicationBuilderTest extends AbstractTest
 
             application = builder.realize(schema, "sleeping", console);
 
-            DeferredAssert.assertThat(application, new GetSystemProperty("uuid"), is(uuid));
+            Eventually.assertThat(application, new GetSystemProperty("uuid"), is(uuid));
         }
         catch (IOException e)
         {

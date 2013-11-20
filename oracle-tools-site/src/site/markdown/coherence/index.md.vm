@@ -1,22 +1,339 @@
-The Coherence Module
---------------------
+The Coherence Module for Oracle Tools
+-------------------------------------
 
-<h4>Overview</h4>
-The Oracle Tools for Coherence module provides extensions to the Oracle Tools Runtime module
-for the purpose of managing [Oracle Coherence][COH]-based Applications.
+<h4>The Twenty Second Synopsis</h4>
 
-As this module is an extension to the Oracle Tools Runtime module, we recommend reading
-the [Introduction to Application Management](../runtime/applications.html) document for
-initial examples and background information.
+**What?**
+The Coherence Module for Oracle Tools allows applications to define, create, monitor
+and simply manage [Oracle Coherence][COH]-based applications, including individual
+Cache Servers (both storage enabled and disabled), Proxy Servers, Management Servers together
+with entire Coherence Clusters at runtime.
 
-<h4>Distribution</h4>
+Technically speaking, the Coherence Module for Oracle Tools is an extension of and
+leverages the facilities provided by the [Runtime Module for Oracle Tools][RUNTIME]
+to control Coherence-based applications, in much the same way that the
+[Runtime Module for Oracle Tools][RUNTIME] controls regular Java and non-Java-based
+applications.
 
-The Oracle Tools Coherence module is distributed as a single jar
-called: `oracle-tools-coherence-${project.version}.jar`
+**When?**
+Use the Coherence Module for Oracle Tools when you need to coordinate multiple
+[Oracle Coherence][COH] applications, servers or clusters, especially as part of
+distributed application functional and integration tests or when you'd traditionally
+make use of Shell/Ant/Maven/Python/Groovy et al scripting or the Java Platform
+`java.lang.Process` class.
 
-<h4>Source Code</h4>
+**Why?**
+Programmatically controlling and testing distributed applications can be a complicated,
+frustrating and error-prone matter.   While the `java.lang.Process` and associated classes
+provide rudimentary mechanisms to control application processes, like [Oracle Coherence][COH],
+developers typically need to make many assumptions about the underlying operating
+system, environment, platforms etc, write defensive code for said platforms or make
+extensive use of platform-specific scripting.
+
+The Coherence Module for Oracle Tools removes these requirements and simplifies
+this development activity when working with [Oracle Coherence][COH], making developing
+complex tests effortless.
+
+**How?**
+As this module is an extension to the [Runtime Module for Oracle Tools][RUNTIME] module, we
+highly recommend reading the [Introduction to Application Management](../runtime/applications.html)
+for core concepts, background information and introductory examples.
+
+**Where?**
+The Coherence Module for Oracle Tools for is defined by the following Maven coordinates
+and Java package:
+
+*   Maven Group Id: `${project.groupId}`
+*   Maven Artifact Id: `oracle-tools-coherence`
+*   Maven Version: `${project.version}`
+*   Java Package: `com.oracle.tools.runtime.coherence`
+
+The Coherence Module for Oracle Tools is distributed as a single jar called:
+`oracle-tools-coherence-${project.version}.jar`
 
 Source code for this and other Oracle Tools modules can be found here:
 [https://github.com/coherence-community/oracle-tools](https://github.com/coherence-community/oracle-tools)
 
+Getting Started
+---------------
+
+Like the [Runtime Module for Oracle Tools][RUNTIME], the Coherence Module for Oracle Tools
+uses the concepts of Schemas, Applications and Builders to define, control and construct
+[Oracle Coherence][COH]-based applications.   The difference however is that the Coherence
+Module for Oracle Tools introduces several new Schemas, Applications and Builders, specifically
+designed for working with [Oracle Coherence][COH].
+
+Specifically the Coherence Module for Oracle Tools introduces the following classes:
+
+**`com.oracle.tools.runtime.coherence.ClusterMemberSchema`**: represents the configuration of a
+proposed [Oracle Coherence][COH]-based application / server.
+
+**`com.oracle.tools.runtime.coherence.ClusterMember`**: represents a controllable runtime
+instance of an [Oracle Coherence][COH]-based application / server.
+
+**`com.oracle.tools.runtime.coherence.ClusterBuilder`**: provides a mechanism to build an
+entire [Oracle Coherence][COH] cluster, based on a collection of ClusterMemberSchemas.
+
+**`com.oracle.tools.runtime.coherence.Cluster`**: provides a mechanism to represents and
+control a [Oracle Coherence][COH] cluster, including access to individual ClusterMembers.
+
+Tutorial
+--------
+
+The following sections provide recipes using the Coherence Module for Oracle Tools with
+[Oracle Coherence][COH].
+
+<h4>Creating a Single Coherence Storage Enabled Server</h4>
+
+The following example will create a storage-enabled Coherence Cache Server, using
+default configuration.
+
+    import com.oracle.tools.runtime.java.JavaApplicationBuilder;
+    import com.oracle.tools.runtime.java.NativeJavaApplicationBuilder
+
+    import com.oracle.tools.runtime.java.container.Container;
+
+    import com.oracle.tools.runtime.network.AvailablePortIterator;
+
+    import static com.oracle.tools.deferred.DeferredHelper.invoking;
+    import static com.oracle.tools.deferred.Eventually.assertThat;
+    import static org.hamcrest.CoreMatchers.is;
+
+    ...
+
+    // acquire a set of available ports on the host
+    AvailablePortIterator availablePorts = Container.getAvailablePorts();
+
+    // define a cluster member
+    ClusterMemberSchema schema =
+        new ClusterMemberSchema()
+            .setClusterPort(availablePorts)    //automatically choose an available port!
+            .useLocalHostMode()
+            .setDiagnosticsEnabled(true);
+
+    // establish a Native Java Application Builder to realize the cluster member
+    // (the realized ClusterMembers will be run as native local processes)
+    JavaApplicationBuilder<ClusterMember, ClusterMemberSchema> builder =
+        new NativeJavaApplicationBuilder<>();
+
+    // the cluster member
+    ClusterMember member  = null;
+
+    try
+    {
+        // realize the cluster member (as a native process)
+        member = builder.realize(schema, "TEST");
+
+        // assert that (eventually) the cluster details are as expected
+        Eventually.assertThat(invoking(member).getLocalMemberId(), is(1));
+        Eventually.assertThat(invoking(member).getClusterSize(), is(1));
+    }
+    finally
+    {
+        if (member != null)
+        {
+            member.destroy();
+        }
+    }
+
+Important concepts from the above example:
+
+<h5>AvailablePortIterators:</h5>
+
+`AvailablePortIterator`s free developers from working out available server socket
+ports on a host.   All port-based parameters for `ClusterMemberSchema` naturally accept
+either a specific port or an `AvailablePortIterator`.   By using `AvailablePortIterator`s
+it's highly unlikely you'll ever have to set a Coherence cluster port.
+
+To determine the port that is actually used for a `ClusterMember`, simply use the
+`ClusterMember.getClusterPort()` method.
+
+<h5>Use Local Host Mode:</h5>
+
+The `useLocalHostMode` property of a `ClusterMemberSchema` automatically sets the
+`ClusterMember` to use a TTL of 0 and binds the localhost to a suitable localhost address.
+
+Using "useLocalHostMode" eliminates the need to determine the cluster address on which
+a `ClusterMember` should listen.   The downside being, that only `ClusterMember`s on the
+said host will cluster together, and not across hosts.
+
+<h5>Java Application Builders:</h5>
+
+As introduced by the [Runtime Module for Oracle Tools][RUNTIME], the Coherence Module
+for Oracle Tools uses Java Application Builders in order to realize and construct
+Cluster Members (and Clusters.
+
+In this example we have used a `NativeJavaApplicationBuilder`, but we could have also
+used a `ContainerBasedJavaApplicationBuilder` to realize and run the `ClusterMember`
+isolated with in the same Java Virtual Machine as the example itself!
+
+<h5>Diagnostics:</h5>
+
+When a `ClusterMemberSchema` has `setDiagnosticsEnabled`, all output from applications
+ie: `ClusterMembers`, created using the said schema will be redirected to the standard
+console.   This is irrespective of any additional console that is specified as part
+of realizing an application using a builder.
+
+Should diagnostics be disabled (the default) and no console is specified for a builder
+when realizing an application, no output from the said application will be produced
+(it essentially all goes to /dev/null).
+
+<h5>Eventually.assertThat(...):</h5>
+
+The use of the `Eventually` class, together with Deferred References, allows developers
+to write test cases and asserts on asynchronous tasks without requiring `Thread.sleep(...)`
+calls being placed in application code.
+
+<h5>ClusterMemberSchema:</h5>
+
+The `ClusterMemberSchema` class provides all of the typically used [Oracle Coherence][COH]
+properties that an application developer would set, including those at the command-line.
+
+Some of the available options include:
+
+    setCacheConfigURI(String)
+    setOperationalOverrideURI(String)
+
+    setPofConfigURI(String)
+    setPofEnabled(boolean)
+
+    setStorageEnabled(boolean)
+
+    setLocalHostAddress(String)
+    setLocalHostPort(int)
+
+    setWellKnownAddress(String)
+    setWellKnownAddressPort(int)
+
+    setTCMPEnabled(boolean)
+
+    setMulticastTTL(int)
+
+    setClusterPort(int)
+    setClusterPort(Iterator<Integer> ports)
+
+    useLocalHostMode()
+
+    setClusterName(string)
+    setRoleName(String)
+    setSiteName(String)
+
+    setJMXManagementMode(JMXManagementMode)
+    setRemoteJMXManagement(boolean)
+
+    setLogLevel(int)
+    setLog(String)
+
+For the complete list of available options, please consult the Java Doc for the
+`ClusterMemberSchema` class.
+
+<h4>Creating a Single Coherence Storage Disabled Server</h4>
+
+Creating a storage-disabled Cluster Member is as simple as setting the `setStorageEnabled`
+property of a `ClusterMemberSchema` to `false`.
+
+    // define a cluster member
+    ClusterMemberSchema schema =
+        new ClusterMemberSchema()
+            .setClusterPort(availablePorts)
+            .useLocalHostMode()
+            .setStorageEnabled(false)          //storage disabled!
+            .setDiagnosticsEnabled(true);
+
+
+<h4>Creating a Cluster of Coherence Storage Enabled Servers</h4>
+
+While creating individual `ClusterMember`s is useful, typically applications and
+integration tests require multiple cluster members, arranged as a Coherence Cluster.
+
+To simplify representing, building and managing multiple `ClusterMember`s as a
+group of applications, ie: a `Cluster`, developers should use the `ClusterBuilder`.
+
+    import com.oracle.tools.runtime.console.SystemApplicationConsole;
+
+    import com.oracle.tools.runtime.java.JavaApplicationBuilder;
+    import com.oracle.tools.runtime.java.NativeJavaApplicationBuilder;
+
+    import com.oracle.tools.runtime.java.container.Container;
+
+    import com.oracle.tools.runtime.network.AvailablePortIterator;
+
+    import static com.oracle.tools.deferred.DeferredHelper.invoking;
+
+    import static com.oracle.tools.deferred.Eventually.assertThat;
+
+    import static org.hamcrest.CoreMatchers.is;
+
+    ...
+
+    // the desired cluster size
+    final int CLUSTER_SIZE   = 3;
+
+    AvailablePortIterator availablePorts = Container.getAvailablePorts();
+
+    // use a Capture to capture the Cluster Port when the first one
+    // is chosen to ensure that all ClusterMembers use the same port!
+    Capture<Integer> clusterPort = new Capture<Integer>(availablePorts);
+
+    // define the schema for an individual ClusterMember
+    ClusterMemberSchema  schema = new ClusterMemberSchema()
+        .setClusterPort(clusterPort)
+        .useLocalHostMode();
+
+    // the cluster
+    Cluster cluster = null;
+
+    // establish a Native Java Application Builder to realize the ClusterMembers
+    JavaApplicationBuilder<ClusterMember, ClusterMemberSchema> memberBuilder =
+        new NativeJavaApplicationBuilder<>();
+
+    try
+    {
+        // configure our ClusterBuilder
+        ClusterBuilder clusterBuilder = new ClusterBuilder();
+
+        // instruct the ClusterBuilder how ClusterMembers will be built
+        // (ClusterBuilder may have many different builders!  We're using just one here)
+        clusterBuilder.addBuilder(memberBuilder, schema, "CacheServer", CLUSTER_SIZE);
+
+        // realize the cluster
+        // (all output from all ClusterMembers in the Cluster will be
+        //  redirected to the System Console)
+        cluster = clusterBuilder.realize(new SystemApplicationConsole());
+
+        // ensure that the expected cluster is created
+        Eventually.assertThat(invoking(cluster).getClusterSize(), is(CLUSTER_SIZE));
+    }
+    catch (Exception e)
+    {
+        e.printStackTrace();
+        Assert.fail();
+    }
+    finally
+    {
+        if (cluster != null)
+        {
+            // destroys and shuts down the entire cluster
+            cluster.destroy();
+        }
+    }
+
+As mentioned in the above comments, a `ClusterBuilder` may in fact have multiple ClusterMember
+builders associated with it.   This allows different topologies to be constructed.
+
+For example, say you have multiple `ClusterSchema` definitions, each of which should have a certain
+number of members in a cluster.   Using a `ClusterBuilder` to define this is as easy as:
+
+        clusterBuilder.addBuilder(memberBuilder, storageSchema, "Storage", nrStorageMembers);
+        clusterBuilder.addBuilder(memberBuilder, proxySchema, "Proxy", nrProxyMembers);
+        clusterBuilder.addBuilder(memberBuilder, managementSchema, "Management", nrManagementMembers);
+
+When the `ClusterBuilder.realize(...)` method is called, an entire cluster consisting of the appropriate
+number of members will be built and returned as a `Cluster`.
+
+Furthermore, each of the `ClusterMember` builders may in fact be different.  For example, you may wish
+to establish some `ClusterMember`s using a `ContainerBasedJavaApplicationBuilder` and others with
+a `NativeJavaApplicationBuilder`.
+
 [COH]: http://www.oracle.com/technetwork/middleware/coherence/overview/index.html "Oracle Coherence"
+[RUNTIME]: ../runtime/index.html

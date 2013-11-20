@@ -25,7 +25,7 @@
 
 package com.oracle.tools.runtime.concurrent.socket;
 
-import com.oracle.tools.deferred.DeferredAssert;
+import com.oracle.tools.deferred.Eventually;
 
 import com.oracle.tools.deferred.listener.DeferredCompletionListener;
 
@@ -72,13 +72,13 @@ public class SocketBasedRemoteExecutorTests
 
             client.submit(new PingPong(), serverResponse);
 
-            DeferredAssert.assertThat(serverResponse, is("PONG"));
+            Eventually.assertThat(serverResponse, is("PONG"));
 
             DeferredCompletionListener<String> clientResponse = new DeferredCompletionListener<String>(String.class);
 
             server.submit(new PingPong(), clientResponse);
 
-            DeferredAssert.assertThat(clientResponse, is("PONG"));
+            Eventually.assertThat(clientResponse, is("PONG"));
         }
         catch (IOException e)
         {

@@ -15,7 +15,8 @@ become available.
 
 **When?**
 Use Deferred References when you feel you need to use `Thread.sleep(...)` to
-wait for resources to become available.
+wait for resources to become available.   A Deferred Reference can be used
+to represent the resource that you want to wait (sleep) upon.
 
 **Why?**
 Using `Thread.sleep(...)`, especially in application tests, can introduce all
@@ -37,14 +38,14 @@ Deferred References are defined in the following Maven module and Java package:
 
 <h4>Overview</h4>
 
-A *Deferred Reference*, commonly abbrevicated to simply a *Deferred*, is
+A *Deferred Reference*, commonly abbreviated to simply a *Deferred*, is
 an object that represents a reference another strongly-typed object, that
 of which may not be available at the time the Deferred was created or may
-have varing availability characteristics during its' lifetime.
+have varying availability characteristics during its' lifetime.
 
 Application developers typically use Deferreds as a means to separate the
 concepts of a). representing resources with questionable availability, and
-b). the mechanims for ensuring that the underlying resources are available
+b). the mechanisms for ensuring that the underlying resources are available
 when required.
 
 >   In programmatic terms, *Deferreds* are represented by the
@@ -251,24 +252,24 @@ DeferredMatches.
 Of course, this does not perform the assert operation for you.  It simply creates a
 Deferred to represent the match that should occur at some point!   To actually
 assert that the condition holds, we need to use the enhanced "assertThat" method
-from the `com.oracle.tools.deferred.DeferredAssert` class.
+from the `com.oracle.tools.deferred.Eventually` class.
 
-**Example: Deferred assertThat**
+**Example: Eventually.assertThat**
 
     //from module oracle-tools-core
     static import com.oracle.tools.deferred.DeferredHelper.*;
 
     //from module oracle-tools-testing-support
-    static import com.oracle.tools.deferred.DeferredAssert.*;
+    static import com.oracle.tools.deferred.Eventually.*;
 
     // acquire a Deferred representation of the MBean
     Deferred<T> deferredMBean = application.getDeferredMBeanProxy(name, T.class);
 
     // assert that the MBean.getCount() method eventually returns 3
-    assertThat(eventually(invoking(deferredMBean).getCount()), is(3));
+    Eventually.assertThat(invoking(deferredMBean).getCount(), is(3));
 
 While in the previous example we made use of the DeferredMatch class, when using
-`DeferredAssert.assertThat`, this is not required.   We can simply provide a Deferred
+`Eventually.assertThat`, this is not required.   We can simply provide a Deferred
 and a Hamcrest Matcher.   The `assertThat` method implementation does the rest,
 including ensuring that the Deferred is available and that the value produced
 matches the condition specified.

@@ -300,11 +300,11 @@ public class ClusterMemberSchemaTest extends AbstractTest
      * @throws Exception
      */
     @Test
-    public void shouldSetHostToLocalhostInSingleServerMode() throws Exception
+    public void shouldSetHostToLocalhostInUseLocalHostMode() throws Exception
     {
         ClusterMemberSchema schema = new ClusterMemberSchema();
 
-        assertThat(schema.setSingleServerMode(), is(sameInstance(schema)));
+        assertThat(schema.useLocalHostMode(), is(sameInstance(schema)));
         assertThat(schema.getSystemPropertiesBuilder().getProperty(ClusterMemberSchema.PROPERTY_LOCALHOST_ADDRESS),
                    is((Object) Constants.getLocalHost()));
     }
@@ -320,7 +320,7 @@ public class ClusterMemberSchemaTest extends AbstractTest
     {
         ClusterMemberSchema schema = new ClusterMemberSchema();
 
-        assertThat(schema.setSingleServerMode(), is(sameInstance(schema)));
+        assertThat(schema.useLocalHostMode(), is(sameInstance(schema)));
         assertThat(schema.getSystemPropertiesBuilder().getProperty(ClusterMemberSchema.PROPERTY_MULTICAST_TTL),
                    is((Object) 0));
     }

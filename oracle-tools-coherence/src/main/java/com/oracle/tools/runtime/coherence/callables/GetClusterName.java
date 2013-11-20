@@ -1,5 +1,5 @@
 /*
- * File: ContainerBasedClusterMemberTest.java
+ * File: GetClusterSize.java
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
@@ -23,27 +23,30 @@
  * "Portions Copyright [year] [name of copyright owner]"
  */
 
-package com.oracle.tools.runtime.coherence;
+package com.oracle.tools.runtime.coherence.callables;
 
-import com.oracle.tools.runtime.java.ContainerBasedJavaApplicationBuilder;
-import com.oracle.tools.runtime.java.JavaApplicationBuilder;
+import com.tangosol.net.CacheFactory;
+
+import java.io.Serializable;
+import java.util.concurrent.Callable;
 
 /**
- * Functional Test for {@link ClusterMember} using a {@link ContainerBasedJavaApplicationBuilder}.
+ * A {@link Callable} to remotely determine the name of a Coherence Cluster.
  * <p>
  * Copyright (c) 2013. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Brian Oliver
  */
-public class ContainerBasedClusterMemberTest extends AbstractClusterMemberTest
+public class GetClusterName implements Callable<String>, Serializable
 {
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public JavaApplicationBuilder<ClusterMember, ClusterMemberSchema> newJavaApplicationBuilder()
+    public String call() throws Exception
     {
-        return new ContainerBasedJavaApplicationBuilder<ClusterMember, ClusterMemberSchema>();
+        // attempt to get the cluster
+        com.tangosol.net.Cluster cluster = CacheFactory.getCluster();
+
+        // when there's no cluster or we're not yet a member there's no result
+        return cluster == null ? null : cluster.getClusterName();
     }
 }

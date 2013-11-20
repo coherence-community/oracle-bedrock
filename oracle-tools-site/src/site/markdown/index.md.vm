@@ -43,7 +43,7 @@ To get started with [Oracle Tools][ORACLETOOLS] we recommend you read the follow
     will dramatically improve the your ability to use Oracle Tools and the
     benefits it provides.
 
-*   [An Introduction to Application Management (with Oracle Tools)](runtime/applications.html).
+*   [An Introduction to Application Management](runtime/applications.html).
 
     The Oracle Tools project provides an expressive mechanism for starting,
     stopping, isolating, monitoring and managing application processes at
@@ -53,6 +53,14 @@ To get started with [Oracle Tools][ORACLETOOLS] we recommend you read the follow
     process of developing concurrent and distributed applications tests,
     across platforms in an operating-system independent manner, without
     the need for scripting.
+
+*   [Using Oracle Tools with Coherence-based Applications](coherence/index.html).
+
+    The Coherence Module for Oracle Tools provides several extensions to the
+    out-of-the-box tools for managing applications at runtime.  These
+    extensions makes it effortless to develop unit and integration tests for
+    Coherence-based applications, including establishing and tearing down clusters
+    both in-process (container-mode) and natively (using local processes).
 
 <h4>Project Modules</h4>
 

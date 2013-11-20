@@ -30,31 +30,68 @@ import com.oracle.tools.runtime.java.JavaApplication;
 import org.hamcrest.Matcher;
 
 import static com.oracle.tools.deferred.DeferredHelper.ensure;
+import static com.oracle.tools.deferred.DeferredHelper.eventually;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
 /**
- * The {@link DeferredAssert} is a helper class that defines commonly used
- * "assertThat" methods for the purposes of unit, functional and integration
- * testing.
+ * A helper class that defines commonly used "assertThat" methods for the
+ * purposes of unit, functional and integration testing, most of which support
+ * working with {@link Deferred}s.
  * <p>
- * As of Oracle Tools 1.1.0, this class has been deprecated.   Developers
- * should instead use the {@link Eventually} class, which provides the
- * same functionality.
- * <p>
- * Copyright (c) 2012-2013. All Rights Reserved. Oracle Corporation.<br>
+ * Copyright (c) 2013. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Brian Oliver
  */
-@Deprecated
-public class DeferredAssert extends Eventually
+public class Eventually
 {
     /**
+     * Asserts that a value will eventually satisfy the specified {@link Matcher}.
+     * <p>
+     * Should the value be the result of a call to {@link DeferredHelper#invoking(Deferred)}
+     * the result is unwrapped into a {@link Deferred} that is then used for the assert.
+     *
+     * @param <T>       the type of value produced by the {@link Deferred}
+     *
+     * @param value     the value
+     * @param matcher   the {@link Matcher}
+     *
+     * @throws AssertionError if the assertion fails
+     */
+    public static <T> void assertThat(T          value,
+                                      Matcher<?> matcher) throws AssertionError
+    {
+        assertThat(null, eventually(value), matcher);
+    }
+
+
+    /**
+     * Asserts that a value will eventually satisfy the specified {@link Matcher}.
+     * <p>
+     * Should the value be the result of a call to {@link DeferredHelper#invoking(Deferred)}
+     * the result is unwrapped into a {@link Deferred} that is then used for the assert.
+     *
+     * @param <T>       the type of value produced by the {@link Deferred}
+     *
+     * @param message   the message for the AssertionError (<code>null</code> ok)
+     * @param value     the value
+     * @param matcher   the {@link Matcher}
+     *
+     * @throws AssertionError if the assertion fails
+     */
+    public static <T> void assertThat(String     message,
+                                      T          value,
+                                      Matcher<?> matcher) throws AssertionError
+    {
+        assertThat(message, eventually(value), matcher);
+    }
+
+
+    /**
      * Asserts that a {@link Deferred}, when it becomes available,
-     * will eventually (after the default amount of time) satisfy the
-     * specified {@link Matcher}.
+     * will eventually satisfy the specified {@link Matcher}.
      *
      * @param <T>       the type of value produced by the {@link Deferred}
      *
@@ -186,12 +223,13 @@ public class DeferredAssert extends Eventually
      * Asserts that the specified {@link Callable} submitted to the {@link JavaApplication}
      * will eventually match the specified matcher.
      *
-     * @param application
-     * @param callable
-     * @param matcher
-     * @param <T>
+     * @param <T>          the type of value produced by the {@link Deferred}
      *
-     * @throws AssertionError
+     * @param application  the {@link JavaApplication} to which the {@link Callable} will be submitted
+     * @param callable     the {@link Callable}
+     * @param matcher      the {@link Matcher} representing the desire condition to match
+     *
+     * @throws AssertionError  if the assertion fails
      */
     public static <T> void assertThat(JavaApplication<?> application,
                                       Callable<T>        callable,

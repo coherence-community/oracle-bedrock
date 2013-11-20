@@ -25,11 +25,10 @@
 
 package com.oracle.tools.runtime.network;
 
+import com.oracle.tools.deferred.Eventually;
+
 import org.junit.Test;
 
-import static com.oracle.tools.deferred.DeferredAssert.assertThat;
-
-import static com.oracle.tools.deferred.DeferredHelper.eventually;
 import static com.oracle.tools.deferred.DeferredHelper.invoking;
 
 import static org.hamcrest.Matchers.is;
@@ -56,6 +55,6 @@ public class AvailablePortIteratorTest
     {
         AvailablePortIterator iterator = new AvailablePortIterator(40000, 40100);
 
-        assertThat(eventually(invoking(iterator).hasNext()), is(true));
+        Eventually.assertThat(invoking(iterator).hasNext(), is(true));
     }
 }

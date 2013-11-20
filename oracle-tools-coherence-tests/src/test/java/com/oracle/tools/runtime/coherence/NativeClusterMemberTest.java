@@ -25,26 +25,8 @@
 
 package com.oracle.tools.runtime.coherence;
 
-import com.oracle.tools.runtime.console.SystemApplicationConsole;
-
-import com.oracle.tools.runtime.java.ContainerBasedJavaApplicationBuilder;
 import com.oracle.tools.runtime.java.JavaApplicationBuilder;
 import com.oracle.tools.runtime.java.NativeJavaApplicationBuilder;
-import com.oracle.tools.runtime.java.container.Container;
-
-import com.oracle.tools.runtime.network.AvailablePortIterator;
-
-import com.tangosol.net.*;
-
-import org.junit.Test;
-
-import static com.oracle.tools.deferred.DeferredAssert.assertThat;
-
-import static org.hamcrest.CoreMatchers.is;
-
-import java.io.Serializable;
-
-import java.util.concurrent.Callable;
 
 /**
  * Functional Test for {@link com.oracle.tools.runtime.coherence.ClusterMember}

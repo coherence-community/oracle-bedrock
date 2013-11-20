@@ -23,14 +23,14 @@ directory and run the following command:
     $ mvn install:install-file  \
           -DgroupId=com.oracle.coherence  \
           -DartifactId=coherence  \
-          -Dversion=3.7.1.9  \
+          -Dversion=3.7.1.10  \
           -Dfile=coherence.jar  \
           -Dpackaging=jar \
           -DgeneratePom=true
 
 **Note:** The `groupId`, `artifactId` and `version` are critically important. 
 
-Of course the above assumes that you are installing the Coherence 3.7.1.5 `jar` 
+Of course the above assumes that you are installing the Coherence 3.7.1.10 `jar`
 file. If you want to install one of the more recent releases, change the version 
 number in the command above accordingly.
 

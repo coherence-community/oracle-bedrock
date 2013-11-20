@@ -138,6 +138,11 @@ public class ClusterMemberSchema extends AbstractJavaApplicationSchema<ClusterMe
     public static final String PROPERTY_LOG_LEVEL = "tangosol.coherence.log.level";
 
     /**
+     * The tangosol.coherence.override property.
+     */
+    public static final String PROPERTY_OPERATIONAL_OVERRIDE = "tangosol.coherence.override";
+
+    /**
      * The tangosol.coherence.role property.
      */
     public static final String PROPERTY_ROLE_NAME = "tangosol.coherence.role";
@@ -253,6 +258,22 @@ public class ClusterMemberSchema extends AbstractJavaApplicationSchema<ClusterMe
     public ClusterMemberSchema setCacheConfigURI(String cacheConfigURI)
     {
         setSystemProperty(PROPERTY_CACHECONFIG, cacheConfigURI);
+
+        return this;
+    }
+
+
+    /**
+     * Sets the Operational Override URI for {@link ClusterMember}s
+     * created with this {@link ClusterMemberSchema}.
+     *
+     * @param operationalOverrideURI   the operational override URI
+     *
+     * @return The {@link ClusterMemberSchema}.
+     */
+    public ClusterMemberSchema setOperationalOverrideURI(String operationalOverrideURI)
+    {
+        setSystemProperty(PROPERTY_OPERATIONAL_OVERRIDE, operationalOverrideURI);
 
         return this;
     }
@@ -441,6 +462,21 @@ public class ClusterMemberSchema extends AbstractJavaApplicationSchema<ClusterMe
 
 
     /**
+     * Sets the localhost port for {@link ClusterMember}s created with this {@link ClusterMemberSchema}.
+     *
+     * @param localHostPorts
+     *
+     * @return The {@link ClusterMemberSchema}.
+     */
+    public ClusterMemberSchema setLocalHostPort(Iterator<Integer> localHostPorts)
+    {
+        setSystemProperty(PROPERTY_LOCALHOST_PORT, localHostPorts);
+
+        return this;
+    }
+
+
+    /**
      * Sets the log level for {@link ClusterMember}s created with this {@link ClusterMemberSchema}.
      *
      * @param level
@@ -506,11 +542,30 @@ public class ClusterMemberSchema extends AbstractJavaApplicationSchema<ClusterMe
 
     /**
      * Configures the {@link ClusterMemberSchema} so that when realized by a {@link JavaApplicationBuilder}
-     * the resulting {@link ClusterMember} will be running locally in single-server mode.
+     * the resulting {@link ClusterMember} will be running locally in local-host only mode.
+     * <p>
+     * This method is now deprecated.   Use {@link #useLocalHostMode} instead.
      *
      * @return The {@link ClusterMemberSchema}.
      */
+    @Deprecated
     public ClusterMemberSchema setSingleServerMode()
+    {
+        return useLocalHostMode();
+    }
+
+
+    /**
+     * Configures the {@link ClusterMemberSchema} so that when realized by a {@link JavaApplicationBuilder}
+     * the resulting {@link ClusterMember} will be running locally in local-host only mode in
+     * that the said {@link ClusterMember} may only cluster with other {@link ClusterMember}s
+     * on the same host (using localhost and the same port configuration).
+     * <p>
+     * This is typically used for running {@link ClusterMember}s locally.
+     *
+     * @return The {@link ClusterMemberSchema}.
+     */
+    public ClusterMemberSchema useLocalHostMode()
     {
         setLocalHostAddress(Constants.getLocalHost());
         setMulticastTTL(0);
@@ -533,7 +588,7 @@ public class ClusterMemberSchema extends AbstractJavaApplicationSchema<ClusterMe
 
 
     /**
-     * Sets the Coherence Well Known Address (WKA) Port
+     * Sets the Coherence Well Known Address (WKA) Port.
      *
      * @param port  The port
      *
@@ -544,6 +599,21 @@ public class ClusterMemberSchema extends AbstractJavaApplicationSchema<ClusterMe
         setLocalHostPort(port);
 
         return setSystemProperty(PROPERTY_WELL_KNOWN_ADDRESS_PORT, port);
+    }
+
+
+    /**
+     * Sets the Coherence Well Known Address (WKA) Port.
+     *
+     * @param ports  The port
+     *
+     * @return The {@link ClusterMemberSchema}.
+     */
+    public ClusterMemberSchema setWellKnownAddressPort(Iterator<Integer> ports)
+    {
+        setLocalHostPort(ports);
+
+        return setSystemProperty(PROPERTY_WELL_KNOWN_ADDRESS_PORT, ports);
     }
 
 

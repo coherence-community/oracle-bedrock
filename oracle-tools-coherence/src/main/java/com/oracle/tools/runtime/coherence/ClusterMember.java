@@ -29,10 +29,12 @@ import com.oracle.tools.runtime.Application;
 import com.oracle.tools.runtime.ApplicationConsole;
 import com.oracle.tools.runtime.LifecycleEventInterceptor;
 
+import com.oracle.tools.runtime.coherence.callables.GetClusterName;
 import com.oracle.tools.runtime.coherence.callables.GetClusterSize;
 import com.oracle.tools.runtime.coherence.callables.GetLocalMemberId;
 import com.oracle.tools.runtime.coherence.callables.GetLocalMemberRoleName;
 import com.oracle.tools.runtime.coherence.callables.GetLocalMemberSiteName;
+import com.oracle.tools.runtime.coherence.callables.IsServiceRunning;
 
 import com.oracle.tools.runtime.java.AbstractJavaApplication;
 import com.oracle.tools.runtime.java.JavaApplication;
@@ -228,5 +230,29 @@ public class ClusterMember extends AbstractJavaApplication<ClusterMember, JavaPr
     public String getSiteName()
     {
         return submit(new GetLocalMemberSiteName());
+    }
+
+
+    /**
+     * Obtains the cluster name for the local member.
+     *
+     * @return the site name
+     */
+    public String getClusterName()
+    {
+        return submit(new GetClusterName());
+    }
+
+
+    /**
+     * Determines if a specified service is being run by the {@link Application}.
+     *
+     * @param serviceName  the name of the service
+     *
+     * @return <code>true</code> if the service is running, <code>false</code> otherwise
+     */
+    public boolean isServiceRunning(String serviceName)
+    {
+        return submit(new IsServiceRunning(serviceName));
     }
 }

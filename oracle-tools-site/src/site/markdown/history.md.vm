@@ -15,27 +15,35 @@ reverse chronological order.
 
 *   No Changes.
 
-<h4>oracle-tools-all</h4>
-
-*   No Changes.
-
 <h4>oracle-tools-core</h4>
 
-*   [ORACLETOOLS-51](https://java.net/jira/browse/ORACLETOOLS-51): Introduced
-    RemoteExecutors Framework support interfaces and implementations.
+*   [ORACLETOOLS-49](https://java.net/jira/browse/ORACLETOOLS-49): Introduced
+    the concept of Capture to capture a single value from an underlying
+    Iterator.  This allows said values to be reused without causing new values
+    to the produced by the underlying Iterator.
 
-    Introduced the CompletionListener and ExceptionListener interfaces together
+*   [ORACLETOOLS-51](https://java.net/jira/browse/ORACLETOOLS-51): Introduced
+    the CompletionListener and ExceptionListener interfaces together
     with FutureCompletionListener and DeferredCompletionListener implementations
-    for the RemoteExecutor Framework.
+    for the RemoteExecutor framework.
 
 <h4>oracle-tools-runtime</h4>
 
 *   [ORACLETOOLS-51](https://java.net/jira/browse/ORACLETOOLS-51): Introduced
-    RemoteExecutors Framework to support remote execution of Callable and Runnables
-    in Java-based Applications.
+    the RemoteExecutor framework to support remote execution of Callable and
+    Runnables in Java-based Applications.   Implemented support for both
+    Container-based and Native Java Applications.
 
-    Introduced com.oracle.tools.runtime.concurrent RemoteExecution framework
-    and Socket-based implementation.
+    eg: application.submit(Callable<T>, CompletionListener<T>)
+
+    Stateful Callables / Runnables will need to be Serializable in order to
+    be successfully executed correctly, for both in-process/Container-based
+    applications and Remote/Native applications.
+
+    Introduced the com.oracle.tools.runtime.concurrent package together with
+    a Socket-based implementation.
+
+    This framework is also used to implement "orphan" protection (see below).
 
 *   [ORACLETOOLS-52](https://java.net/jira/browse/ORACLETOOLS-52): Implemented
     "Orphan Protection" for Java-based Applications.
@@ -44,13 +52,13 @@ reverse chronological order.
     be "orphaned" if the starting process terminates (deliberately or accidentally).
 
     Added new options to the NativeJavaApplicationBuilder to selectively enable
-    orphan protection (on by default) - if a parent process terminates, child
-    processes terminate.
+    orphan protection (enabled by default) - if a parent process terminates,
+    child processes terminate.
 
 <h4>oracle-tools-runtime-tests</h4>
 
 *   [ORACLETOOLS-51](https://java.net/jira/browse/ORACLETOOLS-51): Introduced
-    RemoteExecutors Framework tests.
+    RemoteExecutors framework tests.
 
 *   [ORACLETOOLS-52](https://java.net/jira/browse/ORACLETOOLS-52): Introduced
     "Orphan Protection" tests.
@@ -59,10 +67,17 @@ reverse chronological order.
 
 *   [ORACLETOOLS-54](https://java.net/jira/browse/ORACLETOOLS-54): Introduced
     the ability to use Deferreds to represent Remote Callables together with
-    a new deferred assertThat method to allow deferred asserts based on
-    remotely executed callables.
+    a new Eventually.assertThat method to allow deferred asserts
+    based on submitted Callables.
 
-    eg:  assertThat(application, callable, matcher);
+    eg:  Eventually.assertThat(application, callable, matcher);
+
+    will try to eventually match the result of the specified Callable
+    when executed, possibly numerous times, with the provided application.
+
+*   [ORACLETOOLS-59](https://java.net/jira/browse/ORACLETOOLS-59): Introduced
+    the com.oracle.tools.deferred.Eventually static class to replace the
+    now deprecated DeferredAssert class.
 
 <h4>oracle-tools-coherence</h4>
 
@@ -72,19 +87,43 @@ reverse chronological order.
 
 *   [ORACLETOOLS-53](https://java.net/jira/browse/ORACLETOOLS-53): Refactor
     Coherence-based Tools to use RemoteExecutors to determine Member state
-    instead of relying on JMX/MBeans.
+    instead of relying on JMX/MBeans.   It's now possible to use and control
+    ClusterMembers and Clusters with JMX disabled.
 
 *   [ORACLETOOLS-55](https://java.net/jira/browse/ORACLETOOLS-55): Upgraded
     to use Coherence 3.7.1.10.
 
+*   [ORACLETOOLS-56](https://java.net/jira/browse/ORACLETOOLS-56): Introduced
+    the ability to ask the name of a ClusterMember cluster.
+
+*   [ORACLETOOLS-57](https://java.net/jira/browse/ORACLETOOLS-57): Introduced
+    the ability specify the operational override for a ClusterMember.
+
+*   [ORACLETOOLS-58](https://java.net/jira/browse/ORACLETOOLS-58): Introduced
+    the ability to ask a ClusterMember if a particular service is running.
+
 <h4>oracle-tools-coherence-tests</h4>
 
-*   [ORACLETOOLS-54](https://java.net/jira/browse/ORACLETOOLS-54): Introduced
-    a new test using Remote Callables to assert singleton cluster creation.
+*   Refactored existing tests to take advantage of the new Remote Executables
+    framework and avoid the requirement to use and configure JMX.
+
+*   Refactored existing tests to take advantage of the new Eventually.assertThat
+    method.
+
+*   Refactored existing tests to take advantage of the Captures when creating
+    Clusters using a ClusterBuilder.
+
+*   Introduced new tests for the new features in the oracle-tools-coherence
+    package.
 
 <h4>oracle-tools-coherence-testing-support</h4>
 
 *   No Changes.
+
+<h4>oracle-tools-site</h4>
+
+*   [ORACLETOOLS-47](https://java.net/jira/browse/ORACLETOOLS-47): Introduced
+    initial Coherence Module for Oracle Tools documentation.
 
 
 --------------------------------------------------------------------------------

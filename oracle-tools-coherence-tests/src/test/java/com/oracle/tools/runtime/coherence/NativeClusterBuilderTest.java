@@ -25,7 +25,6 @@
 
 package com.oracle.tools.runtime.coherence;
 
-import com.oracle.tools.runtime.java.ContainerBasedJavaApplicationBuilder;
 import com.oracle.tools.runtime.java.JavaApplicationBuilder;
 import com.oracle.tools.runtime.java.NativeJavaApplicationBuilder;
 

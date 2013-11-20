@@ -47,8 +47,8 @@ as *Applications*.
 
 Central to the operation of the framework are the following three concepts:
 
-1.  **Schemas:**  Define the runtime characteristics of *Applications* when they
-    are created.
+1.  **Schemas:**  Define the desired runtime characteristics of *Applications* when
+    they are created.
 
     The `com.oracle.tools.runtime.ApplicationSchema` interface defines the minimal
     requirements of a Schema.

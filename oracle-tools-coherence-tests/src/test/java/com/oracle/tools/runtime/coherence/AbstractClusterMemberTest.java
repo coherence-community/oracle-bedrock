@@ -26,27 +26,19 @@
 package com.oracle.tools.runtime.coherence;
 
 import com.oracle.tools.junit.AbstractTest;
-
 import com.oracle.tools.runtime.coherence.ClusterMemberSchema.JMXManagementMode;
+import com.oracle.tools.runtime.coherence.callables.GetClusterName;
 import com.oracle.tools.runtime.coherence.callables.GetClusterSize;
 import com.oracle.tools.runtime.coherence.callables.GetLocalMemberId;
-
 import com.oracle.tools.runtime.console.SystemApplicationConsole;
-
 import com.oracle.tools.runtime.java.JavaApplicationBuilder;
 import com.oracle.tools.runtime.java.container.Container;
-
 import com.oracle.tools.runtime.network.AvailablePortIterator;
-
 import junit.framework.Assert;
-
 import org.junit.Test;
 
-import static com.oracle.tools.deferred.DeferredAssert.assertThat;
-
-import static com.oracle.tools.deferred.DeferredHelper.eventually;
 import static com.oracle.tools.deferred.DeferredHelper.invoking;
-
+import static com.oracle.tools.deferred.Eventually.assertThat;
 import static org.hamcrest.CoreMatchers.is;
 
 /**
@@ -79,7 +71,7 @@ public abstract class AbstractClusterMemberTest extends AbstractTest
         AvailablePortIterator availablePorts = Container.getAvailablePorts();
 
         ClusterMemberSchema schema =
-            new ClusterMemberSchema().setClusterPort(availablePorts).setSingleServerMode().setRoleName("test-role")
+            new ClusterMemberSchema().setClusterPort(availablePorts).useLocalHostMode().setRoleName("test-role")
                 .setSiteName("test-site").setJMXSupport(false).setJMXPort(availablePorts)
                 .setJMXManagementMode(JMXManagementMode.LOCAL_ONLY);
 
@@ -91,7 +83,7 @@ public abstract class AbstractClusterMemberTest extends AbstractTest
 
             member = builder.realize(schema, "TEST", new SystemApplicationConsole());
 
-            assertThat(eventually(invoking(member).getClusterSize()), is(1));
+            assertThat(invoking(member).getClusterSize(), is(1));
 
             Assert.assertEquals("test-role", member.getRoleName());
             Assert.assertEquals("test-site", member.getSiteName());
@@ -118,7 +110,7 @@ public abstract class AbstractClusterMemberTest extends AbstractTest
         AvailablePortIterator availablePorts = Container.getAvailablePorts();
 
         ClusterMemberSchema schema =
-            new ClusterMemberSchema().setClusterPort(availablePorts).setSingleServerMode().setRoleName("test-role")
+            new ClusterMemberSchema().setClusterPort(availablePorts).useLocalHostMode().setRoleName("test-role")
                 .setSiteName("test-site").setDiagnosticsEnabled(true);
 
         ClusterMember                                              member  = null;
@@ -131,7 +123,7 @@ public abstract class AbstractClusterMemberTest extends AbstractTest
                 System.out.println("Building Instance: " + i);
                 member = builder.realize(schema, "TEST");
 
-                assertThat(eventually(invoking(member).getClusterSize()), is(1));
+                assertThat(invoking(member).getClusterSize(), is(1));
 
                 Assert.assertEquals("test-role", member.getRoleName());
                 Assert.assertEquals("test-site", member.getSiteName());
@@ -158,7 +150,7 @@ public abstract class AbstractClusterMemberTest extends AbstractTest
         AvailablePortIterator availablePorts = Container.getAvailablePorts();
 
         ClusterMemberSchema schema =
-            new ClusterMemberSchema().setClusterPort(availablePorts).setSingleServerMode().setDiagnosticsEnabled(true);
+            new ClusterMemberSchema().setClusterPort(availablePorts).useLocalHostMode().setDiagnosticsEnabled(true);
 
         JavaApplicationBuilder<ClusterMember, ClusterMemberSchema> builder = newJavaApplicationBuilder();
         ClusterMember                                              member  = null;
@@ -169,6 +161,45 @@ public abstract class AbstractClusterMemberTest extends AbstractTest
 
             assertThat(member, new GetLocalMemberId(), is(1));
             assertThat(member, new GetClusterSize(), is(1));
+        }
+        finally
+        {
+            if (member != null)
+            {
+                member.destroy();
+            }
+        }
+    }
+
+
+    /**
+     * Ensure that we can start and stop a Coherence Cluster Member
+     * that uses a specific operational override.
+     *
+     * @throws Exception
+     */
+    @Test
+    public void shouldUseCustomOperationalOverride() throws Exception
+    {
+        AvailablePortIterator availablePorts = Container.getAvailablePorts();
+
+        ClusterMemberSchema schema =
+                new ClusterMemberSchema()
+                        .setClusterPort(availablePorts)
+                        .setOperationalOverrideURI("test-operational-override.xml")
+                        .useLocalHostMode()
+                        .setDiagnosticsEnabled(true);
+
+        JavaApplicationBuilder<ClusterMember, ClusterMemberSchema> builder = newJavaApplicationBuilder();
+        ClusterMember                                              member  = null;
+
+        try
+        {
+            member = builder.realize(schema, "TEST");
+
+            assertThat(member, new GetLocalMemberId(), is(1));
+            assertThat(member, new GetClusterSize(), is(1));
+            assertThat(member, new GetClusterName(), is("MyCluster"));
         }
         finally
         {

@@ -25,30 +25,8 @@
 
 package com.oracle.tools.runtime.coherence;
 
-import com.oracle.tools.junit.AbstractTest;
-
-import com.oracle.tools.runtime.PropertiesBuilder;
-
-import com.oracle.tools.runtime.coherence.ClusterMemberSchema.JMXManagementMode;
-
-import com.oracle.tools.runtime.console.SystemApplicationConsole;
-
 import com.oracle.tools.runtime.java.ContainerBasedJavaApplicationBuilder;
 import com.oracle.tools.runtime.java.JavaApplicationBuilder;
-import com.oracle.tools.runtime.java.container.Container;
-
-import com.oracle.tools.runtime.network.AvailablePortIterator;
-
-import junit.framework.Assert;
-
-import org.junit.Test;
-
-import static com.oracle.tools.deferred.DeferredAssert.assertThat;
-
-import static com.oracle.tools.deferred.DeferredHelper.eventually;
-import static com.oracle.tools.deferred.DeferredHelper.invoking;
-
-import static org.hamcrest.CoreMatchers.is;
 
 /**
  * Functional Test for {@link ClusterBuilder} using a {@link ContainerBasedJavaApplicationBuilder}.
