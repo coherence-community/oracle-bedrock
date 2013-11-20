@@ -215,7 +215,7 @@
                 <version>${maven.release.plugin.version}</version>
                 <configuration>
                     <autoVersionSubmodules>true</autoVersionSubmodules>
-                    <arguments></arguments>
+                    <goals>deploy</goals>
                 </configuration>
             </plugin>
 
