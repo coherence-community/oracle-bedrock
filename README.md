@@ -10,8 +10,8 @@ contributors, maintainers, issue tracking, releases, source code and contact
 information is available at:
 [http://java.net/projects/oracletools](http://java.net/projects/oracletools)
 
-Detailed project documentation for the latest release (1.0.0) is available
-here: [http://coherence-community.github.com/oracle-tools/1.0.0/](http://coherence-community.github.com/oracle-tools/1.0.0/)
+Detailed project documentation for the latest release (1.1.0) is available
+here: [http://coherence-community.github.com/oracle-tools/1.1.0/](http://coherence-community.github.com/oracle-tools/1.1.0/)
 
 > **NOTE**
 >
