@@ -34,6 +34,7 @@ import com.oracle.tools.runtime.coherence.callables.GetClusterSize;
 import com.oracle.tools.runtime.coherence.callables.GetLocalMemberId;
 import com.oracle.tools.runtime.coherence.callables.GetLocalMemberRoleName;
 import com.oracle.tools.runtime.coherence.callables.GetLocalMemberSiteName;
+import com.oracle.tools.runtime.coherence.callables.GetServiceStatus;
 import com.oracle.tools.runtime.coherence.callables.IsServiceRunning;
 
 import com.oracle.tools.runtime.java.AbstractJavaApplication;
@@ -58,6 +59,60 @@ import javax.management.ObjectName;
  */
 public class ClusterMember extends AbstractJavaApplication<ClusterMember, JavaProcess>
 {
+    /**
+     * The high availability status of a Coherence Service.
+     *
+     * (this is typically only useful for Partition-based Services)
+     */
+    public enum ServiceStatus
+    {
+        /**
+         * The service is endangered.  Any loss will cause data/computation loss.
+         */
+        ENDANGERED,
+
+        /**
+         * The service is machine-safe.  Any machine may be safely shutdown without loss.
+         */
+        MACHINE_SAFE,
+
+        /**
+         * The service is node-safe.  Any node may be safely shutdown without loss.
+         */
+        NODE_SAFE,
+
+        /**
+         * The service has been orphaned.  Data/computational services have been lost.
+         */
+        ORPHANED,
+
+        /**
+         * The service is rack-safe.  Any rack may be safely shutdown without loss.
+         */
+        RACK_SAFE,
+
+        /**
+         * The service is site-safe.  Any site may be safely shutdown without loss.
+         */
+        SITE_SAFE,
+
+        /**
+         * The service is running (but no other information is available).
+         */
+        RUNNING,
+
+        /**
+         * The service is not running.
+         */
+        STOPPED,
+
+        /**
+         * The service is running, but the actual status is undefined / unknown.
+         */
+        UNKNOWN
+    }
+
+
     /**
      * The MBean name of the Coherence Cluster MBean.
      */
@@ -254,5 +309,18 @@ public class ClusterMember extends AbstractJavaApplication<ClusterMember, JavaPr
     public boolean isServiceRunning(String serviceName)
     {
         return submit(new IsServiceRunning(serviceName));
+    }
+
+
+    /**
+     * Determines the status of a service being run by the {@link Application}.
+     *
+     * @param serviceName  the name of the service
+     *
+     * @return the {@link ServiceStatus}
+     */
+    public ServiceStatus getServiceStatus(String serviceName)
+    {
+        return submit(new GetServiceStatus(serviceName));
     }
 }

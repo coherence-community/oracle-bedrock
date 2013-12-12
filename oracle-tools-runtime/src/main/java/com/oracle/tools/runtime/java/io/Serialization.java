@@ -53,7 +53,7 @@ public class Serialization
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         ObjectOutputStream    objectOutputStream    = new ObjectOutputStream(byteArrayOutputStream);
 
-        if (object instanceof Serializable)
+        if (object instanceof Serializable || object == null)
         {
             objectOutputStream.writeBoolean(true);
             objectOutputStream.writeObject(object);

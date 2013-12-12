@@ -9,7 +9,28 @@ reverse chronological order.
 
 <h4>Source and Documentation Contributors</h4>
 
-*  Brian Oliver
+*   Brian Oliver
+
+<h4>Global and Cross-Module Changes</h4>
+
+*   No Changes.
+
+<h4>oracle-tools-coherence</h4>
+
+*   [ORACLETOOLS-6](https://java.net/jira/browse/ORACLETOOLS-6): Introduced
+    the ability to determine the status of a service from a ClusterMember
+    with the ClusterMember.getServiceStatus(String) method.
+
+*   [ORACLETOOLS-62](https://java.net/jira/browse/ORACLETOOLS-62): Upgraded
+    to use Coherence 3.7.1.11
+
+--------------------------------------------------------------------------------
+
+<h3>Version: 1.1.0 on 2013-11-20 17:51</h3>
+
+<h4>Source and Documentation Contributors</h4>
+
+*   Brian Oliver
 
 <h4>Global and Cross-Module Changes</h4>
 

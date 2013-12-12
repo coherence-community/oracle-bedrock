@@ -25,20 +25,31 @@
 
 package com.oracle.tools.runtime.coherence;
 
+import com.oracle.tools.deferred.Eventually;
+
 import com.oracle.tools.junit.AbstractTest;
+
 import com.oracle.tools.runtime.coherence.ClusterMemberSchema.JMXManagementMode;
 import com.oracle.tools.runtime.coherence.callables.GetClusterName;
 import com.oracle.tools.runtime.coherence.callables.GetClusterSize;
 import com.oracle.tools.runtime.coherence.callables.GetLocalMemberId;
+import com.oracle.tools.runtime.coherence.callables.GetServiceStatus;
+
 import com.oracle.tools.runtime.console.SystemApplicationConsole;
+
 import com.oracle.tools.runtime.java.JavaApplicationBuilder;
 import com.oracle.tools.runtime.java.container.Container;
+
 import com.oracle.tools.runtime.network.AvailablePortIterator;
+
 import junit.framework.Assert;
+
 import org.junit.Test;
 
 import static com.oracle.tools.deferred.DeferredHelper.invoking;
+
 import static com.oracle.tools.deferred.Eventually.assertThat;
+
 import static org.hamcrest.CoreMatchers.is;
 
 /**
@@ -161,6 +172,7 @@ public abstract class AbstractClusterMemberTest extends AbstractTest
 
             assertThat(member, new GetLocalMemberId(), is(1));
             assertThat(member, new GetClusterSize(), is(1));
+            assertThat(member, new GetServiceStatus("DistributedCache"), is(ClusterMember.ServiceStatus.ENDANGERED));
         }
         finally
         {
@@ -184,11 +196,9 @@ public abstract class AbstractClusterMemberTest extends AbstractTest
         AvailablePortIterator availablePorts = Container.getAvailablePorts();
 
         ClusterMemberSchema schema =
-                new ClusterMemberSchema()
-                        .setClusterPort(availablePorts)
-                        .setOperationalOverrideURI("test-operational-override.xml")
-                        .useLocalHostMode()
-                        .setDiagnosticsEnabled(true);
+            new ClusterMemberSchema().setClusterPort(availablePorts)
+                .setOperationalOverrideURI("test-operational-override.xml").useLocalHostMode()
+                .setDiagnosticsEnabled(true);
 
         JavaApplicationBuilder<ClusterMember, ClusterMemberSchema> builder = newJavaApplicationBuilder();
         ClusterMember                                              member  = null;

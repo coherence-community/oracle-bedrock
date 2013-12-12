@@ -466,10 +466,15 @@ public class ContainerBasedJavaApplicationBuilder<A extends JavaApplication<A>, 
                                 // then call the Callable as usual
                                 T result = callable.call();
 
+                                // serialize the result (so that we can use the application class loader)
+                                byte[] serializedResult = Serialization.toByteArray(result);
+
                                 // notify the listener (if there is one) of the result
                                 if (listener != null)
                                 {
-                                    listener.onCompletion(result);
+                                    listener.onCompletion((T) Serialization.fromByteArray(serializedResult,
+                                                                                          Object.class,
+                                                                                          originalClassLoader));
                                 }
                             }
                             catch (Exception e)
