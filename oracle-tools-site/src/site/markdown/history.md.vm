@@ -29,6 +29,11 @@ reverse chronological order.
     ApplicationConsole as this may lead to I/O exceptions should the said
     ApplicationConsole be shared with other Applications/ApplicationGroups.
 
+*   [ORACLETOOLS-65](https://java.net/jira/browse/ORACLETOOLS-65): Introduced
+    the ability for AbstractApplicationGroups to add new and remove existing
+    Applications dynamically at runtime.  This included making
+    AbstractApplicationGroups thread-safe.
+
 <h4>oracle-tools-coherence</h4>
 
 *   [ORACLETOOLS-6](https://java.net/jira/browse/ORACLETOOLS-6): Introduced

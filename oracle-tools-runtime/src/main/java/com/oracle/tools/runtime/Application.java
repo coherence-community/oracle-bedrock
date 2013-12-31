@@ -98,7 +98,7 @@ public interface Application<A> extends Closeable
      * To determine the exit value of the terminated application use {@link #exitValue()}.
      */
     @Override
-    void close();
+    public void close();
 
 
     /**

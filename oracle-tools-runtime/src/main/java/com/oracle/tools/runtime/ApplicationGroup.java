@@ -28,7 +28,8 @@ package com.oracle.tools.runtime;
 import java.io.Closeable;
 
 /**
- * An {@link ApplicationGroup} represents a collection of related {@link Application}s at runtime.
+ * An {@link ApplicationGroup} represents a collection of related {@link Application}s
+ * at runtime.
  * <p>
  * {@link ApplicationGroup}s are created using {@link ApplicationGroupBuilder}s.
  *
@@ -65,5 +66,5 @@ public interface ApplicationGroup<A extends Application<A>> extends Iterable<A>,
      * </p>
      */
     @Override
-    void close();
+    public void close();
 }
