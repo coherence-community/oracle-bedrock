@@ -274,18 +274,13 @@ public class ContainerBasedJavaApplicationBuilder<A extends JavaApplication<A>, 
         }
 
 
-        /**
-         * {@inheritDoc}
-         */
+        @Override
         public ClassLoader getClassLoader()
         {
             return m_classLoader;
         }
 
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public long getId()
         {
@@ -293,9 +288,6 @@ public class ContainerBasedJavaApplicationBuilder<A extends JavaApplication<A>, 
         }
 
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public OutputStream getOutputStream()
         {
@@ -303,9 +295,6 @@ public class ContainerBasedJavaApplicationBuilder<A extends JavaApplication<A>, 
         }
 
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public InputStream getInputStream()
         {
@@ -313,9 +302,6 @@ public class ContainerBasedJavaApplicationBuilder<A extends JavaApplication<A>, 
         }
 
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public InputStream getErrorStream()
         {
@@ -323,9 +309,6 @@ public class ContainerBasedJavaApplicationBuilder<A extends JavaApplication<A>, 
         }
 
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public int waitFor() throws InterruptedException
         {
@@ -356,9 +339,6 @@ public class ContainerBasedJavaApplicationBuilder<A extends JavaApplication<A>, 
         }
 
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public int exitValue()
         {
@@ -383,11 +363,8 @@ public class ContainerBasedJavaApplicationBuilder<A extends JavaApplication<A>, 
         }
 
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
-        public void destroy()
+        public void close()
         {
             if (m_controller != null)
             {
@@ -413,9 +390,14 @@ public class ContainerBasedJavaApplicationBuilder<A extends JavaApplication<A>, 
         }
 
 
-        /**
-         * {@inheritDoc}
-         */
+        @Override
+        @Deprecated
+        public void destroy()
+        {
+            close();
+        }
+
+
         @Override
         public <T> void submit(Callable<T>                 callable,
                                final CompletionListener<T> listener)
@@ -508,9 +490,6 @@ public class ContainerBasedJavaApplicationBuilder<A extends JavaApplication<A>, 
         }
 
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public void submit(Runnable runnable) throws IllegalStateException
         {
@@ -624,9 +603,6 @@ public class ContainerBasedJavaApplicationBuilder<A extends JavaApplication<A>, 
         }
 
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public void start(ControllableApplication  application,
                           CompletionListener<Void> listener)
@@ -645,9 +621,6 @@ public class ContainerBasedJavaApplicationBuilder<A extends JavaApplication<A>, 
         }
 
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public void destroy(ControllableApplication  application,
                             CompletionListener<Void> listener)
@@ -754,9 +727,6 @@ public class ContainerBasedJavaApplicationBuilder<A extends JavaApplication<A>, 
         }
 
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public void start(ControllableApplication  application,
                           CompletionListener<Void> listener)
@@ -767,9 +737,6 @@ public class ContainerBasedJavaApplicationBuilder<A extends JavaApplication<A>, 
         }
 
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public void destroy(ControllableApplication  application,
                             CompletionListener<Void> listener)

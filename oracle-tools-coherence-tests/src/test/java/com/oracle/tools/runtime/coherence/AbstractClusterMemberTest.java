@@ -103,7 +103,7 @@ public abstract class AbstractClusterMemberTest extends AbstractTest
         {
             if (member != null)
             {
-                member.destroy();
+                member.close();
             }
         }
     }
@@ -143,7 +143,7 @@ public abstract class AbstractClusterMemberTest extends AbstractTest
             {
                 if (member != null)
                 {
-                    member.destroy();
+                    member.close();
                 }
             }
         }
@@ -178,7 +178,7 @@ public abstract class AbstractClusterMemberTest extends AbstractTest
         {
             if (member != null)
             {
-                member.destroy();
+                member.close();
             }
         }
     }
@@ -215,7 +215,7 @@ public abstract class AbstractClusterMemberTest extends AbstractTest
         {
             if (member != null)
             {
-                member.destroy();
+                member.close();
             }
         }
     }

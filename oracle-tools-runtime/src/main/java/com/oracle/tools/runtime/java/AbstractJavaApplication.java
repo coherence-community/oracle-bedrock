@@ -364,11 +364,8 @@ public abstract class AbstractJavaApplication<A extends JavaApplication<A>, P ex
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public int destroy()
+    public void close()
     {
         // close the JMXConnector (if we've got one)
         JMXConnector jmxConnector = m_cachedJMXConnector.release();
@@ -385,6 +382,6 @@ public abstract class AbstractJavaApplication<A extends JavaApplication<A>, P ex
             }
         }
 
-        return super.destroy();
+        super.close();
     }
 }

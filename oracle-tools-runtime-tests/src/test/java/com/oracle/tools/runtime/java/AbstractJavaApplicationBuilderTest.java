@@ -125,7 +125,7 @@ public abstract class AbstractJavaApplicationBuilderTest extends AbstractTest
 
         assertThat(application.getId(), is(getProcessIdFor(application)));
 
-        application.destroy();
+        application.close();
     }
 
 
@@ -170,7 +170,7 @@ public abstract class AbstractJavaApplicationBuilderTest extends AbstractTest
 
         assertThat(application.getId(), is(getProcessIdFor(application)));
 
-        application.destroy();
+        application.close();
     }
 
 
@@ -209,7 +209,7 @@ public abstract class AbstractJavaApplicationBuilderTest extends AbstractTest
         {
             if (application != null)
             {
-                application.destroy();
+                application.close();
             }
         }
     }

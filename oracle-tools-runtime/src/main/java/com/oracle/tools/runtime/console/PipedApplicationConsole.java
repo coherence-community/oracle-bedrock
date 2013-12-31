@@ -75,9 +75,6 @@ public class PipedApplicationConsole implements ApplicationConsole
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public PrintWriter getOutputWriter()
     {
@@ -97,9 +94,6 @@ public class PipedApplicationConsole implements ApplicationConsole
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public PrintWriter getErrorWriter()
     {
@@ -119,9 +113,6 @@ public class PipedApplicationConsole implements ApplicationConsole
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Reader getInputReader()
     {
@@ -141,9 +132,6 @@ public class PipedApplicationConsole implements ApplicationConsole
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void close()
     {

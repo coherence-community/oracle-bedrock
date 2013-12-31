@@ -130,9 +130,9 @@ public class AbstractApplicationTest
 
         AbstractApplication application = new AbstractApplicationStub(process, applicationName, console, properties);
 
-        application.destroy();
+        application.close();
 
-        verify(process).destroy();
+        verify(process).close();
     }
 
 

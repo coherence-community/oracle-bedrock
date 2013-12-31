@@ -108,7 +108,7 @@ public class ContainerBasedJavaProcessTest extends AbstractTest
         }
         finally
         {
-            process.destroy();
+            process.close();
         }
     }
 
@@ -150,7 +150,7 @@ public class ContainerBasedJavaProcessTest extends AbstractTest
         }
         finally
         {
-            process.destroy();
+            process.close();
         }
     }
 
@@ -192,7 +192,7 @@ public class ContainerBasedJavaProcessTest extends AbstractTest
         }
         finally
         {
-            process.destroy();
+            process.close();
         }
     }
 
@@ -223,7 +223,7 @@ public class ContainerBasedJavaProcessTest extends AbstractTest
 
             assertFalse(InvocationTracingApplication.getMethodInvocations().iterator().hasNext());
 
-            process.destroy();
+            process.close();
 
             Iterator<MethodInvocation> iterator = InvocationTracingApplication.getMethodInvocations().iterator();
 
@@ -236,7 +236,7 @@ public class ContainerBasedJavaProcessTest extends AbstractTest
         }
         finally
         {
-            process.destroy();
+            process.close();
         }
     }
 
@@ -273,7 +273,7 @@ public class ContainerBasedJavaProcessTest extends AbstractTest
         }
         finally
         {
-            process.destroy();
+            process.close();
         }
     }
 }

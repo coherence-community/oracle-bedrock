@@ -105,7 +105,7 @@ public abstract class AbstractClusterBuilderTest extends AbstractTest
         {
             if (cluster != null)
             {
-                cluster.destroy();
+                cluster.close();
             }
         }
     }
@@ -174,7 +174,7 @@ public abstract class AbstractClusterBuilderTest extends AbstractTest
         {
             if (cluster != null)
             {
-                cluster.destroy();
+                cluster.close();
             }
         }
     }
@@ -219,7 +219,7 @@ public abstract class AbstractClusterBuilderTest extends AbstractTest
         {
             if (cluster != null)
             {
-                cluster.destroy();
+                cluster.close();
             }
         }
     }

@@ -110,10 +110,10 @@ public class AbstractApplicationGroupTest
 
         AbstractApplicationGroup group = new AbstractApplicationGroupStub(members);
 
-        group.destroy();
+        group.close();
 
-        verify(memberOne).destroy();
-        verify(memberTwo).destroy();
+        verify(memberOne).close();
+        verify(memberTwo).close();
     }
 
 

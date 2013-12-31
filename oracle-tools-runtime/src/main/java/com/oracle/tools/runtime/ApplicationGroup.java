@@ -25,6 +25,8 @@
 
 package com.oracle.tools.runtime;
 
+import java.io.Closeable;
+
 /**
  * An {@link ApplicationGroup} represents a collection of related {@link Application}s at runtime.
  * <p>
@@ -32,17 +34,36 @@ package com.oracle.tools.runtime;
  *
  * @param <A>  The type of the {@link Application}
  * <p>
- * Copyright (c) 2011. All Rights Reserved. Oracle Corporation.<br>
+ * Copyright (c) 2011-2014. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Brian Oliver
  */
-public interface ApplicationGroup<A extends Application<A>> extends Iterable<A>
+public interface ApplicationGroup<A extends Application<A>> extends Iterable<A>, Closeable
 {
     /**
+     * <b>WARNING:</b>This method is now deprecated.  It is replaced by {@link #close()}.
+     * <p>
      * Destroys all of the {@link Application}s in the {@link ApplicationGroup}.
      * Upon returning from this method you can safely assume all
      * {@link Application}s in the {@link ApplicationGroup} are no longer running.
+     *
+     * @deprecated This method has been replaced by {@link #close()}
      */
+    @Deprecated
     public void destroy();
+
+
+    /**
+     * Closes the {@link ApplicationGroup} including all of the {@link Application}s
+     * that are part of the {@link ApplicationGroup}.
+     * <p>
+     * Upon returning it is safe to assume that all previously running
+     * {@link Application}s have been closed.
+     * <p>
+     * If the {@link ApplicationGroup} is already closed, calling this method has no effect.
+     * </p>
+     */
+    @Override
+    void close();
 }

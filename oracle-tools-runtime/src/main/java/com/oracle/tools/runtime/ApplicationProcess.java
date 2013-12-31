@@ -25,6 +25,7 @@
 
 package com.oracle.tools.runtime;
 
+import java.io.Closeable;
 import java.io.InputStream;
 import java.io.OutputStream;
 
@@ -37,16 +38,16 @@ import java.io.OutputStream;
  * including those running on the local operating system, on a remote operating
  * system, with in a container and/or multi-tenant virtualized/cloud environment.
  * <p>
- * Typically no one should use this interface directly as the {@link Application}
- * interface provides both higher-level concepts and increased functionality
- * over that which is defined here.
+ * Typically application developers would not use this interface directly as
+ * the {@link Application} interface provides both higher-level concepts and
+ * increased functionality over that of which is defined here.
  * <p>
  * Copyright (c) 2013. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Brian Oliver
  */
-public interface ApplicationProcess
+public interface ApplicationProcess extends Closeable
 {
     /**
      * Determines the {@link ApplicationProcess} identifier.
@@ -61,11 +62,27 @@ public interface ApplicationProcess
 
 
     /**
+     * <b>WARNING:</b>This method is now deprecated.  It is replaced by {@link #close()}.
+     * <p>>
      * Attempts to kill the executing {@link ApplicationProcess}.  If the
      * {@link ApplicationProcess} has already terminated, calling this method
      * has no effect.
+     *
+     * @deprecated This method has been replaced by {@link #close()}
      */
+    @Deprecated
     public void destroy();
+
+
+    /**
+     * Closes the {@link ApplicationProcess} and releases all resources maintained
+     * by the {@link ApplicationProcess}.
+     * <p>
+     * If the {@link ApplicationProcess} is already closed, calling
+     * this method has no effect.
+     */
+    @Override
+    public void close();
 
 
     /**

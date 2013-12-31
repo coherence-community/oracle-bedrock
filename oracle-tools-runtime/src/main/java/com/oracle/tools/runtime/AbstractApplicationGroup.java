@@ -25,6 +25,8 @@
 
 package com.oracle.tools.runtime;
 
+import java.io.IOException;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -103,9 +105,6 @@ public abstract class AbstractApplicationGroup<A extends Application<A>> impleme
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Iterator<A> iterator()
     {
@@ -113,11 +112,8 @@ public abstract class AbstractApplicationGroup<A extends Application<A>> impleme
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public void destroy()
+    public void close()
     {
         for (A application : m_applications.values())
         {
@@ -125,7 +121,7 @@ public abstract class AbstractApplicationGroup<A extends Application<A>> impleme
             {
                 try
                 {
-                    application.destroy();
+                    application.close();
                 }
                 catch (Exception e)
                 {
@@ -136,5 +132,13 @@ public abstract class AbstractApplicationGroup<A extends Application<A>> impleme
 
         // now remove the applications
         m_applications.clear();
+    }
+
+
+    @Override
+    @Deprecated
+    public void destroy()
+    {
+        close();
     }
 }

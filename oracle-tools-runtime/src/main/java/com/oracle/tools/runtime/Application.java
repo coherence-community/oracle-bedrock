@@ -25,7 +25,11 @@
 
 package com.oracle.tools.runtime;
 
+import java.io.Closeable;
+import java.io.IOException;
+
 import java.util.Properties;
+
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -39,7 +43,7 @@ import java.util.concurrent.TimeUnit;
  *
  * @author Brian Oliver
  */
-public interface Application<A>
+public interface Application<A> extends Closeable
 {
     /**
      * The {@link Application} {@link EventKind}s.
@@ -70,6 +74,8 @@ public interface Application<A>
 
 
     /**
+     * <b>WARNING:</b>This method is now deprecated.  It is replaced by {@link #close()}.
+     * <p>
      * Terminates and destroys the running {@link Application}.  Upon returning
      * from this method you can safely assume the {@link Application} is no longer
      * running.  All resources, including input / output streams will no longer
@@ -78,13 +84,27 @@ public interface Application<A>
      * @return the exit value of the {@link Application}
      *         (by convention <code>0</code> indicates normal termination)
      */
+    @Deprecated
     public int destroy();
+
+
+    /**
+     * Attempts to gracefully closes and terminate the running {@link Application}.
+     * <p>
+     * Upon returning it is safe to assume that the {@link Application}
+     * is no longer running.   All resources, including input and output streams
+     * used by the {@link Application} are no longer available to be used.
+     * <p>
+     * To determine the exit value of the terminated application use {@link #exitValue()}.
+     */
+    @Override
+    void close();
 
 
     /**
      * Causes the calling {@link Thread} to block and wait until the
      * {@link Application} has terminated, either naturally or due to a call
-     * to {@link #destroy()} by another {@link Thread}.
+     * to {@link #close()} by another {@link Thread}.
      * <p>
      * This method returns immediately if the {@link Application} has already
      * been terminated.

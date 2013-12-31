@@ -136,8 +136,8 @@ public class NativeJavaApplicationBuilderTest extends AbstractJavaApplicationBui
             // wait for the ChildApplication to connect back to the ServerChannel
             Eventually.assertThat(invoking(listener).isOpened(), is(true));
 
-            // destroy the ParentApplication
-            parentApplication.destroy();
+            // close the ParentApplication
+            parentApplication.close();
 
             // submit the child a request to prove that it's orphaned
             RemoteExecutor                     child    = listener.getExecutor();
@@ -160,7 +160,7 @@ public class NativeJavaApplicationBuilderTest extends AbstractJavaApplicationBui
         {
             if (parentApplication != null)
             {
-                parentApplication.destroy();
+                parentApplication.close();
             }
 
             if (server != null)
@@ -213,8 +213,8 @@ public class NativeJavaApplicationBuilderTest extends AbstractJavaApplicationBui
             // wait for the ChildApplication to connect back to the ServerChannel
             Eventually.assertThat(invoking(listener).isOpened(), is(true));
 
-            // destroy the ParentApplication
-            parentApplication.destroy();
+            // close the ParentApplication
+            parentApplication.close();
 
             // wait for the ChildApplication to disconnect from the ServerChannel
             Eventually.assertThat(invoking(listener).isClosed(), is(true));
@@ -226,7 +226,7 @@ public class NativeJavaApplicationBuilderTest extends AbstractJavaApplicationBui
         {
             if (parentApplication != null)
             {
-                parentApplication.destroy();
+                parentApplication.close();
             }
 
             if (server != null)
@@ -278,7 +278,7 @@ public class NativeJavaApplicationBuilderTest extends AbstractJavaApplicationBui
         {
             if (application != null)
             {
-                application.destroy();
+                application.close();
             }
         }
     }

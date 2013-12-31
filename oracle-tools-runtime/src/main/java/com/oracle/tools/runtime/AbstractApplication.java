@@ -198,9 +198,6 @@ public abstract class AbstractApplication<A, P extends ApplicationProcess> imple
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Properties getEnvironmentVariables()
     {
@@ -208,9 +205,6 @@ public abstract class AbstractApplication<A, P extends ApplicationProcess> imple
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String getName()
     {
@@ -218,25 +212,11 @@ public abstract class AbstractApplication<A, P extends ApplicationProcess> imple
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
-    @SuppressWarnings("unchecked")
     @Override
-    public int destroy()
+    public void close()
     {
-        // terminate the process
-        try
-        {
-            m_process.destroy();
-        }
-        catch (Exception e)
-        {
-            // nothing to do here as we don't care
-        }
-
-        // close the console
-        m_console.close();
+        // close the process
+        m_process.close();
 
         // terminate the thread that is reading from the process standard out
         try
@@ -258,18 +238,15 @@ public abstract class AbstractApplication<A, P extends ApplicationProcess> imple
             // nothing to do here as we don't care
         }
 
-        // wait for it to actually terminate (because the above line may not finish for a while)
-        // (if we don't wait the process may be left hanging/orphaned)
-        int result;
-
         try
         {
-            result = m_process.waitFor();
+            // wait for the process to actually terminate (because the above statements may not finish for a while)
+            // (if we don't wait the process may be left hanging/orphaned)
+            m_process.waitFor();
         }
         catch (InterruptedException e)
         {
             // nothing to do here as we don't care
-            result = 0;
         }
 
         // raise the starting / realized event for the application
@@ -292,14 +269,20 @@ public abstract class AbstractApplication<A, P extends ApplicationProcess> imple
         {
             interceptor.onEvent(event);
         }
-
-        return result;
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
+    @SuppressWarnings("unchecked")
+    @Override
+    @Deprecated
+    public int destroy()
+    {
+        close();
+
+        return exitValue();
+    }
+
+
     @Override
     public long getId()
     {
@@ -307,9 +290,6 @@ public abstract class AbstractApplication<A, P extends ApplicationProcess> imple
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public long getDefaultTimeout()
     {
@@ -317,9 +297,6 @@ public abstract class AbstractApplication<A, P extends ApplicationProcess> imple
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public TimeUnit getDefaultTimeoutUnits()
     {
@@ -327,9 +304,6 @@ public abstract class AbstractApplication<A, P extends ApplicationProcess> imple
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Iterable<LifecycleEventInterceptor<A>> getLifecycleInterceptors()
     {
@@ -360,18 +334,14 @@ public abstract class AbstractApplication<A, P extends ApplicationProcess> imple
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public int waitFor() throws InterruptedException
     {
         return m_process.waitFor();
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public int exitValue()
     {
         return m_process.exitValue();
@@ -441,9 +411,7 @@ public abstract class AbstractApplication<A, P extends ApplicationProcess> imple
         }
 
 
-        /**
-         * {@inheritDoc}
-         */
+        @Override
         public void run()
         {
             long lineNumber = 1;

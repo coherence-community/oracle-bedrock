@@ -26,6 +26,7 @@
 package com.oracle.tools.runtime;
 
 import java.io.BufferedReader;
+import java.io.Closeable;
 import java.io.PrintWriter;
 import java.io.Reader;
 
@@ -38,7 +39,7 @@ import java.io.Reader;
  *
  * @author Brian Oliver
  */
-public interface ApplicationConsole
+public interface ApplicationConsole extends Closeable
 {
     /**
      * Obtains the {@link PrintWriter} that an {@link Application} will use
@@ -62,7 +63,7 @@ public interface ApplicationConsole
 
 
     /**
-     * Closes the {@link ApplicationConsole}, after with the console may not
+     * Closes the {@link ApplicationConsole}, after which it may nolonger
      * be used.
      */
     public void close();

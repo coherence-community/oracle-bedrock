@@ -72,7 +72,7 @@ public class SimpleApplicationBuilderTest extends AbstractTest
 
         assertThat(stdout, containsString("Usage: java [-options] class [args...]"));
 
-        application.destroy();
+        application.close();
     }
 
 
@@ -105,7 +105,7 @@ public class SimpleApplicationBuilderTest extends AbstractTest
 
         application.waitFor();
 
-        application.destroy();
+        application.close();
 
         Mockito.verify(interceptor, Mockito.times(2)).onEvent(Mockito.any(LifecycleEvent.class));
 

@@ -68,19 +68,21 @@ public class NativeApplicationProcess implements ApplicationProcess
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
+    @Deprecated
     public void destroy()
+    {
+        close();
+    }
+
+
+    @Override
+    public void close()
     {
         m_process.destroy();
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public long getId()
     {
@@ -139,9 +141,6 @@ public class NativeApplicationProcess implements ApplicationProcess
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public int exitValue()
     {
@@ -149,9 +148,6 @@ public class NativeApplicationProcess implements ApplicationProcess
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public InputStream getErrorStream()
     {
@@ -159,9 +155,6 @@ public class NativeApplicationProcess implements ApplicationProcess
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public InputStream getInputStream()
     {
@@ -169,9 +162,6 @@ public class NativeApplicationProcess implements ApplicationProcess
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public OutputStream getOutputStream()
     {
@@ -179,9 +169,6 @@ public class NativeApplicationProcess implements ApplicationProcess
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public int waitFor() throws InterruptedException
     {

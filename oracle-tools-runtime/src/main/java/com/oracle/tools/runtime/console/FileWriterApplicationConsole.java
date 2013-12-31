@@ -96,9 +96,6 @@ public class FileWriterApplicationConsole implements ApplicationConsole
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void close()
     {
@@ -120,9 +117,6 @@ public class FileWriterApplicationConsole implements ApplicationConsole
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public PrintWriter getOutputWriter()
     {
@@ -130,9 +124,6 @@ public class FileWriterApplicationConsole implements ApplicationConsole
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public PrintWriter getErrorWriter()
     {
@@ -140,9 +131,6 @@ public class FileWriterApplicationConsole implements ApplicationConsole
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Reader getInputReader()
     {

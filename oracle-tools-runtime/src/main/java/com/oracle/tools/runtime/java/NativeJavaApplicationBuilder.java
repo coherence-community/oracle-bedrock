@@ -214,9 +214,6 @@ public class NativeJavaApplicationBuilder<A extends JavaApplication<A>, S extend
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public A realize(S                  schema,
                      String             applicationName,
@@ -397,9 +394,6 @@ public class NativeJavaApplicationBuilder<A extends JavaApplication<A>, S extend
         }
 
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public <T> void submit(Callable<T>           callable,
                                CompletionListener<T> listener)
@@ -408,9 +402,6 @@ public class NativeJavaApplicationBuilder<A extends JavaApplication<A>, S extend
         }
 
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public void submit(Runnable runnable) throws IllegalStateException
         {
@@ -418,13 +409,10 @@ public class NativeJavaApplicationBuilder<A extends JavaApplication<A>, S extend
         }
 
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
-        public void destroy()
+        public void close()
         {
-            super.destroy();
+            super.close();
 
             remoteExecutor.close();
         }

@@ -15,6 +15,20 @@ reverse chronological order.
 
 *   No Changes.
 
+<h4>oracle-tools-runtime</h4>
+
+*   [ORACLETOOLS-63](https://java.net/jira/browse/ORACLETOOLS-63): Made
+    Application, ApplicationGroup, ApplicationConsole and ApplicationProcess
+    implement Closeable to support auto-closing in Java 7+.
+
+    Deprecated all "destroy" methods; they now are delegated onto "close" methods.
+    All "destroy" methods will be removed in a later major srelease.
+
+*   [ORACLETOOLS-64](https://java.net/jira/browse/ORACLETOOLS-64): Destroying
+    or closing an Application or ApplicationGroup should not close a provided
+    ApplicationConsole as this may lead to I/O exceptions should the said
+    ApplicationConsole be shared with other Applications/ApplicationGroups.
+
 <h4>oracle-tools-coherence</h4>
 
 *   [ORACLETOOLS-6](https://java.net/jira/browse/ORACLETOOLS-6): Introduced
