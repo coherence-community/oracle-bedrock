@@ -43,11 +43,10 @@ import com.oracle.tools.runtime.concurrent.socket.RemoteExecutorServer;
 
 import com.oracle.tools.runtime.java.container.Container;
 
+import com.oracle.tools.runtime.network.Constants;
 import com.oracle.tools.util.CompletionListener;
 
 import java.io.IOException;
-
-import java.net.InetAddress;
 
 import java.util.Properties;
 
@@ -265,12 +264,12 @@ public class NativeJavaApplicationBuilder<A extends JavaApplication<A>, S extend
         }
 
         // configure a server channel to communicate with the native process
-        final RemoteExecutorServer server        = new RemoteExecutorServer(Container.getAvailablePorts().next());
-        InetAddress                serverAddress = server.open();
-        InetAddress                localAddress  = InetAddress.getLocalHost();
+        final RemoteExecutorServer server = new RemoteExecutorServer(Container.getAvailablePorts().next());
+
+        server.open();
 
         // add Oracle Tools specific System Properties
-        builder.command().add("-D" + Settings.PARENT_ADDRESS + "=" + localAddress.getHostAddress());
+        builder.command().add("-D" + Settings.PARENT_ADDRESS + "=" + Constants.getLocalHost());
         builder.command().add("-D" + Settings.PARENT_PORT + "=" + server.getPort());
         builder.command().add("-D" + Settings.ORPHANABLE + "=" + areOrphansPermitted());
 
