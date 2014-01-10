@@ -34,6 +34,11 @@ reverse chronological order.
     Applications dynamically at runtime.  This included making
     AbstractApplicationGroups thread-safe.
 
+*   [ORACLETOOLS-66](https://java.net/jira/browse/ORACLETOOLS-65): Made
+    NativeJavaApplicationBuilder use the value from Constants.getLocalHost()
+    as the host address property to be passed to child processes instead of
+    using InetAddress.getLocalHost().
+
 <h4>oracle-tools-coherence</h4>
 
 *   [ORACLETOOLS-6](https://java.net/jira/browse/ORACLETOOLS-6): Introduced
