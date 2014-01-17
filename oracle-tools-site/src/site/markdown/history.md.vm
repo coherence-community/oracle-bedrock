@@ -9,7 +9,7 @@ reverse chronological order.
 
 <h4>Source and Documentation Contributors</h4>
 
-*   Brian Oliver
+*   Jonathan Knight, Brian Oliver
 
 <h4>Global and Cross-Module Changes</h4>
 
@@ -37,7 +37,8 @@ reverse chronological order.
 *   [ORACLETOOLS-66](https://java.net/jira/browse/ORACLETOOLS-65): Made
     NativeJavaApplicationBuilder use the value from Constants.getLocalHost()
     as the host address property to be passed to child processes instead of
-    using InetAddress.getLocalHost().
+    using InetAddress.getLocalHost().   This resolves connectivity issues
+    when running on virtual private networks.
 
 <h4>oracle-tools-coherence</h4>
 
