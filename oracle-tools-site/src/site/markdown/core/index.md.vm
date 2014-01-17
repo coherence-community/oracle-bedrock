@@ -10,6 +10,9 @@ other projects, one of the most important being the concept of [Deferred Referen
 
 The Oracle Tools Core module is distributed as a single jar called: `oracle-tools-core-${project.version}.jar`
 
+If you're not using Apache Maven or you'd prefer to download directly, you can do so from
+[maven.java.net](https://maven.java.net): [oracle-tools-core-${project.version}.jar](https://maven.java.net/service/local/artifact/maven/redirect?r=releases&g=com.oracle.tools&a=oracle-tools-core&v=${project.version}&e=jar)
+
 <h4>Source Code</h4>
 
 Source code for this and other Oracle Tools modules can be found here:

@@ -13,6 +13,9 @@ An introduction to these concepts is covered by the
 
 The Oracle Tools Runtime module is distributed as a single jar called: `oracle-tools-runtime-${project.version}.jar`
 
+If you're not using Apache Maven or you'd prefer to download directly, you can do so from
+[maven.java.net](https://maven.java.net): [oracle-tools-runtime-${project.version}.jar](https://maven.java.net/service/local/artifact/maven/redirect?r=releases&g=com.oracle.tools&a=oracle-tools-runtime&v=${project.version}&e=jar)
+
 <h4>Source Code</h4>
 
 Source code for this and other Oracle Tools modules can be found here:
