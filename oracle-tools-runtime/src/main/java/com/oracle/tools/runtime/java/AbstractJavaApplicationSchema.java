@@ -27,13 +27,18 @@ package com.oracle.tools.runtime.java;
 
 import com.oracle.tools.runtime.AbstractApplicationSchema;
 import com.oracle.tools.runtime.PropertiesBuilder;
-
 import com.oracle.tools.runtime.network.AvailablePortIterator;
-
-import static com.oracle.tools.runtime.java.JavaApplication.*;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.oracle.tools.runtime.java.JavaApplication.JAVA_AWT_HEADLESS;
+import static com.oracle.tools.runtime.java.JavaApplication.JAVA_NET_PREFER_IPV4_STACK;
+import static com.oracle.tools.runtime.java.JavaApplication.JAVA_RMI_SERVER_HOSTNAME;
+import static com.oracle.tools.runtime.java.JavaApplication.SUN_MANAGEMENT_JMXREMOTE;
+import static com.oracle.tools.runtime.java.JavaApplication.SUN_MANAGEMENT_JMXREMOTE_AUTHENTICATE;
+import static com.oracle.tools.runtime.java.JavaApplication.SUN_MANAGEMENT_JMXREMOTE_PORT;
+import static com.oracle.tools.runtime.java.JavaApplication.SUN_MANAGEMENT_JMXREMOTE_SSL;
 
 /**
  * An {@link AbstractJavaApplicationSchema} is a base implementation of a {@link JavaApplicationSchema}.
@@ -281,9 +286,6 @@ public abstract class AbstractJavaApplicationSchema<A extends JavaApplication<A>
      * <li>The remote JMX port to 9000, the Java default for remote JMX management.
      * You can override this setting by calling {@link #setJMXPort(int)} or
      * {@link #setJMXPort(AvailablePortIterator)}.
-     * <p/>
-     * <li>The java.rmi.server.hostname to be {@link com.oracle.tools.runtime.network.Constants#getLocalHost()}
-     * You can override this setting by calling {@link #setRMIServerHostName(String)}.
      * <p/>
      * <li>The sun.management.jmxremote.ssl to false (off)
      * <p/>

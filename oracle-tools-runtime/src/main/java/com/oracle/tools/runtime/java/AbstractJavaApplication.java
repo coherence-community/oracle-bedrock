@@ -25,40 +25,35 @@
 
 package com.oracle.tools.runtime.java;
 
-import com.oracle.tools.deferred.*;
-
+import com.oracle.tools.deferred.Cached;
+import com.oracle.tools.deferred.Deferred;
+import com.oracle.tools.deferred.NeverAvailable;
+import com.oracle.tools.deferred.UnresolvableInstanceException;
 import com.oracle.tools.deferred.jmx.DeferredJMXConnector;
 import com.oracle.tools.deferred.jmx.DeferredMBeanAttribute;
 import com.oracle.tools.deferred.jmx.DeferredMBeanInfo;
 import com.oracle.tools.deferred.jmx.DeferredMBeanProxy;
-
 import com.oracle.tools.runtime.AbstractApplication;
 import com.oracle.tools.runtime.Application;
 import com.oracle.tools.runtime.ApplicationConsole;
 import com.oracle.tools.runtime.LifecycleEventInterceptor;
-
 import com.oracle.tools.runtime.network.Constants;
-
 import com.oracle.tools.util.CompletionListener;
 import com.oracle.tools.util.FutureCompletionListener;
-
-import static com.oracle.tools.deferred.DeferredHelper.cached;
-import static com.oracle.tools.deferred.DeferredHelper.ensured;
-
-import java.io.IOException;
-
-import java.util.Properties;
-import java.util.Set;
-
-import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
 
 import javax.management.MBeanInfo;
 import javax.management.ObjectInstance;
 import javax.management.ObjectName;
 import javax.management.QueryExp;
-
 import javax.management.remote.JMXConnector;
+import java.io.IOException;
+import java.util.Properties;
+import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
+
+import static com.oracle.tools.deferred.DeferredHelper.cached;
+import static com.oracle.tools.deferred.DeferredHelper.ensured;
 
 /**
  * A {@link AbstractJavaApplication} is a base implementation of a {@link JavaApplication} that has

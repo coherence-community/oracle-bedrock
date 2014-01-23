@@ -28,7 +28,7 @@ package com.oracle.tools.runtime.network;
 /**
  * Typical Network {@link Constants}.
  * <p>
- * Copyright (c) 2011-2013. All Rights Reserved. Oracle Corporation.<br>
+ * Copyright (c) 2011-2014. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Brian Oliver
@@ -36,10 +36,10 @@ package com.oracle.tools.runtime.network;
 public class Constants
 {
     /**
-     * Obtains the correct localhost address for the platform, which
-     * may depend on the operating system and version of Java.
+     * Obtains the local host address to use for local-only connections
+     * on the platform.
      *
-     * @return the localhost string for the platform
+     * @return the local host string for the platform
      */
     public static String getLocalHost()
     {
@@ -47,13 +47,9 @@ public class Constants
         {
             return System.getProperty("tangosol.coherence.localhost");
         }
-        else if (System.getProperty("java.version").startsWith("1.6"))
-        {
-            return "127.0.0.1";
-        }
         else
         {
-            return "localhost";
+            return "127.0.0.1";
         }
     }
 }

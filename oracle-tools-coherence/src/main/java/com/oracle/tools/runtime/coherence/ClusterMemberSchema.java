@@ -26,27 +26,20 @@
 package com.oracle.tools.runtime.coherence;
 
 import com.oracle.tools.runtime.ApplicationConsole;
-
 import com.oracle.tools.runtime.java.AbstractJavaApplicationSchema;
 import com.oracle.tools.runtime.java.ContainerBasedJavaApplicationBuilder;
 import com.oracle.tools.runtime.java.JavaApplicationBuilder;
 import com.oracle.tools.runtime.java.JavaApplicationSchema;
 import com.oracle.tools.runtime.java.JavaProcess;
 import com.oracle.tools.runtime.java.util.CallableStaticMethod;
-
 import com.oracle.tools.runtime.network.Constants;
-
 import com.oracle.tools.util.CompletionListener;
-
 import com.tangosol.coherence.component.net.Management;
-
 import com.tangosol.net.DefaultCacheServer;
 
 import java.util.Iterator;
 import java.util.Properties;
-
 import java.util.concurrent.Callable;
-import java.util.concurrent.Future;
 
 /**
  * A {@link ClusterMemberSchema} is a Coherence-based specific {@link JavaApplicationSchema}.
