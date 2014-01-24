@@ -25,31 +25,22 @@
 
 package com.oracle.tools.runtime.coherence;
 
-import com.oracle.tools.deferred.Eventually;
-
 import com.oracle.tools.junit.AbstractTest;
-
 import com.oracle.tools.runtime.coherence.ClusterMemberSchema.JMXManagementMode;
 import com.oracle.tools.runtime.coherence.callables.GetClusterName;
 import com.oracle.tools.runtime.coherence.callables.GetClusterSize;
 import com.oracle.tools.runtime.coherence.callables.GetLocalMemberId;
 import com.oracle.tools.runtime.coherence.callables.GetServiceStatus;
-
 import com.oracle.tools.runtime.console.SystemApplicationConsole;
-
 import com.oracle.tools.runtime.java.JavaApplicationBuilder;
 import com.oracle.tools.runtime.java.container.Container;
-
 import com.oracle.tools.runtime.network.AvailablePortIterator;
-
-import junit.framework.Assert;
-
 import org.junit.Test;
 
+import javax.management.ObjectName;
+
 import static com.oracle.tools.deferred.DeferredHelper.invoking;
-
 import static com.oracle.tools.deferred.Eventually.assertThat;
-
 import static org.hamcrest.CoreMatchers.is;
 
 /**
@@ -83,8 +74,7 @@ public abstract class AbstractClusterMemberTest extends AbstractTest
 
         ClusterMemberSchema schema =
             new ClusterMemberSchema().setClusterPort(availablePorts).useLocalHostMode().setRoleName("test-role")
-                .setSiteName("test-site").setJMXSupport(false).setJMXPort(availablePorts)
-                .setJMXManagementMode(JMXManagementMode.LOCAL_ONLY);
+                .setSiteName("test-site").setJMXManagementMode(JMXManagementMode.LOCAL_ONLY).setJMXPort(availablePorts);
 
         ClusterMember member = null;
 
@@ -95,9 +85,15 @@ public abstract class AbstractClusterMemberTest extends AbstractTest
             member = builder.realize(schema, "TEST", new SystemApplicationConsole());
 
             assertThat(invoking(member).getClusterSize(), is(1));
+            assertThat(member.getRoleName(), is("test-role"));
+            assertThat(member.getSiteName(), is("test-site"));
 
-            Assert.assertEquals("test-role", member.getRoleName());
-            Assert.assertEquals("test-site", member.getSiteName());
+            // use JMX to determine the cluster size
+            int clusterSize = member.getMBeanAttribute(new ObjectName("Coherence:type=Cluster"),
+                                                       "ClusterSize",
+                                                       Integer.class);
+
+            assertThat(clusterSize, is(1));
         }
         finally
         {
@@ -135,9 +131,8 @@ public abstract class AbstractClusterMemberTest extends AbstractTest
                 member = builder.realize(schema, "TEST");
 
                 assertThat(invoking(member).getClusterSize(), is(1));
-
-                Assert.assertEquals("test-role", member.getRoleName());
-                Assert.assertEquals("test-site", member.getSiteName());
+                assertThat(member.getRoleName(), is("test-role"));
+                assertThat(member.getSiteName(), is("test-site"));
             }
             finally
             {

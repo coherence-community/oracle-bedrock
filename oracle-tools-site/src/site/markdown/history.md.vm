@@ -4,7 +4,6 @@ Change History
 The following sections outline Oracle Tools project changes in
 reverse chronological order.
 
-
 <h3>Version ${project.version}: ${timestamp} </h3>
 
 <h4>Source and Documentation Contributors</h4>
@@ -14,12 +13,34 @@ reverse chronological order.
 <h4>Global and Cross-Module Changes</h4>
 
 *   [ORACLETOOLS-67](https://java.net/jira/browse/ORACLETOOLS-67): Modified
-    sure-fire plugin to set java.net.PreferIPv4Stack=true for tests.  This
+    sure-fire plugin to set java.net.PreferIPv4Stack=true for all tests.  This
     resolves possible Container-based test failures on IPv6 enabled platforms
     when running Java 7 (or 8) on Virtual Private Networks (VPNs).
 
-    Consequently changed the definition of Constants.getLocalHost() to return
-    "127.0.0.1" (the loopback adapter) to ensure localized testing on VPNs.
+*   [ORACLETOOLS-71](https://java.net/jira/browse/ORACLETOOLS-71): Upgraded
+    to use JUnit 4.11.
+
+<h4>oracle-tools-runtime</h4>
+
+*   [ORACLETOOLS-67](https://java.net/jira/browse/ORACLETOOLS-67): Changed the
+    definition of Constants.getLocalHost() to return "127.0.0.1"
+    (the loopback adapter) to ensure localized testing on VPNs.
+
+    Added a warning when using Container-based Java Application Builders
+    when there are incompatible java.net.PreferIPv4Stack settings.
+
+*   [ORACLETOOLS-68](https://java.net/jira/browse/ORACLETOOLS-68): Deprecated
+    the concept of "default" properties in the PropertiesBuilder
+    (they weren't used).
+
+*   [ORACLETOOLS-73](https://java.net/jira/browse/ORACLETOOLS-72): Sets a default
+    RMI address (to Constants.getLocalHost()) when enabling JMX.  In the past
+    no default was set.
+
+<h4>oracle-tools-coherence-tests</h4>
+
+*   [ORACLETOOLS-72](https://java.net/jira/browse/ORACLETOOLS-72): Updated JMX-based
+    tests to ensure they use JMX.
 
 --------------------------------------------------------------------------------
 
@@ -66,6 +87,7 @@ reverse chronological order.
 
 *   [ORACLETOOLS-62](https://java.net/jira/browse/ORACLETOOLS-62): Upgraded
     to use Coherence 3.7.1.11
+
 
 --------------------------------------------------------------------------------
 

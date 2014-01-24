@@ -49,6 +49,9 @@ import java.util.Properties;
 
 import java.util.concurrent.*;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 /**
  * An {@link ContainerBasedJavaApplicationBuilder} is a {@link com.oracle.tools.runtime.java.JavaApplicationBuilder}
  * that realizes {@link com.oracle.tools.runtime.java.JavaApplication}s isolated with in the current Java
@@ -72,6 +75,12 @@ import java.util.concurrent.*;
 public class ContainerBasedJavaApplicationBuilder<A extends JavaApplication<A>, S extends JavaApplicationSchema<A, S>>
     extends AbstractJavaApplicationBuilder<A, S> implements JavaApplicationBuilder<A, S>
 {
+    /**
+     * The {@link Logger} for this class.
+     */
+    private static Logger LOGGER = Logger.getLogger(ContainerBasedJavaApplicationBuilder.class.getName());
+
+
     /**
      * Constructs a {@link ContainerBasedJavaApplicationBuilder}.
      */
@@ -98,6 +107,49 @@ public class ContainerBasedJavaApplicationBuilder<A extends JavaApplication<A>, 
 
 
     /**
+     * Performs a sanity check on the specified {@link JavaApplicationSchema}.
+     * <p>
+     * It's particularly important to perform sanity checks on {@link JavaApplicationSchema}s
+     * prior to realizing them in a container as some settings may not be appropriate or
+     * achievable.
+     *
+     * @param schema            the {@link JavaApplicationSchema}
+     * @param schemaProperties  the system {@link Properties} that have been realized for the
+     *                          {@link JavaApplicationSchema}
+     */
+    protected void sanityCheck(S          schema,
+                               Properties schemaProperties)
+    {
+        // ensure that if JAVA_NET_PREFER_IPV4_STACK is requested by the schema it has also been
+        // established at the  platform level as this is only where it can actually be achieved with Java 7+.
+        String schemaPreferIPv4Stack = schemaProperties.getProperty(JavaApplication.JAVA_NET_PREFER_IPV4_STACK);
+
+        schemaPreferIPv4Stack = schemaPreferIPv4Stack == null ? "" : schemaPreferIPv4Stack.trim().toLowerCase();
+
+        String systemPreferIPv4Stack = System.getProperty(JavaApplication.JAVA_NET_PREFER_IPV4_STACK);
+
+        systemPreferIPv4Stack = systemPreferIPv4Stack == null ? "" : systemPreferIPv4Stack.trim().toLowerCase();
+
+        if (systemPreferIPv4Stack.isEmpty() &&!schemaPreferIPv4Stack.isEmpty())
+        {
+            LOGGER.warning("The schema [" + schema + "] defines the " + JavaApplication.JAVA_NET_PREFER_IPV4_STACK
+                + " system property but it is not defined by the current process."
+                + "Container-based applications requiring this system property must have it defined at the operating system level."
+                + "eg: In your case it should be defined as; -D" + JavaApplication.JAVA_NET_PREFER_IPV4_STACK + "="
+                + schemaPreferIPv4Stack);
+        }
+        else if (!systemPreferIPv4Stack.equals(schemaPreferIPv4Stack))
+        {
+            LOGGER.warning("The schema [" + schema + "] defines the " + JavaApplication.JAVA_NET_PREFER_IPV4_STACK
+                + " system property but it is not defined by the current process in the same manner."
+                + "Container-based applications requiring this system property must have it in the same manner at the operating system level."
+                + "eg: In your case it should be defined as; -D" + JavaApplication.JAVA_NET_PREFER_IPV4_STACK + "="
+                + schemaPreferIPv4Stack);
+        }
+    }
+
+
+    /**
      * {@inheritDoc}
      */
     @Override
@@ -109,6 +161,9 @@ public class ContainerBasedJavaApplicationBuilder<A extends JavaApplication<A>, 
         {
             // establish the System Properties for the ContainerBasedJavaApplication
             Properties systemProperties = schema.getSystemPropertiesBuilder().realize();
+
+            // santity check the schema and realized properties
+            sanityCheck(schema, systemProperties);
 
             // establish the ContainerClassLoader for the application
             ContainerClassLoader classLoader = ContainerClassLoader.newInstance(applicationName,
@@ -378,8 +433,7 @@ public class ContainerBasedJavaApplicationBuilder<A extends JavaApplication<A>, 
                 }
                 catch (Exception e)
                 {
-                    // TODO: log this exception
-                    e.printStackTrace();
+                    LOGGER.log(Level.WARNING, "An exception occurred while closing the application", e);
                 }
 
                 m_controller = null;

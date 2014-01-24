@@ -28,6 +28,7 @@ package com.oracle.tools.runtime.java;
 import com.oracle.tools.runtime.AbstractApplicationSchema;
 import com.oracle.tools.runtime.PropertiesBuilder;
 import com.oracle.tools.runtime.network.AvailablePortIterator;
+import com.oracle.tools.runtime.network.Constants;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -127,9 +128,6 @@ public abstract class AbstractJavaApplicationSchema<A extends JavaApplication<A>
     protected abstract void configureDefaults();
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public PropertiesBuilder getSystemPropertiesBuilder()
     {
@@ -137,9 +135,6 @@ public abstract class AbstractJavaApplicationSchema<A extends JavaApplication<A>
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public ClassPath getClassPath()
     {
@@ -147,9 +142,6 @@ public abstract class AbstractJavaApplicationSchema<A extends JavaApplication<A>
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String getApplicationClassName()
     {
@@ -212,6 +204,7 @@ public abstract class AbstractJavaApplicationSchema<A extends JavaApplication<A>
      * @return the {@link JavaApplicationSchema}
      */
     @SuppressWarnings("unchecked")
+    @Deprecated
     public S setDefaultSystemProperty(String name,
                                       Object value)
     {
@@ -267,9 +260,6 @@ public abstract class AbstractJavaApplicationSchema<A extends JavaApplication<A>
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public List<String> getJVMOptions()
     {
@@ -283,16 +273,16 @@ public abstract class AbstractJavaApplicationSchema<A extends JavaApplication<A>
      * This method sets/removes numerous properties to enable/disable JMX.  Including:
      * <p/>
      * <ol>
+     * <li>The java.rmi.server.hostname to {@link Constants#getLocalHost()}
      * <li>The remote JMX port to 9000, the Java default for remote JMX management.
-     * You can override this setting by calling {@link #setJMXPort(int)} or
-     * {@link #setJMXPort(AvailablePortIterator)}.
-     * <p/>
+     *     You can override this setting by calling {@link #setJMXPort(int)} or
+     *     {@link #setJMXPort(AvailablePortIterator)}.
      * <li>The sun.management.jmxremote.ssl to false (off)
-     * <p/>
      * <li>Disables JMX authentication.
-     * You can override this setting by calling {@link #setJMXAuthentication(boolean)}.
+     *     You can override this setting by calling {@link #setJMXAuthentication(boolean)}.
+     * </ol>
      *
-     * @param enabled Should JMX support be enabled
+     * @param enabled  should JMX support be enabled
      * @return the {@link JavaApplicationSchema}
      */
     @SuppressWarnings("unchecked")
@@ -300,10 +290,11 @@ public abstract class AbstractJavaApplicationSchema<A extends JavaApplication<A>
     {
         if (enabled)
         {
-            setDefaultSystemProperty(SUN_MANAGEMENT_JMXREMOTE_PORT, 9000);
-            setDefaultSystemProperty(SUN_MANAGEMENT_JMXREMOTE, "");
-            setDefaultSystemProperty(SUN_MANAGEMENT_JMXREMOTE_AUTHENTICATE, false);
-            setDefaultSystemProperty(SUN_MANAGEMENT_JMXREMOTE_SSL, false);
+            setSystemProperty(SUN_MANAGEMENT_JMXREMOTE_PORT, 9000);
+            setSystemProperty(SUN_MANAGEMENT_JMXREMOTE, "");
+            setSystemProperty(SUN_MANAGEMENT_JMXREMOTE_AUTHENTICATE, false);
+            setSystemProperty(SUN_MANAGEMENT_JMXREMOTE_SSL, false);
+            setSystemProperty(JAVA_RMI_SERVER_HOSTNAME, Constants.getLocalHost());
         }
         else
         {
@@ -326,7 +317,7 @@ public abstract class AbstractJavaApplicationSchema<A extends JavaApplication<A>
      */
     public S setPreferIPv4(boolean enabled)
     {
-        return setDefaultSystemProperty(JAVA_NET_PREFER_IPV4_STACK, enabled);
+        return setSystemProperty(JAVA_NET_PREFER_IPV4_STACK, enabled);
     }
 
 
@@ -338,7 +329,7 @@ public abstract class AbstractJavaApplicationSchema<A extends JavaApplication<A>
      */
     public S setJMXAuthentication(boolean enabled)
     {
-        return setDefaultSystemProperty(SUN_MANAGEMENT_JMXREMOTE_AUTHENTICATE, enabled);
+        return setSystemProperty(SUN_MANAGEMENT_JMXREMOTE_AUTHENTICATE, enabled);
     }
 
 
@@ -375,7 +366,7 @@ public abstract class AbstractJavaApplicationSchema<A extends JavaApplication<A>
     @SuppressWarnings("unchecked")
     public S setRMIServerHostName(String rmiServerHostName)
     {
-        setDefaultSystemProperty(JAVA_RMI_SERVER_HOSTNAME, rmiServerHostName);
+        setSystemProperty(JAVA_RMI_SERVER_HOSTNAME, rmiServerHostName);
 
         return (S) this;
     }

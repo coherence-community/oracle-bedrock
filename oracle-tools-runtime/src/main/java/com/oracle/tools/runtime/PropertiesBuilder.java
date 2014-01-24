@@ -37,8 +37,8 @@ import java.util.*;
  * <p>
  * Unlike traditional {@link Map}-based implementations of properties, a
  * {@link PropertiesBuilder} provides the ability to specify an {@link Iterator}
- * for named properties that will in turn be used to acquire actual property values
- * when the said {@link PropertiesBuilder} is realized.
+ * for named property values, that when accessed will in turn return an acquire actual
+ * property value, when the said {@link PropertiesBuilder} is realized.
  * <p>
  * Copyright (c) 2011. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
@@ -213,6 +213,7 @@ public class PropertiesBuilder
      *          that further chained method calls, like to other
      *          <code>setProperty(...)</code> methods on this class may be used
      */
+    @Deprecated
     public PropertiesBuilder setDefaultProperty(String      name,
                                                 Iterator<?> defaultIterator)
     {
@@ -265,6 +266,7 @@ public class PropertiesBuilder
      *          that further chained method calls, like to other
      *          <code>setProperty(...)</code> methods on this class may be used
      */
+    @Deprecated
     public PropertiesBuilder setDefaultProperty(String name,
                                                 Object defaultValue)
     {
@@ -383,6 +385,7 @@ public class PropertiesBuilder
      *
      * @param name The name of the property value to remove.
      */
+    @Deprecated
     public void removePropertyValue(String name)
     {
         Property property = m_properties.get(name);
@@ -564,8 +567,21 @@ public class PropertiesBuilder
      */
     private static class Property
     {
+        /**
+         * The name of the {@link Property}.
+         */
         private String name;
+
+        /**
+         * The value of the {@link Property}.
+         */
         private Object value;
+
+        /**
+         * The default value of the {@link Property}
+         * (used when value is null).
+         */
+        @Deprecated
         private Object defaultValue;
 
 
@@ -650,6 +666,7 @@ public class PropertiesBuilder
          *
          * @return  the default value of a {@link Property}
          */
+        @Deprecated
         public Object getDefaultValue()
         {
             return defaultValue;
@@ -661,6 +678,7 @@ public class PropertiesBuilder
          *
          * @param defaultValue  the default value of the {@link Property}
          */
+        @Deprecated
         public void setDefaultValue(Object defaultValue)
         {
             this.defaultValue = defaultValue;
