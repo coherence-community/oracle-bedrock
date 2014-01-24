@@ -5,7 +5,7 @@
         <groupId>com.oracle.tools</groupId>
         <artifactId>oracle-tools</artifactId>
         <relativePath>..</relativePath>
-        <version>1.2.1</version>
+        <version>1.2.2-SNAPSHOT</version>
     </parent>
 
     <artifactId>oracle-tools-site</artifactId>
