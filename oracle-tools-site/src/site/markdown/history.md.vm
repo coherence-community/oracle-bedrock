@@ -37,6 +37,12 @@ reverse chronological order.
     RMI address (to Constants.getLocalHost()) when enabling JMX.  In the past
     no default was set.
 
+<h4>oracle-tools-testing-support</h4>
+
+*   [ORACLETOOLS-74](https://java.net/jira/browse/ORACLETOOLS-74): Introduced
+    Hamcrest-based com.oracle.tools.matchers.MapMatcher to support matching
+    Maps (and NamedCaches) in assertThat statements.
+
 <h4>oracle-tools-coherence-tests</h4>
 
 *   [ORACLETOOLS-72](https://java.net/jira/browse/ORACLETOOLS-72): Updated JMX-based
