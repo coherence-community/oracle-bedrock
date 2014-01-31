@@ -25,7 +25,7 @@
 
 package com.oracle.tools.matchers;
 
-import java.lang.Object;import java.lang.Override;import java.lang.String; /**
+/**
  * A function to determine the equivalence of two objects of the same type.
  * <p>
  * Copyright (c) 2014. All Rights Reserved. Oracle Corporation.<br>

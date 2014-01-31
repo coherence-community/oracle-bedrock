@@ -30,7 +30,7 @@ import org.hamcrest.Factory;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
 
-import java.lang.Override;import java.util.Iterator;
+import java.util.Iterator;
 import java.util.Map;
 
 /**
