@@ -26,14 +26,16 @@
 package com.oracle.tools.runtime.network;
 
 import com.oracle.tools.deferred.Eventually;
-
+import org.hamcrest.MatcherAssert;
 import org.junit.Test;
 
-import static com.oracle.tools.deferred.DeferredHelper.invoking;
-
-import static org.hamcrest.Matchers.is;
-
 import java.net.UnknownHostException;
+import java.util.ArrayList;
+
+import static com.oracle.tools.deferred.DeferredHelper.invoking;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
 
 /**
  * Unit tests for the {@link AvailablePortIterator}.
@@ -46,7 +48,7 @@ import java.net.UnknownHostException;
 public class AvailablePortIteratorTest
 {
     /**
-     * Ensure that there is one available port.
+     * Ensure that at least one port is available.
      *
      * @throws UnknownHostException
      */
@@ -56,5 +58,39 @@ public class AvailablePortIteratorTest
         AvailablePortIterator iterator = new AvailablePortIterator(40000, 40100);
 
         Eventually.assertThat(invoking(iterator).hasNext(), is(true));
+    }
+
+
+    /**
+     * Ensure that two {@link AvailablePortIterator}s don't find the
+     * same ports.
+     *
+     * @throws UnknownHostException
+     */
+    @Test
+    public void shouldFindDifferentAvailablePorts() throws UnknownHostException
+    {
+        AvailablePortIterator availablePortIterator1 = new AvailablePortIterator(40000, 40100);
+        AvailablePortIterator availablePortIterator2 = new AvailablePortIterator(40000, 40100);
+
+        ArrayList<Integer>    availablePorts1        = new ArrayList<Integer>();
+
+        for (int i = 0; i < 10; i++)
+        {
+            int port = availablePortIterator1.next();
+
+            availablePorts1.add(port);
+        }
+
+        ArrayList<Integer> availablePorts2 = new ArrayList<Integer>();
+
+        for (int i = 0; i < 10; i++)
+        {
+            int port = availablePortIterator2.next();
+
+            availablePorts2.add(port);
+        }
+
+        MatcherAssert.assertThat(availablePorts1, not(equalTo(availablePorts2)));
     }
 }
