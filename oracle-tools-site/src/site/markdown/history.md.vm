@@ -12,6 +12,36 @@ reverse chronological order.
 
 <h4>Global and Cross-Module Changes</h4>
 
+*   (none)
+
+<h4>oracle-tools-runtime</h4>
+
+*   [ORACLETOOLS-76](https://java.net/jira/browse/ORACLETOOLS-76): Introduced
+    PropertyBuilder.setPropertyIfAbsent method to support optionally setting a property
+
+<h4>oracle-tools-testing-support</h4>
+
+*   [ORACLETOOLS-74](https://java.net/jira/browse/ORACLETOOLS-74): Introduced
+    Hamcrest-based com.oracle.tools.matchers.MapMatcher to support matching
+    Maps (and NamedCaches) in assertThat statements.
+
+<h4>oracle-tools-coherence-testing-support</h4>
+
+*   [ORACLETOOLS-75](https://java.net/jira/browse/ORACLETOOLS-75): Introduced
+    Hamcrest-based com.oracle.tools.matchers.PartitionSetMatcher to support
+    making Coherence PartitionSet-based assertions.
+
+
+--------------------------------------------------------------------------------
+
+<h3>Version 1.2.1: 2014-01-24 15:39</h3>
+
+<h4>Source and Documentation Contributors</h4>
+
+*   Brian Oliver
+
+<h4>Global and Cross-Module Changes</h4>
+
 *   [ORACLETOOLS-67](https://java.net/jira/browse/ORACLETOOLS-67): Modified
     sure-fire plugin to set java.net.PreferIPv4Stack=true for all tests.  This
     resolves possible Container-based test failures on IPv6 enabled platforms
@@ -33,26 +63,14 @@ reverse chronological order.
     the concept of "default" properties in the PropertiesBuilder
     (they weren't used).
 
-*   [ORACLETOOLS-73](https://java.net/jira/browse/ORACLETOOLS-72): Sets a default
-    RMI address (to Constants.getLocalHost()) when enabling JMX.  In the past
-    no default was set.
-
-<h4>oracle-tools-testing-support</h4>
-
-*   [ORACLETOOLS-74](https://java.net/jira/browse/ORACLETOOLS-74): Introduced
-    Hamcrest-based com.oracle.tools.matchers.MapMatcher to support matching
-    Maps (and NamedCaches) in assertThat statements.
+*   [ORACLETOOLS-73](https://java.net/jira/browse/ORACLETOOLS-73): Optionally
+    sets a default RMI address (to Constants.getLocalHost()) when enabling JMX.
+    In the past no default was set.
 
 <h4>oracle-tools-coherence-tests</h4>
 
 *   [ORACLETOOLS-72](https://java.net/jira/browse/ORACLETOOLS-72): Updated JMX-based
     tests to ensure they use JMX.
-
-<h4>oracle-tools-coherence-testing-support</h4>
-
-*   [ORACLETOOLS-75](https://java.net/jira/browse/ORACLETOOLS-75): Introduced
-    Hamcrest-based com.oracle.tools.matchers.PartitionSetMatcher to support
-    making Coherence PartitionSet-based assertions.
 
 
 --------------------------------------------------------------------------------

@@ -87,7 +87,7 @@ public class PropertiesBuilder
     /**
      * The properties defined by the {@link PropertiesBuilder}.
      */
-    private LinkedHashMap<String, Property> m_properties;
+    private LinkedHashMap<String, Property> properties;
 
 
     /**
@@ -96,7 +96,7 @@ public class PropertiesBuilder
      */
     public PropertiesBuilder()
     {
-        m_properties = new LinkedHashMap<String, Property>();
+        properties = new LinkedHashMap<String, Property>();
     }
 
 
@@ -116,7 +116,7 @@ public class PropertiesBuilder
 
         for (String name : properties.keySet())
         {
-            m_properties.put(name, new Property(name, null, properties.get(name)));
+            this.properties.put(name, new Property(name, null, properties.get(name)));
         }
     }
 
@@ -137,7 +137,7 @@ public class PropertiesBuilder
 
         for (String key : properties.stringPropertyNames())
         {
-            m_properties.put(key, new Property(key, null, properties.getProperty(key)));
+            this.properties.put(key, new Property(key, null, properties.getProperty(key)));
         }
     }
 
@@ -155,7 +155,7 @@ public class PropertiesBuilder
 
         for (String name : propertiesBuilder.getPropertyNames())
         {
-            m_properties.put(name, new Property(propertiesBuilder.m_properties.get(name)));
+            this.properties.put(name, new Property(propertiesBuilder.properties.get(name)));
         }
     }
 
@@ -167,13 +167,14 @@ public class PropertiesBuilder
      */
     public int size()
     {
-        return m_properties.size();
+        return properties.size();
     }
 
 
     /**
-     * Sets the specified named property to use an {@link Iterator} to provide
-     * successive property values when the {@link PropertiesBuilder} is realized.
+     * Sets the specified named property to use an {@link Iterator}.
+     * (to provide successive requests for the property with values from the said
+     * {@link Iterator} when the {@link PropertiesBuilder} is realized)
      *
      * @param name      the name of the property
      * @param iterator  an {@link Iterator} that will provide successive property
@@ -189,14 +190,42 @@ public class PropertiesBuilder
     {
         if (containsProperty(name))
         {
-            m_properties.get(name).setValue(iterator);
+            properties.get(name).setValue(iterator);
         }
         else
         {
-            m_properties.put(name, new Property(name, iterator, null));
+            properties.put(name, new Property(name, iterator, null));
         }
 
         return this;
+    }
+
+
+    /**
+     * Optionally sets the specified named property to use an {@link Iterator}
+     * (to provide successive requests for the property with values from the said
+     * {@link Iterator} when the {@link PropertiesBuilder} is realized)
+     *
+     * @param name      the name of the property
+     * @param iterator  an {@link Iterator} that will provide successive property
+     *                  values for the property when the {@link PropertiesBuilder}
+     *                  is realized
+     *
+     * @return  the {@link PropertiesBuilder} to which the property was added so
+     *          that further chained method calls, like to other
+     *          <code>setProperty(...)</code> methods on this class may be used.
+     */
+    public PropertiesBuilder setPropertyIfAbsent(String      name,
+                                                 Iterator<?> iterator)
+    {
+        if (containsProperty(name))
+        {
+            return this;
+        }
+        else
+        {
+            return setProperty(name, iterator);
+        }
     }
 
 
@@ -219,11 +248,11 @@ public class PropertiesBuilder
     {
         if (containsProperty(name))
         {
-            m_properties.get(name).setDefaultValue(defaultIterator);
+            properties.get(name).setDefaultValue(defaultIterator);
         }
         else
         {
-            m_properties.put(name, new Property(name, null, defaultIterator));
+            properties.put(name, new Property(name, null, defaultIterator));
         }
 
         return this;
@@ -245,14 +274,38 @@ public class PropertiesBuilder
     {
         if (containsProperty(name))
         {
-            m_properties.get(name).setValue(value);
+            properties.get(name).setValue(value);
         }
         else
         {
-            m_properties.put(name, new Property(name, value, null));
+            properties.put(name, new Property(name, value, null));
         }
 
         return this;
+    }
+
+
+    /**
+     * Optionally sets the specified named property to have the specified value.
+     *
+     * @param name   the name of the property
+     * @param value  the value of the property
+     *
+     * @return  the {@link PropertiesBuilder} to which the property was added so
+     *          that further chained method calls, like to other
+     *          <code>setProperty(...)</code> methods on this class may be used
+     */
+    public PropertiesBuilder setPropertyIfAbsent(String name,
+                                                 Object value)
+    {
+        if (containsProperty(name))
+        {
+            return this;
+        }
+        else
+        {
+            return setProperty(name, value);
+        }
     }
 
 
@@ -272,11 +325,11 @@ public class PropertiesBuilder
     {
         if (containsProperty(name))
         {
-            m_properties.get(name).setDefaultValue(defaultValue);
+            properties.get(name).setDefaultValue(defaultValue);
         }
         else
         {
-            m_properties.put(name, new Property(name, null, defaultValue));
+            properties.put(name, new Property(name, null, defaultValue));
         }
 
         return this;
@@ -296,7 +349,7 @@ public class PropertiesBuilder
      */
     public PropertiesBuilder setProperties(PropertiesBuilder propertiesBuilder)
     {
-        m_properties.putAll(propertiesBuilder.m_properties);
+        properties.putAll(propertiesBuilder.properties);
 
         return this;
     }
@@ -332,7 +385,7 @@ public class PropertiesBuilder
      */
     public boolean containsProperty(String name)
     {
-        return m_properties.containsKey(name);
+        return properties.containsKey(name);
     }
 
 
@@ -348,9 +401,9 @@ public class PropertiesBuilder
      */
     public Object getProperty(String name)
     {
-        if (m_properties.containsKey(name))
+        if (properties.containsKey(name))
         {
-            Property property = m_properties.get(name);
+            Property property = properties.get(name);
 
             return property.hasValue() ? property.getValue() : property.getDefaultValue();
         }
@@ -372,7 +425,7 @@ public class PropertiesBuilder
      */
     public void removeProperty(String name)
     {
-        m_properties.remove(name);
+        properties.remove(name);
     }
 
 
@@ -388,7 +441,7 @@ public class PropertiesBuilder
     @Deprecated
     public void removePropertyValue(String name)
     {
-        Property property = m_properties.get(name);
+        Property property = properties.get(name);
 
         if (property != null)
         {
@@ -403,7 +456,7 @@ public class PropertiesBuilder
      */
     public void clear()
     {
-        m_properties.clear();
+        properties.clear();
     }
 
 
@@ -415,7 +468,7 @@ public class PropertiesBuilder
      */
     public Iterable<String> getPropertyNames()
     {
-        return m_properties.keySet();
+        return properties.keySet();
     }
 
 

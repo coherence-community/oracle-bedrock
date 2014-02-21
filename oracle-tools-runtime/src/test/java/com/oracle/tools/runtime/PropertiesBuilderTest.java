@@ -27,15 +27,16 @@ package com.oracle.tools.runtime;
 
 import org.junit.Test;
 
-import static org.hamcrest.CoreMatchers.is;
-
-import static org.junit.Assert.assertThat;
-
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
 
 /**
  * Unit Tests for {@link PropertiesBuilder}s.
@@ -218,21 +219,27 @@ public class PropertiesBuilderTest
     @Test
     public void shouldCopyNonStandardSystemProperties()
     {
-        //ensure we have one non-standard property
-        int count = 0;
-        String propertyName = "com.oracle.tools.custom.property." + count;
+        // ensure we have one non-standard property
+        int    count         = 0;
+        String propertyName  = "com.oracle.tools.custom.property." + count;
         String propertyValue = "hello world";
-        while (System.getProperty(propertyName) != null) {
+
+        while (System.getProperty(propertyName) != null)
+        {
             count++;
             propertyName = "com.oracle.tools.custom.property." + count;
         }
+
         System.setProperty(propertyName, propertyValue);
 
-        Properties expected = new Properties();
+        Properties expected         = new Properties();
 
         Properties systemProperties = System.getProperties();
-        for (String name : systemProperties.stringPropertyNames()) {
-            if (!PropertiesBuilder.STANDARD_SYSTEM_PROPERTIES.contains(name)) {
+
+        for (String name : systemProperties.stringPropertyNames())
+        {
+            if (!PropertiesBuilder.STANDARD_SYSTEM_PROPERTIES.contains(name))
+            {
                 expected.put(name, systemProperties.get(name));
             }
         }
@@ -242,7 +249,7 @@ public class PropertiesBuilderTest
 
         assertThat(properties, is(expected));
 
-        //remove the property we added
+        // remove the property we added
         System.getProperties().remove(propertyName);
     }
 
@@ -368,9 +375,56 @@ public class PropertiesBuilderTest
 
 
     /**
+     * Ensure properties are set when using
+     * {@link PropertiesBuilder#setPropertyIfAbsent(String, Object)}.
+     */
+    @Test
+    public void shouldSetPropertyIfAbsent()
+    {
+        PropertiesBuilder builder = new PropertiesBuilder();
+
+        builder.setPropertyIfAbsent("Key-1", "Value-1-Default");
+
+        Iterator<String> iterator = Collections.singletonList("One").iterator();
+
+        builder.setPropertyIfAbsent("Key-2", iterator);
+
+        Properties properties = builder.realize();
+
+        assertThat(properties.getProperty("Key-1"), is("Value-1-Default"));
+        assertThat(properties.getProperty("Key-2"), is("One"));
+    }
+
+
+    /**
+     * Ensure properties are not set when using
+     * {@link PropertiesBuilder#setPropertyIfAbsent(String, Object)}.
+     */
+    @Test
+    public void shouldNotSetPropertyIfAbsent()
+    {
+        PropertiesBuilder builder = new PropertiesBuilder();
+
+        builder.setPropertyIfAbsent("Key-1", "Value-1-Default");
+        builder.setPropertyIfAbsent("Key-1", "Other");
+
+        Iterator<String> iterator = Collections.singletonList("One").iterator();
+
+        builder.setPropertyIfAbsent("Key-2", iterator);
+        builder.setPropertyIfAbsent("Key-2", "Other");
+
+        Properties properties = builder.realize();
+
+        assertThat(properties.getProperty("Key-1"), is("Value-1-Default"));
+        assertThat(properties.getProperty("Key-2"), is("One"));
+    }
+
+
+    /**
      * Ensure a default property value is used when one is not set.
      */
     @Test
+    @Deprecated
     public void shouldUseDefaultIfPropertyNotSet()
     {
         PropertiesBuilder builder = new PropertiesBuilder();
@@ -387,6 +441,7 @@ public class PropertiesBuilderTest
      * Ensure a set property overrides a default property.
      */
     @Test
+    @Deprecated
     public void shouldNotUseDefaultIfPropertySet()
     {
         PropertiesBuilder builder = new PropertiesBuilder();
@@ -404,6 +459,7 @@ public class PropertiesBuilderTest
      * Ensure a default property is used if a property is unset.
      */
     @Test
+    @Deprecated
     public void shouldUseDefaultIfPropertySetThenUnset()
     {
         PropertiesBuilder builder = new PropertiesBuilder();
@@ -422,6 +478,7 @@ public class PropertiesBuilderTest
      * Ensure property values are chosen from an iterator when realized.
      */
     @Test
+    @Deprecated
     public void shouldUseDefaultIteratorProperty()
     {
         List<String>      values  = Arrays.asList("one", "two");

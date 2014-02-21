@@ -197,6 +197,24 @@ public abstract class AbstractJavaApplicationSchema<A extends JavaApplication<A>
 
 
     /**
+     * Optionally sets the specified system property.
+     *
+     * @param name   the name of the system property
+     * @param value  the value for the system property
+     *
+     * @return the {@link JavaApplicationSchema}
+     */
+    @SuppressWarnings("unchecked")
+    public S setSystemPropertyIfAbsent(String name,
+                                       Object value)
+    {
+        m_systemPropertiesBuilder.setPropertyIfAbsent(name, value);
+
+        return (S) this;
+    }
+
+
+    /**
      * Sets a default value for specified system property (to be used if it's not defined)
      *
      * @param name  The name of the system property
@@ -270,17 +288,35 @@ public abstract class AbstractJavaApplicationSchema<A extends JavaApplication<A>
     /**
      * Enables/Disables JMX support for the build {@link JavaApplication}s.
      * <p/>
-     * This method sets/removes numerous properties to enable/disable JMX.  Including:
+     * When enabling JMX support, the following system properties are configured
+     * for the {@link JavaApplicationSchema};
      * <p/>
      * <ol>
-     * <li>The java.rmi.server.hostname to {@link Constants#getLocalHost()}
-     * <li>The remote JMX port to 9000, the Java default for remote JMX management.
-     *     You can override this setting by calling {@link #setJMXPort(int)} or
-     *     {@link #setJMXPort(AvailablePortIterator)}.
-     * <li>The sun.management.jmxremote.ssl to false (off)
-     * <li>Disables JMX authentication.
-     *     You can override this setting by calling {@link #setJMXAuthentication(boolean)}.
+     *   <li>Adds the {@link JavaApplication#SUN_MANAGEMENT_JMXREMOTE} property.</li>
+     *   <li>Sets {@link JavaApplication#JAVA_RMI_SERVER_HOSTNAME} to {@link Constants#getLocalHost()}
+     *       (if not already defined).</li>
+     *   <li>Sets {@link JavaApplication#SUN_MANAGEMENT_JMXREMOTE_PORT} to 9000,
+     *       the Java default for remote JMX management
+     *       (if not already defined).
+     *       You can override this setting by calling {@link #setJMXPort(int)} or
+     *       {@link #setJMXPort(AvailablePortIterator)}.</li>
+     *   <li>Sets {@link JavaApplication#SUN_MANAGEMENT_JMXREMOTE_SSL} to false (off)
+     *       (if not already defined).</li>
+     *   <li>Sets {@link JavaApplication#SUN_MANAGEMENT_JMXREMOTE_AUTHENTICATE} to false (off)
+     *       (if not already defined).
+     *       You can override this setting by calling {@link #setJMXAuthentication(boolean)}.</li>
      * </ol>
+     * </p>
+     * When disabling JMX support, the following system properties are removed
+     * from the {@link JavaApplicationSchema};
+     * <ol>
+     *   <li>{@link JavaApplication#SUN_MANAGEMENT_JMXREMOTE}</li>
+     *   <li>{@link JavaApplication#SUN_MANAGEMENT_JMXREMOTE_PORT}</li>
+     *   <li>{@link JavaApplication#SUN_MANAGEMENT_JMXREMOTE_AUTHENTICATE}</li>
+     *   <li>{@link JavaApplication#SUN_MANAGEMENT_JMXREMOTE_SSL}</li>
+     *   <li>{@link JavaApplication#JAVA_RMI_SERVER_HOSTNAME}</li>
+     * </ol>
+     *
      *
      * @param enabled  should JMX support be enabled
      * @return the {@link JavaApplicationSchema}
@@ -290,11 +326,11 @@ public abstract class AbstractJavaApplicationSchema<A extends JavaApplication<A>
     {
         if (enabled)
         {
-            setSystemProperty(SUN_MANAGEMENT_JMXREMOTE_PORT, 9000);
             setSystemProperty(SUN_MANAGEMENT_JMXREMOTE, "");
-            setSystemProperty(SUN_MANAGEMENT_JMXREMOTE_AUTHENTICATE, false);
-            setSystemProperty(SUN_MANAGEMENT_JMXREMOTE_SSL, false);
-            setSystemProperty(JAVA_RMI_SERVER_HOSTNAME, Constants.getLocalHost());
+            setSystemPropertyIfAbsent(SUN_MANAGEMENT_JMXREMOTE_PORT, 9000);
+            setSystemPropertyIfAbsent(SUN_MANAGEMENT_JMXREMOTE_AUTHENTICATE, false);
+            setSystemPropertyIfAbsent(SUN_MANAGEMENT_JMXREMOTE_SSL, false);
+            setSystemPropertyIfAbsent(JAVA_RMI_SERVER_HOSTNAME, Constants.getLocalHost());
         }
         else
         {
