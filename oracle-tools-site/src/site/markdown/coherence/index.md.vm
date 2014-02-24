@@ -39,20 +39,28 @@ As this module is an extension to the [Runtime Module for Oracle Tools][RUNTIME]
 highly recommend reading the [Introduction to Application Management](../runtime/applications.html)
 for core concepts, background information and introductory examples.
 
-**Where?**
-The Coherence Module for Oracle Tools for is defined by the following Maven coordinates
-and Java package:
+
+--------------------------------------------------------------------------------
+
+<h4>Distribution</h4>
+
+The Oracle Tools Coherence module is distributed as a single jar
+called: `oracle-tools-coherence-${project.version}.jar`
+
+
+The [maven.java.net](https://maven.java.net) artifact information is as follows:
 
 *   Maven Group Id: `${project.groupId}`
 *   Maven Artifact Id: `oracle-tools-coherence`
 *   Maven Version: `${project.version}`
-*   Java Package: `com.oracle.tools.runtime.coherence`
 
-The Coherence Module for Oracle Tools is distributed as a single jar called:
-`oracle-tools-coherence-${project.version}.jar`
+Alternatively you can downlown directly from: <img src="../images/external-link.png" alt="External Link" height="10" width="10" align="top"/> [oracle-tools-coherence-${project.version}.jar](https://maven.java.net/service/local/artifact/maven/redirect?r=${repository}&g=com.oracle.tools&a=oracle-tools-coherence&v=${project.version}&e=jar)
+
+<h4>Source Code</h4>
 
 Source code for this and other Oracle Tools modules can be found here:
 [https://github.com/coherence-community/oracle-tools](https://github.com/coherence-community/oracle-tools)
+
 
 Getting Started
 ---------------
@@ -90,11 +98,8 @@ default configuration.
 
     import com.oracle.tools.runtime.java.JavaApplicationBuilder;
     import com.oracle.tools.runtime.java.NativeJavaApplicationBuilder
-
     import com.oracle.tools.runtime.java.container.Container;
-
     import com.oracle.tools.runtime.network.AvailablePortIterator;
-
     import static com.oracle.tools.deferred.DeferredHelper.invoking;
     import static com.oracle.tools.deferred.Eventually.assertThat;
     import static org.hamcrest.CoreMatchers.is;
@@ -250,18 +255,12 @@ To simplify representing, building and managing multiple `ClusterMember`s as a
 group of applications, ie: a `Cluster`, developers should use the `ClusterBuilder`.
 
     import com.oracle.tools.runtime.console.SystemApplicationConsole;
-
     import com.oracle.tools.runtime.java.JavaApplicationBuilder;
     import com.oracle.tools.runtime.java.NativeJavaApplicationBuilder;
-
     import com.oracle.tools.runtime.java.container.Container;
-
     import com.oracle.tools.runtime.network.AvailablePortIterator;
-
     import static com.oracle.tools.deferred.DeferredHelper.invoking;
-
     import static com.oracle.tools.deferred.Eventually.assertThat;
-
     import static org.hamcrest.CoreMatchers.is;
 
     ...
@@ -313,8 +312,8 @@ group of applications, ie: a `Cluster`, developers should use the `ClusterBuilde
     {
         if (cluster != null)
         {
-            // destroys and shuts down the entire cluster
-            cluster.destroy();
+            // closes and shutsdown the cluster
+            cluster.close();
         }
     }
 
@@ -324,9 +323,9 @@ builders associated with it.   This allows different topologies to be constructe
 For example, say you have multiple `ClusterSchema` definitions, each of which should have a certain
 number of members in a cluster.   Using a `ClusterBuilder` to define this is as easy as:
 
-        clusterBuilder.addBuilder(memberBuilder, storageSchema, "Storage", nrStorageMembers);
-        clusterBuilder.addBuilder(memberBuilder, proxySchema, "Proxy", nrProxyMembers);
-        clusterBuilder.addBuilder(memberBuilder, managementSchema, "Management", nrManagementMembers);
+    clusterBuilder.addBuilder(memberBuilder, storageSchema, "Storage", nrStorageMembers);
+    clusterBuilder.addBuilder(memberBuilder, proxySchema, "Proxy", nrProxyMembers);
+    clusterBuilder.addBuilder(memberBuilder, managementSchema, "Management", nrManagementMembers);
 
 When the `ClusterBuilder.realize(...)` method is called, an entire cluster consisting of the appropriate
 number of members will be built and returned as a `Cluster`.

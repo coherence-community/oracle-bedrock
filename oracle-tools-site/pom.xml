@@ -44,9 +44,9 @@
                 </configuration>
                 <dependencies>
                     <dependency>
-                        <groupId>org.kohsuke</groupId>
+                        <groupId>org.apache.maven.doxia</groupId>
                         <artifactId>doxia-module-markdown</artifactId>
-                        <version>${doxia.module.markdown.version}</version>
+                        <version>${maven.doxia.markdown.plugin.version}</version>
                     </dependency>
                 </dependencies>
             </plugin>

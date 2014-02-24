@@ -37,10 +37,12 @@ h1, h2, h3, h4, h5, h6 {
     width: 670px;
 }
 
-/* change code color */
+/* change code color and font */
 code {
     color: #333333;
 }
+code,pre{font-size:11px;}
+
 
 /* remove 'powered by Maven' */
 .poweredBy {
@@ -87,3 +89,9 @@ footer div.version {
     font-size: 11px;
     width: 920px;
 }
+
+/* remove external link images */
+a.externalLink[href^=http] { background: none; padding-right: 0px}
+a.externalLink[href^=https] { background: none; padding-right: 0px }
+a.externalLink[href^=file] { background: none; padding-right: 0px }
+a.externalLink[href^=ftp] { background: none; padding-right: 0px }

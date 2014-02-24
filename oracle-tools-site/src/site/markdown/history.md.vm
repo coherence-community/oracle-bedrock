@@ -14,16 +14,32 @@ reverse chronological order.
 
 *   (none)
 
+<h4>oracle-tools-site</h4>
+
+*   [ORACLETOOLS-77](https://java.net/jira/browse/ORACLETOOLS-77): Upgraded
+    Doxia and Markdown plug-ins.  This included tidying up the documentation
+    formatting and links that were broken/changed as part of the upgrade.
+
 <h4>oracle-tools-runtime</h4>
 
 *   [ORACLETOOLS-76](https://java.net/jira/browse/ORACLETOOLS-76): Introduced
     PropertyBuilder.setPropertyIfAbsent method to support optionally setting a property
+
+*   [ORACLETOOLS-78](https://java.net/jira/browse/ORACLETOOLS-78): Introduced
+    experimental Actions and ActionExecutors to programmatically control
+    the behavior of Applications and Application Groups at runtime.
 
 <h4>oracle-tools-testing-support</h4>
 
 *   [ORACLETOOLS-74](https://java.net/jira/browse/ORACLETOOLS-74): Introduced
     Hamcrest-based com.oracle.tools.matchers.MapMatcher to support matching
     Maps (and NamedCaches) in assertThat statements.
+
+<h4>oracle-tools-coherence</h4>
+
+*   [ORACLETOOLS-78](https://java.net/jira/browse/ORACLETOOLS-78): Introduced
+    the experimental RestartClusterMemberAction, to safely restart a cluster
+    member as part of an Cluster (ApplicationGroup).
 
 <h4>oracle-tools-coherence-testing-support</h4>
 
@@ -151,7 +167,7 @@ reverse chronological order.
     Runnables in Java-based Applications.   Implemented support for both
     Container-based and Native Java Applications.
 
-    eg: application.submit(Callable<T>, CompletionListener<T>)
+    eg: application.submit(Callable&lt;T&gt;, CompletionListener&lt;T&gt;)
 
     Stateful Callables / Runnables will need to be Serializable in order to
     be successfully executed correctly, for both in-process/Container-based
