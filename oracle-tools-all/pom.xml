@@ -89,7 +89,7 @@
                             </artifactSet>
 
                             <createSourcesJar>true</createSourcesJar>
-                            <createDependencyReducedPom>false</createDependencyReducedPom>
+                            <createDependencyReducedPom>true</createDependencyReducedPom>
                             <promoteTransitiveDependencies>true</promoteTransitiveDependencies>
                         </configuration>
                     </execution>
