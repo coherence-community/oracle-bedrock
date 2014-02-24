@@ -1,5 +1,5 @@
 /*
- * File: ConstantIterator.java
+ * File: CountingAction.java
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
@@ -23,30 +23,51 @@
  * "Portions Copyright [year] [name of copyright owner]"
  */
 
-package com.oracle.tools.util;
+package com.oracle.tools.runtime.actions;
 
-import java.util.Iterator;
+import com.oracle.tools.runtime.ApplicationGroup;
+
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * An {@link Iterator} that infinitely returns the same constant value.
+ * A thread-safe {@link CustomAction} that counts the number of times it has been performed.
  * <p>
- * This class has now been deprecated.  Instead use {@link PerpetualIterator}.
- * <p>
- * Copyright (c) 2013. All Rights Reserved. Oracle Corporation.<br>
+ * Copyright (c) 2014. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Brian Oliver
  */
-@Deprecated
-public class ConstantIterator<T> extends PerpetualIterator<T>
+public class CountingAction implements CustomAction
 {
     /**
-     * Constructs a {@link ConstantIterator}.
-     *
-     * @param value  the value
+     * The number of time the {@link CountingAction} has been executed.
      */
-    public ConstantIterator(T value)
+    private AtomicInteger executionCount;
+
+
+    /**
+     * Constructs an {@link CountingAction}.
+     */
+    public CountingAction()
     {
-        super(value);
+        executionCount = new AtomicInteger();
+    }
+
+
+    /**
+     * Obtain the current execution count.
+     *
+     * @return  the current execution count
+     */
+    public int getExecutionCount()
+    {
+        return executionCount.get();
+    }
+
+
+    @Override
+    public void perform(ApplicationGroup group)
+    {
+        executionCount.incrementAndGet();
     }
 }

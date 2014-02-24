@@ -1,5 +1,5 @@
 /*
- * File: ConstantIterator.java
+ * File: PerpetualAction.java
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
@@ -23,30 +23,43 @@
  * "Portions Copyright [year] [name of copyright owner]"
  */
 
-package com.oracle.tools.util;
+package com.oracle.tools.runtime.actions;
+
+import com.oracle.tools.runtime.Application;
+import com.oracle.tools.runtime.ApplicationGroup;
+
+import com.oracle.tools.util.PerpetualIterator;
 
 import java.util.Iterator;
 
 /**
- * An {@link Iterator} that infinitely returns the same constant value.
+ * A specialized {@link Sequence} that defines an {@link Action} to be performed perpetually.
  * <p>
- * This class has now been deprecated.  Instead use {@link PerpetualIterator}.
- * <p>
- * Copyright (c) 2013. All Rights Reserved. Oracle Corporation.<br>
+ * Copyright (c) 2014. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Brian Oliver
  */
-@Deprecated
-public class ConstantIterator<T> extends PerpetualIterator<T>
+public class PerpetualAction<A extends Application<A>, G extends ApplicationGroup<A>> implements Sequence<A, G>
 {
     /**
-     * Constructs a {@link ConstantIterator}.
-     *
-     * @param value  the value
+     * The {@link Action} to be performed perpetually.
      */
-    public ConstantIterator(T value)
+    private Action<A, G> action;
+
+
+    /**
+     * Constructs a {@link PerpetualAction} based on a single {@link Action}
+     */
+    public PerpetualAction(Action<A, G> action)
     {
-        super(value);
+        this.action = action;
+    }
+
+
+    @Override
+    public Iterator<Action<A, G>> getActions()
+    {
+        return new PerpetualIterator<Action<A, G>>(action);
     }
 }

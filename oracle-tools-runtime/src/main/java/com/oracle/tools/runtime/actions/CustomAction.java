@@ -1,5 +1,5 @@
 /*
- * File: ConstantIterator.java
+ * File: CustomAction.java
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
@@ -23,30 +23,25 @@
  * "Portions Copyright [year] [name of copyright owner]"
  */
 
-package com.oracle.tools.util;
+package com.oracle.tools.runtime.actions;
 
-import java.util.Iterator;
+import com.oracle.tools.runtime.Application;
+import com.oracle.tools.runtime.ApplicationGroup;
 
 /**
- * An {@link Iterator} that infinitely returns the same constant value.
+ * Defines an custom {@link Action} to be performed on an {@link ApplicationGroup}.
  * <p>
- * This class has now been deprecated.  Instead use {@link PerpetualIterator}.
- * <p>
- * Copyright (c) 2013. All Rights Reserved. Oracle Corporation.<br>
+ * Copyright (c) 2014. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Brian Oliver
  */
-@Deprecated
-public class ConstantIterator<T> extends PerpetualIterator<T>
+public interface CustomAction<A extends Application<A>, G extends ApplicationGroup<A>> extends Action<A, G>
 {
     /**
-     * Constructs a {@link ConstantIterator}.
+     * Performs the custom {@link Action} on an {@link ApplicationGroup}.
      *
-     * @param value  the value
+     * @param group  the {@link ApplicationGroup} on which to perform the {@link Action}
      */
-    public ConstantIterator(T value)
-    {
-        super(value);
-    }
+    public void perform(G group);
 }

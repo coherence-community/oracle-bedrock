@@ -26,28 +26,25 @@
 package com.oracle.tools.runtime.coherence;
 
 import com.oracle.tools.junit.AbstractTest;
-
+import com.oracle.tools.runtime.ApplicationConsole;
+import com.oracle.tools.runtime.actions.InteractiveActionExecutor;
+import com.oracle.tools.runtime.actions.PerpetualAction;
+import com.oracle.tools.runtime.coherence.actions.RestartClusterMemberAction;
 import com.oracle.tools.runtime.console.SystemApplicationConsole;
-
 import com.oracle.tools.runtime.java.JavaApplicationBuilder;
 import com.oracle.tools.runtime.java.container.Container;
-
 import com.oracle.tools.runtime.network.AvailablePortIterator;
 import com.oracle.tools.runtime.network.Constants;
-
 import com.oracle.tools.util.Capture;
-
+import com.oracle.tools.util.Predicate;
 import junit.framework.Assert;
-
 import org.junit.Test;
 
-import static com.oracle.tools.deferred.DeferredHelper.invoking;
-
-import static com.oracle.tools.deferred.Eventually.assertThat;
-
-import static org.hamcrest.CoreMatchers.is;
-
 import java.util.HashSet;
+
+import static com.oracle.tools.deferred.DeferredHelper.invoking;
+import static com.oracle.tools.deferred.Eventually.assertThat;
+import static org.hamcrest.CoreMatchers.is;
 
 /**
  * Functional Tests for the {@link com.oracle.tools.runtime.coherence.ClusterBuilder} class.
@@ -209,6 +206,81 @@ public abstract class AbstractClusterBuilderTest extends AbstractTest
             cluster = clusterBuilder.realize(console);
 
             assertThat(invoking(cluster).getClusterSize(), is(desiredClusterSize));
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            Assert.fail();
+        }
+        finally
+        {
+            if (cluster != null)
+            {
+                cluster.close();
+            }
+        }
+    }
+
+
+    /**
+     * Ensure we perform a rolling restart of a {@link Cluster}
+     *
+     * @throws Exception
+     */
+    @Test
+    public void shouldPerformRollingRestartOfCluster() throws Exception
+    {
+        final int                                                  CLUSTER_SIZE   = 4;
+
+        AvailablePortIterator                                      availablePorts = Container.getAvailablePorts();
+        Capture<Integer>                                           clusterPort    =
+            new Capture<Integer>(availablePorts);
+
+        ClusterMemberSchema schema = new ClusterMemberSchema().useLocalHostMode().setClusterPort(clusterPort);
+
+        Cluster                                                    cluster        = null;
+        ApplicationConsole                                         console        = new SystemApplicationConsole();
+        JavaApplicationBuilder<ClusterMember, ClusterMemberSchema> memberBuilder  = newJavaApplicationBuilder();
+
+        try
+        {
+            ClusterBuilder builder = new ClusterBuilder();
+
+            builder.addBuilder(memberBuilder, schema, "DCS", CLUSTER_SIZE);
+
+            cluster = builder.realize(console);
+
+            assertThat(invoking(cluster).getClusterSize(), is(CLUSTER_SIZE));
+
+            // construct the action to restart a cluster member (iff the DistributedCache is NODE_SAFE)
+            RestartClusterMemberAction restartAction = new RestartClusterMemberAction("DCS",
+                                                                                      memberBuilder,
+                                                                                      schema,
+                                                                                      console,
+                                                                                      new Predicate<ClusterMember>()
+            {
+                @Override
+                public boolean evaluate(ClusterMember member)
+                {
+                    ClusterMember.ServiceStatus status = member.getServiceStatus("DistributedCache");
+
+                    return status == ClusterMember.ServiceStatus.NODE_SAFE;
+                }
+            });
+
+            // let's perpetually restart a cluster member
+            PerpetualAction<ClusterMember, Cluster> perpetualAction = new PerpetualAction<ClusterMember,
+                                                                                          Cluster>(restartAction);
+
+            InteractiveActionExecutor<ClusterMember, Cluster> executor = new InteractiveActionExecutor<ClusterMember,
+                                                                                                       Cluster>(cluster,
+                                                                                                                perpetualAction);
+
+            executor.executeNext();
+            executor.executeNext();
+            executor.executeNext();
+
+            assertThat(invoking(cluster).getClusterSize(), is(CLUSTER_SIZE));
         }
         catch (Exception e)
         {

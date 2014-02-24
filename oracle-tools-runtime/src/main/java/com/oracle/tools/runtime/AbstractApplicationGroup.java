@@ -25,12 +25,10 @@
 
 package com.oracle.tools.runtime;
 
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -156,9 +154,12 @@ public abstract class AbstractApplicationGroup<A extends Application<A>> impleme
      *
      * @param application  the {@link Application} to remove
      *
+     * @return <code>true</code> if the specified {@link Application} was removed
+     *         <code>false</code> otherwise
+     *
      * @throws IllegalStateException  when the {@link ApplicationGroup} {@link #isClosed}
      */
-    public void removeApplication(A application)
+    public boolean removeApplication(A application)
     {
         if (isClosed())
         {
@@ -167,7 +168,7 @@ public abstract class AbstractApplicationGroup<A extends Application<A>> impleme
         }
         else
         {
-            applications.remove(application);
+            return applications.remove(application);
         }
     }
 

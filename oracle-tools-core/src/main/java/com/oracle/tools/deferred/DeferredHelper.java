@@ -179,8 +179,8 @@ public class DeferredHelper
         }
         else
         {
-            // default to constant polling
-            return new ConstantIterator<Long>(250L);
+            // default to perpetual polling
+            return new PerpetualIterator<Long>(250L);
         }
     }
 
@@ -290,8 +290,8 @@ public class DeferredHelper
                                           TimeUnit    totalRetryDurationUnits)
     {
         Iterator<Long> retryDurationsMS =
-            new ConstantIterator<Long>(retryDelayDurationUnits.toMillis(retryDelayDuration < 0
-                                                                        ? 0 : retryDelayDuration));
+            new PerpetualIterator<Long>(retryDelayDurationUnits.toMillis(retryDelayDuration < 0
+                                                                         ? 0 : retryDelayDuration));
 
         return deferred instanceof Ensured ? deferred : new Ensured<T>(deferred,
                                                                        retryDurationsMS,

@@ -74,7 +74,7 @@ public class RandomIterator implements Iterator<Long>
      */
     public RandomIterator(long range)
     {
-        this(new ConstantIterator<Long>(range));
+        this(new PerpetualIterator<Long>(range));
     }
 
 

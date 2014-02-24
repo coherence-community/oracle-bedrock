@@ -1,5 +1,5 @@
 /*
- * File: ConstantIterator.java
+ * File: ActionExecutor.java
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
@@ -23,30 +23,29 @@
  * "Portions Copyright [year] [name of copyright owner]"
  */
 
-package com.oracle.tools.util;
+package com.oracle.tools.runtime.actions;
 
-import java.util.Iterator;
+import com.oracle.tools.runtime.Application;
+import com.oracle.tools.runtime.ApplicationGroup;
+
+import java.io.Closeable;
 
 /**
- * An {@link Iterator} that infinitely returns the same constant value.
+ * An {@link ActionExecutor} executes {@link Action}s against a specific
+ * {@link ApplicationGroup} instance.
  * <p>
- * This class has now been deprecated.  Instead use {@link PerpetualIterator}.
- * <p>
- * Copyright (c) 2013. All Rights Reserved. Oracle Corporation.<br>
+ * Copyright (c) 2014. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Brian Oliver
  */
-@Deprecated
-public class ConstantIterator<T> extends PerpetualIterator<T>
+public interface ActionExecutor<A extends Application<A>, G extends ApplicationGroup<A>> extends Closeable
 {
     /**
-     * Constructs a {@link ConstantIterator}.
+     * Obtains the {@link ApplicationGroup} on which the {@link ActionExecutor}
+     * will execute {@link Action}s
      *
-     * @param value  the value
+     * @return  the {@link ApplicationGroup}
      */
-    public ConstantIterator(T value)
-    {
-        super(value);
-    }
+    public G getApplicationGroup();
 }

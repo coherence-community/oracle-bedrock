@@ -1,5 +1,5 @@
 /*
- * File: ConstantIterator.java
+ * File: Sequence.java
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
@@ -23,30 +23,29 @@
  * "Portions Copyright [year] [name of copyright owner]"
  */
 
-package com.oracle.tools.util;
+package com.oracle.tools.runtime.actions;
+
+import com.oracle.tools.runtime.Application;
+import com.oracle.tools.runtime.ApplicationGroup;
 
 import java.util.Iterator;
 
 /**
- * An {@link Iterator} that infinitely returns the same constant value.
+ * A {@link Sequence} is a specialized {@link Action} that defines zero or more
+ * {@link Action}s to be performed in sequence by an {@link ActionExecutor} on an
+ * {@link ApplicationGroup}.
  * <p>
- * This class has now been deprecated.  Instead use {@link PerpetualIterator}.
- * <p>
- * Copyright (c) 2013. All Rights Reserved. Oracle Corporation.<br>
+ * Copyright (c) 2014. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Brian Oliver
  */
-@Deprecated
-public class ConstantIterator<T> extends PerpetualIterator<T>
+public interface Sequence<A extends Application<A>, G extends ApplicationGroup<A>> extends Action<A, G>
 {
     /**
-     * Constructs a {@link ConstantIterator}.
+     * Obtains the {@link Action}s to be executed in sequence.
      *
-     * @param value  the value
+     * @return an {@link Iterator} of {@link Action}s to execute
      */
-    public ConstantIterator(T value)
-    {
-        super(value);
-    }
+    public Iterator<Action<A, G>> getActions();
 }

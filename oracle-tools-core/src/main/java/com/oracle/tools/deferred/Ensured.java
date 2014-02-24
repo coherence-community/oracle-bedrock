@@ -25,10 +25,7 @@
 
 package com.oracle.tools.deferred;
 
-import com.oracle.tools.util.ConstantIterator;
-
 import java.util.Iterator;
-
 import java.util.concurrent.TimeUnit;
 
 /**

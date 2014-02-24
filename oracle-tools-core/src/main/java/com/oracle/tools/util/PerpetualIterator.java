@@ -1,5 +1,5 @@
 /*
- * File: ConstantIterator.java
+ * File: PerpetualIterator.java
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
@@ -28,25 +28,49 @@ package com.oracle.tools.util;
 import java.util.Iterator;
 
 /**
- * An {@link Iterator} that infinitely returns the same constant value.
+ * An {@link Iterator} that perpetually returns the same value.
  * <p>
- * This class has now been deprecated.  Instead use {@link PerpetualIterator}.
- * <p>
- * Copyright (c) 2013. All Rights Reserved. Oracle Corporation.<br>
+ * Copyright (c) 2014. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Brian Oliver
  */
-@Deprecated
-public class ConstantIterator<T> extends PerpetualIterator<T>
+public class PerpetualIterator<T> implements Iterator<T>
 {
     /**
-     * Constructs a {@link ConstantIterator}.
-     *
-     * @param value  the value
+     * The value to return for each {@link #next()} call.
      */
-    public ConstantIterator(T value)
+    private T value;
+
+
+    /**
+     * Constructs an {@link PerpetualIterator}.
+     *
+     * @param value  the value to return
+     */
+    public PerpetualIterator(T value)
     {
-        super(value);
+        this.value = value;
+    }
+
+
+    @Override
+    public boolean hasNext()
+    {
+        return true;
+    }
+
+
+    @Override
+    public T next()
+    {
+        return value;
+    }
+
+
+    @Override
+    public void remove()
+    {
+        throw new UnsupportedOperationException("PerpetualIterator's don't support removing values");
     }
 }
