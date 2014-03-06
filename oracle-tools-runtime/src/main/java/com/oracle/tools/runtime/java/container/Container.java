@@ -104,6 +104,7 @@ public class Container
             System.setProperties(new DelegatingProperties(s_defaultScope.getProperties()));
             System.setOut(new PrintStream(new DelegatingStdOutOutputStream(s_platformScope.getStandardOutput()), true));
             System.setErr(new PrintStream(new DelegatingStdErrOutputStream(s_platformScope.getStandardError()), true));
+            System.setIn(new DelegatingStdInInputStream(s_platformScope.getStandardInput()));
         }
     }
 

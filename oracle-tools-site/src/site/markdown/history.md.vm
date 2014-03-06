@@ -9,6 +9,42 @@ reverse chronological order.
 <h4>Source and Documentation Contributors</h4>
 
 *   Brian Oliver
+*   Jonathan Knight
+
+<h4>Global and Cross-Module Changes</h4>
+
+*   (none)
+
+<h4>oracle-tools-site</h4>
+
+*   (none)
+
+<h4>oracle-tools-runtime</h4>
+
+*   [ORACLETOOLS-79](https://java.net/jira/browse/ORACLETOOLS-79): Implemented
+    the link between a process stdin stream and an ApplicationConsole so that
+    it is possible to pipe input to a process.
+
+<h4>oracle-tools-testing-support</h4>
+
+*   (none)
+
+<h4>oracle-tools-coherence</h4>
+
+*   (none)
+
+<h4>oracle-tools-coherence-testing-support</h4>
+
+*   (none)
+
+
+--------------------------------------------------------------------------------
+
+<h3>Version: 1.2.2 on 2014-02-25 11:21</h3>
+
+<h4>Source and Documentation Contributors</h4>
+
+*   Brian Oliver
 
 <h4>Global and Cross-Module Changes</h4>
 

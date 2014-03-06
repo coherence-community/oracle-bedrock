@@ -29,12 +29,7 @@ import com.oracle.tools.runtime.console.SystemApplicationConsole;
 
 import com.oracle.tools.runtime.java.container.Container;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -99,6 +94,11 @@ public abstract class AbstractApplication<A, P extends ApplicationProcess> imple
      * The {@link Thread} that is used to capture standard error from the underlying {@link Process}.
      */
     private Thread m_errThread;
+
+    /**
+     * The {@link Thread} that is used to pipe standard in into the underlying {@link Process}.
+     */
+    private Thread m_inThread;
 
     /**
      * The default timeout duration.
@@ -195,6 +195,11 @@ public abstract class AbstractApplication<A, P extends ApplicationProcess> imple
         m_errThread.setDaemon(true);
         m_errThread.setName(name + " StdErr Thread");
         m_errThread.start();
+
+        m_inThread = new Thread(new InputRedirector(m_console.getInputReader(), m_process.getOutputStream()));
+        m_inThread.setDaemon(true);
+        m_inThread.setName(name + " StdIn Thread");
+        m_inThread.start();
     }
 
 
@@ -217,6 +222,16 @@ public abstract class AbstractApplication<A, P extends ApplicationProcess> imple
     {
         // close the process
         m_process.close();
+
+        // terminate the thread that is writing to the process standard in
+        try
+        {
+            m_inThread.interrupt();
+        }
+        catch (Exception e)
+        {
+            // nothing to do here as we don't care
+        }
 
         // terminate the thread that is reading from the process standard out
         try
@@ -469,6 +484,64 @@ public abstract class AbstractApplication<A, P extends ApplicationProcess> imple
                 m_outputWriter.flush();
             }
             catch (Exception e)
+            {
+                // SKIP: deliberately empty as we safely assume exceptions
+                // are always due to process termination.
+            }
+        }
+    }
+
+    /**
+     * An {@link InputRedirector} pipes input to an {@link OutputStream},
+     * typically from an {@link ApplicationConsole} to a {@link Process}.
+     */
+    private static class InputRedirector implements Runnable
+    {
+        /**
+         * The {@link Reader} from which content will be read.
+         */
+        private Reader m_inputReader;
+
+        /**
+         * The {@link OutputStream} to which the content read from the
+         * {@link Reader} will be written.
+         */
+        private OutputStream m_outputStream;
+
+
+        /**
+         * Constructs an {@link OutputRedirector}.
+         *
+         * @param inputStream      the {@link InputStream} from which to read content
+         * @param outputStream     the {@link PrintWriter} to which to write content
+         */
+        private InputRedirector(Reader inputStream, OutputStream outputStream)
+        {
+            m_inputReader  = inputStream;
+            m_outputStream = outputStream;
+        }
+
+
+        @Override
+        public void run()
+        {
+            try
+            {
+                BufferedReader reader = new BufferedReader(m_inputReader);
+                PrintWriter    writer = new PrintWriter(m_outputStream);
+                while (true)
+                {
+                    String line = reader.readLine();
+
+                    if (line == null)
+                    {
+                        break;
+                    }
+                    writer.println(line);
+                    writer.flush();
+                }
+            }
+            catch (Exception exception)
             {
                 // SKIP: deliberately empty as we safely assume exceptions
                 // are always due to process termination.
