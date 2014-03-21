@@ -15,6 +15,14 @@ reverse chronological order.
 
 *   (none)
 
+<h4>oracle-tools-core</h4>
+
+*   [ORACLETOOLS-87](https://java.net/jira/browse/ORACLETOOLS-87): Increased
+    the default Deferred timeout to 60 seconds from 30 seconds.  This won't
+    impact existing tests but will allow for longer running tests without
+    requiring developers to explicitly specify a max timeout or override
+    system properties.
+
 <h4>oracle-tools-site</h4>
 
 *   (none)
@@ -24,6 +32,10 @@ reverse chronological order.
 *   [ORACLETOOLS-79](https://java.net/jira/browse/ORACLETOOLS-79): Implemented
     the link between a process stdin stream and an ApplicationConsole so that
     it is possible to pipe input to a process.
+
+*   [ORACLETOOLS-86](https://java.net/jira/browse/ORACLETOOLS-86): Resolved issue
+    where calling Application.waitFor() will not terminate when using applications
+    produced by NativeJavaApplicationBuilders.
 
 <h4>oracle-tools-testing-support</h4>
 

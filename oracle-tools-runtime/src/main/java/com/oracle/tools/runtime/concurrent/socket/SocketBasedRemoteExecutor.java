@@ -239,6 +239,8 @@ public class SocketBasedRemoteExecutor extends AbstractControllableRemoteExecuto
                 }
             });
 
+            requestAcceptorThread.setName("RemoteExecutor:RequestAcceptor");
+            requestAcceptorThread.setDaemon(true);
             requestAcceptorThread.start();
 
             for (RemoteExecutorListener listener : getListeners())

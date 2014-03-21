@@ -26,39 +26,26 @@
 package com.oracle.tools.runtime.java;
 
 import com.oracle.tools.deferred.Eventually;
-
-import com.oracle.tools.deferred.listener.DeferredCompletionListener;
-
 import com.oracle.tools.junit.AbstractTest;
-
 import com.oracle.tools.lang.StringHelper;
-
 import com.oracle.tools.runtime.ApplicationConsole;
 import com.oracle.tools.runtime.DummyApp;
 import com.oracle.tools.runtime.DummyClassPathApp;
-
 import com.oracle.tools.runtime.console.PipedApplicationConsole;
 import com.oracle.tools.runtime.console.SystemApplicationConsole;
-
 import com.oracle.tools.runtime.java.applications.SleepingApplication;
 import com.oracle.tools.runtime.java.container.ContainerClassLoader;
-
 import org.junit.Test;
-
 import org.mockito.Mock;
-
-import static org.hamcrest.CoreMatchers.is;
-
-import static org.hamcrest.core.StringContains.containsString;
-
-import static org.junit.Assert.assertThat;
 
 import java.io.IOException;
 import java.io.Serializable;
-
 import java.util.UUID;
-
 import java.util.concurrent.Callable;
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.core.StringContains.containsString;
+import static org.junit.Assert.assertThat;
 
 /**
  * Functional Tests for {@link JavaApplicationBuilder}s.
@@ -175,8 +162,8 @@ public abstract class AbstractJavaApplicationBuilderTest extends AbstractTest
 
 
     /**
-     * Ensure that {@link NativeJavaApplicationBuilder}s create applications that
-     * can have {@link java.util.concurrent.Callable}s submitted to them and executed.
+     * Ensure that we can create applications that can have {@link java.util.concurrent.Callable}s
+     * submitted to them and executed.
      */
     @Test
     public void shouldExecuteCallable() throws InterruptedException
@@ -201,6 +188,44 @@ public abstract class AbstractJavaApplicationBuilderTest extends AbstractTest
             application = builder.realize(schema, "sleeping", console);
 
             Eventually.assertThat(application, new GetSystemProperty("uuid"), is(uuid));
+        }
+        catch (IOException e)
+        {
+        }
+        finally
+        {
+            if (application != null)
+            {
+                application.close();
+            }
+        }
+    }
+
+
+    /**
+     * Ensure that we can wait for applications to terminate.
+     */
+    @Test(timeout = 10000)
+    public void shouldWaitFor() throws InterruptedException
+    {
+        SimpleJavaApplication application = null;
+
+        try
+        {
+            // define and start the SleepingApplication
+            SimpleJavaApplicationSchema schema = new SimpleJavaApplicationSchema(SleepingApplication.class.getName());
+
+            // we'll wait at most 5 seconds in the application
+            schema.setArgument("5");
+
+            JavaApplicationBuilder<SimpleJavaApplication, SimpleJavaApplicationSchema> builder =
+                    newJavaApplicationBuilder();
+
+            ApplicationConsole console = new SystemApplicationConsole();
+
+            application = builder.realize(schema, "sleeping", console);
+
+            application.waitFor();
         }
         catch (IOException e)
         {

@@ -50,9 +50,26 @@ public class SleepingApplication
     {
         System.out.printf("%s started\n", SleepingApplication.class.getName());
 
-        System.out.println("Now sleeping");
+        // determine the number of seconds to sleep
+        int secondsToSleep = 30;
 
-        Thread.sleep(TimeUnit.MINUTES.toMillis(1));
+        if (arguments.length == 1)
+        {
+            try
+            {
+                secondsToSleep = Integer.parseInt(arguments[0]);
+            }
+            catch (NumberFormatException e)
+            {
+                System.out.println("Argument [" + arguments[0]
+                                   + "] is not a number representing seconds, defaulting to 5 seconds");
+                secondsToSleep = 5;
+            }
+        }
+
+        System.out.println("Now sleeping for " + secondsToSleep + " seconds");
+
+        Thread.sleep(TimeUnit.SECONDS.toMillis(secondsToSleep));
 
         System.out.println("Finished sleeping... now terminating");
     }
