@@ -91,7 +91,7 @@ public class DeferredHelper
      * The default maximum retry timeout to use (in seconds) when a timeout
      * is not configured or specified.
      */
-    public static final long ORACLETOOLS_DEFERRED_RETRY_TIMEOUT_SECS = 30;
+    public static final long ORACLETOOLS_DEFERRED_RETRY_TIMEOUT_SECS = 60;
 
     /**
      * A {@link ThreadLocal} to capture the most recent {@link Deferred}
