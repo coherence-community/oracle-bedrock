@@ -482,7 +482,7 @@ public class PropertiesBuilder
      *
      * @param overrides  (optional may be <code>null</code>) a
      *                   {@link PropertiesBuilder} specifying properties that
-     *                   will must be used to overrider those present in this
+     *                   will must be used to override those present in this
      *                   {@link PropertiesBuilder} when realizing the
      *                   {@link Properties}
      *

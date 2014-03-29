@@ -112,6 +112,22 @@ public class ClassPathTest
 
 
     /**
+     * Ensure that we can create a ClassPath using a wildcard *.
+     */
+    @Test
+    public void shouldCreateWildCardClassPath()
+    {
+        String    path      = "*";
+        ClassPath classPath = new ClassPath(path);
+
+        Assert.assertThat(classPath.toString(), is(path));
+        Assert.assertTrue(classPath.contains(path));
+        Assert.assertFalse(classPath.isEmpty());
+        Assert.assertThat(classPath.size(), is(1));
+    }
+
+
+    /**
      * Ensure that we can create a ClassPath a single File separator.
      */
     @Test

@@ -364,6 +364,68 @@ public abstract class AbstractApplication<A, P extends ApplicationProcess> imple
 
 
     /**
+     * An {@link InputRedirector} pipes input to an {@link OutputStream},
+     * typically from an {@link ApplicationConsole} to a {@link Process}.
+     */
+    private static class InputRedirector implements Runnable
+    {
+        /**
+         * The {@link Reader} from which content will be read.
+         */
+        private Reader m_inputReader;
+
+        /**
+         * The {@link OutputStream} to which the content read from the
+         * {@link Reader} will be written.
+         */
+        private OutputStream m_outputStream;
+
+
+        /**
+         * Constructs an {@link OutputRedirector}.
+         *
+         * @param inputStream      the {@link InputStream} from which to read content
+         * @param outputStream     the {@link PrintWriter} to which to write content
+         */
+        private InputRedirector(Reader       inputStream,
+                                OutputStream outputStream)
+        {
+            m_inputReader  = inputStream;
+            m_outputStream = outputStream;
+        }
+
+
+        @Override
+        public void run()
+        {
+            try
+            {
+                BufferedReader reader = new BufferedReader(m_inputReader);
+                PrintWriter    writer = new PrintWriter(m_outputStream);
+
+                while (true)
+                {
+                    String line = reader.readLine();
+
+                    if (line == null)
+                    {
+                        break;
+                    }
+
+                    writer.println(line);
+                    writer.flush();
+                }
+            }
+            catch (Exception exception)
+            {
+                // SKIP: deliberately empty as we safely assume exceptions
+                // are always due to process termination.
+            }
+        }
+    }
+
+
+    /**
      * An {@link OutputRedirector} pipes output from an {@link InputStream},
      * typically of some {@link Process} to an {@link ApplicationConsole}.
      */
@@ -484,64 +546,6 @@ public abstract class AbstractApplication<A, P extends ApplicationProcess> imple
                 m_outputWriter.flush();
             }
             catch (Exception e)
-            {
-                // SKIP: deliberately empty as we safely assume exceptions
-                // are always due to process termination.
-            }
-        }
-    }
-
-    /**
-     * An {@link InputRedirector} pipes input to an {@link OutputStream},
-     * typically from an {@link ApplicationConsole} to a {@link Process}.
-     */
-    private static class InputRedirector implements Runnable
-    {
-        /**
-         * The {@link Reader} from which content will be read.
-         */
-        private Reader m_inputReader;
-
-        /**
-         * The {@link OutputStream} to which the content read from the
-         * {@link Reader} will be written.
-         */
-        private OutputStream m_outputStream;
-
-
-        /**
-         * Constructs an {@link OutputRedirector}.
-         *
-         * @param inputStream      the {@link InputStream} from which to read content
-         * @param outputStream     the {@link PrintWriter} to which to write content
-         */
-        private InputRedirector(Reader inputStream, OutputStream outputStream)
-        {
-            m_inputReader  = inputStream;
-            m_outputStream = outputStream;
-        }
-
-
-        @Override
-        public void run()
-        {
-            try
-            {
-                BufferedReader reader = new BufferedReader(m_inputReader);
-                PrintWriter    writer = new PrintWriter(m_outputStream);
-                while (true)
-                {
-                    String line = reader.readLine();
-
-                    if (line == null)
-                    {
-                        break;
-                    }
-                    writer.println(line);
-                    writer.flush();
-                }
-            }
-            catch (Exception exception)
             {
                 // SKIP: deliberately empty as we safely assume exceptions
                 // are always due to process termination.

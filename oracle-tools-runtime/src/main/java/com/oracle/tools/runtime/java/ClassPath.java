@@ -29,18 +29,21 @@ import com.oracle.tools.lang.StringHelper;
 
 import java.io.File;
 import java.io.IOException;
+
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
+
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Iterator;
 
 /**
- * A platform independent, immutable representation of a Java ClassPath.
+ * A local immutable representation of a Java class path.
  * <p>
  * Copyright (c) 2013. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
@@ -57,29 +60,46 @@ public class ClassPath implements Iterable<String>
                                                                     "war", "zip"};
 
     /**
-     * The paths that make up the ClassPath.
+     * The paths that make up the {@link ClassPath}.
      */
-    private final ArrayList<String> m_paths;
+    private final ArrayList<String> paths;
+
+    /**
+     * The {@link File#separator} to use when converting the {@link ClassPath} to a {@link String}.
+     */
+    private String fileSeparator;
+
+    /**
+     * The {@link File#pathSeparator} to use when converting the {@link ClassPath} to a {@link String}.
+     */
+    private String pathSeparator;
 
 
     /**
-     * Constructs an empty ClassPath.
+     * Constructs an empty {@link ClassPath} using the system default
+     * {@link File#separator} and {@link File#pathSeparator}s.
      */
     public ClassPath()
     {
-        m_paths = new ArrayList<String>();
+        paths         = new ArrayList<String>();
+
+        fileSeparator = File.separator;
+        pathSeparator = File.pathSeparator;
     }
 
 
     /**
-     * Constructs a ClassPath based zero or more other ClassPaths.
+     * Constructs a {@link ClassPath} based zero or more other {@link ClassPath}s.
      * (ie: a copy constructor)
      *
-     * @param classPaths  the ClassPaths to copy
+     * @param classPaths  the {@link ClassPath}s to copy
      */
     public ClassPath(ClassPath... classPaths)
     {
-        m_paths = new ArrayList<String>();
+        paths         = new ArrayList<String>();
+
+        fileSeparator = File.separator;
+        pathSeparator = File.pathSeparator;
 
         if (classPaths != null && classPaths.length > 0)
         {
@@ -88,7 +108,7 @@ public class ClassPath implements Iterable<String>
                 for (String path : classPath)
                 {
                     path = sanitizePath(path);
-                    m_paths.add(path);
+                    paths.add(path);
                 }
             }
         }
@@ -96,16 +116,44 @@ public class ClassPath implements Iterable<String>
 
 
     /**
-     * Constructs a ClassPath from zero or more standard Java class-paths
+     * Constructs a {@link ClassPath} based zero or more other {@link ClassPath}s.
+     * (ie: a copy constructor)
+     *
+     * @param classPaths  the {@link ClassPath}s to copy
+     */
+    public ClassPath(Iterable<ClassPath> classPaths)
+    {
+        paths         = new ArrayList<String>();
+
+        fileSeparator = File.separator;
+        pathSeparator = File.pathSeparator;
+
+        if (classPaths != null)
+        {
+            for (ClassPath classPath : classPaths)
+            {
+                for (String path : classPath)
+                {
+                    path = sanitizePath(path);
+                    paths.add(path);
+                }
+            }
+        }
+    }
+
+
+    /**
+     * Constructs a {@link ClassPath} from zero or more standard Java class-paths
      * (using the system defined path and file separators).
      *
      * @param classPaths zero or more Java class-paths
      */
     public ClassPath(String... classPaths)
     {
-        String pathSeparator = File.pathSeparator;
+        paths         = new ArrayList<String>();
 
-        m_paths = new ArrayList<String>();
+        fileSeparator = File.separator;
+        pathSeparator = File.pathSeparator;
 
         if (classPaths != null)
         {
@@ -129,7 +177,7 @@ public class ClassPath implements Iterable<String>
 
                         if (!path.isEmpty())
                         {
-                            m_paths.add(path);
+                            this.paths.add(path);
                         }
                     }
                 }
@@ -139,38 +187,38 @@ public class ClassPath implements Iterable<String>
 
 
     /**
-     * Obtain the number of path elements in the ClassPath
+     * Obtain the number of path elements in the {@link ClassPath}
      *
      * @return the number of path elements
      */
     public int size()
     {
-        return m_paths.size();
+        return paths.size();
     }
 
 
     /**
-     * Determines if the ClassPath is empty (contains no path definitions).
+     * Determines if the {@link ClassPath} is empty (contains no path definitions).
      *
-     * @return true iff the ClassPath is empty
+     * @return true iff the {@link ClassPath} is empty
      */
     public boolean isEmpty()
     {
-        return m_paths.isEmpty();
+        return paths.isEmpty();
     }
 
 
     /**
-     * Obtains the paths defined by the ClassPath as an array of URLs.
+     * Obtains the paths defined by the {@link ClassPath} as an array of URLs.
      *
-     * @return an array of URLs representing the paths defined by the ClassPath
+     * @return an array of URLs representing the paths defined by the {@link ClassPath}
      */
     public URL[] getURLs()
     {
-        URL[] urls = new URL[m_paths.size()];
+        URL[] urls = new URL[paths.size()];
         int   i    = 0;
 
-        for (String path : m_paths)
+        for (String path : paths)
         {
             try
             {
@@ -187,11 +235,11 @@ public class ClassPath implements Iterable<String>
 
 
     /**
-     * Determines if the ClassPath contains the specified path element.
+     * Determines if the {@link ClassPath} contains the specified path element.
      *
      * @param path the path element
      *
-     * @return true iff the ClassPath contains the specified path element
+     * @return true iff the {@link ClassPath} contains the specified path element
      *         (exact match)
      */
     public boolean contains(String path)
@@ -205,7 +253,7 @@ public class ClassPath implements Iterable<String>
             // sanitize the path
             path = sanitizePath(path);
 
-            for (String aPath : m_paths)
+            for (String aPath : paths)
             {
                 if (aPath.equals(path))
                 {
@@ -219,13 +267,13 @@ public class ClassPath implements Iterable<String>
 
 
     /**
-     * Determines if the ClassPath contains all of the path elements defined
-     * by the specified ClassPath.
+     * Determines if the {@link ClassPath} contains all of the path elements defined
+     * by the specified {@link ClassPath}.
      *
-     * @param classPath  the ClassPath containing the path elements to confirm
-     *                   that are in this ClassPath
+     * @param classPath  the {@link ClassPath} containing the path elements to confirm
+     *                   that are in this {@link ClassPath}
      *
-     * @return true iff the specified ClassPath is contained in this ClassPath
+     * @return true iff the specified {@link ClassPath} is contained in this {@link ClassPath}
      */
     public boolean contains(ClassPath classPath)
     {
@@ -254,12 +302,12 @@ public class ClassPath implements Iterable<String>
     @Override
     public Iterator<String> iterator()
     {
-        return m_paths.iterator();
+        return paths.iterator();
     }
 
 
     /**
-     * Obtains a String representation of the ClassPath that is suitable
+     * Obtains a String representation of the {@link ClassPath} that is suitable
      * for using as a Java class-path property (using the system defined
      * file and path separators).
      *
@@ -268,10 +316,9 @@ public class ClassPath implements Iterable<String>
     @Override
     public String toString()
     {
-        String        pathSeparator = File.pathSeparator;
-        StringBuilder builder       = new StringBuilder();
+        StringBuilder builder = new StringBuilder();
 
-        for (String path : m_paths)
+        for (String path : paths)
         {
             if (builder.length() > 0)
             {
@@ -285,9 +332,6 @@ public class ClassPath implements Iterable<String>
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public boolean equals(Object other)
     {
@@ -303,13 +347,10 @@ public class ClassPath implements Iterable<String>
 
         ClassPath classPath = (ClassPath) other;
 
-        return m_paths.equals(classPath.m_paths);
+        return paths.equals(classPath.paths);
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public int hashCode()
     {
@@ -342,7 +383,8 @@ public class ClassPath implements Iterable<String>
             if (!path.isEmpty())
             {
                 // add a file separator iff it's not an archive
-                path = isResourceAnArchive(path) || path.endsWith(File.separator) ? path : path + File.separator;
+                path = isResourceAnArchive(path) || path.endsWith(File.separator) || path.endsWith("*")
+                       ? path : path + File.separator;
             }
 
             return path;
@@ -420,13 +462,13 @@ public class ClassPath implements Iterable<String>
 
 
     /**
-     * Obtains the ClassPath for the specified resource using the provided ClassLoader.
+     * Obtains the {@link ClassPath} for the specified resource using the provided ClassLoader.
      *
      * @param resourceName  the resource to locate
      * @param classLoader   the ClassLoader (or null indicating the current
      *                      Thread getContextClassLoader())
      *
-     * @return a ClassPath representing the location of the specified resource
+     * @return a {@link ClassPath} representing the location of the specified resource
      *
      * @throws IOException  when the resource can't be located
      */
@@ -490,12 +532,12 @@ public class ClassPath implements Iterable<String>
 
 
     /**
-     * Obtains the ClassPath for the specified resource using the current Thread
+     * Obtains the {@link ClassPath} for the specified resource using the current Thread
      * context ClassLoader
      *
      * @param resourceName  the resource to locate
      *
-     * @return a ClassPath representing the location of the specified resource
+     * @return a {@link ClassPath} representing the location of the specified resource
      *
      * @throws IOException  when the resource can't be located
      */
@@ -506,11 +548,11 @@ public class ClassPath implements Iterable<String>
 
 
     /**
-     * Obtains the ClassPath for the specified Class.
+     * Obtains the {@link ClassPath} for the specified Class.
      *
      * @param clazz  the class
      *
-     * @return a ClassPath representing the location of the specified Class
+     * @return a {@link ClassPath} representing the location of the specified Class
      *
      * @throws IOException  when the resource can't be located
      */
@@ -533,7 +575,7 @@ public class ClassPath implements Iterable<String>
 
 
     /**
-     * Obtains a ClassPath containing only absolute path of the specified File
+     * Obtains a {@link ClassPath} containing only absolute path of the specified File
      *
      * @param file the file
      */
@@ -553,10 +595,38 @@ public class ClassPath implements Iterable<String>
     /**
      * Obtains Java System class-path.
      *
-     * @return a ClassPath representing the System java.class.path property.
+     * @return a {@link ClassPath} representing the System java.class.path property.
      */
     public static ClassPath ofSystem()
     {
         return new ClassPath(System.getProperty("java.class.path"));
+    }
+
+
+    /**
+     * Obtains a {@link ClassPath} for the specified {@link Iterable} of
+     * path elements.
+     *
+     * @param paths  the paths for the {@link ClassPath}
+     *
+     * @return a {@link ClassPath} representing the paths
+     */
+    public static ClassPath of(Iterable<String> paths)
+    {
+        if (paths == null)
+        {
+            return new ClassPath();
+        }
+        else
+        {
+            ArrayList<ClassPath> classPaths = new ArrayList<ClassPath>();
+
+            for (String path : paths)
+            {
+                classPaths.add(new ClassPath(path));
+            }
+
+            return new ClassPath(classPaths);
+        }
     }
 }

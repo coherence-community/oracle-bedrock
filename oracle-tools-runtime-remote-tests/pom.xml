@@ -7,20 +7,24 @@
         <version>1.3.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>oracle-tools-coherence-tests</artifactId>
+    <artifactId>oracle-tools-runtime-remote-tests</artifactId>
 
-    <name>Oracle Tools for Coherence (Tests)</name>
+    <name>Oracle Tools for Remote Runtime Management (Tests)</name>
 
     <description>
-        Functional and Integration tests for the Oracle Tools Coherence module.
+        Functional and Integration tests for the Remote Runtime Management module.
     </description>
+
+    <properties>
+        <!-- override the following to skip remote tests -->
+        <skip-remote-tests>false</skip-remote-tests>
+    </properties>
 
     <dependencies>
         <dependency>
-            <groupId>com.oracle.coherence</groupId>
-            <artifactId>coherence</artifactId>
-            <version>${coherence.version}</version>
-            <scope>provided</scope>
+            <groupId>com.oracle.tools</groupId>
+            <artifactId>oracle-tools-core</artifactId>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>
@@ -31,20 +35,35 @@
 
         <dependency>
             <groupId>com.oracle.tools</groupId>
-            <artifactId>oracle-tools-coherence</artifactId>
+            <artifactId>oracle-tools-runtime-remote</artifactId>
             <version>${project.version}</version>
         </dependency>
 
         <dependency>
-            <groupId>com.oracle.tools</groupId>
-            <artifactId>oracle-tools-testing-support</artifactId>
-            <version>${project.version}</version>
+            <groupId>com.jcraft</groupId>
+            <artifactId>jsch</artifactId>
+            <version>${jsch.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>hamcrest-library</artifactId>
+            <version>${hamcrest.version}</version>
+            <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>${mockito.version}</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
@@ -52,10 +71,9 @@
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-deploy-plugin</artifactId>
-                <version>${maven.deploy.plugin.version}</version>
+                <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
-                    <skip>true</skip>
+                    <skipTests>${skip-remote-tests}</skipTests>
                 </configuration>
             </plugin>
         </plugins>

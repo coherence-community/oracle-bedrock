@@ -44,6 +44,7 @@ import com.oracle.tools.runtime.concurrent.socket.RemoteExecutorServer;
 import com.oracle.tools.runtime.java.container.Container;
 
 import com.oracle.tools.runtime.network.Constants;
+
 import com.oracle.tools.util.CompletionListener;
 
 import java.io.IOException;
@@ -77,14 +78,14 @@ public class NativeJavaApplicationBuilder<A extends JavaApplication<A>, S extend
      * <p/>
      * The default is <code>false</code>.
      */
-    private boolean m_isRemoteDebuggingEnabled;
+    private boolean isRemoteDebuggingEnabled;
 
     /**
      * Should remote debugging processes be started in suspended mode?
      * <p/>
      * The default is <code>false</code>.
      */
-    private boolean m_isRemoteStartSuspended;
+    private boolean isRemoteStartSuspended;
 
     /**
      * Should {@link JavaApplication}s produced by this builder allowed
@@ -92,7 +93,7 @@ public class NativeJavaApplicationBuilder<A extends JavaApplication<A>, S extend
      * <p/>
      * The default is <code>false</code>.
      */
-    private boolean m_areOrphansPermitted;
+    private boolean areOrphansPermitted;
 
 
     /**
@@ -103,13 +104,13 @@ public class NativeJavaApplicationBuilder<A extends JavaApplication<A>, S extend
         super();
 
         // don't start in remote debug mode
-        m_isRemoteDebuggingEnabled = false;
+        isRemoteDebuggingEnabled = false;
 
         // don't suspend when in remote debug mode
-        m_isRemoteStartSuspended = false;
+        isRemoteStartSuspended = false;
 
         // don't permit orphaned applications
-        m_areOrphansPermitted = false;
+        areOrphansPermitted = false;
     }
 
 
@@ -123,7 +124,7 @@ public class NativeJavaApplicationBuilder<A extends JavaApplication<A>, S extend
      */
     public NativeJavaApplicationBuilder setDiagnosticsEnabled(boolean isDiagnosticsEnabled)
     {
-        m_isDiagnosticsEnabled = isDiagnosticsEnabled;
+        this.m_isDiagnosticsEnabled = isDiagnosticsEnabled;
 
         return this;
     }
@@ -139,7 +140,7 @@ public class NativeJavaApplicationBuilder<A extends JavaApplication<A>, S extend
      */
     public NativeJavaApplicationBuilder setRemoteDebuggingEnabled(boolean isRemoteDebuggingEnabled)
     {
-        m_isRemoteDebuggingEnabled = isRemoteDebuggingEnabled;
+        this.isRemoteDebuggingEnabled = isRemoteDebuggingEnabled;
 
         return this;
     }
@@ -153,7 +154,7 @@ public class NativeJavaApplicationBuilder<A extends JavaApplication<A>, S extend
      */
     public boolean isRemoteDebuggingEnabled()
     {
-        return m_isRemoteDebuggingEnabled;
+        return isRemoteDebuggingEnabled;
     }
 
 
@@ -166,7 +167,7 @@ public class NativeJavaApplicationBuilder<A extends JavaApplication<A>, S extend
      */
     public NativeJavaApplicationBuilder setRemoteDebuggingStartSuspended(boolean isRemoteStartSuspended)
     {
-        m_isRemoteStartSuspended = isRemoteStartSuspended;
+        this.isRemoteStartSuspended = isRemoteStartSuspended;
 
         return this;
     }
@@ -180,7 +181,7 @@ public class NativeJavaApplicationBuilder<A extends JavaApplication<A>, S extend
      */
     public boolean isRemoteDebuggingStartSuspended()
     {
-        return m_isRemoteStartSuspended;
+        return isRemoteStartSuspended;
     }
 
 
@@ -195,7 +196,7 @@ public class NativeJavaApplicationBuilder<A extends JavaApplication<A>, S extend
      */
     public NativeJavaApplicationBuilder setOrphansPermitted(boolean areOrphansPermitted)
     {
-        m_areOrphansPermitted = areOrphansPermitted;
+        this.areOrphansPermitted = areOrphansPermitted;
 
         return this;
     }
@@ -209,7 +210,7 @@ public class NativeJavaApplicationBuilder<A extends JavaApplication<A>, S extend
      */
     public boolean areOrphansPermitted()
     {
-        return m_areOrphansPermitted;
+        return areOrphansPermitted;
     }
 
 
@@ -280,14 +281,14 @@ public class NativeJavaApplicationBuilder<A extends JavaApplication<A>, S extend
         }
 
         // add debug option
-        if (m_isRemoteDebuggingEnabled)
+        if (this.isRemoteDebuggingEnabled)
         {
             // determine a free debug port
             int debugPort = Container.getAvailablePorts().next();
 
             // construct the Java option
             String option = String.format("-agentlib:jdwp=transport=dt_socket,server=y,suspend=%s,address=%d",
-                                          (m_isRemoteStartSuspended ? "y" : "n"),
+                                          (isRemoteStartSuspended ? "y" : "n"),
                                           debugPort);
 
             builder.command().add(option);

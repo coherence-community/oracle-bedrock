@@ -23,19 +23,24 @@ reverse chronological order.
     requiring developers to explicitly specify a max timeout or override
     system properties.
 
-<h4>oracle-tools-site</h4>
-
-*   (none)
-
 <h4>oracle-tools-runtime</h4>
 
-*   [ORACLETOOLS-79](https://java.net/jira/browse/ORACLETOOLS-79): Implemented
-    the link between a process stdin stream and an ApplicationConsole so that
-    it is possible to pipe input to a process.
+*   [ORACLETOOLS-79](https://java.net/jira/browse/ORACLETOOLS-79): Completed
+    implementation of stdin redirection so that an ApplicationConsole can
+    be used to interact with an Application stdin.
 
 *   [ORACLETOOLS-86](https://java.net/jira/browse/ORACLETOOLS-86): Resolved issue
     where calling Application.waitFor() will not terminate when using applications
     produced by NativeJavaApplicationBuilders.
+
+*   [ORACLETOOLS-88](https://java.net/jira/browse/ORACLETOOLS-88): Added wildcard
+    classpath support to ClassPath.
+
+<h4>oracle-tools-runtime-remote</h4>
+
+*   [ORACLETOOLS-91](https://java.net/jira/browse/ORACLETOOLS-91): Introduced
+    experimental RemoteApplicationBuilders in the new oracle-tools-runtime-remote
+    module.
 
 <h4>oracle-tools-testing-support</h4>
 
@@ -46,6 +51,10 @@ reverse chronological order.
 *   (none)
 
 <h4>oracle-tools-coherence-testing-support</h4>
+
+*   (none)
+
+<h4>oracle-tools-site</h4>
 
 *   (none)
 

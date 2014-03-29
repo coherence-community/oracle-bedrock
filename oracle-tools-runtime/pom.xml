@@ -4,8 +4,7 @@
     <parent>
         <artifactId>oracle-tools</artifactId>
         <groupId>com.oracle.tools</groupId>
-        <relativePath>../pom.xml</relativePath>
-        <version>1.2.3-SNAPSHOT</version>
+        <version>1.3.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>oracle-tools-runtime</artifactId>
@@ -21,7 +20,7 @@
         <dependency>
             <groupId>com.oracle.tools</groupId>
             <artifactId>oracle-tools-core</artifactId>
-            <version>${project.parent.version}</version>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>

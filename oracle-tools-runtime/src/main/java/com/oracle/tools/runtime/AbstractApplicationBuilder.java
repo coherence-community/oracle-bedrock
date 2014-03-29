@@ -33,9 +33,14 @@ import java.util.UUID;
 
 /**
  * An {@link AbstractApplicationBuilder} is a base implementation of an {@link ApplicationBuilder}.
+ *
+ * @param <A>  the type of the {@link Application}s the {@link ApplicationBuilder} will realize
+ * @param <S>  the type of the {@link ApplicationSchema} for the {@link Application}s
  * <p>
  * Copyright (c) 2011. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
+ *
+ * @author Brian Oliver
  */
 public abstract class AbstractApplicationBuilder<A extends Application<A>, S extends ApplicationSchema<A, S>>
     implements ApplicationBuilder<A, S>
