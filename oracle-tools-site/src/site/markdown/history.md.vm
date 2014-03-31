@@ -13,7 +13,7 @@ reverse chronological order.
 
 <h4>Global and Cross-Module Changes</h4>
 
-*   (none)
+*   Removed redundant and organized import statements.
 
 <h4>oracle-tools-core</h4>
 
@@ -36,6 +36,18 @@ reverse chronological order.
 *   [ORACLETOOLS-88](https://java.net/jira/browse/ORACLETOOLS-88): Added wildcard
     classpath support to ClassPath.
 
+*   [ORACLETOOLS-92](https://java.net/jira/browse/ORACLETOOLS-92): Introduced
+    RemoteRunnable and RemoteCallable for use with RemoteExecutors (and applications)
+    to allow Java 8 Lambda expressions to be used to represent remote
+    requests.
+
+    NOTE: While this is a BREAKING CHANGE in the APIs (from Runnable to RemoteRunnable
+    and Callable to RemoteCallable), the impact on public implementations should
+    be minimal as most implementations are already serializable.   All that is
+    required is changing either "implements Runnable, Serializable" to
+    "implements RemoteRunnable", or "implements Callable&lt;T&gt;, Serializable" to
+    "implements RemoteCallable&lt;T&gt;".
+
 <h4>oracle-tools-runtime-remote</h4>
 
 *   [ORACLETOOLS-91](https://java.net/jira/browse/ORACLETOOLS-91): Introduced
@@ -44,11 +56,14 @@ reverse chronological order.
 
 <h4>oracle-tools-testing-support</h4>
 
-*   (none)
+*   [ORACLETOOLS-84](https://java.net/jira/browse/ORACLETOOLS-84): Introduced
+    missing Eventually.assertThat methods to support timeouts.
 
 <h4>oracle-tools-coherence</h4>
 
-*   (none)
+*   [ORACLETOOLS-92](https://java.net/jira/browse/ORACLETOOLS-92): Refactored
+    Coherence-specific Runnables and Callables to be RemoteRunnables
+    and RemoteCallables respectively.
 
 <h4>oracle-tools-coherence-testing-support</h4>
 

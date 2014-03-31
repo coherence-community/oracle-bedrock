@@ -29,10 +29,11 @@ import com.oracle.tools.deferred.Eventually;
 
 import com.oracle.tools.deferred.listener.DeferredCompletionListener;
 
+import com.oracle.tools.runtime.concurrent.RemoteCallable;
+
 import com.oracle.tools.runtime.java.container.Container;
 
-import junit.framework.Assert;
-
+import org.junit.Assert;
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -121,7 +122,7 @@ public class SocketBasedRemoteExecutorTests
 
             DeferredCompletionListener<String> serverResponse = new DeferredCompletionListener<String>(String.class);
 
-            client.submit(new Callable<String>()
+            client.submit(new RemoteCallable<String>()
             {
                 @Override
                 public String call() throws Exception
@@ -156,9 +157,9 @@ public class SocketBasedRemoteExecutorTests
 
 
     /**
-     * A simple ping-pong {@link Callable}.
+     * A simple ping-pong {@link RemoteCallable}.
      */
-    public static class PingPong implements Callable<String>
+    public static class PingPong implements RemoteCallable<String>
     {
         /**
          * {@inheritDoc}

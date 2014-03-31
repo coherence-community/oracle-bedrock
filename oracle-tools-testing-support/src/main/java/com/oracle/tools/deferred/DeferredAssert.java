@@ -1,5 +1,5 @@
 /*
- * File: Eventually.java
+ * File: DeferredAssert.java
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
@@ -25,13 +25,14 @@
 
 package com.oracle.tools.deferred;
 
+import com.oracle.tools.runtime.concurrent.RemoteCallable;
+
 import com.oracle.tools.runtime.java.JavaApplication;
 
 import org.hamcrest.Matcher;
 
 import static com.oracle.tools.deferred.DeferredHelper.ensure;
 
-import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -123,7 +124,7 @@ public class DeferredAssert extends Eventually
      * will eventually (after the specified amount of time) satisfy the
      * specified {@link Matcher}.
      *
-     * @param <T>       the type of value produced by the {@link Deferred}
+     * @param <T>                      the type of value produced by the {@link Deferred}
      *
      * @param message                  the message for the AssertionError (<code>null</code> ok)
      * @param deferred                 the {@link Deferred}
@@ -183,18 +184,19 @@ public class DeferredAssert extends Eventually
 
 
     /**
-     * Asserts that the specified {@link Callable} submitted to the {@link JavaApplication}
-     * will eventually match the specified matcher.
+     * Asserts that the specified {@link RemoteCallable} submitted to the
+     * {@link JavaApplication} will eventually match the specified matcher.
      *
-     * @param application
-     * @param callable
-     * @param matcher
-     * @param <T>
+     * @param <T>          the type of matcher
+     *
+     * @param application  the {@link JavaApplication} on which to execute the {@link RemoteCallable}
+     * @param callable     the {@link RemoteCallable}
+     * @param matcher      the {@link Matcher} to eventually match
      *
      * @throws AssertionError
      */
     public static <T> void assertThat(JavaApplication<?> application,
-                                      Callable<T>        callable,
+                                      RemoteCallable<T>  callable,
                                       Matcher<?>         matcher) throws AssertionError
     {
         assertThat(new DeferredRemoteExecution<T>(application, callable), matcher);

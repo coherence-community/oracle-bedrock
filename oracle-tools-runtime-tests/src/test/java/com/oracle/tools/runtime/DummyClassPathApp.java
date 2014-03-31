@@ -51,7 +51,8 @@ public class DummyClassPathApp
         {
             ClassLoader classLoader = DummyClassPathApp.class.getClassLoader();
 
-            ClassPath classPath;
+            ClassPath   classPath;
+
             if (classLoader instanceof ContainerClassLoader)
             {
                 classPath = ((ContainerClassLoader) classLoader).getClassPath();

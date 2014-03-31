@@ -25,7 +25,6 @@
 
 package com.oracle.tools.runtime;
 
-import java.io.BufferedReader;
 import java.io.Closeable;
 import java.io.PrintWriter;
 import java.io.Reader;

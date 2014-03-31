@@ -60,7 +60,7 @@ public class ChildApplication
 
         RemoteExecutorClient channel =
             new RemoteExecutorClient(InetAddress.getByName(System.getProperty("server.address")),
-                                    Integer.getInteger("server.port"));
+                                     Integer.getInteger("server.port"));
 
         channel.open();
 

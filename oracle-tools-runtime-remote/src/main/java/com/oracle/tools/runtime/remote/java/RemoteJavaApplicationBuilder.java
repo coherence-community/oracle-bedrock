@@ -28,7 +28,9 @@ package com.oracle.tools.runtime.remote.java;
 import com.oracle.tools.runtime.ApplicationConsole;
 
 import com.oracle.tools.runtime.concurrent.ControllableRemoteExecutor;
+import com.oracle.tools.runtime.concurrent.RemoteCallable;
 import com.oracle.tools.runtime.concurrent.RemoteExecutor;
+import com.oracle.tools.runtime.concurrent.RemoteRunnable;
 
 import com.oracle.tools.runtime.java.ClassPath;
 import com.oracle.tools.runtime.java.JavaApplication;
@@ -47,8 +49,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 import java.util.HashSet;
-
-import java.util.concurrent.Callable;
 
 /**
  * A {@link JavaApplicationBuilder} that realizes {@link JavaApplication}s on
@@ -341,7 +341,7 @@ public class RemoteJavaApplicationBuilder<A extends JavaApplication<A>, S extend
 
 
         @Override
-        public <T> void submit(Callable<T>           callable,
+        public <T> void submit(RemoteCallable<T>     callable,
                                CompletionListener<T> listener) throws IllegalStateException
         {
             remoteExecutor.submit(callable, listener);
@@ -349,7 +349,7 @@ public class RemoteJavaApplicationBuilder<A extends JavaApplication<A>, S extend
 
 
         @Override
-        public void submit(Runnable runnable) throws IllegalStateException
+        public void submit(RemoteRunnable runnable) throws IllegalStateException
         {
             remoteExecutor.submit(runnable);
         }

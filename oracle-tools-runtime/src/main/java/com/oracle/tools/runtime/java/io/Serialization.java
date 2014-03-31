@@ -27,7 +27,13 @@ package com.oracle.tools.runtime.java.io;
 
 import com.oracle.tools.runtime.java.container.Container;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.PrintStream;
+import java.io.Serializable;
 
 /**
  * Helpers to aid in the serialization and deserialization of Objects.

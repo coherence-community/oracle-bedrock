@@ -27,27 +27,23 @@ package com.oracle.tools.runtime.coherence.callables;
 
 import com.oracle.tools.runtime.coherence.ClusterMember;
 
+import com.oracle.tools.runtime.concurrent.RemoteCallable;
+
 import com.tangosol.coherence.component.util.daemon.queueProcessor.service.grid.PartitionedService;
 import com.tangosol.coherence.component.util.safeService.safeCacheService.SafeDistributedCacheService;
 
 import com.tangosol.net.CacheFactory;
 import com.tangosol.net.Service;
 
-import java.io.Serializable;
-
-import java.lang.reflect.Method;
-
-import java.util.concurrent.Callable;
-
 /**
- * A {@link Callable} to remotely determine the status of a service.
+ * A {@link RemoteCallable} to remotely determine the status of a service.
  * <p>
  * Copyright (c) 2013. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Brian Oliver
  */
-public class GetServiceStatus implements Callable<ClusterMember.ServiceStatus>, Serializable
+public class GetServiceStatus implements RemoteCallable<ClusterMember.ServiceStatus>
 {
     /**
      * The name of the service.

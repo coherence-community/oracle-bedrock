@@ -27,7 +27,15 @@ package com.oracle.tools.runtime.java.container;
 
 import com.oracle.tools.runtime.network.AvailablePortIterator;
 
-import static com.oracle.tools.runtime.java.JavaApplication.*;
+import static com.oracle.tools.runtime.java.JavaApplication.JAVA_HOME;
+import static com.oracle.tools.runtime.java.JavaApplication.JAVA_RMI_SERVER_HOSTNAME;
+import static com.oracle.tools.runtime.java.JavaApplication.SUN_MANAGEMENT_JMXREMOTE;
+import static com.oracle.tools.runtime.java.JavaApplication.SUN_MANAGEMENT_JMXREMOTE_ACCESS_FILE;
+import static com.oracle.tools.runtime.java.JavaApplication.SUN_MANAGEMENT_JMXREMOTE_AUTHENTICATE;
+import static com.oracle.tools.runtime.java.JavaApplication.SUN_MANAGEMENT_JMXREMOTE_PASSWORD_FILE;
+import static com.oracle.tools.runtime.java.JavaApplication.SUN_MANAGEMENT_JMXREMOTE_PORT;
+import static com.oracle.tools.runtime.java.JavaApplication.SUN_MANAGEMENT_JMXREMOTE_SSL;
+import static com.oracle.tools.runtime.java.JavaApplication.SUN_MANAGEMENT_JMXREMOTE_URL;
 
 import java.io.IOException;
 
@@ -506,7 +514,7 @@ public class ContainerMBeanServerBuilder extends MBeanServerBuilder
             {
                 LocateRegistry.createRegistry(port);
             }
-            catch (ExportException _)
+            catch (ExportException e)
             {
                 // Ignored as the most likely cause is that we
                 // have already bound a registry to this port

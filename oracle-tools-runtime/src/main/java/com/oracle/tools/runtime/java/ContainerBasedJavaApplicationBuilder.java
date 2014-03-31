@@ -29,12 +29,14 @@ import com.oracle.tools.runtime.Application;
 import com.oracle.tools.runtime.ApplicationConsole;
 import com.oracle.tools.runtime.PropertiesBuilder;
 
+import com.oracle.tools.runtime.concurrent.RemoteCallable;
 import com.oracle.tools.runtime.concurrent.RemoteExecutor;
+import com.oracle.tools.runtime.concurrent.RemoteRunnable;
 
 import com.oracle.tools.runtime.java.container.Container;
 import com.oracle.tools.runtime.java.container.ContainerClassLoader;
 import com.oracle.tools.runtime.java.io.Serialization;
-import com.oracle.tools.runtime.java.util.CallableStaticMethod;
+import com.oracle.tools.runtime.java.util.RemoteCallableStaticMethod;
 
 import com.oracle.tools.util.CompletionListener;
 import com.oracle.tools.util.FutureCompletionListener;
@@ -47,7 +49,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
-import java.util.concurrent.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -453,7 +458,7 @@ public class ContainerBasedJavaApplicationBuilder<A extends JavaApplication<A>, 
 
 
         @Override
-        public <T> void submit(Callable<T>                 callable,
+        public <T> void submit(RemoteCallable<T>           callable,
                                final CompletionListener<T> listener)
         {
             if (m_controller == null)
@@ -545,7 +550,7 @@ public class ContainerBasedJavaApplicationBuilder<A extends JavaApplication<A>, 
 
 
         @Override
-        public void submit(Runnable runnable) throws IllegalStateException
+        public void submit(RemoteRunnable runnable) throws IllegalStateException
         {
             if (m_controller == null)
             {
@@ -618,23 +623,23 @@ public class ContainerBasedJavaApplicationBuilder<A extends JavaApplication<A>, 
     public static class CustomController implements ApplicationController
     {
         /**
-         * The {@link CallableStaticMethod} to start the application.
+         * The {@link RemoteCallableStaticMethod} to start the application.
          */
-        private CallableStaticMethod<Void> m_callableStartStaticMethod;
+        private RemoteCallableStaticMethod<Void> m_callableStartStaticMethod;
 
         /**
-         * The {@link CallableStaticMethod} to destroy the application.
+         * The {@link RemoteCallableStaticMethod} to destroy the application.
          */
-        private CallableStaticMethod<Void> m_callableDestroyStaticMethod;
+        private RemoteCallableStaticMethod<Void> m_callableDestroyStaticMethod;
 
 
         /**
          * Constructs a CustomController.
          *
-         * @param callableStartStaticMethod    the {@link CallableStaticMethod} to
+         * @param callableStartStaticMethod    the {@link RemoteCallableStaticMethod} to
          *                                     start the application (may be null)
          */
-        public CustomController(CallableStaticMethod<Void> callableStartStaticMethod)
+        public CustomController(RemoteCallableStaticMethod<Void> callableStartStaticMethod)
         {
             this(callableStartStaticMethod, null);
         }
@@ -643,14 +648,14 @@ public class ContainerBasedJavaApplicationBuilder<A extends JavaApplication<A>, 
         /**
          * Constructs a CustomController.
          *
-         * @param callableStartStaticMethod    the {@link CallableStaticMethod} to
+         * @param callableStartStaticMethod    the {@link RemoteCallableStaticMethod} to
          *                                     start the application (may be null)
-         * @param callableDestroyStaticMethod  the {@link CallableStaticMethod} to
+         * @param callableDestroyStaticMethod  the {@link RemoteCallableStaticMethod} to
          *                                     destroy the application (may be null)
          *
          */
-        public CustomController(CallableStaticMethod<Void> callableStartStaticMethod,
-                                CallableStaticMethod<Void> callableDestroyStaticMethod)
+        public CustomController(RemoteCallableStaticMethod<Void> callableStartStaticMethod,
+                                RemoteCallableStaticMethod<Void> callableDestroyStaticMethod)
         {
             m_callableStartStaticMethod   = callableStartStaticMethod;
             m_callableDestroyStaticMethod = callableDestroyStaticMethod;
@@ -785,7 +790,9 @@ public class ContainerBasedJavaApplicationBuilder<A extends JavaApplication<A>, 
         public void start(ControllableApplication  application,
                           CompletionListener<Void> listener)
         {
-            Callable<Void> callable = new CallableStaticMethod<Void>(applicationClassName, "main", arguments);
+            RemoteCallable<Void> callable = new RemoteCallableStaticMethod<Void>(applicationClassName,
+                                                                                 "main",
+                                                                                 arguments);
 
             application.submit(callable, listener);
         }

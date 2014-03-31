@@ -30,12 +30,6 @@ import com.oracle.tools.runtime.SimpleApplicationSchema;
 
 import com.oracle.tools.runtime.console.SystemApplicationConsole;
 
-import com.oracle.tools.runtime.java.SimpleJavaApplication;
-import com.oracle.tools.runtime.java.SimpleJavaApplicationSchema;
-
-import com.oracle.tools.runtime.remote.java.RemoteJavaApplicationBuilder;
-import com.oracle.tools.runtime.remote.java.applications.SleepingApplication;
-
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -45,7 +39,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import java.io.File;
 import java.io.IOException;
 
-import java.net.URISyntaxException;
 import java.net.URL;
 
 /**

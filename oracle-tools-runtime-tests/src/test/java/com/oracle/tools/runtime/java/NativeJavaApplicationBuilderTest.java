@@ -31,6 +31,7 @@ import com.oracle.tools.deferred.listener.DeferredCompletionListener;
 
 import com.oracle.tools.runtime.ApplicationConsole;
 
+import com.oracle.tools.runtime.concurrent.RemoteCallable;
 import com.oracle.tools.runtime.concurrent.RemoteExecutor;
 import com.oracle.tools.runtime.concurrent.RemoteExecutorListener;
 import com.oracle.tools.runtime.concurrent.socket.RemoteExecutorServer;
@@ -44,7 +45,6 @@ import com.oracle.tools.runtime.java.container.Container;
 
 import org.junit.Test;
 
-import static com.oracle.tools.deferred.DeferredHelper.eventually;
 import static com.oracle.tools.deferred.DeferredHelper.invoking;
 
 import static org.hamcrest.CoreMatchers.instanceOf;
@@ -53,13 +53,10 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
 import java.io.IOException;
-import java.io.Serializable;
 
 import java.net.InetAddress;
 
 import java.util.UUID;
-
-import java.util.concurrent.Callable;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -372,9 +369,9 @@ public class NativeJavaApplicationBuilderTest extends AbstractJavaApplicationBui
 
 
     /**
-     * A {@link Callable} to perform a {@link System#exit(int)}.
+     * A {@link RemoteCallable} to perform a {@link System#exit(int)}.
      */
-    public static class SystemExitRequest implements Callable<Void>
+    public static class SystemExitRequest implements RemoteCallable<Void>
     {
         /**
          * {@inheritDoc}

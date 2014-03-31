@@ -1,5 +1,5 @@
 /*
- * File: GetClusterSize.java
+ * File: GetClusterName.java
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
@@ -25,20 +25,19 @@
 
 package com.oracle.tools.runtime.coherence.callables;
 
+import com.oracle.tools.runtime.concurrent.RemoteCallable;
+
 import com.tangosol.net.CacheFactory;
 
-import java.io.Serializable;
-import java.util.concurrent.Callable;
-
 /**
- * A {@link Callable} to remotely determine the name of a Coherence Cluster.
+ * A {@link RemoteCallable} to remotely determine the name of a Coherence Cluster.
  * <p>
  * Copyright (c) 2013. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Brian Oliver
  */
-public class GetClusterName implements Callable<String>, Serializable
+public class GetClusterName implements RemoteCallable<String>
 {
     @Override
     public String call() throws Exception

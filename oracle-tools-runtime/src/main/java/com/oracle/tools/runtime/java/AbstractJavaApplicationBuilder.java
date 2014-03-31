@@ -26,9 +26,6 @@
 package com.oracle.tools.runtime.java;
 
 import com.oracle.tools.runtime.AbstractApplicationBuilder;
-import com.oracle.tools.runtime.Application;
-import com.oracle.tools.runtime.LifecycleEvent;
-import com.oracle.tools.runtime.LifecycleEventInterceptor;
 
 /**
  * An {@link AbstractJavaApplicationBuilder} is the base implementation for {@link JavaApplicationBuilder}s.

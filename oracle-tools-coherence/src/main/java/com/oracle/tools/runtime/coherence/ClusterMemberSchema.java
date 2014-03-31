@@ -26,20 +26,26 @@
 package com.oracle.tools.runtime.coherence;
 
 import com.oracle.tools.runtime.ApplicationConsole;
+
+import com.oracle.tools.runtime.concurrent.RemoteCallable;
+
 import com.oracle.tools.runtime.java.AbstractJavaApplicationSchema;
 import com.oracle.tools.runtime.java.ContainerBasedJavaApplicationBuilder;
 import com.oracle.tools.runtime.java.JavaApplicationBuilder;
 import com.oracle.tools.runtime.java.JavaApplicationSchema;
 import com.oracle.tools.runtime.java.JavaProcess;
-import com.oracle.tools.runtime.java.util.CallableStaticMethod;
+import com.oracle.tools.runtime.java.util.RemoteCallableStaticMethod;
+
 import com.oracle.tools.runtime.network.Constants;
+
 import com.oracle.tools.util.CompletionListener;
+
 import com.tangosol.coherence.component.net.Management;
+
 import com.tangosol.net.DefaultCacheServer;
 
 import java.util.Iterator;
 import java.util.Properties;
-import java.util.concurrent.Callable;
 
 /**
  * A {@link ClusterMemberSchema} is a Coherence-based specific {@link JavaApplicationSchema}.
@@ -639,7 +645,8 @@ public class ClusterMemberSchema extends AbstractJavaApplicationSchema<ClusterMe
     public void start(ContainerBasedJavaApplicationBuilder.ControllableApplication application,
                       CompletionListener<Void>                                     listener)
     {
-        Callable<Void> callable = new CallableStaticMethod<Void>("com.tangosol.net.DefaultCacheServer", "start");
+        RemoteCallable<Void> callable = new RemoteCallableStaticMethod<Void>("com.tangosol.net.DefaultCacheServer",
+                                                                             "start");
 
         application.submit(callable, listener);
     }
@@ -652,7 +659,8 @@ public class ClusterMemberSchema extends AbstractJavaApplicationSchema<ClusterMe
     public void destroy(ContainerBasedJavaApplicationBuilder.ControllableApplication application,
                         CompletionListener<Void>                                     listener)
     {
-        Callable<Void> callable = new CallableStaticMethod<Void>("com.tangosol.net.DefaultCacheServer", "shutdown");
+        RemoteCallable<Void> callable = new RemoteCallableStaticMethod<Void>("com.tangosol.net.DefaultCacheServer",
+                                                                             "shutdown");
 
         application.submit(callable, listener);
     }

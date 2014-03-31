@@ -60,8 +60,7 @@ public abstract class AbstractCoherenceTest extends AbstractTest
         super.onBeforeEachTest();
 
         // we only want to run locally
-        System.setProperty("tangosol.coherence.clusterport",
-                           Integer.toString(Container.getAvailablePorts().next()));
+        System.setProperty("tangosol.coherence.clusterport", Integer.toString(Container.getAvailablePorts().next()));
         System.setProperty("tangosol.coherence.localhost", Constants.getLocalHost());
         System.setProperty("tangosol.coherence.ttl", Integer.toString(0));
     }

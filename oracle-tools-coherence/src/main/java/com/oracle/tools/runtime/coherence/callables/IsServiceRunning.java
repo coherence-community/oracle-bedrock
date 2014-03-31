@@ -25,24 +25,20 @@
 
 package com.oracle.tools.runtime.coherence.callables;
 
-import com.oracle.tools.runtime.java.container.Container;
+import com.oracle.tools.runtime.concurrent.RemoteCallable;
 
 import com.tangosol.net.CacheFactory;
 import com.tangosol.net.Service;
 
-import java.io.Serializable;
-
-import java.util.concurrent.Callable;
-
 /**
- * A {@link Callable} to remotely determine if a named service is running
+ * A {@link RemoteCallable} to remotely determine if a named service is running
  * <p>
  * Copyright (c) 2013. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Brian Oliver
  */
-public class IsServiceRunning implements Callable<Boolean>, Serializable
+public class IsServiceRunning implements RemoteCallable<Boolean>
 {
     /**
      * The name of the service.

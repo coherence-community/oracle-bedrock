@@ -26,27 +26,23 @@
 package com.oracle.tools.runtime;
 
 import com.oracle.tools.runtime.console.NullApplicationConsole;
-import com.oracle.tools.runtime.console.PipedApplicationConsole;
 
 import com.oracle.tools.runtime.java.ContainerBasedJavaApplicationBuilder;
 
-import com.oracle.tools.util.Pair;
-
 import org.junit.Test;
 
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.sameInstance;
 
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
-import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Properties;
 
 /**

@@ -27,8 +27,7 @@ package com.oracle.tools.deferred;
 
 import com.oracle.tools.util.StopWatch;
 
-import junit.framework.Assert;
-
+import org.junit.Assert;
 import org.junit.Test;
 
 import static org.hamcrest.core.Is.is;
@@ -49,7 +48,7 @@ public class EventuallyTest
     /**
      * Ensure that a {@link Eventually#assertThat(Deferred, org.hamcrest.Matcher)}
      * waits at least the default amount of time before throwing an exception when
-     * the {@link Deferred} returns <code>null</code>.
+     * a {@link Deferred} is {@link NotAvailable}.
      */
     @Test
     public void shouldWaitDefaultTimeout()
@@ -73,7 +72,7 @@ public class EventuallyTest
                         DeferredHelper.ORACLETOOLS_DEFERRED_RETRY_TIMEOUT_SECS,
                         stopWatch.getElapsedTimeIn(TimeUnit.SECONDS)),
                               stopWatch.getElapsedTimeIn(TimeUnit.SECONDS)
-                              >= DeferredHelper.ORACLETOOLS_DEFERRED_RETRY_TIMEOUT_SECS);
+                              >= DeferredHelper.ORACLETOOLS_DEFERRED_RETRY_TIMEOUT_SECS * 0.95);
         }
         catch (Exception e)
         {

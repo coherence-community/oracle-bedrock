@@ -26,11 +26,9 @@
 package com.oracle.tools.runtime.remote;
 
 import com.oracle.tools.runtime.Application;
-import com.oracle.tools.runtime.ApplicationSchema;
 
 import java.io.Closeable;
 
-import java.util.Collections;
 import java.util.Properties;
 
 /**

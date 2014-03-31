@@ -29,8 +29,6 @@ import com.oracle.tools.runtime.ApplicationConsole;
 import com.oracle.tools.runtime.SimpleApplication;
 import com.oracle.tools.runtime.SimpleApplicationSchema;
 
-import java.util.Properties;
-
 /**
  * A simple implementation of a {@link RemoteApplicationBuilder}.
  * <p>

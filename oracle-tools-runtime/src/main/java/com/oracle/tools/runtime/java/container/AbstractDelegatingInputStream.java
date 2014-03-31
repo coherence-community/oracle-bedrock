@@ -1,3 +1,28 @@
+/*
+ * File: AbstractDelegatingInputStream.java
+ *
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ *
+ * The contents of this file are subject to the terms and conditions of 
+ * the Common Development and Distribution License 1.0 (the "License").
+ *
+ * You may not use this file except in compliance with the License.
+ *
+ * You can obtain a copy of the License by consulting the LICENSE.txt file
+ * distributed with this file, or by consulting https://oss.oracle.com/licenses/CDDL
+ *
+ * See the License for the specific language governing permissions
+ * and limitations under the License.
+ *
+ * When distributing the software, include this License Header Notice in each
+ * file and include the License file LICENSE.txt.
+ *
+ * MODIFICATIONS:
+ * If applicable, add the following below the License Header, with the fields
+ * enclosed by brackets [] replaced by your own identifying information:
+ * "Portions Copyright [year] [name of copyright owner]"
+ */
+
 package com.oracle.tools.runtime.java.container;
 
 import java.io.IOException;
@@ -34,70 +59,91 @@ public abstract class AbstractDelegatingInputStream extends InputStream
         this.m_inputStream = inputStream;
     }
 
+
     /**
      * {@inheritDoc}
      */
-    public int read() throws IOException {
+    public int read() throws IOException
+    {
         return getDelegateInputStream().read();
     }
 
+
     /**
      * {@inheritDoc}
      */
     @Override
-    public int read(byte[] b) throws IOException {
+    public int read(byte[] b) throws IOException
+    {
         return getDelegateInputStream().read(b);
     }
 
+
     /**
      * {@inheritDoc}
      */
     @Override
-    public int read(byte[] b, int off, int len) throws IOException {
+    public int read(byte[] b,
+                    int    off,
+                    int    len) throws IOException
+    {
         return getDelegateInputStream().read(b, off, len);
     }
 
+
     /**
      * {@inheritDoc}
      */
-    public long skip(long n) throws IOException {
+    public long skip(long n) throws IOException
+    {
         return getDelegateInputStream().skip(n);
     }
 
+
     /**
      * {@inheritDoc}
      */
-    public int available() throws IOException {
+    public int available() throws IOException
+    {
         return getDelegateInputStream().available();
     }
 
+
     /**
      * {@inheritDoc}
      */
-    public void close() throws IOException {
+    public void close() throws IOException
+    {
         getDelegateInputStream().close();
     }
 
+
     /**
      * {@inheritDoc}
      */
-    public synchronized void mark(int readlimit) {
+    public synchronized void mark(int readlimit)
+    {
         getDelegateInputStream().mark(readlimit);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public synchronized void reset() throws IOException {
-        getDelegateInputStream().reset();
-    }
 
     /**
      * {@inheritDoc}
      */
-    public boolean markSupported() {
+    public synchronized void reset() throws IOException
+    {
+        getDelegateInputStream().reset();
+    }
+
+
+    /**
+     * {@inheritDoc}
+     */
+    public boolean markSupported()
+    {
         return getDelegateInputStream().markSupported();
     }
+
 
     /**
      * Obtain the {@link java.io.InputStream} to delegate to.
@@ -113,7 +159,8 @@ public abstract class AbstractDelegatingInputStream extends InputStream
     {
         ContainerScope scope = Container.getContainerScope();
 
-        if (scope == null) {
+        if (scope == null)
+        {
             return m_inputStream;
         }
 

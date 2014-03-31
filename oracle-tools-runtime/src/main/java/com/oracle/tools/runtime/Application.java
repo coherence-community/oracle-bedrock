@@ -26,7 +26,6 @@
 package com.oracle.tools.runtime;
 
 import java.io.Closeable;
-import java.io.IOException;
 
 import java.util.Properties;
 

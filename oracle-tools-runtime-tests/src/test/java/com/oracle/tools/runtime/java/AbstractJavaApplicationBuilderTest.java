@@ -26,26 +26,36 @@
 package com.oracle.tools.runtime.java;
 
 import com.oracle.tools.deferred.Eventually;
+
 import com.oracle.tools.junit.AbstractTest;
+
 import com.oracle.tools.lang.StringHelper;
+
 import com.oracle.tools.runtime.ApplicationConsole;
 import com.oracle.tools.runtime.DummyApp;
 import com.oracle.tools.runtime.DummyClassPathApp;
+
+import com.oracle.tools.runtime.concurrent.RemoteCallable;
+
 import com.oracle.tools.runtime.console.PipedApplicationConsole;
 import com.oracle.tools.runtime.console.SystemApplicationConsole;
+
 import com.oracle.tools.runtime.java.applications.SleepingApplication;
 import com.oracle.tools.runtime.java.container.ContainerClassLoader;
+
 import org.junit.Test;
+
 import org.mockito.Mock;
 
-import java.io.IOException;
-import java.io.Serializable;
-import java.util.UUID;
-import java.util.concurrent.Callable;
-
 import static org.hamcrest.CoreMatchers.is;
+
 import static org.hamcrest.core.StringContains.containsString;
+
 import static org.junit.Assert.assertThat;
+
+import java.io.IOException;
+
+import java.util.UUID;
 
 /**
  * Functional Tests for {@link JavaApplicationBuilder}s.
@@ -219,7 +229,7 @@ public abstract class AbstractJavaApplicationBuilderTest extends AbstractTest
             schema.setArgument("5");
 
             JavaApplicationBuilder<SimpleJavaApplication, SimpleJavaApplicationSchema> builder =
-                    newJavaApplicationBuilder();
+                newJavaApplicationBuilder();
 
             ApplicationConsole console = new SystemApplicationConsole();
 
@@ -241,9 +251,9 @@ public abstract class AbstractJavaApplicationBuilderTest extends AbstractTest
 
 
     /**
-     * A {@link java.util.concurrent.Callable} that returns a {@link System#getProperty(String)}.
+     * A {@link RemoteCallable} that returns a {@link System#getProperty(String)}.
      */
-    public static class GetSystemProperty implements Callable<String>, Serializable
+    public static class GetSystemProperty implements RemoteCallable<String>
     {
         /**
          * The name of the {@link System#getProperty(String)} to return.

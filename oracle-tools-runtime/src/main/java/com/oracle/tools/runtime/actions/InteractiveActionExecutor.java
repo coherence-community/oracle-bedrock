@@ -35,7 +35,7 @@ import java.util.Iterator;
 import java.util.Stack;
 
 /**
- * A {@link ActionExecutor} that executes {@link Action}(s) in an interactive,
+ * An {@link ActionExecutor} that executes {@link Action}(s) in an interactive,
  * one {@link Action} at-a-time manner.
  * <p>
  * Copyright (c) 2014. All Rights Reserved. Oracle Corporation.<br>

@@ -30,8 +30,8 @@ import com.oracle.tools.util.CompletionListener;
 import java.util.concurrent.Callable;
 
 /**
- * A means of submitting {@link Callable}s and/or {@link Runnable}s
- * for asynchronous remote execution.
+ * Provides a means of submitting {@link RemoteCallable}s and/or
+ * {@link RemoteRunnable}s for asynchronous remote execution.
  * <p>
  * The submitted {@link Callable}s/{@link Runnable}s are not required to be
  * {@link java.io.Serializable}.
@@ -48,7 +48,7 @@ import java.util.concurrent.Callable;
 public interface RemoteExecutor
 {
     /**
-     * Submits the {@link Callable} to be asynchronously executed remotely.
+     * Submits the {@link RemoteCallable} to be asynchronously executed remotely.
      *
      * @param callable  the {@link Callable} to be executed remotely
      * @param listener  a {@link CompletionListener} to be notified upon
@@ -57,16 +57,16 @@ public interface RemoteExecutor
      *
      * @throws IllegalStateException  if the {@link RemoteExecutor} is closed
      */
-    public <T> void submit(Callable<T>           callable,
+    public <T> void submit(RemoteCallable<T>     callable,
                            CompletionListener<T> listener) throws IllegalStateException;
 
 
     /**
-     * Submits the {@link Runnable} for asynchronous remote execution.
+     * Submits the {@link RemoteRunnable} for asynchronous remote execution.
      *
      * @param runnable  the {@link Runnable} to asynchronously execute remotely
      *
      * @throws IllegalStateException  if the {@link RemoteExecutor} is closed
      */
-    public void submit(Runnable runnable) throws IllegalStateException;
+    public void submit(RemoteRunnable runnable) throws IllegalStateException;
 }

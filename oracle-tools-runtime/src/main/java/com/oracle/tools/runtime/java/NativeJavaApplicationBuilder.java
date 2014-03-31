@@ -38,7 +38,9 @@ import com.oracle.tools.runtime.NativeApplicationProcess;
 import com.oracle.tools.runtime.Settings;
 
 import com.oracle.tools.runtime.concurrent.ControllableRemoteExecutor;
+import com.oracle.tools.runtime.concurrent.RemoteCallable;
 import com.oracle.tools.runtime.concurrent.RemoteExecutor;
+import com.oracle.tools.runtime.concurrent.RemoteRunnable;
 import com.oracle.tools.runtime.concurrent.socket.RemoteExecutorServer;
 
 import com.oracle.tools.runtime.java.container.Container;
@@ -50,8 +52,6 @@ import com.oracle.tools.util.CompletionListener;
 import java.io.IOException;
 
 import java.util.Properties;
-
-import java.util.concurrent.Callable;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -395,7 +395,7 @@ public class NativeJavaApplicationBuilder<A extends JavaApplication<A>, S extend
 
 
         @Override
-        public <T> void submit(Callable<T>           callable,
+        public <T> void submit(RemoteCallable<T>     callable,
                                CompletionListener<T> listener)
         {
             remoteExecutor.submit(callable, listener);
@@ -403,7 +403,7 @@ public class NativeJavaApplicationBuilder<A extends JavaApplication<A>, S extend
 
 
         @Override
-        public void submit(Runnable runnable) throws IllegalStateException
+        public void submit(RemoteRunnable runnable) throws IllegalStateException
         {
             remoteExecutor.submit(runnable);
         }

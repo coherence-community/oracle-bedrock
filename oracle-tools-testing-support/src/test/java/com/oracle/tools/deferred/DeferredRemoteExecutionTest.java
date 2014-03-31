@@ -25,16 +25,10 @@
 
 package com.oracle.tools.deferred;
 
-import junit.framework.Assert;
+import com.oracle.tools.runtime.concurrent.RemoteCallable;
 
+import org.junit.Assert;
 import org.junit.Test;
-
-import static org.hamcrest.core.Is.is;
-
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
-
-import java.util.concurrent.Callable;
 
 /**
  * Unit tests for {@link DeferredRemoteExecution}.
@@ -52,7 +46,7 @@ public class DeferredRemoteExecutionTest
     @Test
     public void shouldReturnCorrectCallableType()
     {
-        Deferred<String> deferred = new DeferredRemoteExecution<String>(null, new Callable<String>()
+        Deferred<String> deferred = new DeferredRemoteExecution<String>(null, new RemoteCallable<String>()
         {
             @Override
             public String call() throws Exception

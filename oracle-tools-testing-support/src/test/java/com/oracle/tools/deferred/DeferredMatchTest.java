@@ -25,8 +25,7 @@
 
 package com.oracle.tools.deferred;
 
-import junit.framework.Assert;
-
+import org.junit.Assert;
 import org.junit.Test;
 
 import static org.hamcrest.core.Is.is;

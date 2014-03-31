@@ -26,7 +26,9 @@
 package com.oracle.tools.runtime.concurrent.socket;
 
 import com.oracle.tools.runtime.concurrent.AbstractControllableRemoteExecutor;
+import com.oracle.tools.runtime.concurrent.RemoteCallable;
 import com.oracle.tools.runtime.concurrent.RemoteExecutorListener;
+import com.oracle.tools.runtime.concurrent.RemoteRunnable;
 
 import com.oracle.tools.util.CompletionListener;
 
@@ -233,7 +235,7 @@ public class RemoteExecutorServer extends AbstractControllableRemoteExecutor
      * {@inheritDoc}
      */
     @Override
-    public <T> void submit(Callable<T>           callable,
+    public <T> void submit(RemoteCallable<T>     callable,
                            CompletionListener<T> listener) throws IllegalStateException
     {
         synchronized (this)
@@ -258,7 +260,7 @@ public class RemoteExecutorServer extends AbstractControllableRemoteExecutor
      * {@inheritDoc}
      */
     @Override
-    public void submit(Runnable runnable) throws IllegalStateException
+    public void submit(RemoteRunnable runnable) throws IllegalStateException
     {
         synchronized (this)
         {

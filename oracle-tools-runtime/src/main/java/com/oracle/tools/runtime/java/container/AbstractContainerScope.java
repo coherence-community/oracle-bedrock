@@ -27,9 +27,6 @@ package com.oracle.tools.runtime.java.container;
 
 import com.oracle.tools.runtime.network.AvailablePortIterator;
 
-import java.io.InputStream;
-import java.io.PrintStream;
-
 import java.util.Properties;
 
 /**

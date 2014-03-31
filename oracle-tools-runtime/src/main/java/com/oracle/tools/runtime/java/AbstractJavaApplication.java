@@ -29,31 +29,42 @@ import com.oracle.tools.deferred.Cached;
 import com.oracle.tools.deferred.Deferred;
 import com.oracle.tools.deferred.NeverAvailable;
 import com.oracle.tools.deferred.UnresolvableInstanceException;
+
 import com.oracle.tools.deferred.jmx.DeferredJMXConnector;
 import com.oracle.tools.deferred.jmx.DeferredMBeanAttribute;
 import com.oracle.tools.deferred.jmx.DeferredMBeanInfo;
 import com.oracle.tools.deferred.jmx.DeferredMBeanProxy;
+
 import com.oracle.tools.runtime.AbstractApplication;
 import com.oracle.tools.runtime.Application;
 import com.oracle.tools.runtime.ApplicationConsole;
 import com.oracle.tools.runtime.LifecycleEventInterceptor;
+
+import com.oracle.tools.runtime.concurrent.RemoteCallable;
+import com.oracle.tools.runtime.concurrent.RemoteRunnable;
+
 import com.oracle.tools.runtime.network.Constants;
+
 import com.oracle.tools.util.CompletionListener;
 import com.oracle.tools.util.FutureCompletionListener;
+
+import static com.oracle.tools.deferred.DeferredHelper.cached;
+import static com.oracle.tools.deferred.DeferredHelper.ensured;
+
+import java.io.IOException;
+
+import java.util.Properties;
+import java.util.Set;
+
+import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
 
 import javax.management.MBeanInfo;
 import javax.management.ObjectInstance;
 import javax.management.ObjectName;
 import javax.management.QueryExp;
-import javax.management.remote.JMXConnector;
-import java.io.IOException;
-import java.util.Properties;
-import java.util.Set;
-import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
 
-import static com.oracle.tools.deferred.DeferredHelper.cached;
-import static com.oracle.tools.deferred.DeferredHelper.ensured;
+import javax.management.remote.JMXConnector;
 
 /**
  * A {@link AbstractJavaApplication} is a base implementation of a {@link JavaApplication} that has
@@ -145,7 +156,7 @@ public abstract class AbstractJavaApplication<A extends JavaApplication<A>, P ex
      * @param callable  the {@link Callable} to execute
      * @param <T>       the type of the result
      */
-    public <T> T submit(Callable<T> callable)
+    public <T> T submit(RemoteCallable<T> callable)
     {
         FutureCompletionListener<T> future = new FutureCompletionListener<T>();
 
@@ -342,7 +353,7 @@ public abstract class AbstractJavaApplication<A extends JavaApplication<A>, P ex
      * {@inheritDoc}
      */
     @Override
-    public <T> void submit(Callable<T>           callable,
+    public <T> void submit(RemoteCallable<T>     callable,
                            CompletionListener<T> listener)
     {
         getJavaProcess().submit(callable, listener);
@@ -353,7 +364,7 @@ public abstract class AbstractJavaApplication<A extends JavaApplication<A>, P ex
      * {@inheritDoc}
      */
     @Override
-    public void submit(Runnable runnable) throws IllegalStateException
+    public void submit(RemoteRunnable runnable) throws IllegalStateException
     {
         getJavaProcess().submit(runnable);
     }

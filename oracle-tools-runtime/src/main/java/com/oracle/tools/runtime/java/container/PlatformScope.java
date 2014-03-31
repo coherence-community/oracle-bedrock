@@ -27,17 +27,6 @@ package com.oracle.tools.runtime.java.container;
 
 import com.oracle.tools.runtime.network.AvailablePortIterator;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.PipedInputStream;
-import java.io.PipedOutputStream;
-import java.io.PrintStream;
-
-import java.util.Properties;
-
-import java.util.concurrent.atomic.AtomicBoolean;
-
 /**
  * A {@link Scope} that encapsulates the native platform resources.
  * <p>

@@ -1,5 +1,5 @@
 /*
- * File: JavaProcess.java
+ * File: RemoteCallable.java
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
@@ -23,21 +23,22 @@
  * "Portions Copyright [year] [name of copyright owner]"
  */
 
-package com.oracle.tools.runtime.java;
+package com.oracle.tools.runtime.concurrent;
 
-import com.oracle.tools.runtime.ApplicationProcess;
+import java.io.Serializable;
 
-import com.oracle.tools.runtime.concurrent.RemoteExecutor;
+import java.util.concurrent.Callable;
 
 /**
- * A specialized [@link ApplicationProcess}, suitable for managing Java-based
- * Applications at runtime.
+ * A {@link Callable} that may be executed remotely.
  * <p>
- * Copyright (c) 2013. All Rights Reserved. Oracle Corporation.<br>
+ * Copyright (c) 2014. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Brian Oliver
+ *
+ * @see RemoteExecutor
  */
-public interface JavaProcess extends ApplicationProcess, RemoteExecutor
+public interface RemoteCallable<T> extends Callable<T>, Serializable
 {
 }

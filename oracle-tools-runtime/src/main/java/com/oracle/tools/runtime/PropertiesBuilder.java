@@ -29,7 +29,11 @@ import java.io.IOException;
 
 import java.net.URL;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Properties;
 
 /**
  * A {@link PropertiesBuilder} defines a set of property definitions that when

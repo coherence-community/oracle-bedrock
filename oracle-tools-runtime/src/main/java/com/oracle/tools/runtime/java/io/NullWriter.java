@@ -26,7 +26,6 @@
 package com.oracle.tools.runtime.java.io;
 
 import java.io.IOException;
-import java.io.Reader;
 import java.io.Writer;
 
 import java.util.concurrent.atomic.AtomicBoolean;

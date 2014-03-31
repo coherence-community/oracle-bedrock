@@ -26,9 +26,7 @@
 package com.oracle.tools.runtime.java.applications;
 
 import java.io.IOException;
-
 import java.net.UnknownHostException;
-
 import java.util.concurrent.TimeUnit;
 
 /**

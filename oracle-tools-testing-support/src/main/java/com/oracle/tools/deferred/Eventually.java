@@ -25,6 +25,8 @@
 
 package com.oracle.tools.deferred;
 
+import com.oracle.tools.runtime.concurrent.RemoteCallable;
+
 import com.oracle.tools.runtime.java.JavaApplication;
 
 import org.hamcrest.Matcher;
@@ -32,7 +34,6 @@ import org.hamcrest.Matcher;
 import static com.oracle.tools.deferred.DeferredHelper.ensure;
 import static com.oracle.tools.deferred.DeferredHelper.eventually;
 
-import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -73,6 +74,30 @@ public class Eventually
      * Should the value be the result of a call to {@link DeferredHelper#invoking(Deferred)}
      * the result is unwrapped into a {@link Deferred} that is then used for the assert.
      *
+     * @param <T>                      the type of value produced by the {@link Deferred}
+     *
+     * @param value                    the value
+     * @param matcher                  the {@link Matcher}
+     * @param totalRetryDuration       the maximum duration for retrying
+     * @param totalRetryDurationUnits  the {@link TimeUnit}s for the duration
+     *
+     * @throws AssertionError if the assertion fails
+     */
+    public static <T> void assertThat(T          value,
+                                      Matcher<?> matcher,
+                                      long       totalRetryDuration,
+                                      TimeUnit   totalRetryDurationUnits) throws AssertionError
+    {
+        assertThat(null, eventually(value), matcher, totalRetryDuration, totalRetryDurationUnits);
+    }
+
+
+    /**
+     * Asserts that a value will eventually satisfy the specified {@link Matcher}.
+     * <p>
+     * Should the value be the result of a call to {@link DeferredHelper#invoking(Deferred)}
+     * the result is unwrapped into a {@link Deferred} that is then used for the assert.
+     *
      * @param <T>       the type of value produced by the {@link Deferred}
      *
      * @param message   the message for the AssertionError (<code>null</code> ok)
@@ -86,6 +111,32 @@ public class Eventually
                                       Matcher<?> matcher) throws AssertionError
     {
         assertThat(message, eventually(value), matcher);
+    }
+
+
+    /**
+     * Asserts that a value will eventually satisfy the specified {@link Matcher}.
+     * <p>
+     * Should the value be the result of a call to {@link DeferredHelper#invoking(Deferred)}
+     * the result is unwrapped into a {@link Deferred} that is then used for the assert.
+     *
+     * @param <T>                      the type of value produced by the {@link Deferred}
+     *
+     * @param message                  the message for the AssertionError (<code>null</code> ok)
+     * @param value                    the value
+     * @param matcher                  the {@link Matcher}
+     * @param totalRetryDuration       the maximum duration for retrying
+     * @param totalRetryDurationUnits  the {@link TimeUnit}s for the duration
+     *
+     * @throws AssertionError if the assertion fails
+     */
+    public static <T> void assertThat(String     message,
+                                      T          value,
+                                      Matcher<?> matcher,
+                                      long       totalRetryDuration,
+                                      TimeUnit   totalRetryDurationUnits) throws AssertionError
+    {
+        assertThat(message, eventually(value), matcher, totalRetryDuration, totalRetryDurationUnits);
     }
 
 
@@ -137,7 +188,7 @@ public class Eventually
      * will eventually (after the specified amount of time) satisfy the
      * specified {@link Matcher}.
      *
-     * @param <T>       the type of value produced by the {@link Deferred}
+     * @param <T>                      the type of value produced by the {@link Deferred}
      *
      * @param deferred                 the {@link Deferred}
      * @param matcher                  the {@link Matcher}
@@ -160,7 +211,7 @@ public class Eventually
      * will eventually (after the specified amount of time) satisfy the
      * specified {@link Matcher}.
      *
-     * @param <T>       the type of value produced by the {@link Deferred}
+     * @param <T>                      the type of value produced by the {@link Deferred}
      *
      * @param message                  the message for the AssertionError (<code>null</code> ok)
      * @param deferred                 the {@link Deferred}
@@ -220,21 +271,46 @@ public class Eventually
 
 
     /**
-     * Asserts that the specified {@link Callable} submitted to the {@link JavaApplication}
+     * Asserts that the specified {@link RemoteCallable} submitted to the {@link JavaApplication}
      * will eventually match the specified matcher.
      *
      * @param <T>          the type of value produced by the {@link Deferred}
      *
-     * @param application  the {@link JavaApplication} to which the {@link Callable} will be submitted
-     * @param callable     the {@link Callable}
+     * @param application  the {@link JavaApplication} to which the {@link RemoteCallable} will be submitted
+     * @param callable     the {@link RemoteCallable}
      * @param matcher      the {@link Matcher} representing the desire condition to match
      *
      * @throws AssertionError  if the assertion fails
      */
     public static <T> void assertThat(JavaApplication<?> application,
-                                      Callable<T>        callable,
+                                      RemoteCallable<T>  callable,
                                       Matcher<?>         matcher) throws AssertionError
     {
         assertThat(new DeferredRemoteExecution<T>(application, callable), matcher);
+    }
+
+
+    /**
+     * Asserts that the specified {@link RemoteCallable} submitted to the {@link JavaApplication}
+     * will eventually match the specified matcher.
+     *
+     * @param <T>                      the type of value produced by the {@link Deferred}
+     *
+     * @param application              the {@link JavaApplication} to which the {@link RemoteCallable} will be submitted
+     * @param callable                 the {@link RemoteCallable}
+     * @param matcher                  the {@link Matcher} representing the desire condition to match
+     * @param totalRetryDuration       the maximum duration for retrying
+     * @param totalRetryDurationUnits  the {@link TimeUnit}s for the duration
+     *
+     * @throws AssertionError  if the assertion fails
+     */
+    public static <T> void assertThat(JavaApplication<?> application,
+                                      RemoteCallable<T>  callable,
+                                      Matcher<?>         matcher,
+                                      long               totalRetryDuration,
+                                      TimeUnit           totalRetryDurationUnits) throws AssertionError
+    {
+        assertThat(new DeferredRemoteExecution<T>(application,
+                                                  callable), matcher, totalRetryDuration, totalRetryDurationUnits);
     }
 }

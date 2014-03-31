@@ -1,5 +1,5 @@
 /*
- * File: CallableStaticMethod.java
+ * File: RemoteCallableStaticMethod.java
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
@@ -25,7 +25,7 @@
 
 package com.oracle.tools.runtime.java.util;
 
-import java.io.Serializable;
+import com.oracle.tools.runtime.concurrent.RemoteCallable;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -36,14 +36,14 @@ import java.util.Arrays;
 import java.util.concurrent.Callable;
 
 /**
- * A {@link Callable} for a static {@link Method}.
+ * A {@link RemoteCallable} for a static {@link Method}.
  * <p>
- * Copyright (c) 2013. All Rights Reserved. Oracle Corporation.<br>
+ * Copyright (c) 2014. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Brian Oliver
  */
-public class CallableStaticMethod<T> implements Callable<T>, Serializable
+public class RemoteCallableStaticMethod<T> implements RemoteCallable<T>
 {
     /**
      * The name of the {@link Class} on which the static method is defined.
@@ -62,15 +62,15 @@ public class CallableStaticMethod<T> implements Callable<T>, Serializable
 
 
     /**
-     * Constructs an CallableStaticMethod.
+     * Constructs an RemoteCallableStaticMethod.
      *
      * @param className   the name of the class
      * @param methodName  the name of the static method
      * @param args        the arguments for the method
      */
-    public CallableStaticMethod(String           className,
-                                String           methodName,
-                                Iterable<String> args)
+    public RemoteCallableStaticMethod(String           className,
+                                      String           methodName,
+                                      Iterable<String> args)
     {
         m_className  = className;
         m_methodName = methodName;
@@ -88,15 +88,15 @@ public class CallableStaticMethod<T> implements Callable<T>, Serializable
 
 
     /**
-     * Constructs an CallableStaticMethod.
+     * Constructs an RemoteCallableStaticMethod.
      *
      * @param className   the name of the class
      * @param methodName  the name of the static method
      * @param args        the arguments for the method
      */
-    public CallableStaticMethod(String    className,
-                                String    methodName,
-                                String... args)
+    public RemoteCallableStaticMethod(String    className,
+                                      String    methodName,
+                                      String... args)
     {
         m_className  = className;
         m_methodName = methodName;
@@ -104,9 +104,6 @@ public class CallableStaticMethod<T> implements Callable<T>, Serializable
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public T call() throws Exception
     {
@@ -143,15 +140,10 @@ public class CallableStaticMethod<T> implements Callable<T>, Serializable
     }
 
 
-    /**
-     * Method description
-     *
-     * @return
-     */
     @Override
     public String toString()
     {
-        return "CallableStaticMethod{ClassName=\'" + m_className + '\'' + ", Method='" + m_methodName + '\''
+        return "RemoteCallableStaticMethod{ClassName=\'" + m_className + '\'' + ", Method='" + m_methodName + '\''
                + ", Arguments=" + Arrays.toString(m_args) + '}';
     }
 }

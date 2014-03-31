@@ -25,6 +25,7 @@
 
 package com.oracle.tools.deferred;
 
+import com.oracle.tools.runtime.concurrent.RemoteCallable;
 import com.oracle.tools.runtime.concurrent.RemoteExecutor;
 
 import com.oracle.tools.util.CompletionListener;
@@ -33,8 +34,6 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 
 import java.util.concurrent.Callable;
-
-import javax.lang.model.type.UnknownTypeException;
 
 /**
  * A {@link Deferred} representing the result of a {@link Callable}
@@ -54,9 +53,9 @@ public class DeferredRemoteExecution<T> implements Deferred<T>, CompletionListen
     private RemoteExecutor remoteExecutor;
 
     /**
-     * The {@link Callable} to submit for execution.
+     * The {@link RemoteCallable} to submit for execution.
      */
-    private Callable<T> callable;
+    private RemoteCallable<T> callable;
 
     /**
      * A flag indicating if the {@link Callable} has been submitted for execution.
@@ -83,10 +82,10 @@ public class DeferredRemoteExecution<T> implements Deferred<T>, CompletionListen
      * Constructs a {@link DeferredRemoteExecution}
      *
      * @param remoteExecutor  the {@link RemoteExecutor} to be used for execution
-     * @param callable        the {@link Callable} to execute
+     * @param callable        the {@link RemoteCallable} to execute
      */
-    public DeferredRemoteExecution(RemoteExecutor remoteExecutor,
-                                   Callable<T>    callable)
+    public DeferredRemoteExecution(RemoteExecutor    remoteExecutor,
+                                   RemoteCallable<T> callable)
     {
         this.remoteExecutor       = remoteExecutor;
         this.callable             = callable;
@@ -206,7 +205,7 @@ public class DeferredRemoteExecution<T> implements Deferred<T>, CompletionListen
             {
                 ParameterizedType parameterizedType = (ParameterizedType) type;
 
-                if (parameterizedType.getRawType().equals(Callable.class))
+                if (parameterizedType.getRawType().equals(RemoteCallable.class))
                 {
                     return (Class<T>) parameterizedType.getActualTypeArguments()[0];
                 }

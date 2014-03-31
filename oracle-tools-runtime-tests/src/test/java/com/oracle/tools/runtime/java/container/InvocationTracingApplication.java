@@ -26,7 +26,6 @@
 package com.oracle.tools.runtime.java.container;
 
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * A simple application that is designed to run in a container so that we can

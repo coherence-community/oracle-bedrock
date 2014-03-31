@@ -28,7 +28,7 @@ package com.oracle.tools.runtime.java.container;
 import com.oracle.tools.junit.AbstractTest;
 
 import com.oracle.tools.runtime.java.ContainerBasedJavaApplicationBuilder;
-import com.oracle.tools.runtime.java.util.CallableStaticMethod;
+import com.oracle.tools.runtime.java.util.RemoteCallableStaticMethod;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -42,13 +42,14 @@ import static org.hamcrest.CoreMatchers.nullValue;
 
 import static org.hamcrest.collection.IsArrayContainingInOrder.arrayContaining;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-
-import java.util.concurrent.ExecutionException;
 
 /**
  * Functional Tests for {@link ContainerBasedJavaProcess}es.
@@ -121,12 +122,14 @@ public class ContainerBasedJavaProcessTest extends AbstractTest
     @Test
     public void shouldStartCustomApplication() throws Exception
     {
-        ContainerClassLoader       classLoader = ContainerClassLoader.newInstance("shouldStartCustomApplication");
+        ContainerClassLoader classLoader = ContainerClassLoader.newInstance("shouldStartCustomApplication");
 
-        String                     className   = InvocationTracingApplication.class.getCanonicalName();
-        String                     methodName  = InvocationTracingApplication.METHOD_STATIC_START;
-        List<String>               arguments   = Arrays.asList("1", "2", "3");
-        CallableStaticMethod<Void> callable    = new CallableStaticMethod<Void>(className, methodName, arguments);
+        String               className   = InvocationTracingApplication.class.getCanonicalName();
+        String               methodName  = InvocationTracingApplication.METHOD_STATIC_START;
+        List<String>         arguments   = Arrays.asList("1", "2", "3");
+        RemoteCallableStaticMethod<Void> callable = new RemoteCallableStaticMethod<Void>(className,
+                                                                                         methodName,
+                                                                                         arguments);
 
         ContainerBasedJavaProcess process = new ContainerBasedJavaProcess(classLoader,
                                                                           new ContainerBasedJavaApplicationBuilder
@@ -166,9 +169,9 @@ public class ContainerBasedJavaProcessTest extends AbstractTest
         ContainerClassLoader classLoader =
             ContainerClassLoader.newInstance("shouldStartCustomApplicationWithoutArguments");
 
-        String                     className  = InvocationTracingApplication.class.getCanonicalName();
-        String                     methodName = InvocationTracingApplication.METHOD_STATIC_START_NO_ARGS;
-        CallableStaticMethod<Void> callable   = new CallableStaticMethod<Void>(className, methodName);
+        String                           className  = InvocationTracingApplication.class.getCanonicalName();
+        String                           methodName = InvocationTracingApplication.METHOD_STATIC_START_NO_ARGS;
+        RemoteCallableStaticMethod<Void> callable   = new RemoteCallableStaticMethod<Void>(className, methodName);
 
         ContainerBasedJavaProcess process = new ContainerBasedJavaProcess(classLoader,
                                                                           new ContainerBasedJavaApplicationBuilder
@@ -208,9 +211,9 @@ public class ContainerBasedJavaProcessTest extends AbstractTest
         ContainerClassLoader classLoader =
             ContainerClassLoader.newInstance("shouldStopCustomApplicationWithoutArguments");
 
-        String                     className  = InvocationTracingApplication.class.getCanonicalName();
-        String                     methodName = InvocationTracingApplication.METHOD_STATIC_STOP_NO_ARGS;
-        CallableStaticMethod<Void> callable   = new CallableStaticMethod<Void>(className, methodName);
+        String                           className  = InvocationTracingApplication.class.getCanonicalName();
+        String                           methodName = InvocationTracingApplication.METHOD_STATIC_STOP_NO_ARGS;
+        RemoteCallableStaticMethod<Void> callable   = new RemoteCallableStaticMethod<Void>(className, methodName);
 
         ContainerBasedJavaProcess process = new ContainerBasedJavaProcess(classLoader,
                                                                           new ContainerBasedJavaApplicationBuilder
@@ -252,9 +255,9 @@ public class ContainerBasedJavaProcessTest extends AbstractTest
         ContainerClassLoader classLoader =
             ContainerClassLoader.newInstance("shouldNotStartCustomApplicationWithoutArguments");
 
-        String                     className  = InvocationTracingApplication.class.getCanonicalName();
-        String                     methodName = "method_does_not_exist";
-        CallableStaticMethod<Void> callable   = new CallableStaticMethod<Void>(className, methodName);
+        String                           className  = InvocationTracingApplication.class.getCanonicalName();
+        String                           methodName = "method_does_not_exist";
+        RemoteCallableStaticMethod<Void> callable   = new RemoteCallableStaticMethod<Void>(className, methodName);
 
         ContainerBasedJavaProcess process = new ContainerBasedJavaProcess(classLoader,
                                                                           new ContainerBasedJavaApplicationBuilder
