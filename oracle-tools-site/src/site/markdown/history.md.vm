@@ -23,6 +23,10 @@ reverse chronological order.
     requiring developers to explicitly specify a max timeout or override
     system properties.
 
+*   [ORACLETOOLS-95](https://java.net/jira/browse/ORACLETOOLS-95): Introduced
+    AbstractDeferred class to enable simple annoymous inner-class (and Lambda)
+    implementations of Deferreds.
+
 <h4>oracle-tools-runtime</h4>
 
 *   [ORACLETOOLS-79](https://java.net/jira/browse/ORACLETOOLS-79): Completed

@@ -25,6 +25,7 @@
 
 package com.oracle.tools.runtime.java;
 
+import com.oracle.tools.deferred.AbstractDeferred;
 import com.oracle.tools.deferred.Deferred;
 import com.oracle.tools.deferred.DeferredHelper;
 import com.oracle.tools.deferred.InstanceUnavailableException;
@@ -373,7 +374,7 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication<A>, S extends
                                                            systemProperties);
 
         // ensure that the process connects back
-        DeferredHelper.ensure(new Deferred<Boolean>()
+        DeferredHelper.ensure(new AbstractDeferred<Boolean>()
         {
             @Override
             public Boolean get() throws UnresolvableInstanceException, InstanceUnavailableException
@@ -386,12 +387,6 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication<A>, S extends
                 {
                     return true;
                 }
-            }
-
-            @Override
-            public Class<Boolean> getDeferredClass()
-            {
-                return Boolean.TYPE;
             }
         });
 
