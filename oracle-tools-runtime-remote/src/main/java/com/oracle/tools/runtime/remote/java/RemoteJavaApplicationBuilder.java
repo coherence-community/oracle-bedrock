@@ -64,6 +64,14 @@ public class RemoteJavaApplicationBuilder<A extends JavaApplication<A>, S extend
                                              RemoteJavaApplicationBuilder<A, S>> implements JavaApplicationBuilder<A, S>
 {
     /**
+     * The path for the JAVA_HOME.
+     * <p>
+     * This is <code>null</code> if the JAVA_HOME of the {@link JavaApplicationSchema}
+     * should be used.
+     */
+    private String remoteJavaHome;
+
+    /**
      * Are remote {@link JavaApplication}s produced by this builder allowed
      * to become orphans (when their parent application process is destroyed/killed)?
      * <p>
@@ -116,6 +124,9 @@ public class RemoteJavaApplicationBuilder<A extends JavaApplication<A>, S extend
     {
         super(hostName, port, userName, authentication);
 
+        // by default use the JAVA_HOME of the {@link JavaApplicationSchema}
+        remoteJavaHome = null;
+
         // by default orphan remote processes are not permitted
         areOrphansPermitted = false;
 
@@ -134,6 +145,23 @@ public class RemoteJavaApplicationBuilder<A extends JavaApplication<A>, S extend
         doNotDeployFileNames.add("jconsole.jar");
         doNotDeployFileNames.add("plugin.jar");
         doNotDeployFileNames.add("sunpkcs11.jar");
+    }
+
+
+    /**
+     * Sets the remote JAVA_HOME to be used when realizing the {@link JavaApplication}.
+     *
+     * @param remoteJavaHome  the value for the remote JAVA_HOME environment variable
+     *                        or <code>null</code> if {@link JavaApplicationSchema}
+     *                        value should be used instead
+     *
+     * @return  the builder (so that we can perform method chaining)
+     */
+    public RemoteJavaApplicationBuilder<A, S> setJavaHome(String remoteJavaHome)
+    {
+        this.remoteJavaHome = remoteJavaHome;
+
+        return this;
     }
 
 
@@ -230,7 +258,8 @@ public class RemoteJavaApplicationBuilder<A extends JavaApplication<A>, S extend
                                                     remotePathSeparatorChar,
                                                     areOrphansPermitted,
                                                     isAutoDeployEnabled,
-                                                    doNotDeployFileNames);
+                                                    doNotDeployFileNames,
+                                                    remoteJavaHome);
     }
 
 

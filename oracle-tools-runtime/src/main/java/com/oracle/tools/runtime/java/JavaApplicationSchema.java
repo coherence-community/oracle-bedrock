@@ -78,6 +78,15 @@ public interface JavaApplicationSchema<A extends JavaApplication<A>, S extends J
 
 
     /**
+     * Obtain the value to be used for the JAVA_HOME.
+     * When <code>null</code> the platform default is assumed.
+     *
+     * @return  the value for JAVA_HOME or null for the platform default
+     */
+    public String getJavaHome();
+
+
+    /**
      * Instantiates a suitable {@link JavaApplication} to control the underlying
      * {@link JavaProcess}.  It's through this {@link JavaApplication}
      * that developers will interact with the underlying Java {@link Process}.

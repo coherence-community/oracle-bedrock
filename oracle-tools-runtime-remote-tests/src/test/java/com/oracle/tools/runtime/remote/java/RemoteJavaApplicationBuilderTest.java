@@ -25,10 +25,16 @@
 
 package com.oracle.tools.runtime.remote.java;
 
+import com.oracle.tools.deferred.Eventually;
+
+import com.oracle.tools.runtime.ApplicationConsole;
+
 import com.oracle.tools.runtime.console.SystemApplicationConsole;
 
+import com.oracle.tools.runtime.java.NativeJavaApplicationBuilder;
 import com.oracle.tools.runtime.java.SimpleJavaApplication;
 import com.oracle.tools.runtime.java.SimpleJavaApplicationSchema;
+import com.oracle.tools.runtime.java.concurrent.GetSystemProperty;
 
 import com.oracle.tools.runtime.remote.AbstractRemoteApplicationBuilderTest;
 import com.oracle.tools.runtime.remote.SecureKeys;
@@ -81,5 +87,51 @@ public class RemoteJavaApplicationBuilderTest extends AbstractRemoteApplicationB
         application.close();
 
         assertThat(application.exitValue(), is(0));
+    }
+
+
+    /**
+     * Ensure that {@link NativeJavaApplicationBuilder}s set the JAVA_HOME
+     * environment variable.
+     */
+    @Test
+    public void shouldSetJavaHome() throws InterruptedException
+    {
+        SimpleJavaApplication application = null;
+
+        try
+        {
+            // define the SleepingApplication
+            SimpleJavaApplicationSchema schema = new SimpleJavaApplicationSchema(SleepingApplication.class.getName());
+
+            // set the JAVA_HOME environment variable to be the same as this application
+            String javaHome = System.getProperty("java.home");
+
+            schema.setSystemProperty("java.home", javaHome);
+
+            // build and start the SleepingApplication
+            RemoteJavaApplicationBuilder<SimpleJavaApplication, SimpleJavaApplicationSchema> builder =
+                new RemoteJavaApplicationBuilder<SimpleJavaApplication,
+                                                 SimpleJavaApplicationSchema>(getRemoteHostName(),
+                                                                              getRemoteUserName(),
+                                                                              SecureKeys
+                                                                                  .fromPrivateKeyFile(getPrivateKeyFile()));
+
+            ApplicationConsole console = new SystemApplicationConsole();
+
+            application = builder.realize(schema, "sleeping", console);
+
+            Eventually.assertThat(application, new GetSystemProperty("java.home"), is(javaHome));
+        }
+        catch (IOException e)
+        {
+        }
+        finally
+        {
+            if (application != null)
+            {
+                application.close();
+            }
+        }
     }
 }

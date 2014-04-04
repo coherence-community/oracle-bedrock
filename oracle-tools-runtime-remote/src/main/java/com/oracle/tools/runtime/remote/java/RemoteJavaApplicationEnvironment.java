@@ -82,6 +82,12 @@ public class RemoteJavaApplicationEnvironment<A extends JavaApplication<A>, S ex
      */
     private ArrayList<DeploymentArtifact> deploymentArtifacts;
 
+    /**
+     * The remote JAVA_HOME to use or <code>null</code> to use the
+     * schema java home (which if null means the platform defined JAVA HOME).
+     */
+    private String remoteJavaHome;
+
 
     /**
      * Constructs a {@link RemoteJavaApplicationEnvironment}.
@@ -92,13 +98,15 @@ public class RemoteJavaApplicationEnvironment<A extends JavaApplication<A>, S ex
      * @param areOrphansPermitted   are orphaned remote {@link JavaApplication}s permitted
      * @param isAutoDeployEnabled   automatically deploy {@link JavaApplication}s
      * @param doNotDeployFileNames  the names of files not to deploy (when deployment enabled)
+     * @param remoteJavaHome        the remote JAVA HOME (may be null for a default)
      */
     public RemoteJavaApplicationEnvironment(S           schema,
                                             char        remoteFileSeparator,
                                             char        remotePathSeparator,
                                             boolean     areOrphansPermitted,
                                             boolean     isAutoDeployEnabled,
-                                            Set<String> doNotDeployFileNames) throws IOException
+                                            Set<String> doNotDeployFileNames,
+                                            String      remoteJavaHome) throws IOException
     {
         super(schema);
 
@@ -207,6 +215,8 @@ public class RemoteJavaApplicationEnvironment<A extends JavaApplication<A>, S ex
             // no deployment means no changes in class path are required
             remoteClassPath = classPath;
         }
+
+        this.remoteJavaHome = remoteJavaHome;
     }
 
 
@@ -287,6 +297,23 @@ public class RemoteJavaApplicationEnvironment<A extends JavaApplication<A>, S ex
         }
 
         return builder.toString();
+    }
+
+
+    @Override
+    public Properties getRemoteEnvironmentVariables()
+    {
+        Properties properties = super.getRemoteEnvironmentVariables();
+
+        // set the JAVA_HOME
+        String javaHome = remoteJavaHome == null ? schema.getJavaHome() : remoteJavaHome;
+
+        if (javaHome != null)
+        {
+            properties.put("JAVA_HOME", javaHome);
+        }
+
+        return properties;
     }
 
 

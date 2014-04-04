@@ -48,6 +48,11 @@ reverse chronological order.
     "implements RemoteRunnable", or "implements Callable&lt;T&gt;, Serializable" to
     "implements RemoteCallable&lt;T&gt;".
 
+*   [ORACLETOOLS-93](https://java.net/jira/browse/ORACLETOOLS-93): Added the
+    ability to explicitly set the required JAVA_HOME to use for a Java Application
+    Schema and/or JavaApplicationBuilder.  When not set, the JAVA_HOME of the
+    executing process is assumed.
+
 <h4>oracle-tools-runtime-remote</h4>
 
 *   [ORACLETOOLS-91](https://java.net/jira/browse/ORACLETOOLS-91): Introduced

@@ -74,6 +74,14 @@ public class NativeJavaApplicationBuilder<A extends JavaApplication<A>, S extend
     private static Logger LOGGER = Logger.getLogger(NativeJavaApplicationBuilder.class.getName());
 
     /**
+     * The path for the JAVA_HOME.
+     * <p>
+     * This is <code>null</code> if the JAVA_HOME of the {@link JavaApplicationSchema}
+     * should be used.
+     */
+    private String javaHome;
+
+    /**
      * Should processes be started in remote debug mode?
      * <p/>
      * The default is <code>false</code>.
@@ -103,6 +111,9 @@ public class NativeJavaApplicationBuilder<A extends JavaApplication<A>, S extend
     {
         super();
 
+        // use the JAVA HOME of the {@link JavaApplicationSchema}
+        javaHome = null;
+
         // don't start in remote debug mode
         isRemoteDebuggingEnabled = false;
 
@@ -125,6 +136,23 @@ public class NativeJavaApplicationBuilder<A extends JavaApplication<A>, S extend
     public NativeJavaApplicationBuilder setDiagnosticsEnabled(boolean isDiagnosticsEnabled)
     {
         this.m_isDiagnosticsEnabled = isDiagnosticsEnabled;
+
+        return this;
+    }
+
+
+    /**
+     * Sets the JAVA_HOME to be used to realize the {@link JavaApplication}.
+     *
+     * @param javaHome  the value for the JAVA_HOME environment variable
+     *                  or <code>null</code> if {@link JavaApplicationSchema}
+     *                  value should be used instead
+     *
+     * @return  the builder (so that we can perform method chaining)
+     */
+    public NativeJavaApplicationBuilder setJavaHome(String javaHome)
+    {
+        this.javaHome = javaHome;
 
         return this;
     }
@@ -240,6 +268,14 @@ public class NativeJavaApplicationBuilder<A extends JavaApplication<A>, S extend
         for (String variableName : environmentVariables.stringPropertyNames())
         {
             builder.environment().put(variableName, environmentVariables.getProperty(variableName));
+        }
+
+        // set the JAVA_HOME
+        String javaHome = this.javaHome == null ? schema.getJavaHome() : this.javaHome;
+
+        if (javaHome != null)
+        {
+            builder.environment().put("JAVA_HOME", javaHome);
         }
 
         // set the class path (it's an environment variable)

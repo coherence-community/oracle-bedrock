@@ -41,6 +41,7 @@ import com.oracle.tools.runtime.console.PipedApplicationConsole;
 import com.oracle.tools.runtime.console.SystemApplicationConsole;
 
 import com.oracle.tools.runtime.java.applications.SleepingApplication;
+import com.oracle.tools.runtime.java.concurrent.GetSystemProperty;
 import com.oracle.tools.runtime.java.container.ContainerClassLoader;
 
 import org.junit.Test;
@@ -246,49 +247,6 @@ public abstract class AbstractJavaApplicationBuilderTest extends AbstractTest
             {
                 application.close();
             }
-        }
-    }
-
-
-    /**
-     * A {@link RemoteCallable} that returns a {@link System#getProperty(String)}.
-     */
-    public static class GetSystemProperty implements RemoteCallable<String>
-    {
-        /**
-         * The name of the {@link System#getProperty(String)} to return.
-         */
-        private String propertyName;
-
-
-        /**
-         * Constructs a {@link GetSystemProperty}.
-         *
-         * (for serialization)
-         */
-        public GetSystemProperty()
-        {
-        }
-
-
-        /**
-         * Constructs a {@link GetSystemProperty}.
-         *
-         * @param propertyName the name of the system property
-         */
-        public GetSystemProperty(String propertyName)
-        {
-            this.propertyName = propertyName;
-        }
-
-
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public String call() throws Exception
-        {
-            return System.getProperty(propertyName);
         }
     }
 }

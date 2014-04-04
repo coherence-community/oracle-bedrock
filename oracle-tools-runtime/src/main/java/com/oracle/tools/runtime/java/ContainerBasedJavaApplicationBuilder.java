@@ -151,6 +151,8 @@ public class ContainerBasedJavaApplicationBuilder<A extends JavaApplication<A>, 
                 + "eg: In your case it should be defined as; -D" + JavaApplication.JAVA_NET_PREFER_IPV4_STACK + "="
                 + schemaPreferIPv4Stack);
         }
+
+        //TODO: check that the JavaHome is not set or not different from the current platform setting
     }
 
 

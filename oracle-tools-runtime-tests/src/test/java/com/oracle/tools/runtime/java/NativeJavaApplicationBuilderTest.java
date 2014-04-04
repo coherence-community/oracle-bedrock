@@ -41,6 +41,8 @@ import com.oracle.tools.runtime.console.SystemApplicationConsole;
 
 import com.oracle.tools.runtime.java.applications.ParentApplication;
 import com.oracle.tools.runtime.java.applications.SleepingApplication;
+import com.oracle.tools.runtime.java.concurrent.GetSystemProperty;
+import com.oracle.tools.runtime.java.concurrent.SystemExit;
 import com.oracle.tools.runtime.java.container.Container;
 
 import org.junit.Test;
@@ -71,9 +73,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class NativeJavaApplicationBuilderTest extends AbstractJavaApplicationBuilderTest
 {
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public JavaApplicationBuilder<SimpleJavaApplication, SimpleJavaApplicationSchema> newJavaApplicationBuilder()
     {
         return new NativeJavaApplicationBuilder<SimpleJavaApplication, SimpleJavaApplicationSchema>();
@@ -144,8 +144,8 @@ public class NativeJavaApplicationBuilderTest extends AbstractJavaApplicationBui
 
             Eventually.assertThat(response, is("PONG"));
 
-            // shutdown the client
-            child.submit(new SystemExitRequest(), null);
+            // shutdown the client (by invoking a System.exit internally)
+            child.submit(new SystemExit());
 
             // wait for the ChildApplication to disconnect from the ServerChannel
             Eventually.assertThat(invoking(listener).isClosed(), is(true));
@@ -282,6 +282,48 @@ public class NativeJavaApplicationBuilderTest extends AbstractJavaApplicationBui
 
 
     /**
+     * Ensure that {@link NativeJavaApplicationBuilder}s set the JAVA_HOME
+     * environment variable.
+     */
+    @Test
+    public void shouldSetJavaHome() throws InterruptedException
+    {
+        SimpleJavaApplication application = null;
+
+        try
+        {
+            // define the SleepingApplication
+            SimpleJavaApplicationSchema schema = new SimpleJavaApplicationSchema(SleepingApplication.class.getName());
+
+            // set the JAVA_HOME environment variable to be the same as this application
+            String javaHome = System.getProperty("java.home");
+
+            schema.setSystemProperty("java.home", javaHome);
+
+            // build and start the SleepingApplication
+            NativeJavaApplicationBuilder<SimpleJavaApplication, SimpleJavaApplicationSchema> builder =
+                new NativeJavaApplicationBuilder<SimpleJavaApplication, SimpleJavaApplicationSchema>();
+
+            ApplicationConsole console = new SystemApplicationConsole();
+
+            application = builder.realize(schema, "sleeping", console);
+
+            Eventually.assertThat(application, new GetSystemProperty("java.home"), is(javaHome));
+        }
+        catch (IOException e)
+        {
+        }
+        finally
+        {
+            if (application != null)
+            {
+                application.close();
+            }
+        }
+    }
+
+
+    /**
      * A {@link com.oracle.tools.runtime.concurrent.RemoteExecutorListener} to track when it's been opened and closed.
      */
     public static class ClientApplicationListener implements RemoteExecutorListener
@@ -364,26 +406,6 @@ public class NativeJavaApplicationBuilderTest extends AbstractJavaApplicationBui
         public RemoteExecutor getExecutor()
         {
             return executor;
-        }
-    }
-
-
-    /**
-     * A {@link RemoteCallable} to perform a {@link System#exit(int)}.
-     */
-    public static class SystemExitRequest implements RemoteCallable<Void>
-    {
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public Void call() throws Exception
-        {
-            System.out.println("Terminating Application (due to SystemExitRequest)");
-
-            System.exit(-1);
-
-            return null;
         }
     }
 }

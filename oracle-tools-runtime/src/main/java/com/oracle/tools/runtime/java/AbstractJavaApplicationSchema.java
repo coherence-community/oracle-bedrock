@@ -27,11 +27,9 @@ package com.oracle.tools.runtime.java;
 
 import com.oracle.tools.runtime.AbstractApplicationSchema;
 import com.oracle.tools.runtime.PropertiesBuilder;
+
 import com.oracle.tools.runtime.network.AvailablePortIterator;
 import com.oracle.tools.runtime.network.Constants;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import static com.oracle.tools.runtime.java.JavaApplication.JAVA_AWT_HEADLESS;
 import static com.oracle.tools.runtime.java.JavaApplication.JAVA_NET_PREFER_IPV4_STACK;
@@ -40,6 +38,9 @@ import static com.oracle.tools.runtime.java.JavaApplication.SUN_MANAGEMENT_JMXRE
 import static com.oracle.tools.runtime.java.JavaApplication.SUN_MANAGEMENT_JMXREMOTE_AUTHENTICATE;
 import static com.oracle.tools.runtime.java.JavaApplication.SUN_MANAGEMENT_JMXREMOTE_PORT;
 import static com.oracle.tools.runtime.java.JavaApplication.SUN_MANAGEMENT_JMXREMOTE_SSL;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * An {@link AbstractJavaApplicationSchema} is a base implementation of a {@link JavaApplicationSchema}.
@@ -72,6 +73,12 @@ public abstract class AbstractJavaApplicationSchema<A extends JavaApplication<A>
      * The system properties for the {@link JavaApplication}.
      */
     private PropertiesBuilder m_systemPropertiesBuilder;
+
+    /**
+     * The value of the JAVA_HOME environment variable
+     * (or <code>null</code> for the platform default)
+     */
+    private String javaHome;
 
 
     /**
@@ -117,6 +124,7 @@ public abstract class AbstractJavaApplicationSchema<A extends JavaApplication<A>
         m_classPath               = new ClassPath(classPath);
         m_jvmOptions              = new ArrayList<String>();
         m_systemPropertiesBuilder = new PropertiesBuilder();
+        javaHome                  = null;
 
         configureDefaults();
     }
@@ -146,6 +154,25 @@ public abstract class AbstractJavaApplicationSchema<A extends JavaApplication<A>
     public String getApplicationClassName()
     {
         return m_applicationClassName;
+    }
+
+
+    @Override
+    public String getJavaHome()
+    {
+        return javaHome;
+    }
+
+
+    /**
+     * Sets the value to use for JAVA_HOME or <code>null</code> to
+     * use the underlying platform setting.
+     *
+     * @param javaHome  the value of JAVA_HOME
+     */
+    public void setJavaHome(String javaHome)
+    {
+        this.javaHome = javaHome;
     }
 
 

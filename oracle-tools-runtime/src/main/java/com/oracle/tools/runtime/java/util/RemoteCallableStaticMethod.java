@@ -33,8 +33,6 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import java.util.concurrent.Callable;
-
 /**
  * A {@link RemoteCallable} for a static {@link Method}.
  * <p>
@@ -48,17 +46,17 @@ public class RemoteCallableStaticMethod<T> implements RemoteCallable<T>
     /**
      * The name of the {@link Class} on which the static method is defined.
      */
-    private final String m_className;
+    private final String className;
 
     /**
      * The name of the static method.
      */
-    private final String m_methodName;
+    private final String methodName;
 
     /**
      * The arguments for the method.
      */
-    private String[] m_args;
+    private String[] args;
 
 
     /**
@@ -72,8 +70,8 @@ public class RemoteCallableStaticMethod<T> implements RemoteCallable<T>
                                       String           methodName,
                                       Iterable<String> args)
     {
-        m_className  = className;
-        m_methodName = methodName;
+        this.className  = className;
+        this.methodName = methodName;
 
         ArrayList<String> arguments = new ArrayList<String>();
 
@@ -82,8 +80,8 @@ public class RemoteCallableStaticMethod<T> implements RemoteCallable<T>
             arguments.add(arg);
         }
 
-        m_args = new String[arguments.size()];
-        arguments.toArray(m_args);
+        this.args = new String[arguments.size()];
+        arguments.toArray(this.args);
     }
 
 
@@ -98,9 +96,9 @@ public class RemoteCallableStaticMethod<T> implements RemoteCallable<T>
                                       String    methodName,
                                       String... args)
     {
-        m_className  = className;
-        m_methodName = methodName;
-        m_args       = args;
+        this.className  = className;
+        this.methodName = methodName;
+        this.args       = args;
     }
 
 
@@ -110,7 +108,7 @@ public class RemoteCallableStaticMethod<T> implements RemoteCallable<T>
         // use the Thread's context ClassLoader to resolve the Class.
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 
-        Class<?>    clazz       = classLoader.loadClass(m_className);
+        Class<?>    clazz       = classLoader.loadClass(className);
 
         Method      method;
         boolean     hasArgs;
@@ -118,23 +116,23 @@ public class RemoteCallableStaticMethod<T> implements RemoteCallable<T>
         try
         {
             // FUTURE: we should enhance this to support any type of argument, not just a list of strings.
-            method  = clazz.getMethod(m_methodName, new String[0].getClass());
+            method  = clazz.getMethod(methodName, new String[0].getClass());
             hasArgs = true;
         }
         catch (NoSuchMethodException e)
         {
-            method  = clazz.getMethod(m_methodName);
+            method  = clazz.getMethod(methodName);
             hasArgs = false;
         }
 
         // ensure that the method is declared as a static
         if (Modifier.isStatic(method.getModifiers()))
         {
-            return hasArgs ? (T) method.invoke(null, (Object) m_args) : (T) method.invoke(null);
+            return hasArgs ? (T) method.invoke(null, (Object) args) : (T) method.invoke(null);
         }
         else
         {
-            throw new IllegalArgumentException("The specified method [" + m_className + "." + m_methodName
+            throw new IllegalArgumentException("The specified method [" + className + "." + methodName
                                                + "] is not static");
         }
     }
@@ -143,7 +141,7 @@ public class RemoteCallableStaticMethod<T> implements RemoteCallable<T>
     @Override
     public String toString()
     {
-        return "RemoteCallableStaticMethod{ClassName=\'" + m_className + '\'' + ", Method='" + m_methodName + '\''
-               + ", Arguments=" + Arrays.toString(m_args) + '}';
+        return "RemoteCallableStaticMethod{ClassName=\'" + className + '\'' + ", Method='" + methodName + '\''
+               + ", Arguments=" + Arrays.toString(args) + '}';
     }
 }
