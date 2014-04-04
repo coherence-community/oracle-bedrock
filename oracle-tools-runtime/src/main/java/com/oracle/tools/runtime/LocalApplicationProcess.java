@@ -1,5 +1,5 @@
 /*
- * File: NativeApplicationProcess.java
+ * File: LocalApplicationProcess.java
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
@@ -34,28 +34,28 @@ import java.lang.management.RuntimeMXBean;
 import java.lang.reflect.Field;
 
 /**
- * An {@link ApplicationProcess} that represents a locally executing, native
+ * An {@link ApplicationProcess} that represents a locally executing
  * operating system process.
  * <p>
- * Copyright (c) 2013. All Rights Reserved. Oracle Corporation.<br>
+ * Copyright (c) 2014. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Brian Oliver
  */
-public class NativeApplicationProcess implements ApplicationProcess
+public class LocalApplicationProcess implements ApplicationProcess
 {
     /**
      * The underlying representation of the {@link ApplicationProcess}.
      */
-    protected Process m_process;
+    protected Process process;
 
 
     /**
-     * Construct a {@link NativeApplicationProcess} based on a Java {@link Process}.
+     * Construct a {@link LocalApplicationProcess} based on a Java {@link Process}.
      *
      * @param process  the Java {@link Process}
      */
-    public NativeApplicationProcess(Process process)
+    public LocalApplicationProcess(Process process)
     {
         if (process == null)
         {
@@ -63,7 +63,7 @@ public class NativeApplicationProcess implements ApplicationProcess
         }
         else
         {
-            m_process = process;
+            this.process = process;
         }
     }
 
@@ -79,7 +79,7 @@ public class NativeApplicationProcess implements ApplicationProcess
     @Override
     public void close()
     {
-        m_process.destroy();
+        process.destroy();
     }
 
 
@@ -90,14 +90,14 @@ public class NativeApplicationProcess implements ApplicationProcess
 
         try
         {
-            if (m_process.getClass().getSimpleName().equals("UNIXProcess"))
+            if (process.getClass().getSimpleName().equals("UNIXProcess"))
             {
-                final Class<?> clazz = m_process.getClass();
+                final Class<?> clazz = process.getClass();
                 final Field    field = clazz.getDeclaredField("pid");
 
                 field.setAccessible(true);
 
-                Object oPid = field.get(m_process);
+                Object oPid = field.get(process);
 
                 if (oPid instanceof Number)
                 {
@@ -144,34 +144,34 @@ public class NativeApplicationProcess implements ApplicationProcess
     @Override
     public int exitValue()
     {
-        return m_process.exitValue();
+        return process.exitValue();
     }
 
 
     @Override
     public InputStream getErrorStream()
     {
-        return m_process.getErrorStream();
+        return process.getErrorStream();
     }
 
 
     @Override
     public InputStream getInputStream()
     {
-        return m_process.getInputStream();
+        return process.getInputStream();
     }
 
 
     @Override
     public OutputStream getOutputStream()
     {
-        return m_process.getOutputStream();
+        return process.getOutputStream();
     }
 
 
     @Override
     public int waitFor() throws InterruptedException
     {
-        return m_process.waitFor();
+        return process.waitFor();
     }
 }

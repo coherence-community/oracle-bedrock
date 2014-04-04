@@ -46,7 +46,7 @@ import java.util.concurrent.TimeUnit;
  * The default behavior of {@link #get()} is to attempt to acquire the
  * underlying resource from the specified {@link Deferred}, retrying a number
  * of times, waiting for at most the configured duration.   The delay
- * between each successful failure and retry is specified by an
+ * between subsequent failures and corresponding retries is specified by an
  * {@link Iterator}.
  * <p>
  * Copyright (c) 2013. All Rights Reserved. Oracle Corporation.<br>

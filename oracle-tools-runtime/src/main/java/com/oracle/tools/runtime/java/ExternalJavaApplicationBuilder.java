@@ -30,7 +30,7 @@ package com.oracle.tools.runtime.java;
  * external, native non-child operating system processes.
  * <p>
  * WARNING: This class is now deprecated.  All implementations using this class
- * should migrate to use the new {@link NativeJavaApplicationBuilder}.
+ * should migrate to use the new {@link LocalJavaApplicationBuilder}.
  * <p>
  * Copyright (c) 2013. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
@@ -39,10 +39,10 @@ package com.oracle.tools.runtime.java;
  */
 @Deprecated
 public class ExternalJavaApplicationBuilder<A extends JavaApplication<A>, S extends JavaApplicationSchema<A, S>>
-    extends NativeJavaApplicationBuilder<A, S>
+    extends LocalJavaApplicationBuilder<A, S>
 {
     /**
-     * Constructs a {@link com.oracle.tools.runtime.java.ExternalJavaApplicationBuilder}.
+     * Constructs an {@link ExternalJavaApplicationBuilder}.
      */
     public ExternalJavaApplicationBuilder()
     {

@@ -26,22 +26,29 @@
 package com.oracle.tools.runtime.coherence;
 
 import com.oracle.tools.junit.AbstractTest;
+
 import com.oracle.tools.runtime.coherence.ClusterMemberSchema.JMXManagementMode;
 import com.oracle.tools.runtime.coherence.callables.GetClusterName;
 import com.oracle.tools.runtime.coherence.callables.GetClusterSize;
 import com.oracle.tools.runtime.coherence.callables.GetLocalMemberId;
 import com.oracle.tools.runtime.coherence.callables.GetServiceStatus;
+
 import com.oracle.tools.runtime.console.SystemApplicationConsole;
+
 import com.oracle.tools.runtime.java.JavaApplicationBuilder;
 import com.oracle.tools.runtime.java.container.Container;
+
 import com.oracle.tools.runtime.network.AvailablePortIterator;
+
 import org.junit.Test;
 
-import javax.management.ObjectName;
-
 import static com.oracle.tools.deferred.DeferredHelper.invoking;
+
 import static com.oracle.tools.deferred.Eventually.assertThat;
+
 import static org.hamcrest.CoreMatchers.is;
+
+import javax.management.ObjectName;
 
 /**
  * Functional Tests for {@link com.oracle.tools.runtime.coherence.ClusterMember}s.
@@ -51,7 +58,8 @@ import static org.hamcrest.CoreMatchers.is;
  *
  * @author Brian Oliver
  */
-public abstract class AbstractClusterMemberTest extends AbstractTest
+public abstract class AbstractClusterMemberTest<B extends JavaApplicationBuilder<ClusterMember, ClusterMemberSchema>>
+    extends AbstractTest
 {
     /**
      * Creates a new {@link com.oracle.tools.runtime.java.JavaApplicationBuilder}
@@ -59,7 +67,7 @@ public abstract class AbstractClusterMemberTest extends AbstractTest
      *
      * @return the {@link com.oracle.tools.runtime.java.JavaApplicationBuilder}
      */
-    public abstract JavaApplicationBuilder<ClusterMember, ClusterMemberSchema> newJavaApplicationBuilder();
+    public abstract B newJavaApplicationBuilder();
 
 
     /**
@@ -80,7 +88,7 @@ public abstract class AbstractClusterMemberTest extends AbstractTest
 
         try
         {
-            JavaApplicationBuilder<ClusterMember, ClusterMemberSchema> builder = newJavaApplicationBuilder();
+            B builder = newJavaApplicationBuilder();
 
             member = builder.realize(schema, "TEST", new SystemApplicationConsole());
 
@@ -120,8 +128,8 @@ public abstract class AbstractClusterMemberTest extends AbstractTest
             new ClusterMemberSchema().setClusterPort(availablePorts).useLocalHostMode().setRoleName("test-role")
                 .setSiteName("test-site").setDiagnosticsEnabled(true);
 
-        ClusterMember                                              member  = null;
-        JavaApplicationBuilder<ClusterMember, ClusterMemberSchema> builder = newJavaApplicationBuilder();
+        ClusterMember member  = null;
+        B             builder = newJavaApplicationBuilder();
 
         for (int i = 1; i <= 10; i++)
         {
@@ -158,8 +166,8 @@ public abstract class AbstractClusterMemberTest extends AbstractTest
         ClusterMemberSchema schema =
             new ClusterMemberSchema().setClusterPort(availablePorts).useLocalHostMode().setDiagnosticsEnabled(true);
 
-        JavaApplicationBuilder<ClusterMember, ClusterMemberSchema> builder = newJavaApplicationBuilder();
-        ClusterMember                                              member  = null;
+        B             builder = newJavaApplicationBuilder();
+        ClusterMember member  = null;
 
         try
         {
@@ -195,8 +203,8 @@ public abstract class AbstractClusterMemberTest extends AbstractTest
                 .setOperationalOverrideURI("test-operational-override.xml").useLocalHostMode()
                 .setDiagnosticsEnabled(true);
 
-        JavaApplicationBuilder<ClusterMember, ClusterMemberSchema> builder = newJavaApplicationBuilder();
-        ClusterMember                                              member  = null;
+        B             builder = newJavaApplicationBuilder();
+        ClusterMember member  = null;
 
         try
         {

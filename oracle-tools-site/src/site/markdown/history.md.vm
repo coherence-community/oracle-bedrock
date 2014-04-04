@@ -53,6 +53,11 @@ reverse chronological order.
     Schema and/or JavaApplicationBuilder.  When not set, the JAVA_HOME of the
     executing process is assumed.
 
+*   [ORACLETOOLS-94](https://java.net/jira/browse/ORACLETOOLS-94): Introduced
+    Local(Java)ApplicationBuilder to replace and deprecate the
+    Native(Java)ApplicationBuilder.   This provides consistency and appropriate
+    symmetry with the new Remote(Java)ApplicationBuilders.
+
 <h4>oracle-tools-runtime-remote</h4>
 
 *   [ORACLETOOLS-91](https://java.net/jira/browse/ORACLETOOLS-91): Introduced

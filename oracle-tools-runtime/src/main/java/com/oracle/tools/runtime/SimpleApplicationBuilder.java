@@ -113,15 +113,14 @@ public class SimpleApplicationBuilder extends AbstractApplicationBuilder<SimpleA
         processBuilder.redirectErrorStream(schema.isErrorStreamRedirected());
 
         // start the process
-        final SimpleApplication application =
-            new SimpleApplication(new NativeApplicationProcess(processBuilder.start()),
-                                  name,
-                                  console,
-                                  environmentVariables,
-                                  schema.isDiagnosticsEnabled(),
-                                  schema.getDefaultTimeout(),
-                                  schema.getDefaultTimeoutUnits(),
-                                  schema.getLifecycleInterceptors());
+        final SimpleApplication application = new SimpleApplication(new LocalApplicationProcess(processBuilder.start()),
+                                                                    name,
+                                                                    console,
+                                                                    environmentVariables,
+                                                                    schema.isDiagnosticsEnabled(),
+                                                                    schema.getDefaultTimeout(),
+                                                                    schema.getDefaultTimeoutUnits(),
+                                                                    schema.getLifecycleInterceptors());
 
         // let interceptors know that the application has been realized
         raiseApplicationLifecycleEvent(application, Application.EventKind.REALIZED);

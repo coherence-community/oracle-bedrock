@@ -78,7 +78,7 @@ import java.util.logging.Logger;
  * @author Jonathan Knight
  */
 public class ContainerBasedJavaApplicationBuilder<A extends JavaApplication<A>, S extends JavaApplicationSchema<A, S>>
-    extends AbstractJavaApplicationBuilder<A, S> implements JavaApplicationBuilder<A, S>
+    extends AbstractJavaApplicationBuilder<A, S>
 {
     /**
      * The {@link Logger} for this class.
@@ -152,7 +152,7 @@ public class ContainerBasedJavaApplicationBuilder<A extends JavaApplication<A>, 
                 + schemaPreferIPv4Stack);
         }
 
-        //TODO: check that the JavaHome is not set or not different from the current platform setting
+        // TODO: check that the JavaHome is not set or not different from the current platform setting
     }
 
 

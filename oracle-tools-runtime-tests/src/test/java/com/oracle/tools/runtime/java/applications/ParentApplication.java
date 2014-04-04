@@ -29,7 +29,7 @@ import com.oracle.tools.runtime.ApplicationConsole;
 
 import com.oracle.tools.runtime.console.SystemApplicationConsole;
 
-import com.oracle.tools.runtime.java.NativeJavaApplicationBuilder;
+import com.oracle.tools.runtime.java.LocalJavaApplicationBuilder;
 import com.oracle.tools.runtime.java.SimpleJavaApplication;
 import com.oracle.tools.runtime.java.SimpleJavaApplicationSchema;
 
@@ -63,8 +63,8 @@ public class ParentApplication
         schema.setSystemProperty("server.address", System.getProperty("server.address"));
         schema.setSystemProperty("server.port", System.getProperty("server.port"));
 
-        NativeJavaApplicationBuilder<SimpleJavaApplication, SimpleJavaApplicationSchema> builder =
-            new NativeJavaApplicationBuilder<SimpleJavaApplication, SimpleJavaApplicationSchema>();
+        LocalJavaApplicationBuilder<SimpleJavaApplication, SimpleJavaApplicationSchema> builder =
+            new LocalJavaApplicationBuilder<SimpleJavaApplication, SimpleJavaApplicationSchema>();
 
         builder.setOrphansPermitted(Boolean.getBoolean("orphan.children"));
 

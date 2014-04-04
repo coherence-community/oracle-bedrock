@@ -1,5 +1,5 @@
 /*
- * File: NativeJavaApplicationBuilderTest.java
+ * File: LocalJavaApplicationBuilderTest.java
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
@@ -63,7 +63,7 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * Functional Tests for {@link com.oracle.tools.runtime.java.NativeJavaApplicationBuilder}s.
+ * Functional Tests for {@link com.oracle.tools.runtime.java.LocalJavaApplicationBuilder}s.
  * <p>
  * Copyright (c) 2013. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
@@ -71,12 +71,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * @author Brian Oliver
  * @author Jonathan Knight
  */
-public class NativeJavaApplicationBuilderTest extends AbstractJavaApplicationBuilderTest
+public class LocalJavaApplicationBuilderTest extends AbstractJavaApplicationBuilderTest
 {
     @Override
     public JavaApplicationBuilder<SimpleJavaApplication, SimpleJavaApplicationSchema> newJavaApplicationBuilder()
     {
-        return new NativeJavaApplicationBuilder<SimpleJavaApplication, SimpleJavaApplicationSchema>();
+        return new LocalJavaApplicationBuilder<SimpleJavaApplication, SimpleJavaApplicationSchema>();
     }
 
 
@@ -87,12 +87,12 @@ public class NativeJavaApplicationBuilderTest extends AbstractJavaApplicationBui
     @Test
     public void shouldBeCorrectJavaApplicationBuilder()
     {
-        assertThat(newJavaApplicationBuilder(), is(instanceOf(NativeJavaApplicationBuilder.class)));
+        assertThat(newJavaApplicationBuilder(), is(instanceOf(LocalJavaApplicationBuilder.class)));
     }
 
 
     /**
-     * Ensure that {@link NativeJavaApplicationBuilder}s in orphan mode
+     * Ensure that {@link LocalJavaApplicationBuilder}s in orphan mode
      * will leave orphan application processes running.
      */
     @Test
@@ -121,8 +121,8 @@ public class NativeJavaApplicationBuilderTest extends AbstractJavaApplicationBui
             schema.setSystemProperty("server.port", server.getPort());
             schema.setSystemProperty("orphan.children", true);
 
-            NativeJavaApplicationBuilder<SimpleJavaApplication, SimpleJavaApplicationSchema> builder =
-                new NativeJavaApplicationBuilder<SimpleJavaApplication, SimpleJavaApplicationSchema>();
+            LocalJavaApplicationBuilder<SimpleJavaApplication, SimpleJavaApplicationSchema> builder =
+                new LocalJavaApplicationBuilder<SimpleJavaApplication, SimpleJavaApplicationSchema>();
 
             builder.setOrphansPermitted(false);
 
@@ -169,7 +169,7 @@ public class NativeJavaApplicationBuilderTest extends AbstractJavaApplicationBui
 
 
     /**
-     * Ensure that {@link NativeJavaApplicationBuilder}s in orphan-less mode don't leave
+     * Ensure that {@link LocalJavaApplicationBuilder}s in orphan-less mode don't leave
      * orphan application processes running.
      */
     @Test
@@ -198,8 +198,8 @@ public class NativeJavaApplicationBuilderTest extends AbstractJavaApplicationBui
             schema.setSystemProperty("server.port", server.getPort());
             schema.setSystemProperty("orphan.children", false);
 
-            NativeJavaApplicationBuilder<SimpleJavaApplication, SimpleJavaApplicationSchema> builder =
-                new NativeJavaApplicationBuilder<SimpleJavaApplication, SimpleJavaApplicationSchema>();
+            LocalJavaApplicationBuilder<SimpleJavaApplication, SimpleJavaApplicationSchema> builder =
+                new LocalJavaApplicationBuilder<SimpleJavaApplication, SimpleJavaApplicationSchema>();
 
             builder.setOrphansPermitted(false);
 
@@ -235,7 +235,7 @@ public class NativeJavaApplicationBuilderTest extends AbstractJavaApplicationBui
 
 
     /**
-     * Ensure that {@link NativeJavaApplicationBuilder}s create applications that
+     * Ensure that {@link LocalJavaApplicationBuilder}s create applications that
      * can have {@link java.util.concurrent.Callable}s submitted to them and executed.
      */
     @Test
@@ -254,8 +254,8 @@ public class NativeJavaApplicationBuilderTest extends AbstractJavaApplicationBui
             schema.setSystemProperty("uuid", uuid);
 
             // build and start the SleepingApplication
-            NativeJavaApplicationBuilder<SimpleJavaApplication, SimpleJavaApplicationSchema> builder =
-                new NativeJavaApplicationBuilder<SimpleJavaApplication, SimpleJavaApplicationSchema>();
+            LocalJavaApplicationBuilder<SimpleJavaApplication, SimpleJavaApplicationSchema> builder =
+                new LocalJavaApplicationBuilder<SimpleJavaApplication, SimpleJavaApplicationSchema>();
 
             ApplicationConsole console = new SystemApplicationConsole();
 
@@ -282,7 +282,7 @@ public class NativeJavaApplicationBuilderTest extends AbstractJavaApplicationBui
 
 
     /**
-     * Ensure that {@link NativeJavaApplicationBuilder}s set the JAVA_HOME
+     * Ensure that {@link LocalJavaApplicationBuilder}s set the JAVA_HOME
      * environment variable.
      */
     @Test
@@ -301,8 +301,8 @@ public class NativeJavaApplicationBuilderTest extends AbstractJavaApplicationBui
             schema.setSystemProperty("java.home", javaHome);
 
             // build and start the SleepingApplication
-            NativeJavaApplicationBuilder<SimpleJavaApplication, SimpleJavaApplicationSchema> builder =
-                new NativeJavaApplicationBuilder<SimpleJavaApplication, SimpleJavaApplicationSchema>();
+            LocalJavaApplicationBuilder<SimpleJavaApplication, SimpleJavaApplicationSchema> builder =
+                new LocalJavaApplicationBuilder<SimpleJavaApplication, SimpleJavaApplicationSchema>();
 
             ApplicationConsole console = new SystemApplicationConsole();
 
@@ -355,9 +355,6 @@ public class NativeJavaApplicationBuilderTest extends AbstractJavaApplicationBui
         }
 
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public void onOpened(RemoteExecutor executor)
         {
@@ -377,9 +374,6 @@ public class NativeJavaApplicationBuilderTest extends AbstractJavaApplicationBui
         }
 
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public void onClosed(RemoteExecutor executor)
         {

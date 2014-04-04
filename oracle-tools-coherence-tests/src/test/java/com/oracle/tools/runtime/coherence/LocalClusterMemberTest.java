@@ -1,5 +1,5 @@
 /*
- * File: NativeClusterMemberTest.java
+ * File: LocalClusterMemberTest.java
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
@@ -25,26 +25,23 @@
 
 package com.oracle.tools.runtime.coherence;
 
-import com.oracle.tools.runtime.java.JavaApplicationBuilder;
-import com.oracle.tools.runtime.java.NativeJavaApplicationBuilder;
+import com.oracle.tools.runtime.java.LocalJavaApplicationBuilder;
 
 /**
  * Functional Test for {@link com.oracle.tools.runtime.coherence.ClusterMember}
- * using a {@link com.oracle.tools.runtime.java.NativeJavaApplicationBuilder}.
+ * using a {@link com.oracle.tools.runtime.java.LocalJavaApplicationBuilder}.
  * <p>
  * Copyright (c) 2013. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Brian Oliver
  */
-public class NativeClusterMemberTest extends AbstractClusterMemberTest
+public class LocalClusterMemberTest
+    extends AbstractClusterMemberTest<LocalJavaApplicationBuilder<ClusterMember, ClusterMemberSchema>>
 {
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public JavaApplicationBuilder<ClusterMember, ClusterMemberSchema> newJavaApplicationBuilder()
+    public LocalJavaApplicationBuilder<ClusterMember, ClusterMemberSchema> newJavaApplicationBuilder()
     {
-        return new NativeJavaApplicationBuilder<ClusterMember, ClusterMemberSchema>();
+        return new LocalJavaApplicationBuilder<ClusterMember, ClusterMemberSchema>();
     }
 }

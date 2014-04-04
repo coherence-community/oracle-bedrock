@@ -31,7 +31,6 @@ import com.oracle.tools.runtime.ApplicationConsole;
 
 import com.oracle.tools.runtime.console.SystemApplicationConsole;
 
-import com.oracle.tools.runtime.java.NativeJavaApplicationBuilder;
 import com.oracle.tools.runtime.java.SimpleJavaApplication;
 import com.oracle.tools.runtime.java.SimpleJavaApplicationSchema;
 import com.oracle.tools.runtime.java.concurrent.GetSystemProperty;
@@ -91,7 +90,7 @@ public class RemoteJavaApplicationBuilderTest extends AbstractRemoteApplicationB
 
 
     /**
-     * Ensure that {@link NativeJavaApplicationBuilder}s set the JAVA_HOME
+     * Ensure that {@link RemoteJavaApplicationBuilder}s sets the JAVA_HOME
      * environment variable.
      */
     @Test
