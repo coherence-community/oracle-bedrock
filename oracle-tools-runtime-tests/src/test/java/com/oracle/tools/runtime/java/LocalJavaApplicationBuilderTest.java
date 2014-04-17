@@ -29,9 +29,10 @@ import com.oracle.tools.deferred.Eventually;
 
 import com.oracle.tools.deferred.listener.DeferredCompletionListener;
 
+import com.oracle.tools.io.NetworkHelper;
+
 import com.oracle.tools.runtime.ApplicationConsole;
 
-import com.oracle.tools.runtime.concurrent.RemoteCallable;
 import com.oracle.tools.runtime.concurrent.RemoteExecutor;
 import com.oracle.tools.runtime.concurrent.RemoteExecutorListener;
 import com.oracle.tools.runtime.concurrent.socket.RemoteExecutorServer;
@@ -43,7 +44,6 @@ import com.oracle.tools.runtime.java.applications.ParentApplication;
 import com.oracle.tools.runtime.java.applications.SleepingApplication;
 import com.oracle.tools.runtime.java.concurrent.GetSystemProperty;
 import com.oracle.tools.runtime.java.concurrent.SystemExit;
-import com.oracle.tools.runtime.java.container.Container;
 
 import org.junit.Test;
 
@@ -55,8 +55,6 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
 import java.io.IOException;
-
-import java.net.InetAddress;
 
 import java.util.UUID;
 
@@ -98,14 +96,11 @@ public class LocalJavaApplicationBuilderTest extends AbstractJavaApplicationBuil
     @Test
     public void shouldCreateOrphans()
     {
-        RemoteExecutorServer  server            = new RemoteExecutorServer(Container.getAvailablePorts().next());
+        RemoteExecutorServer  server            = new RemoteExecutorServer();
         SimpleJavaApplication parentApplication = null;
 
         try
         {
-            // determine the address
-            InetAddress localAddress = InetAddress.getLocalHost();
-
             // start a server that the child can connect too.
             server.open();
 
@@ -117,7 +112,8 @@ public class LocalJavaApplicationBuilderTest extends AbstractJavaApplicationBuil
             // define and start the ParentApplication (this will start a ChildApplication)
             SimpleJavaApplicationSchema schema = new SimpleJavaApplicationSchema(ParentApplication.class.getName());
 
-            schema.setSystemProperty("server.address", localAddress.getHostAddress());
+            schema.setSystemProperty("server.address",
+                                     server.getInetAddress(NetworkHelper.LOOPBACK_ADDRESS).getHostAddress());
             schema.setSystemProperty("server.port", server.getPort());
             schema.setSystemProperty("orphan.children", true);
 
@@ -175,14 +171,11 @@ public class LocalJavaApplicationBuilderTest extends AbstractJavaApplicationBuil
     @Test
     public void shouldNotCreateOrphans()
     {
-        RemoteExecutorServer  server            = new RemoteExecutorServer(Container.getAvailablePorts().next());
+        RemoteExecutorServer  server            = new RemoteExecutorServer();
         SimpleJavaApplication parentApplication = null;
 
         try
         {
-            // determine the address
-            InetAddress localAddress = InetAddress.getLocalHost();
-
             // start a server that the child can connect too.
             server.open();
 
@@ -194,7 +187,8 @@ public class LocalJavaApplicationBuilderTest extends AbstractJavaApplicationBuil
             // define and start the ParentApplication (this will start a ChildApplication)
             SimpleJavaApplicationSchema schema = new SimpleJavaApplicationSchema(ParentApplication.class.getName());
 
-            schema.setSystemProperty("server.address", localAddress.getHostAddress());
+            schema.setSystemProperty("server.address",
+                                     server.getInetAddress(NetworkHelper.LOOPBACK_ADDRESS).getHostAddress());
             schema.setSystemProperty("server.port", server.getPort());
             schema.setSystemProperty("orphan.children", false);
 

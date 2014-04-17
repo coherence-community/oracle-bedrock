@@ -25,19 +25,22 @@
 
 package com.oracle.tools.runtime.concurrent.socket;
 
+import com.oracle.tools.io.NetworkHelper;
+
 import com.oracle.tools.runtime.concurrent.AbstractControllableRemoteExecutor;
 import com.oracle.tools.runtime.concurrent.RemoteCallable;
 import com.oracle.tools.runtime.concurrent.RemoteExecutorListener;
 import com.oracle.tools.runtime.concurrent.RemoteRunnable;
 
 import com.oracle.tools.util.CompletionListener;
+import com.oracle.tools.util.Predicate;
 
 import java.io.IOException;
 
 import java.net.InetAddress;
-import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
@@ -55,12 +58,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class RemoteExecutorServer extends AbstractControllableRemoteExecutor
 {
-    /**
-     * The port on which the {@link RemoteExecutorServer} will accept
-     * {@link com.oracle.tools.runtime.concurrent.socket.RemoteExecutorClient} connections and requests.
-     */
-    private int port;
-
     /**
      * The {@link ServerSocket} that will be used to accept {@link com.oracle.tools.runtime.concurrent.socket.RemoteExecutorClient}
      * connections and requests.
@@ -92,12 +89,9 @@ public class RemoteExecutorServer extends AbstractControllableRemoteExecutor
     /**
      * Constructs a {@link RemoteExecutorServer} that will accept
      * and process {@link Callable}s from {@link com.oracle.tools.runtime.concurrent.socket.RemoteExecutorClient}s.
-     *
-     * @param port  the ports on which to accept and process {@link Callable}s
      */
-    public RemoteExecutorServer(int port)
+    public RemoteExecutorServer()
     {
-        this.port            = port;
         this.serverSocket    = null;
         this.serverThread    = null;
         this.remoteExecutors = new ConcurrentHashMap<Integer, SocketBasedRemoteExecutor>();
@@ -117,9 +111,8 @@ public class RemoteExecutorServer extends AbstractControllableRemoteExecutor
     {
         if (!isOpen())
         {
-            serverSocket = new ServerSocket();
+            serverSocket = new ServerSocket(0);    // use an ephemeral port
             serverSocket.setReuseAddress(true);
-            serverSocket.bind(new InetSocketAddress(port));
 
             serverThread = new Thread(new Runnable()
             {
@@ -162,7 +155,8 @@ public class RemoteExecutorServer extends AbstractControllableRemoteExecutor
             setOpen(true);
         }
 
-        return serverSocket.getInetAddress();
+        return getInetAddress(new Predicate.All<InetAddress>(NetworkHelper.LOOPBACK_ADDRESS,
+                                                             NetworkHelper.DEFAULT_ADDRESS));
     }
 
 
@@ -175,7 +169,7 @@ public class RemoteExecutorServer extends AbstractControllableRemoteExecutor
     {
         if (serverSocket != null)
         {
-            return port;
+            return serverSocket.getLocalPort();
         }
         else
         {
@@ -185,15 +179,28 @@ public class RemoteExecutorServer extends AbstractControllableRemoteExecutor
 
 
     /**
-     * Obtains the {@link InetAddress} on which the {@link RemoteExecutorServer} is listening.
+     * Obtains the {@link InetAddress} on which the {@link RemoteExecutorServer}
+     * will accept connections (based on a specific {@link Predicate})
+     *
+     * @param predicate  the {@link Predicate} to filter {@link InetAddress}es
+     *                   (or <code>null</code> indicating the default is acceptable)
      *
      * @return the {@link InetAddress}
      */
-    public synchronized InetAddress getInetAddress()
+    public synchronized InetAddress getInetAddress(Predicate<InetAddress> predicate)
     {
         if (serverSocket != null)
         {
-            return serverSocket.getInetAddress();
+            try
+            {
+                predicate = predicate == null ? NetworkHelper.DEFAULT_ADDRESS : predicate;
+
+                return NetworkHelper.getInetAddress(predicate);
+            }
+            catch (SocketException e)
+            {
+                return serverSocket.getInetAddress();
+            }
         }
         else
         {
@@ -202,9 +209,6 @@ public class RemoteExecutorServer extends AbstractControllableRemoteExecutor
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected synchronized void onClose()
     {
@@ -231,9 +235,6 @@ public class RemoteExecutorServer extends AbstractControllableRemoteExecutor
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public <T> void submit(RemoteCallable<T>     callable,
                            CompletionListener<T> listener) throws IllegalStateException
@@ -256,9 +257,6 @@ public class RemoteExecutorServer extends AbstractControllableRemoteExecutor
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void submit(RemoteRunnable runnable) throws IllegalStateException
     {

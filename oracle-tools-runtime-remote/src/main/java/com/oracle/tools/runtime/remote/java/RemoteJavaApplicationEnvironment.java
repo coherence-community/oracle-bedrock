@@ -26,6 +26,7 @@
 package com.oracle.tools.runtime.remote.java;
 
 import com.oracle.tools.io.FileHelper;
+import com.oracle.tools.io.NetworkHelper;
 
 import com.oracle.tools.lang.StringHelper;
 
@@ -42,8 +43,12 @@ import com.oracle.tools.runtime.java.container.Container;
 import com.oracle.tools.runtime.remote.AbstractRemoteApplicationEnvironment;
 import com.oracle.tools.runtime.remote.DeploymentArtifact;
 
+import com.oracle.tools.util.Predicate;
+
 import java.io.File;
 import java.io.IOException;
+
+import java.net.InetAddress;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -110,11 +115,8 @@ public class RemoteJavaApplicationEnvironment<A extends JavaApplication<A>, S ex
     {
         super(schema);
 
-        // TODO: the following port must be on a public address, not loopback
-        // TODO: it should also be an ephemeral port
-
         // configure a server that the remote process can communicate with
-        remoteExecutor = new RemoteExecutorServer(Container.getAvailablePorts().next());
+        remoteExecutor = new RemoteExecutorServer();
 
         remoteExecutor.open();
 
@@ -136,7 +138,13 @@ public class RemoteJavaApplicationEnvironment<A extends JavaApplication<A>, S ex
         }
 
         // add oracle tools specific system properties
-        remoteSystemProperties.setProperty(Settings.PARENT_ADDRESS, remoteExecutor.getInetAddress().getHostAddress());
+        Predicate<InetAddress> preferred = new Predicate.All<InetAddress>(NetworkHelper.NON_LOOPBACK_ADDRESS,
+                                                                          schema.isIPv4Preferred()
+                                                                          ? NetworkHelper.IPv4_ADDRESS
+                                                                          : NetworkHelper.DEFAULT_ADDRESS);
+
+        remoteSystemProperties.setProperty(Settings.PARENT_ADDRESS,
+                                           remoteExecutor.getInetAddress(preferred).getHostAddress());
         remoteSystemProperties.setProperty(Settings.PARENT_PORT, Integer.toString(remoteExecutor.getPort()));
         remoteSystemProperties.setProperty(Settings.ORPHANABLE, Boolean.toString(areOrphansPermitted));
 

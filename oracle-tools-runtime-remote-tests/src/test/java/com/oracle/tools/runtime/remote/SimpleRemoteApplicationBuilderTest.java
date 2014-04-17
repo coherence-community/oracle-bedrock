@@ -63,8 +63,7 @@ public class SimpleRemoteApplicationBuilderTest extends AbstractRemoteApplicatio
 
         SimpleRemoteApplicationBuilder builder = new SimpleRemoteApplicationBuilder(getRemoteHostName(),
                                                                                     getRemoteUserName(),
-                                                                                    SecureKeys
-                                                                                        .fromPrivateKeyFile(getPrivateKeyFile()));
+                                                                                    getRemoteAuthentication());
 
         URL  testFileURL = Thread.currentThread().getContextClassLoader().getResource("test.txt");
         File testFile    = new File(testFileURL.getFile());

@@ -384,6 +384,22 @@ public abstract class AbstractJavaApplicationSchema<A extends JavaApplication<A>
     }
 
 
+    @Override
+    public boolean isIPv4Preferred()
+    {
+        if (m_systemPropertiesBuilder.containsProperty(JAVA_NET_PREFER_IPV4_STACK))
+        {
+            Object isIPv4Preferred = m_systemPropertiesBuilder.getProperty(JAVA_NET_PREFER_IPV4_STACK);
+
+            return isIPv4Preferred == null ? false : Boolean.valueOf(isIPv4Preferred.toString());
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+
     /**
      * Specifies if JMX authentication is enabled.
      *

@@ -87,6 +87,14 @@ public interface JavaApplicationSchema<A extends JavaApplication<A>, S extends J
 
 
     /**
+     * Obtain if IPv4 is preferred for the {@link JavaApplication}.
+     *
+     * @return  <code>true</code> if IPv4 is preferred or <code>false</code> if not
+     */
+    public boolean isIPv4Preferred();
+
+
+    /**
      * Instantiates a suitable {@link JavaApplication} to control the underlying
      * {@link JavaProcess}.  It's through this {@link JavaApplication}
      * that developers will interact with the underlying Java {@link Process}.

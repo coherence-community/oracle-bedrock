@@ -136,15 +136,24 @@ public class RemoteJavaApplicationBuilder<A extends JavaApplication<A>, S extend
         // set the default files not to deploy
         doNotDeployFileNames = new HashSet<String>();
 
+        doNotDeployFileNames.add("apple_provider.jar");
         doNotDeployFileNames.add("classes.jar");
         doNotDeployFileNames.add("charsets.jar");
+        doNotDeployFileNames.add("deploy.jar");
+        doNotDeployFileNames.add("dt.jar");
+        doNotDeployFileNames.add("dnsns.jar");
+        doNotDeployFileNames.add("idea_rt.jar");
+        doNotDeployFileNames.add("localedata.jar");
         doNotDeployFileNames.add("jsse.jar");
         doNotDeployFileNames.add("jce.jar");
         doNotDeployFileNames.add("javaws.jar");
-        doNotDeployFileNames.add("sunjce_provider.jar");
         doNotDeployFileNames.add("jconsole.jar");
+        doNotDeployFileNames.add("management-agent.jar");
         doNotDeployFileNames.add("plugin.jar");
+        doNotDeployFileNames.add("sa-jdi.jar");
+        doNotDeployFileNames.add("sunjce_provider.jar");
         doNotDeployFileNames.add("sunpkcs11.jar");
+        doNotDeployFileNames.add("ui.jar");
     }
 
 

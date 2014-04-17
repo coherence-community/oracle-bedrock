@@ -68,16 +68,13 @@ public abstract class AbstractRemoteApplicationBuilderTest
 
 
     /**
-     * Obtains the private key file to use for securing the connection to the remote server host.
-     * <p>
-     * By default this will use the "oracletools.remote.privatekey.file" system property
-     * to determine the location of the private key and if this is not defined, it will default to
-     * "~/.ssh/127.0.0.1_dsa"
+     * Obtains the remote {@link Authentication} to use for connection to the remote server host.
      *
-     * @return  the location of the private key file
+     * @return  the remote {@link Authentication}
      */
-    public String getPrivateKeyFile()
+    public Authentication getRemoteAuthentication()
     {
-        return System.getProperty("oracletools.remote.privatekey.file", "~/.ssh/127.0.0.1_dsa");
+        return SecureKeys.fromPrivateKeyFile(System.getProperty("oracletools.remote.privatekey.file",
+                                                                "~/.ssh/127.0.0.1_dsa"));
     }
 }

@@ -33,6 +33,11 @@ reverse chronological order.
     implementation of stdin redirection so that an ApplicationConsole can
     be used to interact with an Application stdin.
 
+*   [ORACLETOOLS-83](https://java.net/jira/browse/ORACLETOOLS-83): Refactored
+    RemoteExecutorServer to use ephemeral ports and remove hardcoded binding
+    to Constants.getLocalHost() ie: 127.0.0.1 to allow operation in non-localhost
+    modes (like for the new Remote Runtime module).
+
 *   [ORACLETOOLS-86](https://java.net/jira/browse/ORACLETOOLS-86): Resolved issue
     where calling Application.waitFor() will not terminate when using applications
     produced by NativeJavaApplicationBuilders.

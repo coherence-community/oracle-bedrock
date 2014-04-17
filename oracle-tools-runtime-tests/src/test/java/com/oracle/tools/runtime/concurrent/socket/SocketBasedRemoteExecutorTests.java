@@ -61,7 +61,7 @@ public class SocketBasedRemoteExecutorTests
 
         try
         {
-            server = new RemoteExecutorServer(Container.getAvailablePorts().next());
+            server = new RemoteExecutorServer();
 
             InetAddress address = server.open();
 
@@ -112,7 +112,7 @@ public class SocketBasedRemoteExecutorTests
 
         try
         {
-            server = new RemoteExecutorServer(Container.getAvailablePorts().next());
+            server = new RemoteExecutorServer();
 
             InetAddress address = server.open();
 

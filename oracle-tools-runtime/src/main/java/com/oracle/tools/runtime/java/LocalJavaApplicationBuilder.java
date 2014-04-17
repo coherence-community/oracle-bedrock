@@ -26,10 +26,11 @@
 package com.oracle.tools.runtime.java;
 
 import com.oracle.tools.deferred.AbstractDeferred;
-import com.oracle.tools.deferred.Deferred;
 import com.oracle.tools.deferred.DeferredHelper;
 import com.oracle.tools.deferred.InstanceUnavailableException;
 import com.oracle.tools.deferred.UnresolvableInstanceException;
+
+import com.oracle.tools.io.NetworkHelper;
 
 import com.oracle.tools.lang.StringHelper;
 
@@ -46,11 +47,12 @@ import com.oracle.tools.runtime.concurrent.socket.RemoteExecutorServer;
 
 import com.oracle.tools.runtime.java.container.Container;
 
-import com.oracle.tools.runtime.network.Constants;
-
 import com.oracle.tools.util.CompletionListener;
+import com.oracle.tools.util.Predicate;
 
 import java.io.IOException;
+
+import java.net.InetAddress;
 
 import java.util.Properties;
 
@@ -302,12 +304,18 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication<A>, S extends
         }
 
         // configure a server channel to communicate with the native process
-        final RemoteExecutorServer server = new RemoteExecutorServer(Container.getAvailablePorts().next());
+        final RemoteExecutorServer server = new RemoteExecutorServer();
 
         server.open();
 
         // add Oracle Tools specific System Properties
-        builder.command().add("-D" + Settings.PARENT_ADDRESS + "=" + Constants.getLocalHost());
+        Predicate<InetAddress> preferred = schema.isIPv4Preferred()
+                                           ? new Predicate.All<InetAddress>(NetworkHelper.IPv4_ADDRESS,
+                                                                            NetworkHelper
+                                                                                .NON_LOOPBACK_ADDRESS) : NetworkHelper
+                                                                                    .DEFAULT_ADDRESS;
+
+        builder.command().add("-D" + Settings.PARENT_ADDRESS + "=" + server.getInetAddress(preferred).getHostAddress());
         builder.command().add("-D" + Settings.PARENT_PORT + "=" + server.getPort());
         builder.command().add("-D" + Settings.ORPHANABLE + "=" + areOrphansPermitted());
 
