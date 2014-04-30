@@ -37,6 +37,7 @@ import com.oracle.tools.lang.StringHelper;
 import com.oracle.tools.runtime.Application;
 import com.oracle.tools.runtime.ApplicationConsole;
 import com.oracle.tools.runtime.LocalApplicationProcess;
+import com.oracle.tools.runtime.PropertiesBuilder;
 import com.oracle.tools.runtime.Settings;
 
 import com.oracle.tools.runtime.concurrent.ControllableRemoteExecutor;
@@ -50,10 +51,12 @@ import com.oracle.tools.runtime.java.container.Container;
 import com.oracle.tools.util.CompletionListener;
 import com.oracle.tools.util.Predicate;
 
+import java.io.File;
 import java.io.IOException;
 
 import java.net.InetAddress;
 
+import java.util.Iterator;
 import java.util.Properties;
 
 import java.util.logging.Level;
@@ -61,7 +64,8 @@ import java.util.logging.Logger;
 
 /**
  * A {@link JavaApplicationBuilder} that realizes {@link JavaApplication}s as
- * external, non-child local operating system processes.
+ * external, non-child local operating system processes, by default using the
+ * environment variables of the current system process.
  * <p>
  * Copyright (c) 2014. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
@@ -77,6 +81,18 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication<A>, S extends
     private static Logger LOGGER = Logger.getLogger(LocalJavaApplicationBuilder.class.getName());
 
     /**
+     * Should environment variables be inherited from the current executing process
+     * as the basis for {@link JavaApplication}s produced by this {@link LocalJavaApplicationBuilder}.
+     */
+    private boolean isEnvironmentInherited;
+
+    /**
+     * The {@link PropertiesBuilder} defining custom environment variables to
+     * establish when realizing a {@link JavaApplication}.
+     */
+    private PropertiesBuilder environmentVariablesBuilder;
+
+    /**
      * The path for the JAVA_HOME.
      * <p>
      * This is <code>null</code> if the JAVA_HOME of the {@link JavaApplicationSchema}
@@ -86,14 +102,14 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication<A>, S extends
 
     /**
      * Should processes be started in remote debug mode?
-     * <p/>
+     * <p>
      * The default is <code>false</code>.
      */
     private boolean isRemoteDebuggingEnabled;
 
     /**
      * Should remote debugging processes be started in suspended mode?
-     * <p/>
+     * <p>
      * The default is <code>false</code>.
      */
     private boolean isRemoteStartSuspended;
@@ -101,7 +117,7 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication<A>, S extends
     /**
      * Should {@link JavaApplication}s produced by this builder allowed
      * to become orphans (when their parent application process is destroyed/killed)?
-     * <p/>
+     * <p>
      * The default is <code>false</code>.
      */
     private boolean areOrphansPermitted;
@@ -114,6 +130,12 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication<A>, S extends
     {
         super();
 
+        // by default there are no custom environment variables
+        environmentVariablesBuilder = new PropertiesBuilder();
+
+        // by default we always inherit local environment variables
+        isEnvironmentInherited = true;
+
         // use the JAVA HOME of the {@link JavaApplicationSchema}
         javaHome = null;
 
@@ -125,6 +147,95 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication<A>, S extends
 
         // don't permit orphaned applications
         areOrphansPermitted = false;
+    }
+
+
+    /**
+     * Obtains the {@link PropertiesBuilder} defining custom
+     * {@link JavaApplication}-specific operating system environment
+     * variables to be established when realizing an {@link JavaApplication}.
+     *
+     * @return {@link PropertiesBuilder}
+     */
+    public PropertiesBuilder getEnvironmentVariablesBuilder()
+    {
+        return environmentVariablesBuilder;
+    }
+
+
+    /**
+     * Sets whether the environment variables from the currently executing
+     * process should be inherited and used as the basis for environment variables
+     * when realizing an {@link JavaApplication}.
+     *
+     * @param isEnvironmentInherited  <code>true</code> if the {@link LocalJavaApplicationBuilder}
+     *                                should inherit the environment variables from the
+     *                                currently executing process or <code>false</code>
+     *                                if a clean/empty environment should be used
+     *                                (containing only those custom variables defined by this
+     *                                {@link LocalJavaApplicationBuilder} and an
+     *                                {@link JavaApplicationSchema})
+     *
+     * @return this {@link LocalJavaApplicationBuilder} to permit fluent method calls
+     */
+    public LocalJavaApplicationBuilder setEnvironmentInherited(boolean isEnvironmentInherited)
+    {
+        this.isEnvironmentInherited = isEnvironmentInherited;
+
+        return this;
+    }
+
+
+    /**
+     * Determines if the environment variables of the currently executing
+     * process will be inherited and used as a basis for environment variables
+     * when realizing a {@link JavaApplication}.
+     *
+     * @return  <code>true</code> if environment variables are inherited from
+     *          the current process when realizing a {@link JavaApplication} or
+     *          <code>false</code> if a clean environment is used instead
+     */
+    public boolean isEnvironmentInherited()
+    {
+        return isEnvironmentInherited;
+    }
+
+
+    /**
+     * Defines a custom environment variable for {@link JavaApplication}s
+     * realized by this {@link LocalJavaApplicationBuilder} based on values
+     * returned by the {@link Iterator}.
+     *
+     * @param name      the name of the environment variable
+     * @param iterator  an {@link Iterator} providing values for the environment
+     *                  variable
+     *
+     * @return this {@link LocalJavaApplicationBuilder} to permit fluent method calls
+     */
+    public LocalJavaApplicationBuilder setEnvironmentVariable(String      name,
+                                                              Iterator<?> iterator)
+    {
+        environmentVariablesBuilder.setProperty(name, iterator);
+
+        return this;
+    }
+
+
+    /**
+     * Defines a custom environment variable for {@link JavaApplication}s
+     * realized by this {@link LocalJavaApplicationBuilder}.
+     *
+     * @param name   the name of the environment variable
+     * @param value  the value of the environment variable
+     *
+     * @return this {@link LocalJavaApplicationBuilder} to permit fluent method calls
+     */
+    public LocalJavaApplicationBuilder setEnvironmentVariable(String name,
+                                                              Object value)
+    {
+        environmentVariablesBuilder.setProperty(name, value);
+
+        return this;
     }
 
 
@@ -250,43 +361,64 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication<A>, S extends
                      String             applicationName,
                      ApplicationConsole console) throws IOException
     {
-        // establish the ProcessBuilder that we'll use to construct the
-        // underlying operating system Process
-        ProcessBuilder builder = new ProcessBuilder(schema.getExecutableName());
+        // ---- establish the underlying ProcessBuilder -----
+
+        // we'll use the native operating system process builder to create
+        // and manage the local application process
+        ProcessBuilder processBuilder = new ProcessBuilder(schema.getExecutableName());
+
+        // ----- establish the working directory -----
 
         // set the working directory for the Process
-        builder.directory(schema.getWorkingDirectory());
+        File directory = schema.getWorkingDirectory();
 
-        // set the environment variables for the Process
-        if (!schema.isEnvironmentInherited())
+        if (directory != null)
         {
-            // when we're not inheriting from the current environment we must
-            // start with a clean environment
-            builder.environment().clear();
+            processBuilder.directory(schema.getWorkingDirectory());
         }
 
-        // realize the environment variables from the provided Schema
+        // ----- establish environment variables -----
+
+        // when not inheriting we need to clear the defined environment
+        if (!isEnvironmentInherited() &&!schema.isEnvironmentInherited())
+        {
+            processBuilder.environment().clear();
+        }
+
+        // add the environment variables defined by the schema
         Properties environmentVariables = schema.getEnvironmentVariablesBuilder().realize();
 
         for (String variableName : environmentVariables.stringPropertyNames())
         {
-            builder.environment().put(variableName, environmentVariables.getProperty(variableName));
+            processBuilder.environment().put(variableName, environmentVariables.getProperty(variableName));
         }
+
+        // add the environment variables defined by the builder
+        environmentVariables = getEnvironmentVariablesBuilder().realize();
+
+        for (String variableName : environmentVariables.stringPropertyNames())
+        {
+            processBuilder.environment().put(variableName, environmentVariables.getProperty(variableName));
+        }
+
+        // ----- establish Java specific environment variables -----
 
         // set the JAVA_HOME
         String javaHome = this.javaHome == null ? schema.getJavaHome() : this.javaHome;
 
         if (javaHome != null)
         {
-            builder.environment().put("JAVA_HOME", javaHome);
+            processBuilder.environment().put("JAVA_HOME", javaHome);
         }
 
         // set the class path (it's an environment variable)
         String classPath = schema.getClassPath().toString();
 
-        builder.environment().put("CLASSPATH", classPath);
+        processBuilder.environment().put("CLASSPATH", classPath);
 
-        // set the System Properties for the Process
+        // ----- establish the system properties for the java application -----
+
+        // define the system properties based on those defined by the schema
         Properties systemProperties = schema.getSystemPropertiesBuilder().realize();
 
         for (String propertyName : systemProperties.stringPropertyNames())
@@ -297,11 +429,13 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication<A>, S extends
             // (we don't want to have "parents" applications effect child applications
             if (!propertyName.startsWith("oracletools"))
             {
-                builder.command().add("-D" + propertyName
-                                      + (propertyValue.isEmpty()
-                                         ? "" : "=" + StringHelper.doubleQuoteIfNecessary(propertyValue)));
+                processBuilder.command().add("-D" + propertyName
+                                             + (propertyValue.isEmpty()
+                                                ? "" : "=" + StringHelper.doubleQuoteIfNecessary(propertyValue)));
             }
         }
+
+        // ----- establish Oracle Tools specific system properties -----
 
         // configure a server channel to communicate with the native process
         final RemoteExecutorServer server = new RemoteExecutorServer();
@@ -315,14 +449,16 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication<A>, S extends
                                                                                 .NON_LOOPBACK_ADDRESS) : NetworkHelper
                                                                                     .DEFAULT_ADDRESS;
 
-        builder.command().add("-D" + Settings.PARENT_ADDRESS + "=" + server.getInetAddress(preferred).getHostAddress());
-        builder.command().add("-D" + Settings.PARENT_PORT + "=" + server.getPort());
-        builder.command().add("-D" + Settings.ORPHANABLE + "=" + areOrphansPermitted());
+        processBuilder.command().add("-D" + Settings.PARENT_ADDRESS + "="
+                                     + server.getInetAddress(preferred).getHostAddress());
+        processBuilder.command().add("-D" + Settings.PARENT_PORT + "=" + server.getPort());
+        processBuilder.command().add("-D" + Settings.ORPHANABLE + "=" + areOrphansPermitted());
 
-        // set the JVM options for the Process
+        // ----- establish JVM options for the application -----
+
         for (String option : schema.getJVMOptions())
         {
-            builder.command().add("-" + option);
+            processBuilder.command().add("-" + option);
         }
 
         // add debug option
@@ -336,30 +472,34 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication<A>, S extends
                                           (isRemoteStartSuspended ? "y" : "n"),
                                           debugPort);
 
-            builder.command().add(option);
+            processBuilder.command().add(option);
         }
+
+        // ----- establish the application command line to execute -----
 
         // use the launcher to launch the application
         // (we don't start the application directly itself)
-        builder.command().add("com.oracle.tools.runtime.java.JavaApplicationLauncher");
+        processBuilder.command().add("com.oracle.tools.runtime.java.JavaApplicationLauncher");
 
         // set the Java application class name we need to launch
-        builder.command().add(schema.getApplicationClassName());
+        processBuilder.command().add(schema.getApplicationClassName());
 
         // add the arguments to the command for the process
         for (String argument : schema.getArguments())
         {
-            builder.command().add(argument);
+            processBuilder.command().add(argument);
         }
 
         // should the standard error be redirected to the standard out?
-        builder.redirectErrorStream(schema.isErrorStreamRedirected());
+        processBuilder.redirectErrorStream(schema.isErrorStreamRedirected());
+
+        // ----- start the local process -----
 
         if (LOGGER.isLoggable(Level.INFO))
         {
             StringBuilder commandBuilder = new StringBuilder();
 
-            for (String command : builder.command())
+            for (String command : processBuilder.command())
             {
                 commandBuilder.append(command);
                 commandBuilder.append(" ");
@@ -369,7 +509,9 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication<A>, S extends
         }
 
         // create and start the process
-        Process process = builder.start();
+        Process process = processBuilder.start();
+
+        // ----- create the local process and application -----
 
         // establish a LocalJavaProcess to represent the underlying Process
         LocalJavaProcess localJavaProcess = new LocalJavaProcess(process, server);
@@ -381,7 +523,7 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication<A>, S extends
                                                            environmentVariables,
                                                            systemProperties);
 
-        // ensure that the process connects back
+        // ensure that the launcher process connects back
         DeferredHelper.ensure(new AbstractDeferred<Boolean>()
         {
             @Override
@@ -397,6 +539,8 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication<A>, S extends
                 }
             }
         });
+
+        // ----- notify all of the lifecycle listeners -----
 
         // let interceptors know that the application has been realized
         raiseApplicationLifecycleEvent(application, Application.EventKind.REALIZED);

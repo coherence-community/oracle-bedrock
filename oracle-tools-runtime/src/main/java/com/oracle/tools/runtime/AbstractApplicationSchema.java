@@ -47,58 +47,59 @@ public abstract class AbstractApplicationSchema<A extends Application<A>, S exte
     implements ApplicationSchema<A, S>
 {
     /**
-     * The name of the executable that will be run
+     * The name of the executable that will be run.
      */
-    private String m_executableName;
+    private String executableName;
 
     /**
-     * The working directory for the application
+     * The working directory for the application.
      */
-    private File m_workingDirectory;
+    private File workingDirectory;
 
     /**
-     * The {@link PropertiesBuilder} containing the environment variables to
-     * be used when realizing the {@link Application}.
+     * The {@link PropertiesBuilder} defining custom environment variables to
+     * establish when realizing the {@link Application} using this
+     * {@link ApplicationSchema}.
      */
-    private PropertiesBuilder m_propertiesBuilder;
+    private PropertiesBuilder environmentVariablesBuilder;
 
     /**
      * Should the Error Stream be redirected to the Standard Output stream?
      */
-    private boolean m_isErrorStreamRedirected;
+    private boolean isErrorStreamRedirected;
 
     /**
      * Should diagnostic information be enabled for the {@link Application}s
      * produced by this {@link ApplicationSchema}.
      */
-    private boolean m_isDiagnosticsEnabled;
+    private boolean isDiagnosticsEnabled;
 
     /**
      * The default {@link Application} timeout duration.
      */
-    private long m_defaultTimeout;
+    private long defaultTimeout;
 
     /**
      * The default {@link Application} timeout units
      */
-    private TimeUnit m_defaultTimeoutUnits;
+    private TimeUnit defaultTimeoutUnits;
 
     /**
      * Should environment variables be inherited from the current executing process
      * for the {@link Application}s produced from this {@link ApplicationSchema}.
      */
-    private boolean m_isEnvironmentInherited;
+    private boolean isEnvironmentInherited;
 
     /**
      * The arguments for the {@link Application}.
      */
-    private ArrayList<String> m_applicationArguments;
+    private ArrayList<String> applicationArguments;
 
     /**
      * The {@link LifecycleEventInterceptor}s for {@link Application}s
      * realized from the {@link ApplicationSchema}.
      */
-    private LinkedList<LifecycleEventInterceptor<A>> m_lifecycleInterceptors;
+    private LinkedList<LifecycleEventInterceptor<A>> lifecycleInterceptors;
 
 
     /**
@@ -109,33 +110,36 @@ public abstract class AbstractApplicationSchema<A extends Application<A>, S exte
      */
     public AbstractApplicationSchema(String executableName)
     {
-        m_executableName          = executableName;
-        m_propertiesBuilder       = new PropertiesBuilder();
-        m_applicationArguments    = new ArrayList<String>();
-        m_isErrorStreamRedirected = false;
-        m_isDiagnosticsEnabled    = false;
-        m_defaultTimeout          = 1;
-        m_defaultTimeoutUnits     = TimeUnit.MINUTES;
-        m_isEnvironmentInherited  = true;
-        m_lifecycleInterceptors   = new LinkedList<LifecycleEventInterceptor<A>>();
+        this.executableName              = executableName;
+        this.environmentVariablesBuilder = new PropertiesBuilder();
+        this.isEnvironmentInherited      = false;
+        this.applicationArguments        = new ArrayList<String>();
+        this.isErrorStreamRedirected     = false;
+        this.isDiagnosticsEnabled        = false;
+        this.defaultTimeout              = 1;
+        this.defaultTimeoutUnits         = TimeUnit.MINUTES;
+        this.lifecycleInterceptors       = new LinkedList<LifecycleEventInterceptor<A>>();
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public String getExecutableName()
     {
-        return m_executableName;
+        return executableName;
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public File getWorkingDirectory()
     {
-        return m_workingDirectory;
+        return workingDirectory;
+    }
+
+
+    @Override
+    public PropertiesBuilder getEnvironmentVariablesBuilder()
+    {
+        return environmentVariablesBuilder;
     }
 
 
@@ -146,22 +150,11 @@ public abstract class AbstractApplicationSchema<A extends Application<A>, S exte
      *
      * @return the {@link ApplicationSchema} (so that we can perform method chaining)
      */
-    @SuppressWarnings({"unchecked"})
     public S setWorkingDirectory(File workingDirectory)
     {
-        this.m_workingDirectory = workingDirectory;
+        this.workingDirectory = workingDirectory;
 
         return (S) this;
-    }
-
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public PropertiesBuilder getEnvironmentVariablesBuilder()
-    {
-        return m_propertiesBuilder;
     }
 
 
@@ -175,11 +168,10 @@ public abstract class AbstractApplicationSchema<A extends Application<A>, S exte
      *
      * @return the {@link ApplicationSchema} (so that we can perform method chaining)
      */
-    @SuppressWarnings("unchecked")
     public S setEnvironmentVariable(String      name,
                                     Iterator<?> iterator)
     {
-        m_propertiesBuilder.setProperty(name, iterator);
+        environmentVariablesBuilder.setProperty(name, iterator);
 
         return (S) this;
     }
@@ -193,11 +185,10 @@ public abstract class AbstractApplicationSchema<A extends Application<A>, S exte
      *
      * @return the {@link ApplicationSchema} (so that we can perform method chaining)
      */
-    @SuppressWarnings("unchecked")
     public S setEnvironmentVariable(String name,
                                     Object value)
     {
-        m_propertiesBuilder.setProperty(name, value);
+        environmentVariablesBuilder.setProperty(name, value);
 
         return (S) this;
     }
@@ -212,25 +203,23 @@ public abstract class AbstractApplicationSchema<A extends Application<A>, S exte
      *
      * @return the {@link ApplicationSchema} (so that we can perform method chaining)
      */
-    @SuppressWarnings("unchecked")
     public S setEnvironmentVariables(PropertiesBuilder environmentVariablesBuilder)
     {
-        m_propertiesBuilder.addProperties(environmentVariablesBuilder);
+        this.environmentVariablesBuilder.addProperties(environmentVariablesBuilder);
 
         return (S) this;
     }
 
 
     /**
-     * Clears the currently registered environment variables from the
-     * {@link ApplicationBuilder}.
+     * Clears the custom environment variables defined for the {@link ApplicationSchema}.
      *
      * @return  the {@link ApplicationSchema} (so that we can perform method chaining)
      */
-    @SuppressWarnings("unchecked")
+    @Deprecated
     public S clearEnvironmentVariables()
     {
-        m_propertiesBuilder.clear();
+        environmentVariablesBuilder.clear();
 
         return (S) this;
     }
@@ -250,10 +239,10 @@ public abstract class AbstractApplicationSchema<A extends Application<A>, S exte
      *
      * @return  the {@link ApplicationSchema} (so that we can perform method chaining)
      */
-    @SuppressWarnings({"unchecked"})
+    @Deprecated
     public S setEnvironmentInherited(boolean isInherited)
     {
-        this.m_isEnvironmentInherited = isInherited;
+        this.isEnvironmentInherited = isInherited;
 
         return (S) this;
     }
@@ -262,9 +251,10 @@ public abstract class AbstractApplicationSchema<A extends Application<A>, S exte
     /**
      * {@inheritDoc}
      */
+    @Deprecated
     public boolean isEnvironmentInherited()
     {
-        return m_isEnvironmentInherited;
+        return isEnvironmentInherited;
     }
 
 
@@ -279,7 +269,7 @@ public abstract class AbstractApplicationSchema<A extends Application<A>, S exte
      */
     public S setDiagnosticsEnabled(boolean isDiagnosticsEnabled)
     {
-        m_isDiagnosticsEnabled = isDiagnosticsEnabled;
+        this.isDiagnosticsEnabled = isDiagnosticsEnabled;
 
         return (S) this;
     }
@@ -291,7 +281,7 @@ public abstract class AbstractApplicationSchema<A extends Application<A>, S exte
     @Override
     public boolean isDiagnosticsEnabled()
     {
-        return m_isDiagnosticsEnabled;
+        return isDiagnosticsEnabled;
     }
 
 
@@ -301,7 +291,7 @@ public abstract class AbstractApplicationSchema<A extends Application<A>, S exte
     @Override
     public boolean isErrorStreamRedirected()
     {
-        return m_isErrorStreamRedirected;
+        return isErrorStreamRedirected;
     }
 
 
@@ -315,7 +305,7 @@ public abstract class AbstractApplicationSchema<A extends Application<A>, S exte
      */
     public S setErrorStreamRedirected(boolean isErrorStreamRedirected)
     {
-        m_isErrorStreamRedirected = isErrorStreamRedirected;
+        this.isErrorStreamRedirected = isErrorStreamRedirected;
 
         return (S) this;
     }
@@ -327,7 +317,7 @@ public abstract class AbstractApplicationSchema<A extends Application<A>, S exte
     @Override
     public long getDefaultTimeout()
     {
-        return m_defaultTimeout;
+        return defaultTimeout;
     }
 
 
@@ -337,7 +327,7 @@ public abstract class AbstractApplicationSchema<A extends Application<A>, S exte
     @Override
     public TimeUnit getDefaultTimeoutUnits()
     {
-        return m_defaultTimeoutUnits;
+        return defaultTimeoutUnits;
     }
 
 
@@ -350,12 +340,11 @@ public abstract class AbstractApplicationSchema<A extends Application<A>, S exte
      *
      * @return  the {@link ApplicationSchema} (so that we can perform method chaining)
      */
-    @SuppressWarnings({"unchecked"})
-    public S setDefaultTimout(long     defaultTimeout,
-                              TimeUnit defaultTimeoutUnit)
+    public S setDefaultTimeout(long     defaultTimeout,
+                               TimeUnit defaultTimeoutUnit)
     {
-        m_defaultTimeout      = defaultTimeout;
-        m_defaultTimeoutUnits = defaultTimeoutUnit;
+        this.defaultTimeout      = defaultTimeout;
+        this.defaultTimeoutUnits = defaultTimeoutUnit;
 
         return (S) this;
     }
@@ -368,7 +357,7 @@ public abstract class AbstractApplicationSchema<A extends Application<A>, S exte
      */
     public void addArgument(String argument)
     {
-        m_applicationArguments.add(argument);
+        applicationArguments.add(argument);
     }
 
 
@@ -377,7 +366,7 @@ public abstract class AbstractApplicationSchema<A extends Application<A>, S exte
      */
     public List<String> getArguments()
     {
-        return m_applicationArguments;
+        return applicationArguments;
     }
 
 
@@ -388,7 +377,6 @@ public abstract class AbstractApplicationSchema<A extends Application<A>, S exte
      *
      * @return  the {@link ApplicationSchema} (so that we can perform method chaining)
      */
-    @SuppressWarnings("unchecked")
     public S setArgument(String argument)
     {
         addArgument(argument);
@@ -403,7 +391,7 @@ public abstract class AbstractApplicationSchema<A extends Application<A>, S exte
     @Override
     public Iterable<LifecycleEventInterceptor<A>> getLifecycleInterceptors()
     {
-        return m_lifecycleInterceptors;
+        return lifecycleInterceptors;
     }
 
 
@@ -416,10 +404,9 @@ public abstract class AbstractApplicationSchema<A extends Application<A>, S exte
      *
      * @return  the {@link ApplicationSchema} (so that we can perform method chaining)
      */
-    @SuppressWarnings("unchecked")
     public S addLifecycleInterceptor(LifecycleEventInterceptor<A> interceptor)
     {
-        m_lifecycleInterceptors.add(interceptor);
+        lifecycleInterceptors.add(interceptor);
 
         return (S) this;
     }

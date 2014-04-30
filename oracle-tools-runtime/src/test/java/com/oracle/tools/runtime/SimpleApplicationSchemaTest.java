@@ -145,6 +145,20 @@ public class SimpleApplicationSchemaTest
 
 
     /**
+     * Ensure Environment Variables are not inherited (the default).
+     *
+     * @throws Exception
+     */
+    @Test
+    public void shouldNotInheritEnvironmentVariables() throws Exception
+    {
+        SimpleApplicationSchema schema = new SimpleApplicationSchema("test.sh");
+
+        assertThat(schema.isEnvironmentInherited(), Matchers.is(false));
+    }
+
+
+    /**
      * Ensure Environment Variables can be inherited (explicitly set).
      *
      * @throws Exception
@@ -152,23 +166,9 @@ public class SimpleApplicationSchemaTest
     @Test
     public void shouldInheritEnvironmentVariables() throws Exception
     {
-        SimpleApplicationSchema schema = new SimpleApplicationSchema("test.sh");
+        SimpleApplicationSchema schema = new SimpleApplicationSchema("test.sh").setEnvironmentInherited(true);
 
         assertThat(schema.isEnvironmentInherited(), Matchers.is(true));
-    }
-
-
-    /**
-     * Ensure Environment Variables can not be inherited (explicitly set).
-     *
-     * @throws Exception
-     */
-    @Test
-    public void shouldNotInheritEnvironmentVariables() throws Exception
-    {
-        SimpleApplicationSchema schema = new SimpleApplicationSchema("test.sh").setEnvironmentInherited(false);
-
-        assertThat(schema.isEnvironmentInherited(), Matchers.is(false));
     }
 
 
@@ -182,7 +182,7 @@ public class SimpleApplicationSchemaTest
     {
         SimpleApplicationSchema schema = new SimpleApplicationSchema("test.sh");
 
-        assertThat(schema.isEnvironmentInherited(), Matchers.is(true));
+        assertThat(schema.isEnvironmentInherited(), Matchers.is(false));
     }
 
 
@@ -191,7 +191,6 @@ public class SimpleApplicationSchemaTest
      *
      * @throws Exception
      */
-    @SuppressWarnings({"unchecked"})
     @Test
     public void shouldSetArguments() throws Exception
     {

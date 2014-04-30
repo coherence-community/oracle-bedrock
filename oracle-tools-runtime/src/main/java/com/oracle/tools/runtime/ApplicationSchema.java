@@ -68,9 +68,9 @@ public interface ApplicationSchema<A extends Application<A>, S extends Applicati
 
 
     /**
-     * Obtains the {@link PropertiesBuilder} that will be used to determine
-     * operating system environment variables to be provided to the
-     * {@link Application}.
+     * Obtains the {@link PropertiesBuilder} defining custom,
+     * {@link Application}-specific operating system environment
+     * variables to be established when realizing an {@link Application}.
      *
      * @return {@link PropertiesBuilder}
      */
@@ -87,12 +87,17 @@ public interface ApplicationSchema<A extends Application<A>, S extends Applicati
 
 
     /**
+     * <strong>DEPRECATED:</strong>  This method should not be used.  How and
+     * when to inherit the underlying environment variables should be configured
+     * using an appropriate {@link ApplicationBuilder}.
+     *
      * Determines if the environment variables for the {@link ApplicationSchema}
      * should be inherited from the process in which the {@link ApplicationSchema}
      * was created.
      *
      * @return true if the environment variables are inherited
      */
+    @Deprecated
     public boolean isEnvironmentInherited();
 
 

@@ -18,7 +18,7 @@ reverse chronological order.
 <h4>oracle-tools-core</h4>
 
 *   [ORACLETOOLS-87](https://java.net/jira/browse/ORACLETOOLS-87): Increased
-    the default Deferred timeout to 60 seconds from 30 seconds.  This won't
+    the default Deferred timeout from 30 to 60 seconds.  This won't
     impact existing tests but will allow for longer running tests without
     requiring developers to explicitly specify a max timeout or override
     system properties.
@@ -40,7 +40,7 @@ reverse chronological order.
 
 *   [ORACLETOOLS-86](https://java.net/jira/browse/ORACLETOOLS-86): Resolved issue
     where calling Application.waitFor() will not terminate when using applications
-    produced by NativeJavaApplicationBuilders.
+    produced by LocalJavaApplicationBuilders.
 
 *   [ORACLETOOLS-88](https://java.net/jira/browse/ORACLETOOLS-88): Added wildcard
     classpath support to ClassPath.
@@ -66,6 +66,16 @@ reverse chronological order.
     Local(Java)ApplicationBuilder to replace and deprecate the
     Native(Java)ApplicationBuilder.   This provides consistency and appropriate
     symmetry with the new Remote(Java)ApplicationBuilders.
+
+*   [ORACLETOOLS-96](https://java.net/jira/browse/ORACLETOOLS-96): Refactored how
+    custom operating system environment variables may be defined.  They can now
+    be defined on ApplicationSchema and ApplicationBuilders, but only
+    ApplicationBuilders have the ability to "inherit" them from a local environment.
+    The ability for ApplicationSchemas to "inherit" environment variables has
+    been deprecated.
+
+    For the most part environment variables should be defined on ApplicationBuilders
+    and not ApplicationSchemas as they are usually an environment/builder setting.
 
 <h4>oracle-tools-runtime-remote</h4>
 

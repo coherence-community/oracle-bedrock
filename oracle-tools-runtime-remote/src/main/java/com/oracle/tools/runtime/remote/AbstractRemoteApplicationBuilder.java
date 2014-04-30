@@ -36,6 +36,9 @@ import com.oracle.tools.runtime.AbstractApplicationBuilder;
 import com.oracle.tools.runtime.Application;
 import com.oracle.tools.runtime.ApplicationConsole;
 import com.oracle.tools.runtime.ApplicationSchema;
+import com.oracle.tools.runtime.PropertiesBuilder;
+
+import com.oracle.tools.runtime.java.JavaApplication;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -43,6 +46,7 @@ import java.io.IOException;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Iterator;
 import java.util.Properties;
 
 import java.util.concurrent.TimeUnit;
@@ -122,6 +126,12 @@ public abstract class AbstractRemoteApplicationBuilder<A extends Application<A>,
      */
     protected File remoteTemporaryDirectoryFile;
 
+    /**
+     * The {@link PropertiesBuilder} defining custom environment variables to
+     * establish when realizing a remote {@link Application}.
+     */
+    private PropertiesBuilder remoteEnvironmentVariablesBuilder;
+
 
     /**
      * Constructs an {@link AbstractRemoteApplicationBuilder} (using the default port).
@@ -164,6 +174,9 @@ public abstract class AbstractRemoteApplicationBuilder<A extends Application<A>,
         this.remotePathSeparatorChar      = File.pathSeparatorChar;
         this.strictHostChecking           = true;
 
+        // by default there are no custom remote environment variables
+        remoteEnvironmentVariablesBuilder = new PropertiesBuilder();
+
         // by default the builder doesn't deploy any artifacts
         deploymentArtifacts = new ArrayList<DeploymentArtifact>();
 
@@ -175,6 +188,44 @@ public abstract class AbstractRemoteApplicationBuilder<A extends Application<A>,
         {
             ((JSchBasedAuthentication) authentication).configureFramework(jsch);
         }
+    }
+
+
+    /**
+     * Defines a custom environment variable for remote {@link Application}s
+     * realized by this {@link RemoteApplicationBuilder} based on values
+     * returned by the {@link Iterator}.
+     *
+     * @param name      the name of the environment variable
+     * @param iterator  an {@link Iterator} providing values for the environment
+     *                  variable
+     *
+     * @return this {@link RemoteApplicationBuilder} to permit fluent method calls
+     */
+    public B setEnvironmentVariable(String      name,
+                                    Iterator<?> iterator)
+    {
+        remoteEnvironmentVariablesBuilder.setProperty(name, iterator);
+
+        return (B) this;
+    }
+
+
+    /**
+     * Defines a custom environment variable for remote {@link Application}s
+     * realized by this {@link RemoteApplicationBuilder}.
+     *
+     * @param name   the name of the environment variable
+     * @param value  the value of the environment variable
+     *
+     * @return this {@link RemoteApplicationBuilder} to permit fluent method calls
+     */
+    public B setEnvironmentVariable(String name,
+                                    Object value)
+    {
+        remoteEnvironmentVariablesBuilder.setProperty(name, value);
+
+        return (B) this;
     }
 
 
@@ -374,7 +425,7 @@ public abstract class AbstractRemoteApplicationBuilder<A extends Application<A>,
             // connect the session
             session.connect();
 
-            // -------- deploy remote application artifacts (using sftp) --------
+            // ----- deploy remote application artifacts (using sftp) -----
 
             // assume the remote directory is the working directory
             File remoteDirectoryFile = schema.getWorkingDirectory();
@@ -468,18 +519,26 @@ public abstract class AbstractRemoteApplicationBuilder<A extends Application<A>,
                 }
             }
 
-            // -------- execute remote application (using ssh) --------
+            // ----- establish the remote channel (using ssh) -----
 
             // open the channel (for a remote execution)
             ChannelExec execChannel = (ChannelExec) session.openChannel("exec");
 
-            // set the remote environment variables
+            // ----- establish the remote environment variables -----
+
+            // establish the remote environment variables (based on the schema)
             Properties environmentVariables = environment.getRemoteEnvironmentVariables();
 
+            // override the schema defined environment variables with those from this builder
+            environmentVariables.putAll(remoteEnvironmentVariablesBuilder.realize());
+
+            // define the remote environment variables in the remote channel
             for (String variableName : environmentVariables.stringPropertyNames())
             {
                 execChannel.setEnv(variableName, environmentVariables.getProperty(variableName));
             }
+
+            // ----- establish the application command line to execute -----
 
             // determine the command to execute remotely
             String command = environment.getRemoteCommandToExecute();
@@ -489,8 +548,12 @@ public abstract class AbstractRemoteApplicationBuilder<A extends Application<A>,
 
             execChannel.setCommand(remoteCommand);
 
+            // ----- establish the remote application process to represent the remote application -----
+
             // establish a RemoteApplicationProcess representing the remote application
             RemoteApplicationProcess process = new RemoteApplicationProcess(session, execChannel);
+
+            // ----- start the remote application -----
 
             // connect the channel
             execChannel.connect(timeout);
@@ -498,7 +561,7 @@ public abstract class AbstractRemoteApplicationBuilder<A extends Application<A>,
             // create the Application based on the RemoteApplicationProcess
             A application = createApplication(schema, environment, applicationName, process, console);
 
-            // -------- raise application interceptor events --------
+            // ----- notify all of the lifecycle listeners -----
 
             raiseApplicationLifecycleEvent(application, Application.EventKind.REALIZED);
 
