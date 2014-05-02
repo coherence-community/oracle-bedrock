@@ -93,6 +93,16 @@ public class RemoteJavaApplicationEnvironment<A extends JavaApplication<A>, S ex
      */
     private String remoteJavaHome;
 
+    /**
+     * The remote {@link File#separator}.
+     */
+    private char remoteFileSeparator;
+
+    /**
+     * The remote {@link File#pathSeparator}.
+     */
+    private char remotePathSeparator;
+
 
     /**
      * Constructs a {@link RemoteJavaApplicationEnvironment}.
@@ -115,12 +125,16 @@ public class RemoteJavaApplicationEnvironment<A extends JavaApplication<A>, S ex
     {
         super(schema);
 
+        this.remoteFileSeparator = remoteFileSeparator;
+        this.remotePathSeparator = remotePathSeparator;
+
         // configure a server that the remote process can communicate with
         remoteExecutor = new RemoteExecutorServer();
 
         remoteExecutor.open();
 
         // ----- determine the remote system properties -----
+
         Properties properties = schema.getSystemPropertiesBuilder().realize();
 
         remoteSystemProperties = new Properties();
@@ -149,6 +163,7 @@ public class RemoteJavaApplicationEnvironment<A extends JavaApplication<A>, S ex
         remoteSystemProperties.setProperty(Settings.ORPHANABLE, Boolean.toString(areOrphansPermitted));
 
         // ----- determine the remote classpath and deployment artifacts -----
+
         ClassPath classPath = schema.getClassPath();
 
         deploymentArtifacts = new ArrayList<DeploymentArtifact>();
@@ -224,6 +239,19 @@ public class RemoteJavaApplicationEnvironment<A extends JavaApplication<A>, S ex
             remoteClassPath = classPath;
         }
 
+        // ----- establish the remote java home -----
+
+        if (remoteJavaHome != null)
+        {
+            // ensure that the java home ends with the remote file separator
+            remoteJavaHome = remoteJavaHome.trim();
+
+            if (!remoteJavaHome.endsWith(String.valueOf(remoteFileSeparator)))
+            {
+                remoteJavaHome = remoteJavaHome + remoteFileSeparator;
+            }
+        }
+
         this.remoteJavaHome = remoteJavaHome;
     }
 
@@ -256,19 +284,38 @@ public class RemoteJavaApplicationEnvironment<A extends JavaApplication<A>, S ex
     {
         StringBuilder builder = new StringBuilder();
 
-        // we use java to execute the application
-        builder.append("java");
+        // ----- establish the command to start java -----
+
+        if (remoteJavaHome == null)
+        {
+            // when we don't have a java home we just use the defined executable
+            builder.append(schema.getExecutableName());
+        }
+        else
+        {
+            // when we have a java home, we prefix the executable name with the java.home/home/bin/
+            builder.append(remoteJavaHome);
+            builder.append(remoteFileSeparator);
+            builder.append("bin");
+            builder.append(remoteFileSeparator);
+
+            builder.append(schema.getExecutableName());
+        }
+
+        // ----- establish the remote application class path -----
 
         // set the remote classpath
         builder.append(" -cp " + remoteClassPath.toString());
 
-        // add the java runtime options to the command
-        // set the JVM options for the Process
+        // ----- establish JVM options -----
+
         for (String option : schema.getJVMOptions())
         {
             builder.append(" ");
             builder.append("-" + option);
         }
+
+        // ----- establish the system properties for the java application -----
 
         // add the system properties to the command
         Properties properties = getRemoteSystemProperties();
@@ -313,7 +360,8 @@ public class RemoteJavaApplicationEnvironment<A extends JavaApplication<A>, S ex
     {
         Properties properties = super.getRemoteEnvironmentVariables();
 
-        // set the JAVA_HOME
+        // ----- establish the java home -----
+
         String javaHome = remoteJavaHome == null ? schema.getJavaHome() : remoteJavaHome;
 
         if (javaHome != null)

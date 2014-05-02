@@ -169,9 +169,10 @@ public abstract class AbstractRemoteApplicationBuilder<A extends Application<A>,
         this.authentication = authentication;
 
         // establish the default remote server properties
-        this.remoteTemporaryDirectoryFile = new File(File.separatorChar + "tmp");
-        this.remoteFileSeparatorChar      = File.separatorChar;
-        this.remotePathSeparatorChar      = File.pathSeparatorChar;
+        // (we default to using unix-style separators as we're using SSH for remote execution)
+        this.remoteFileSeparatorChar      = '/';
+        this.remotePathSeparatorChar      = ':';
+        this.remoteTemporaryDirectoryFile = new File(remoteFileSeparatorChar + "tmp");
         this.strictHostChecking           = true;
 
         // by default there are no custom remote environment variables

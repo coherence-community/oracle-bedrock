@@ -50,6 +50,8 @@ public class SleepingApplication
     {
         System.out.printf("%s started\n", SleepingApplication.class.getName());
 
+        System.out.printf("Using java.home: %s\n", System.getProperty("java.home"));
+
         // determine the number of seconds to sleep
         int secondsToSleep = 30;
 

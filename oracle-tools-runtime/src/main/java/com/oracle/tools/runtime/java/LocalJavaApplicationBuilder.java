@@ -401,10 +401,18 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication<A>, S extends
             processBuilder.environment().put(variableName, environmentVariables.getProperty(variableName));
         }
 
-        // ----- establish Java specific environment variables -----
+        // ----- establish java specific environment variables -----
 
-        // set the JAVA_HOME
+        // by default we use the java home defined by the schema.  if that's not
+        // defined we'll attempt to use the java home defined by this builder.
         String javaHome = this.javaHome == null ? schema.getJavaHome() : this.javaHome;
+
+        // when we still don't have a java home we use what this process defines
+        // (using the system property)
+        if (javaHome == null)
+        {
+            javaHome = System.getProperty("java.home", null);
+        }
 
         if (javaHome != null)
         {
@@ -415,6 +423,26 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication<A>, S extends
         String classPath = schema.getClassPath().toString();
 
         processBuilder.environment().put("CLASSPATH", classPath);
+
+        // ----- establish the command to start java -----
+
+        if (javaHome == null)
+        {
+            // when we don't have a java home we just use the defined executable
+            processBuilder.command(schema.getExecutableName());
+        }
+        else
+        {
+            // when we have a java home, we prefix the executable name with the java.home/bin/
+            javaHome = javaHome.trim();
+
+            if (!javaHome.endsWith(File.separator))
+            {
+                javaHome = javaHome + File.separator;
+            }
+
+            processBuilder.command(javaHome + "bin" + File.separator + schema.getExecutableName());
+        }
 
         // ----- establish the system properties for the java application -----
 
@@ -454,7 +482,7 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication<A>, S extends
         processBuilder.command().add("-D" + Settings.PARENT_PORT + "=" + server.getPort());
         processBuilder.command().add("-D" + Settings.ORPHANABLE + "=" + areOrphansPermitted());
 
-        // ----- establish JVM options for the application -----
+        // ----- establish JVM options -----
 
         for (String option : schema.getJVMOptions())
         {

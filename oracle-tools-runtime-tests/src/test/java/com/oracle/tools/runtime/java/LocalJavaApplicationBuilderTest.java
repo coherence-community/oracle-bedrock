@@ -292,7 +292,7 @@ public class LocalJavaApplicationBuilderTest extends AbstractJavaApplicationBuil
             // set the JAVA_HOME environment variable to be the same as this application
             String javaHome = System.getProperty("java.home");
 
-            schema.setSystemProperty("java.home", javaHome);
+            schema.setJavaHome(javaHome);
 
             // build and start the SleepingApplication
             LocalJavaApplicationBuilder<SimpleJavaApplication, SimpleJavaApplicationSchema> builder =

@@ -62,8 +62,6 @@ public class RemoteJavaApplicationBuilderTest extends AbstractRemoteApplicationB
         // sleep only for 5 seconds
         schema.setArgument("5");
 
-        schema.setEnvironmentInherited(false);
-
         RemoteJavaApplicationBuilder<SimpleJavaApplication, SimpleJavaApplicationSchema> builder =
             new RemoteJavaApplicationBuilder<SimpleJavaApplication, SimpleJavaApplicationSchema>(getRemoteHostName(),
                                                                                                  getRemoteUserName(),
@@ -71,6 +69,7 @@ public class RemoteJavaApplicationBuilderTest extends AbstractRemoteApplicationB
 
         builder.setStrictHostChecking(false);
         builder.setAutoDeployEnabled(true);
+        builder.setJavaHome(System.getProperty("java.home"));
 
         SimpleJavaApplication application = builder.realize(schema, "Java", new SystemApplicationConsole());
 
