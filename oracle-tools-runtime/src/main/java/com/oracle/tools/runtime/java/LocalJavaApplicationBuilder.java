@@ -34,6 +34,8 @@ import com.oracle.tools.io.NetworkHelper;
 
 import com.oracle.tools.lang.StringHelper;
 
+import com.oracle.tools.predicate.Predicate;
+
 import com.oracle.tools.runtime.Application;
 import com.oracle.tools.runtime.ApplicationConsole;
 import com.oracle.tools.runtime.LocalApplicationProcess;
@@ -49,7 +51,8 @@ import com.oracle.tools.runtime.concurrent.socket.RemoteExecutorServer;
 import com.oracle.tools.runtime.java.container.Container;
 
 import com.oracle.tools.util.CompletionListener;
-import com.oracle.tools.util.Predicate;
+
+import static com.oracle.tools.predicate.Predicates.allOf;
 
 import java.io.File;
 import java.io.IOException;
@@ -471,8 +474,7 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication<A>, S extends
         server.open();
 
         // add Oracle Tools specific System Properties
-        Predicate<InetAddress> preferred = schema.isIPv4Preferred()
-                                           ? new Predicate.All<InetAddress>(NetworkHelper.IPv4_ADDRESS,
+        Predicate<InetAddress> preferred = schema.isIPv4Preferred() ? allOf(NetworkHelper.IPv4_ADDRESS,
                                                                             NetworkHelper
                                                                                 .NON_LOOPBACK_ADDRESS) : NetworkHelper
                                                                                     .DEFAULT_ADDRESS;

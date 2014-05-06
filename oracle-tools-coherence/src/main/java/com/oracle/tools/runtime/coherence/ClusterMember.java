@@ -29,11 +29,13 @@ import com.oracle.tools.runtime.Application;
 import com.oracle.tools.runtime.ApplicationConsole;
 import com.oracle.tools.runtime.LifecycleEventInterceptor;
 
+import com.oracle.tools.runtime.coherence.callables.GetClusterMemberUIDs;
 import com.oracle.tools.runtime.coherence.callables.GetClusterName;
 import com.oracle.tools.runtime.coherence.callables.GetClusterSize;
 import com.oracle.tools.runtime.coherence.callables.GetLocalMemberId;
 import com.oracle.tools.runtime.coherence.callables.GetLocalMemberRoleName;
 import com.oracle.tools.runtime.coherence.callables.GetLocalMemberSiteName;
+import com.oracle.tools.runtime.coherence.callables.GetLocalMemberUID;
 import com.oracle.tools.runtime.coherence.callables.GetServiceStatus;
 import com.oracle.tools.runtime.coherence.callables.IsServiceRunning;
 
@@ -41,7 +43,10 @@ import com.oracle.tools.runtime.java.AbstractJavaApplication;
 import com.oracle.tools.runtime.java.JavaApplication;
 import com.oracle.tools.runtime.java.JavaProcess;
 
+import com.tangosol.util.UID;
+
 import java.util.Properties;
+import java.util.Set;
 
 import java.util.concurrent.TimeUnit;
 
@@ -225,6 +230,28 @@ public class ClusterMember extends AbstractJavaApplication<ClusterMember, JavaPr
     public int getLocalMemberId()
     {
         return submit(new GetLocalMemberId());
+    }
+
+
+    /**
+     * Obtains the local member {@link UID} for the {@link ClusterMember}.
+     * <p>
+     * @return the local member {@link UID}
+     */
+    public UID getLocalMemberUID()
+    {
+        return submit(new GetLocalMemberUID());
+    }
+
+
+    /**
+     * Obtains the member {@link UID}s for the {@link Cluster} in which the {@link ClusterMember} is operating.
+     *
+     * @return  a {@link Set} of {@link UID}, one for each {@link ClusterMember}
+     */
+    public Set<UID> getClusterMemberUIDs()
+    {
+        return submit(new GetClusterMemberUIDs());
     }
 
 

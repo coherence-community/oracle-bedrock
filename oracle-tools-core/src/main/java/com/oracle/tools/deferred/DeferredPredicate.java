@@ -25,7 +25,7 @@
 
 package com.oracle.tools.deferred;
 
-import com.oracle.tools.util.Predicate;
+import com.oracle.tools.predicate.Predicate;
 
 /**
  * A {@link DeferredPredicate} is a {@link Deferred} that represents an attempt to
@@ -46,7 +46,7 @@ public class DeferredPredicate<T> implements Deferred<Boolean>
     /**
      * The {@link Predicate} to use for matching.
      */
-    private Predicate<T> predicate;
+    private Predicate<? super T> predicate;
 
     /**
      * The {@link Deferred} value to be used for evaluating the
@@ -69,8 +69,8 @@ public class DeferredPredicate<T> implements Deferred<Boolean>
      * @param deferred   the {@link Deferred} value to match with the {@link Predicate}
      * @param predicate  the {@link Predicate}
      */
-    public DeferredPredicate(Deferred<T>  deferred,
-                             Predicate<T> predicate)
+    public DeferredPredicate(Deferred<T>          deferred,
+                             Predicate<? super T> predicate)
     {
         this.deferred         = deferred;
         this.predicate        = predicate;
@@ -85,8 +85,8 @@ public class DeferredPredicate<T> implements Deferred<Boolean>
      * @param value      the value to use supplied to the {@link Predicate}
      * @param predicate  the {@link Predicate}
      */
-    public DeferredPredicate(T            value,
-                             Predicate<T> predicate)
+    public DeferredPredicate(T                    value,
+                             Predicate<? super T> predicate)
     {
         if (value instanceof Deferred)
         {
@@ -119,7 +119,7 @@ public class DeferredPredicate<T> implements Deferred<Boolean>
      *
      * @return the {@link Predicate}
      */
-    public Predicate<T> getPredicate()
+    public Predicate<? super T> getPredicate()
     {
         return predicate;
     }

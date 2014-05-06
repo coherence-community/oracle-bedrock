@@ -25,22 +25,35 @@
 
 package com.oracle.tools.runtime.coherence.actions;
 
-import com.oracle.tools.deferred.DeferredHelper;
 import com.oracle.tools.deferred.DeferredPredicate;
+
+import com.oracle.tools.predicate.Predicate;
+
 import com.oracle.tools.runtime.ApplicationConsole;
+
 import com.oracle.tools.runtime.actions.CustomAction;
+
 import com.oracle.tools.runtime.coherence.Cluster;
 import com.oracle.tools.runtime.coherence.ClusterMember;
 import com.oracle.tools.runtime.coherence.ClusterMemberSchema;
+
 import com.oracle.tools.runtime.java.JavaApplicationBuilder;
-import com.oracle.tools.util.Predicate;
 
-import java.util.Iterator;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import com.tangosol.util.UID;
 
+import static com.oracle.tools.deferred.DeferredHelper.ensure;
 import static com.oracle.tools.deferred.DeferredHelper.eventually;
 import static com.oracle.tools.deferred.DeferredHelper.invoking;
+
+import static com.oracle.tools.predicate.Predicates.contains;
+import static com.oracle.tools.predicate.Predicates.doesNotContain;
+import static com.oracle.tools.predicate.Predicates.greaterThan;
+import static com.oracle.tools.predicate.Predicates.is;
+
+import java.util.Iterator;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * A {@link CustomAction} to destroy a {@link ClusterMember} that is defined as part
@@ -90,12 +103,12 @@ public class RestartClusterMemberAction implements CustomAction<ClusterMember, C
     /**
      * Constructs a {@link RestartClusterMemberAction}.
      *
-     * @param prefix            the prefix that must match existing {@link ClusterMember} names
-     * @param builder           the {@link JavaApplicationBuilder} to realize new {@link ClusterMember}s
-     * @param schema            the {@link ClusterMemberSchema for new {@link ClusterMember}s
-     * @param console           the {@link ApplicationConsole} for new {@link ClusterMember}s
+     * @param prefix          the prefix that must match existing {@link ClusterMember} names
+     * @param builder         the {@link JavaApplicationBuilder} to realize new {@link ClusterMember}s
+     * @param schema          the {@link ClusterMemberSchema for new {@link ClusterMember}s
+     * @param console         the {@link ApplicationConsole} for new {@link ClusterMember}s
      * @param closePredicate  the optional {@link Predicate} that must be satisfied before restarting a
-     *                          {@link ClusterMember} (may be <code>null</code>)
+     *                        {@link ClusterMember} (may be <code>null</code>)
      */
     public RestartClusterMemberAction(String                                                     prefix,
                                       JavaApplicationBuilder<ClusterMember, ClusterMemberSchema> builder,
@@ -103,31 +116,29 @@ public class RestartClusterMemberAction implements CustomAction<ClusterMember, C
                                       ApplicationConsole                                         console,
                                       Predicate<ClusterMember>                                   closePredicate)
     {
-        this.prefix         = prefix;
-        this.builder        = builder;
-        this.schema         = schema;
-        this.console        = console;
-        this.closePredicate = closePredicate == null ? Predicate.ALWAYS : closePredicate;
+        this.prefix  = prefix;
+        this.builder = builder;
+        this.schema  = schema;
+        this.console = console;
+        this.closePredicate = closePredicate == null
+                              ? com.oracle.tools.predicate.Predicates.<ClusterMember>always() : closePredicate;
     }
 
 
     @Override
-    public void perform(Cluster cluster)
+    public void perform(final Cluster cluster)
     {
         // obtain an iterator over the candidate cluster members
         Iterator<ClusterMember> clusterMembers = cluster.getApplications(prefix).iterator();
 
         if (clusterMembers.hasNext())
         {
-            // before closing the member determine the cluster size
-            // (so that we can wait until the member is closed before starting another)
-            int clusterSize = cluster.getClusterSize();
-
             // assume we want to realize a new member
             boolean realizeNewMember = true;
 
             // choose the first cluster member from the candidates
-            ClusterMember member = clusterMembers.next();
+            ClusterMember member    = clusterMembers.next();
+            UID           memberUID = member.getLocalMemberUID();
 
             // we'll use the same ClusterMember name for the new ClusterMember
             String name = member.getName();
@@ -141,7 +152,7 @@ public class RestartClusterMemberAction implements CustomAction<ClusterMember, C
                 }
 
                 // ensure that the predicate is satisfied (using a deferred)
-                DeferredHelper.ensure(new DeferredPredicate<ClusterMember>(member, closePredicate));
+                ensure(new DeferredPredicate<ClusterMember>(member, closePredicate));
 
                 if (cluster.removeApplication(member))
                 {
@@ -178,21 +189,22 @@ public class RestartClusterMemberAction implements CustomAction<ClusterMember, C
                         }
                         else
                         {
-                            // ensure that the cluster size is one less than prior to the closing the member
-                            DeferredHelper
-                                .ensure(new DeferredPredicate<Integer>(eventually(invoking(cluster).getClusterSize()),
-                                                                       new Predicate.Is<Integer>(clusterSize - 1)));
+                            // ensure that the cluster no longer contains the closed member
+                            ensure(eventually(invoking(cluster).getClusterMemberUIDs()), doesNotContain(memberUID));
 
-                            // start a new ClusterMember (with the same name)
+                            // start a new ClusterMember (with the same name as the old member)
                             member = builder.realize(schema, name, console);
+
+                            // ensure that the new member has joined the cluster
+                            ensure(eventually(invoking(member).getClusterSize()), is(greaterThan(1)));
+
+                            memberUID = member.getLocalMemberUID();
 
                             // add the new ClusterMember into the Cluster
                             cluster.addApplication(member);
 
-                            // ensure that the new member has joined the cluster
-                            DeferredHelper
-                                .ensure(new DeferredPredicate<Integer>(eventually(invoking(member).getClusterSize()),
-                                                                       new Predicate.Is<Integer>(clusterSize)));
+                            // ensure that the new member is a member of the cluster
+                            ensure(eventually(invoking(cluster).getClusterMemberUIDs()), contains(memberUID));
 
                             if (LOGGER.isLoggable(Level.INFO))
                             {

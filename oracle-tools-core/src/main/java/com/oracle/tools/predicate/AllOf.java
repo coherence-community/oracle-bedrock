@@ -1,5 +1,5 @@
 /*
- * File: ConditionalBlock.java
+ * File: AllOf.java
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
@@ -23,46 +23,65 @@
  * "Portions Copyright [year] [name of copyright owner]"
  */
 
-package com.oracle.tools.runtime.actions;
+package com.oracle.tools.predicate;
 
-import com.oracle.tools.predicate.Predicate;
-
-import com.oracle.tools.runtime.Application;
-import com.oracle.tools.runtime.ApplicationGroup;
+import java.util.Arrays;
 
 /**
- * A specialized {@link Block} that is only executed if and only if a {@link Predicate} is satisfied.
+ * A {@link Predicate} representing the lazy conjunction of
+ * zero or more other {@link Predicate}s.
  * <p>
  * Copyright (c) 2014. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
+ * @param <T>  the type of the {@link Predicate} value
+ *
  * @author Brian Oliver
  */
-public class ConditionalBlock<A extends Application<A>, G extends ApplicationGroup<A>> extends Block<A, G>
-    implements ConditionalAction<A, G>
+public class AllOf<T> implements Predicate<T>
 {
     /**
-     * The {@link Predicate} to be satisfied.
+     * The {@link Predicate}s that must hold.
      */
-    private Predicate<G> predicate;
+    private Predicate<? super T>[] predicates;
 
 
     /**
-     * Constructs a {@link ConditionalBlock}.
+     * Constructor for the {@link AllOf} {@link Predicate}.
      *
-     * @param predicate  the {@link Predicate} to be satisfied
+     * @param predicates  the {@link Predicate}s to check
      */
-    public ConditionalBlock(Predicate<G> predicate)
+    public AllOf(Predicate<? super T>... predicates)
     {
-        super();
-
-        this.predicate = predicate;
+        this.predicates = predicates;
     }
 
 
     @Override
-    public Predicate<G> getPredicate()
+    public boolean evaluate(T value)
     {
-        return predicate;
+        if (predicates == null)
+        {
+            return false;
+        }
+        else
+        {
+            for (Predicate<? super T> predicate : predicates)
+            {
+                if (!predicate.evaluate(value))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+    }
+
+
+    @Override
+    public String toString()
+    {
+        return "AllOf{" + Arrays.toString(predicates) + '}';
     }
 }

@@ -1,5 +1,5 @@
 /*
- * File: ConditionalBlock.java
+ * File: GreaterThan.java
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
@@ -23,46 +23,48 @@
  * "Portions Copyright [year] [name of copyright owner]"
  */
 
-package com.oracle.tools.runtime.actions;
-
-import com.oracle.tools.predicate.Predicate;
-
-import com.oracle.tools.runtime.Application;
-import com.oracle.tools.runtime.ApplicationGroup;
+package com.oracle.tools.predicate;
 
 /**
- * A specialized {@link Block} that is only executed if and only if a {@link Predicate} is satisfied.
+ * A {@link Predicate} to determine if a {@link Comparable} value is greater
+ * than another.
  * <p>
  * Copyright (c) 2014. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
+ * @param <T>  the type of the {@link Predicate} value
+ *
  * @author Brian Oliver
  */
-public class ConditionalBlock<A extends Application<A>, G extends ApplicationGroup<A>> extends Block<A, G>
-    implements ConditionalAction<A, G>
+public class GreaterThan<T extends Comparable<T>> extends AbstractPredicate<T>
 {
     /**
-     * The {@link Predicate} to be satisfied.
+     * The value to compare.  The passed in value must be greater than this value.
      */
-    private Predicate<G> predicate;
+    private T value;
 
 
     /**
-     * Constructs a {@link ConditionalBlock}.
+     * Constructor for the {@link GreaterThan} {@link Predicate}.
      *
-     * @param predicate  the {@link Predicate} to be satisfied
+     * @param value  the value to compare with
      */
-    public ConditionalBlock(Predicate<G> predicate)
+    public GreaterThan(T value)
     {
-        super();
-
-        this.predicate = predicate;
+        this.value = value;
     }
 
 
     @Override
-    public Predicate<G> getPredicate()
+    public boolean evaluate(T value)
     {
-        return predicate;
+        return value == null ? false : value.compareTo(this.value) > 0;
+    }
+
+
+    @Override
+    public String toString()
+    {
+        return "GreaterThan{value=" + value + "}";
     }
 }

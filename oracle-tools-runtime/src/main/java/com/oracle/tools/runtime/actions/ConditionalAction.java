@@ -25,9 +25,10 @@
 
 package com.oracle.tools.runtime.actions;
 
+import com.oracle.tools.predicate.Predicate;
+
 import com.oracle.tools.runtime.Application;
 import com.oracle.tools.runtime.ApplicationGroup;
-import com.oracle.tools.util.Predicate;
 
 /**
  * An {@link Action} to be performed on an {@link ApplicationGroup} if and only if a

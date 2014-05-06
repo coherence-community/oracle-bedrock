@@ -1,5 +1,5 @@
 /*
- * File: ConditionalBlock.java
+ * File: GetLocalMemberId.java
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
@@ -23,46 +23,29 @@
  * "Portions Copyright [year] [name of copyright owner]"
  */
 
-package com.oracle.tools.runtime.actions;
+package com.oracle.tools.runtime.coherence.callables;
 
-import com.oracle.tools.predicate.Predicate;
-
-import com.oracle.tools.runtime.Application;
-import com.oracle.tools.runtime.ApplicationGroup;
+import com.oracle.tools.runtime.concurrent.RemoteCallable;
+import com.tangosol.net.CacheFactory;
+import com.tangosol.util.UID;
 
 /**
- * A specialized {@link Block} that is only executed if and only if a {@link Predicate} is satisfied.
+ * A {@link RemoteCallable} to remotely determine the Coherence Cluster Local Member {@link UID}.
  * <p>
  * Copyright (c) 2014. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Brian Oliver
  */
-public class ConditionalBlock<A extends Application<A>, G extends ApplicationGroup<A>> extends Block<A, G>
-    implements ConditionalAction<A, G>
+public class GetLocalMemberUID implements RemoteCallable<UID>
 {
-    /**
-     * The {@link Predicate} to be satisfied.
-     */
-    private Predicate<G> predicate;
-
-
-    /**
-     * Constructs a {@link ConditionalBlock}.
-     *
-     * @param predicate  the {@link Predicate} to be satisfied
-     */
-    public ConditionalBlock(Predicate<G> predicate)
-    {
-        super();
-
-        this.predicate = predicate;
-    }
-
-
     @Override
-    public Predicate<G> getPredicate()
+    public UID call() throws Exception
     {
-        return predicate;
+        // attempt to get the cluster
+        com.tangosol.net.Cluster cluster = CacheFactory.getCluster();
+
+        // when there's no cluster there's no result
+        return cluster == null ? null : cluster.getLocalMember().getUid();
     }
 }

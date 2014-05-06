@@ -27,13 +27,16 @@ package com.oracle.tools.runtime.concurrent.socket;
 
 import com.oracle.tools.io.NetworkHelper;
 
+import com.oracle.tools.predicate.Predicate;
+
 import com.oracle.tools.runtime.concurrent.AbstractControllableRemoteExecutor;
 import com.oracle.tools.runtime.concurrent.RemoteCallable;
 import com.oracle.tools.runtime.concurrent.RemoteExecutorListener;
 import com.oracle.tools.runtime.concurrent.RemoteRunnable;
 
 import com.oracle.tools.util.CompletionListener;
-import com.oracle.tools.util.Predicate;
+
+import static com.oracle.tools.predicate.Predicates.allOf;
 
 import java.io.IOException;
 
@@ -155,8 +158,7 @@ public class RemoteExecutorServer extends AbstractControllableRemoteExecutor
             setOpen(true);
         }
 
-        return getInetAddress(new Predicate.All<InetAddress>(NetworkHelper.LOOPBACK_ADDRESS,
-                                                             NetworkHelper.DEFAULT_ADDRESS));
+        return getInetAddress(allOf(NetworkHelper.LOOPBACK_ADDRESS, NetworkHelper.DEFAULT_ADDRESS));
     }
 
 

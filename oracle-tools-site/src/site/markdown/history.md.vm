@@ -27,6 +27,14 @@ reverse chronological order.
     AbstractDeferred class to enable simple annoymous inner-class (and Lambda)
     implementations of Deferreds.
 
+*   [ORACLETOOLS-97](https://java.net/jira/browse/ORACLETOOLS-97): Introduced
+    the com.oracle.tools.predicate package and refactored existing Predicate
+    based classes and usages to that package.
+
+    *BREAKING CHANGE ALERT:*  This may be a breaking change for implementations
+    that are extending the Predicate interface in the future.   Implementations
+    should instead be based on com.oracle.tools.predicate.Predicate interface.
+
 <h4>oracle-tools-runtime</h4>
 
 *   [ORACLETOOLS-79](https://java.net/jira/browse/ORACLETOOLS-79): Completed
@@ -93,6 +101,15 @@ reverse chronological order.
 *   [ORACLETOOLS-92](https://java.net/jira/browse/ORACLETOOLS-92): Refactored
     Coherence-specific Runnables and Callables to be RemoteRunnables
     and RemoteCallables respectively.
+
+*   [ORACLETOOLS-98](https://java.net/jira/browse/ORACLETOOLS-98): Refactor
+    RestartClusterMemberAction to ensure the existing cluster member is
+    no longer present in the cluster and the newly created member becomes
+    a member of the cluster.
+
+*   [ORACLETOOLS-99](https://java.net/jira/browse/ORACLETOOLS-99): Introduced
+    the ability to determine the UID of a ClusterMember and the UIDs of all
+    cluster members from a Cluster.
 
 <h4>oracle-tools-coherence-testing-support</h4>
 

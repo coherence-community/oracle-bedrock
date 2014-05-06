@@ -27,6 +27,8 @@ package com.oracle.tools.runtime.coherence;
 
 import com.oracle.tools.junit.AbstractTest;
 
+import com.oracle.tools.predicate.Predicate;
+
 import com.oracle.tools.runtime.ApplicationConsole;
 
 import com.oracle.tools.runtime.actions.InteractiveActionExecutor;
@@ -43,7 +45,6 @@ import com.oracle.tools.runtime.network.AvailablePortIterator;
 import com.oracle.tools.runtime.network.Constants;
 
 import com.oracle.tools.util.Capture;
-import com.oracle.tools.util.Predicate;
 
 import org.junit.Assert;
 import org.junit.Test;

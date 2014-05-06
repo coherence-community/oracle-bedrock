@@ -25,7 +25,9 @@
 
 package com.oracle.tools.io;
 
-import com.oracle.tools.util.Predicate;
+import com.oracle.tools.predicate.Predicate;
+
+import static com.oracle.tools.predicate.Predicates.always;
 
 import java.net.Inet4Address;
 import java.net.Inet6Address;
@@ -138,7 +140,7 @@ public class NetworkHelper
             }
             else
             {
-                predicate = Predicate.ALWAYS;
+                predicate = always();
             }
 
             return predicate.evaluate(address);

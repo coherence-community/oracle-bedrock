@@ -30,6 +30,8 @@ import com.oracle.tools.io.NetworkHelper;
 
 import com.oracle.tools.lang.StringHelper;
 
+import com.oracle.tools.predicate.Predicate;
+
 import com.oracle.tools.runtime.Settings;
 
 import com.oracle.tools.runtime.concurrent.ControllableRemoteExecutor;
@@ -43,7 +45,7 @@ import com.oracle.tools.runtime.java.container.Container;
 import com.oracle.tools.runtime.remote.AbstractRemoteApplicationEnvironment;
 import com.oracle.tools.runtime.remote.DeploymentArtifact;
 
-import com.oracle.tools.util.Predicate;
+import static com.oracle.tools.predicate.Predicates.allOf;
 
 import java.io.File;
 import java.io.IOException;
@@ -152,10 +154,9 @@ public class RemoteJavaApplicationEnvironment<A extends JavaApplication<A>, S ex
         }
 
         // add oracle tools specific system properties
-        Predicate<InetAddress> preferred = new Predicate.All<InetAddress>(NetworkHelper.NON_LOOPBACK_ADDRESS,
-                                                                          schema.isIPv4Preferred()
-                                                                          ? NetworkHelper.IPv4_ADDRESS
-                                                                          : NetworkHelper.DEFAULT_ADDRESS);
+        Predicate<InetAddress> preferred = allOf(NetworkHelper.NON_LOOPBACK_ADDRESS,
+                                                 schema.isIPv4Preferred()
+                                                 ? NetworkHelper.IPv4_ADDRESS : NetworkHelper.DEFAULT_ADDRESS);
 
         remoteSystemProperties.setProperty(Settings.PARENT_ADDRESS,
                                            remoteExecutor.getInetAddress(preferred).getHostAddress());

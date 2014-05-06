@@ -29,7 +29,13 @@ import com.oracle.tools.deferred.atomic.DeferredAtomicBoolean;
 import com.oracle.tools.deferred.atomic.DeferredAtomicInteger;
 import com.oracle.tools.deferred.atomic.DeferredAtomicLong;
 
-import com.oracle.tools.util.*;
+import com.oracle.tools.predicate.Predicate;
+
+import com.oracle.tools.util.ExponentialIterator;
+import com.oracle.tools.util.FibonacciIterator;
+import com.oracle.tools.util.PerpetualIterator;
+import com.oracle.tools.util.RandomIterator;
+import com.oracle.tools.util.ReflectionHelper;
 
 import net.sf.cglib.proxy.MethodInterceptor;
 import net.sf.cglib.proxy.MethodProxy;
@@ -345,6 +351,13 @@ public class DeferredHelper
     public static <T> T ensure(Deferred<T> deferred)
     {
         return ensured(deferred).get();
+    }
+
+
+    public static <T> boolean ensure(Deferred<T>          deferred,
+                                     Predicate<? super T> predicate)
+    {
+        return ensure(new DeferredPredicate<T>(deferred, predicate));
     }
 
 

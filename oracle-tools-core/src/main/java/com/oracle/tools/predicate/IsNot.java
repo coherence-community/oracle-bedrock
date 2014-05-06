@@ -1,5 +1,5 @@
 /*
- * File: ConditionalBlock.java
+ * File: IsNot.java
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
@@ -23,46 +23,47 @@
  * "Portions Copyright [year] [name of copyright owner]"
  */
 
-package com.oracle.tools.runtime.actions;
-
-import com.oracle.tools.predicate.Predicate;
-
-import com.oracle.tools.runtime.Application;
-import com.oracle.tools.runtime.ApplicationGroup;
+package com.oracle.tools.predicate;
 
 /**
- * A specialized {@link Block} that is only executed if and only if a {@link Predicate} is satisfied.
+ * A {@link Predicate} to negate another {@link Predicate}.
  * <p>
  * Copyright (c) 2014. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
+ * @param <T>  the type of the {@link Predicate} value
+ *
  * @author Brian Oliver
  */
-public class ConditionalBlock<A extends Application<A>, G extends ApplicationGroup<A>> extends Block<A, G>
-    implements ConditionalAction<A, G>
+public class IsNot<T> implements Predicate<T>
 {
     /**
-     * The {@link Predicate} to be satisfied.
+     * The {@link Predicate} to negate.
      */
-    private Predicate<G> predicate;
+    private Predicate<T> predicate;
 
 
     /**
-     * Constructs a {@link ConditionalBlock}.
+     * Constructor for the {@link IsNot} {@link Predicate}.
      *
-     * @param predicate  the {@link Predicate} to be satisfied
+     * @param predicate  the {@link Predicate} to negate
      */
-    public ConditionalBlock(Predicate<G> predicate)
+    public IsNot(Predicate<T> predicate)
     {
-        super();
-
         this.predicate = predicate;
     }
 
 
     @Override
-    public Predicate<G> getPredicate()
+    public boolean evaluate(T value)
     {
-        return predicate;
+        return !predicate.evaluate(value);
+    }
+
+
+    @Override
+    public String toString()
+    {
+        return "IsNot{" + predicate + '}';
     }
 }

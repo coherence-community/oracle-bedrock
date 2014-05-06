@@ -1,5 +1,5 @@
 /*
- * File: ConditionalBlock.java
+ * File: Contains.java
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
@@ -23,46 +23,49 @@
  * "Portions Copyright [year] [name of copyright owner]"
  */
 
-package com.oracle.tools.runtime.actions;
+package com.oracle.tools.predicate;
 
-import com.oracle.tools.predicate.Predicate;
-
-import com.oracle.tools.runtime.Application;
-import com.oracle.tools.runtime.ApplicationGroup;
+import java.util.Collection;
 
 /**
- * A specialized {@link Block} that is only executed if and only if a {@link Predicate} is satisfied.
+ * A {@link Predicate} to determine if a value is in a {@link Collection}.
  * <p>
  * Copyright (c) 2014. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
+ * @param <T>  the type of the {@link Predicate} value
+ *
  * @author Brian Oliver
  */
-public class ConditionalBlock<A extends Application<A>, G extends ApplicationGroup<A>> extends Block<A, G>
-    implements ConditionalAction<A, G>
+public class Contains<T> extends AbstractPredicate<Collection<T>>
 {
     /**
-     * The {@link Predicate} to be satisfied.
+     * The value to locate in the collection
      */
-    private Predicate<G> predicate;
+    private T value;
 
 
     /**
-     * Constructs a {@link ConditionalBlock}.
+     * Constructor for a {@link Contains} {@link Predicate}.
      *
-     * @param predicate  the {@link Predicate} to be satisfied
+     * @param value  the value to locate in the collection
      */
-    public ConditionalBlock(Predicate<G> predicate)
+    public Contains(T value)
     {
-        super();
-
-        this.predicate = predicate;
+        this.value = value;
     }
 
 
     @Override
-    public Predicate<G> getPredicate()
+    public boolean evaluate(Collection<T> set)
     {
-        return predicate;
+        return set == null ? false : set.contains(value);
+    }
+
+
+    @Override
+    public String toString()
+    {
+        return "Contains{" + value + "}";
     }
 }

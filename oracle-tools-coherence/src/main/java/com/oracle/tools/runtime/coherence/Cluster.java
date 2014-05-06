@@ -28,8 +28,12 @@ package com.oracle.tools.runtime.coherence;
 import com.oracle.tools.runtime.AbstractApplicationGroup;
 import com.oracle.tools.runtime.ApplicationGroup;
 
+import com.tangosol.util.UID;
+
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * A {@link Cluster} represents an Coherence Cluster as an {@link ApplicationGroup}.
@@ -62,5 +66,18 @@ public class Cluster extends AbstractApplicationGroup<ClusterMember>
         Iterator<ClusterMember> members = iterator();
 
         return members.hasNext() ? members.next().getClusterSize() : 0;
+    }
+
+
+    /**
+     * Obtains the member {@link UID}s for the {@link Cluster}.
+     *
+     * @return  a {@link Set} of {@link UID}, one for each {@link ClusterMember}
+     */
+    public Set<UID> getClusterMemberUIDs()
+    {
+        Iterator<ClusterMember> members = iterator();
+
+        return members.hasNext() ? members.next().getClusterMemberUIDs() : new TreeSet<UID>();
     }
 }

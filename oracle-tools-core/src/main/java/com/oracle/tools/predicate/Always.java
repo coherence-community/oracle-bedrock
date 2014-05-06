@@ -1,5 +1,5 @@
 /*
- * File: ConditionalBlock.java
+ * File: Always.java
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
@@ -23,46 +23,28 @@
  * "Portions Copyright [year] [name of copyright owner]"
  */
 
-package com.oracle.tools.runtime.actions;
-
-import com.oracle.tools.predicate.Predicate;
-
-import com.oracle.tools.runtime.Application;
-import com.oracle.tools.runtime.ApplicationGroup;
+package com.oracle.tools.predicate;
 
 /**
- * A specialized {@link Block} that is only executed if and only if a {@link Predicate} is satisfied.
+ * A {@link Predicate} that always succeeds.
  * <p>
  * Copyright (c) 2014. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Brian Oliver
  */
-public class ConditionalBlock<A extends Application<A>, G extends ApplicationGroup<A>> extends Block<A, G>
-    implements ConditionalAction<A, G>
+public class Always implements Predicate
 {
-    /**
-     * The {@link Predicate} to be satisfied.
-     */
-    private Predicate<G> predicate;
-
-
-    /**
-     * Constructs a {@link ConditionalBlock}.
-     *
-     * @param predicate  the {@link Predicate} to be satisfied
-     */
-    public ConditionalBlock(Predicate<G> predicate)
+    @Override
+    public boolean evaluate(Object value)
     {
-        super();
-
-        this.predicate = predicate;
+        return true;
     }
 
 
     @Override
-    public Predicate<G> getPredicate()
+    public String toString()
     {
-        return predicate;
+        return "Always{}";
     }
 }
