@@ -26,9 +26,11 @@
 package com.oracle.tools.runtime.console;
 
 import com.oracle.tools.runtime.ApplicationConsole;
+import com.oracle.tools.runtime.ApplicationConsoleBuilder;
 
 import com.oracle.tools.runtime.java.container.Container;
 
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -135,5 +137,66 @@ public class FileWriterApplicationConsole implements ApplicationConsole
     public Reader getInputReader()
     {
         return m_inputReader;
+    }
+
+
+    /**
+     * Obtains a {@link ApplicationConsoleBuilder} for the
+     * {@link FileWriterApplicationConsole}.
+     *
+     * @param directory  the existing directory in which to create the files
+     * @param prefix     the prefix to use for files (may be null)
+     *
+     * @return a {@link ApplicationConsoleBuilder}
+     */
+    public static ApplicationConsoleBuilder builder(final String directory,
+                                                    final String prefix)
+    {
+        return new ApplicationConsoleBuilder()
+        {
+            @Override
+            public ApplicationConsole realize(String applicationName)
+            {
+                // normalize the directory
+                String normalizedDirectory = directory.trim();
+
+                if (!normalizedDirectory.endsWith(File.separator))
+                {
+                    normalizedDirectory = normalizedDirectory + File.separator;
+                }
+
+                // ensure the directory exists
+                File file = new File(normalizedDirectory);
+
+                if (file.exists())
+                {
+                    // normalize the prefix
+                    String normalizedPrefix = prefix == null ? "" : prefix.trim();
+
+                    if (normalizedPrefix.length() > 0 &&!normalizedPrefix.endsWith("-"))
+                    {
+                        normalizedPrefix = normalizedPrefix + "-";
+                    }
+
+                    // normalize the application name
+                    String normalizedApplicationName = applicationName.trim();
+
+                    String fileName = normalizedDirectory + normalizedPrefix + normalizedApplicationName;
+
+                    try
+                    {
+                        return new FileWriterApplicationConsole(fileName);
+                    }
+                    catch (IOException e)
+                    {
+                        throw new RuntimeException("Failed to create file:" + fileName, e);
+                    }
+                }
+                else
+                {
+                    throw new RuntimeException("The specified directory [" + directory + "] does not exist");
+                }
+            }
+        };
     }
 }

@@ -31,9 +31,10 @@ reverse chronological order.
     the com.oracle.tools.predicate package and refactored existing Predicate
     based classes and usages to that package.
 
-    *BREAKING CHANGE ALERT:*  This may be a breaking change for implementations
-    that are extending the Predicate interface in the future.   Implementations
-    should instead be based on com.oracle.tools.predicate.Predicate interface.
+    *BREAKING CHANGE:*  This may be a breaking change for implementations
+    that are extending the existing Predicate interface in the future.
+    Implementations are encouraged to instead extend the
+    com.oracle.tools.predicate.Predicate interface.
 
 <h4>oracle-tools-runtime</h4>
 
@@ -84,6 +85,10 @@ reverse chronological order.
 
     For the most part environment variables should be defined on ApplicationBuilders
     and not ApplicationSchemas as they are usually an environment/builder setting.
+
+*   [ORACLETOOLS-101](https://java.net/jira/browse/ORACLETOOLS-101): Introduced
+    the ability to specify an ApplicationConsoleBuilder and thus ApplicationConsole
+    for each Application defined as part of an ApplicationGroup.
 
 <h4>oracle-tools-runtime-remote</h4>
 

@@ -26,9 +26,13 @@
 package com.oracle.tools.runtime;
 
 import com.oracle.tools.runtime.console.NullApplicationConsole;
+import com.oracle.tools.runtime.console.SingletonApplicationConsoleBuilder;
+
+import com.oracle.tools.util.Quadruple;
 import com.oracle.tools.util.Triple;
 
 import java.io.IOException;
+
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -49,7 +53,7 @@ public abstract class AbstractApplicationGroupBuilder<A extends Application<A>, 
     /**
      * The map of {@link ApplicationBuilder}s to create applications, keyed by application prefix name.
      */
-    protected LinkedHashMap<String, Triple<B, S, Integer>> m_builders;
+    protected LinkedHashMap<String, Quadruple<B, S, Integer, ApplicationConsoleBuilder>> m_builders;
 
 
     /**
@@ -57,40 +61,64 @@ public abstract class AbstractApplicationGroupBuilder<A extends Application<A>, 
      */
     public AbstractApplicationGroupBuilder()
     {
-        m_builders = new LinkedHashMap<String, Triple<B, S, Integer>>();
+        m_builders = new LinkedHashMap<String, Quadruple<B, S, Integer, ApplicationConsoleBuilder>>();
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
-    public void addBuilder(B      bldrApplication,
-                           S      schema,
-                           String sApplicationPrefix,
-                           int    cRequiredInstances)
+    public void addBuilder(B      applicationBuilder,
+                           S      applicationSchema,
+                           String applicationNamePrefix,
+                           int    count)
     {
-        m_builders.put(sApplicationPrefix, new Triple<B, S, Integer>(bldrApplication, schema, cRequiredInstances));
+        addBuilder(applicationBuilder, applicationSchema, applicationNamePrefix, count, null);
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
-    public G realize(ApplicationConsole console) throws java.io.IOException
+    @Override
+    public void addBuilder(B                         applicationBuilder,
+                           S                         applicationSchema,
+                           String                    applicationNamePrefix,
+                           int                       count,
+                           ApplicationConsoleBuilder consoleBuilder)
+    {
+        m_builders.put(applicationNamePrefix,
+                       new Quadruple<B, S, Integer, ApplicationConsoleBuilder>(applicationBuilder,
+                                                                               applicationSchema,
+                                                                               count,
+                                                                               consoleBuilder));
+    }
+
+
+    @Override
+    public G realize(ApplicationConsoleBuilder overridingConsoleBuilder) throws IOException
     {
         // build a list of applications
         LinkedList<A> applications = new LinkedList<A>();
 
         for (String prefix : m_builders.keySet())
         {
-            Triple<B, S, Integer> triple             = m_builders.get(prefix);
-            B                     builder            = triple.getX();
-            S                     schema             = triple.getY();
-            int                   cRequiredInstances = triple.getZ();
+            Quadruple<B, S, Integer, ApplicationConsoleBuilder> quadruple          = m_builders.get(prefix);
+            B                                                   builder            = quadruple.getA();
+            S                                                   schema             = quadruple.getB();
+            int                                                 cRequiredInstances = quadruple.getC();
+            ApplicationConsoleBuilder                           consoleBuilder     = quadruple.getD();
+
+            // override the application defined console builder when this method is provied with one
+            if (overridingConsoleBuilder != null)
+            {
+                consoleBuilder = overridingConsoleBuilder;
+            }
 
             for (int i = 1; i <= cRequiredInstances; i++)
             {
-                String applicationName = String.format("%s-%d", prefix, i);
+                String             applicationName = String.format("%s-%d", prefix, i);
+
+                ApplicationConsole console = consoleBuilder == null ? null : consoleBuilder.realize(applicationName);
+
+                if (console == null)
+                {
+                    console = new NullApplicationConsole();
+                }
 
                 applications.add(builder.realize(schema, applicationName, console));
             }
@@ -100,13 +128,16 @@ public abstract class AbstractApplicationGroupBuilder<A extends Application<A>, 
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
+    public G realize(ApplicationConsole overridingConsole) throws java.io.IOException
+    {
+        return realize(overridingConsole == null ? null : new SingletonApplicationConsoleBuilder(overridingConsole));
+    }
+
+
     @Override
     public G realize() throws IOException
     {
-        return realize(new NullApplicationConsole());
+        return realize((ApplicationConsoleBuilder) null);
     }
 
 

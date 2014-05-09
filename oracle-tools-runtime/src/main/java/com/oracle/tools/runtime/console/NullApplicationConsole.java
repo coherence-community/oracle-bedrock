@@ -26,6 +26,7 @@
 package com.oracle.tools.runtime.console;
 
 import com.oracle.tools.runtime.ApplicationConsole;
+import com.oracle.tools.runtime.ApplicationConsoleBuilder;
 
 import com.oracle.tools.runtime.java.io.NullReader;
 import com.oracle.tools.runtime.java.io.NullWriter;
@@ -107,5 +108,24 @@ public class NullApplicationConsole implements ApplicationConsole
     public Reader getInputReader()
     {
         return m_inputReader;
+    }
+
+
+    /**
+     * Obtains a {@link ApplicationConsoleBuilder} for the
+     * {@link NullApplicationConsole}.
+     *
+     * @return a {@link ApplicationConsoleBuilder}
+     */
+    public static ApplicationConsoleBuilder builder()
+    {
+        return new ApplicationConsoleBuilder()
+        {
+            @Override
+            public ApplicationConsole realize(String applicationName)
+            {
+                return new NullApplicationConsole();
+            }
+        };
     }
 }
