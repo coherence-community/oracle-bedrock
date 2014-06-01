@@ -43,6 +43,7 @@ import java.util.TreeSet;
  *
  * @author Brian Oliver
  */
+@Deprecated
 public class Cluster extends AbstractApplicationGroup<ClusterMember>
 {
     /**
@@ -50,7 +51,7 @@ public class Cluster extends AbstractApplicationGroup<ClusterMember>
      *
      * @param members The collection of {@link ClusterMember}s.
      */
-    Cluster(List<ClusterMember> members)
+    Cluster(List<? extends ClusterMember> members)
     {
         super(members);
     }

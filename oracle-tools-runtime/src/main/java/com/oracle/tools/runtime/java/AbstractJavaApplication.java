@@ -75,8 +75,8 @@ import javax.management.remote.JMXConnector;
  *
  * @author Brian Oliver
  */
-public abstract class AbstractJavaApplication<A extends JavaApplication<A>, P extends JavaProcess>
-    extends AbstractApplication<A, P> implements JavaApplication<A>
+public abstract class AbstractJavaApplication<A extends AbstractJavaApplication<A, P>, P extends JavaProcess>
+    extends AbstractApplication<A, P> implements FluentJavaApplication<A>
 {
     /**
      * The System Properties used to create the underlying {@link Process} represented by
@@ -104,15 +104,15 @@ public abstract class AbstractJavaApplication<A extends JavaApplication<A>, P ex
      * @param defaultTimeoutUnits   the default timeout duration {@link TimeUnit}
      * @param interceptors          the {@link LifecycleEventInterceptor}s
      */
-    public AbstractJavaApplication(P                                      process,
-                                   String                                 name,
-                                   ApplicationConsole                     console,
-                                   Properties                             environmentVariables,
-                                   Properties                             systemProperties,
-                                   boolean                                isDiagnosticsEnabled,
-                                   long                                   defaultTimeout,
-                                   TimeUnit                               defaultTimeoutUnits,
-                                   Iterable<LifecycleEventInterceptor<A>> interceptors)
+    public AbstractJavaApplication(P                                              process,
+                                   String                                         name,
+                                   ApplicationConsole                             console,
+                                   Properties                                     environmentVariables,
+                                   Properties                                     systemProperties,
+                                   boolean                                        isDiagnosticsEnabled,
+                                   long                                           defaultTimeout,
+                                   TimeUnit                                       defaultTimeoutUnits,
+                                   Iterable<LifecycleEventInterceptor<? super A>> interceptors)
     {
         super(process,
               name,

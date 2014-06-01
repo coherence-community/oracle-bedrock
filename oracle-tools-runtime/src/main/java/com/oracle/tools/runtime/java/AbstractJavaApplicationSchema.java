@@ -39,6 +39,8 @@ import static com.oracle.tools.runtime.java.JavaApplication.SUN_MANAGEMENT_JMXRE
 import static com.oracle.tools.runtime.java.JavaApplication.SUN_MANAGEMENT_JMXREMOTE_PORT;
 import static com.oracle.tools.runtime.java.JavaApplication.SUN_MANAGEMENT_JMXREMOTE_SSL;
 
+import com.sun.tools.internal.xjc.reader.dtd.TDTDReader;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -50,9 +52,9 @@ import java.util.List;
  *
  * @author Brian Oliver
  */
-public abstract class AbstractJavaApplicationSchema<A extends JavaApplication<A>,
-                                                    S extends JavaApplicationSchema<A, S>>
-    extends AbstractApplicationSchema<A, S> implements JavaApplicationSchema<A, S>
+public abstract class AbstractJavaApplicationSchema<A extends JavaApplication,
+                                                    S extends AbstractJavaApplicationSchema<A, S>>
+    extends AbstractApplicationSchema<A, S> implements FluentJavaApplicationSchema<A, S>
 {
     /**
      * The class name for the {@link JavaApplication}.
@@ -220,6 +222,36 @@ public abstract class AbstractJavaApplicationSchema<A extends JavaApplication<A>
         m_systemPropertiesBuilder.setProperty(name, value);
 
         return (S) this;
+    }
+
+
+    /**
+     * Obtains the specified system property from the system properties builder
+     * and casts it to the specified type.  Should the property not exist the default value
+     * is returned.
+     *
+     * @param name           the name of the system property
+     * @param propertyClass  the desired property value type
+     * @param defaultValue   the default value to use if the property is not defined
+     * @param <T>            the type of the system proeprty
+     *
+     * @return  the system property value alternatively the specified default value
+     *          should the system property not be defined
+     */
+    public <T> T getSystemProperty(String   name,
+                                   Class<T> propertyClass,
+                                   T        defaultValue)
+    {
+        if (m_systemPropertiesBuilder.containsProperty(name))
+        {
+            Object property = m_systemPropertiesBuilder.getProperty(name);
+
+            return propertyClass.cast(property);
+        }
+        else
+        {
+            return defaultValue;
+        }
     }
 
 

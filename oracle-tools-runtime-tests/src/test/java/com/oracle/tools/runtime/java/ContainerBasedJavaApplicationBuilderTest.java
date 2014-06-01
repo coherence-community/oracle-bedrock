@@ -46,9 +46,9 @@ public class ContainerBasedJavaApplicationBuilderTest extends AbstractJavaApplic
     /**
      * {@inheritDoc}
      */
-    public JavaApplicationBuilder<SimpleJavaApplication, SimpleJavaApplicationSchema> newJavaApplicationBuilder()
+    public JavaApplicationBuilder<JavaApplication> newJavaApplicationBuilder()
     {
-        return new ContainerBasedJavaApplicationBuilder<SimpleJavaApplication, SimpleJavaApplicationSchema>();
+        return new ContainerBasedJavaApplicationBuilder<JavaApplication>();
     }
 
 

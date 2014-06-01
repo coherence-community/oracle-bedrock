@@ -44,17 +44,22 @@ import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
 /**
- * An {@link AbstractApplication} is a base implementation for an
- * {@link Application} that internally uses an {@link ApplicationProcess} as a
- * means of representing and controlling the said {@link Application}.
+ * A base implementation of an {@link Application} that internally uses an
+ * {@link ApplicationProcess} as a means of representing and controlling the said
+ * {@link Application}.
  * <p>
  * Copyright (c) 2011. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Brian Oliver
  * @author Harvey Raja
+ *
+ * @param <A>  the type of {@link AbstractApplication} to permit fluent method calls
+ * @param <P>  the type of {@link ApplicationProcess} used to internally represent
+ *             the underlying {@link Application} at runtime
  */
-public abstract class AbstractApplication<A, P extends ApplicationProcess> implements Application<A>
+public abstract class AbstractApplication<A extends AbstractApplication<A, P>, P extends ApplicationProcess>
+    implements FluentApplication<A>
 {
     /**
      * The default timeout for the {@link Application}.
@@ -120,7 +125,7 @@ public abstract class AbstractApplication<A, P extends ApplicationProcess> imple
      * The {@link LifecycleEventInterceptor}s that must be executed for
      * {@link LifecycleEvent}s on the {@link Application}.
      */
-    private List<LifecycleEventInterceptor<A>> m_interceptors;
+    private List<LifecycleEventInterceptor<? super A>> m_interceptors;
 
 
     /**
@@ -152,14 +157,14 @@ public abstract class AbstractApplication<A, P extends ApplicationProcess> imple
      * @param defaultTimeoutUnits   the default timeout duration {@link TimeUnit}
      * @param interceptors          the {@link LifecycleEventInterceptor}s
      */
-    public AbstractApplication(P                                      process,
-                               String                                 name,
-                               ApplicationConsole                     console,
-                               Properties                             environmentVariables,
-                               boolean                                isDiagnosticsEnabled,
-                               long                                   defaultTimeout,
-                               TimeUnit                               defaultTimeoutUnits,
-                               Iterable<LifecycleEventInterceptor<A>> interceptors)
+    public AbstractApplication(P                                              process,
+                               String                                         name,
+                               ApplicationConsole                             console,
+                               Properties                                     environmentVariables,
+                               boolean                                        isDiagnosticsEnabled,
+                               long                                           defaultTimeout,
+                               TimeUnit                                       defaultTimeoutUnits,
+                               Iterable<LifecycleEventInterceptor<? super A>> interceptors)
     {
         m_process              = process;
         m_name                 = name;
@@ -170,11 +175,11 @@ public abstract class AbstractApplication<A, P extends ApplicationProcess> imple
         m_defaultTimeoutUnits  = defaultTimeoutUnits;
 
         // make a copy of the interceptors
-        m_interceptors = new ArrayList<LifecycleEventInterceptor<A>>();
+        m_interceptors = new ArrayList<LifecycleEventInterceptor<? super A>>();
 
         if (interceptors != null)
         {
-            for (LifecycleEventInterceptor<A> interceptor : interceptors)
+            for (LifecycleEventInterceptor<? super A> interceptor : interceptors)
             {
                 m_interceptors.add(interceptor);
             }
@@ -286,7 +291,7 @@ public abstract class AbstractApplication<A, P extends ApplicationProcess> imple
             }
         };
 
-        for (LifecycleEventInterceptor<A> interceptor : this.getLifecycleInterceptors())
+        for (LifecycleEventInterceptor<? super A> interceptor : this.getLifecycleInterceptors())
         {
             interceptor.onEvent(event);
         }
@@ -326,7 +331,7 @@ public abstract class AbstractApplication<A, P extends ApplicationProcess> imple
 
 
     @Override
-    public Iterable<LifecycleEventInterceptor<A>> getLifecycleInterceptors()
+    public Iterable<LifecycleEventInterceptor<? super A>> getLifecycleInterceptors()
     {
         return m_interceptors;
     }

@@ -25,8 +25,6 @@
 
 package com.oracle.tools.runtime;
 
-import java.io.IOException;
-
 /**
  * An {@link ApplicationGroupBuilder} is a builder for {@link ApplicationGroup}s.
  * That is, collections of related {@link Application}s.
@@ -39,105 +37,9 @@ import java.io.IOException;
  * @param <A>  the type of {@link Application}s that will be built by the
  *             {@link ApplicationGroupBuilder}.
  */
-public interface ApplicationGroupBuilder<A extends Application<A>, S extends ApplicationSchema<A, S>,
-                                         B extends ApplicationBuilder<A, S>, G extends ApplicationGroup<A>>
+@Deprecated
+public interface ApplicationGroupBuilder<A extends Application, S extends ApplicationSchema<A>,
+                                         B extends ApplicationBuilder<A>, G extends ApplicationGroup<A>>
+    extends AssemblyBuilder<A, G>
 {
-    /**
-     * Adds an {@link ApplicationBuilder} to the {@link ApplicationGroupBuilder}
-     * that will be used to realize a type of {@link Application} when the
-     * {@link ApplicationGroup} is realized.
-     * <p>
-     * Multiple calls to this method is permitted, this allowing an {@link ApplicationGroup}
-     * to contain different types of {@link Application}s.
-     * <p>
-     * By default no {@link ApplicationConsole} will be used for the realized
-     * {@link Application}s, unless one is specified when realizing the {@link ApplicationGroup}.
-     *
-     * @param applicationBuilder     the {@link ApplicationBuilder} for the {@link Application}s
-     * @param applicationSchema      the {@link ApplicationSchema} from which to
-     *                               realize/configure the {@link Application}s
-     * @param applicationNamePrefix  the {@link Application} name prefix for each
-     *                               of the realized {@link Application}
-     * @param count                  the number of instances of the {@link Application} that should be realized for
-     *                               the {@link ApplicationGroup} when {@link #realize(ApplicationConsole)} is called
-     */
-    public void addBuilder(B      applicationBuilder,
-                           S      applicationSchema,
-                           String applicationNamePrefix,
-                           int    count);
-
-
-    /**
-     * Adds an {@link ApplicationBuilder} to the {@link ApplicationGroupBuilder}
-     * that will be used to realize a type of {@link Application} when the
-     * {@link ApplicationGroup} is realized.
-     * <p>
-     * Multiple calls to this method is permitted, this allowing an {@link ApplicationGroup}
-     * to contain different types of {@link Application}s.
-     * <p>
-     * By default a new {@link ApplicationConsole} provided by the {@link ApplicationConsoleBuilder}
-     * will used for each {@link Application} realized when creating the {@link ApplicationGroup}.
-     *
-     * @param applicationBuilder     the {@link ApplicationBuilder} for the {@link Application}s
-     * @param applicationSchema      the {@link ApplicationSchema} from which to
-     *                               realize/configure the {@link Application}s
-     * @param applicationNamePrefix  the {@link Application} name prefix for each
-     *                               of the realized {@link Application}
-     * @param count                  the number of instances of the {@link Application} that should be realized for
-     *                               the {@link ApplicationGroup} when {@link #realize(ApplicationConsole)} is called
-     * @param consoleBuilder         the {@link ApplicationConsoleBuilder} to be used to provide
-     *                               {@link ApplicationConsole}s for realized {@link Application}s.
-     */
-    public void addBuilder(B                         applicationBuilder,
-                           S                         applicationSchema,
-                           String                    applicationNamePrefix,
-                           int                       count,
-                           ApplicationConsoleBuilder consoleBuilder);
-
-
-    /**
-     * Realizes an instance of an {@link ApplicationGroup}.
-     *
-     * @param overridingConsole  the {@link ApplicationConsole} that will be used for I/O by all of the
-     *                           {@link Application}s realized in the {@link ApplicationGroup}, including
-     *                           those that had a specific {@link ApplicationConsoleBuilder} specified for
-     *                           them using {@link #addBuilder(ApplicationBuilder, ApplicationSchema, String, int, ApplicationConsoleBuilder)}
-     *                           When this is <code>null</code> the defined {@link ApplicationConsole}
-     *                           will be used for each {@link Application} in the {@link ApplicationGroup}
-     *
-     * @return an {@link ApplicationGroup} representing the collection of realized {@link Application}s.
-     *
-     * @throws IOException Thrown if a problem occurs while realizing the application
-     */
-    public G realize(ApplicationConsole overridingConsole) throws IOException;
-
-
-    /**
-     * Realizes an instance of an {@link ApplicationGroup}.
-     *
-     * @param overridingConsoleBuilder  the {@link ApplicationConsoleBuilder} that will be used to create
-     *                                  {@link ApplicationConsole}s for each of the realized {@link Application}s
-     *                                  in the {@link ApplicationGroup}, overriding those that had a specific
-     *                                  {@link ApplicationConsoleBuilder} specified for them using
-     *                                  {@link #addBuilder(ApplicationBuilder, ApplicationSchema, String, int, ApplicationConsoleBuilder)}
-     *                                  When this is <code>null</code> the defined {@link ApplicationConsole}
-     *                                  will be used for each {@link Application} in the {@link ApplicationGroup}
-     *
-     * @return an {@link ApplicationGroup} representing the collection of realized {@link Application}s.
-     *
-     * @throws IOException Thrown if a problem occurs while realizing the application
-     */
-    public G realize(ApplicationConsoleBuilder overridingConsoleBuilder) throws IOException;
-
-
-    /**
-     * Realizes an instance of an {@link ApplicationGroup} consisting of the {@link Application}s
-     * defined by the {@link ApplicationGroupBuilder}, using the {@link ApplicationConsole}s
-     * that were defined for them.
-     *
-     * @return an {@link ApplicationGroup} representing the collection of realized {@link Application}s.
-     *
-     * @throws IOException Thrown if a problem occurs while realizing the application
-     */
-    public G realize() throws IOException;
 }

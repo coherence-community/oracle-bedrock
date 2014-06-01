@@ -32,56 +32,55 @@ import java.io.IOException;
 
 /**
  * An {@link ApplicationBuilder} is responsible the creation of {@link Application}s based on {@link ApplicationSchema}s.
- *
- * @param <A>  the type of the {@link Application}s the {@link ApplicationBuilder} will realize
- * @param <S>  the type of the {@link ApplicationSchema} for the {@link Application}s
  * <p>
  * Copyright (c) 2011. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Brian Oliver
+ *
+ * @param <A>  the type of the {@link Application}s the {@link ApplicationBuilder} will realize
  */
-public interface ApplicationBuilder<A extends Application<A>, S extends ApplicationSchema<A, S>>
+public interface ApplicationBuilder<A extends Application>
 {
     /**
      * Realizes an instance of an {@link Application}.
      *
-     * @param schema           the {@link ApplicationSchema} to use for realizing the {@link Application}
-     * @param applicationName  the name of the application
-     * @param console          the {@link ApplicationConsole} that will be used for I/O by the
-     *                         realized {@link Application}. This may be <code>null</code> if not required
+     * @param applicationSchema  the {@link ApplicationSchema} to use for realizing the {@link Application}
+     * @param applicationName    the name of the application
+     * @param console            the {@link ApplicationConsole} that will be used for I/O by the
+     *                           realized {@link Application}. This may be <code>null</code> if not required
      *
      * @return an {@link Application} representing the application realized by the {@link ApplicationBuilder}
      *
      * @throws IOException when a problem occurs while starting the application
      */
-    public A realize(S                  schema,
-                     String             applicationName,
-                     ApplicationConsole console) throws IOException;
+    public <T extends A, S extends ApplicationSchema<T>> T realize(S                  applicationSchema,
+                                                                   String             applicationName,
+                                                                   ApplicationConsole console) throws IOException;
 
 
     /**
      * Realizes an instance of an {@link Application} (using a {@link SystemApplicationConsole}).
      *
-     * @param schema            the {@link ApplicationSchema} to use for realizing the {@link Application}
-     * @param applicationName   the name of the application.
+     * @param applicationSchema  the {@link ApplicationSchema} to use for realizing the {@link Application}
+     * @param applicationName    the name of the application.
      *
      * @return an {@link Application} representing the application realized by the {@link ApplicationBuilder}
      *
      * @throws IOException when a problem occurs while starting the application
      */
-    public A realize(S      schema,
-                     String applicationName) throws IOException;
+    public <T extends A, S extends ApplicationSchema<T>> T realize(S      applicationSchema,
+                                                                   String applicationName) throws IOException;
 
 
     /**
      * Realizes an instance of an {@link Application} (without a name and using a {@link NullApplicationConsole}).
      *
-     * @param schema  the {@link ApplicationSchema} to use for realizing the {@link Application}
+     * @param applicationSchema  the {@link ApplicationSchema} to use for realizing the {@link Application}
      *
      * @return an {@link Application} representing the application realized by the {@link ApplicationBuilder}
      *
      * @throws IOException  when a problem occurs while starting the application
      */
-    public A realize(S schema) throws IOException;
+    public <T extends A, S extends ApplicationSchema<T>> T realize(S applicationSchema) throws IOException;
 }

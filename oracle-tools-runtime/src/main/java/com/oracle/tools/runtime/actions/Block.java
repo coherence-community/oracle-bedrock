@@ -27,6 +27,7 @@ package com.oracle.tools.runtime.actions;
 
 import com.oracle.tools.runtime.Application;
 import com.oracle.tools.runtime.ApplicationGroup;
+import com.oracle.tools.runtime.Assembly;
 
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -39,7 +40,7 @@ import java.util.LinkedList;
  *
  * @author Brian Oliver
  */
-public class Block<A extends Application<A>, G extends ApplicationGroup<A>> implements Sequence<A, G>
+public class Block<A extends Application, G extends Assembly<A>> implements Sequence<A, G>
 {
     /**
      * The {@link Action}s to be performed.

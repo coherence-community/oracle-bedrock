@@ -38,8 +38,8 @@ package com.oracle.tools.runtime.java;
  * @author Brian Oliver
  */
 @Deprecated
-public class NativeJavaApplicationBuilder<A extends JavaApplication<A>, S extends JavaApplicationSchema<A, S>>
-    extends LocalJavaApplicationBuilder<A, S>
+public class NativeJavaApplicationBuilder<A extends JavaApplication, S extends JavaApplicationSchema<A>>
+    extends LocalJavaApplicationBuilder<A>
 {
     /**
      * Constructs a {@link NativeJavaApplicationBuilder}.

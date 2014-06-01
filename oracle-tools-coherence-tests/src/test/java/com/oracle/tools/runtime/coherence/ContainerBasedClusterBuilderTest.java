@@ -36,14 +36,15 @@ import com.oracle.tools.runtime.java.JavaApplicationBuilder;
  *
  * @author Brian Oliver
  */
+@Deprecated
 public class ContainerBasedClusterBuilderTest extends AbstractClusterBuilderTest
 {
     /**
      * {@inheritDoc}
      */
     @Override
-    public JavaApplicationBuilder<ClusterMember, ClusterMemberSchema> newJavaApplicationBuilder()
+    public JavaApplicationBuilder<ClusterMember> newJavaApplicationBuilder()
     {
-        return new ContainerBasedJavaApplicationBuilder<ClusterMember, ClusterMemberSchema>();
+        return new ContainerBasedJavaApplicationBuilder<ClusterMember>();
     }
 }

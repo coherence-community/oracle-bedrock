@@ -27,6 +27,7 @@ package com.oracle.tools.runtime.java;
 
 import com.oracle.tools.runtime.Application;
 import com.oracle.tools.runtime.ApplicationConsole;
+import com.oracle.tools.runtime.ApplicationSchema;
 import com.oracle.tools.runtime.PropertiesBuilder;
 
 import com.oracle.tools.runtime.concurrent.RemoteCallable;
@@ -77,8 +78,7 @@ import java.util.logging.Logger;
  * @author Brian Oliver
  * @author Jonathan Knight
  */
-public class ContainerBasedJavaApplicationBuilder<A extends JavaApplication<A>, S extends JavaApplicationSchema<A, S>>
-    extends AbstractJavaApplicationBuilder<A, S>
+public class ContainerBasedJavaApplicationBuilder<A extends JavaApplication> extends AbstractJavaApplicationBuilder<A>
 {
     /**
      * The {@link Logger} for this class.
@@ -122,8 +122,8 @@ public class ContainerBasedJavaApplicationBuilder<A extends JavaApplication<A>, 
      * @param schemaProperties  the system {@link Properties} that have been realized for the
      *                          {@link JavaApplicationSchema}
      */
-    protected void sanityCheck(S          schema,
-                               Properties schemaProperties)
+    protected <T extends A, S extends ApplicationSchema<T>> void sanityCheck(S          schema,
+                                                                             Properties schemaProperties)
     {
         // ensure that if JAVA_NET_PREFER_IPV4_STACK is requested by the schema it has also been
         // established at the  platform level as this is only where it can actually be achieved with Java 7+.
@@ -160,10 +160,13 @@ public class ContainerBasedJavaApplicationBuilder<A extends JavaApplication<A>, 
      * {@inheritDoc}
      */
     @Override
-    public A realize(S                  schema,
-                     String             applicationName,
-                     ApplicationConsole console) throws IOException
+    public <T extends A, S extends ApplicationSchema<T>> T realize(S                  applicationSchema,
+                                                                   String             applicationName,
+                                                                   ApplicationConsole console) throws IOException
     {
+        // TODO: this should be a safe cast but we should also check to make sure
+        JavaApplicationSchema<T> schema = (JavaApplicationSchema) applicationSchema;
+
         try
         {
             // establish the System Properties for the ContainerBasedJavaApplication
@@ -204,7 +207,7 @@ public class ContainerBasedJavaApplicationBuilder<A extends JavaApplication<A>, 
             Properties environmentVariables = PropertiesBuilder.fromCurrentEnvironmentVariables().realize();
 
             // delegate Application creation to the Schema
-            final A application = schema.createJavaApplication(process,
+            final T application = schema.createJavaApplication(process,
                                                                applicationName,
                                                                console,
                                                                environmentVariables,

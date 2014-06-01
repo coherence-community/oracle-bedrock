@@ -57,15 +57,15 @@ public class SimpleJavaApplication extends AbstractJavaApplication<SimpleJavaApp
      * @param defaultTimeoutUnits   the default timeout duration {@link TimeUnit}
      * @param interceptors          the {@link LifecycleEventInterceptor}s
      */
-    public SimpleJavaApplication(JavaProcess                                                process,
-                                 String                                                     name,
-                                 ApplicationConsole                                         console,
-                                 Properties                                                 environmentVariables,
-                                 Properties                                                 systemProperties,
-                                 boolean                                                    isDiagnosticsEnabled,
-                                 long                                                       defaultTimeout,
-                                 TimeUnit                                                   defaultTimeoutUnits,
-                                 Iterable<LifecycleEventInterceptor<SimpleJavaApplication>> interceptors)
+    public SimpleJavaApplication(JavaProcess                                                        process,
+                                 String                                                             name,
+                                 ApplicationConsole                                                 console,
+                                 Properties                                                         environmentVariables,
+                                 Properties                                                         systemProperties,
+                                 boolean                                                            isDiagnosticsEnabled,
+                                 long                                                               defaultTimeout,
+                                 TimeUnit                                                           defaultTimeoutUnits,
+                                 Iterable<LifecycleEventInterceptor<? super SimpleJavaApplication>> interceptors)
     {
         super(process,
               name,

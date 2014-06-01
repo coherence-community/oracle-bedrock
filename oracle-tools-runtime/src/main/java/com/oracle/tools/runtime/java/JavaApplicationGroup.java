@@ -39,7 +39,7 @@ import com.oracle.tools.runtime.ApplicationGroup;
  *
  * @author Brian Oliver
  */
-public interface JavaApplicationGroup<A extends JavaApplication<A>> extends ApplicationGroup<A>
+public interface JavaApplicationGroup<A extends JavaApplication> extends ApplicationGroup<A>
 {
     // this is deliberately empty
 }

@@ -27,25 +27,25 @@ package com.oracle.tools.runtime.actions;
 
 import com.oracle.tools.runtime.Application;
 import com.oracle.tools.runtime.ApplicationGroup;
+import com.oracle.tools.runtime.Assembly;
 
 import java.io.Closeable;
 
 /**
- * An {@link ActionExecutor} executes {@link Action}s against a specific
- * {@link ApplicationGroup} instance.
+ * Executes {@link Action}s against an {@link Assembly}.
  * <p>
  * Copyright (c) 2014. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Brian Oliver
  */
-public interface ActionExecutor<A extends Application<A>, G extends ApplicationGroup<A>> extends Closeable
+public interface ActionExecutor<A extends Application, G extends Assembly<A>> extends Closeable
 {
     /**
-     * Obtains the {@link ApplicationGroup} on which the {@link ActionExecutor}
+     * Obtains the {@link Assembly} on which the {@link ActionExecutor}
      * will execute {@link Action}s
      *
-     * @return  the {@link ApplicationGroup}
+     * @return  the {@link Assembly}
      */
-    public G getApplicationGroup();
+    public G getAssembly();
 }

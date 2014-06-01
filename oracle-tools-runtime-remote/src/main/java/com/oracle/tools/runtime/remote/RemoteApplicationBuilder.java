@@ -32,17 +32,15 @@ import com.oracle.tools.runtime.ApplicationSchema;
 /**
  * A {@link RemoteApplicationBuilder} is a specialized {@link ApplicationBuilder}, responsible for building
  * that execute remotely, typically on another machine.
- *
- * @param <A>  the type of the {@link Application}s the {@link RemoteApplicationBuilder} will realize
- * @param <S>  the type of the {@link ApplicationSchema} for the {@link Application}s
  * <p>
  * Copyright (c) 2014. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Brian Oliver
+ *
+ * @param <A>  the type of the {@link Application}s the {@link RemoteApplicationBuilder} will realize
  */
-public interface RemoteApplicationBuilder<A extends Application<A>, S extends ApplicationSchema<A, S>>
-    extends ApplicationBuilder<A, S>
+public interface RemoteApplicationBuilder<A extends Application> extends ApplicationBuilder<A>
 {
     /**
      * The default port for secure connection to a remote server (over SSH)

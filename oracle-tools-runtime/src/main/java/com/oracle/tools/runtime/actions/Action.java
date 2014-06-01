@@ -26,13 +26,13 @@
 package com.oracle.tools.runtime.actions;
 
 import com.oracle.tools.runtime.Application;
-import com.oracle.tools.runtime.ApplicationGroup;
+import com.oracle.tools.runtime.Assembly;
 
 /**
  * Defines an {@link Action} to be performed by a {@link ActionExecutor} on an
- * {@link ApplicationGroup} or {@link Application}s in an {@link ApplicationGroup}.
+ * {@link Assembly} or {@link Application}s in an {@link Assembly}.
  * <p>
- * Developers wishing to define custom {@link Action}s for {@link ApplicationGroup}s
+ * Developers wishing to define custom {@link Action}s for {@link Assembly}s
  * should implement the {@link CustomAction} interface.
  * <p>
  * Copyright (c) 2014. All Rights Reserved. Oracle Corporation.<br>
@@ -46,6 +46,6 @@ import com.oracle.tools.runtime.ApplicationGroup;
  * @see Block
  * @see ConditionalBlock
  */
-public interface Action<A extends Application<A>, G extends ApplicationGroup<A>>
+public interface Action<A extends Application, G extends Assembly<A>>
 {
 }

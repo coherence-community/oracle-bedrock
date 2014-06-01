@@ -36,12 +36,12 @@ import com.oracle.tools.runtime.java.LocalJavaApplicationBuilder;
  *
  * @author Brian Oliver
  */
-public class LocalClusterMemberTest
-    extends AbstractClusterMemberTest<LocalJavaApplicationBuilder<ClusterMember, ClusterMemberSchema>>
+@Deprecated
+public class LocalClusterMemberTest extends AbstractClusterMemberTest<LocalJavaApplicationBuilder<ClusterMember>>
 {
     @Override
-    public LocalJavaApplicationBuilder<ClusterMember, ClusterMemberSchema> newJavaApplicationBuilder()
+    public LocalJavaApplicationBuilder<ClusterMember> newJavaApplicationBuilder()
     {
-        return new LocalJavaApplicationBuilder<ClusterMember, ClusterMemberSchema>();
+        return new LocalJavaApplicationBuilder<ClusterMember>();
     }
 }

@@ -25,7 +25,7 @@
 
 package com.oracle.tools.runtime.coherence.callables;
 
-import com.oracle.tools.runtime.coherence.ClusterMember;
+import com.oracle.tools.runtime.coherence.ServiceStatus;
 
 import com.oracle.tools.runtime.concurrent.RemoteCallable;
 
@@ -43,7 +43,7 @@ import com.tangosol.net.Service;
  *
  * @author Brian Oliver
  */
-public class GetServiceStatus implements RemoteCallable<ClusterMember.ServiceStatus>
+public class GetServiceStatus implements RemoteCallable<ServiceStatus>
 {
     /**
      * The name of the service.
@@ -63,7 +63,7 @@ public class GetServiceStatus implements RemoteCallable<ClusterMember.ServiceSta
 
 
     @Override
-    public ClusterMember.ServiceStatus call() throws Exception
+    public ServiceStatus call() throws Exception
     {
         com.tangosol.net.Cluster cluster = CacheFactory.getCluster();
         Service                  service = cluster == null ? null : cluster.getService(serviceName);
@@ -84,36 +84,36 @@ public class GetServiceStatus implements RemoteCallable<ClusterMember.ServiceSta
                 switch (backupStrength)
                 {
                 case 0 :
-                    return ClusterMember.ServiceStatus.ORPHANED;
+                    return ServiceStatus.ORPHANED;
 
                 case 1 :
-                    return ClusterMember.ServiceStatus.ENDANGERED;
+                    return ServiceStatus.ENDANGERED;
 
                 case 2 :
-                    return ClusterMember.ServiceStatus.NODE_SAFE;
+                    return ServiceStatus.NODE_SAFE;
 
                 case 3 :
-                    return ClusterMember.ServiceStatus.MACHINE_SAFE;
+                    return ServiceStatus.MACHINE_SAFE;
 
                 case 4 :
-                    return ClusterMember.ServiceStatus.RACK_SAFE;
+                    return ServiceStatus.RACK_SAFE;
 
                 case 5 :
-                    return ClusterMember.ServiceStatus.SITE_SAFE;
+                    return ServiceStatus.SITE_SAFE;
 
                 default :
-                    return ClusterMember.ServiceStatus.UNKNOWN;
+                    return ServiceStatus.UNKNOWN;
                 }
             }
             else
             {
-                return ClusterMember.ServiceStatus.RUNNING;
+                return ServiceStatus.RUNNING;
             }
 
         }
         else
         {
-            return ClusterMember.ServiceStatus.STOPPED;
+            return ServiceStatus.STOPPED;
         }
     }
 }

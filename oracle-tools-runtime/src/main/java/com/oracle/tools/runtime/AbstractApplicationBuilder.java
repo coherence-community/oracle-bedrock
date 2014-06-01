@@ -33,17 +33,15 @@ import java.util.UUID;
 
 /**
  * An {@link AbstractApplicationBuilder} is a base implementation of an {@link ApplicationBuilder}.
- *
- * @param <A>  the type of the {@link Application}s the {@link ApplicationBuilder} will realize
- * @param <S>  the type of the {@link ApplicationSchema} for the {@link Application}s
  * <p>
  * Copyright (c) 2011. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Brian Oliver
+ *
+ * @param <A>  the type of the {@link Application}s the {@link ApplicationBuilder} will realize
  */
-public abstract class AbstractApplicationBuilder<A extends Application<A>, S extends ApplicationSchema<A, S>>
-    implements ApplicationBuilder<A, S>
+public abstract class AbstractApplicationBuilder<A extends Application> implements ApplicationBuilder<A>
 {
     /**
      * Should diagnostic information be enabled for the {@link Application}s
@@ -74,22 +72,18 @@ public abstract class AbstractApplicationBuilder<A extends Application<A>, S ext
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
-    public A realize(S schema) throws IOException
+    @Override
+    public <T extends A, S extends ApplicationSchema<T>> T realize(S applicationSchema) throws IOException
     {
-        return realize(schema, UUID.randomUUID().toString());
+        return realize(applicationSchema, UUID.randomUUID().toString());
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
-    public A realize(S      schema,
-                     String applicationName) throws IOException
+    @Override
+    public <T extends A, S extends ApplicationSchema<T>> T realize(S      applicationSchema,
+                                                                   String applicationName) throws IOException
     {
-        return realize(schema, applicationName, new NullApplicationConsole());
+        return realize(applicationSchema, applicationName, new NullApplicationConsole());
     }
 
 
@@ -103,26 +97,31 @@ public abstract class AbstractApplicationBuilder<A extends Application<A>, S ext
     protected void raiseApplicationLifecycleEvent(final A                     application,
                                                   final Application.EventKind eventKind)
     {
-        // construct the LifecycleEvent
-        @SuppressWarnings("rawtypes") LifecycleEvent event = new LifecycleEvent<A>()
+        if (application instanceof FluentApplication)
         {
-            @Override
-            public Application.EventKind getType()
-            {
-                return eventKind;
-            }
+            FluentApplication<?> fluentApplication = (FluentApplication) application;
 
-            @Override
-            public A getObject()
+            // construct the LifecycleEvent
+            LifecycleEvent event = new LifecycleEvent<A>()
             {
-                return application;
-            }
-        };
+                @Override
+                public Application.EventKind getType()
+                {
+                    return eventKind;
+                }
 
-        // raise the event
-        for (LifecycleEventInterceptor<A> interceptor : application.getLifecycleInterceptors())
-        {
-            interceptor.onEvent(event);
+                @Override
+                public A getObject()
+                {
+                    return application;
+                }
+            };
+
+            // raise the event
+            for (LifecycleEventInterceptor interceptor : fluentApplication.getLifecycleInterceptors())
+            {
+                interceptor.onEvent(event);
+            }
         }
     }
 }

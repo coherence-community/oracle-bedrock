@@ -32,17 +32,15 @@ import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
 /**
- * An {@link Application} provides a mechanism to represent, access and control
- * an {@link ApplicationProcess}.
- *
- * @param <A> the concrete type of {@link Application}
+ * A platform and location independent mechanism to represent, access and
+ * control a running application.
  * <p>
  * Copyright (c) 2011. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Brian Oliver
  */
-public interface Application<A> extends Closeable
+public interface Application extends Closeable
 {
     /**
      * The {@link Application} {@link EventKind}s.
@@ -50,8 +48,6 @@ public interface Application<A> extends Closeable
     public static enum EventKind {REALIZED,
                                   DESTROYED}
 
-
-    ;
 
     /**
      * Obtains the environment variables that were supplied to the
@@ -155,12 +151,4 @@ public interface Application<A> extends Closeable
      * @return the {@link TimeUnit} for default {@link Application} timeouts
      */
     public TimeUnit getDefaultTimeoutUnits();
-
-
-    /**
-     * Obtains the {@link LifecycleEventInterceptor}s for the {@link Application}.
-     *
-     * @return  the {@link LifecycleEventInterceptor}s
-     */
-    public Iterable<LifecycleEventInterceptor<A>> getLifecycleInterceptors();
 }

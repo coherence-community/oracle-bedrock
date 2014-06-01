@@ -61,7 +61,7 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * Functional Tests for {@link com.oracle.tools.runtime.java.LocalJavaApplicationBuilder}s.
+ * Functional Tests for {@link LocalJavaApplicationBuilder}s.
  * <p>
  * Copyright (c) 2013. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
@@ -72,9 +72,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class LocalJavaApplicationBuilderTest extends AbstractJavaApplicationBuilderTest
 {
     @Override
-    public JavaApplicationBuilder<SimpleJavaApplication, SimpleJavaApplicationSchema> newJavaApplicationBuilder()
+    public JavaApplicationBuilder<JavaApplication> newJavaApplicationBuilder()
     {
-        return new LocalJavaApplicationBuilder<SimpleJavaApplication, SimpleJavaApplicationSchema>();
+        return new LocalJavaApplicationBuilder<JavaApplication>();
     }
 
 
@@ -117,8 +117,8 @@ public class LocalJavaApplicationBuilderTest extends AbstractJavaApplicationBuil
             schema.setSystemProperty("server.port", server.getPort());
             schema.setSystemProperty("orphan.children", true);
 
-            LocalJavaApplicationBuilder<SimpleJavaApplication, SimpleJavaApplicationSchema> builder =
-                new LocalJavaApplicationBuilder<SimpleJavaApplication, SimpleJavaApplicationSchema>();
+            LocalJavaApplicationBuilder<SimpleJavaApplication> builder =
+                new LocalJavaApplicationBuilder<SimpleJavaApplication>();
 
             builder.setOrphansPermitted(false);
 
@@ -192,8 +192,8 @@ public class LocalJavaApplicationBuilderTest extends AbstractJavaApplicationBuil
             schema.setSystemProperty("server.port", server.getPort());
             schema.setSystemProperty("orphan.children", false);
 
-            LocalJavaApplicationBuilder<SimpleJavaApplication, SimpleJavaApplicationSchema> builder =
-                new LocalJavaApplicationBuilder<SimpleJavaApplication, SimpleJavaApplicationSchema>();
+            LocalJavaApplicationBuilder<SimpleJavaApplication> builder =
+                new LocalJavaApplicationBuilder<SimpleJavaApplication>();
 
             builder.setOrphansPermitted(false);
 
@@ -248,10 +248,9 @@ public class LocalJavaApplicationBuilderTest extends AbstractJavaApplicationBuil
             schema.setSystemProperty("uuid", uuid);
 
             // build and start the SleepingApplication
-            LocalJavaApplicationBuilder<SimpleJavaApplication, SimpleJavaApplicationSchema> builder =
-                new LocalJavaApplicationBuilder<SimpleJavaApplication, SimpleJavaApplicationSchema>();
+            LocalJavaApplicationBuilder<JavaApplication> builder = new LocalJavaApplicationBuilder<JavaApplication>();
 
-            ApplicationConsole console = new SystemApplicationConsole();
+            ApplicationConsole                           console = new SystemApplicationConsole();
 
             application = builder.realize(schema, "sleeping", console);
 
@@ -295,10 +294,9 @@ public class LocalJavaApplicationBuilderTest extends AbstractJavaApplicationBuil
             schema.setJavaHome(javaHome);
 
             // build and start the SleepingApplication
-            LocalJavaApplicationBuilder<SimpleJavaApplication, SimpleJavaApplicationSchema> builder =
-                new LocalJavaApplicationBuilder<SimpleJavaApplication, SimpleJavaApplicationSchema>();
+            LocalJavaApplicationBuilder<JavaApplication> builder = new LocalJavaApplicationBuilder<JavaApplication>();
 
-            ApplicationConsole console = new SystemApplicationConsole();
+            ApplicationConsole                           console = new SystemApplicationConsole();
 
             application = builder.realize(schema, "sleeping", console);
 

@@ -26,6 +26,7 @@
 package com.oracle.tools.runtime.remote.java;
 
 import com.oracle.tools.runtime.ApplicationConsole;
+import com.oracle.tools.runtime.ApplicationSchema;
 
 import com.oracle.tools.runtime.concurrent.ControllableRemoteExecutor;
 import com.oracle.tools.runtime.concurrent.RemoteCallable;
@@ -59,9 +60,9 @@ import java.util.HashSet;
  *
  * @author Brian Oliver
  */
-public class RemoteJavaApplicationBuilder<A extends JavaApplication<A>, S extends JavaApplicationSchema<A, S>>
-    extends AbstractRemoteApplicationBuilder<A, S, RemoteJavaApplicationEnvironment<A, S>,
-                                             RemoteJavaApplicationBuilder<A, S>> implements JavaApplicationBuilder<A, S>
+public class RemoteJavaApplicationBuilder<A extends JavaApplication>
+    extends AbstractRemoteApplicationBuilder<A, RemoteJavaApplicationEnvironment<A>, RemoteJavaApplicationBuilder<A>>
+    implements JavaApplicationBuilder<A>
 {
     /**
      * The path for the JAVA_HOME.
@@ -166,7 +167,7 @@ public class RemoteJavaApplicationBuilder<A extends JavaApplication<A>, S extend
      *
      * @return  the builder (so that we can perform method chaining)
      */
-    public RemoteJavaApplicationBuilder<A, S> setJavaHome(String remoteJavaHome)
+    public RemoteJavaApplicationBuilder<A> setJavaHome(String remoteJavaHome)
     {
         this.remoteJavaHome = remoteJavaHome;
 
@@ -183,7 +184,7 @@ public class RemoteJavaApplicationBuilder<A extends JavaApplication<A>, S extend
      *
      * @return  the {@link RemoteJavaApplicationBuilder} to allow fluent-method calls
      */
-    public RemoteJavaApplicationBuilder<A, S> setOrphansPermitted(boolean areOrphansPermitted)
+    public RemoteJavaApplicationBuilder<A> setOrphansPermitted(boolean areOrphansPermitted)
     {
         this.areOrphansPermitted = areOrphansPermitted;
 
@@ -212,7 +213,7 @@ public class RemoteJavaApplicationBuilder<A extends JavaApplication<A>, S extend
      *
      * @return  the {@link RemoteJavaApplicationBuilder} to allow fluent-method calls
      */
-    public RemoteJavaApplicationBuilder<A, S> setAutoDeployEnabled(boolean isAutoDeployEnabled)
+    public RemoteJavaApplicationBuilder<A> setAutoDeployEnabled(boolean isAutoDeployEnabled)
     {
         this.isAutoDeployEnabled = isAutoDeployEnabled;
 
@@ -240,7 +241,7 @@ public class RemoteJavaApplicationBuilder<A extends JavaApplication<A>, S extend
      *
      * @return  the {@link RemoteJavaApplicationBuilder} to allow fluent-method calls
      */
-    public RemoteJavaApplicationBuilder<A, S> addDoNotDeployFileName(String fileName)
+    public RemoteJavaApplicationBuilder<A> addDoNotDeployFileName(String fileName)
     {
         doNotDeployFileNames.add(fileName);
 
@@ -260,8 +261,12 @@ public class RemoteJavaApplicationBuilder<A extends JavaApplication<A>, S extend
 
 
     @Override
-    protected RemoteJavaApplicationEnvironment<A, S> getRemoteApplicationEnvironment(S schema) throws IOException
+    protected <T extends A,
+        S extends ApplicationSchema<T>> RemoteJavaApplicationEnvironment<A> getRemoteApplicationEnvironment(S applicationSchema)
+            throws IOException
     {
+        JavaApplicationSchema<A> schema = (JavaApplicationSchema) applicationSchema;
+
         return new RemoteJavaApplicationEnvironment(schema,
                                                     remoteFileSeparatorChar,
                                                     remotePathSeparatorChar,
@@ -273,20 +278,22 @@ public class RemoteJavaApplicationBuilder<A extends JavaApplication<A>, S extend
 
 
     @Override
-    protected A createApplication(S                                      schema,
-                                  RemoteJavaApplicationEnvironment<A, S> environment,
-                                  String                                 applicationName,
-                                  RemoteApplicationProcess               process,
-                                  ApplicationConsole                     console)
+    protected <T extends A, S extends ApplicationSchema<T>> T createApplication(S                                   schema,
+                                                                                RemoteJavaApplicationEnvironment<A> environment,
+                                                                                String                              applicationName,
+                                                                                RemoteApplicationProcess            process,
+                                                                                ApplicationConsole                  console)
     {
+        JavaApplicationSchema<T> javaSchema = (JavaApplicationSchema) schema;
+
         // create a JavaProcess representation of the RemoteApplicationProcess
         RemoteJavaProcess remoteJavaProcess = new RemoteJavaProcess(process, environment.getRemoteExecutor());
 
-        return schema.createJavaApplication(remoteJavaProcess,
-                                            applicationName,
-                                            console,
-                                            environment.getRemoteEnvironmentVariables(),
-                                            environment.getRemoteSystemProperties());
+        return javaSchema.createJavaApplication(remoteJavaProcess,
+                                                applicationName,
+                                                console,
+                                                environment.getRemoteEnvironmentVariables(),
+                                                environment.getRemoteSystemProperties());
     }
 
 

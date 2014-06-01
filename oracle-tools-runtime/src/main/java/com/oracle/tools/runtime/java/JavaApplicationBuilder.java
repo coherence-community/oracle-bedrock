@@ -35,8 +35,7 @@ import com.oracle.tools.runtime.ApplicationBuilder;
  *
  * @author Brian Oliver
  */
-public interface JavaApplicationBuilder<A extends JavaApplication<A>, S extends JavaApplicationSchema<A, S>>
-    extends ApplicationBuilder<A, S>
+public interface JavaApplicationBuilder<A extends JavaApplication> extends ApplicationBuilder<A>
 {
     // this is deliberately empty
 }

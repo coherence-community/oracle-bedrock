@@ -27,20 +27,21 @@ package com.oracle.tools.runtime.actions;
 
 import com.oracle.tools.runtime.Application;
 import com.oracle.tools.runtime.ApplicationGroup;
+import com.oracle.tools.runtime.Assembly;
 
 import java.util.Iterator;
 
 /**
  * A {@link Sequence} is a specialized {@link Action} that defines zero or more
  * {@link Action}s to be performed in sequence by an {@link ActionExecutor} on an
- * {@link ApplicationGroup}.
+ * {@link Assembly}.
  * <p>
  * Copyright (c) 2014. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Brian Oliver
  */
-public interface Sequence<A extends Application<A>, G extends ApplicationGroup<A>> extends Action<A, G>
+public interface Sequence<A extends Application, G extends Assembly<A>> extends Action<A, G>
 {
     /**
      * Obtains the {@link Action}s to be executed in sequence.

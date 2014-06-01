@@ -58,8 +58,8 @@ import javax.management.ObjectName;
  *
  * @author Brian Oliver
  */
-public abstract class AbstractClusterMemberTest<B extends JavaApplicationBuilder<ClusterMember, ClusterMemberSchema>>
-    extends AbstractTest
+@Deprecated
+public abstract class AbstractClusterMemberTest<B extends JavaApplicationBuilder<ClusterMember>> extends AbstractTest
 {
     /**
      * Creates a new {@link com.oracle.tools.runtime.java.JavaApplicationBuilder}
@@ -175,7 +175,7 @@ public abstract class AbstractClusterMemberTest<B extends JavaApplicationBuilder
 
             assertThat(member, new GetLocalMemberId(), is(1));
             assertThat(member, new GetClusterSize(), is(1));
-            assertThat(member, new GetServiceStatus("DistributedCache"), is(ClusterMember.ServiceStatus.ENDANGERED));
+            assertThat(member, new GetServiceStatus("DistributedCache"), is(ServiceStatus.ENDANGERED));
         }
         finally
         {

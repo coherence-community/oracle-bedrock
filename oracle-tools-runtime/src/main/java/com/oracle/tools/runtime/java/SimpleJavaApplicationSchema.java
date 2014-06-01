@@ -40,7 +40,6 @@ import java.util.Properties;
  */
 public class SimpleJavaApplicationSchema
     extends AbstractJavaApplicationSchema<SimpleJavaApplication, SimpleJavaApplicationSchema>
-    implements JavaApplicationSchema<SimpleJavaApplication, SimpleJavaApplicationSchema>
 {
     /**
      * Construct a {@link SimpleJavaApplicationSchema} with a given application
@@ -67,9 +66,6 @@ public class SimpleJavaApplicationSchema
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public SimpleJavaApplication createJavaApplication(JavaProcess        process,
                                                        String             name,
@@ -89,9 +85,6 @@ public class SimpleJavaApplicationSchema
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void configureDefaults()
     {

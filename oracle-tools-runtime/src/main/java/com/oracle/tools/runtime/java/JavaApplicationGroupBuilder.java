@@ -38,8 +38,8 @@ import com.oracle.tools.runtime.ApplicationGroupBuilder;
  *
  * @author Brian Oliver
  */
-public interface JavaApplicationGroupBuilder<A extends JavaApplication<A>, S extends JavaApplicationSchema<A, S>,
-                                             B extends JavaApplicationBuilder<A, S>, G extends JavaApplicationGroup<A>>
+public interface JavaApplicationGroupBuilder<A extends JavaApplication, S extends JavaApplicationSchema<A>,
+                                             B extends JavaApplicationBuilder<A>, G extends JavaApplicationGroup<A>>
     extends ApplicationGroupBuilder<A, S, B, G>
 {
     // this is deliberately empty

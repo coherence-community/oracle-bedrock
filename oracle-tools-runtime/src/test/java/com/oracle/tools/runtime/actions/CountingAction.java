@@ -25,7 +25,7 @@
 
 package com.oracle.tools.runtime.actions;
 
-import com.oracle.tools.runtime.ApplicationGroup;
+import com.oracle.tools.runtime.Assembly;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -66,7 +66,7 @@ public class CountingAction implements CustomAction
 
 
     @Override
-    public void perform(ApplicationGroup group)
+    public void perform(Assembly assembly)
     {
         executionCount.incrementAndGet();
     }

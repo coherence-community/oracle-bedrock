@@ -36,16 +36,16 @@ import java.util.Properties;
 
 /**
  * A base implementation of a {@link RemoteApplicationEnvironment}.
- *
- * @param <A>  the type of the {@link Application}s the {@link RemoteApplicationBuilder} will realize
- * @param <S>  the type of the {@link ApplicationSchema} for the {@link Application}s
  * <p>
  * Copyright (c) 2014. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
+ * @param <A>  the type of the {@link Application}s the {@link RemoteApplicationBuilder} will realize
+ * @param <S>  the type of the {@link ApplicationSchema} for the {@link Application}s
+ *
  * @author Brian Oliver
  */
-public abstract class AbstractRemoteApplicationEnvironment<A extends Application<A>, S extends ApplicationSchema<A, S>>
+public abstract class AbstractRemoteApplicationEnvironment<A extends Application, S extends ApplicationSchema<A>>
     implements RemoteApplicationEnvironment
 {
     /**

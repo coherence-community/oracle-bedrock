@@ -54,14 +54,14 @@ public class SimpleApplication extends AbstractApplication<SimpleApplication, Ap
      * @param defaultTimeoutUnits   the default timeout duration {@link TimeUnit}
      * @param interceptors          the {@link LifecycleEventInterceptor}s
      */
-    public SimpleApplication(ApplicationProcess                                     process,
-                             String                                                 name,
-                             ApplicationConsole                                     console,
-                             Properties                                             environmentVariables,
-                             boolean                                                isDiagnosticsEnabled,
-                             long                                                   defaultTimeout,
-                             TimeUnit                                               defaultTimeoutUnits,
-                             Iterable<LifecycleEventInterceptor<SimpleApplication>> interceptors)
+    public SimpleApplication(ApplicationProcess                                             process,
+                             String                                                         name,
+                             ApplicationConsole                                             console,
+                             Properties                                                     environmentVariables,
+                             boolean                                                        isDiagnosticsEnabled,
+                             long                                                           defaultTimeout,
+                             TimeUnit                                                       defaultTimeoutUnits,
+                             Iterable<LifecycleEventInterceptor<? super SimpleApplication>> interceptors)
     {
         super(process,
               name,

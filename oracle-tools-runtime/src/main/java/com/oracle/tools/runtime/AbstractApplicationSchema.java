@@ -25,6 +25,8 @@
 
 package com.oracle.tools.runtime;
 
+import com.oracle.tools.runtime.java.FluentJavaApplicationSchema;
+
 import java.io.File;
 
 import java.util.ArrayList;
@@ -35,16 +37,18 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
- * An {@link AbstractApplicationSchema} is a base implementation of an
- * {@link ApplicationSchema}.
+ * A base implementation of a {@link FluentApplicationSchema}.
  * <p>
  * Copyright (c) 2011. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Brian Oliver
+ *
+ * @param <A>  the type of {@link Application} that can be configured by the {@link ApplicationSchema}
+ * @param <S>  the type of {@link AbstractApplicationSchema} that will be returned from fluent methods
  */
-public abstract class AbstractApplicationSchema<A extends Application<A>, S extends ApplicationSchema<A, S>>
-    implements ApplicationSchema<A, S>
+public abstract class AbstractApplicationSchema<A extends Application, S extends AbstractApplicationSchema<A, S>>
+    implements FluentApplicationSchema<A, S>
 {
     /**
      * The name of the executable that will be run.
@@ -99,7 +103,7 @@ public abstract class AbstractApplicationSchema<A extends Application<A>, S exte
      * The {@link LifecycleEventInterceptor}s for {@link Application}s
      * realized from the {@link ApplicationSchema}.
      */
-    private LinkedList<LifecycleEventInterceptor<A>> lifecycleInterceptors;
+    private LinkedList<LifecycleEventInterceptor<? super A>> lifecycleInterceptors;
 
 
     /**
@@ -118,7 +122,7 @@ public abstract class AbstractApplicationSchema<A extends Application<A>, S exte
         this.isDiagnosticsEnabled        = false;
         this.defaultTimeout              = 1;
         this.defaultTimeoutUnits         = TimeUnit.MINUTES;
-        this.lifecycleInterceptors       = new LinkedList<LifecycleEventInterceptor<A>>();
+        this.lifecycleInterceptors       = new LinkedList<LifecycleEventInterceptor<? super A>>();
     }
 
 
@@ -248,9 +252,6 @@ public abstract class AbstractApplicationSchema<A extends Application<A>, S exte
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Deprecated
     public boolean isEnvironmentInherited()
     {
@@ -275,9 +276,6 @@ public abstract class AbstractApplicationSchema<A extends Application<A>, S exte
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public boolean isDiagnosticsEnabled()
     {
@@ -285,9 +283,6 @@ public abstract class AbstractApplicationSchema<A extends Application<A>, S exte
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public boolean isErrorStreamRedirected()
     {
@@ -311,9 +306,6 @@ public abstract class AbstractApplicationSchema<A extends Application<A>, S exte
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public long getDefaultTimeout()
     {
@@ -321,9 +313,6 @@ public abstract class AbstractApplicationSchema<A extends Application<A>, S exte
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public TimeUnit getDefaultTimeoutUnits()
     {
@@ -361,9 +350,7 @@ public abstract class AbstractApplicationSchema<A extends Application<A>, S exte
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public List<String> getArguments()
     {
         return applicationArguments;
@@ -385,26 +372,15 @@ public abstract class AbstractApplicationSchema<A extends Application<A>, S exte
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public Iterable<LifecycleEventInterceptor<A>> getLifecycleInterceptors()
+    public Iterable<LifecycleEventInterceptor<? super A>> getLifecycleInterceptors()
     {
         return lifecycleInterceptors;
     }
 
 
-    /**
-     * Adds an {@link LifecycleEventInterceptor} to the {@link ApplicationSchema}
-     * those of which will be executed when certain {@link LifecycleEvent}s
-     * occur on {@link Application}s created with the {@link ApplicationSchema}.
-     *
-     * @param interceptor  the {@link LifecycleEventInterceptor}
-     *
-     * @return  the {@link ApplicationSchema} (so that we can perform method chaining)
-     */
-    public S addLifecycleInterceptor(LifecycleEventInterceptor<A> interceptor)
+    @Override
+    public S addLifecycleInterceptor(LifecycleEventInterceptor<? super A> interceptor)
     {
         lifecycleInterceptors.add(interceptor);
 

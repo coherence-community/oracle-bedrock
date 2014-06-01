@@ -29,6 +29,7 @@ import com.oracle.tools.predicate.Predicate;
 
 import com.oracle.tools.runtime.Application;
 import com.oracle.tools.runtime.ApplicationGroup;
+import com.oracle.tools.runtime.Assembly;
 
 /**
  * A specialized {@link Block} that is only executed if and only if a {@link Predicate} is satisfied.
@@ -38,7 +39,7 @@ import com.oracle.tools.runtime.ApplicationGroup;
  *
  * @author Brian Oliver
  */
-public class ConditionalBlock<A extends Application<A>, G extends ApplicationGroup<A>> extends Block<A, G>
+public class ConditionalBlock<A extends Application, G extends Assembly<A>> extends Block<A, G>
     implements ConditionalAction<A, G>
 {
     /**

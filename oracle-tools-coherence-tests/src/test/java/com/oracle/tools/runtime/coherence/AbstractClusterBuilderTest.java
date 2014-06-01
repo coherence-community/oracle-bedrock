@@ -65,6 +65,7 @@ import java.util.HashSet;
  *
  * @author Brian Oliver
  */
+@Deprecated
 public abstract class AbstractClusterBuilderTest extends AbstractTest
 {
     /**
@@ -73,7 +74,7 @@ public abstract class AbstractClusterBuilderTest extends AbstractTest
      *
      * @return the {@link com.oracle.tools.runtime.java.JavaApplicationBuilder}
      */
-    public abstract JavaApplicationBuilder<ClusterMember, ClusterMemberSchema> newJavaApplicationBuilder();
+    public abstract JavaApplicationBuilder<ClusterMember> newJavaApplicationBuilder();
 
 
     /**
@@ -241,17 +242,16 @@ public abstract class AbstractClusterBuilderTest extends AbstractTest
     @Test
     public void shouldPerformRollingRestartOfCluster() throws Exception
     {
-        final int                                                  CLUSTER_SIZE   = 4;
+        final int                             CLUSTER_SIZE   = 4;
 
-        AvailablePortIterator                                      availablePorts = Container.getAvailablePorts();
-        Capture<Integer>                                           clusterPort    =
-            new Capture<Integer>(availablePorts);
+        AvailablePortIterator                 availablePorts = Container.getAvailablePorts();
+        Capture<Integer>                      clusterPort    = new Capture<Integer>(availablePorts);
 
         ClusterMemberSchema schema = new ClusterMemberSchema().useLocalHostMode().setClusterPort(clusterPort);
 
-        Cluster                                                    cluster        = null;
-        ApplicationConsole                                         console        = new SystemApplicationConsole();
-        JavaApplicationBuilder<ClusterMember, ClusterMemberSchema> memberBuilder  = newJavaApplicationBuilder();
+        Cluster                               cluster        = null;
+        ApplicationConsole                    console        = new SystemApplicationConsole();
+        JavaApplicationBuilder<ClusterMember> memberBuilder  = newJavaApplicationBuilder();
 
         try
         {
@@ -273,9 +273,9 @@ public abstract class AbstractClusterBuilderTest extends AbstractTest
                 @Override
                 public boolean evaluate(ClusterMember member)
                 {
-                    ClusterMember.ServiceStatus status = member.getServiceStatus("DistributedCache");
+                    ServiceStatus status = member.getServiceStatus("DistributedCache");
 
-                    return status == ClusterMember.ServiceStatus.NODE_SAFE;
+                    return status == ServiceStatus.NODE_SAFE;
                 }
             });
 

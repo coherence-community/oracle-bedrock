@@ -121,7 +121,7 @@ public class AbstractApplicationGroupTest
     }
 
 
-    private class AbstractApplicationGroupStub<A extends Application<A>> extends AbstractApplicationGroup<A>
+    private class AbstractApplicationGroupStub<A extends Application> extends AbstractApplicationGroup<A>
     {
         private AbstractApplicationGroupStub(List<A> applications)
         {

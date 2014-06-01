@@ -38,6 +38,7 @@ import com.oracle.tools.predicate.Predicate;
 
 import com.oracle.tools.runtime.Application;
 import com.oracle.tools.runtime.ApplicationConsole;
+import com.oracle.tools.runtime.ApplicationSchema;
 import com.oracle.tools.runtime.LocalApplicationProcess;
 import com.oracle.tools.runtime.PropertiesBuilder;
 import com.oracle.tools.runtime.Settings;
@@ -75,8 +76,7 @@ import java.util.logging.Logger;
  *
  * @author Brian Oliver
  */
-public class LocalJavaApplicationBuilder<A extends JavaApplication<A>, S extends JavaApplicationSchema<A, S>>
-    extends AbstractJavaApplicationBuilder<A, S>
+public class LocalJavaApplicationBuilder<A extends JavaApplication> extends AbstractJavaApplicationBuilder<A>
 {
     /**
      * The {@link Logger} for this class.
@@ -360,10 +360,13 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication<A>, S extends
 
 
     @Override
-    public A realize(S                  schema,
-                     String             applicationName,
-                     ApplicationConsole console) throws IOException
+    public <T extends A, S extends ApplicationSchema<T>> T realize(S                  applicationSchema,
+                                                                   String             applicationName,
+                                                                   ApplicationConsole console) throws IOException
     {
+        //TODO: this should be a safe cast but we should also check to make sure
+        JavaApplicationSchema<T> schema = (JavaApplicationSchema) applicationSchema;
+
         // ---- establish the underlying ProcessBuilder -----
 
         // we'll use the native operating system process builder to create
@@ -547,7 +550,7 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication<A>, S extends
         LocalJavaProcess localJavaProcess = new LocalJavaProcess(process, server);
 
         // delegate Application creation to the Schema
-        final A application = schema.createJavaApplication(localJavaProcess,
+        final T application = schema.createJavaApplication(localJavaProcess,
                                                            applicationName,
                                                            console,
                                                            environmentVariables,

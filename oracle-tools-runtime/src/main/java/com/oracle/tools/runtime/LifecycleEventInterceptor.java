@@ -37,12 +37,12 @@ package com.oracle.tools.runtime;
  *
  * @author Brian Oliver
  */
-public interface LifecycleEventInterceptor<A>
+public interface LifecycleEventInterceptor<T>
 {
     /**
      * Handle the {@link LifecycleEvent}.
      *
      * @param event the {@link LifecycleEvent}
      */
-    public void onEvent(LifecycleEvent<A> event);
+    public void onEvent(LifecycleEvent<T> event);
 }

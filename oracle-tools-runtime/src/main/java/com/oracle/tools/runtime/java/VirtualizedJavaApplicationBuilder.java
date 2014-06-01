@@ -39,8 +39,8 @@ package com.oracle.tools.runtime.java;
  * @author Brian Oliver
  */
 @Deprecated
-public class VirtualizedJavaApplicationBuilder<A extends JavaApplication<A>, S extends JavaApplicationSchema<A, S>>
-    extends ContainerBasedJavaApplicationBuilder<A, S>
+public class VirtualizedJavaApplicationBuilder<A extends JavaApplication, S extends JavaApplicationSchema<A>>
+    extends ContainerBasedJavaApplicationBuilder<A>
 {
     /**
      * Constructs a {@link VirtualizedJavaApplicationBuilder}.

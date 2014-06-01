@@ -282,9 +282,9 @@ public class Eventually
      *
      * @throws AssertionError  if the assertion fails
      */
-    public static <T> void assertThat(JavaApplication<?> application,
-                                      RemoteCallable<T>  callable,
-                                      Matcher<?>         matcher) throws AssertionError
+    public static <T> void assertThat(JavaApplication   application,
+                                      RemoteCallable<T> callable,
+                                      Matcher<?>        matcher) throws AssertionError
     {
         assertThat(new DeferredRemoteExecution<T>(application, callable), matcher);
     }
@@ -304,11 +304,11 @@ public class Eventually
      *
      * @throws AssertionError  if the assertion fails
      */
-    public static <T> void assertThat(JavaApplication<?> application,
-                                      RemoteCallable<T>  callable,
-                                      Matcher<?>         matcher,
-                                      long               totalRetryDuration,
-                                      TimeUnit           totalRetryDurationUnits) throws AssertionError
+    public static <T> void assertThat(JavaApplication   application,
+                                      RemoteCallable<T> callable,
+                                      Matcher<?>        matcher,
+                                      long              totalRetryDuration,
+                                      TimeUnit          totalRetryDurationUnits) throws AssertionError
     {
         assertThat(new DeferredRemoteExecution<T>(application,
                                                   callable), matcher, totalRetryDuration, totalRetryDurationUnits);

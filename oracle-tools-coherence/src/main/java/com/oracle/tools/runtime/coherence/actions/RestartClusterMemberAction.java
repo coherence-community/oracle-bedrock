@@ -65,6 +65,7 @@ import java.util.logging.Logger;
  *
  * @author Brian Oliver
  */
+@Deprecated
 public class RestartClusterMemberAction implements CustomAction<ClusterMember, Cluster>
 {
     /**
@@ -86,7 +87,7 @@ public class RestartClusterMemberAction implements CustomAction<ClusterMember, C
     /**
      * The {@link JavaApplicationBuilder} to create a new {@link ClusterMember}.
      */
-    private JavaApplicationBuilder<ClusterMember, ClusterMemberSchema> builder;
+    private JavaApplicationBuilder<ClusterMember> builder;
 
     /**
      * The {@link ApplicationConsole} to use for a new {@link ClusterMember}.
@@ -110,11 +111,11 @@ public class RestartClusterMemberAction implements CustomAction<ClusterMember, C
      * @param closePredicate  the optional {@link Predicate} that must be satisfied before restarting a
      *                        {@link ClusterMember} (may be <code>null</code>)
      */
-    public RestartClusterMemberAction(String                                                     prefix,
-                                      JavaApplicationBuilder<ClusterMember, ClusterMemberSchema> builder,
-                                      ClusterMemberSchema                                        schema,
-                                      ApplicationConsole                                         console,
-                                      Predicate<ClusterMember>                                   closePredicate)
+    public RestartClusterMemberAction(String                                prefix,
+                                      JavaApplicationBuilder<ClusterMember> builder,
+                                      ClusterMemberSchema                   schema,
+                                      ApplicationConsole                    console,
+                                      Predicate<ClusterMember>              closePredicate)
     {
         this.prefix  = prefix;
         this.builder = builder;

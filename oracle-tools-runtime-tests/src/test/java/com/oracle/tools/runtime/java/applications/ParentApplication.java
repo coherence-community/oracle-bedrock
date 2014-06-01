@@ -63,8 +63,8 @@ public class ParentApplication
         schema.setSystemProperty("server.address", System.getProperty("server.address"));
         schema.setSystemProperty("server.port", System.getProperty("server.port"));
 
-        LocalJavaApplicationBuilder<SimpleJavaApplication, SimpleJavaApplicationSchema> builder =
-            new LocalJavaApplicationBuilder<SimpleJavaApplication, SimpleJavaApplicationSchema>();
+        LocalJavaApplicationBuilder<SimpleJavaApplication> builder =
+            new LocalJavaApplicationBuilder<SimpleJavaApplication>();
 
         builder.setOrphansPermitted(Boolean.getBoolean("orphan.children"));
 

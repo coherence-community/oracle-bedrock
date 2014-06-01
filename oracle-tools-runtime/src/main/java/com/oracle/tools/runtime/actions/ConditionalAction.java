@@ -29,17 +29,18 @@ import com.oracle.tools.predicate.Predicate;
 
 import com.oracle.tools.runtime.Application;
 import com.oracle.tools.runtime.ApplicationGroup;
+import com.oracle.tools.runtime.Assembly;
 
 /**
- * An {@link Action} to be performed on an {@link ApplicationGroup} if and only if a
- * {@link Predicate} is satisfied for the said {@link ApplicationGroup}.
+ * An {@link Action} to be performed on an {@link Assembly} if and only if a
+ * {@link Predicate} is satisfied for the said {@link Assembly}.
  * <p>
  * Copyright (c) 2014. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Brian Oliver
  */
-public interface ConditionalAction<A extends Application<A>, G extends ApplicationGroup<A>> extends Action<A, G>
+public interface ConditionalAction<A extends Application, G extends Assembly<A>> extends Action<A, G>
 {
     /**
      * Obtain the {@link Predicate} for the {@link ConditionalAction}.

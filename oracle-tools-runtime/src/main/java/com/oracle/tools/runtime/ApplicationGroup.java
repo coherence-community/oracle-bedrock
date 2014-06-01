@@ -40,7 +40,8 @@ import java.io.Closeable;
  *
  * @author Brian Oliver
  */
-public interface ApplicationGroup<A extends Application<A>> extends Iterable<A>, Closeable
+@Deprecated
+public interface ApplicationGroup<A extends Application> extends Assembly<A>
 {
     /**
      * <b>WARNING:</b>This method is now deprecated.  It is replaced by {@link #close()}.
@@ -53,18 +54,4 @@ public interface ApplicationGroup<A extends Application<A>> extends Iterable<A>,
      */
     @Deprecated
     public void destroy();
-
-
-    /**
-     * Closes the {@link ApplicationGroup} including all of the {@link Application}s
-     * that are part of the {@link ApplicationGroup}.
-     * <p>
-     * Upon returning it is safe to assume that all previously running
-     * {@link Application}s have been closed.
-     * <p>
-     * If the {@link ApplicationGroup} is already closed, calling this method has no effect.
-     * </p>
-     */
-    @Override
-    public void close();
 }

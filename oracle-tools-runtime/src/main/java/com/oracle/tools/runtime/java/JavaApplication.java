@@ -26,31 +26,33 @@
 package com.oracle.tools.runtime.java;
 
 import com.oracle.tools.deferred.Deferred;
+
 import com.oracle.tools.runtime.Application;
+
 import com.oracle.tools.runtime.concurrent.RemoteExecutor;
+
+import java.util.Properties;
+import java.util.Set;
 
 import javax.management.MBeanInfo;
 import javax.management.ObjectInstance;
 import javax.management.ObjectName;
 import javax.management.QueryExp;
+
 import javax.management.remote.JMXConnector;
-import java.util.Properties;
-import java.util.Set;
 
 /**
- * A {@link JavaApplication} is an {@link Application} for Java-based
- * application processes that use system properties in addition to environment
- * variables as provided by regular {@link Application}s.
- *
- * @see Application
- * @see JavaApplicationBuilder
+ * An {@link Application} specifically representing Java-based applications.
  * <p>
  * Copyright (c) 2011. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Brian Oliver
+ *
+ * @see Application
+ * @see JavaApplicationBuilder
  */
-public interface JavaApplication<A> extends Application<A>, RemoteExecutor
+public interface JavaApplication extends Application, RemoteExecutor
 {
     /**
      * The com.sun.management.jmxremote JVM property.

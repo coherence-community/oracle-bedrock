@@ -27,21 +27,22 @@ package com.oracle.tools.runtime.actions;
 
 import com.oracle.tools.runtime.Application;
 import com.oracle.tools.runtime.ApplicationGroup;
+import com.oracle.tools.runtime.Assembly;
 
 /**
- * Defines an custom {@link Action} to be performed on an {@link ApplicationGroup}.
+ * Defines an custom {@link Action} to be performed on an {@link Assembly}.
  * <p>
  * Copyright (c) 2014. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Brian Oliver
  */
-public interface CustomAction<A extends Application<A>, G extends ApplicationGroup<A>> extends Action<A, G>
+public interface CustomAction<A extends Application, G extends Assembly<A>> extends Action<A, G>
 {
     /**
-     * Performs the custom {@link Action} on an {@link ApplicationGroup}.
+     * Performs the custom {@link Action} on an {@link Assembly}.
      *
-     * @param group  the {@link ApplicationGroup} on which to perform the {@link Action}
+     * @param assembly  the {@link Assembly} on which to perform the {@link Action}
      */
-    public void perform(G group);
+    public void perform(G assembly);
 }

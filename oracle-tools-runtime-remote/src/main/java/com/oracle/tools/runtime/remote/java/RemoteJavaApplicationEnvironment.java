@@ -65,8 +65,8 @@ import java.util.Set;
  *
  * @author Brian Oliver
  */
-public class RemoteJavaApplicationEnvironment<A extends JavaApplication<A>, S extends JavaApplicationSchema<A, S>>
-    extends AbstractRemoteApplicationEnvironment<A, S>
+public class RemoteJavaApplicationEnvironment<A extends JavaApplication>
+    extends AbstractRemoteApplicationEnvironment<A, JavaApplicationSchema<A>>
 {
     /**
      * The {@link ControllableRemoteExecutor} that can be used to communicate with
@@ -117,13 +117,13 @@ public class RemoteJavaApplicationEnvironment<A extends JavaApplication<A>, S ex
      * @param doNotDeployFileNames  the names of files not to deploy (when deployment enabled)
      * @param remoteJavaHome        the remote JAVA HOME (may be null for a default)
      */
-    public RemoteJavaApplicationEnvironment(S           schema,
-                                            char        remoteFileSeparator,
-                                            char        remotePathSeparator,
-                                            boolean     areOrphansPermitted,
-                                            boolean     isAutoDeployEnabled,
-                                            Set<String> doNotDeployFileNames,
-                                            String      remoteJavaHome) throws IOException
+    public RemoteJavaApplicationEnvironment(JavaApplicationSchema<A> schema,
+                                            char                     remoteFileSeparator,
+                                            char                     remotePathSeparator,
+                                            boolean                  areOrphansPermitted,
+                                            boolean                  isAutoDeployEnabled,
+                                            Set<String>              doNotDeployFileNames,
+                                            String                   remoteJavaHome) throws IOException
     {
         super(schema);
 

@@ -27,6 +27,7 @@ package com.oracle.tools.runtime.actions;
 
 import com.oracle.tools.runtime.Application;
 import com.oracle.tools.runtime.ApplicationGroup;
+import com.oracle.tools.runtime.Assembly;
 
 import java.io.IOException;
 
@@ -43,13 +44,12 @@ import java.util.Stack;
  *
  * @author Brian Oliver
  */
-public class InteractiveActionExecutor<A extends Application<A>, G extends ApplicationGroup<A>>
-    implements ActionExecutor<A, G>
+public class InteractiveActionExecutor<A extends Application, G extends Assembly<A>> implements ActionExecutor<A, G>
 {
     /**
-     * The {@link ApplicationGroup} being controlled by the {@link ActionExecutor}.
+     * The {@link Assembly} being controlled by the {@link ActionExecutor}.
      */
-    private G applicationGroup;
+    private G assembly;
 
     /**
      * The initial {@link Action} provided to the {@link ActionExecutor}.
@@ -65,14 +65,14 @@ public class InteractiveActionExecutor<A extends Application<A>, G extends Appli
     /**
      * Constructs an {@link InteractiveActionExecutor}.
      *
-     * @param applicationGroup  the {@link ApplicationGroup} on which to execute the {@link Sequence}
-     * @param action            the {@link Action} to execute
+     * @param assembly  the {@link Assembly} on which to execute the {@link Sequence}
+     * @param action    the {@link Action} to execute
      */
-    public InteractiveActionExecutor(G            applicationGroup,
+    public InteractiveActionExecutor(G            assembly,
                                      Action<A, G> action)
     {
-        this.applicationGroup = applicationGroup;
-        this.initialAction    = action;
+        this.assembly      = assembly;
+        this.initialAction = action;
 
         // now start the action
         restart();
@@ -81,7 +81,7 @@ public class InteractiveActionExecutor<A extends Application<A>, G extends Appli
 
     /**
      * Restarts the {@link InteractiveActionExecutor} execution for the
-     * {@link ApplicationGroup}, starting again with the initially provided
+     * {@link Assembly}, starting again with the initially provided
      * {@link Action}.
      */
     public void restart()
@@ -122,15 +122,14 @@ public class InteractiveActionExecutor<A extends Application<A>, G extends Appli
                 actionsStack.push(actions);
             }
 
-            if ((action instanceof ConditionalAction
-                 && ((ConditionalAction) action).getPredicate().evaluate(applicationGroup)) ||!(action
-                    instanceof ConditionalAction))
+            if ((action instanceof ConditionalAction && ((ConditionalAction) action).getPredicate().evaluate(assembly))
+                ||!(action instanceof ConditionalAction))
             {
                 if (action instanceof CustomAction)
                 {
                     CustomAction<A, G> customAction = (CustomAction) action;
 
-                    customAction.perform(applicationGroup);
+                    customAction.perform(assembly);
 
                     hasExecutedAnAction = true;
                 }
@@ -162,9 +161,9 @@ public class InteractiveActionExecutor<A extends Application<A>, G extends Appli
 
 
     @Override
-    public G getApplicationGroup()
+    public G getAssembly()
     {
-        return applicationGroup;
+        return assembly;
     }
 
 

@@ -34,15 +34,16 @@ import java.util.List;
 import java.util.Properties;
 
 /**
- * A {@link JavaApplicationSchema} is a Java specific {@link ApplicationSchema}.
+ * An {@link ApplicationSchema} specifically for Java-based {@link Application}s.
  * <p>
  * Copyright (c) 2011. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Brian Oliver
+ *
+ * @param <A>  the type of {@link JavaApplication} that can be configured by the {@link JavaApplicationSchema}
  */
-public interface JavaApplicationSchema<A extends JavaApplication<A>, S extends JavaApplicationSchema<A, S>>
-    extends ApplicationSchema<A, S>
+public interface JavaApplicationSchema<A extends JavaApplication> extends ApplicationSchema<A>
 {
     /**
      * Obtains the {@link PropertiesBuilder} that will be used as a basis for configuring the Java System Properties

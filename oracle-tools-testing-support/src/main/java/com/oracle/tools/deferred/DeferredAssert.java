@@ -195,9 +195,9 @@ public class DeferredAssert extends Eventually
      *
      * @throws AssertionError
      */
-    public static <T> void assertThat(JavaApplication<?> application,
-                                      RemoteCallable<T>  callable,
-                                      Matcher<?>         matcher) throws AssertionError
+    public static <T> void assertThat(JavaApplication   application,
+                                      RemoteCallable<T> callable,
+                                      Matcher<?>        matcher) throws AssertionError
     {
         assertThat(new DeferredRemoteExecution<T>(application, callable), matcher);
     }

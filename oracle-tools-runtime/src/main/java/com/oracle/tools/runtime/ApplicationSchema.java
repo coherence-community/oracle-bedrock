@@ -32,23 +32,17 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
- * {@link ApplicationSchema} defines a schema encapsulating configuration and
- * operational settings that an {@link ApplicationBuilder} will use to
- * realize an {@link Application}.
- *
- * @param <A>  the type of the {@link Application} that will be realized by an
- *             {@link ApplicationBuilder} using this {@link ApplicationSchema}
- * @param <S>  the type of {@link ApplicationSchema} that will be returned from
- *             setter calls on this interface.  This is to permit extensible
- *             type-safe fluent-style definitions of setter methods in
- *             sub-interfaces.
+ * A schema encapsulating configuration and operational settings that an
+ * {@link ApplicationBuilder} will use to realize an {@link Application}.
  * <p>
  * Copyright (c) 2011. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Brian Oliver
+ *
+ * @param <A>  the type of {@link Application} that can be configured by the {@link ApplicationSchema}
  */
-public interface ApplicationSchema<A extends Application<A>, S extends ApplicationSchema<A, S>>
+public interface ApplicationSchema<A extends Application>
 {
     /**
      * Obtains the name of the application executable.
@@ -137,18 +131,4 @@ public interface ApplicationSchema<A extends Application<A>, S extends Applicati
      * @return the {@link TimeUnit} for {@link Application} timeouts
      */
     public TimeUnit getDefaultTimeoutUnits();
-
-
-    /**
-     * Obtains the {@link LifecycleEventInterceptor}s that the
-     * {@link ApplicationSchema} will attach to {@link Application}s
-     * produced by the said {@link ApplicationSchema}.
-     * <p>
-     * {@link LifecycleEventInterceptor}s are typically used by {@link Application}s
-     * and {@link ApplicationBuilder}s to raise {@link LifecycleEvent}s pertaining
-     * to the life-cycle of an {@link Application}.
-     *
-     * @return  the {@link LifecycleEventInterceptor}s
-     */
-    public Iterable<LifecycleEventInterceptor<A>> getLifecycleInterceptors();
 }

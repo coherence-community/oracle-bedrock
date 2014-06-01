@@ -26,8 +26,12 @@
 package com.oracle.tools.runtime.remote;
 
 import com.oracle.tools.runtime.ApplicationConsole;
+import com.oracle.tools.runtime.ApplicationSchema;
+import com.oracle.tools.runtime.FluentApplicationSchema;
 import com.oracle.tools.runtime.SimpleApplication;
 import com.oracle.tools.runtime.SimpleApplicationSchema;
+
+import java.io.IOException;
 
 /**
  * A simple implementation of a {@link RemoteApplicationBuilder}.
@@ -38,8 +42,8 @@ import com.oracle.tools.runtime.SimpleApplicationSchema;
  * @author Brian Oliver
  */
 public class SimpleRemoteApplicationBuilder
-    extends AbstractRemoteApplicationBuilder<SimpleApplication, SimpleApplicationSchema,
-                                             SimpleRemoteApplicationEnvironment, SimpleRemoteApplicationBuilder>
+    extends AbstractRemoteApplicationBuilder<SimpleApplication, SimpleRemoteApplicationEnvironment,
+                                             SimpleRemoteApplicationBuilder>
 {
     /**
      * Constructs a {@link SimpleRemoteApplicationBuilder} (using the default port).
@@ -74,26 +78,32 @@ public class SimpleRemoteApplicationBuilder
 
 
     @Override
-    protected SimpleRemoteApplicationEnvironment getRemoteApplicationEnvironment(SimpleApplicationSchema schema)
+    protected <T extends SimpleApplication,
+        S extends ApplicationSchema<T>> SimpleRemoteApplicationEnvironment getRemoteApplicationEnvironment(S applicationSchema)
+            throws IOException
     {
+        SimpleApplicationSchema schema = (SimpleApplicationSchema) applicationSchema;
+
         return new SimpleRemoteApplicationEnvironment(schema);
     }
 
 
     @Override
-    protected SimpleApplication createApplication(SimpleApplicationSchema            schema,
-                                                  SimpleRemoteApplicationEnvironment environment,
-                                                  String                             applicationName,
-                                                  RemoteApplicationProcess           process,
-                                                  ApplicationConsole                 console)
+    protected <T extends SimpleApplication, S extends ApplicationSchema<T>> T createApplication(S                                  schema,
+                                                                                                SimpleRemoteApplicationEnvironment environment,
+                                                                                                String                             applicationName,
+                                                                                                RemoteApplicationProcess           process,
+                                                                                                ApplicationConsole                 console)
     {
-        return new SimpleApplication(process,
-                                     applicationName,
-                                     console,
-                                     environment.getRemoteEnvironmentVariables(),
-                                     schema.isDiagnosticsEnabled(),
-                                     schema.getDefaultTimeout(),
-                                     schema.getDefaultTimeoutUnits(),
-                                     schema.getLifecycleInterceptors());
+        return (T) new SimpleApplication(process,
+                                         applicationName,
+                                         console,
+                                         environment.getRemoteEnvironmentVariables(),
+                                         schema.isDiagnosticsEnabled(),
+                                         schema.getDefaultTimeout(),
+                                         schema.getDefaultTimeoutUnits(),
+                                         schema instanceof FluentApplicationSchema
+                                         ? ((FluentApplicationSchema<SimpleApplication,
+                                                                     ?>) schema).getLifecycleInterceptors() : null);
     }
 }

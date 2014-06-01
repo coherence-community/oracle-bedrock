@@ -27,6 +27,7 @@ package com.oracle.tools.runtime.actions;
 
 import com.oracle.tools.runtime.Application;
 import com.oracle.tools.runtime.ApplicationGroup;
+import com.oracle.tools.runtime.Assembly;
 
 import com.oracle.tools.util.RepetitiveIterator;
 
@@ -40,7 +41,7 @@ import java.util.Iterator;
  *
  * @author Brian Oliver
  */
-public class RepetitiveAction<A extends Application<A>, G extends ApplicationGroup<A>> implements Sequence<A, G>
+public class RepetitiveAction<A extends Application, G extends Assembly<A>> implements Sequence<A, G>
 {
     /**
      * The {@link Action} to be performed.

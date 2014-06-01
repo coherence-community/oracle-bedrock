@@ -41,7 +41,7 @@ import java.util.Properties;
  *
  * @author Jonathan Knight
  */
-public class SimpleApplicationBuilder extends AbstractApplicationBuilder<SimpleApplication, SimpleApplicationSchema>
+public class SimpleApplicationBuilder extends AbstractApplicationBuilder<SimpleApplication>
 {
     /**
      * Should environment variables be inherited from the current executing process
@@ -177,10 +177,13 @@ public class SimpleApplicationBuilder extends AbstractApplicationBuilder<SimpleA
 
 
     @Override
-    public SimpleApplication realize(SimpleApplicationSchema schema,
-                                     String                  name,
-                                     ApplicationConsole      console) throws IOException
+    public <T extends SimpleApplication, S extends ApplicationSchema<T>> T realize(S                  applicationSchema,
+                                                                                   String             applicationName,
+                                                                                   ApplicationConsole console)
+                                                                                       throws IOException
     {
+        ApplicationSchema<T> schema = applicationSchema;
+
         // ---- establish the underlying ProcessBuilder -----
 
         // we'll use the native operating system process builder to create
@@ -237,14 +240,16 @@ public class SimpleApplicationBuilder extends AbstractApplicationBuilder<SimpleA
         // ----- start the process and establish the application -----
 
         // start the process
-        final SimpleApplication application = new SimpleApplication(new LocalApplicationProcess(processBuilder.start()),
-                                                                    name,
-                                                                    console,
-                                                                    environmentVariables,
-                                                                    schema.isDiagnosticsEnabled(),
-                                                                    schema.getDefaultTimeout(),
-                                                                    schema.getDefaultTimeoutUnits(),
-                                                                    schema.getLifecycleInterceptors());
+        final T application = (T) new SimpleApplication(new LocalApplicationProcess(processBuilder.start()),
+                                                        applicationName,
+                                                        console,
+                                                        environmentVariables,
+                                                        schema.isDiagnosticsEnabled(),
+                                                        schema.getDefaultTimeout(),
+                                                        schema.getDefaultTimeoutUnits(),
+                                                        schema instanceof FluentApplicationSchema
+                                                        ? ((FluentApplicationSchema<SimpleApplication, ?>) schema)
+                                                            .getLifecycleInterceptors() : null);
 
         // ----- notify all of the lifecycle listeners -----
 

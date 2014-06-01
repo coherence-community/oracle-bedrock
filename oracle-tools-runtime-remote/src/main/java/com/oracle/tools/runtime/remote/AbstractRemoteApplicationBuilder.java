@@ -39,6 +39,7 @@ import com.oracle.tools.runtime.ApplicationSchema;
 import com.oracle.tools.runtime.PropertiesBuilder;
 
 import com.oracle.tools.runtime.java.JavaApplication;
+import com.oracle.tools.runtime.java.JavaApplicationSchema;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -65,10 +66,9 @@ import java.util.concurrent.TimeUnit;
  *
  * @author Brian Oliver
  */
-public abstract class AbstractRemoteApplicationBuilder<A extends Application<A>, S extends ApplicationSchema<A, S>,
-                                                       E extends RemoteApplicationEnvironment,
-                                                       B extends AbstractRemoteApplicationBuilder<A, S, E, B>>
-    extends AbstractApplicationBuilder<A, S> implements RemoteApplicationBuilder<A, S>
+public abstract class AbstractRemoteApplicationBuilder<A extends Application, E extends RemoteApplicationEnvironment,
+                                                       B extends AbstractRemoteApplicationBuilder<A, E, B>>
+    extends AbstractApplicationBuilder<A> implements RemoteApplicationBuilder<A>
 {
     /**
      * The {@link JSch} framework.
@@ -363,35 +363,39 @@ public abstract class AbstractRemoteApplicationBuilder<A extends Application<A>,
      *
      * @return the {@link RemoteApplicationEnvironment}
      */
-    abstract protected E getRemoteApplicationEnvironment(S schema) throws IOException;
+    abstract protected <T extends A, S extends ApplicationSchema<T>> E getRemoteApplicationEnvironment(S schema)
+        throws IOException;
 
 
     /**
      * Creates the {@link Application} representing the underlying
      * {@link RemoteApplicationProcess}.
      *
-     * @param schema                the {@link ApplicationSchema} used to define the application
-     * @param environment           the {@link RemoteApplicationEnvironment} for the application
-     * @param applicationName       the name of the application
-     * @param process               the {@link RemoteApplicationProcess}
-     * @param console               the {@link ApplicationConsole} to use to capture the
-     *                              {@link RemoteApplicationProcess} input and output
+     * @param schema           the {@link ApplicationSchema} used to define the application
+     * @param environment      the {@link RemoteApplicationEnvironment} for the application
+     * @param applicationName  the name of the application
+     * @param process          the {@link RemoteApplicationProcess}
+     * @param console          the {@link ApplicationConsole} to use to capture the
+     *                         {@link RemoteApplicationProcess} input and output
      *
      * @return the {@link Application}
      */
-    protected abstract A createApplication(S                        schema,
-                                           E                        environment,
-                                           String                   applicationName,
-                                           RemoteApplicationProcess process,
-                                           ApplicationConsole       console);
+    protected abstract <T extends A, S extends ApplicationSchema<T>> T createApplication(S                        schema,
+                                                                                         E                        environment,
+                                                                                         String                   applicationName,
+                                                                                         RemoteApplicationProcess process,
+                                                                                         ApplicationConsole       console);
 
 
     @Override
-    public A realize(S                  schema,
-                     String             applicationName,
-                     ApplicationConsole console) throws IOException
+    public <T extends A, S extends ApplicationSchema<T>> T realize(S                  applicationSchema,
+                                                                   String             applicationName,
+                                                                   ApplicationConsole console) throws IOException
     {
-        Session session = null;
+        // TODO: this should be a safe cast but we should also check to make sure
+        ApplicationSchema<T> schema  = (ApplicationSchema) applicationSchema;
+
+        Session              session = null;
 
         // obtain the builder-specific remote application environment based on the schema
         E environment = getRemoteApplicationEnvironment(schema);
@@ -560,7 +564,7 @@ public abstract class AbstractRemoteApplicationBuilder<A extends Application<A>,
             execChannel.connect(timeout);
 
             // create the Application based on the RemoteApplicationProcess
-            A application = createApplication(schema, environment, applicationName, process, console);
+            T application = createApplication(schema, environment, applicationName, process, console);
 
             // ----- notify all of the lifecycle listeners -----
 

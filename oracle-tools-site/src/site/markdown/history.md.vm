@@ -59,7 +59,7 @@ reverse chronological order.
     to allow Java 8 Lambda expressions to be used to represent remote
     requests.
 
-    NOTE: While this is a BREAKING CHANGE in the APIs (from Runnable to RemoteRunnable
+    *BREAKING CHANGE:* While a breaking change in the APIs (from Runnable to RemoteRunnable
     and Callable to RemoteCallable), the impact on public implementations should
     be minimal as most implementations are already serializable.   All that is
     required is changing either "implements Runnable, Serializable" to
@@ -88,7 +88,16 @@ reverse chronological order.
 
 *   [ORACLETOOLS-101](https://java.net/jira/browse/ORACLETOOLS-101): Introduced
     the ability to specify an ApplicationConsoleBuilder and thus ApplicationConsole
-    for each Application defined as part of an ApplicationGroup.
+    for each Application defined as part of an Assembly/ApplicationGroup.
+
+*   [ORACLETOOLS-104](https://java.net/jira/browse/ORACLETOOLS-104): Refactored
+    fluent-methods from existing interfaces and classes into their own interfaces.
+
+    This enables dramatic simplification of the use of generics, especially when
+    creating ApplicationBuilders, Assembly/ApplicationGroup Builders and new Schemas.
+
+*   [ORACLETOOLS-106](https://java.net/jira/browse/ORACLETOOLS-106): Introduced
+    the concept of an Assembly.  This replaces the concept of an ApplicationGroup.
 
 <h4>oracle-tools-runtime-remote</h4>
 
@@ -115,6 +124,13 @@ reverse chronological order.
 *   [ORACLETOOLS-99](https://java.net/jira/browse/ORACLETOOLS-99): Introduced
     the ability to determine the UID of a ClusterMember and the UIDs of all
     cluster members from a Cluster.
+
+*   [ORACLETOOLS-103](https://java.net/jira/browse/ORACLETOOLS-103): Moved
+    ClusterMember.ServiceStatus to a standalone enumeration.
+
+*   [ORACLETOOLS-105](https://java.net/jira/browse/ORACLETOOLS-105): Introduced
+    new Coherence-based interfaces and class implementations to simplify
+    creating different types of Coherence applications, members and clusters.
 
 <h4>oracle-tools-coherence-testing-support</h4>
 

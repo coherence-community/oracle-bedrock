@@ -35,9 +35,8 @@ import com.oracle.tools.runtime.AbstractApplicationBuilder;
  *
  * @author Brian Oliver
  */
-public abstract class AbstractJavaApplicationBuilder<A extends JavaApplication<A>,
-                                                     S extends JavaApplicationSchema<A, S>>
-    extends AbstractApplicationBuilder<A, S> implements JavaApplicationBuilder<A, S>
+public abstract class AbstractJavaApplicationBuilder<A extends JavaApplication>
+    extends AbstractApplicationBuilder<A> implements JavaApplicationBuilder<A>
 {
     /**
      * Constructs a {@link AbstractJavaApplicationBuilder}.

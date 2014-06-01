@@ -75,8 +75,7 @@ public abstract class AbstractJavaApplicationBuilderTest extends AbstractTest
      *
      * @return the {@link JavaApplicationBuilder}
      */
-    public abstract JavaApplicationBuilder<SimpleJavaApplication,
-                                           SimpleJavaApplicationSchema> newJavaApplicationBuilder();
+    public abstract JavaApplicationBuilder<JavaApplication> newJavaApplicationBuilder();
 
 
     /**
@@ -87,7 +86,7 @@ public abstract class AbstractJavaApplicationBuilderTest extends AbstractTest
      *
      * @return the process id
      */
-    public long getProcessIdFor(JavaApplication<?> application)
+    public long getProcessIdFor(JavaApplication application)
     {
         return ((AbstractJavaApplication) application).getJavaProcess().getId();
     }
@@ -106,13 +105,12 @@ public abstract class AbstractJavaApplicationBuilderTest extends AbstractTest
                 .setSystemProperty("test.prop.1",
                                    "value.1").setSystemProperty("test.prop.2", "value.2").setDiagnosticsEnabled(true);
 
-        JavaApplicationBuilder<SimpleJavaApplication, SimpleJavaApplicationSchema> builder =
-            newJavaApplicationBuilder();
+        JavaApplicationBuilder<JavaApplication> builder     = newJavaApplicationBuilder();
 
-        PipedApplicationConsole console     = new PipedApplicationConsole();
-        JavaApplication<?>      application = builder.realize(schema, "java-app", console);
+        PipedApplicationConsole                 console     = new PipedApplicationConsole();
+        JavaApplication                         application = builder.realize(schema, "java-app", console);
 
-        String                  stdout      = console.getOutputReader().readLine();
+        String                                  stdout      = console.getOutputReader().readLine();
 
         assertThat(stdout.startsWith("[java-app:"), is(true));
         assertThat(stdout, containsString("arg1,arg2"));
@@ -148,13 +146,12 @@ public abstract class AbstractJavaApplicationBuilderTest extends AbstractTest
             new SimpleJavaApplicationSchema(DummyClassPathApp.class.getCanonicalName()).setClassPath(classPath)
                 .setArgument(knownClass.getCanonicalName()).setDiagnosticsEnabled(true);
 
-        JavaApplicationBuilder<SimpleJavaApplication, SimpleJavaApplicationSchema> builder =
-            newJavaApplicationBuilder();
+        JavaApplicationBuilder<JavaApplication> builder     = newJavaApplicationBuilder();
 
-        PipedApplicationConsole console     = new PipedApplicationConsole();
-        JavaApplication<?>      application = builder.realize(schema, "java-app", console);
+        PipedApplicationConsole                 console     = new PipedApplicationConsole();
+        JavaApplication                         application = builder.realize(schema, "java-app", console);
 
-        String                  stdout      = console.getOutputReader().readLine();
+        String                                  stdout      = console.getOutputReader().readLine();
 
         assertThat(stdout, containsString(knownJarClassPath.iterator().next()));
 
@@ -191,10 +188,9 @@ public abstract class AbstractJavaApplicationBuilderTest extends AbstractTest
 
             schema.setSystemProperty("uuid", uuid);
 
-            JavaApplicationBuilder<SimpleJavaApplication, SimpleJavaApplicationSchema> builder =
-                newJavaApplicationBuilder();
+            JavaApplicationBuilder<JavaApplication> builder = newJavaApplicationBuilder();
 
-            ApplicationConsole console = new SystemApplicationConsole();
+            ApplicationConsole                      console = new SystemApplicationConsole();
 
             application = builder.realize(schema, "sleeping", console);
 
@@ -229,10 +225,9 @@ public abstract class AbstractJavaApplicationBuilderTest extends AbstractTest
             // we'll wait at most 5 seconds in the application
             schema.setArgument("5");
 
-            JavaApplicationBuilder<SimpleJavaApplication, SimpleJavaApplicationSchema> builder =
-                newJavaApplicationBuilder();
+            JavaApplicationBuilder<JavaApplication> builder = newJavaApplicationBuilder();
 
-            ApplicationConsole console = new SystemApplicationConsole();
+            ApplicationConsole                      console = new SystemApplicationConsole();
 
             application = builder.realize(schema, "sleeping", console);
 
