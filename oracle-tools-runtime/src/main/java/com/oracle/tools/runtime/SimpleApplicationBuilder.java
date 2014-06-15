@@ -180,7 +180,6 @@ public class SimpleApplicationBuilder extends AbstractApplicationBuilder<SimpleA
     public <T extends SimpleApplication, S extends ApplicationSchema<T>> T realize(S                  applicationSchema,
                                                                                    String             applicationName,
                                                                                    ApplicationConsole console)
-                                                                                       throws IOException
     {
         ApplicationSchema<T> schema = applicationSchema;
 
@@ -239,8 +238,19 @@ public class SimpleApplicationBuilder extends AbstractApplicationBuilder<SimpleA
 
         // ----- start the process and establish the application -----
 
-        // start the process
-        final T application = (T) new SimpleApplication(new LocalApplicationProcess(processBuilder.start()),
+        // create and start the native process
+        Process process;
+
+        try
+        {
+            process = processBuilder.start();
+        }
+        catch (IOException e)
+        {
+            throw new RuntimeException("Failed to build the underlying native process for the application", e);
+        }
+
+        final T application = (T) new SimpleApplication(new LocalApplicationProcess(process),
                                                         applicationName,
                                                         console,
                                                         environmentVariables,

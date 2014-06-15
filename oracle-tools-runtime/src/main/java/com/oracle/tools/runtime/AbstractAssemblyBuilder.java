@@ -91,7 +91,7 @@ public abstract class AbstractAssemblyBuilder<A extends Application, G extends A
 
 
     @Override
-    public G realize(ApplicationConsoleBuilder overridingConsoleBuilder) throws IOException
+    public G realize(ApplicationConsoleBuilder overridingConsoleBuilder)
     {
         // build a list of applications
         LinkedList<A> applications = new LinkedList<A>();
@@ -130,7 +130,7 @@ public abstract class AbstractAssemblyBuilder<A extends Application, G extends A
     }
 
 
-    public G realize(ApplicationConsole overridingConsole) throws IOException
+    public G realize(ApplicationConsole overridingConsole)
     {
         return realize(overridingConsole == null ? null : new SingletonApplicationConsoleBuilder(overridingConsole));
     }

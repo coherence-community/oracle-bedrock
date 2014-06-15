@@ -362,9 +362,9 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication> extends Abst
     @Override
     public <T extends A, S extends ApplicationSchema<T>> T realize(S                  applicationSchema,
                                                                    String             applicationName,
-                                                                   ApplicationConsole console) throws IOException
+                                                                   ApplicationConsole console)
     {
-        //TODO: this should be a safe cast but we should also check to make sure
+        // TODO: this should be a safe cast but we should also check to make sure
         JavaApplicationSchema<T> schema = (JavaApplicationSchema) applicationSchema;
 
         // ---- establish the underlying ProcessBuilder -----
@@ -474,7 +474,14 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication> extends Abst
         // configure a server channel to communicate with the native process
         final RemoteExecutorServer server = new RemoteExecutorServer();
 
-        server.open();
+        try
+        {
+            server.open();
+        }
+        catch (IOException e)
+        {
+            throw new RuntimeException("Failed to create remote execution server for the application", e);
+        }
 
         // add Oracle Tools specific System Properties
         Predicate<InetAddress> preferred = schema.isIPv4Preferred() ? allOf(NetworkHelper.IPv4_ADDRESS,
@@ -541,8 +548,17 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication> extends Abst
             LOGGER.log(Level.INFO, "Starting Local Process: " + commandBuilder.toString());
         }
 
-        // create and start the process
-        Process process = processBuilder.start();
+        // create and start the native process
+        Process process;
+
+        try
+        {
+            process = processBuilder.start();
+        }
+        catch (IOException e)
+        {
+            throw new RuntimeException("Failed to build the underlying native process for the application", e);
+        }
 
         // ----- create the local process and application -----
 

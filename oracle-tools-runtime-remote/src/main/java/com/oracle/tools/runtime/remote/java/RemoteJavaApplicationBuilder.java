@@ -263,17 +263,23 @@ public class RemoteJavaApplicationBuilder<A extends JavaApplication>
     @Override
     protected <T extends A,
         S extends ApplicationSchema<T>> RemoteJavaApplicationEnvironment<A> getRemoteApplicationEnvironment(S applicationSchema)
-            throws IOException
     {
         JavaApplicationSchema<A> schema = (JavaApplicationSchema) applicationSchema;
 
-        return new RemoteJavaApplicationEnvironment(schema,
-                                                    remoteFileSeparatorChar,
-                                                    remotePathSeparatorChar,
-                                                    areOrphansPermitted,
-                                                    isAutoDeployEnabled,
-                                                    doNotDeployFileNames,
-                                                    remoteJavaHome);
+        try
+        {
+            return new RemoteJavaApplicationEnvironment(schema,
+                                                        remoteFileSeparatorChar,
+                                                        remotePathSeparatorChar,
+                                                        areOrphansPermitted,
+                                                        isAutoDeployEnabled,
+                                                        doNotDeployFileNames,
+                                                        remoteJavaHome);
+        }
+        catch (IOException e)
+        {
+            throw new RuntimeException("Failed to establish the remote application environment", e);
+        }
     }
 
 

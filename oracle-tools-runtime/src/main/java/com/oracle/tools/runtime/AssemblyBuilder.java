@@ -107,9 +107,9 @@ public interface AssemblyBuilder<A extends Application, G extends Assembly<A>>
      *
      * @return an {@link Assembly} representing the collection of realized {@link Application}s.
      *
-     * @throws IOException Thrown if a problem occurs while realizing the application
+     * @throws RuntimeException Thrown if a problem occurs while realizing the application
      */
-    public G realize(ApplicationConsole overridingConsole) throws IOException;
+    public G realize(ApplicationConsole overridingConsole);
 
 
     /**
@@ -125,9 +125,9 @@ public interface AssemblyBuilder<A extends Application, G extends Assembly<A>>
      *
      * @return an {@link Assembly} representing the collection of realized {@link Application}s.
      *
-     * @throws IOException Thrown if a problem occurs while realizing the application
+     * @throws RuntimeException Thrown if a problem occurs while realizing the application
      */
-    public G realize(ApplicationConsoleBuilder overridingConsoleBuilder) throws IOException;
+    public G realize(ApplicationConsoleBuilder overridingConsoleBuilder);
 
 
     /**

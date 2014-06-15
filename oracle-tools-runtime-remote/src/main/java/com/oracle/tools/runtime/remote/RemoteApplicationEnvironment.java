@@ -66,4 +66,11 @@ public interface RemoteApplicationEnvironment extends Closeable
      * @return  a {@link Properties} representing the required remote environment variables
      */
     public Properties getRemoteEnvironmentVariables();
+
+
+    /**
+     * Closes the {@link RemoteApplicationEnvironment}.
+     */
+    @Override
+    public void close();
 }

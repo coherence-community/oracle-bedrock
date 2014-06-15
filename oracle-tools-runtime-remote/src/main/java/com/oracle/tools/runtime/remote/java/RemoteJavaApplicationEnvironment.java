@@ -382,7 +382,7 @@ public class RemoteJavaApplicationEnvironment<A extends JavaApplication>
 
 
     @Override
-    public void close() throws IOException
+    public void close()
     {
         remoteExecutor.close();
         super.close();

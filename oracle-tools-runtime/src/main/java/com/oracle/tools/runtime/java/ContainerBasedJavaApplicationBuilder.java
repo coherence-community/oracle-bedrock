@@ -162,7 +162,7 @@ public class ContainerBasedJavaApplicationBuilder<A extends JavaApplication> ext
     @Override
     public <T extends A, S extends ApplicationSchema<T>> T realize(S                  applicationSchema,
                                                                    String             applicationName,
-                                                                   ApplicationConsole console) throws IOException
+                                                                   ApplicationConsole console)
     {
         // TODO: this should be a safe cast but we should also check to make sure
         JavaApplicationSchema<T> schema = (JavaApplicationSchema) applicationSchema;
@@ -220,7 +220,7 @@ public class ContainerBasedJavaApplicationBuilder<A extends JavaApplication> ext
         }
         catch (Exception e)
         {
-            throw new IOException("Failed to start ContainerBasedJavaProcess", e);
+            throw new RuntimeException("Failed to start ContainerBasedJavaProcess", e);
         }
     }
 

@@ -52,11 +52,11 @@ public interface ApplicationBuilder<A extends Application>
      *
      * @return an {@link Application} representing the application realized by the {@link ApplicationBuilder}
      *
-     * @throws IOException when a problem occurs while starting the application
+     * @throws RuntimeException when a problem occurs while starting the application
      */
     public <T extends A, S extends ApplicationSchema<T>> T realize(S                  applicationSchema,
                                                                    String             applicationName,
-                                                                   ApplicationConsole console) throws IOException;
+                                                                   ApplicationConsole console);
 
 
     /**
@@ -67,10 +67,10 @@ public interface ApplicationBuilder<A extends Application>
      *
      * @return an {@link Application} representing the application realized by the {@link ApplicationBuilder}
      *
-     * @throws IOException when a problem occurs while starting the application
+     * @throws RuntimeException when a problem occurs while starting the application
      */
     public <T extends A, S extends ApplicationSchema<T>> T realize(S      applicationSchema,
-                                                                   String applicationName) throws IOException;
+                                                                   String applicationName);
 
 
     /**
@@ -80,7 +80,7 @@ public interface ApplicationBuilder<A extends Application>
      *
      * @return an {@link Application} representing the application realized by the {@link ApplicationBuilder}
      *
-     * @throws IOException  when a problem occurs while starting the application
+     * @throws RuntimeException  when a problem occurs while starting the application
      */
-    public <T extends A, S extends ApplicationSchema<T>> T realize(S applicationSchema) throws IOException;
+    public <T extends A, S extends ApplicationSchema<T>> T realize(S applicationSchema);
 }

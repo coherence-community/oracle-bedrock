@@ -363,8 +363,7 @@ public abstract class AbstractRemoteApplicationBuilder<A extends Application, E 
      *
      * @return the {@link RemoteApplicationEnvironment}
      */
-    abstract protected <T extends A, S extends ApplicationSchema<T>> E getRemoteApplicationEnvironment(S schema)
-        throws IOException;
+    abstract protected <T extends A, S extends ApplicationSchema<T>> E getRemoteApplicationEnvironment(S schema);
 
 
     /**
@@ -390,7 +389,7 @@ public abstract class AbstractRemoteApplicationBuilder<A extends Application, E 
     @Override
     public <T extends A, S extends ApplicationSchema<T>> T realize(S                  applicationSchema,
                                                                    String             applicationName,
-                                                                   ApplicationConsole console) throws IOException
+                                                                   ApplicationConsole console)
     {
         // TODO: this should be a safe cast but we should also check to make sure
         ApplicationSchema<T> schema  = (ApplicationSchema) applicationSchema;
@@ -511,9 +510,13 @@ public abstract class AbstractRemoteApplicationBuilder<A extends Application, E 
                         sftpChannel.put(new FileInputStream(sourceFile), destinationFileName);
                     }
                 }
+                catch (IOException e)
+                {
+                    throw new RuntimeException("Failed to deploy application", e);
+                }
                 catch (SftpException e)
                 {
-                    throw new IOException("Failed to deploy application", e);
+                    throw new RuntimeException("Failed to deploy application", e);
                 }
                 finally
                 {
@@ -556,7 +559,16 @@ public abstract class AbstractRemoteApplicationBuilder<A extends Application, E 
             // ----- establish the remote application process to represent the remote application -----
 
             // establish a RemoteApplicationProcess representing the remote application
-            RemoteApplicationProcess process = new RemoteApplicationProcess(session, execChannel);
+            RemoteApplicationProcess process;
+
+            try
+            {
+                process = new RemoteApplicationProcess(session, execChannel);
+            }
+            catch (IOException e)
+            {
+                throw new RuntimeException("Failed to connect to the underlying remote process for the application", e);
+            }
 
             // ----- start the remote application -----
 
@@ -581,7 +593,7 @@ public abstract class AbstractRemoteApplicationBuilder<A extends Application, E 
 
             environment.close();
 
-            throw new IOException("Failed to create remote application", e);
+            throw new RuntimeException("Failed to create remote application", e);
         }
     }
 }

@@ -90,6 +90,14 @@ reverse chronological order.
     the ability to specify an ApplicationConsoleBuilder and thus ApplicationConsole
     for each Application defined as part of an Assembly/ApplicationGroup.
 
+*   [ORACLETOOLS-102](https://java.net/jira/browse/ORACLETOOLS-102): Removed the
+    requirement to throw/catch IOExceptions when using ApplicationBuilders and
+    AssemblyBuilders.
+
+    *BREAKING CHANGE:*  This will be a breaking change for applications that
+    expect IOExceptions to be thrown from ApplicationBuilders or
+    ApplicationGroupBuilders.
+
 *   [ORACLETOOLS-104](https://java.net/jira/browse/ORACLETOOLS-104): Refactored
     fluent-methods from existing interfaces and classes into their own interfaces.
 

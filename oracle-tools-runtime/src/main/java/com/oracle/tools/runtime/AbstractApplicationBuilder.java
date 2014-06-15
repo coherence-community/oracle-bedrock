@@ -73,7 +73,7 @@ public abstract class AbstractApplicationBuilder<A extends Application> implemen
 
 
     @Override
-    public <T extends A, S extends ApplicationSchema<T>> T realize(S applicationSchema) throws IOException
+    public <T extends A, S extends ApplicationSchema<T>> T realize(S applicationSchema)
     {
         return realize(applicationSchema, UUID.randomUUID().toString());
     }
@@ -81,7 +81,7 @@ public abstract class AbstractApplicationBuilder<A extends Application> implemen
 
     @Override
     public <T extends A, S extends ApplicationSchema<T>> T realize(S      applicationSchema,
-                                                                   String applicationName) throws IOException
+                                                                   String applicationName)
     {
         return realize(applicationSchema, applicationName, new NullApplicationConsole());
     }

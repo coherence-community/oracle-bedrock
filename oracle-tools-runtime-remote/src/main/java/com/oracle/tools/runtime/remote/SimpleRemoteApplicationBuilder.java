@@ -80,7 +80,6 @@ public class SimpleRemoteApplicationBuilder
     @Override
     protected <T extends SimpleApplication,
         S extends ApplicationSchema<T>> SimpleRemoteApplicationEnvironment getRemoteApplicationEnvironment(S applicationSchema)
-            throws IOException
     {
         SimpleApplicationSchema schema = (SimpleApplicationSchema) applicationSchema;
 

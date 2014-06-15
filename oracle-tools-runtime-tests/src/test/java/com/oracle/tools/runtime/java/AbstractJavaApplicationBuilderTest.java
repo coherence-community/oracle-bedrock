@@ -178,34 +178,23 @@ public abstract class AbstractJavaApplicationBuilderTest extends AbstractTest
     {
         SimpleJavaApplication application = null;
 
-        try
-        {
-            // define and start the SleepingApplication
-            SimpleJavaApplicationSchema schema = new SimpleJavaApplicationSchema(SleepingApplication.class.getName());
+        // define and start the SleepingApplication
+        SimpleJavaApplicationSchema schema = new SimpleJavaApplicationSchema(SleepingApplication.class.getName());
 
-            // set a System-Property for the SleepingApplication (we'll request it back)
-            String uuid = UUID.randomUUID().toString();
+        // set a System-Property for the SleepingApplication (we'll request it back)
+        String uuid = UUID.randomUUID().toString();
 
-            schema.setSystemProperty("uuid", uuid);
+        schema.setSystemProperty("uuid", uuid);
 
-            JavaApplicationBuilder<JavaApplication> builder = newJavaApplicationBuilder();
+        JavaApplicationBuilder<JavaApplication> builder = newJavaApplicationBuilder();
 
-            ApplicationConsole                      console = new SystemApplicationConsole();
+        ApplicationConsole                      console = new SystemApplicationConsole();
 
-            application = builder.realize(schema, "sleeping", console);
+        application = builder.realize(schema, "sleeping", console);
 
-            Eventually.assertThat(application, new GetSystemProperty("uuid"), is(uuid));
-        }
-        catch (IOException e)
-        {
-        }
-        finally
-        {
-            if (application != null)
-            {
-                application.close();
-            }
-        }
+        Eventually.assertThat(application, new GetSystemProperty("uuid"), is(uuid));
+
+        application.close();
     }
 
 
@@ -215,33 +204,20 @@ public abstract class AbstractJavaApplicationBuilderTest extends AbstractTest
     @Test(timeout = 10000)
     public void shouldWaitFor() throws InterruptedException
     {
-        SimpleJavaApplication application = null;
+        // define and start the SleepingApplication
+        SimpleJavaApplicationSchema schema = new SimpleJavaApplicationSchema(SleepingApplication.class.getName());
 
-        try
-        {
-            // define and start the SleepingApplication
-            SimpleJavaApplicationSchema schema = new SimpleJavaApplicationSchema(SleepingApplication.class.getName());
+        // we'll wait at most 5 seconds in the application
+        schema.setArgument("5");
 
-            // we'll wait at most 5 seconds in the application
-            schema.setArgument("5");
+        JavaApplicationBuilder<JavaApplication> builder     = newJavaApplicationBuilder();
 
-            JavaApplicationBuilder<JavaApplication> builder = newJavaApplicationBuilder();
+        ApplicationConsole                      console     = new SystemApplicationConsole();
 
-            ApplicationConsole                      console = new SystemApplicationConsole();
+        SimpleJavaApplication                   application = builder.realize(schema, "sleeping", console);
 
-            application = builder.realize(schema, "sleeping", console);
+        application.waitFor();
 
-            application.waitFor();
-        }
-        catch (IOException e)
-        {
-        }
-        finally
-        {
-            if (application != null)
-            {
-                application.close();
-            }
-        }
+        application.close();
     }
 }

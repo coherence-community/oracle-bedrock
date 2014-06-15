@@ -98,7 +98,7 @@ public abstract class AbstractRemoteApplicationEnvironment<A extends Application
 
 
     @Override
-    public void close() throws IOException
+    public void close()
     {
         // nothing to do by default
     }

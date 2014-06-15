@@ -235,42 +235,29 @@ public class LocalJavaApplicationBuilderTest extends AbstractJavaApplicationBuil
     @Test
     public void shouldExecuteCallable() throws InterruptedException
     {
-        SimpleJavaApplication application = null;
+        // define the SleepingApplication
+        SimpleJavaApplicationSchema schema = new SimpleJavaApplicationSchema(SleepingApplication.class.getName());
 
-        try
-        {
-            // define the SleepingApplication
-            SimpleJavaApplicationSchema schema = new SimpleJavaApplicationSchema(SleepingApplication.class.getName());
+        // set a System-Property for the SleepingApplication (we'll request it back)
+        String uuid = UUID.randomUUID().toString();
 
-            // set a System-Property for the SleepingApplication (we'll request it back)
-            String uuid = UUID.randomUUID().toString();
+        schema.setSystemProperty("uuid", uuid);
 
-            schema.setSystemProperty("uuid", uuid);
+        // build and start the SleepingApplication
+        LocalJavaApplicationBuilder<JavaApplication> builder     = new LocalJavaApplicationBuilder<JavaApplication>();
 
-            // build and start the SleepingApplication
-            LocalJavaApplicationBuilder<JavaApplication> builder = new LocalJavaApplicationBuilder<JavaApplication>();
+        ApplicationConsole                           console     = new SystemApplicationConsole();
 
-            ApplicationConsole                           console = new SystemApplicationConsole();
+        SimpleJavaApplication                        application = builder.realize(schema, "sleeping", console);
 
-            application = builder.realize(schema, "sleeping", console);
+        // request the system property from the SleepingApplication
+        DeferredCompletionListener<String> deferred = new DeferredCompletionListener<String>(String.class);
 
-            // request the system property from the SleepingApplication
-            DeferredCompletionListener<String> deferred = new DeferredCompletionListener<String>(String.class);
+        application.submit(new GetSystemProperty("uuid"), deferred);
 
-            application.submit(new GetSystemProperty("uuid"), deferred);
+        Eventually.assertThat(deferred, is(uuid));
 
-            Eventually.assertThat(deferred, is(uuid));
-        }
-        catch (IOException e)
-        {
-        }
-        finally
-        {
-            if (application != null)
-            {
-                application.close();
-            }
-        }
+        application.close();
     }
 
 
@@ -281,37 +268,24 @@ public class LocalJavaApplicationBuilderTest extends AbstractJavaApplicationBuil
     @Test
     public void shouldSetJavaHome() throws InterruptedException
     {
-        SimpleJavaApplication application = null;
+        // define the SleepingApplication
+        SimpleJavaApplicationSchema schema = new SimpleJavaApplicationSchema(SleepingApplication.class.getName());
 
-        try
-        {
-            // define the SleepingApplication
-            SimpleJavaApplicationSchema schema = new SimpleJavaApplicationSchema(SleepingApplication.class.getName());
+        // set the JAVA_HOME environment variable to be the same as this application
+        String javaHome = System.getProperty("java.home");
 
-            // set the JAVA_HOME environment variable to be the same as this application
-            String javaHome = System.getProperty("java.home");
+        schema.setJavaHome(javaHome);
 
-            schema.setJavaHome(javaHome);
+        // build and start the SleepingApplication
+        LocalJavaApplicationBuilder<JavaApplication> builder     = new LocalJavaApplicationBuilder<JavaApplication>();
 
-            // build and start the SleepingApplication
-            LocalJavaApplicationBuilder<JavaApplication> builder = new LocalJavaApplicationBuilder<JavaApplication>();
+        ApplicationConsole                           console     = new SystemApplicationConsole();
 
-            ApplicationConsole                           console = new SystemApplicationConsole();
+        SimpleJavaApplication                        application = builder.realize(schema, "sleeping", console);
 
-            application = builder.realize(schema, "sleeping", console);
+        Eventually.assertThat(application, new GetSystemProperty("java.home"), is(javaHome));
 
-            Eventually.assertThat(application, new GetSystemProperty("java.home"), is(javaHome));
-        }
-        catch (IOException e)
-        {
-        }
-        finally
-        {
-            if (application != null)
-            {
-                application.close();
-            }
-        }
+        application.close();
     }
 
 
