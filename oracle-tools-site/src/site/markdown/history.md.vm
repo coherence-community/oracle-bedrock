@@ -13,7 +13,10 @@ reverse chronological order.
 
 <h4>Global and Cross-Module Changes</h4>
 
-*   Removed redundant and organized import statements.
+*   [ORACLETOOLS-89](https://java.net/jira/browse/ORACLETOOLS-89): Upgraded to require Java 7.
+
+    *BREAKING CHANGE:*  This is a breaking change for those applications that depend on Java 6
+    as Oracle Tools now uses Java 7 features (like Autocloseable).
 
 <h4>oracle-tools-core</h4>
 

@@ -39,8 +39,6 @@ import static com.oracle.tools.runtime.java.JavaApplication.SUN_MANAGEMENT_JMXRE
 import static com.oracle.tools.runtime.java.JavaApplication.SUN_MANAGEMENT_JMXREMOTE_PORT;
 import static com.oracle.tools.runtime.java.JavaApplication.SUN_MANAGEMENT_JMXREMOTE_SSL;
 
-import com.sun.tools.internal.xjc.reader.dtd.TDTDReader;
-
 import java.util.ArrayList;
 import java.util.List;
 

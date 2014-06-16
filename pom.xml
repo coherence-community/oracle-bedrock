@@ -82,7 +82,8 @@
           -->
         <repository>snapshots</repository>
 
-        <!-- source encoding definition -->
+        <!-- source requirements -->
+        <java.version>1.7</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <!-- plugin dependency versions -->
@@ -176,8 +177,8 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>${maven.compiler.plugin.version}</version>
                 <configuration>
-                    <source>1.6</source>
-                    <target>1.6</target>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
                 </configuration>
             </plugin>
 
@@ -197,7 +198,7 @@
                                     <version>3.0.4</version>
                                 </requireMavenVersion>
                                 <requireJavaVersion>
-                                    <version>1.6</version>
+                                    <version>${java.version}</version>
                                 </requireJavaVersion>
                             </rules>
                         </configuration>
