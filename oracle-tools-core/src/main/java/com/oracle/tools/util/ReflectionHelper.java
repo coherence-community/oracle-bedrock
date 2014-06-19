@@ -50,45 +50,56 @@ public class ReflectionHelper
     /**
      * Get a compatible constructor to the supplied parameter types.
      *
-     * @param clazz the class which we want to construct
-     * @param parameterTypes the types required of the constructor
+     * @param clazz          the class which we want to construct
+     * @param argumentTypes  the types required of the constructor
      *
      * @return a compatible constructor or null if none exists
      */
     public static Constructor<?> getCompatibleConstructor(Class<?>   clazz,
-                                                          Class<?>[] parameterTypes)
+                                                          Class<?>[] argumentTypes)
     {
-        Constructor<?>[] constructors = clazz.getConstructors();
-
-        for (int i = 0; i < constructors.length; i++)
+        // first attempt to find a constructor with the exact types
+        try
         {
-            if (constructors[i].getParameterTypes().length == (parameterTypes != null ? parameterTypes.length : 0))
-            {
-                // If we have the same number of parameters there is a shot that we have a compatible
-                // constructor
-                Class<?>[] constructorTypes = constructors[i].getParameterTypes();
-                boolean    isCompatible     = true;
+            return clazz.getConstructor(argumentTypes);
+        }
+        catch (NoSuchMethodException e)
+        {
+        }
 
-                for (int j = 0; j < (parameterTypes != null ? parameterTypes.length : 0); j++)
+        // try to find a constructor with compatible types
+        for (Constructor constructor : clazz.getConstructors())
+        {
+            Class<?>[] formalParameterTypes = constructor.getParameterTypes();
+
+            if (argumentTypes.length == formalParameterTypes.length)
+            {
+                boolean parametersMatch = true;
+
+                // check compatibility of each formal and actual parameter
+                for (int i = 0; i < argumentTypes.length && parametersMatch; i++)
                 {
-                    if (!constructorTypes[j].isAssignableFrom(parameterTypes[j]))
+                    Class<?> argumentType        = argumentTypes[i];
+                    Class<?> formalParameterType = formalParameterTypes[i];
+
+                    if (argumentType == null)
                     {
-                        // The type is not assignment compatible, however
-                        // we might be able to coerce from a basic type to a boxed type
-                        if (constructorTypes[j].isPrimitive())
-                        {
-                            if (!isAssignablePrimitive(constructorTypes[j], parameterTypes[j]))
-                            {
-                                isCompatible = false;
-                                break;
-                            }
-                        }
+                        // a null argument cannot be assigned to a primitive parameter
+                        parametersMatch = !formalParameterType.isPrimitive();
+                    }
+                    else if (argumentType.isPrimitive())
+                    {
+                        parametersMatch = isAssignablePrimitive(argumentType, formalParameterType);
+                    }
+                    else
+                    {
+                        parametersMatch = formalParameterType.isAssignableFrom(argumentType);
                     }
                 }
 
-                if (isCompatible)
+                if (parametersMatch)
                 {
-                    return constructors[i];
+                    return constructor;
                 }
             }
         }
@@ -139,22 +150,56 @@ public class ReflectionHelper
             argumentTypes[i] = arguments[i] == null ? null : arguments[i].getClass();
         }
 
+        // first attempt to find a method with the exact types
         try
         {
-            // attempt to find the method on the specified class
-            // (this may fail, in which case we should try super classes)
-            return clazz.getDeclaredMethod(methodName, argumentTypes);
-        }
-        catch (SecurityException e)
-        {
-            return null;
+            return clazz.getMethod(methodName, argumentTypes);
         }
         catch (NoSuchMethodException e)
         {
-            return clazz.getSuperclass() == null ? null : getCompatibleMethod(clazz.getSuperclass(),
-                                                                              methodName,
-                                                                              arguments);
         }
+
+        // try to find a method with compatible types
+        for (Method method : clazz.getMethods())
+        {
+            if (methodName.equals(method.getName()))
+            {
+                Class<?>[] formalParameterTypes = method.getParameterTypes();
+
+                if (argumentTypes.length == formalParameterTypes.length)
+                {
+                    boolean parametersMatch = true;
+
+                    // check compatibility of each formal and actual parameter
+                    for (int i = 0; i < argumentTypes.length && parametersMatch; i++)
+                    {
+                        Class<?> argumentType        = argumentTypes[i];
+                        Class<?> formalParameterType = formalParameterTypes[i];
+
+                        if (argumentType == null)
+                        {
+                            // a null argument cannot be assigned to a primitive parameter
+                            parametersMatch = !formalParameterType.isPrimitive();
+                        }
+                        else if (argumentType.isPrimitive())
+                        {
+                            parametersMatch = isAssignablePrimitive(argumentType, formalParameterType);
+                        }
+                        else
+                        {
+                            parametersMatch = formalParameterType.isAssignableFrom(argumentType);
+                        }
+                    }
+
+                    if (parametersMatch)
+                    {
+                        return method;
+                    }
+                }
+            }
+        }
+
+        return null;
     }
 
 

@@ -1,5 +1,5 @@
 /*
- * File: StringsTest.java
+ * File: StringHelperTest.java
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
@@ -28,9 +28,7 @@ package com.oracle.tools.lang;
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.nullValue;
-
 import static org.hamcrest.core.Is.is;
-
 import static org.junit.Assert.assertThat;
 
 /**

@@ -86,12 +86,10 @@ public class ContainerBasedJavaProcessTest extends AbstractTest
         String               methodName  = InvocationTracingApplication.METHOD_STATIC_MAIN;
         List<String>         arguments   = Arrays.asList("1", "2");
 
-        ContainerBasedJavaProcess process = new ContainerBasedJavaProcess(classLoader,
-                                                                          new ContainerBasedJavaApplicationBuilder
-                                                                              .StandardController(className,
-                                                                                                  arguments));
-
-        try
+        try (ContainerBasedJavaProcess process = new ContainerBasedJavaProcess(classLoader,
+                                                                               new ContainerBasedJavaApplicationBuilder
+                                                                                   .StandardController(className,
+                                                                                                       arguments)))
         {
             process.start();
             process.waitFor();
@@ -106,10 +104,6 @@ public class ContainerBasedJavaProcessTest extends AbstractTest
 
             assertThat(methodInvocation.getMethodName(), is(methodName));
             assertThat(methodInvocation.getArguments(), is(arrayContaining((Object) "1", (Object) "2")));
-        }
-        finally
-        {
-            process.close();
         }
     }
 
@@ -131,11 +125,9 @@ public class ContainerBasedJavaProcessTest extends AbstractTest
                                                                                          methodName,
                                                                                          arguments);
 
-        ContainerBasedJavaProcess process = new ContainerBasedJavaProcess(classLoader,
-                                                                          new ContainerBasedJavaApplicationBuilder
-                                                                              .CustomController(callable));
-
-        try
+        try (ContainerBasedJavaProcess process = new ContainerBasedJavaProcess(classLoader,
+                                                                               new ContainerBasedJavaApplicationBuilder
+                                                                                   .CustomController(callable)))
         {
             process.start();
             process.waitFor();
@@ -150,10 +142,6 @@ public class ContainerBasedJavaProcessTest extends AbstractTest
 
             assertThat(methodInvocation.getMethodName(), is(methodName));
             assertThat(methodInvocation.getArguments(), is(arrayContaining((Object) "1", (Object) "2", (Object) "3")));
-        }
-        finally
-        {
-            process.close();
         }
     }
 
@@ -173,11 +161,9 @@ public class ContainerBasedJavaProcessTest extends AbstractTest
         String                           methodName = InvocationTracingApplication.METHOD_STATIC_START_NO_ARGS;
         RemoteCallableStaticMethod<Void> callable   = new RemoteCallableStaticMethod<Void>(className, methodName);
 
-        ContainerBasedJavaProcess process = new ContainerBasedJavaProcess(classLoader,
-                                                                          new ContainerBasedJavaApplicationBuilder
-                                                                              .CustomController(callable));
-
-        try
+        try (ContainerBasedJavaProcess process = new ContainerBasedJavaProcess(classLoader,
+                                                                               new ContainerBasedJavaApplicationBuilder
+                                                                                   .CustomController(callable)))
         {
             process.start();
             process.waitFor();
@@ -192,10 +178,6 @@ public class ContainerBasedJavaProcessTest extends AbstractTest
 
             assertThat(methodInvocation.getMethodName(), is(methodName));
             assertThat(methodInvocation.getArguments(), is(nullValue()));
-        }
-        finally
-        {
-            process.close();
         }
     }
 
@@ -215,12 +197,10 @@ public class ContainerBasedJavaProcessTest extends AbstractTest
         String                           methodName = InvocationTracingApplication.METHOD_STATIC_STOP_NO_ARGS;
         RemoteCallableStaticMethod<Void> callable   = new RemoteCallableStaticMethod<Void>(className, methodName);
 
-        ContainerBasedJavaProcess process = new ContainerBasedJavaProcess(classLoader,
-                                                                          new ContainerBasedJavaApplicationBuilder
-                                                                              .CustomController(null,
-                                                                                                callable));
-
-        try
+        try (ContainerBasedJavaProcess process = new ContainerBasedJavaProcess(classLoader,
+                                                                               new ContainerBasedJavaApplicationBuilder
+                                                                                   .CustomController(null,
+                                                                                                     callable)))
         {
             process.start();
 
@@ -236,10 +216,6 @@ public class ContainerBasedJavaProcessTest extends AbstractTest
 
             assertThat(methodInvocation.getMethodName(), is(methodName));
             assertThat(methodInvocation.getArguments(), is(nullValue()));
-        }
-        finally
-        {
-            process.close();
         }
     }
 
@@ -259,11 +235,9 @@ public class ContainerBasedJavaProcessTest extends AbstractTest
         String                           methodName = "method_does_not_exist";
         RemoteCallableStaticMethod<Void> callable   = new RemoteCallableStaticMethod<Void>(className, methodName);
 
-        ContainerBasedJavaProcess process = new ContainerBasedJavaProcess(classLoader,
-                                                                          new ContainerBasedJavaApplicationBuilder
-                                                                              .CustomController(callable));
-
-        try
+        try (ContainerBasedJavaProcess process = new ContainerBasedJavaProcess(classLoader,
+                                                                               new ContainerBasedJavaApplicationBuilder
+                                                                                   .CustomController(callable)))
         {
             process.start();
             process.waitFor();
@@ -273,10 +247,6 @@ public class ContainerBasedJavaProcessTest extends AbstractTest
         catch (RuntimeException e)
         {
             assertThat(e.getCause(), is(instanceOf(NoSuchMethodException.class)));
-        }
-        finally
-        {
-            process.close();
         }
     }
 }

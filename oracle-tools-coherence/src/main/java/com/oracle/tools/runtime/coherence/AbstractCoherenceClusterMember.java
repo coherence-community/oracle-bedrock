@@ -25,6 +25,8 @@
 
 package com.oracle.tools.runtime.coherence;
 
+import com.oracle.tools.predicate.Predicate;
+
 import com.oracle.tools.runtime.Application;
 import com.oracle.tools.runtime.ApplicationConsole;
 import com.oracle.tools.runtime.LifecycleEventInterceptor;
@@ -42,8 +44,13 @@ import com.oracle.tools.runtime.coherence.callables.IsServiceRunning;
 import com.oracle.tools.runtime.java.AbstractJavaApplication;
 import com.oracle.tools.runtime.java.JavaApplication;
 import com.oracle.tools.runtime.java.JavaProcess;
+import com.oracle.tools.runtime.java.util.RemoteCallableStaticMethod;
+
+import com.tangosol.net.NamedCache;
 
 import com.tangosol.util.UID;
+
+import java.lang.reflect.Method;
 
 import java.util.Properties;
 import java.util.Set;
@@ -221,6 +228,28 @@ public abstract class AbstractCoherenceClusterMember<A extends AbstractCoherence
     public String getClusterName()
     {
         return submit(new GetClusterName());
+    }
+
+
+    @Override
+    public NamedCache getCache(String cacheName)
+    {
+        // some methods can't be proxied!
+        final Predicate<Method> unsupportedMethodsPredicate = new Predicate<Method>()
+        {
+            @Override
+            public boolean evaluate(Method method)
+            {
+                return method.getName().equals("getCacheService") || method.getName().equals("addMapListener")
+                       || method.getName().equals("removeMapListener");
+            }
+        };
+
+        return getProxyFor(NamedCache.class,
+                           new RemoteCallableStaticMethod<NamedCache>("com.tangosol.net.CacheFactory",
+                                                                      "getCache",
+                                                                      cacheName),
+                           unsupportedMethodsPredicate);
     }
 
 

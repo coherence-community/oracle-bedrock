@@ -1,5 +1,5 @@
 /*
- * File: ExponentialIteratorTest.java
+ * File: ReflectionHelperTest.java
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
@@ -25,38 +25,52 @@
 
 package com.oracle.tools.util;
 
+import org.junit.Assert;
 import org.junit.Test;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
+import java.lang.reflect.Method;
+import java.util.HashMap;
+
+import static org.hamcrest.core.IsNot.not;
+import static org.mockito.Matchers.isNull;
 
 /**
- * Unit Tests for {@link ExponentialIterator}.
+ * Unit Tests for the {@link ReflectionHelper} class.
  * <p>
- * Copyright (c) 2013. All Rights Reserved. Oracle Corporation.<br>
+ * Copyright (c) 2014. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Brian Oliver
  */
-public class ExponentialIteratorTest
+public class ReflectionHelperTest
 {
     /**
-     * Ensure {@link ExponentialIterator} generated the first few
-     * correct exponential numbers.
+     * Ensure that we can find an interface method that is implemented by an abstract parent class
      */
     @Test
-    public void shouldGenerateExponentialSequence()
+    public void shouldLocateMethodImplementedByAbstractParentClass()
     {
-        ExponentialIterator iterator = new ExponentialIterator(0, 100);
+        HashMap map    = new HashMap();
+        Method  method = ReflectionHelper.getCompatibleMethod(map.getClass(), "put", "key", "value");
 
-        assertThat(iterator.next(), is(0L));
-        assertThat(iterator.next(), is(1L));
-        assertThat(iterator.next(), is(2L));
-        assertThat(iterator.next(), is(4L));
-        assertThat(iterator.next(), is(8L));
-        assertThat(iterator.next(), is(16L));
-        assertThat(iterator.next(), is(32L));
-        assertThat(iterator.next(), is(64L));
-        assertThat(iterator.next(), is(128L));
+        Assert.assertThat(method, not(isNull()));
+    }
+
+
+    /**
+     * Ensure that we can find a static main method.
+     */
+    @Test
+    public void shouldLocateStaticMainMethod()
+    {
+        Method method = ReflectionHelper.getCompatibleMethod(this.getClass(), "main", (Object) new String[] {"hello"});
+
+        Assert.assertThat(method, not(isNull()));
+    }
+
+
+    public static void main(String[] args)
+    {
+        // for testing purposes
     }
 }

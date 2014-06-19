@@ -36,6 +36,8 @@ import com.oracle.tools.runtime.actions.PerpetualAction;
 
 import com.oracle.tools.runtime.coherence.actions.RestartClusterMemberAction;
 import com.oracle.tools.runtime.coherence.actions.RestartCoherenceClusterMemberAction;
+import com.oracle.tools.runtime.coherence.callables.GetClusterSize;
+import com.oracle.tools.runtime.coherence.callables.GetLocalMemberId;
 
 import com.oracle.tools.runtime.console.SystemApplicationConsole;
 
@@ -46,6 +48,8 @@ import com.oracle.tools.runtime.network.AvailablePortIterator;
 import com.oracle.tools.runtime.network.Constants;
 
 import com.oracle.tools.util.Capture;
+
+import com.tangosol.net.NamedCache;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -79,11 +83,9 @@ public abstract class AbstractCoherenceClusterBuilderTest extends AbstractTest
     /**
      * Ensure we can build and destroy a {@link CoherenceCluster} containing storage-enabled
      * {@link CoherenceCacheServer}s.
-     *
-     * @throws Exception
      */
     @Test
-    public void shouldBuildStorageEnabledCluster() throws Exception
+    public void shouldBuildStorageEnabledCluster()
     {
         final int             CLUSTER_SIZE   = 3;
 
@@ -93,16 +95,12 @@ public abstract class AbstractCoherenceClusterBuilderTest extends AbstractTest
         CoherenceCacheServerSchema schema =
             new CoherenceCacheServerSchema().useLocalHostMode().setClusterPort(clusterPort);
 
-        CoherenceCluster cluster = null;
+        CoherenceClusterBuilder builder = new CoherenceClusterBuilder();
 
-        try
+        builder.addBuilder(newJavaApplicationBuilder(), schema, "DCS", CLUSTER_SIZE);
+
+        try (CoherenceCluster cluster = builder.realize(new SystemApplicationConsole()))
         {
-            CoherenceClusterBuilder builder = new CoherenceClusterBuilder();
-
-            builder.addBuilder(newJavaApplicationBuilder(), schema, "DCS", CLUSTER_SIZE);
-
-            cluster = builder.realize(new SystemApplicationConsole());
-
             assertThat(invoking(cluster).getClusterSize(), is(CLUSTER_SIZE));
         }
         catch (Exception e)
@@ -110,24 +108,15 @@ public abstract class AbstractCoherenceClusterBuilderTest extends AbstractTest
             e.printStackTrace();
             Assert.fail();
         }
-        finally
-        {
-            if (cluster != null)
-            {
-                cluster.close();
-            }
-        }
     }
 
 
     /**
      * Ensure we can build and destroy a {@link com.oracle.tools.runtime.coherence.Cluster}
      * of storage enabled members with a proxy server.
-     *
-     * @throws Exception
      */
     @Test
-    public void shouldBuildStorageAndProxyCluster() throws Exception
+    public void shouldBuildStorageAndProxyCluster()
     {
         AvailablePortIterator availablePorts = Container.getAvailablePorts();
         Capture<Integer>      clusterPort    = new Capture<Integer>(availablePorts);
@@ -141,17 +130,13 @@ public abstract class AbstractCoherenceClusterBuilderTest extends AbstractTest
                 .setCacheConfigURI("test-extend-proxy-config.xml").setSystemProperty("coherence.extend.port",
                                                                                      availablePorts).useLocalHostMode();
 
-        CoherenceCluster cluster = null;
+        CoherenceClusterBuilder builder = new CoherenceClusterBuilder();
 
-        try
+        builder.addBuilder(newJavaApplicationBuilder(), storageSchema, "storage", 2);
+        builder.addBuilder(newJavaApplicationBuilder(), extendSchema, "extend", 1);
+
+        try (CoherenceCluster cluster = builder.realize(new SystemApplicationConsole()))
         {
-            CoherenceClusterBuilder builder = new CoherenceClusterBuilder();
-
-            builder.addBuilder(newJavaApplicationBuilder(), storageSchema, "storage", 2);
-            builder.addBuilder(newJavaApplicationBuilder(), extendSchema, "extend", 1);
-
-            cluster = builder.realize(new SystemApplicationConsole());
-
             // ensure the cluster size is as expected
             assertThat(invoking(cluster).getClusterSize(), is(3));
 
@@ -179,23 +164,14 @@ public abstract class AbstractCoherenceClusterBuilderTest extends AbstractTest
             e.printStackTrace();
             Assert.fail();
         }
-        finally
-        {
-            if (cluster != null)
-            {
-                cluster.close();
-            }
-        }
     }
 
 
     /**
      * Ensure that we can build a cluster using WKA.
-     *
-     * @throws Exception
      */
     @Test
-    public void shouldBuilderWKABasedStorageCluster() throws Exception
+    public void shouldBuilderWKABasedStorageCluster()
     {
         Capture<Integer> wkaPort   = new Capture<Integer>(Container.getAvailablePorts());
         String           localHost = Constants.getLocalHost();
@@ -205,18 +181,13 @@ public abstract class AbstractCoherenceClusterBuilderTest extends AbstractTest
                 .setWellKnownAddressPort(wkaPort).setLocalHostAddress(localHost).setLocalHostPort(wkaPort);
 
         SystemApplicationConsole console            = new SystemApplicationConsole();
-
-        CoherenceCluster         cluster            = null;
         int                      desiredClusterSize = 4;
+        CoherenceClusterBuilder  clusterBuilder     = new CoherenceClusterBuilder();
 
-        try
+        clusterBuilder.addBuilder(newJavaApplicationBuilder(), schema, "storage", desiredClusterSize);
+
+        try (CoherenceCluster cluster = clusterBuilder.realize(console))
         {
-            CoherenceClusterBuilder clusterBuilder = new CoherenceClusterBuilder();
-
-            clusterBuilder.addBuilder(newJavaApplicationBuilder(), schema, "storage", desiredClusterSize);
-
-            cluster = clusterBuilder.realize(console);
-
             assertThat(invoking(cluster).getClusterSize(), is(desiredClusterSize));
         }
         catch (Exception e)
@@ -224,23 +195,14 @@ public abstract class AbstractCoherenceClusterBuilderTest extends AbstractTest
             e.printStackTrace();
             Assert.fail();
         }
-        finally
-        {
-            if (cluster != null)
-            {
-                cluster.close();
-            }
-        }
     }
 
 
     /**
-     * Ensure we perform a rolling restart of a {@link Cluster}
-     *
-     * @throws Exception
+     * Ensure we perform a rolling restart of a {@link CoherenceCluster}
      */
     @Test
-    public void shouldPerformRollingRestartOfCluster() throws Exception
+    public void shouldPerformRollingRestartOfCluster()
     {
         final int             CLUSTER_SIZE   = 4;
 
@@ -250,18 +212,15 @@ public abstract class AbstractCoherenceClusterBuilderTest extends AbstractTest
         CoherenceCacheServerSchema schema =
             new CoherenceCacheServerSchema().useLocalHostMode().setClusterPort(clusterPort);
 
-        CoherenceCluster                             cluster       = null;
         ApplicationConsole                           console       = new SystemApplicationConsole();
         JavaApplicationBuilder<CoherenceCacheServer> memberBuilder = newJavaApplicationBuilder();
 
-        try
+        CoherenceClusterBuilder                      builder       = new CoherenceClusterBuilder();
+
+        builder.addBuilder(memberBuilder, schema, "DCS", CLUSTER_SIZE);
+
+        try (CoherenceCluster cluster = builder.realize(console))
         {
-            CoherenceClusterBuilder builder = new CoherenceClusterBuilder();
-
-            builder.addBuilder(memberBuilder, schema, "DCS", CLUSTER_SIZE);
-
-            cluster = builder.realize(console);
-
             assertThat(invoking(cluster).getClusterSize(), is(CLUSTER_SIZE));
 
             // construct the action to restart a cluster member (iff the DistributedCache is NODE_SAFE)
@@ -299,12 +258,43 @@ public abstract class AbstractCoherenceClusterBuilderTest extends AbstractTest
             e.printStackTrace();
             Assert.fail();
         }
-        finally
+    }
+
+
+    /**
+     * Ensure that we can create and use a NamedCache via a CoherenceCacheServer.
+     */
+    @Test
+    public void shouldAccessNamedCache()
+    {
+        final int             CLUSTER_SIZE   = 3;
+
+        AvailablePortIterator availablePorts = Container.getAvailablePorts();
+        Capture<Integer>      clusterPort    = new Capture<Integer>(availablePorts);
+
+        CoherenceCacheServerSchema schema =
+            new CoherenceCacheServerSchema().useLocalHostMode().setClusterPort(clusterPort);
+
+        CoherenceClusterBuilder builder = new CoherenceClusterBuilder();
+
+        builder.addBuilder(newJavaApplicationBuilder(), schema, "DCS", CLUSTER_SIZE);
+
+        try (CoherenceCluster cluster = builder.realize(new SystemApplicationConsole()))
         {
-            if (cluster != null)
-            {
-                cluster.close();
-            }
+            assertThat(invoking(cluster).getClusterSize(), is(CLUSTER_SIZE));
+
+            NamedCache namedCache = cluster.getCache("dist-example");
+
+            assertThat(namedCache.size(), is(0));
+            namedCache.put("key", "hello");
+
+            assertThat(namedCache.size(), is(1));
+            assertThat(namedCache.get("key"), is("hello"));
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            Assert.fail();
         }
     }
 }

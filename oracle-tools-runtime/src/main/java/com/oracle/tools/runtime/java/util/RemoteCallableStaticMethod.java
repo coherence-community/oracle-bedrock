@@ -27,6 +27,8 @@ package com.oracle.tools.runtime.java.util;
 
 import com.oracle.tools.runtime.concurrent.RemoteCallable;
 
+import com.oracle.tools.util.ReflectionHelper;
+
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
@@ -56,11 +58,15 @@ public class RemoteCallableStaticMethod<T> implements RemoteCallable<T>
     /**
      * The arguments for the method.
      */
-    private String[] args;
+    private Object[] args;
 
 
     /**
-     * Constructs an RemoteCallableStaticMethod.
+     * Constructs an {@link RemoteCallableStaticMethod} for a String-based var-arg
+     * static methods (like <code>public static void main(String[] args)</code> methods).
+     * <p>
+     * ie: This constructor assumes the method being represented is declared as
+     * <code>methodName(String[] args)</code> or <code>methodName(String... args)</code>.
      *
      * @param className   the name of the class
      * @param methodName  the name of the static method
@@ -73,20 +79,36 @@ public class RemoteCallableStaticMethod<T> implements RemoteCallable<T>
         this.className  = className;
         this.methodName = methodName;
 
-        ArrayList<String> arguments = new ArrayList<String>();
+        ArrayList<String> argumentList = new ArrayList<String>();
 
         for (String arg : args)
         {
-            arguments.add(arg);
+            argumentList.add(arg);
         }
 
-        this.args = new String[arguments.size()];
-        arguments.toArray(this.args);
+        String[] argumentArray = new String[argumentList.size()];
+
+        argumentList.toArray(argumentArray);
+
+        if (argumentArray.length == 0)
+        {
+            this.args = new Object[0];
+        }
+        else
+        {
+            this.args    = new Object[1];
+            this.args[0] = argumentArray;
+        }
     }
 
 
     /**
-     * Constructs an RemoteCallableStaticMethod.
+     * Constructs an {@link RemoteCallableStaticMethod}.
+     * <p>
+     * If the method is defined using a var-arg, the last parameter to this constructor
+     * must be an array.  eg: the method "methodName(Foo... args)" must be
+     * represented as a call this this constructor as:
+     * RemoteCallableStaticMethod(className, "methodName", new Foo[]{...});
      *
      * @param className   the name of the class
      * @param methodName  the name of the static method
@@ -94,7 +116,7 @@ public class RemoteCallableStaticMethod<T> implements RemoteCallable<T>
      */
     public RemoteCallableStaticMethod(String    className,
                                       String    methodName,
-                                      String... args)
+                                      Object... args)
     {
         this.className  = className;
         this.methodName = methodName;
@@ -102,38 +124,36 @@ public class RemoteCallableStaticMethod<T> implements RemoteCallable<T>
     }
 
 
+
     @Override
     public T call() throws Exception
     {
         // use the Thread's context ClassLoader to resolve the Class.
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-
         Class<?>    clazz       = classLoader.loadClass(className);
 
-        Method      method;
-        boolean     hasArgs;
+        // resolve the static method to call
+        Method method = ReflectionHelper.getCompatibleMethod(clazz, methodName, args);
 
-        try
+        // was the method found?
+        if (method == null)
         {
-            // FUTURE: we should enhance this to support any type of argument, not just a list of strings.
-            method  = clazz.getMethod(methodName, new String[0].getClass());
-            hasArgs = true;
-        }
-        catch (NoSuchMethodException e)
-        {
-            method  = clazz.getMethod(methodName);
-            hasArgs = false;
-        }
-
-        // ensure that the method is declared as a static
-        if (Modifier.isStatic(method.getModifiers()))
-        {
-            return hasArgs ? (T) method.invoke(null, (Object) args) : (T) method.invoke(null);
+            throw new NoSuchMethodException("The specified method [" + className + "." + methodName
+                                            + "] for the arguments [" + Arrays.toString(args)
+                                            + "] could not be located");
         }
         else
         {
-            throw new IllegalArgumentException("The specified method [" + className + "." + methodName
-                                               + "] is not static");
+            // ensure that the method is static
+            if (Modifier.isStatic(method.getModifiers()))
+            {
+                return args.length > 0 ? (T) method.invoke(null, args) : (T) method.invoke(null);
+            }
+            else
+            {
+                throw new IllegalArgumentException("The specified method [" + className + "." + methodName
+                                                   + "] is not static");
+            }
         }
     }
 

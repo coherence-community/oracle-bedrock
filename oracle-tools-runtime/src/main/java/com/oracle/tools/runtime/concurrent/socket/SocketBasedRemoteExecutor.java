@@ -928,6 +928,7 @@ public class SocketBasedRemoteExecutor extends AbstractControllableRemoteExecuto
             {
                 // TODO: we should do something here?
                 System.out.printf("Something horrible happened!\n%s\n", e);
+                e.printStackTrace();
             }
         }
     }

@@ -39,6 +39,10 @@ reverse chronological order.
     Implementations are encouraged to instead extend the
     com.oracle.tools.predicate.Predicate interface.
 
+*   [ORACLETOOLS-109](https://java.net/jira/browse/ORACLETOOLS-109): Resolved
+    issues with the ReflectionHelper.getCompatibleMethod/Constructor failing
+    to locate interface methods and those defined in super classes
+
 <h4>oracle-tools-runtime</h4>
 
 *   [ORACLETOOLS-79](https://java.net/jira/browse/ORACLETOOLS-79): Completed
@@ -142,6 +146,10 @@ reverse chronological order.
 *   [ORACLETOOLS-105](https://java.net/jira/browse/ORACLETOOLS-105): Introduced
     new Coherence-based interfaces and class implementations to simplify
     creating different types of Coherence applications, members and clusters.
+
+*   [ORACLETOOLS-110](https://java.net/jira/browse/ORACLETOOLS-110): Introduced
+    the ability to access NamedCaches using CoherenceClusterMember-based
+    applications and via a CoherenceCluster instance.
 
 <h4>oracle-tools-coherence-testing-support</h4>
 

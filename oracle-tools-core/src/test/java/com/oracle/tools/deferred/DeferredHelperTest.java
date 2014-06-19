@@ -32,7 +32,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
-import static com.oracle.tools.deferred.DeferredHelper.*;
+import static com.oracle.tools.deferred.DeferredHelper.deferred;
+import static com.oracle.tools.deferred.DeferredHelper.eventually;
+import static com.oracle.tools.deferred.DeferredHelper.invoking;
 
 /**
  * Unit tests for the {@link DeferredHelper}.

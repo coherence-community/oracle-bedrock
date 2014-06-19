@@ -26,6 +26,11 @@
 package com.oracle.tools.runtime.coherence;
 
 import com.oracle.tools.runtime.AbstractAssembly;
+import com.oracle.tools.runtime.Assembly;
+
+import com.oracle.tools.runtime.java.util.RemoteCallableStaticMethod;
+
+import com.tangosol.net.NamedCache;
 
 import com.tangosol.util.UID;
 
@@ -35,7 +40,12 @@ import java.util.Set;
 import java.util.TreeSet;
 
 /**
- * Created by brianoliver on 5/22/14.
+ * An {@link Assembly} that represents a collection of {@link CoherenceClusterMember}s.
+ * <p>
+ * Copyright (c) 2014. All Rights Reserved. Oracle Corporation.<br>
+ * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
+ *
+ * @author Brian Oliver
  */
 public class CoherenceCluster extends AbstractAssembly<CoherenceClusterMember>
 {
@@ -64,14 +74,30 @@ public class CoherenceCluster extends AbstractAssembly<CoherenceClusterMember>
 
 
     /**
-     * Obtains the member {@link UID}s for the {@link Cluster}.
+     * Obtains the member {@link UID}s for the {@link CoherenceCluster}.
      *
-     * @return  a {@link Set} of {@link UID}, one for each {@link ClusterMember}
+     * @return  a {@link Set} of {@link UID}, one for each {@link CoherenceClusterMember}
      */
     public Set<UID> getClusterMemberUIDs()
     {
         Iterator<CoherenceClusterMember> members = iterator();
 
         return members.hasNext() ? members.next().getClusterMemberUIDs() : new TreeSet<UID>();
+    }
+
+
+    /**
+     * Obtains a proxy of the specified {@link NamedCache} available in the
+     * {@link CoherenceCluster}.
+     *
+     * @param cacheName  the name of the {@link NamedCache}
+     *
+     * @return  a proxy to the {@link NamedCache}
+     */
+    public NamedCache getCache(String cacheName)
+    {
+        Iterator<CoherenceClusterMember> members = iterator();
+
+        return members.hasNext() ? members.next().getCache(cacheName) : null;
     }
 }

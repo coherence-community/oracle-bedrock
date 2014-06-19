@@ -39,6 +39,8 @@ import com.oracle.tools.runtime.java.container.Container;
 
 import com.oracle.tools.runtime.network.AvailablePortIterator;
 
+import com.tangosol.net.NamedCache;
+
 import org.junit.Test;
 
 import static com.oracle.tools.deferred.DeferredHelper.invoking;
@@ -83,14 +85,10 @@ public abstract class AbstractCoherenceCacheServerTest<B extends JavaApplication
             new CoherenceCacheServerSchema().setClusterPort(availablePorts).useLocalHostMode().setRoleName("test-role")
                 .setSiteName("test-site").setJMXManagementMode(JMXManagementMode.LOCAL_ONLY).setJMXPort(availablePorts);
 
-        CoherenceCacheServer server = null;
+        B builder = newJavaApplicationBuilder();
 
-        try
+        try (CoherenceCacheServer server = builder.realize(schema, "TEST", new SystemApplicationConsole()))
         {
-            B builder = newJavaApplicationBuilder();
-
-            server = builder.realize(schema, "TEST", new SystemApplicationConsole());
-
             assertThat(invoking(server).getClusterSize(), is(1));
             assertThat(server.getRoleName(), is("test-role"));
             assertThat(server.getSiteName(), is("test-site"));
@@ -100,24 +98,15 @@ public abstract class AbstractCoherenceCacheServerTest<B extends JavaApplication
 
             assertThat(size, is(1));
         }
-        finally
-        {
-            if (server != null)
-            {
-                server.close();
-            }
-        }
     }
 
 
     /**
      * Ensure that we can start and stop Coherence Members on the same port
      * continuously (quickly) and there is only ever one member.
-     *
-     * @throws Exception
      */
     @Test
-    public void shouldStartStopMultipleTimes() throws Exception
+    public void shouldStartStopMultipleTimes()
     {
         AvailablePortIterator availablePorts = Container.getAvailablePorts();
 
@@ -125,26 +114,17 @@ public abstract class AbstractCoherenceCacheServerTest<B extends JavaApplication
             new CoherenceCacheServerSchema().setClusterPort(availablePorts).useLocalHostMode().setRoleName("test-role")
                 .setSiteName("test-site").setDiagnosticsEnabled(true);
 
-        CoherenceCacheServer server  = null;
-        B                    builder = newJavaApplicationBuilder();
+        B builder = newJavaApplicationBuilder();
 
         for (int i = 1; i <= 10; i++)
         {
-            try
-            {
-                System.out.println("Building Instance: " + i);
-                server = builder.realize(schema, "TEST");
+            System.out.println("Building Instance: " + i);
 
+            try (CoherenceCacheServer server = builder.realize(schema, "TEST"))
+            {
                 assertThat(invoking(server).getClusterSize(), is(1));
                 assertThat(server.getRoleName(), is("test-role"));
                 assertThat(server.getSiteName(), is("test-site"));
-            }
-            finally
-            {
-                if (server != null)
-                {
-                    server.close();
-                }
             }
         }
     }
@@ -152,11 +132,9 @@ public abstract class AbstractCoherenceCacheServerTest<B extends JavaApplication
 
     /**
      * Ensure that we can start and stop a single Coherence Cluster Member.
-     *
-     * @throws Exception
      */
     @Test
-    public void shouldStartSingletonCluster() throws Exception
+    public void shouldStartSingletonCluster()
     {
         AvailablePortIterator availablePorts = Container.getAvailablePorts();
 
@@ -164,23 +142,13 @@ public abstract class AbstractCoherenceCacheServerTest<B extends JavaApplication
             new CoherenceCacheServerSchema().setClusterPort(availablePorts).useLocalHostMode()
                 .setDiagnosticsEnabled(true);
 
-        B                    builder = newJavaApplicationBuilder();
-        CoherenceCacheServer server  = null;
+        B builder = newJavaApplicationBuilder();
 
-        try
+        try (CoherenceCacheServer server = builder.realize(schema, "TEST"))
         {
-            server = builder.realize(schema, "TEST");
-
             assertThat(server, new GetLocalMemberId(), is(1));
             assertThat(server, new GetClusterSize(), is(1));
             assertThat(server, new GetServiceStatus("DistributedCache"), is(ServiceStatus.ENDANGERED));
-        }
-        finally
-        {
-            if (server != null)
-            {
-                server.close();
-            }
         }
     }
 
@@ -188,11 +156,9 @@ public abstract class AbstractCoherenceCacheServerTest<B extends JavaApplication
     /**
      * Ensure that we can start and stop a Coherence Cluster Member
      * that uses a specific operational override.
-     *
-     * @throws Exception
      */
     @Test
-    public void shouldUseCustomOperationalOverride() throws Exception
+    public void shouldUseCustomOperationalOverride()
     {
         AvailablePortIterator availablePorts = Container.getAvailablePorts();
 
@@ -201,23 +167,43 @@ public abstract class AbstractCoherenceCacheServerTest<B extends JavaApplication
                 .setOperationalOverrideURI("test-operational-override.xml").useLocalHostMode()
                 .setDiagnosticsEnabled(true);
 
-        B                    builder = newJavaApplicationBuilder();
-        CoherenceCacheServer server  = null;
+        B builder = newJavaApplicationBuilder();
 
-        try
+        try (CoherenceCacheServer server = builder.realize(schema, "TEST"))
         {
-            server = builder.realize(schema, "TEST");
-
             assertThat(server, new GetLocalMemberId(), is(1));
             assertThat(server, new GetClusterSize(), is(1));
             assertThat(server, new GetClusterName(), is("MyCluster"));
         }
-        finally
+    }
+
+
+    /**
+     * Ensure that we can create and use a NamedCache via a CoherenceCacheServer.
+     */
+    @Test
+    public void shouldAccessNamedCache()
+    {
+        AvailablePortIterator availablePorts = Container.getAvailablePorts();
+
+        CoherenceCacheServerSchema schema =
+            new CoherenceCacheServerSchema().setClusterPort(availablePorts).useLocalHostMode()
+                .setDiagnosticsEnabled(true);
+
+        B builder = newJavaApplicationBuilder();
+
+        try (CoherenceCacheServer server = builder.realize(schema, "TEST"))
         {
-            if (server != null)
-            {
-                server.close();
-            }
+            assertThat(server, new GetLocalMemberId(), is(1));
+            assertThat(server, new GetClusterSize(), is(1));
+
+            NamedCache namedCache = server.getCache("dist-example");
+
+            assertThat(namedCache.size(), is(0));
+            namedCache.put("key", "hello");
+
+            assertThat(namedCache.size(), is(1));
+            assertThat(namedCache.get("key"), is("hello"));
         }
     }
 }

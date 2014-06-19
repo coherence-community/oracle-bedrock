@@ -27,6 +27,8 @@ package com.oracle.tools.runtime.coherence;
 
 import com.oracle.tools.runtime.java.JavaApplication;
 
+import com.tangosol.net.NamedCache;
+
 import com.tangosol.util.UID;
 
 import java.util.Set;
@@ -97,6 +99,17 @@ public interface CoherenceClusterMember extends JavaApplication
      * @return the site name
      */
     public String getClusterName();
+
+
+    /**
+     * Obtains a proxy of the specified {@link NamedCache} available in the
+     * {@link CoherenceClusterMember}.
+     *
+     * @param cacheName  the name of the {@link NamedCache}
+     *
+     * @return  a proxy to the {@link NamedCache}
+     */
+    public NamedCache getCache(String cacheName);
 
 
     /**

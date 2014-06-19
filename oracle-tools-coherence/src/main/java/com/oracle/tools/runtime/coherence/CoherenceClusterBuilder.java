@@ -26,6 +26,7 @@
 package com.oracle.tools.runtime.coherence;
 
 import com.oracle.tools.runtime.AbstractAssemblyBuilder;
+import com.oracle.tools.runtime.AssemblyBuilder;
 
 import com.oracle.tools.runtime.java.JavaApplication;
 import com.oracle.tools.runtime.java.JavaApplicationBuilder;
@@ -33,7 +34,13 @@ import com.oracle.tools.runtime.java.JavaApplicationBuilder;
 import java.util.List;
 
 /**
- * Created by brianoliver on 5/22/14.
+ * An {@link AssemblyBuilder} for a collection of {@link CoherenceClusterMember}s, called
+ * a {@link CoherenceCluster}.
+ * <p>
+ * Copyright (c) 2014. All Rights Reserved. Oracle Corporation.<br>
+ * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
+ *
+ * @author Brian Oliver
  */
 public class CoherenceClusterBuilder extends AbstractAssemblyBuilder<CoherenceClusterMember, CoherenceCluster>
 {

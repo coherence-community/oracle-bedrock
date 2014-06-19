@@ -35,6 +35,9 @@ import com.oracle.tools.deferred.jmx.DeferredMBeanAttribute;
 import com.oracle.tools.deferred.jmx.DeferredMBeanInfo;
 import com.oracle.tools.deferred.jmx.DeferredMBeanProxy;
 
+import com.oracle.tools.predicate.Predicate;
+import com.oracle.tools.predicate.Predicates;
+
 import com.oracle.tools.runtime.AbstractApplication;
 import com.oracle.tools.runtime.Application;
 import com.oracle.tools.runtime.ApplicationConsole;
@@ -47,11 +50,17 @@ import com.oracle.tools.runtime.network.Constants;
 
 import com.oracle.tools.util.CompletionListener;
 import com.oracle.tools.util.FutureCompletionListener;
+import com.oracle.tools.util.ReflectionHelper;
+
+import net.sf.cglib.proxy.MethodInterceptor;
+import net.sf.cglib.proxy.MethodProxy;
 
 import static com.oracle.tools.deferred.DeferredHelper.cached;
 import static com.oracle.tools.deferred.DeferredHelper.ensured;
 
 import java.io.IOException;
+
+import java.lang.reflect.Method;
 
 import java.util.Properties;
 import java.util.Set;
@@ -190,9 +199,6 @@ public abstract class AbstractJavaApplication<A extends AbstractJavaApplication<
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Properties getSystemProperties()
     {
@@ -200,9 +206,6 @@ public abstract class AbstractJavaApplication<A extends AbstractJavaApplication<
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String getSystemProperty(String name)
     {
@@ -210,9 +213,6 @@ public abstract class AbstractJavaApplication<A extends AbstractJavaApplication<
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public boolean isJMXEnabled()
     {
@@ -220,9 +220,6 @@ public abstract class AbstractJavaApplication<A extends AbstractJavaApplication<
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public int getRemoteJMXPort()
     {
@@ -237,9 +234,6 @@ public abstract class AbstractJavaApplication<A extends AbstractJavaApplication<
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String getRMIServerHostName()
     {
@@ -249,9 +243,6 @@ public abstract class AbstractJavaApplication<A extends AbstractJavaApplication<
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Deferred<JMXConnector> getDeferredJMXConnector()
     {
@@ -259,9 +250,6 @@ public abstract class AbstractJavaApplication<A extends AbstractJavaApplication<
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public <T> Deferred<T> getDeferredMBeanProxy(ObjectName objectName,
                                                  Class<T>   proxyClass)
@@ -270,9 +258,6 @@ public abstract class AbstractJavaApplication<A extends AbstractJavaApplication<
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public <T> T getMBeanProxy(ObjectName objectName,
                                Class<T>   proxyClass)
@@ -283,9 +268,6 @@ public abstract class AbstractJavaApplication<A extends AbstractJavaApplication<
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Deferred<MBeanInfo> getDeferredMBeanInfo(ObjectName objectName)
     {
@@ -293,9 +275,6 @@ public abstract class AbstractJavaApplication<A extends AbstractJavaApplication<
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public MBeanInfo getMBeanInfo(ObjectName objectName)
     {
@@ -303,9 +282,6 @@ public abstract class AbstractJavaApplication<A extends AbstractJavaApplication<
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public <T> Deferred<T> getDeferredMBeanAttribute(ObjectName objectName,
                                                      String     attributeName,
@@ -315,9 +291,6 @@ public abstract class AbstractJavaApplication<A extends AbstractJavaApplication<
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public <T> T getMBeanAttribute(ObjectName objectName,
                                    String     attributeName,
@@ -329,9 +302,6 @@ public abstract class AbstractJavaApplication<A extends AbstractJavaApplication<
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Set<ObjectInstance> queryMBeans(ObjectName name,
                                            QueryExp   query)
@@ -349,9 +319,6 @@ public abstract class AbstractJavaApplication<A extends AbstractJavaApplication<
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public <T> void submit(RemoteCallable<T>     callable,
                            CompletionListener<T> listener)
@@ -360,9 +327,6 @@ public abstract class AbstractJavaApplication<A extends AbstractJavaApplication<
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void submit(RemoteRunnable runnable) throws IllegalStateException
     {
@@ -389,5 +353,168 @@ public abstract class AbstractJavaApplication<A extends AbstractJavaApplication<
         }
 
         super.close();
+    }
+
+
+    /**
+     * Creates a local proxy of an application owned instance, afterwards the proxy may
+     * be used to interact with the application owned instance.
+     * <p>
+     * Note:  Only methods of the proxy interface that have serializable method parameters
+     * and return values may be called using the returned proxy.
+     *
+     * @param <T>  the type of the proxy
+     *
+     * @param classToProxy                the class of the proxy
+     * @param instanceProducer            a {@link RemoteCallable} that will provide the application instance
+     *                                    to which proxy method calls should be invoked
+     * @param unsupportedMethodPredicate  a {@link Predicate} to determine if a dynamically invoked
+     *                                    {@link Method} is unsupported.  <code>true</code> means calling the
+     *                                    {@link Method} should throw an {@link UnsupportedOperationException}
+     * @return  a proxy of an application instance
+     */
+    public <T> T getProxyFor(Class<T>          classToProxy,
+                             RemoteCallable<T> instanceProducer,
+                             Predicate<Method> unsupportedMethodPredicate)
+    {
+        return ReflectionHelper.createProxyOf(classToProxy, new ProxyMethodInterceptor(instanceProducer));
+    }
+
+
+    private class ProxyMethodInterceptor<T> implements MethodInterceptor
+    {
+        /**
+         * The {@link RemoteCallable} that will provide the application instance
+         * on which proxy method calls should be invoked
+         */
+        private RemoteCallable<T> instanceProducer;
+
+        /**
+         * A {@link Predicate} to determine if a {@link Method} invocation
+         * is supported or not. When evaluating to <code>true</code> the
+         * {@link Method} is unsupported.
+         */
+        private Predicate<Method> unsupportedMethodPredicate;
+
+
+        /**
+         * Constructs a {@link ProxyMethodInterceptor}.
+         *
+         * @param instanceProducer  the {@link RemoteCallable} that produces the instance on which
+         *                          proxied methods should be invoked
+         */
+        public ProxyMethodInterceptor(RemoteCallable<T> instanceProducer)
+        {
+            this(instanceProducer, Predicates.<Method>never());
+        }
+
+
+        /**
+         * Constructs a {@link ProxyMethodInterceptor} with the ability to raise
+         * {@link UnsupportedOperationException}s for {@link Method}s that can't be implemented.
+         *
+         * @param instanceProducer            the {@link RemoteCallable} that produces the instance on which
+         *                                    proxied methods should be invoked
+         * @param unsupportedMethodPredicate  a {@link Predicate} to evaluate when a {@link Method} is unsupported
+         */
+        public ProxyMethodInterceptor(RemoteCallable<T> instanceProducer,
+                                      Predicate<Method> unsupportedMethodPredicate)
+        {
+            this.instanceProducer           = instanceProducer;
+            this.unsupportedMethodPredicate = unsupportedMethodPredicate;
+        }
+
+
+        @Override
+        public Object intercept(Object      self,
+                                Method      method,
+                                Object[]    args,
+                                MethodProxy methodProxy) throws Throwable
+        {
+            if (unsupportedMethodPredicate.evaluate(method))
+            {
+                throw new UnsupportedOperationException("The method: " + method.getName() + " is not supported");
+            }
+            else
+            {
+                FutureCompletionListener listener = new FutureCompletionListener();
+
+                AbstractJavaApplication.this.submit(new RemoteMethodInvocation<T>(instanceProducer,
+                                                                                  method.getName(),
+                                                                                  args), listener);
+
+                return listener.get();
+            }
+        }
+    }
+
+
+    /**
+     * A {@link RemoteCallable} representing a remote method invocation against
+     * a remote instance (also represented by a {@link RemoteCallable}.
+     *
+     * @param <T>  the type of the instance on which the method will be invoked
+     */
+    public static class RemoteMethodInvocation<T> implements RemoteCallable
+    {
+        /**
+         * The {@link RemoteCallable} that will produce the instance on which
+         * to invoke the specified method.
+         */
+        private RemoteCallable<T> instanceProducer;
+
+        /**
+         * The name of the method to invoke on the instance.
+         */
+        private String methodName;
+
+        /**
+         * The arguments for the method invocation.
+         */
+        private Object[] args;
+
+
+        /**
+         * Constructs a {@link RemoteMethodInvocation}.
+         *
+         * @param instanceProducer  the {@link RemoteCallable} that produces the instance
+         *                          on which the method should be invoked
+         * @param methodName        the name of the method to invoke
+         * @param args              the arguments to the instance
+         */
+        public RemoteMethodInvocation(RemoteCallable<T> instanceProducer,
+                                      String            methodName,
+                                      Object[]          args)
+        {
+            this.instanceProducer = instanceProducer;
+            this.methodName       = methodName;
+            this.args             = args;
+        }
+
+
+        @Override
+        public Object call() throws Exception
+        {
+            T instance = instanceProducer.call();
+
+            if (instance == null)
+            {
+                throw new NullPointerException("Remote Instance is null");
+            }
+            else
+            {
+                // find the compatible method on the instance
+                Method method = ReflectionHelper.getCompatibleMethod(instance.getClass(), methodName, args);
+
+                if (method == null)
+                {
+                    throw new NoSuchMethodException(methodName);
+                }
+                else
+                {
+                    return method.invoke(instance, args);
+                }
+            }
+        }
     }
 }
