@@ -120,6 +120,9 @@ reverse chronological order.
 
 <h4>oracle-tools-runtime-remote</h4>
 
+*   [ORACLETOOLS-113](https://java.net/jira/browse/ORACLETOOLS-113): Introduced
+    a RemotePlatform implementation of a Platform.
+
 *   [ORACLETOOLS-91](https://java.net/jira/browse/ORACLETOOLS-91): Introduced
     experimental RemoteApplicationBuilders in the new oracle-tools-runtime-remote
     module.

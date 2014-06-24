@@ -38,6 +38,13 @@ package com.oracle.tools.runtime;
 public interface Platform
 {
     /**
+     * Obtain the host name for this {@link Platform}.
+     *
+     * @return the host name for this {@link Platform}.
+     */
+    public String getHostname();
+
+    /**
      * Obtains a suitable {@link ApplicationBuilder} for a specific class of {@link Application}.
      *
      * @param <A>  the type of {@link Application}
@@ -45,11 +52,8 @@ public interface Platform
      *
      * @param applicationClass  the {@link Class} of {@link Application} for which a {@link ApplicationBuilder}
      *                          is required
-     * @return  the {@link ApplicationBuilder}
-     *
-     * @throws IllegalArgumentException  if the {@link Platform} can't provide a suitable
-     *                                   {@link ApplicationBuilder} for the specified {@link Application}
-     *                                   {@link Class}
+     * @return  the {@link ApplicationBuilder} or null if this {@link Platform} cannot supply a builder for
+     *          the specified {@link Application} {@link Class}
      */
     public <A extends Application, B extends ApplicationBuilder<A>> B getApplicationBuilder(Class<A> applicationClass);
 }

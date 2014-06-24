@@ -27,6 +27,7 @@ package com.oracle.tools.runtime;
 
 import com.oracle.tools.runtime.java.JavaApplication;
 import com.oracle.tools.runtime.java.LocalJavaApplicationBuilder;
+import com.oracle.tools.runtime.network.Constants;
 
 /**
  * The {@link Platform} in which this Java Virtual Machine is running.
@@ -39,7 +40,32 @@ import com.oracle.tools.runtime.java.LocalJavaApplicationBuilder;
  */
 public class LocalPlatform implements Platform
 {
+    /**
+     * The singleton instance of {@link LocalPlatform}.
+     */
+    public static LocalPlatform INSTANCE = new LocalPlatform();
+
+    /**
+     * Construct a new {@link LocalPlatform}.
+     */
+    public LocalPlatform()
+    {
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
+    public String getHostname()
+    {
+        return Constants.getLocalHost();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    @SuppressWarnings("unchecked")
     public <A extends Application, B extends ApplicationBuilder<A>> B getApplicationBuilder(Class<A> applicationClass)
     {
         if (JavaApplication.class.isAssignableFrom(applicationClass))

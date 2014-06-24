@@ -27,11 +27,11 @@ package com.oracle.tools.runtime;
 
 import com.oracle.tools.runtime.java.JavaApplication;
 import com.oracle.tools.runtime.java.JavaApplicationBuilder;
-
+import com.oracle.tools.runtime.network.Constants;
 import org.junit.Test;
 
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-
 import static org.hamcrest.core.IsInstanceOf.instanceOf;
 
 /**
@@ -45,6 +45,14 @@ import static org.hamcrest.core.IsInstanceOf.instanceOf;
  */
 public class LocalPlatformTest
 {
+    @Test
+    public void shouldReturnHostName() throws Exception
+    {
+        Platform platform = LocalPlatform.INSTANCE;
+
+        assertThat(platform.getHostname(), is(Constants.getLocalHost()));
+    }
+
     @Test
     public void shouldReturnJavaApplicationBuilder()
     {
