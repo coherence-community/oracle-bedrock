@@ -45,6 +45,10 @@ reverse chronological order.
 
 <h4>oracle-tools-runtime</h4>
 
+*   [ORACLETOOLS-114](https://java.net/jira/browse/ORACLETOOLS-113): Introduced
+    JavaVirtualMachine as an implementation of a Platform to represent the
+    current JVM process.
+
 *   [ORACLETOOLS-61](https://java.net/jira/browse/ORACLETOOLS-61): Introduced
     the concept of Platform, together with LocalPlatform and RemotePlatform
     implementations.
