@@ -25,15 +25,15 @@
 
 package com.oracle.tools.runtime.java.container;
 
+import com.oracle.tools.runtime.LocalPlatform;
 import org.junit.Test;
+
+import java.util.Properties;
 
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.sameInstance;
-
 import static org.junit.Assert.assertThat;
-
-import java.util.Properties;
 
 /**
  * Unit Tests for {@link com.oracle.tools.runtime.java.container.DelegatingProperties}.
@@ -129,7 +129,7 @@ public class DelegatingPropertiesTest
 
         ContainerScope scope = new ContainerScope("test",
                                                   platformScope.getProperties(),
-                                                  Container.getAvailablePorts(),
+                                                  LocalPlatform.getInstance().getAvailablePorts(),
                                                   null,
                                                   false,
                                                   Container.PIPE_BUFFER_SIZE_BYTES);
@@ -169,7 +169,7 @@ public class DelegatingPropertiesTest
 
         ContainerScope scope = new ContainerScope("test",
                                                   platformScope.getProperties(),
-                                                  Container.getAvailablePorts(),
+                                                  LocalPlatform.getInstance().getAvailablePorts(),
                                                   null,
                                                   false,
                                                   Container.PIPE_BUFFER_SIZE_BYTES);

@@ -27,7 +27,6 @@ package com.oracle.tools.runtime;
 
 import java.io.File;
 import java.io.IOException;
-
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
@@ -179,7 +178,8 @@ public class SimpleApplicationBuilder extends AbstractApplicationBuilder<SimpleA
     @Override
     public <T extends SimpleApplication, S extends ApplicationSchema<T>> T realize(S                  applicationSchema,
                                                                                    String             applicationName,
-                                                                                   ApplicationConsole console)
+                                                                                   ApplicationConsole console,
+                                                                                   Platform           platform)
     {
         ApplicationSchema<T> schema = applicationSchema;
 

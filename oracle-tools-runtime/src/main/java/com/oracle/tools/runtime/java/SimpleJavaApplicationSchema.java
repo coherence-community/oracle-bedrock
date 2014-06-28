@@ -49,7 +49,7 @@ public class SimpleJavaApplicationSchema
      */
     public SimpleJavaApplicationSchema(String applicationClassName)
     {
-        super(applicationClassName);
+        super(SimpleJavaApplication.class, applicationClassName);
     }
 
 
@@ -62,7 +62,7 @@ public class SimpleJavaApplicationSchema
     public SimpleJavaApplicationSchema(String applicationClassName,
                                        String classPath)
     {
-        super(applicationClassName, classPath);
+        super(SimpleJavaApplication.class, applicationClassName, classPath);
     }
 
 

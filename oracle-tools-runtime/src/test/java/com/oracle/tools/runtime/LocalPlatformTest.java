@@ -27,8 +27,9 @@ package com.oracle.tools.runtime;
 
 import com.oracle.tools.runtime.java.JavaApplication;
 import com.oracle.tools.runtime.java.JavaApplicationBuilder;
-import com.oracle.tools.runtime.network.Constants;
 import org.junit.Test;
+
+import java.net.InetAddress;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -48,17 +49,15 @@ public class LocalPlatformTest
     @Test
     public void shouldReturnHostName() throws Exception
     {
-        Platform platform = LocalPlatform.INSTANCE;
+        String hostName = LocalPlatform.getInstance().getHostName();
 
-        assertThat(platform.getHostname(), is(Constants.getLocalHost()));
+        assertThat(LocalPlatform.getInstance().getPrivateInetAddress(), is(InetAddress.getByName(hostName)));
     }
 
     @Test
     public void shouldReturnJavaApplicationBuilder()
     {
-        Platform           platform = new LocalPlatform();
-
-        ApplicationBuilder builder  = platform.getApplicationBuilder(JavaApplication.class);
+        ApplicationBuilder builder = LocalPlatform.getInstance().getApplicationBuilder(JavaApplication.class);
 
         assertThat(builder, instanceOf(JavaApplicationBuilder.class));
     }
@@ -67,9 +66,7 @@ public class LocalPlatformTest
     @Test
     public void shouldReturnLocalApplicationBuilder()
     {
-        Platform           platform = new LocalPlatform();
-
-        ApplicationBuilder builder  = platform.getApplicationBuilder(SimpleApplication.class);
+        ApplicationBuilder builder = LocalPlatform.getInstance().getApplicationBuilder(SimpleApplication.class);
 
         assertThat(builder, instanceOf(SimpleApplicationBuilder.class));
     }

@@ -25,19 +25,16 @@
 
 package com.oracle.tools.runtime.java.container;
 
+import com.oracle.tools.runtime.LocalPlatform;
 import com.oracle.tools.runtime.PropertiesBuilder;
-
 import com.oracle.tools.runtime.java.ClassPath;
-
 import com.oracle.tools.runtime.network.AvailablePortIterator;
 
 import java.net.URL;
-
 import java.security.AllPermission;
 import java.security.CodeSource;
 import java.security.PermissionCollection;
 import java.security.Permissions;
-
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -155,7 +152,7 @@ public class ContainerClassLoader extends ContainerScopeClassLoader
                            ClassPath.ofSystem(),
                            builder.realize(),
                            System.getProperties(),
-                           Container.getAvailablePorts(),
+                           LocalPlatform.getInstance().getAvailablePorts(),
                            false,
                            Container.PIPE_BUFFER_SIZE_BYTES);
     }
@@ -180,7 +177,7 @@ public class ContainerClassLoader extends ContainerScopeClassLoader
                            classPath,
                            localProperties,
                            System.getProperties(),
-                           Container.getAvailablePorts(),
+                           LocalPlatform.getInstance().getAvailablePorts(),
                            false,
                            Container.PIPE_BUFFER_SIZE_BYTES);
     }
@@ -221,7 +218,7 @@ public class ContainerClassLoader extends ContainerScopeClassLoader
         Scope platformScope = Container.getPlatformScope();
 
         // establish an MBeanServerBuilder
-        ContainerMBeanServerBuilder mBeanServerBuilder = new ContainerMBeanServerBuilder(Container.getAvailablePorts());
+        ContainerMBeanServerBuilder mBeanServerBuilder = new ContainerMBeanServerBuilder(LocalPlatform.getInstance().getAvailablePorts());
 
         // establish the Scope for the application
         ContainerScope scope = new ContainerScope(applicationName,

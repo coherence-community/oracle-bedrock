@@ -27,28 +27,24 @@ package com.oracle.tools.runtime.remote.java;
 
 import com.oracle.tools.runtime.ApplicationConsole;
 import com.oracle.tools.runtime.ApplicationSchema;
-
+import com.oracle.tools.runtime.Platform;
 import com.oracle.tools.runtime.concurrent.ControllableRemoteExecutor;
 import com.oracle.tools.runtime.concurrent.RemoteCallable;
 import com.oracle.tools.runtime.concurrent.RemoteExecutor;
 import com.oracle.tools.runtime.concurrent.RemoteRunnable;
-
 import com.oracle.tools.runtime.java.ClassPath;
 import com.oracle.tools.runtime.java.JavaApplication;
 import com.oracle.tools.runtime.java.JavaApplicationBuilder;
 import com.oracle.tools.runtime.java.JavaApplicationSchema;
 import com.oracle.tools.runtime.java.JavaProcess;
-
 import com.oracle.tools.runtime.remote.AbstractRemoteApplicationBuilder;
 import com.oracle.tools.runtime.remote.Authentication;
 import com.oracle.tools.runtime.remote.RemoteApplicationProcess;
-
 import com.oracle.tools.util.CompletionListener;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-
 import java.util.HashSet;
 
 /**
@@ -261,8 +257,9 @@ public class RemoteJavaApplicationBuilder<A extends JavaApplication>
 
 
     @Override
+    @SuppressWarnings("unchecked")
     protected <T extends A,
-        S extends ApplicationSchema<T>> RemoteJavaApplicationEnvironment<A> getRemoteApplicationEnvironment(S applicationSchema)
+        S extends ApplicationSchema<T>> RemoteJavaApplicationEnvironment<A> getRemoteApplicationEnvironment(S applicationSchema, Platform platform)
     {
         JavaApplicationSchema<A> schema = (JavaApplicationSchema) applicationSchema;
 
@@ -274,7 +271,8 @@ public class RemoteJavaApplicationBuilder<A extends JavaApplication>
                                                         areOrphansPermitted,
                                                         isAutoDeployEnabled,
                                                         doNotDeployFileNames,
-                                                        remoteJavaHome);
+                                                        remoteJavaHome,
+                                                        platform);
         }
         catch (IOException e)
         {

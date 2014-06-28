@@ -27,35 +27,27 @@ package com.oracle.tools.runtime.remote.java;
 
 import com.oracle.tools.io.FileHelper;
 import com.oracle.tools.io.NetworkHelper;
-
 import com.oracle.tools.lang.StringHelper;
-
 import com.oracle.tools.predicate.Predicate;
-
+import com.oracle.tools.runtime.Platform;
 import com.oracle.tools.runtime.Settings;
-
 import com.oracle.tools.runtime.concurrent.ControllableRemoteExecutor;
 import com.oracle.tools.runtime.concurrent.socket.RemoteExecutorServer;
-
 import com.oracle.tools.runtime.java.ClassPath;
 import com.oracle.tools.runtime.java.JavaApplication;
 import com.oracle.tools.runtime.java.JavaApplicationSchema;
-import com.oracle.tools.runtime.java.container.Container;
-
 import com.oracle.tools.runtime.remote.AbstractRemoteApplicationEnvironment;
 import com.oracle.tools.runtime.remote.DeploymentArtifact;
 
-import static com.oracle.tools.predicate.Predicates.allOf;
-
 import java.io.File;
 import java.io.IOException;
-
 import java.net.InetAddress;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Properties;
 import java.util.Set;
+
+import static com.oracle.tools.predicate.Predicates.allOf;
 
 /**
  * A Java-based implementation of a {@link RemoteJavaApplicationEnvironment}.
@@ -108,14 +100,14 @@ public class RemoteJavaApplicationEnvironment<A extends JavaApplication>
 
     /**
      * Constructs a {@link RemoteJavaApplicationEnvironment}.
-     *
-     * @param schema                the {@link JavaApplicationSchema}
-     * @param remoteFileSeparator   the {@link File#separator} for the remote server
-     * @param remotePathSeparator   the {@link File#pathSeparator} for the remote server
-     * @param areOrphansPermitted   are orphaned remote {@link JavaApplication}s permitted
-     * @param isAutoDeployEnabled   automatically deploy {@link JavaApplication}s
+     *  @param schema                the {@link com.oracle.tools.runtime.java.JavaApplicationSchema}
+     * @param remoteFileSeparator   the {@link java.io.File#separator} for the remote server
+     * @param remotePathSeparator   the {@link java.io.File#pathSeparator} for the remote server
+     * @param areOrphansPermitted   are orphaned remote {@link com.oracle.tools.runtime.java.JavaApplication}s permitted
+     * @param isAutoDeployEnabled   automatically deploy {@link com.oracle.tools.runtime.java.JavaApplication}s
      * @param doNotDeployFileNames  the names of files not to deploy (when deployment enabled)
      * @param remoteJavaHome        the remote JAVA HOME (may be null for a default)
+     * @param platform              the {@link Platform} representing the remoteO/S
      */
     public RemoteJavaApplicationEnvironment(JavaApplicationSchema<A> schema,
                                             char                     remoteFileSeparator,
@@ -123,9 +115,10 @@ public class RemoteJavaApplicationEnvironment<A extends JavaApplication>
                                             boolean                  areOrphansPermitted,
                                             boolean                  isAutoDeployEnabled,
                                             Set<String>              doNotDeployFileNames,
-                                            String                   remoteJavaHome) throws IOException
+                                            String                   remoteJavaHome,
+                                            Platform                 platform) throws IOException
     {
-        super(schema);
+        super(schema, platform);
 
         this.remoteFileSeparator = remoteFileSeparator;
         this.remotePathSeparator = remotePathSeparator;
@@ -137,7 +130,7 @@ public class RemoteJavaApplicationEnvironment<A extends JavaApplication>
 
         // ----- determine the remote system properties -----
 
-        Properties properties = schema.getSystemPropertiesBuilder().realize();
+        Properties properties = schema.getSystemProperties(platform);
 
         remoteSystemProperties = new Properties();
 

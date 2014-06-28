@@ -25,6 +25,8 @@
 
 package com.oracle.tools.runtime;
 
+import java.net.InetAddress;
+
 /**
  * Provides a means to represent a platform at runtime, a server, machine or
  * operating system on which {@link Application}s may be running, managed or deployed.
@@ -38,11 +40,45 @@ package com.oracle.tools.runtime;
 public interface Platform
 {
     /**
-     * Obtain the host name for this {@link Platform}.
+     * Obtain the name of this {@link Platform}.
      *
-     * @return the host name for this {@link Platform}.
+     * @return the name of this {@link Platform}
      */
-    public String getHostname();
+    public String getName();
+
+    /**
+     * Obtain the private InetAddress for this {@link Platform}, this is
+     * the address that will be used internally by Oracle Tools to
+     * open connections to this {@link Platform}.
+     *
+     * @return the private InetAddress for this {@link Platform}.
+     */
+    public InetAddress getPrivateInetAddress();
+
+    /**
+     * Obtain the public InetAddress for this {@link Platform}, this is
+     * the address that is visible to the outside world should be used
+     * to open connections to this {@link Platform}.
+     *
+     * @return the public InetAddress for this {@link Platform}.
+     */
+    public InetAddress getPublicInetAddress();
+
+    /**
+     * Realizes an instance of an {@link Application}.
+     *
+     * @param applicationSchema  the {@link ApplicationSchema} to use for realizing the {@link Application}
+     * @param applicationName    the name of the application
+     * @param console            the {@link ApplicationConsole} that will be used for I/O by the
+     *                           realized {@link Application}. This may be <code>null</code> if not required
+     *
+     * @return an {@link Application} representing the realized application
+     *
+     * @throws RuntimeException when a problem occurs while starting the application
+     */
+    public <A extends Application, S extends ApplicationSchema<A>> A realize(S applicationSchema,
+                                                                             String applicationName,
+                                                                             ApplicationConsole console);
 
     /**
      * Obtains a suitable {@link ApplicationBuilder} for a specific class of {@link Application}.

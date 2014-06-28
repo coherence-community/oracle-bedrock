@@ -28,6 +28,7 @@ package com.oracle.tools.runtime.java;
 import com.oracle.tools.runtime.Application;
 import com.oracle.tools.runtime.ApplicationConsole;
 import com.oracle.tools.runtime.ApplicationSchema;
+import com.oracle.tools.runtime.Platform;
 import com.oracle.tools.runtime.PropertiesBuilder;
 
 import java.util.List;
@@ -53,6 +54,16 @@ public interface JavaApplicationSchema<A extends JavaApplication> extends Applic
      */
     public PropertiesBuilder getSystemPropertiesBuilder();
 
+    /**
+     * Obtains the system {@link Properties} that will be used as a basis for
+     * configuring the Java System Properties of the realized
+     * {@link JavaApplication}s from an {@link JavaApplicationBuilder} based on
+     * the properties set in this schema and any properties derived from the
+     * specified {@link Platform}.
+     *
+     * @return {@link PropertiesBuilder}
+     */
+    public Properties getSystemProperties(Platform platform);
 
     /**
      * Obtains the JVM options to be used for starting the {@link JavaApplication}.

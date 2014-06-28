@@ -44,6 +44,6 @@ public class SimpleApplicationSchema extends AbstractApplicationSchema<SimpleApp
      */
     public SimpleApplicationSchema(String executableName)
     {
-        super(executableName);
+        super(SimpleApplication.class, executableName);
     }
 }

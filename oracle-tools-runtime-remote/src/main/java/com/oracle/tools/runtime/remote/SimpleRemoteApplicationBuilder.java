@@ -28,10 +28,9 @@ package com.oracle.tools.runtime.remote;
 import com.oracle.tools.runtime.ApplicationConsole;
 import com.oracle.tools.runtime.ApplicationSchema;
 import com.oracle.tools.runtime.FluentApplicationSchema;
+import com.oracle.tools.runtime.Platform;
 import com.oracle.tools.runtime.SimpleApplication;
 import com.oracle.tools.runtime.SimpleApplicationSchema;
-
-import java.io.IOException;
 
 /**
  * A simple implementation of a {@link RemoteApplicationBuilder}.
@@ -79,15 +78,16 @@ public class SimpleRemoteApplicationBuilder
 
     @Override
     protected <T extends SimpleApplication,
-        S extends ApplicationSchema<T>> SimpleRemoteApplicationEnvironment getRemoteApplicationEnvironment(S applicationSchema)
+        S extends ApplicationSchema<T>> SimpleRemoteApplicationEnvironment getRemoteApplicationEnvironment(S applicationSchema, Platform platform)
     {
         SimpleApplicationSchema schema = (SimpleApplicationSchema) applicationSchema;
 
-        return new SimpleRemoteApplicationEnvironment(schema);
+        return new SimpleRemoteApplicationEnvironment(schema, platform);
     }
 
 
     @Override
+    @SuppressWarnings("unchecked")
     protected <T extends SimpleApplication, S extends ApplicationSchema<T>> T createApplication(S                                  schema,
                                                                                                 SimpleRemoteApplicationEnvironment environment,
                                                                                                 String                             applicationName,

@@ -25,10 +25,13 @@
 
 package com.oracle.tools.runtime.java;
 
+import com.oracle.tools.runtime.AbstractPlatform;
 import com.oracle.tools.runtime.Application;
 import com.oracle.tools.runtime.ApplicationBuilder;
+import com.oracle.tools.runtime.LocalPlatform;
 import com.oracle.tools.runtime.Platform;
-import com.oracle.tools.runtime.network.Constants;
+
+import java.net.InetAddress;
 
 /**
  * An implementation of a {@link Platform} for running, deploying and
@@ -36,27 +39,27 @@ import com.oracle.tools.runtime.network.Constants;
  *
  * @author Jonathan Knight
  */
-public class JavaVirtualMachine implements Platform
+public class JavaVirtualMachine extends AbstractPlatform
 {
     /**
      * The singleton instance of {@link JavaVirtualMachine}.
      */
-    public static JavaVirtualMachine INSTANCE = new JavaVirtualMachine();
+    private static JavaVirtualMachine INSTANCE = new JavaVirtualMachine();
 
     /**
      * Construct a new {@link JavaVirtualMachine}.
+     * This constructor is private as the {@link JavaVirtualMachine}
+     * platform is a singleton as there is only one local JVM.
      */
-    public JavaVirtualMachine()
+    private JavaVirtualMachine()
     {
+        super("JVM");
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public String getHostname()
+    public InetAddress getPublicInetAddress()
     {
-        return Constants.getLocalHost();
+        return  LocalPlatform.getInstance().getPrivateInetAddress();
     }
 
     /**
@@ -73,4 +76,15 @@ public class JavaVirtualMachine implements Platform
 
         return null;
     }
+
+    /**
+     * Obtain the singleton instance of the {@link JavaVirtualMachine}.
+     *
+     * @return the singleton instance of the {@link JavaVirtualMachine}
+     */
+    public static JavaVirtualMachine getInstance()
+    {
+        return INSTANCE;
+    }
+
 }

@@ -27,9 +27,8 @@ package com.oracle.tools.runtime.remote;
 
 import com.oracle.tools.runtime.Application;
 import com.oracle.tools.runtime.ApplicationSchema;
+import com.oracle.tools.runtime.Platform;
 import com.oracle.tools.runtime.PropertiesBuilder;
-
-import java.io.IOException;
 
 import java.util.Collections;
 import java.util.Properties;
@@ -53,15 +52,21 @@ public abstract class AbstractRemoteApplicationEnvironment<A extends Application
      */
     protected S schema;
 
+    /**
+     * The {@link Platform} representing the remoteO/S
+     */
+    protected Platform platform;
 
     /**
      * Constructs an {@link AbstractRemoteApplicationEnvironment}.
      *
-     * @param schema  the {@link ApplicationSchema}
+     * @param schema    the {@link com.oracle.tools.runtime.ApplicationSchema}
+     * @param platform  the {@link Platform} representing the remoteO/S
      */
-    protected AbstractRemoteApplicationEnvironment(S schema)
+    protected AbstractRemoteApplicationEnvironment(S schema, Platform platform)
     {
-        this.schema = schema;
+        this.schema   = schema;
+        this.platform = platform;
     }
 
 
@@ -92,7 +97,7 @@ public abstract class AbstractRemoteApplicationEnvironment<A extends Application
         }
         else
         {
-            return schema.getEnvironmentVariablesBuilder().realize();
+            return schema.getEnvironmentVariables(platform);
         }
     }
 

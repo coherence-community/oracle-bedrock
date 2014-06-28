@@ -25,11 +25,7 @@
 
 package com.oracle.tools.runtime.coherence;
 
-import com.oracle.tools.runtime.java.JavaApplication;
-import com.oracle.tools.runtime.java.JavaApplicationBuilder;
 import com.oracle.tools.runtime.java.JavaApplicationSchema;
-
-import java.util.Iterator;
 
 /**
  * Defines a schema encapsulating configuration and operational settings
@@ -78,6 +74,11 @@ public interface CoherenceClusterMemberSchema<A extends CoherenceClusterMember> 
     public static final String PROPERTY_ROLE_NAME = "tangosol.coherence.role";
 
     /**
+     * The tangosol.coherence.machine property.
+     */
+    public static final String PROPERTY_MACHINE_NAME = "tangosol.coherence.machine";
+
+    /**
      * The tangosol.coherence.tcmp.enabled property.
      */
     public static final String PROPERTY_TCMP_ENABLED = "tangosol.coherence.tcmp.enabled";
@@ -107,6 +108,13 @@ public interface CoherenceClusterMemberSchema<A extends CoherenceClusterMember> 
      */
     public String getRoleName();
 
+
+    /**
+     * Obtains the machine name for Oracle Coherence applications based on this {@link CoherenceClusterMemberSchema}.
+     *
+     * @return  the machine name (or null if not set)
+     */
+    public String getMachineName();
 
     /**
      * Obtains if remote JMX monitoring is enabled for Oracle Coherence applications based on this

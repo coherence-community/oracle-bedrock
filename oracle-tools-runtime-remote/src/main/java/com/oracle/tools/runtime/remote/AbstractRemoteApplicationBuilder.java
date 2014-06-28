@@ -31,25 +31,20 @@ import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import com.jcraft.jsch.SftpException;
-
 import com.oracle.tools.runtime.AbstractApplicationBuilder;
 import com.oracle.tools.runtime.Application;
 import com.oracle.tools.runtime.ApplicationConsole;
 import com.oracle.tools.runtime.ApplicationSchema;
+import com.oracle.tools.runtime.Platform;
 import com.oracle.tools.runtime.PropertiesBuilder;
-
-import com.oracle.tools.runtime.java.JavaApplication;
-import com.oracle.tools.runtime.java.JavaApplicationSchema;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Iterator;
 import java.util.Properties;
-
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -57,7 +52,6 @@ import java.util.concurrent.TimeUnit;
  * (over SSH).
  *
  * @param <A>  the type of the {@link Application}s the {@link RemoteApplicationBuilder} will realize
- * @param <S>  the type of the {@link ApplicationSchema} for the {@link Application}s
  * @param <E>  the type of the {@link RemoteApplicationEnvironment} used by the {@link RemoteApplicationBuilder}
  * @param <B>  the type of the {@link RemoteApplicationBuilder}
  * <p>
@@ -359,11 +353,13 @@ public abstract class AbstractRemoteApplicationBuilder<A extends Application, E 
      * Obtains the {@link RemoteApplicationBuilder} specific {@link RemoteApplicationEnvironment}
      * to be used for configuring and realizing a remote {@link Application}.
      *
-     * @param schema  the {@link ApplicationSchema} defining the application
+     * @param schema    the {@link com.oracle.tools.runtime.ApplicationSchema} defining the application
+     * @param platform  the {@link Platform} representing the remote O/S
      *
      * @return the {@link RemoteApplicationEnvironment}
      */
-    abstract protected <T extends A, S extends ApplicationSchema<T>> E getRemoteApplicationEnvironment(S schema);
+    abstract protected <T extends A, S extends ApplicationSchema<T>> E getRemoteApplicationEnvironment(S schema,
+                                                                                                       Platform platform);
 
 
     /**
@@ -389,15 +385,13 @@ public abstract class AbstractRemoteApplicationBuilder<A extends Application, E 
     @Override
     public <T extends A, S extends ApplicationSchema<T>> T realize(S                  applicationSchema,
                                                                    String             applicationName,
-                                                                   ApplicationConsole console)
+                                                                   ApplicationConsole console,
+                                                                   Platform           platform)
     {
-        // TODO: this should be a safe cast but we should also check to make sure
-        ApplicationSchema<T> schema  = (ApplicationSchema) applicationSchema;
-
         Session              session = null;
 
         // obtain the builder-specific remote application environment based on the schema
-        E environment = getRemoteApplicationEnvironment(schema);
+        E environment = getRemoteApplicationEnvironment(applicationSchema, platform);
 
         try
         {
@@ -408,7 +402,7 @@ public abstract class AbstractRemoteApplicationBuilder<A extends Application, E 
             session.setDaemonThread(true);
 
             // determine the timeout (based on the schema)
-            int timeout = (int) schema.getDefaultTimeoutUnits().convert(schema.getDefaultTimeout(),
+            int timeout = (int) applicationSchema.getDefaultTimeoutUnits().convert(applicationSchema.getDefaultTimeout(),
                                                                         TimeUnit.MILLISECONDS);
 
             // set the default session timeouts (in milliseconds)
@@ -432,7 +426,7 @@ public abstract class AbstractRemoteApplicationBuilder<A extends Application, E 
             // ----- deploy remote application artifacts (using sftp) -----
 
             // assume the remote directory is the working directory
-            File remoteDirectoryFile = schema.getWorkingDirectory();
+            File remoteDirectoryFile = applicationSchema.getWorkingDirectory();
             String remoteDirectory = remoteDirectoryFile == null
                                      ? null : asRemotePlatformFileName(remoteDirectoryFile.toString());
 
@@ -576,7 +570,7 @@ public abstract class AbstractRemoteApplicationBuilder<A extends Application, E 
             execChannel.connect(timeout);
 
             // create the Application based on the RemoteApplicationProcess
-            T application = createApplication(schema, environment, applicationName, process, console);
+            T application = createApplication(applicationSchema, environment, applicationName, process, console);
 
             // ----- notify all of the lifecycle listeners -----
 

@@ -26,7 +26,6 @@
 package com.oracle.tools.runtime.coherence;
 
 import com.oracle.tools.runtime.ApplicationConsole;
-
 import com.oracle.tools.runtime.java.JavaProcess;
 
 import java.util.Properties;
@@ -49,7 +48,7 @@ public class CoherenceCacheServerSchema
      */
     public CoherenceCacheServerSchema()
     {
-        super(DEFAULT_CACHE_SERVER_CLASSNAME);
+        super(CoherenceCacheServer.class, DEFAULT_CACHE_SERVER_CLASSNAME);
     }
 
 
@@ -61,7 +60,7 @@ public class CoherenceCacheServerSchema
      */
     public CoherenceCacheServerSchema(String applicationClassName)
     {
-        super(applicationClassName);
+        super(CoherenceCacheServer.class, applicationClassName);
     }
 
 
@@ -75,7 +74,7 @@ public class CoherenceCacheServerSchema
     public CoherenceCacheServerSchema(String applicationClassName,
                                       String classPath)
     {
-        super(applicationClassName, classPath);
+        super(CoherenceCacheServer.class, applicationClassName, classPath);
     }
 
 
@@ -90,7 +89,7 @@ public class CoherenceCacheServerSchema
                                       String applicationClassName,
                                       String classPath)
     {
-        super(executableName, applicationClassName, classPath);
+        super(CoherenceCacheServer.class, executableName, applicationClassName, classPath);
     }
 
 

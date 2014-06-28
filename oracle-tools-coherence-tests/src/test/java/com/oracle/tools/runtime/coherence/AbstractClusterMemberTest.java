@@ -26,29 +26,22 @@
 package com.oracle.tools.runtime.coherence;
 
 import com.oracle.tools.junit.AbstractTest;
-
+import com.oracle.tools.runtime.LocalPlatform;
 import com.oracle.tools.runtime.coherence.ClusterMemberSchema.JMXManagementMode;
 import com.oracle.tools.runtime.coherence.callables.GetClusterName;
 import com.oracle.tools.runtime.coherence.callables.GetClusterSize;
 import com.oracle.tools.runtime.coherence.callables.GetLocalMemberId;
 import com.oracle.tools.runtime.coherence.callables.GetServiceStatus;
-
 import com.oracle.tools.runtime.console.SystemApplicationConsole;
-
 import com.oracle.tools.runtime.java.JavaApplicationBuilder;
-import com.oracle.tools.runtime.java.container.Container;
-
 import com.oracle.tools.runtime.network.AvailablePortIterator;
-
 import org.junit.Test;
 
-import static com.oracle.tools.deferred.DeferredHelper.invoking;
-
-import static com.oracle.tools.deferred.Eventually.assertThat;
-
-import static org.hamcrest.CoreMatchers.is;
-
 import javax.management.ObjectName;
+
+import static com.oracle.tools.deferred.DeferredHelper.invoking;
+import static com.oracle.tools.deferred.Eventually.assertThat;
+import static org.hamcrest.CoreMatchers.is;
 
 /**
  * Functional Tests for {@link com.oracle.tools.runtime.coherence.ClusterMember}s.
@@ -78,7 +71,7 @@ public abstract class AbstractClusterMemberTest<B extends JavaApplicationBuilder
     @Test
     public void shouldStartJMXConnection() throws Exception
     {
-        AvailablePortIterator availablePorts = Container.getAvailablePorts();
+        AvailablePortIterator availablePorts = LocalPlatform.getInstance().getAvailablePorts();
 
         ClusterMemberSchema schema =
             new ClusterMemberSchema().setClusterPort(availablePorts).useLocalHostMode().setRoleName("test-role")
@@ -122,7 +115,7 @@ public abstract class AbstractClusterMemberTest<B extends JavaApplicationBuilder
     @Test
     public void shouldStartStopMultipleTimes() throws Exception
     {
-        AvailablePortIterator availablePorts = Container.getAvailablePorts();
+        AvailablePortIterator availablePorts = LocalPlatform.getInstance().getAvailablePorts();
 
         ClusterMemberSchema schema =
             new ClusterMemberSchema().setClusterPort(availablePorts).useLocalHostMode().setRoleName("test-role")
@@ -161,7 +154,7 @@ public abstract class AbstractClusterMemberTest<B extends JavaApplicationBuilder
     @Test
     public void shouldStartSingletonCluster() throws Exception
     {
-        AvailablePortIterator availablePorts = Container.getAvailablePorts();
+        AvailablePortIterator availablePorts = LocalPlatform.getInstance().getAvailablePorts();
 
         ClusterMemberSchema schema =
             new ClusterMemberSchema().setClusterPort(availablePorts).useLocalHostMode().setDiagnosticsEnabled(true);
@@ -196,7 +189,7 @@ public abstract class AbstractClusterMemberTest<B extends JavaApplicationBuilder
     @Test
     public void shouldUseCustomOperationalOverride() throws Exception
     {
-        AvailablePortIterator availablePorts = Container.getAvailablePorts();
+        AvailablePortIterator availablePorts = LocalPlatform.getInstance().getAvailablePorts();
 
         ClusterMemberSchema schema =
             new ClusterMemberSchema().setClusterPort(availablePorts)

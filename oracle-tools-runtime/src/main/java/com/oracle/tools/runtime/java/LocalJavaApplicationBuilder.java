@@ -29,42 +29,33 @@ import com.oracle.tools.deferred.AbstractDeferred;
 import com.oracle.tools.deferred.DeferredHelper;
 import com.oracle.tools.deferred.InstanceUnavailableException;
 import com.oracle.tools.deferred.UnresolvableInstanceException;
-
 import com.oracle.tools.io.NetworkHelper;
-
 import com.oracle.tools.lang.StringHelper;
-
 import com.oracle.tools.predicate.Predicate;
-
 import com.oracle.tools.runtime.Application;
 import com.oracle.tools.runtime.ApplicationConsole;
 import com.oracle.tools.runtime.ApplicationSchema;
 import com.oracle.tools.runtime.LocalApplicationProcess;
+import com.oracle.tools.runtime.LocalPlatform;
+import com.oracle.tools.runtime.Platform;
 import com.oracle.tools.runtime.PropertiesBuilder;
 import com.oracle.tools.runtime.Settings;
-
 import com.oracle.tools.runtime.concurrent.ControllableRemoteExecutor;
 import com.oracle.tools.runtime.concurrent.RemoteCallable;
 import com.oracle.tools.runtime.concurrent.RemoteExecutor;
 import com.oracle.tools.runtime.concurrent.RemoteRunnable;
 import com.oracle.tools.runtime.concurrent.socket.RemoteExecutorServer;
-
-import com.oracle.tools.runtime.java.container.Container;
-
 import com.oracle.tools.util.CompletionListener;
-
-import static com.oracle.tools.predicate.Predicates.allOf;
 
 import java.io.File;
 import java.io.IOException;
-
 import java.net.InetAddress;
-
 import java.util.Iterator;
 import java.util.Properties;
-
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import static com.oracle.tools.predicate.Predicates.allOf;
 
 /**
  * A {@link JavaApplicationBuilder} that realizes {@link JavaApplication}s as
@@ -362,7 +353,8 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication> extends Abst
     @Override
     public <T extends A, S extends ApplicationSchema<T>> T realize(S                  applicationSchema,
                                                                    String             applicationName,
-                                                                   ApplicationConsole console)
+                                                                   ApplicationConsole console,
+                                                                   Platform           platform)
     {
         // TODO: this should be a safe cast but we should also check to make sure
         JavaApplicationSchema<T> schema = (JavaApplicationSchema) applicationSchema;
@@ -392,7 +384,7 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication> extends Abst
         }
 
         // add the environment variables defined by the schema
-        Properties environmentVariables = schema.getEnvironmentVariablesBuilder().realize();
+        Properties environmentVariables = schema.getEnvironmentVariables(platform);
 
         for (String variableName : environmentVariables.stringPropertyNames())
         {
@@ -453,7 +445,7 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication> extends Abst
         // ----- establish the system properties for the java application -----
 
         // define the system properties based on those defined by the schema
-        Properties systemProperties = schema.getSystemPropertiesBuilder().realize();
+        Properties systemProperties = schema.getSystemProperties(platform);
 
         for (String propertyName : systemProperties.stringPropertyNames())
         {
@@ -505,7 +497,7 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication> extends Abst
         if (this.isRemoteDebuggingEnabled)
         {
             // determine a free debug port
-            int debugPort = Container.getAvailablePorts().next();
+            int debugPort = LocalPlatform.getInstance().getAvailablePorts().next();
 
             // construct the Java option
             String option = String.format("-agentlib:jdwp=transport=dt_socket,server=y,suspend=%s,address=%d",

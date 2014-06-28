@@ -26,18 +26,15 @@
 package com.oracle.tools.runtime.network;
 
 import java.io.IOException;
-
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.UnknownHostException;
-
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Queue;
-
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
@@ -60,7 +57,7 @@ public class AvailablePortIterator implements Iterator<Integer>, Iterable<Intege
     /**
      * The maximum port that can be used.
      */
-    private final static int MAXIMUM_PORT = 65535;
+    public final static int MAXIMUM_PORT = 65535;
 
     /**
      * The minimum number of ports allowed in the queue until we

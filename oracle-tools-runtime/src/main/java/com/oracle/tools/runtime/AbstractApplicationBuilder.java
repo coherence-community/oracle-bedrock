@@ -27,8 +27,6 @@ package com.oracle.tools.runtime;
 
 import com.oracle.tools.runtime.console.NullApplicationConsole;
 
-import java.io.IOException;
-
 import java.util.UUID;
 
 /**
@@ -86,6 +84,13 @@ public abstract class AbstractApplicationBuilder<A extends Application> implemen
         return realize(applicationSchema, applicationName, new NullApplicationConsole());
     }
 
+    @Override
+    public <T extends A, S extends ApplicationSchema<T>> T realize(S                  applicationSchema,
+                                                                   String             applicationName,
+                                                                   ApplicationConsole console)
+    {
+        return realize(applicationSchema, applicationName, console, null);
+    }
 
     /**
      * Raises a specific type of {@link Application} {@link LifecycleEvent} for
@@ -94,6 +99,7 @@ public abstract class AbstractApplicationBuilder<A extends Application> implemen
      * @param application  the application on which the event occurred
      * @param eventKind    the event type
      */
+    @SuppressWarnings("unchecked")
     protected void raiseApplicationLifecycleEvent(final A                     application,
                                                   final Application.EventKind eventKind)
     {

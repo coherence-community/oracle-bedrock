@@ -26,9 +26,8 @@
 package com.oracle.tools.runtime;
 
 import java.io.File;
-
 import java.util.List;
-
+import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -44,6 +43,15 @@ import java.util.concurrent.TimeUnit;
  */
 public interface ApplicationSchema<A extends Application>
 {
+    /**
+     * Obtain the {@link Class} specifying the type of {@link Application}
+     * that this {@link ApplicationSchema} defines.
+     *
+     * @return the {@link Class} specifying the type of {@link Application}
+     *         that this {@link ApplicationSchema} defines
+     */
+    public Class<A> getApplicationClass();
+
     /**
      * Obtains the name of the application executable.
      *
@@ -70,6 +78,19 @@ public interface ApplicationSchema<A extends Application>
      */
     public PropertiesBuilder getEnvironmentVariablesBuilder();
 
+    /**
+     * Obtains the custom, {@link Application}-specific operating
+     * system environment variables with any modifications and additions
+     * based on the specified {@link Platform}.
+     *
+     * @param platform  the {@link Platform} that the {@link Application}
+     *                  will be realized on
+     *
+     * @return the custom, {@link Application}-specific operating
+     *         system environment variables with any modifications
+     *         and additions based on the specified {@link Platform}
+     */
+    public Properties getEnvironmentVariables(Platform platform);
 
     /**
      * Determines the standard error stream will be redirected to the standard

@@ -26,9 +26,9 @@
 package com.oracle.tools.runtime.java;
 
 import com.oracle.tools.runtime.ApplicationBuilder;
+import com.oracle.tools.runtime.LocalPlatform;
 import com.oracle.tools.runtime.Platform;
 import com.oracle.tools.runtime.SimpleApplication;
-import com.oracle.tools.runtime.network.Constants;
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -50,26 +50,25 @@ public class JavaVirtualMachineTest
     @Test
     public void shouldReturnHostName() throws Exception
     {
-        Platform platform = JavaVirtualMachine.INSTANCE;
+        Platform platform = JavaVirtualMachine.getInstance();
 
-        assertThat(platform.getHostname(), is(Constants.getLocalHost()));
+        assertThat(platform.getPrivateInetAddress(), is(LocalPlatform.getInstance().getPrivateInetAddress()));
     }
 
     @Test
     public void shouldReturnJavaApplicationBuilder()
     {
-        Platform           platform = new JavaVirtualMachine();
+        Platform           platform = JavaVirtualMachine.getInstance();
 
         ApplicationBuilder builder  = platform.getApplicationBuilder(JavaApplication.class);
 
         assertThat(builder, instanceOf(ContainerBasedJavaApplicationBuilder.class));
     }
 
-
     @Test
     public void shouldReturnLocalApplicationBuilder()
     {
-        Platform           platform = new JavaVirtualMachine();
+        Platform           platform = JavaVirtualMachine.getInstance();
 
         ApplicationBuilder builder  = platform.getApplicationBuilder(SimpleApplication.class);
 

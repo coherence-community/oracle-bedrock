@@ -26,36 +26,25 @@
 package com.oracle.tools.runtime.coherence;
 
 import com.oracle.tools.junit.AbstractTest;
-
 import com.oracle.tools.predicate.Predicate;
-
 import com.oracle.tools.runtime.ApplicationConsole;
-
+import com.oracle.tools.runtime.LocalPlatform;
 import com.oracle.tools.runtime.actions.InteractiveActionExecutor;
 import com.oracle.tools.runtime.actions.PerpetualAction;
-
 import com.oracle.tools.runtime.coherence.actions.RestartClusterMemberAction;
-
 import com.oracle.tools.runtime.console.SystemApplicationConsole;
-
 import com.oracle.tools.runtime.java.JavaApplicationBuilder;
-import com.oracle.tools.runtime.java.container.Container;
-
 import com.oracle.tools.runtime.network.AvailablePortIterator;
 import com.oracle.tools.runtime.network.Constants;
-
 import com.oracle.tools.util.Capture;
-
 import org.junit.Assert;
 import org.junit.Test;
 
-import static com.oracle.tools.deferred.DeferredHelper.invoking;
-
-import static com.oracle.tools.deferred.Eventually.assertThat;
-
-import static org.hamcrest.CoreMatchers.is;
-
 import java.util.HashSet;
+
+import static com.oracle.tools.deferred.DeferredHelper.invoking;
+import static com.oracle.tools.deferred.Eventually.assertThat;
+import static org.hamcrest.CoreMatchers.is;
 
 /**
  * Functional Tests for the {@link com.oracle.tools.runtime.coherence.ClusterBuilder} class.
@@ -88,7 +77,7 @@ public abstract class AbstractClusterBuilderTest extends AbstractTest
     {
         final int             CLUSTER_SIZE   = 3;
 
-        AvailablePortIterator availablePorts = Container.getAvailablePorts();
+        AvailablePortIterator availablePorts = LocalPlatform.getInstance().getAvailablePorts();
         Capture<Integer>      clusterPort    = new Capture<Integer>(availablePorts);
 
         ClusterMemberSchema   schema         = new ClusterMemberSchema().useLocalHostMode().setClusterPort(clusterPort);
@@ -129,7 +118,7 @@ public abstract class AbstractClusterBuilderTest extends AbstractTest
     @Test
     public void shouldBuildStorageAndProxyCluster() throws Exception
     {
-        AvailablePortIterator availablePorts = Container.getAvailablePorts();
+        AvailablePortIterator availablePorts = LocalPlatform.getInstance().getAvailablePorts();
         Capture<Integer>      clusterPort    = new Capture<Integer>(availablePorts);
 
         ClusterMemberSchema storageSchema =
@@ -197,7 +186,7 @@ public abstract class AbstractClusterBuilderTest extends AbstractTest
     @Test
     public void shouldBuilderWKABasedStorageCluster() throws Exception
     {
-        Capture<Integer> wkaPort   = new Capture<Integer>(Container.getAvailablePorts());
+        Capture<Integer> wkaPort   = new Capture<Integer>(LocalPlatform.getInstance().getAvailablePorts());
         String           localHost = Constants.getLocalHost();
 
         ClusterMemberSchema memberSchema =
@@ -244,7 +233,7 @@ public abstract class AbstractClusterBuilderTest extends AbstractTest
     {
         final int                             CLUSTER_SIZE   = 4;
 
-        AvailablePortIterator                 availablePorts = Container.getAvailablePorts();
+        AvailablePortIterator                 availablePorts = LocalPlatform.getInstance().getAvailablePorts();
         Capture<Integer>                      clusterPort    = new Capture<Integer>(availablePorts);
 
         ClusterMemberSchema schema = new ClusterMemberSchema().useLocalHostMode().setClusterPort(clusterPort);

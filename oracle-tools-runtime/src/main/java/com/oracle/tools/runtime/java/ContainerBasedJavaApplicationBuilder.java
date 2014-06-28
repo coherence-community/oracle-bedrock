@@ -28,33 +28,28 @@ package com.oracle.tools.runtime.java;
 import com.oracle.tools.runtime.Application;
 import com.oracle.tools.runtime.ApplicationConsole;
 import com.oracle.tools.runtime.ApplicationSchema;
+import com.oracle.tools.runtime.Platform;
 import com.oracle.tools.runtime.PropertiesBuilder;
-
 import com.oracle.tools.runtime.concurrent.RemoteCallable;
 import com.oracle.tools.runtime.concurrent.RemoteExecutor;
 import com.oracle.tools.runtime.concurrent.RemoteRunnable;
-
 import com.oracle.tools.runtime.java.container.Container;
 import com.oracle.tools.runtime.java.container.ContainerClassLoader;
 import com.oracle.tools.runtime.java.io.Serialization;
 import com.oracle.tools.runtime.java.util.RemoteCallableStaticMethod;
-
 import com.oracle.tools.util.CompletionListener;
 import com.oracle.tools.util.FutureCompletionListener;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
-
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -160,9 +155,11 @@ public class ContainerBasedJavaApplicationBuilder<A extends JavaApplication> ext
      * {@inheritDoc}
      */
     @Override
+    @SuppressWarnings("unchecked")
     public <T extends A, S extends ApplicationSchema<T>> T realize(S                  applicationSchema,
                                                                    String             applicationName,
-                                                                   ApplicationConsole console)
+                                                                   ApplicationConsole console,
+                                                                   Platform           platform)
     {
         // TODO: this should be a safe cast but we should also check to make sure
         JavaApplicationSchema<T> schema = (JavaApplicationSchema) applicationSchema;
@@ -170,7 +167,7 @@ public class ContainerBasedJavaApplicationBuilder<A extends JavaApplication> ext
         try
         {
             // establish the System Properties for the ContainerBasedJavaApplication
-            Properties systemProperties = schema.getSystemPropertiesBuilder().realize();
+            Properties systemProperties = schema.getSystemProperties(platform);
 
             // santity check the schema and realized properties
             sanityCheck(schema, systemProperties);

@@ -95,6 +95,16 @@ public interface FluentCoherenceClusterMemberSchema<A extends CoherenceClusterMe
 
 
     /**
+     * Sets the machine name for Oracle Coherence applications based on this {@link FluentCoherenceClusterMemberSchema}.
+     *
+     * @param name  the machine name
+     *
+     * @return  the {@link FluentCoherenceClusterMemberSchema}
+     */
+    public S setMachineName(String name);
+
+
+    /**
      * Sets if remote JMX monitoring is enabled for Oracle Coherence applications based on this
      * {@link FluentCoherenceClusterMemberSchema}.
      *

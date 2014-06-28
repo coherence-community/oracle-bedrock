@@ -25,6 +25,8 @@
 
 package com.oracle.tools.runtime.network;
 
+import com.oracle.tools.runtime.LocalPlatform;
+
 /**
  * Typical Network {@link Constants}.
  * <p>
@@ -40,16 +42,11 @@ public class Constants
      * on the platform.
      *
      * @return the local host string for the platform
+     *
+     * @deprecated use LocalPlatform.INSTANCE.getHostName()
      */
     public static String getLocalHost()
     {
-        if (System.getProperties().containsKey("tangosol.coherence.localhost"))
-        {
-            return System.getProperty("tangosol.coherence.localhost");
-        }
-        else
-        {
-            return "127.0.0.1";
-        }
+        return LocalPlatform.getInstance().getHostName();
     }
 }

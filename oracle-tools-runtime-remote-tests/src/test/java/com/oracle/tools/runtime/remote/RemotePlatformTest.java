@@ -32,6 +32,8 @@ import com.oracle.tools.runtime.java.JavaApplication;
 import com.oracle.tools.runtime.remote.java.RemoteJavaApplicationBuilder;
 import org.junit.Test;
 
+import java.net.InetAddress;
+
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.sameInstance;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -47,21 +49,23 @@ public class RemotePlatformTest
     @Test
     public void shouldReturnHostName() throws Exception
     {
-        Platform platform = new RemotePlatform("test-host", 1234, "jk", new Password("foo"));
+        InetAddress address  = InetAddress.getLocalHost();
+        Platform    platform = new RemotePlatform("foo", address, 1234, "jk", new Password("bar"));
 
-        assertThat(platform.getHostname(), is("test-host"));
+        assertThat(platform.getPrivateInetAddress(), is(address));
     }
 
     @Test
-    public void shouldReturnJavaApplicationBuilder()
+    public void shouldReturnJavaApplicationBuilder() throws Exception
     {
-        Authentication     auth     = new Password("foo");
-        Platform           platform = new RemotePlatform("test-host", 1234, "jk", auth);
+        InetAddress        address  = InetAddress.getLocalHost();
+        Authentication     auth     = new Password("bar");
+        Platform           platform = new RemotePlatform("foo", address, 1234, "jk", auth);
 
         ApplicationBuilder builder  = platform.getApplicationBuilder(JavaApplication.class);
 
         assertThat(builder, instanceOf(RemoteJavaApplicationBuilder.class));
-        assertThat(((RemoteJavaApplicationBuilder) builder).hostName, is("test-host"));
+        assertThat(((RemoteJavaApplicationBuilder) builder).hostName, is(address.getHostName()));
         assertThat(((RemoteJavaApplicationBuilder) builder).port, is(1234));
         assertThat(((RemoteJavaApplicationBuilder) builder).userName, is("jk"));
         assertThat(((RemoteJavaApplicationBuilder) builder).authentication, is(sameInstance(auth)));
@@ -69,15 +73,16 @@ public class RemotePlatformTest
 
 
     @Test
-    public void shouldReturnLocalApplicationBuilder()
+    public void shouldReturnLocalApplicationBuilder() throws Exception
     {
-        Authentication     auth     = new Password("foo");
-        Platform           platform = new RemotePlatform("test-host", 1234, "jk", auth);
+        Authentication     auth     = new Password("bar");
+        InetAddress        address  = InetAddress.getLocalHost();
+        Platform           platform = new RemotePlatform("foo", address, 1234, "jk", auth);
 
         ApplicationBuilder builder  = platform.getApplicationBuilder(SimpleApplication.class);
 
         assertThat(builder, instanceOf(SimpleRemoteApplicationBuilder.class));
-        assertThat(((SimpleRemoteApplicationBuilder) builder).hostName, is("test-host"));
+        assertThat(((SimpleRemoteApplicationBuilder) builder).hostName, is(address.getHostName()));
         assertThat(((SimpleRemoteApplicationBuilder) builder).port, is(1234));
         assertThat(((SimpleRemoteApplicationBuilder) builder).userName, is("jk"));
         assertThat(((SimpleRemoteApplicationBuilder) builder).authentication, is(sameInstance(auth)));

@@ -25,11 +25,13 @@
 
 package com.oracle.tools.runtime.remote;
 
+import com.oracle.tools.runtime.AbstractPlatform;
 import com.oracle.tools.runtime.Application;
 import com.oracle.tools.runtime.ApplicationBuilder;
-import com.oracle.tools.runtime.Platform;
 import com.oracle.tools.runtime.java.JavaApplication;
 import com.oracle.tools.runtime.remote.java.RemoteJavaApplicationBuilder;
+
+import java.net.InetAddress;
 
 /**
  * A {@link com.oracle.tools.runtime.Platform} that is remote from the
@@ -40,12 +42,17 @@ import com.oracle.tools.runtime.remote.java.RemoteJavaApplicationBuilder;
  *
  * @author Jonathan Knight
  */
-public class RemotePlatform implements Platform
+public class RemotePlatform extends AbstractPlatform
 {
     /**
-     * The name of the remote host for the SSH-based session.
+     * The private {@link InetAddress}.
      */
-    protected String hostName;
+    protected InetAddress privateAddress;
+
+    /**
+     * The public {@link InetAddress}.
+     */
+    protected InetAddress publicAddress;
 
     /**
      * The port of the remote host to connect for the SSH-based session.
@@ -63,41 +70,107 @@ public class RemotePlatform implements Platform
     protected String userName;
 
     /**
+     * Is strict host name checking enforced?
+     * <p>
+     * WARNING: By setting to false this may lower system security.
+     */
+    protected boolean strictHostChecking;
+
+    /**
      * Construct a new {@link RemotePlatform}.
      *
-     * @param hostName        the remote host name
+     * @param address         the remote address
      * @param port            the remote port
      * @param userName        the user name on the remote host
      * @param authentication  the {@link Authentication} for connecting to the host
      */
-    public RemotePlatform(String hostName, int port, String userName, Authentication authentication)
+    public RemotePlatform(String name, InetAddress address, int port, String userName,
+                          Authentication authentication)
     {
-        this.hostName       = hostName;
+        super(name);
+        this.privateAddress = address;
+        this.publicAddress  = address;
         this.port           = port;
         this.userName       = userName;
         this.authentication = authentication;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public String getHostname()
+    public InetAddress getPrivateInetAddress()
     {
-        return hostName;
+        return privateAddress;
+    }
+
+    @Override
+    public InetAddress getPublicInetAddress()
+    {
+        return publicAddress;
+    }
+
+    /**
+     * Obtain the port to use with the private {@link InetAddress}
+     * to use to SSH to the remote host.
+     *
+     * @return the port to use with the private {@link InetAddress}
+     *         to use to SSH to the remote host.
+     */
+    public int getPort()
+    {
+        return port;
+    }
+
+    /**
+     * Obtain the username to use to SSH to the remote host.
+     *
+     * @return the username to use to SSH to the remote host.
+     */
+    public String getUserName()
+    {
+        return userName;
+    }
+
+    /**
+     * Obtain the {@link Authentication} to use to SSH to the remote host.
+     *
+     * @return the {@link Authentication} to SSH to the remote host.
+     */
+    public Authentication getAuthentication()
+    {
+        return authentication;
+    }
+
+    public void setPublicAddress(InetAddress publicAddress)
+    {
+        this.publicAddress = publicAddress;
+    }
+
+    /**
+     * Sets whether strict host file checking is required (true by default).
+     * By setting to false security will be lowered.
+     *
+     * @param strictHostChecking  true to use strict host checking
+     */
+    public void setStrictHostChecking(boolean strictHostChecking)
+    {
+        this.strictHostChecking = strictHostChecking;
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public <A extends Application, B extends ApplicationBuilder<A>> B getApplicationBuilder(Class<A> applicationClass)
     {
+        AbstractRemoteApplicationBuilder builder;
         if (JavaApplication.class.isAssignableFrom(applicationClass))
         {
-            return (B) new RemoteJavaApplicationBuilder(hostName, port, userName, authentication);
+            builder = new RemoteJavaApplicationBuilder(privateAddress.getHostName(), port, userName, authentication);
         }
         else
         {
-            return (B) new SimpleRemoteApplicationBuilder(hostName, port, userName, authentication);
+            builder = new SimpleRemoteApplicationBuilder(privateAddress.getHostName(), port, userName, authentication);
         }
+
+        builder.setStrictHostChecking(strictHostChecking);
+
+        return (B) builder;
     }
 }

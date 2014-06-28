@@ -28,8 +28,6 @@ package com.oracle.tools.runtime;
 import com.oracle.tools.runtime.console.NullApplicationConsole;
 import com.oracle.tools.runtime.console.SystemApplicationConsole;
 
-import java.io.IOException;
-
 /**
  * An {@link ApplicationBuilder} is responsible the creation of {@link Application}s based on {@link ApplicationSchema}s.
  * <p>
@@ -49,6 +47,24 @@ public interface ApplicationBuilder<A extends Application>
      * @param applicationName    the name of the application
      * @param console            the {@link ApplicationConsole} that will be used for I/O by the
      *                           realized {@link Application}. This may be <code>null</code> if not required
+     * @param platform           an optional {@link Platform} on which the {@link Application} will be realized
+     *
+     * @return an {@link Application} representing the application realized by the {@link ApplicationBuilder}
+     *
+     * @throws RuntimeException when a problem occurs while starting the application
+     */
+    public <T extends A, S extends ApplicationSchema<T>> T realize(S                  applicationSchema,
+                                                                   String             applicationName,
+                                                                   ApplicationConsole console,
+                                                                   Platform           platform);
+
+    /**
+     * Realizes an instance of an {@link Application}.
+     *
+     * @param applicationSchema  the {@link ApplicationSchema} to use for realizing the {@link Application}
+     * @param applicationName    the name of the application
+     * @param console            the {@link ApplicationConsole} that will be used for I/O by the
+     *                           realized {@link Application}. This may be <code>null</code> if not required
      *
      * @return an {@link Application} representing the application realized by the {@link ApplicationBuilder}
      *
@@ -57,7 +73,6 @@ public interface ApplicationBuilder<A extends Application>
     public <T extends A, S extends ApplicationSchema<T>> T realize(S                  applicationSchema,
                                                                    String             applicationName,
                                                                    ApplicationConsole console);
-
 
     /**
      * Realizes an instance of an {@link Application} (using a {@link SystemApplicationConsole}).

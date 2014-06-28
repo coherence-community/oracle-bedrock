@@ -26,30 +26,22 @@
 package com.oracle.tools.runtime.coherence;
 
 import com.oracle.tools.junit.AbstractTest;
-
+import com.oracle.tools.runtime.LocalPlatform;
 import com.oracle.tools.runtime.coherence.callables.GetClusterName;
 import com.oracle.tools.runtime.coherence.callables.GetClusterSize;
 import com.oracle.tools.runtime.coherence.callables.GetLocalMemberId;
 import com.oracle.tools.runtime.coherence.callables.GetServiceStatus;
-
 import com.oracle.tools.runtime.console.SystemApplicationConsole;
-
 import com.oracle.tools.runtime.java.JavaApplicationBuilder;
-import com.oracle.tools.runtime.java.container.Container;
-
 import com.oracle.tools.runtime.network.AvailablePortIterator;
-
 import com.tangosol.net.NamedCache;
-
 import org.junit.Test;
 
-import static com.oracle.tools.deferred.DeferredHelper.invoking;
-
-import static com.oracle.tools.deferred.Eventually.assertThat;
-
-import static org.hamcrest.CoreMatchers.is;
-
 import javax.management.ObjectName;
+
+import static com.oracle.tools.deferred.DeferredHelper.invoking;
+import static com.oracle.tools.deferred.Eventually.assertThat;
+import static org.hamcrest.CoreMatchers.is;
 
 /**
  * Functional Tests for {@link CoherenceCacheServer}s.
@@ -79,7 +71,7 @@ public abstract class AbstractCoherenceCacheServerTest<B extends JavaApplication
     @Test
     public void shouldStartJMXConnection() throws Exception
     {
-        AvailablePortIterator availablePorts = Container.getAvailablePorts();
+        AvailablePortIterator availablePorts = LocalPlatform.getInstance().getAvailablePorts();
 
         CoherenceCacheServerSchema schema =
             new CoherenceCacheServerSchema().setClusterPort(availablePorts).useLocalHostMode().setRoleName("test-role")
@@ -108,7 +100,7 @@ public abstract class AbstractCoherenceCacheServerTest<B extends JavaApplication
     @Test
     public void shouldStartStopMultipleTimes()
     {
-        AvailablePortIterator availablePorts = Container.getAvailablePorts();
+        AvailablePortIterator availablePorts = LocalPlatform.getInstance().getAvailablePorts();
 
         CoherenceCacheServerSchema schema =
             new CoherenceCacheServerSchema().setClusterPort(availablePorts).useLocalHostMode().setRoleName("test-role")
@@ -136,7 +128,7 @@ public abstract class AbstractCoherenceCacheServerTest<B extends JavaApplication
     @Test
     public void shouldStartSingletonCluster()
     {
-        AvailablePortIterator availablePorts = Container.getAvailablePorts();
+        AvailablePortIterator availablePorts = LocalPlatform.getInstance().getAvailablePorts();
 
         CoherenceCacheServerSchema schema =
             new CoherenceCacheServerSchema().setClusterPort(availablePorts).useLocalHostMode()
@@ -160,7 +152,7 @@ public abstract class AbstractCoherenceCacheServerTest<B extends JavaApplication
     @Test
     public void shouldUseCustomOperationalOverride()
     {
-        AvailablePortIterator availablePorts = Container.getAvailablePorts();
+        AvailablePortIterator availablePorts = LocalPlatform.getInstance().getAvailablePorts();
 
         CoherenceCacheServerSchema schema =
             new CoherenceCacheServerSchema().setClusterPort(availablePorts)
@@ -184,7 +176,7 @@ public abstract class AbstractCoherenceCacheServerTest<B extends JavaApplication
     @Test
     public void shouldAccessNamedCache()
     {
-        AvailablePortIterator availablePorts = Container.getAvailablePorts();
+        AvailablePortIterator availablePorts = LocalPlatform.getInstance().getAvailablePorts();
 
         CoherenceCacheServerSchema schema =
             new CoherenceCacheServerSchema().setClusterPort(availablePorts).useLocalHostMode()

@@ -25,12 +25,9 @@
 
 package com.oracle.tools.junit;
 
-import com.oracle.tools.runtime.java.container.Container;
-
+import com.oracle.tools.runtime.LocalPlatform;
 import com.oracle.tools.runtime.network.Constants;
-
 import com.tangosol.net.CacheFactory;
-
 import org.junit.After;
 import org.junit.Before;
 
@@ -60,7 +57,7 @@ public abstract class AbstractCoherenceTest extends AbstractTest
         super.onBeforeEachTest();
 
         // we only want to run locally
-        System.setProperty("tangosol.coherence.clusterport", Integer.toString(Container.getAvailablePorts().next()));
+        System.setProperty("tangosol.coherence.clusterport", Integer.toString(LocalPlatform.getInstance().getAvailablePorts().next()));
         System.setProperty("tangosol.coherence.localhost", Constants.getLocalHost());
         System.setProperty("tangosol.coherence.ttl", Integer.toString(0));
     }

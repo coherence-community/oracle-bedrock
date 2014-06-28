@@ -27,7 +27,10 @@ package com.oracle.tools.runtime;
 
 import com.oracle.tools.runtime.java.JavaApplication;
 import com.oracle.tools.runtime.java.LocalJavaApplicationBuilder;
-import com.oracle.tools.runtime.network.Constants;
+import com.oracle.tools.runtime.network.AvailablePortIterator;
+
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 
 /**
  * The {@link Platform} in which this Java Virtual Machine is running.
@@ -38,27 +41,65 @@ import com.oracle.tools.runtime.network.Constants;
  * @author Jonathan Knight
  * @author Brian Oliver
  */
-public class LocalPlatform implements Platform
+public class LocalPlatform extends AbstractPlatform
 {
     /**
      * The singleton instance of {@link LocalPlatform}.
      */
-    public static LocalPlatform INSTANCE = new LocalPlatform();
+    private static LocalPlatform INSTANCE = new LocalPlatform();
+
+    private AvailablePortIterator availablePortIterator;
 
     /**
      * Construct a new {@link LocalPlatform}.
      */
-    public LocalPlatform()
+    private LocalPlatform()
     {
+        super("Local");
+        availablePortIterator = new AvailablePortIterator(getPrivateInetAddress(),
+                                                          30000,
+                                                          AvailablePortIterator.MAXIMUM_PORT);
+    }
+
+    @Override
+    public InetAddress getPublicInetAddress()
+    {
+        try
+        {
+            return InetAddress.getByName(getHostName());
+        }
+        catch (UnknownHostException e)
+        {
+            throw new RuntimeException("Unable to obtain an InetAddress for the LocalPlatform", e);
+        }
     }
 
     /**
-     * {@inheritDoc}
+     * Obtains the local host address to use for local-only connections
+     * on the platform.
+     *
+     * @return the local host string for the platform
      */
-    @Override
-    public String getHostname()
+    public String getHostName()
     {
-        return Constants.getLocalHost();
+        if (System.getProperties().containsKey("tangosol.coherence.localhost"))
+        {
+            return System.getProperty("tangosol.coherence.localhost");
+        }
+        else
+        {
+            return "127.0.0.1";
+        }
+    }
+
+    /**
+     * Obtains the {@link AvailablePortIterator} for the {@link LocalPlatform}.
+     *
+     * @return the {@link AvailablePortIterator}
+     */
+    public AvailablePortIterator getAvailablePorts()
+    {
+        return availablePortIterator;
     }
 
     /**
@@ -76,5 +117,15 @@ public class LocalPlatform implements Platform
         {
             return (B) new SimpleApplicationBuilder();
         }
+    }
+
+    /**
+     * Obtain the singleton instance of the {@link LocalPlatform}.
+     *
+     * @return the singleton instance of the {@link LocalPlatform}
+     */
+    public static LocalPlatform getInstance()
+    {
+        return INSTANCE;
     }
 }

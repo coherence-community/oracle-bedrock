@@ -26,10 +26,15 @@
 package com.oracle.tools.runtime.java;
 
 import com.oracle.tools.runtime.AbstractApplicationSchema;
+import com.oracle.tools.runtime.LocalPlatform;
+import com.oracle.tools.runtime.Platform;
 import com.oracle.tools.runtime.PropertiesBuilder;
-
 import com.oracle.tools.runtime.network.AvailablePortIterator;
 import com.oracle.tools.runtime.network.Constants;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Properties;
 
 import static com.oracle.tools.runtime.java.JavaApplication.JAVA_AWT_HEADLESS;
 import static com.oracle.tools.runtime.java.JavaApplication.JAVA_NET_PREFER_IPV4_STACK;
@@ -38,9 +43,6 @@ import static com.oracle.tools.runtime.java.JavaApplication.SUN_MANAGEMENT_JMXRE
 import static com.oracle.tools.runtime.java.JavaApplication.SUN_MANAGEMENT_JMXREMOTE_AUTHENTICATE;
 import static com.oracle.tools.runtime.java.JavaApplication.SUN_MANAGEMENT_JMXREMOTE_PORT;
 import static com.oracle.tools.runtime.java.JavaApplication.SUN_MANAGEMENT_JMXREMOTE_SSL;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * An {@link AbstractJavaApplicationSchema} is a base implementation of a {@link JavaApplicationSchema}.
@@ -85,11 +87,13 @@ public abstract class AbstractJavaApplicationSchema<A extends JavaApplication,
      * Construct a {@link JavaApplicationSchema} with a given application class name,
      * but using the class path of the executing application.
      *
+     * @param applicationType      the type of {@link com.oracle.tools.runtime.Application}
+     *                             that this schema defines
      * @param applicationClassName The fully qualified class name of the Java application.
      */
-    public AbstractJavaApplicationSchema(String applicationClassName)
+    public AbstractJavaApplicationSchema(Class<A> applicationType, String applicationClassName)
     {
-        this("java", applicationClassName, System.getProperty("java.class.path"));
+        this(applicationType, "java", applicationClassName, System.getProperty("java.class.path"));
     }
 
 
@@ -97,28 +101,33 @@ public abstract class AbstractJavaApplicationSchema<A extends JavaApplication,
      * Construct a {@link JavaApplicationSchema} with a given application class name,
      * but using the class path of the executing application.
      *
+     * @param applicationType      the type of {@link com.oracle.tools.runtime.Application}
+     *                             that this schema defines
      * @param applicationClassName The fully qualified class name of the Java application.
      * @param classPath            The class path for the Java application.
      */
-    public AbstractJavaApplicationSchema(String applicationClassName,
+    public AbstractJavaApplicationSchema(Class<A> applicationType, String applicationClassName,
                                          String classPath)
     {
-        this("java", applicationClassName, classPath);
+        this(applicationType, "java", applicationClassName, classPath);
     }
 
 
     /**
      * Construct a {@link JavaApplicationSchema}.
      *
+     * @param applicationType      the type of {@link com.oracle.tools.runtime.Application}
+     *                             that this schema defines
      * @param executableName       The executable name to run
      * @param applicationClassName The fully qualified class name of the Java application.
      * @param classPath            The class path for the Java application.
      */
-    public AbstractJavaApplicationSchema(String executableName,
+    public AbstractJavaApplicationSchema(Class<A> applicationType,
+                                         String executableName,
                                          String applicationClassName,
                                          String classPath)
     {
-        super(executableName);
+        super(applicationType, executableName);
 
         m_applicationClassName    = applicationClassName;
         m_classPath               = new ClassPath(classPath);
@@ -142,6 +151,11 @@ public abstract class AbstractJavaApplicationSchema<A extends JavaApplication,
         return m_systemPropertiesBuilder;
     }
 
+    @Override
+    public Properties getSystemProperties(Platform platform)
+    {
+        return getSystemPropertiesBuilder().realize();
+    }
 
     @Override
     public ClassPath getClassPath()
@@ -278,8 +292,8 @@ public abstract class AbstractJavaApplicationSchema<A extends JavaApplication,
      * @param value The value for the system property
      * @return the {@link JavaApplicationSchema}
      */
-    @SuppressWarnings("unchecked")
     @Deprecated
+    @SuppressWarnings("unchecked")
     public S setDefaultSystemProperty(String name,
                                       Object value)
     {
@@ -387,7 +401,7 @@ public abstract class AbstractJavaApplicationSchema<A extends JavaApplication,
             setSystemPropertyIfAbsent(SUN_MANAGEMENT_JMXREMOTE_PORT, 9000);
             setSystemPropertyIfAbsent(SUN_MANAGEMENT_JMXREMOTE_AUTHENTICATE, false);
             setSystemPropertyIfAbsent(SUN_MANAGEMENT_JMXREMOTE_SSL, false);
-            setSystemPropertyIfAbsent(JAVA_RMI_SERVER_HOSTNAME, Constants.getLocalHost());
+            setSystemPropertyIfAbsent(JAVA_RMI_SERVER_HOSTNAME, LocalPlatform.getInstance().getHostName());
         }
         else
         {
@@ -405,7 +419,8 @@ public abstract class AbstractJavaApplicationSchema<A extends JavaApplication,
     /**
      * Specifies if IPv4 is required.
      *
-     * @param enabled
+     * @param enabled  is IPv4 required
+     *
      * @return the {@link JavaApplicationSchema}
      */
     public S setPreferIPv4(boolean enabled)
@@ -489,6 +504,7 @@ public abstract class AbstractJavaApplicationSchema<A extends JavaApplication,
      *
      * @see JavaApplication#JAVA_AWT_HEADLESS
      */
+    @SuppressWarnings("unchecked")
     public S setHeadless(boolean isHeadless)
     {
         setSystemProperty(JAVA_AWT_HEADLESS, isHeadless);

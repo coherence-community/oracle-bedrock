@@ -25,15 +25,12 @@
 
 package com.oracle.tools.runtime;
 
-import com.oracle.tools.runtime.java.FluentJavaApplicationSchema;
-
 import java.io.File;
-
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-
+import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -105,15 +102,21 @@ public abstract class AbstractApplicationSchema<A extends Application, S extends
      */
     private LinkedList<LifecycleEventInterceptor<? super A>> lifecycleInterceptors;
 
+    /**
+     * The type of {@link Application} that this {@link ApplicationSchema} defines
+     */
+    private Class<A> applicationType;
 
     /**
      * Constructs an {@link AbstractApplicationSchema}.
      *
-     * @param executableName  the name of the executable for the {@link Application}s
-     *                        produced from this {@link ApplicationSchema}
+     * @param applicationType  the type of {@link Application} that this schema defines
+     * @param executableName   the name of the executable for the {@link Application}s
+     *                         produced from this {@link ApplicationSchema}
      */
-    public AbstractApplicationSchema(String executableName)
+    public AbstractApplicationSchema(Class<A> applicationType, String executableName)
     {
+        this.applicationType             = applicationType;
         this.executableName              = executableName;
         this.environmentVariablesBuilder = new PropertiesBuilder();
         this.isEnvironmentInherited      = false;
@@ -125,6 +128,14 @@ public abstract class AbstractApplicationSchema<A extends Application, S extends
         this.lifecycleInterceptors       = new LinkedList<LifecycleEventInterceptor<? super A>>();
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Class<A> getApplicationClass()
+    {
+        return applicationType;
+    }
 
     @Override
     public String getExecutableName()
@@ -146,6 +157,11 @@ public abstract class AbstractApplicationSchema<A extends Application, S extends
         return environmentVariablesBuilder;
     }
 
+    @Override
+    public Properties getEnvironmentVariables(Platform platform)
+    {
+        return getEnvironmentVariablesBuilder().realize();
+    }
 
     /**
      * Sets the working directory in which the {@link Application} will start.
@@ -154,6 +170,7 @@ public abstract class AbstractApplicationSchema<A extends Application, S extends
      *
      * @return the {@link ApplicationSchema} (so that we can perform method chaining)
      */
+    @SuppressWarnings("unchecked")
     public S setWorkingDirectory(File workingDirectory)
     {
         this.workingDirectory = workingDirectory;
@@ -172,6 +189,7 @@ public abstract class AbstractApplicationSchema<A extends Application, S extends
      *
      * @return the {@link ApplicationSchema} (so that we can perform method chaining)
      */
+    @SuppressWarnings("unchecked")
     public S setEnvironmentVariable(String      name,
                                     Iterator<?> iterator)
     {
@@ -189,6 +207,7 @@ public abstract class AbstractApplicationSchema<A extends Application, S extends
      *
      * @return the {@link ApplicationSchema} (so that we can perform method chaining)
      */
+    @SuppressWarnings("unchecked")
     public S setEnvironmentVariable(String name,
                                     Object value)
     {
@@ -207,6 +226,7 @@ public abstract class AbstractApplicationSchema<A extends Application, S extends
      *
      * @return the {@link ApplicationSchema} (so that we can perform method chaining)
      */
+    @SuppressWarnings("unchecked")
     public S setEnvironmentVariables(PropertiesBuilder environmentVariablesBuilder)
     {
         this.environmentVariablesBuilder.addProperties(environmentVariablesBuilder);
@@ -221,6 +241,7 @@ public abstract class AbstractApplicationSchema<A extends Application, S extends
      * @return  the {@link ApplicationSchema} (so that we can perform method chaining)
      */
     @Deprecated
+    @SuppressWarnings("unchecked")
     public S clearEnvironmentVariables()
     {
         environmentVariablesBuilder.clear();
@@ -244,6 +265,7 @@ public abstract class AbstractApplicationSchema<A extends Application, S extends
      * @return  the {@link ApplicationSchema} (so that we can perform method chaining)
      */
     @Deprecated
+    @SuppressWarnings("unchecked")
     public S setEnvironmentInherited(boolean isInherited)
     {
         this.isEnvironmentInherited = isInherited;
@@ -268,6 +290,7 @@ public abstract class AbstractApplicationSchema<A extends Application, S extends
      *
      * @return  the {@link ApplicationSchema} (so that we can perform method chaining)
      */
+    @SuppressWarnings("unchecked")
     public S setDiagnosticsEnabled(boolean isDiagnosticsEnabled)
     {
         this.isDiagnosticsEnabled = isDiagnosticsEnabled;
@@ -298,6 +321,7 @@ public abstract class AbstractApplicationSchema<A extends Application, S extends
      *
      * @return  the {@link ApplicationSchema} (so that we can perform method chaining)
      */
+    @SuppressWarnings("unchecked")
     public S setErrorStreamRedirected(boolean isErrorStreamRedirected)
     {
         this.isErrorStreamRedirected = isErrorStreamRedirected;
@@ -329,6 +353,7 @@ public abstract class AbstractApplicationSchema<A extends Application, S extends
      *
      * @return  the {@link ApplicationSchema} (so that we can perform method chaining)
      */
+    @SuppressWarnings("unchecked")
     public S setDefaultTimeout(long     defaultTimeout,
                                TimeUnit defaultTimeoutUnit)
     {
@@ -364,6 +389,7 @@ public abstract class AbstractApplicationSchema<A extends Application, S extends
      *
      * @return  the {@link ApplicationSchema} (so that we can perform method chaining)
      */
+    @SuppressWarnings("unchecked")
     public S setArgument(String argument)
     {
         addArgument(argument);
@@ -380,6 +406,7 @@ public abstract class AbstractApplicationSchema<A extends Application, S extends
 
 
     @Override
+    @SuppressWarnings("unchecked")
     public S addLifecycleInterceptor(LifecycleEventInterceptor<? super A> interceptor)
     {
         lifecycleInterceptors.add(interceptor);

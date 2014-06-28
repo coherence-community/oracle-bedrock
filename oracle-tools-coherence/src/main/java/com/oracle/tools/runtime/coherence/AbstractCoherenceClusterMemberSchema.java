@@ -25,17 +25,17 @@
 
 package com.oracle.tools.runtime.coherence;
 
+import com.oracle.tools.runtime.LocalPlatform;
+import com.oracle.tools.runtime.Platform;
 import com.oracle.tools.runtime.concurrent.RemoteCallable;
-
 import com.oracle.tools.runtime.java.AbstractJavaApplicationSchema;
 import com.oracle.tools.runtime.java.ContainerBasedJavaApplicationBuilder;
 import com.oracle.tools.runtime.java.util.RemoteCallableStaticMethod;
-
-import com.oracle.tools.runtime.network.Constants;
-
 import com.oracle.tools.util.CompletionListener;
 
+import java.net.InetAddress;
 import java.util.Iterator;
+import java.util.Properties;
 
 /**
  * An abstract implementation of a {@link CoherenceClusterMemberSchema}.
@@ -54,11 +54,13 @@ public abstract class AbstractCoherenceClusterMemberSchema<A extends CoherenceCl
      * Construct a {@link AbstractCoherenceClusterMemberSchema} with a given application class name,
      * using the class path of the executing application.
      *
+     * @param applicationType       the type of {@link com.oracle.tools.runtime.Application}
+     *                              that this schema defines
      * @param applicationClassName  the fully qualified class name of the Java application
      */
-    public AbstractCoherenceClusterMemberSchema(String applicationClassName)
+    public AbstractCoherenceClusterMemberSchema(Class<A> applicationType, String applicationClassName)
     {
-        super(applicationClassName);
+        super(applicationType, applicationClassName);
     }
 
 
@@ -66,30 +68,60 @@ public abstract class AbstractCoherenceClusterMemberSchema<A extends CoherenceCl
      * Construct a {@link AbstractCoherenceClusterMemberSchema} with a given application class name,
      * but using the class path of the executing application.
      *
+     * @param applicationType       the type of {@link com.oracle.tools.runtime.Application}
+     *                              that this schema defines
      * @param applicationClassName  the fully qualified class name of the Java application
      * @param classPath             the class path for the Java application.
      */
-    public AbstractCoherenceClusterMemberSchema(String applicationClassName,
+    public AbstractCoherenceClusterMemberSchema(Class<A> applicationType, String applicationClassName,
                                                 String classPath)
     {
-        super(applicationClassName, classPath);
+        super(applicationType, applicationClassName, classPath);
     }
 
 
     /**
      * Construct a {@link AbstractCoherenceClusterMemberSchema}.
      *
+     * @param applicationType       the type of {@link com.oracle.tools.runtime.Application}
+     *                              that this schema defines
      * @param executableName        the executable name to run
      * @param applicationClassName  the fully qualified class name of the Java application
      * @param classPath             the class path for the Java application
      */
-    public AbstractCoherenceClusterMemberSchema(String executableName,
+    public AbstractCoherenceClusterMemberSchema(Class<A> applicationType,
+                                                String executableName,
                                                 String applicationClassName,
                                                 String classPath)
     {
-        super(executableName, applicationClassName, classPath);
+        super(applicationType, executableName, applicationClassName, classPath);
     }
 
+    @Override
+    public Properties getSystemProperties(Platform platform)
+    {
+        Properties properties = super.getSystemProperties(platform);
+        if (platform == null)
+        {
+            return properties;
+        }
+
+        if (!properties.containsKey(CoherenceCacheServerSchema.PROPERTY_LOCALHOST_ADDRESS))
+        {
+            InetAddress inetAddress = platform.getPublicInetAddress();
+            if (inetAddress != null)
+            {
+                properties.setProperty(CoherenceClusterMemberSchema.PROPERTY_LOCALHOST_ADDRESS, inetAddress.getHostName());
+            }
+        }
+
+        if (!properties.containsKey(CoherenceCacheServerSchema.PROPERTY_MACHINE_NAME))
+        {
+            properties.setProperty(CoherenceClusterMemberSchema.PROPERTY_MACHINE_NAME, platform.getName());
+        }
+
+        return properties;
+    }
 
     @Override
     public void start(ContainerBasedJavaApplicationBuilder.ControllableApplication application,
@@ -143,7 +175,6 @@ public abstract class AbstractCoherenceClusterMemberSchema<A extends CoherenceCl
     public S setClusterName(String name)
     {
         return setSystemProperty(PROPERTY_CLUSTER_NAME, name);
-
     }
 
 
@@ -225,6 +256,7 @@ public abstract class AbstractCoherenceClusterMemberSchema<A extends CoherenceCl
 
 
     @Override
+    @SuppressWarnings("unchecked")
     public S setJMXManagementMode(JMXManagementMode mode)
     {
         setJMXSupport((mode == JMXManagementMode.ALL || mode == JMXManagementMode.LOCAL_ONLY));
@@ -326,6 +358,7 @@ public abstract class AbstractCoherenceClusterMemberSchema<A extends CoherenceCl
 
 
     @Override
+    @SuppressWarnings("unchecked")
     public S setRemoteJMXManagement(boolean isEnabled)
     {
         setJMXSupport(isEnabled);
@@ -358,6 +391,20 @@ public abstract class AbstractCoherenceClusterMemberSchema<A extends CoherenceCl
 
 
     @Override
+    public S setMachineName(String name)
+    {
+        return setSystemProperty(PROPERTY_MACHINE_NAME, name);
+    }
+
+
+    @Override
+    public String getMachineName()
+    {
+        return getSystemProperty(PROPERTY_MACHINE_NAME, String.class, null);
+    }
+
+
+    @Override
     public S setTCMPEnabled(boolean isTCMPEnabled)
     {
         return setSystemProperty(PROPERTY_TCMP_ENABLED, isTCMPEnabled);
@@ -372,9 +419,10 @@ public abstract class AbstractCoherenceClusterMemberSchema<A extends CoherenceCl
 
 
     @Override
+    @SuppressWarnings("unchecked")
     public S useLocalHostMode()
     {
-        setLocalHostAddress(Constants.getLocalHost());
+        setLocalHostAddress(LocalPlatform.getInstance().getHostName());
         setMulticastTTL(0);
 
         return (S) this;

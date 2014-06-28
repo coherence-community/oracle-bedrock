@@ -25,11 +25,10 @@
 
 package com.oracle.tools.runtime.java.container;
 
+import com.oracle.tools.runtime.LocalPlatform;
 import com.oracle.tools.runtime.network.AvailablePortIterator;
 
 import java.io.PrintStream;
-
-import java.net.UnknownHostException;
 
 /**
  * The {@link Container} class provides mechanisms to establish and dismantal
@@ -67,12 +66,6 @@ public class Container
      * The {@link ContainerScope} associated with the current {@link Thread}.
      */
     private static InheritableThreadLocal<ContainerScope> s_threadScope;
-
-    /**
-     * The {@link AvailablePortIterator} that the {@link Container}
-     * will use for allocating ports
-     */
-    private static AvailablePortIterator s_availablePortIterator;
 
     /**
      * The number of bytes to reserve for i/o buffers used by
@@ -254,10 +247,12 @@ public class Container
      * Obtains the {@link AvailablePortIterator} for the {@link Container}.
      *
      * @return the {@link AvailablePortIterator}
+     *
+     * @deprecated use LocalPlatform.INSTANCE.getAvailablePorts()
      */
     public static AvailablePortIterator getAvailablePorts()
     {
-        return s_availablePortIterator;
+        return LocalPlatform.getInstance().getAvailablePorts();
     }
 
 
@@ -269,18 +264,7 @@ public class Container
         // establish the ability to track Scopes by thread
         s_threadScope = new InheritableThreadLocal<ContainerScope>();
 
-        // create an available port iterator for allocating ports
-        try
-        {
-            // attempt to create an available port iterator on this host
-            s_availablePortIterator = new AvailablePortIterator(30000);
-
-            // create a PlatformScope representing the platform itself
-            s_platformScope = new PlatformScope(s_availablePortIterator);
-        }
-        catch (UnknownHostException e)
-        {
-            throw new RuntimeException("Failed to start Container", e);
-        }
+        // create a PlatformScope representing the platform itself
+        s_platformScope = new PlatformScope(getAvailablePorts());
     }
 }

@@ -25,6 +25,7 @@
 
 package com.oracle.tools.runtime.java.container;
 
+import com.oracle.tools.runtime.LocalPlatform;
 import com.oracle.tools.runtime.network.AvailablePortIterator;
 
 import java.io.IOException;
@@ -33,7 +34,6 @@ import java.io.OutputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.io.PrintStream;
-
 import java.util.Properties;
 
 /**
@@ -120,7 +120,7 @@ public class ContainerScope extends AbstractContainerScope
      */
     public ContainerScope(String name)
     {
-        this(name, new Properties(), Container.getAvailablePorts(), null, false, Container.PIPE_BUFFER_SIZE_BYTES);
+        this(name, new Properties(), LocalPlatform.getInstance().getAvailablePorts(), null, false, Container.PIPE_BUFFER_SIZE_BYTES);
     }
 
 
@@ -133,7 +133,7 @@ public class ContainerScope extends AbstractContainerScope
     public ContainerScope(String     name,
                           Properties properties)
     {
-        this(name, properties, Container.getAvailablePorts(), null, false, Container.PIPE_BUFFER_SIZE_BYTES);
+        this(name, properties, LocalPlatform.getInstance().getAvailablePorts(), null, false, Container.PIPE_BUFFER_SIZE_BYTES);
     }
 
 

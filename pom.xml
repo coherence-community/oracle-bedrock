@@ -62,9 +62,15 @@
         <module>oracle-tools-runtime-remote</module>
         <module>oracle-tools-runtime-remote-tests</module>
 
+        <module>oracle-tools-runtime-virtual</module>
+        <module>oracle-tools-runtime-virtual-tests</module>
+
         <module>oracle-tools-coherence</module>
         <module>oracle-tools-coherence-tests</module>
         <module>oracle-tools-coherence-testing-support</module>
+
+        <module>oracle-tools-runtime-vagrant</module>
+        <module>oracle-tools-runtime-vagrant-tests</module>
 
         <module>oracle-tools-site</module>
 
