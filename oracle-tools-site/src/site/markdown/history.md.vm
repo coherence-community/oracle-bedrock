@@ -131,6 +131,12 @@ reverse chronological order.
     experimental RemoteApplicationBuilders in the new oracle-tools-runtime-remote
     module.
 
+<h4>oracle-tools-runtime-virtual</h4>
+
+*   [ORACLETOOLS-115](https://java.net/jira/browse/ORACLETOOLS-115): Introduced
+    support for Virtual Machines and specifically support for configuring
+    conrolling virtual machines using Vagrant.
+
 <h4>oracle-tools-testing-support</h4>
 
 *   [ORACLETOOLS-84](https://java.net/jira/browse/ORACLETOOLS-84): Introduced
