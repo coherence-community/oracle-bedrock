@@ -45,7 +45,14 @@ reverse chronological order.
 
 <h4>oracle-tools-runtime</h4>
 
-*   [ORACLETOOLS-114](https://java.net/jira/browse/ORACLETOOLS-113): Introduced
+*   [ORACLETOOLS-119](https://java.net/jira/browse/ORACLETOOLS-119): Added
+    Plain Mode to ApplicationConsole to allow consoles to indicate that they
+    want output from Applications not to be prefixed with details of the
+    Application name, PID and line number. This is useful especially for
+    tests that use PipedApplicationConsole to read and assert Application
+    output so that they do not need to parse the output to remove the prefix.
+
+*   [ORACLETOOLS-114](https://java.net/jira/browse/ORACLETOOLS-114): Introduced
     JavaVirtualMachine as an implementation of a Platform to represent the
     current JVM process.
 

@@ -27,7 +27,6 @@ package com.oracle.tools.runtime.console;
 
 import com.oracle.tools.runtime.ApplicationConsole;
 import com.oracle.tools.runtime.ApplicationConsoleBuilder;
-
 import com.oracle.tools.runtime.java.container.Container;
 
 import java.io.InputStreamReader;
@@ -98,6 +97,23 @@ public class SystemApplicationConsole implements ApplicationConsole
         return m_inputReader;
     }
 
+    /**
+     * Obtains the flag indicating whether output to this {@link ApplicationConsole}
+     * should not be formatted to include information about the application.
+     * </p>
+     * This method always returns false as the {@link SystemApplicationConsole}
+     * is writing to the controlling process StdOut or StdErr and the output
+     * from {@link com.oracle.tools.runtime.Application}s should be differentiated
+     * from the controlling process output.
+     *
+     * @return true if output should be the plain output from the process, false if
+     *         the output is formatted to include application information
+     */
+    @Override
+    public boolean isPlainMode()
+    {
+        return false;
+    }
 
     /**
      * Obtains a {@link ApplicationConsoleBuilder} for the

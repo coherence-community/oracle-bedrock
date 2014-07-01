@@ -51,7 +51,7 @@ public class PipedApplicationConsole implements ApplicationConsole
     private PrintWriter    m_errorWriter;
     private PipedReader    m_inputReader;
     private PrintWriter    m_inputWriter;
-
+    private boolean        m_plainMode;
 
     /**
      * Constructs {@link }PipedApplicationConsole}.
@@ -60,7 +60,22 @@ public class PipedApplicationConsole implements ApplicationConsole
      */
     public PipedApplicationConsole() throws IOException
     {
+        this(false);
+    }
+
+    /**
+     * Constructs {@link }PipedApplicationConsole}.
+     *
+     * @param plainMode  if true, output to this console is not formatted
+     *                   with application details or line numbers
+     *
+     * @throws IOException
+     */
+    public PipedApplicationConsole(boolean plainMode) throws IOException
+    {
         PipedReader pipedOutputReader = new PipedReader();
+
+        m_plainMode    = plainMode;
 
         m_outputReader = new BufferedReader(pipedOutputReader);
         m_outputWriter = new PrintWriter(new PipedWriter(pipedOutputReader));
@@ -131,6 +146,11 @@ public class PipedApplicationConsole implements ApplicationConsole
         return m_inputWriter;
     }
 
+    @Override
+    public boolean isPlainMode()
+    {
+        return m_plainMode;
+    }
 
     @Override
     public void close()

@@ -26,7 +26,6 @@
 package com.oracle.tools.runtime;
 
 import com.oracle.tools.runtime.console.SystemApplicationConsole;
-
 import com.oracle.tools.runtime.java.container.Container;
 
 import java.io.BufferedInputStream;
@@ -36,11 +35,9 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.Reader;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
-
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -191,7 +188,8 @@ public abstract class AbstractApplication<A extends AbstractApplication<A, P>, P
                                                       m_process.getInputStream(),
                                                       m_console.getOutputWriter(),
                                                       m_process.getId(),
-                                                      m_isDiagnosticsEnabled));
+                                                      m_isDiagnosticsEnabled,
+                                                      m_console.isPlainMode()));
         m_outThread.setDaemon(true);
         m_outThread.setName(name + " StdOut Thread");
         m_outThread.start();
@@ -202,7 +200,8 @@ public abstract class AbstractApplication<A extends AbstractApplication<A, P>, P
                                                       m_process.getErrorStream(),
                                                       m_console.getErrorWriter(),
                                                       m_process.getId(),
-                                                      m_isDiagnosticsEnabled));
+                                                      m_isDiagnosticsEnabled,
+                                                      m_console.isPlainMode()));
         m_errThread.setDaemon(true);
         m_errThread.setName(name + " StdErr Thread");
         m_errThread.start();
@@ -440,7 +439,7 @@ public abstract class AbstractApplication<A extends AbstractApplication<A, P>, P
      * An {@link OutputRedirector} pipes output from an {@link InputStream},
      * typically of some {@link Process} to an {@link ApplicationConsole}.
      */
-    private static class OutputRedirector implements Runnable
+    static class OutputRedirector implements Runnable
     {
         private String m_ApplicationName;
 
@@ -470,25 +469,33 @@ public abstract class AbstractApplication<A extends AbstractApplication<A, P>, P
          */
         private PrintWriter m_outputWriter;
 
+        /**
+         * Flag indicating whether output should not be prefixed with
+         * details of the application.
+         */
+        private boolean m_plainMode;
 
         /**
          * Constructs an {@link OutputRedirector}.
          *
-         * @param applicationName  the name of the application
-         * @param prefix           the prefix to output on each console line
-         *                         (typically this is the abbreviation of the stream
-         *                          like "stderr" or "stdout")
-         * @param inputStream      the {@link InputStream} from which to read content
-         * @param outputWriter     the {@link PrintWriter} to which to write content
-         * @param processId        the {@link ApplicationProcess} identifier
+         * @param applicationName       the name of the application
+         * @param prefix                the prefix to output on each console line
+         *                              (typically this is the abbreviation of the stream
+         *                              like "stderr" or "stdout")
+         * @param inputStream           the {@link InputStream} from which to read content
+         * @param outputWriter          the {@link PrintWriter} to which to write content
+         * @param processId             the {@link ApplicationProcess} identifier
          * @param isDiagnosticsEnabled  should diagnostic information be logged/output
+         * @param plainMode             if true then the process output is redirected
+         *                              without prefixing with application information
          */
-        private OutputRedirector(String      applicationName,
+        OutputRedirector(String      applicationName,
                                  String      prefix,
                                  InputStream inputStream,
                                  PrintWriter outputWriter,
-                                 long        processId,
-                                 boolean     isDiagnosticsEnabled)
+                                 long processId,
+                                 boolean isDiagnosticsEnabled,
+                                 boolean plainMode)
         {
             m_ApplicationName      = applicationName;
             m_prefix               = prefix;
@@ -496,6 +503,7 @@ public abstract class AbstractApplication<A extends AbstractApplication<A, P>, P
             m_outputWriter         = outputWriter;
             m_processId            = processId;
             m_isDiagnosticsEnabled = isDiagnosticsEnabled;
+            m_plainMode            = plainMode;
         }
 
 
@@ -530,7 +538,15 @@ public abstract class AbstractApplication<A extends AbstractApplication<A, P>, P
                         Container.getPlatformScope().getStandardOutput().print(output);
                     }
 
-                    m_outputWriter.print(output);
+                    if (m_plainMode)
+                    {
+                        m_outputWriter.println(line);
+                    }
+                    else
+                    {
+                        m_outputWriter.print(output);
+                    }
+
                     m_outputWriter.flush();
                 }
             }
@@ -553,7 +569,15 @@ public abstract class AbstractApplication<A extends AbstractApplication<A, P>, P
                     Container.getPlatformScope().getStandardOutput().print(output);
                 }
 
-                m_outputWriter.print(output);
+                if (m_plainMode)
+                {
+                    m_outputWriter.println("(terminated)");
+                }
+                else
+                {
+                    m_outputWriter.print(output);
+                }
+
                 m_outputWriter.flush();
             }
             catch (Exception e)

@@ -27,7 +27,6 @@ package com.oracle.tools.runtime.console;
 
 import com.oracle.tools.runtime.ApplicationConsole;
 import com.oracle.tools.runtime.ApplicationConsoleBuilder;
-
 import com.oracle.tools.runtime.java.container.Container;
 
 import java.io.File;
@@ -68,6 +67,29 @@ public class FileWriterApplicationConsole implements ApplicationConsole
      */
     private Reader m_inputReader;
 
+    /**
+     * If true, application output should be plain text without
+     * being formatted to include application information.
+     */
+    private boolean m_plainMode;
+
+    /**
+     * Constructs a {@link FileWriterApplicationConsole}.
+     *
+     * @param fileWriter  the {@link FileWriter} to use for the console
+     * @param plainMode   if true, output to this console is not formatted
+     *                    with application details or line numbers
+     */
+    public FileWriterApplicationConsole(FileWriter fileWriter, boolean plainMode)
+    {
+        m_plainMode    = plainMode;
+        m_fileWriter   = fileWriter;
+
+        m_outputWriter = new PrintWriter(fileWriter);
+        m_errorWriter  = new PrintWriter(fileWriter);
+        m_inputReader  = new InputStreamReader(Container.getPlatformScope().getStandardInput());
+    }
+
 
     /**
      * Constructs a {@link FileWriterApplicationConsole}.
@@ -76,12 +98,7 @@ public class FileWriterApplicationConsole implements ApplicationConsole
      */
     public FileWriterApplicationConsole(FileWriter fileWriter)
     {
-        m_fileWriter   = fileWriter;
-
-        m_outputWriter = new PrintWriter(fileWriter);
-        m_errorWriter  = new PrintWriter(fileWriter);
-        m_inputReader  = new InputStreamReader(Container.getPlatformScope().getStandardInput());
-
+        this(fileWriter, false);
     }
 
 
@@ -94,7 +111,7 @@ public class FileWriterApplicationConsole implements ApplicationConsole
      */
     public FileWriterApplicationConsole(String fileName) throws IOException
     {
-        this(new FileWriter(fileName, true));
+        this(new FileWriter(fileName, true), false);
     }
 
 
@@ -139,6 +156,11 @@ public class FileWriterApplicationConsole implements ApplicationConsole
         return m_inputReader;
     }
 
+    @Override
+    public boolean isPlainMode()
+    {
+        return m_plainMode;
+    }
 
     /**
      * Obtains a {@link ApplicationConsoleBuilder} for the

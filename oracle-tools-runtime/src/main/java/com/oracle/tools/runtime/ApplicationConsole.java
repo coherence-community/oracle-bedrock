@@ -66,4 +66,13 @@ public interface ApplicationConsole extends Closeable
      * be used.
      */
     public void close();
+
+    /**
+     * Obtains the flag indicating whether output to this {@link ApplicationConsole}
+     * should not be formatted to include information about the application.
+     *
+     * @return true if output should be the plain output from the process, false if
+     *         the output is formatted to include application information
+     */
+    public boolean isPlainMode();
 }
