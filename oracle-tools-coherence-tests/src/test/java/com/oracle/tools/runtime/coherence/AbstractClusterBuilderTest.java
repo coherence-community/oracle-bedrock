@@ -196,7 +196,7 @@ public abstract class AbstractClusterBuilderTest extends AbstractTest
         SystemApplicationConsole console            = new SystemApplicationConsole();
 
         Cluster                  cluster            = null;
-        int                      desiredClusterSize = 4;
+        int                      desiredClusterSize = 3;
 
         try
         {
@@ -231,7 +231,7 @@ public abstract class AbstractClusterBuilderTest extends AbstractTest
     @Test
     public void shouldPerformRollingRestartOfCluster() throws Exception
     {
-        final int                             CLUSTER_SIZE   = 4;
+        final int                             CLUSTER_SIZE   = 3;
 
         AvailablePortIterator                 availablePorts = LocalPlatform.getInstance().getAvailablePorts();
         Capture<Integer>                      clusterPort    = new Capture<Integer>(availablePorts);

@@ -68,7 +68,6 @@
 
     <build>
         <plugins>
-            <!-- currently disabled due to maven.java.net deployment issues
             <plugin>
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <version>${maven.javadoc.plugin.version}</version>
@@ -89,7 +88,6 @@
                     </execution>
                 </executions>
             </plugin>
-            -->
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
