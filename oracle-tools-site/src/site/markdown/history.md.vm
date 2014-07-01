@@ -168,6 +168,9 @@ reverse chronological order.
     the ability to access NamedCaches using CoherenceClusterMember-based
     applications and via a CoherenceCluster instance.
 
+*   [ORACLETOOLS-117](https://java.net/jira/browse/ORACLETOOLS-117): Removed
+    unused and incorrect custom namespaces from Coherence-based tests
+
 <h4>oracle-tools-coherence-testing-support</h4>
 
 *   (none)

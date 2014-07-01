@@ -28,10 +28,7 @@
 <cache-config
 	xmlns="http://xmlns.oracle.com/coherence/coherence-cache-config"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://xmlns.oracle.com/coherence/coherence-cache-config coherence-cache-config.xsd"
-
-    xmlns:element="class://com.oracle.coherence.environment.extensible.namespaces.XmlElementProcessingNamespaceContentHandler"
-    element:introduce-cache-config="coherence-common-cache-config.xml">
+    xsi:schemaLocation="http://xmlns.oracle.com/coherence/coherence-cache-config coherence-cache-config.xsd">
 
     <defaults>
         <serializer>pof</serializer>
