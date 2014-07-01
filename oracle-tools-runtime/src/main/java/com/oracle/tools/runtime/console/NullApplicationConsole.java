@@ -27,7 +27,6 @@ package com.oracle.tools.runtime.console;
 
 import com.oracle.tools.runtime.ApplicationConsole;
 import com.oracle.tools.runtime.ApplicationConsoleBuilder;
-
 import com.oracle.tools.runtime.java.io.NullReader;
 import com.oracle.tools.runtime.java.io.NullWriter;
 
@@ -110,6 +109,22 @@ public class NullApplicationConsole implements ApplicationConsole
         return m_inputReader;
     }
 
+    /**
+     * Obtains the flag indicating whether output to this {@link ApplicationConsole}
+     * should not be formatted to include information about the application.
+     * </p>
+     * This method always returns true as the {@link NullApplicationConsole}
+     * does not output anything so there is no point wasting CPU cycles adding
+     * a prefix to the output.
+     *
+     * @return true if output should be the plain output from the process, false if
+     *         the output is formatted to include application information
+     */
+    @Override
+    public boolean isPlainMode()
+    {
+        return true;
+    }
 
     /**
      * Obtains a {@link ApplicationConsoleBuilder} for the
