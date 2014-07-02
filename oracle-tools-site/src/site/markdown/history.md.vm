@@ -45,6 +45,12 @@ reverse chronological order.
 
 <h4>oracle-tools-runtime</h4>
 
+*   [ORACLETOOLS-118](https://java.net/jira/browse/ORACLETOOLS-118): Fixed
+    issues where not all output was readable from PipedApplicationConsole
+    when the Application has terminated. Continuing to read past the last
+    line of output would throw an Exception rather than returning the
+    correct end-of-file result.
+
 *   [ORACLETOOLS-120](https://java.net/jira/browse/ORACLETOOLS-120): Fixed
     a bug in RemoteCallableStaticMethod where no matching method is found
     if an empty Iterable is passed to its constructor.

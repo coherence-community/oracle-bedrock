@@ -1,5 +1,5 @@
 /*
- * File: FileWriterApplicationConsoleTest.java
+ * File: PipedApplicationConsoleTest.java
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
@@ -25,12 +25,20 @@
 
 package com.oracle.tools.runtime.console;
 
+import com.oracle.tools.runtime.LocalPlatform;
+import com.oracle.tools.runtime.java.SimpleJavaApplication;
+import com.oracle.tools.runtime.java.SimpleJavaApplicationSchema;
 import org.junit.Test;
 
+import java.io.BufferedReader;
+
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertThat;
 
 /**
+ * Tests for {@link PipedApplicationConsole}
+ *
  * @author Jonathan Knight
  */
 public class PipedApplicationConsoleTest
@@ -47,7 +55,7 @@ public class PipedApplicationConsoleTest
     @Test
     public void shouldNotBePlainMode() throws Exception
     {
-        PipedApplicationConsole console = new PipedApplicationConsole(false);
+        PipedApplicationConsole console = new PipedApplicationConsole(PipedApplicationConsole.DEFAULT_PIPE_SIZE, false);
 
         assertThat(console.isPlainMode(), is(false));
     }
@@ -56,8 +64,52 @@ public class PipedApplicationConsoleTest
     @Test
     public void shouldBePlainMode() throws Exception
     {
-        PipedApplicationConsole console = new PipedApplicationConsole(true);
+        PipedApplicationConsole console = new PipedApplicationConsole(PipedApplicationConsole.DEFAULT_PIPE_SIZE, true);
 
         assertThat(console.isPlainMode(), is(true));
+    }
+
+
+    @Test
+    public void shouldBeAbleToReadPipedStdOutAfterConsoleClosed() throws Exception
+    {
+        SimpleJavaApplicationSchema schema =
+            new SimpleJavaApplicationSchema(SimpleApp.class.getCanonicalName()).setArgument("foo").setArgument("bar");
+
+        PipedApplicationConsole console = new PipedApplicationConsole(1024, true);
+
+        SimpleJavaApplication   app     = LocalPlatform.getInstance().realize(schema, "App", console);
+
+        BufferedReader          reader  = console.getOutputReader();
+
+        app.waitFor();
+        app.close();
+
+        assertThat(reader.readLine(), is("Out: foo"));
+        assertThat(reader.readLine(), is("Out: bar"));
+        assertThat(reader.readLine(), is("(terminated)"));
+        assertThat(reader.readLine(), is(nullValue()));
+    }
+
+
+    @Test
+    public void shouldBeAbleToReadPipedStdErrAfterConsoleClosed() throws Exception
+    {
+        SimpleJavaApplicationSchema schema =
+            new SimpleJavaApplicationSchema(SimpleApp.class.getCanonicalName()).setArgument("foo").setArgument("bar");
+
+        PipedApplicationConsole console = new PipedApplicationConsole(1024, true);
+
+        SimpleJavaApplication   app     = LocalPlatform.getInstance().realize(schema, "App", console);
+
+        BufferedReader          reader  = console.getErrorReader();
+
+        app.waitFor();
+        app.close();
+
+        assertThat(reader.readLine(), is("Err: foo"));
+        assertThat(reader.readLine(), is("Err: bar"));
+        assertThat(reader.readLine(), is("(terminated)"));
+        assertThat(reader.readLine(), is(nullValue()));
     }
 }

@@ -43,9 +43,6 @@ import static org.junit.Assert.assertThat;
  */
 public class AbstractApplicationOutputRedirectorTest
 {
-    /**
-     *
-     */
     @Test
     public void shouldWritePlainOutput() throws Exception
     {
@@ -72,9 +69,7 @@ public class AbstractApplicationOutputRedirectorTest
         assertThat(line3, is(nullValue()));
     }
 
-    /**
-     *
-     */
+
     @Test
     public void shouldWriteDecoratedOutput() throws Exception
     {

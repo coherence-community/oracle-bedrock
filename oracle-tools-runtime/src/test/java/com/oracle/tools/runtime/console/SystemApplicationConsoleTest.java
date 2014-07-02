@@ -25,10 +25,18 @@
 
 package com.oracle.tools.runtime.console;
 
+import com.oracle.tools.runtime.java.container.Scope;
 import org.junit.Test;
+
+import java.io.InputStream;
+import java.io.PrintStream;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * @author Jonathan Knight
@@ -43,6 +51,58 @@ public class SystemApplicationConsoleTest
     public void shouldNotBePlainMode() throws Exception
     {
         SystemApplicationConsole console = new SystemApplicationConsole();
+
         assertThat(console.isPlainMode(), is(false));
+    }
+
+
+    /**
+     * Make sure that if the PrintWriter wrapping System.out
+     * is closed that System.out is not closed.
+     */
+    @Test
+    public void shouldNoCloseSystemOutIfOutputWriterClosed() throws Exception
+    {
+        Scope       scope  = mock(Scope.class);
+        PrintStream stdOut = mock(PrintStream.class, "Out");
+        PrintStream stdErr = mock(PrintStream.class, "Out");
+        InputStream stdIn  = mock(InputStream.class, "In");
+
+        when(scope.getStandardOutput()).thenReturn(stdOut);
+        when(scope.getStandardError()).thenReturn(stdErr);
+        when(scope.getStandardInput()).thenReturn(stdIn);
+
+        SystemApplicationConsole console = new SystemApplicationConsole();
+
+        console.init(scope);
+
+        console.getOutputWriter().close();
+
+        verify(stdOut, never()).close();
+    }
+
+    /**
+     * Make sure that if the PrintWriter wrapping System.err
+     * is closed that System.err is not closed.
+     */
+    @Test
+    public void shouldNoCloseSystemErrIfErrorWriterClosed() throws Exception
+    {
+        Scope       scope  = mock(Scope.class);
+        PrintStream stdOut = mock(PrintStream.class, "Out");
+        PrintStream stdErr = mock(PrintStream.class, "Out");
+        InputStream stdIn  = mock(InputStream.class, "In");
+
+        when(scope.getStandardOutput()).thenReturn(stdOut);
+        when(scope.getStandardError()).thenReturn(stdErr);
+        when(scope.getStandardInput()).thenReturn(stdIn);
+
+        SystemApplicationConsole console = new SystemApplicationConsole();
+
+        console.init(scope);
+
+        console.getErrorWriter().close();
+
+        verify(stdErr, never()).close();
     }
 }

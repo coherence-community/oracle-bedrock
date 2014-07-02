@@ -38,29 +38,75 @@ import java.io.Reader;
  * An {@link com.oracle.tools.runtime.ApplicationConsole} pipes all output to
  * appropriate readers and all input to appropriate writers.
  * <p>
+ * A {link PipedApplicationConsole} uses {@link java.io.PipedWriter}s and
+ * {@link java.io.PipedReader}s to read from and write to an
+ * {@link com.oracle.tools.runtime.Application}'s streams. These pipes have a
+ * fixed size, which defaults to 1024 bytes and is configurable using a constructor
+ * parameter. If the number of bytes written to stdout or stderr by the application
+ * exceeds the size of the pipe then no more output will be written to the pipes until
+ * space is made available by reading from the other end of the pipe; that is, by
+ * reading from this {@link PipedApplicationConsole}'s OutputReader or ErrorReader.
+ * </p>
+ * <b>Note:</b> If attempting to read from this {@link PipedApplicationConsole}'s
+ * OutputReader or ErrorReader after the underlying {@link com.oracle.tools.runtime.Application}
+ * has been closed then this {@link PipedApplicationConsole} should be closed first as this
+ * will then properly close the pipes and avoid exceptions being thrown due to the {@link Thread}
+ * writing to the pipe's having terminated.
+ * <p>
  * Copyright (c) 2013. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Brian Oliver
+ *
+ * @see java.io.PipedReader
+ * @see java.io.PipedWriter
  */
 public class PipedApplicationConsole implements ApplicationConsole
 {
+    public static final int DEFAULT_PIPE_SIZE = 1024;
+
     private BufferedReader m_outputReader;
     private PrintWriter    m_outputWriter;
+    private PipedWriter    m_outputPipedWriter;
     private BufferedReader m_errorReader;
     private PrintWriter    m_errorWriter;
+    private PipedWriter    m_errorPipedWriter;
     private PipedReader    m_inputReader;
     private PrintWriter    m_inputWriter;
     private boolean        m_plainMode;
 
     /**
-     * Constructs {@link }PipedApplicationConsole}.
+     * Constructs {@link PipedApplicationConsole}.
+     * </p>
+     * The buffers for the pipes used by this {@link PipedApplicationConsole}
+     * will be set to the default size {@link PipedApplicationConsole#DEFAULT_PIPE_SIZE}.
+     * Once the buffer is filled to this size then no more output will be captured until
+     * the pipes are read from.
      *
-     * @throws IOException
+     * @see java.io.PipedReader
+     * @see java.io.PipedWriter
+     *
+     * @throws IOException if an error occurs creating this {@link PipedApplicationConsole}
      */
     public PipedApplicationConsole() throws IOException
     {
-        this(false);
+        this(DEFAULT_PIPE_SIZE, false);
+    }
+
+    /**
+     * Constructs {@link PipedApplicationConsole}.
+     *
+     * @param pipeSize  the size of the buffers for the
+     *                  pipes used by this {@link PipedApplicationConsole}.
+     *
+     * @see java.io.PipedReader
+     * @see java.io.PipedWriter
+     *
+     * @throws IOException if an error occurs creating this {@link PipedApplicationConsole}
+     */
+    public PipedApplicationConsole(int pipeSize) throws IOException
+    {
+        this(pipeSize, false);
     }
 
     /**
@@ -69,24 +115,29 @@ public class PipedApplicationConsole implements ApplicationConsole
      * @param plainMode  if true, output to this console is not formatted
      *                   with application details or line numbers
      *
-     * @throws IOException
+     * @see java.io.PipedReader
+     * @see java.io.PipedWriter
+     *
+     * @throws IOException if an error occurs creating this {@link PipedApplicationConsole}
      */
-    public PipedApplicationConsole(boolean plainMode) throws IOException
+    public PipedApplicationConsole(int pipeSize, boolean plainMode) throws IOException
     {
-        PipedReader pipedOutputReader = new PipedReader();
+        PipedReader pipedOutputReader = new PipedReader(pipeSize);
 
-        m_plainMode    = plainMode;
+        m_plainMode         = plainMode;
 
-        m_outputReader = new BufferedReader(pipedOutputReader);
-        m_outputWriter = new PrintWriter(new PipedWriter(pipedOutputReader));
+        m_outputReader      = new BufferedReader(pipedOutputReader);
+        m_outputPipedWriter = new PipedWriter(pipedOutputReader);
+        m_outputWriter      = new PrintWriter(m_outputPipedWriter);
 
-        PipedReader pipedErrorReader = new PipedReader();
+        PipedReader pipedErrorReader = new PipedReader(pipeSize);
 
-        m_errorReader = new BufferedReader(pipedErrorReader);
-        m_errorWriter = new PrintWriter(new PipedWriter(pipedErrorReader));
+        m_errorReader      = new BufferedReader(pipedErrorReader);
+        m_errorPipedWriter = new PipedWriter(pipedErrorReader);
+        m_errorWriter      = new PrintWriter(m_errorPipedWriter);
 
-        m_inputReader = new PipedReader();
-        m_inputWriter = new PrintWriter(new PipedWriter(m_inputReader));
+        m_inputReader      = new PipedReader(pipeSize);
+        m_inputWriter      = new PrintWriter(new PipedWriter(m_inputReader));
     }
 
 
@@ -164,28 +215,22 @@ public class PipedApplicationConsole implements ApplicationConsole
             // SKIP: ignore exceptions
         }
 
-        m_inputWriter.close();
-
         try
         {
-            m_outputReader.close();
+            m_outputPipedWriter.close();
         }
         catch (IOException e)
         {
             // SKIP: ignore exceptions
         }
 
-        m_outputWriter.close();
-
         try
         {
-            m_errorReader.close();
+            m_errorPipedWriter.close();
         }
         catch (IOException e)
         {
             // SKIP: ignore exceptions
         }
-
-        m_errorWriter.close();
     }
 }

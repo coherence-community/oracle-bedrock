@@ -54,10 +54,10 @@
     <modules>
         <module>oracle-tools-core</module>
 
-        <module>oracle-tools-testing-support</module>
-
         <module>oracle-tools-runtime</module>
         <module>oracle-tools-runtime-tests</module>
+
+        <module>oracle-tools-testing-support</module>
 
         <module>oracle-tools-runtime-remote</module>
         <module>oracle-tools-runtime-remote-tests</module>

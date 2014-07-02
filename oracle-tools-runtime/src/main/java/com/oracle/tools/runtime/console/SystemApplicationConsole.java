@@ -28,6 +28,7 @@ package com.oracle.tools.runtime.console;
 import com.oracle.tools.runtime.ApplicationConsole;
 import com.oracle.tools.runtime.ApplicationConsoleBuilder;
 import com.oracle.tools.runtime.java.container.Container;
+import com.oracle.tools.runtime.java.container.Scope;
 
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
@@ -64,9 +65,29 @@ public class SystemApplicationConsole implements ApplicationConsole
      */
     public SystemApplicationConsole()
     {
-        m_outputWriter = new PrintWriter(Container.getPlatformScope().getStandardOutput());
-        m_errorWriter  = new PrintWriter(Container.getPlatformScope().getStandardError());
-        m_inputReader  = new InputStreamReader(Container.getPlatformScope().getStandardInput());
+        init(Container.getPlatformScope());
+    }
+
+    /**
+     * Initialise the streams for this console
+     */
+    void init(Scope scope)
+    {
+        m_outputWriter = new PrintWriter(scope.getStandardOutput())
+        {
+            @Override
+            public void close()
+            {
+            }
+        };
+        m_errorWriter  = new PrintWriter(scope.getStandardError())
+        {
+            @Override
+            public void close()
+            {
+            }
+        };
+        m_inputReader  = new InputStreamReader(scope.getStandardInput());
     }
 
 

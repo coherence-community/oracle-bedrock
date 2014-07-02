@@ -32,6 +32,7 @@ import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.InterruptedIOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.Reader;
@@ -253,10 +254,37 @@ public abstract class AbstractApplication<A extends AbstractApplication<A, P>, P
             // nothing to do here as we don't care
         }
 
+        try
+        {
+            m_outThread.join();
+        }
+        catch (InterruptedException e)
+        {
+            // nothing to do here as we don't care
+        }
+
         // terminate the thread that is reading from the process standard err
         try
         {
             m_errThread.interrupt();
+        }
+        catch (Exception e)
+        {
+            // nothing to do here as we don't care
+        }
+
+        try
+        {
+            m_errThread.join();
+        }
+        catch (InterruptedException e)
+        {
+            // nothing to do here as we don't care
+        }
+
+        try
+        {
+            m_console.close();
         }
         catch (Exception e)
         {
@@ -490,12 +518,12 @@ public abstract class AbstractApplication<A extends AbstractApplication<A, P>, P
          *                              without prefixing with application information
          */
         OutputRedirector(String      applicationName,
-                                 String      prefix,
-                                 InputStream inputStream,
-                                 PrintWriter outputWriter,
-                                 long processId,
-                                 boolean isDiagnosticsEnabled,
-                                 boolean plainMode)
+                         String      prefix,
+                         InputStream inputStream,
+                         PrintWriter outputWriter,
+                         long        processId,
+                         boolean     isDiagnosticsEnabled,
+                         boolean     plainMode)
         {
             m_ApplicationName      = applicationName;
             m_prefix               = prefix;
@@ -517,37 +545,46 @@ public abstract class AbstractApplication<A extends AbstractApplication<A, P>, P
                 BufferedReader reader =
                     new BufferedReader(new InputStreamReader(new BufferedInputStream(m_inputStream)));
 
-                while (true)
+                boolean running = true;
+
+                while (running || reader.ready())
                 {
-                    String line = reader.readLine();
-
-                    if (line == null)
+                    try
                     {
-                        break;
+                        String line = reader.readLine();
+
+                        if (line == null)
+                        {
+                            break;
+                        }
+
+                        String output = String.format("[%s:%s%s] %4d: %s\n",
+                                                      m_ApplicationName,
+                                                      m_prefix,
+                                                      m_processId < 0 ? "" : ":" + m_processId,
+                                                      lineNumber++,
+                                                      line);
+
+                        if (m_isDiagnosticsEnabled)
+                        {
+                            Container.getPlatformScope().getStandardOutput().print(output);
+                        }
+
+                        if (m_plainMode)
+                        {
+                            m_outputWriter.println(line);
+                        }
+                        else
+                        {
+                            m_outputWriter.print(output);
+                        }
+
+                        m_outputWriter.flush();
                     }
-
-                    String output = String.format("[%s:%s%s] %4d: %s\n",
-                                                  m_ApplicationName,
-                                                  m_prefix,
-                                                  m_processId < 0 ? "" : ":" + m_processId,
-                                                  lineNumber++,
-                                                  line);
-
-                    if (m_isDiagnosticsEnabled)
+                    catch (InterruptedIOException e)
                     {
-                        Container.getPlatformScope().getStandardOutput().print(output);
+                        running = false;
                     }
-
-                    if (m_plainMode)
-                    {
-                        m_outputWriter.println(line);
-                    }
-                    else
-                    {
-                        m_outputWriter.print(output);
-                    }
-
-                    m_outputWriter.flush();
                 }
             }
             catch (Exception exception)
