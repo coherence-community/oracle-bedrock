@@ -26,38 +26,27 @@
 package com.oracle.tools.runtime.coherence.actions;
 
 import com.oracle.tools.deferred.DeferredPredicate;
-
 import com.oracle.tools.predicate.Predicate;
-
 import com.oracle.tools.runtime.ApplicationConsole;
-
+import com.oracle.tools.runtime.Platform;
 import com.oracle.tools.runtime.actions.CustomAction;
-
-import com.oracle.tools.runtime.coherence.Cluster;
-import com.oracle.tools.runtime.coherence.ClusterMember;
-import com.oracle.tools.runtime.coherence.ClusterMemberSchema;
-import com.oracle.tools.runtime.coherence.CoherenceCacheServerSchema;
 import com.oracle.tools.runtime.coherence.CoherenceCluster;
 import com.oracle.tools.runtime.coherence.CoherenceClusterMember;
 import com.oracle.tools.runtime.coherence.CoherenceClusterMemberSchema;
-
 import com.oracle.tools.runtime.java.JavaApplicationBuilder;
-
 import com.tangosol.util.UID;
+
+import java.util.Iterator;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import static com.oracle.tools.deferred.DeferredHelper.ensure;
 import static com.oracle.tools.deferred.DeferredHelper.eventually;
 import static com.oracle.tools.deferred.DeferredHelper.invoking;
-
 import static com.oracle.tools.predicate.Predicates.contains;
 import static com.oracle.tools.predicate.Predicates.doesNotContain;
 import static com.oracle.tools.predicate.Predicates.greaterThan;
 import static com.oracle.tools.predicate.Predicates.is;
-
-import java.util.Iterator;
-
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * A {@link CustomAction} to destroy a {@link CoherenceClusterMember} that is defined as part
@@ -91,7 +80,7 @@ public class RestartCoherenceClusterMemberAction<A extends CoherenceClusterMembe
     /**
      * The {@link JavaApplicationBuilder} to create a new {@link CoherenceClusterMember}.
      */
-    private JavaApplicationBuilder<A> builder;
+    private Platform platform;
 
     /**
      * The {@link ApplicationConsole} to use for a new {@link CoherenceClusterMember}.
@@ -108,22 +97,22 @@ public class RestartCoherenceClusterMemberAction<A extends CoherenceClusterMembe
      * Constructs a {@link RestartCoherenceClusterMemberAction}.
      *
      * @param prefix          the prefix that must match existing {@link CoherenceClusterMember} names
-     * @param builder         the {@link JavaApplicationBuilder} to realize new {@link CoherenceClusterMember}s
+     * @param platform        the {@link Platform} to realize new {@link CoherenceClusterMember}s on
      * @param schema          the {@link CoherenceClusterMemberSchema for new {@link CoherenceClusterMember}s
      * @param console         the {@link ApplicationConsole} for new {@link CoherenceClusterMember}s
      * @param closePredicate  the optional {@link Predicate} that must be satisfied before restarting a
      *                        {@link CoherenceClusterMember} (may be <code>null</code>)
      */
     public RestartCoherenceClusterMemberAction(String                            prefix,
-                                               JavaApplicationBuilder<A>         builder,
+                                               Platform                          platform,
                                                S                                 schema,
                                                ApplicationConsole                console,
                                                Predicate<CoherenceClusterMember> closePredicate)
     {
-        this.prefix  = prefix;
-        this.builder = builder;
-        this.schema  = schema;
-        this.console = console;
+        this.prefix   = prefix;
+        this.platform = platform;
+        this.schema   = schema;
+        this.console  = console;
         this.closePredicate = closePredicate == null
                               ? com.oracle.tools.predicate.Predicates.<CoherenceClusterMember>always() : closePredicate;
     }
@@ -197,7 +186,7 @@ public class RestartCoherenceClusterMemberAction<A extends CoherenceClusterMembe
                             ensure(eventually(invoking(cluster).getClusterMemberUIDs()), doesNotContain(memberUID));
 
                             // start a new ClusterMember (with the same name as the old member)
-                            member = builder.realize(schema, name, console);
+                            member = platform.realize(schema, name, console);
 
                             // ensure that the new member has joined the cluster
                             ensure(eventually(invoking(member).getClusterSize()), is(greaterThan(1)));

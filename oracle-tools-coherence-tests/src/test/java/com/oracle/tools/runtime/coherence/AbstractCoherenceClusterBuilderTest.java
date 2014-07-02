@@ -29,6 +29,7 @@ import com.oracle.tools.junit.AbstractTest;
 import com.oracle.tools.predicate.Predicate;
 import com.oracle.tools.runtime.ApplicationConsole;
 import com.oracle.tools.runtime.LocalPlatform;
+import com.oracle.tools.runtime.Platform;
 import com.oracle.tools.runtime.actions.InteractiveActionExecutor;
 import com.oracle.tools.runtime.actions.PerpetualAction;
 import com.oracle.tools.runtime.coherence.actions.RestartCoherenceClusterMemberAction;
@@ -62,7 +63,7 @@ public abstract class AbstractCoherenceClusterBuilderTest extends AbstractTest
      *
      * @return the {@link JavaApplicationBuilder}
      */
-    public abstract JavaApplicationBuilder<CoherenceCacheServer> newJavaApplicationBuilder();
+    public abstract Platform getPlatform();
 
 
     /**
@@ -82,7 +83,7 @@ public abstract class AbstractCoherenceClusterBuilderTest extends AbstractTest
 
         CoherenceClusterBuilder builder = new CoherenceClusterBuilder();
 
-        builder.addBuilder(newJavaApplicationBuilder(), schema, "DCS", CLUSTER_SIZE);
+        builder.addApplication(getPlatform(), schema, "DCS", CLUSTER_SIZE);
 
         try (CoherenceCluster cluster = builder.realize(new SystemApplicationConsole()))
         {
@@ -117,8 +118,8 @@ public abstract class AbstractCoherenceClusterBuilderTest extends AbstractTest
 
         CoherenceClusterBuilder builder = new CoherenceClusterBuilder();
 
-        builder.addBuilder(newJavaApplicationBuilder(), storageSchema, "storage", 2);
-        builder.addBuilder(newJavaApplicationBuilder(), extendSchema, "extend", 1);
+        builder.addApplication(getPlatform(), storageSchema, "storage", 2);
+        builder.addApplication(getPlatform(), extendSchema, "extend", 1);
 
         try (CoherenceCluster cluster = builder.realize(new SystemApplicationConsole()))
         {
@@ -169,7 +170,7 @@ public abstract class AbstractCoherenceClusterBuilderTest extends AbstractTest
         int                      desiredClusterSize = 4;
         CoherenceClusterBuilder  clusterBuilder     = new CoherenceClusterBuilder();
 
-        clusterBuilder.addBuilder(newJavaApplicationBuilder(), schema, "storage", desiredClusterSize);
+        clusterBuilder.addApplication(getPlatform(), schema, "storage", desiredClusterSize);
 
         try (CoherenceCluster cluster = clusterBuilder.realize(console))
         {
@@ -198,11 +199,11 @@ public abstract class AbstractCoherenceClusterBuilderTest extends AbstractTest
             new CoherenceCacheServerSchema().useLocalHostMode().setClusterPort(clusterPort);
 
         ApplicationConsole                           console       = new SystemApplicationConsole();
-        JavaApplicationBuilder<CoherenceCacheServer> memberBuilder = newJavaApplicationBuilder();
+        Platform                                     memberBuilder = getPlatform();
 
         CoherenceClusterBuilder                      builder       = new CoherenceClusterBuilder();
 
-        builder.addBuilder(memberBuilder, schema, "DCS", CLUSTER_SIZE);
+        builder.addApplication(memberBuilder, schema, "DCS", CLUSTER_SIZE);
 
         try (CoherenceCluster cluster = builder.realize(console))
         {
@@ -262,7 +263,7 @@ public abstract class AbstractCoherenceClusterBuilderTest extends AbstractTest
 
         CoherenceClusterBuilder builder = new CoherenceClusterBuilder();
 
-        builder.addBuilder(newJavaApplicationBuilder(), schema, "DCS", CLUSTER_SIZE);
+        builder.addApplication(getPlatform(), schema, "DCS", CLUSTER_SIZE);
 
         try (CoherenceCluster cluster = builder.realize(new SystemApplicationConsole()))
         {

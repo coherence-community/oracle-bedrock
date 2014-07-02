@@ -25,8 +25,9 @@
 
 package com.oracle.tools.runtime.coherence;
 
+import com.oracle.tools.runtime.Platform;
 import com.oracle.tools.runtime.java.ContainerBasedJavaApplicationBuilder;
-import com.oracle.tools.runtime.java.JavaApplicationBuilder;
+import com.oracle.tools.runtime.java.JavaVirtualMachine;
 
 /**
  * Functional Tests for {@link CoherenceClusterBuilder}s using a {@link ContainerBasedJavaApplicationBuilder}.
@@ -39,8 +40,8 @@ import com.oracle.tools.runtime.java.JavaApplicationBuilder;
 public class ContainerBasedCoherenceClusterBuilderTest extends AbstractCoherenceClusterBuilderTest
 {
     @Override
-    public JavaApplicationBuilder<CoherenceCacheServer> newJavaApplicationBuilder()
+    public Platform getPlatform()
     {
-        return new ContainerBasedJavaApplicationBuilder<CoherenceCacheServer>();
+        return JavaVirtualMachine.getInstance();
     }
 }

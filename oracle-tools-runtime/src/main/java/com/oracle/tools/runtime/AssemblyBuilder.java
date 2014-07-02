@@ -41,17 +41,16 @@ import java.io.IOException;
 public interface AssemblyBuilder<A extends Application, G extends Assembly<A>>
 {
     /**
-     * Adds an {@link ApplicationBuilder} to the {@link AssemblyBuilder}
-     * that will be used to realize a type of {@link Application} when the
+     * Adds an {@link Application} to be realized by the {@link AssemblyBuilder}
      * {@link Assembly} is realized.
      * <p>
-     * Multiple calls to this method is permitted, this allowing an {@link Assembly}
+     * Multiple calls to this method are permitted, this allowing an {@link Assembly}
      * to contain different types of {@link Application}s.
      * <p>
      * By default no {@link ApplicationConsole} will be used for the realized
      * {@link Application}s, unless one is specified when realizing the {@link Assembly}.
      *
-     * @param applicationBuilder     the {@link ApplicationBuilder} for the {@link Application}s
+     * @param platform               the {@link Platform} on which to realize the {@link Application}s
      * @param applicationSchema      the {@link ApplicationSchema} from which to
      *                               realize/configure the {@link Application}s
      * @param applicationNamePrefix  the {@link Application} name prefix for each
@@ -59,16 +58,13 @@ public interface AssemblyBuilder<A extends Application, G extends Assembly<A>>
      * @param count                  the number of instances of the {@link Application} that should be realized for
      *                               the {@link Assembly} when {@link #realize(ApplicationConsole)} is called
      */
-    public <T extends A, S extends ApplicationSchema<T>,
-            B extends ApplicationBuilder<T>> void addBuilder(B      applicationBuilder,
-                                                             S      applicationSchema,
-                                                             String applicationNamePrefix,
-                                                             int    count);
-
+    public <T extends A, S extends ApplicationSchema<T>> void addApplication(Platform platform,
+                                                                             S        applicationSchema,
+                                                                             String   applicationNamePrefix,
+                                                                             int      count);
 
     /**
-     * Adds an {@link ApplicationBuilder} to the {@link AssemblyBuilder}
-     * that will be used to realize a type of {@link Application} when the
+     * Adds an {@link Application} to be realized by the {@link AssemblyBuilder}
      * {@link Assembly} is realized.
      * <p>
      * Multiple calls to this method is permitted, this allowing an {@link Assembly}
@@ -77,7 +73,7 @@ public interface AssemblyBuilder<A extends Application, G extends Assembly<A>>
      * By default a new {@link ApplicationConsole} provided by the {@link ApplicationConsoleBuilder}
      * will used for each {@link Application} realized when creating the {@link Assembly}.
      *
-     * @param applicationBuilder     the {@link ApplicationBuilder} for the {@link Application}s
+     * @param platform               the {@link Platform} on which to realize the {@link Application}s
      * @param applicationSchema      the {@link ApplicationSchema} from which to
      *                               realize/configure the {@link Application}s
      * @param applicationNamePrefix  the {@link Application} name prefix for each
@@ -87,12 +83,11 @@ public interface AssemblyBuilder<A extends Application, G extends Assembly<A>>
      * @param consoleBuilder         the {@link ApplicationConsoleBuilder} to be used to provide
      *                               {@link ApplicationConsole}s for realized {@link Application}s.
      */
-    public <T extends A, S extends ApplicationSchema<T>,
-            B extends ApplicationBuilder<T>> void addBuilder(B                         applicationBuilder,
-                                                             S                         applicationSchema,
-                                                             String                    applicationNamePrefix,
-                                                             int                       count,
-                                                             ApplicationConsoleBuilder consoleBuilder);
+    public <T extends A, S extends ApplicationSchema<T>> void addApplication(Platform                  platform,
+                                                                             S                         applicationSchema,
+                                                                             String                    applicationNamePrefix,
+                                                                             int                       count,
+                                                                             ApplicationConsoleBuilder consoleBuilder);
 
 
     /**
@@ -101,7 +96,7 @@ public interface AssemblyBuilder<A extends Application, G extends Assembly<A>>
      * @param overridingConsole  the {@link ApplicationConsole} that will be used for I/O by all of the
      *                           {@link Application}s realized in the {@link Assembly}, including
      *                           those that had a specific {@link ApplicationConsoleBuilder} specified for
-     *                           them using {@link #addBuilder(ApplicationBuilder, ApplicationSchema, String, int, ApplicationConsoleBuilder)}
+     *                           them using {@link #addApplication(Platform, ApplicationSchema, String, int, ApplicationConsoleBuilder)}
      *                           When this is <code>null</code> the defined {@link ApplicationConsole}
      *                           will be used for each {@link Application} in the {@link Assembly}
      *
@@ -119,7 +114,7 @@ public interface AssemblyBuilder<A extends Application, G extends Assembly<A>>
      *                                  {@link ApplicationConsole}s for each of the realized {@link Application}s
      *                                  in the {@link Assembly}, overriding those that had a specific
      *                                  {@link ApplicationConsoleBuilder} specified for them using
-     *                                  {@link #addBuilder(ApplicationBuilder, ApplicationSchema, String, int, ApplicationConsoleBuilder)}
+     *                                  {@link #addApplication(Platform, ApplicationSchema, String, int, ApplicationConsoleBuilder)}
      *                                  When this is <code>null</code> the defined {@link ApplicationConsole}
      *                                  will be used for each {@link Application} in the {@link Assembly}
      *

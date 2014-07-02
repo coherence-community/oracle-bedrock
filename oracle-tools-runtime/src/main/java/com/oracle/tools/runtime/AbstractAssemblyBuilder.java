@@ -27,11 +27,9 @@ package com.oracle.tools.runtime;
 
 import com.oracle.tools.runtime.console.NullApplicationConsole;
 import com.oracle.tools.runtime.console.SingletonApplicationConsoleBuilder;
-
 import com.oracle.tools.util.Quadruple;
 
 import java.io.IOException;
-
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -53,40 +51,39 @@ public abstract class AbstractAssemblyBuilder<A extends Application, G extends A
     /**
      * The map of {@link ApplicationBuilder}s to create applications, keyed by application prefix name.
      */
-    protected LinkedHashMap<String, Quadruple<ApplicationBuilder<A>, ApplicationSchema<A>, Integer, ApplicationConsoleBuilder>> m_builders;
-
+    protected LinkedHashMap<String, Quadruple<Platform, ApplicationSchema<A>, Integer, ApplicationConsoleBuilder>> m_schema;
 
     /**
      * Construct an {@link AbstractAssemblyBuilder}.
      */
     public AbstractAssemblyBuilder()
     {
-        m_builders = new LinkedHashMap<String,
-                                       Quadruple<ApplicationBuilder<A>, ApplicationSchema<A>, Integer,
+        m_schema   = new LinkedHashMap<String,
+                                       Quadruple<Platform, ApplicationSchema<A>, Integer,
                                                  ApplicationConsoleBuilder>>();
     }
 
 
-    public <T extends A, S extends ApplicationSchema<T>,
-            B extends ApplicationBuilder<T>> void addBuilder(B      applicationBuilder,
-                                                             S      applicationSchema,
-                                                             String applicationNamePrefix,
-                                                             int    count)
+    @Override
+    public <T extends A, S extends ApplicationSchema<T>> void addApplication(Platform platform,
+                                                                             S        applicationSchema,
+                                                                             String   applicationNamePrefix,
+                                                                             int      count)
     {
-        addBuilder(applicationBuilder, applicationSchema, applicationNamePrefix, count, null);
+        addApplication(platform, applicationSchema, applicationNamePrefix, count, null);
     }
 
 
     @Override
-    public <T extends A, S extends ApplicationSchema<T>,
-            B extends ApplicationBuilder<T>> void addBuilder(B                         applicationBuilder,
-                                                             S                         applicationSchema,
-                                                             String                    applicationNamePrefix,
-                                                             int                       count,
-                                                             ApplicationConsoleBuilder consoleBuilder)
+    @SuppressWarnings("unchecked")
+    public <T extends A, S extends ApplicationSchema<T>> void addApplication(Platform                  platform,
+                                                                             S                         applicationSchema,
+                                                                             String                    applicationNamePrefix,
+                                                                             int                       count,
+                                                                             ApplicationConsoleBuilder consoleBuilder)
     {
-        m_builders.put(applicationNamePrefix,
-                       new Quadruple(applicationBuilder, applicationSchema, count, consoleBuilder));
+        m_schema.put(applicationNamePrefix,
+                     new Quadruple(platform, applicationSchema, count, consoleBuilder));
     }
 
 
@@ -96,11 +93,40 @@ public abstract class AbstractAssemblyBuilder<A extends Application, G extends A
         // build a list of applications
         LinkedList<A> applications = new LinkedList<A>();
 
-        for (String prefix : m_builders.keySet())
+        realizeApplicationFromSchema(applications, overridingConsoleBuilder);
+
+        return createApplicationGroup(applications);
+    }
+
+
+    public G realize(ApplicationConsole overridingConsole)
+    {
+        return realize(overridingConsole == null ? null : new SingletonApplicationConsoleBuilder(overridingConsole));
+    }
+
+
+    @Override
+    public G realize() throws IOException
+    {
+        return realize((ApplicationConsoleBuilder) null);
+    }
+
+
+    /**
+     * Realize the {@link Application}s from the {@link ApplicationSchema} and {@link Platform}s
+     * previously added to this builder.
+     *
+     * @param applications              the list to add each realized {@link Application} to
+     * @param overridingConsoleBuilder  the {@link ApplicationConsoleBuilder} to use to build {@link ApplicationConsole}s
+     *                                  for each {@link Application}
+     */
+    protected void realizeApplicationFromSchema(LinkedList<A> applications, ApplicationConsoleBuilder overridingConsoleBuilder)
+    {
+        for (String prefix : m_schema.keySet())
         {
-            Quadruple<ApplicationBuilder<A>, ApplicationSchema<A>, Integer, ApplicationConsoleBuilder> quadruple =
-                m_builders.get(prefix);
-            ApplicationBuilder<A>     builder            = quadruple.getA();
+            Quadruple<Platform, ApplicationSchema<A>, Integer, ApplicationConsoleBuilder> quadruple =
+                    m_schema.get(prefix);
+            Platform                  platform           = quadruple.getA();
             ApplicationSchema<A>      schema             = quadruple.getB();
             int                       cRequiredInstances = quadruple.getC();
             ApplicationConsoleBuilder consoleBuilder     = quadruple.getD();
@@ -122,33 +148,18 @@ public abstract class AbstractAssemblyBuilder<A extends Application, G extends A
                     console = new NullApplicationConsole();
                 }
 
-                applications.add(builder.realize(schema, applicationName, console));
+                applications.add(platform.realize(schema, applicationName, console));
             }
         }
-
-        return createApplicationGroup(applications);
-    }
-
-
-    public G realize(ApplicationConsole overridingConsole)
-    {
-        return realize(overridingConsole == null ? null : new SingletonApplicationConsoleBuilder(overridingConsole));
-    }
-
-
-    @Override
-    public G realize() throws IOException
-    {
-        return realize((ApplicationConsoleBuilder) null);
     }
 
 
     /**
-     * Create an {@link ApplicationGroup} based on the specified collection of {@link Application}s.
+     * Create an {@link Assembly} based on the specified collection of {@link Application}s.
      *
      * @param applications  The collection of {@link Application}s.
      *
-     * @return An {@link ApplicationGroup} implementation.
+     * @return An {@link Assembly} implementation.
      */
     abstract protected G createApplicationGroup(List<? extends A> applications);
 }
