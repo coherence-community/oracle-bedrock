@@ -45,6 +45,10 @@ reverse chronological order.
 
 <h4>oracle-tools-runtime</h4>
 
+*   [ORACLETOOLS-120](https://java.net/jira/browse/ORACLETOOLS-120): Fixed
+    a bug in RemoteCallableStaticMethod where no matching method is found
+    if an empty Iterable is passed to its constructor.
+
 *   [ORACLETOOLS-119](https://java.net/jira/browse/ORACLETOOLS-119): Added
     Plain Mode to ApplicationConsole to allow consoles to indicate that they
     want output from Applications not to be prefixed with details of the

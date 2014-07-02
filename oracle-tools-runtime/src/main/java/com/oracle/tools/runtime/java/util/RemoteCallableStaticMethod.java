@@ -26,12 +26,10 @@
 package com.oracle.tools.runtime.java.util;
 
 import com.oracle.tools.runtime.concurrent.RemoteCallable;
-
 import com.oracle.tools.util.ReflectionHelper;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -90,15 +88,7 @@ public class RemoteCallableStaticMethod<T> implements RemoteCallable<T>
 
         argumentList.toArray(argumentArray);
 
-        if (argumentArray.length == 0)
-        {
-            this.args = new Object[0];
-        }
-        else
-        {
-            this.args    = new Object[1];
-            this.args[0] = argumentArray;
-        }
+        this.args = new Object[]{argumentArray};
     }
 
 
