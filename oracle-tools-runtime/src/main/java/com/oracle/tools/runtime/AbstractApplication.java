@@ -190,7 +190,7 @@ public abstract class AbstractApplication<A extends AbstractApplication<A, P>, P
                                                       m_console.getOutputWriter(),
                                                       m_process.getId(),
                                                       m_isDiagnosticsEnabled,
-                                                      m_console.isPlainMode()));
+                                                      m_console.isDiagnosticsEnabled()));
         m_outThread.setDaemon(true);
         m_outThread.setName(name + " StdOut Thread");
         m_outThread.start();
@@ -202,7 +202,7 @@ public abstract class AbstractApplication<A extends AbstractApplication<A, P>, P
                                                       m_console.getErrorWriter(),
                                                       m_process.getId(),
                                                       m_isDiagnosticsEnabled,
-                                                      m_console.isPlainMode()));
+                                                      m_console.isDiagnosticsEnabled()));
         m_errThread.setDaemon(true);
         m_errThread.setName(name + " StdErr Thread");
         m_errThread.start();
@@ -498,24 +498,24 @@ public abstract class AbstractApplication<A extends AbstractApplication<A, P>, P
         private PrintWriter m_outputWriter;
 
         /**
-         * Flag indicating whether output should not be prefixed with
-         * details of the application.
+         * Flag indicating whether output to the {@link ApplicationConsole}
+         * should be prefixed with details of the application.
          */
-        private boolean m_plainMode;
+        private boolean m_isConsoleDiagnosticsEnabled;
 
         /**
          * Constructs an {@link OutputRedirector}.
          *
-         * @param applicationName       the name of the application
-         * @param prefix                the prefix to output on each console line
-         *                              (typically this is the abbreviation of the stream
-         *                              like "stderr" or "stdout")
-         * @param inputStream           the {@link InputStream} from which to read content
-         * @param outputWriter          the {@link PrintWriter} to which to write content
-         * @param processId             the {@link ApplicationProcess} identifier
-         * @param isDiagnosticsEnabled  should diagnostic information be logged/output
-         * @param plainMode             if true then the process output is redirected
-         *                              without prefixing with application information
+         * @param applicationName              the name of the application
+         * @param prefix                       the prefix to output on each console line
+         *                                     (typically this is the abbreviation of the stream
+         *                                     like "stderr" or "stdout")
+         * @param inputStream                  the {@link InputStream} from which to read content
+         * @param outputWriter                 the {@link PrintWriter} to which to write content
+         * @param processId                    the {@link ApplicationProcess} identifier
+         * @param isDiagnosticsEnabled         should diagnostic information be logged/output
+         * @param isConsoleDiagnosticsEnabled  if false then the process output is redirected
+         *                                     without prefixing with application information
          */
         OutputRedirector(String      applicationName,
                          String      prefix,
@@ -523,15 +523,15 @@ public abstract class AbstractApplication<A extends AbstractApplication<A, P>, P
                          PrintWriter outputWriter,
                          long        processId,
                          boolean     isDiagnosticsEnabled,
-                         boolean     plainMode)
+                         boolean     isConsoleDiagnosticsEnabled)
         {
-            m_ApplicationName      = applicationName;
-            m_prefix               = prefix;
-            m_inputStream          = inputStream;
-            m_outputWriter         = outputWriter;
-            m_processId            = processId;
-            m_isDiagnosticsEnabled = isDiagnosticsEnabled;
-            m_plainMode            = plainMode;
+            m_ApplicationName            = applicationName;
+            m_prefix                     = prefix;
+            m_inputStream                = inputStream;
+            m_outputWriter               = outputWriter;
+            m_processId                  = processId;
+            m_isDiagnosticsEnabled       = isDiagnosticsEnabled;
+            m_isConsoleDiagnosticsEnabled = isConsoleDiagnosticsEnabled;
         }
 
 
@@ -558,27 +558,23 @@ public abstract class AbstractApplication<A extends AbstractApplication<A, P>, P
                             break;
                         }
 
-                        String output = String.format("[%s:%s%s] %4d: %s\n",
-                                                      m_ApplicationName,
-                                                      m_prefix,
-                                                      m_processId < 0 ? "" : ":" + m_processId,
-                                                      lineNumber++,
-                                                      line);
+                        String diagnosticOutput = (m_isDiagnosticsEnabled || m_isConsoleDiagnosticsEnabled)
+                                    ? String.format("[%s:%s%s] %4d: %s",
+                                                    m_ApplicationName,
+                                                    m_prefix,
+                                                    m_processId < 0 ? "" : ":" + m_processId,
+                                                    lineNumber++,
+                                                    line)
+                                    : null;
+
+                        String output = m_isConsoleDiagnosticsEnabled ? diagnosticOutput : line;
 
                         if (m_isDiagnosticsEnabled)
                         {
-                            Container.getPlatformScope().getStandardOutput().print(output);
+                            Container.getPlatformScope().getStandardOutput().println(output);
                         }
 
-                        if (m_plainMode)
-                        {
-                            m_outputWriter.println(line);
-                        }
-                        else
-                        {
-                            m_outputWriter.print(output);
-                        }
-
+                        m_outputWriter.println(output);
                         m_outputWriter.flush();
                     }
                     catch (InterruptedIOException e)
@@ -595,26 +591,22 @@ public abstract class AbstractApplication<A extends AbstractApplication<A, P>, P
 
             try
             {
-                String output = String.format("[%s:%s%s] %4d: (terminated)\n",
-                                              m_ApplicationName,
-                                              m_prefix,
-                                              m_processId < 0 ? "" : ":" + m_processId,
-                                              lineNumber);
+                String diagnosticOutput = (m_isDiagnosticsEnabled || m_isConsoleDiagnosticsEnabled)
+                                    ? String.format("[%s:%s%s] %4d: (terminated)",
+                                                    m_ApplicationName,
+                                                    m_prefix,
+                                                    m_processId < 0 ? "" : ":" + m_processId,
+                                                    lineNumber)
+                                    : null;
+
+                String output = m_isConsoleDiagnosticsEnabled ? diagnosticOutput : "(terminated)";
 
                 if (m_isDiagnosticsEnabled)
                 {
-                    Container.getPlatformScope().getStandardOutput().print(output);
+                    Container.getPlatformScope().getStandardOutput().println(output);
                 }
 
-                if (m_plainMode)
-                {
-                    m_outputWriter.println("(terminated)");
-                }
-                else
-                {
-                    m_outputWriter.print(output);
-                }
-
+                m_outputWriter.println(output);
                 m_outputWriter.flush();
             }
             catch (Exception e)
