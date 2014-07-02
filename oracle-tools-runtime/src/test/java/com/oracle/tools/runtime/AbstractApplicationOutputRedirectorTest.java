@@ -44,7 +44,7 @@ import static org.junit.Assert.assertThat;
 public class AbstractApplicationOutputRedirectorTest
 {
     @Test
-    public void shouldWritePlainOutput() throws Exception
+    public void shouldWriteNonConsoleDiagnosticOutput() throws Exception
     {
         InputStream  inputStream  = new ByteArrayInputStream("foo".getBytes());
         StringWriter writer       = new StringWriter();
@@ -56,7 +56,7 @@ public class AbstractApplicationOutputRedirectorTest
                                                                                                    outputWriter,
                                                                                                    1234,
                                                                                                    false,
-                                                                                                   true);
+                                                                                                   false);
 
         redirector.run();
 
@@ -71,7 +71,7 @@ public class AbstractApplicationOutputRedirectorTest
 
 
     @Test
-    public void shouldWriteDecoratedOutput() throws Exception
+    public void shouldWriteConsoleDiagnosticOutput() throws Exception
     {
         InputStream  inputStream  = new ByteArrayInputStream("foo".getBytes());
         StringWriter writer       = new StringWriter();
@@ -83,7 +83,7 @@ public class AbstractApplicationOutputRedirectorTest
                                                                                                    outputWriter,
                                                                                                    1234,
                                                                                                    false,
-                                                                                                   false);
+                                                                                                   true);
 
         redirector.run();
 

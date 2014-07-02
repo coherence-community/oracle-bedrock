@@ -45,14 +45,14 @@ public class SystemApplicationConsoleTest
 {
     /**
      * A {@link SystemApplicationConsole} should always return false
-     * from {@link SystemApplicationConsole#isPlainMode()}
+     * from {@link SystemApplicationConsole#isDiagnosticsEnabled()}
      */
     @Test
-    public void shouldNotBePlainMode() throws Exception
+    public void shouldBeDiagnosticEnabled() throws Exception
     {
         SystemApplicationConsole console = new SystemApplicationConsole();
 
-        assertThat(console.isPlainMode(), is(false));
+        assertThat(console.isDiagnosticsEnabled(), is(true));
     }
 
 

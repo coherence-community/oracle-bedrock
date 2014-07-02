@@ -36,14 +36,14 @@ import static org.junit.Assert.assertThat;
 public class NullApplicationConsoleTest
 {
     /**
-     * A {@link NullApplicationConsole} should always return true
-     * from {@link NullApplicationConsole#isPlainMode()}
+     * A {@link NullApplicationConsole} should always return false
+     * from {@link NullApplicationConsole#isDiagnosticsEnabled()}
      */
     @Test
-    public void shouldNotBePlainMode() throws Exception
+    public void shouldNotBeDiagnosticMode() throws Exception
     {
         NullApplicationConsole console = new NullApplicationConsole();
 
-        assertThat(console.isPlainMode(), is(true));
+        assertThat(console.isDiagnosticsEnabled(), is(false));
     }
 }

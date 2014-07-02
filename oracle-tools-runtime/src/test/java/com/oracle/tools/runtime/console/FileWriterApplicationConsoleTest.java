@@ -44,31 +44,31 @@ public class FileWriterApplicationConsoleTest
     public static TemporaryFolder temporaryFolder = new TemporaryFolder();
 
     @Test
-    public void shouldNotBePlainModeByDefault() throws Exception
+    public void shouldBeDiagnosticModeByDefault() throws Exception
     {
         File                         file     = temporaryFolder.newFile();
         FileWriterApplicationConsole console1 = new FileWriterApplicationConsole(new FileWriter(file));
         FileWriterApplicationConsole console2 = new FileWriterApplicationConsole(file.getCanonicalPath());
 
-        assertThat(console1.isPlainMode(), is(false));
-        assertThat(console2.isPlainMode(), is(false));
+        assertThat(console1.isDiagnosticsEnabled(), is(true));
+        assertThat(console2.isDiagnosticsEnabled(), is(true));
     }
 
     @Test
-    public void shouldNotBePlainMode() throws Exception
+    public void shouldNotBeDiagnosticMode() throws Exception
     {
         File                         file    = temporaryFolder.newFile();
         FileWriterApplicationConsole console = new FileWriterApplicationConsole(new FileWriter(file), false);
 
-        assertThat(console.isPlainMode(), is(false));
+        assertThat(console.isDiagnosticsEnabled(), is(false));
     }
 
     @Test
-    public void shouldBePlainMode() throws Exception
+    public void shouldBeDiagnosticMode() throws Exception
     {
         File                         file    = temporaryFolder.newFile();
         FileWriterApplicationConsole console = new FileWriterApplicationConsole(new FileWriter(file), true);
 
-        assertThat(console.isPlainMode(), is(true));
+        assertThat(console.isDiagnosticsEnabled(), is(true));
     }
 }

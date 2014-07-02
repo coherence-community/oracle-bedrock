@@ -111,19 +111,18 @@ public class NullApplicationConsole implements ApplicationConsole
 
     /**
      * Obtains the flag indicating whether output to this {@link ApplicationConsole}
-     * should not be formatted to include information about the application.
+     * should be formatted to include information about the application.
      * </p>
-     * This method always returns true as the {@link NullApplicationConsole}
+     * This method always returns false as the {@link NullApplicationConsole}
      * does not output anything so there is no point wasting CPU cycles adding
-     * a prefix to the output.
+     * a extra information to the output.
      *
-     * @return true if output should be the plain output from the process, false if
-     *         the output is formatted to include application information
+     * @return true if output should be formatted to include application information
      */
     @Override
-    public boolean isPlainMode()
+    public boolean isDiagnosticsEnabled()
     {
-        return true;
+        return false;
     }
 
     /**

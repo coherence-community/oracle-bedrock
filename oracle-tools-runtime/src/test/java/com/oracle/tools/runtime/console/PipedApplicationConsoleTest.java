@@ -44,29 +44,29 @@ import static org.junit.Assert.assertThat;
 public class PipedApplicationConsoleTest
 {
     @Test
-    public void shouldNotBePlainModeByDefault() throws Exception
+    public void shouldBeDiagnosticModeByDefault() throws Exception
     {
         PipedApplicationConsole console = new PipedApplicationConsole();
 
-        assertThat(console.isPlainMode(), is(false));
+        assertThat(console.isDiagnosticsEnabled(), is(true));
     }
 
 
     @Test
-    public void shouldNotBePlainMode() throws Exception
+    public void shouldNotBeDiagnosticMode() throws Exception
     {
         PipedApplicationConsole console = new PipedApplicationConsole(PipedApplicationConsole.DEFAULT_PIPE_SIZE, false);
 
-        assertThat(console.isPlainMode(), is(false));
+        assertThat(console.isDiagnosticsEnabled(), is(false));
     }
 
 
     @Test
-    public void shouldBePlainMode() throws Exception
+    public void shouldBeDiagnosticMode() throws Exception
     {
         PipedApplicationConsole console = new PipedApplicationConsole(PipedApplicationConsole.DEFAULT_PIPE_SIZE, true);
 
-        assertThat(console.isPlainMode(), is(true));
+        assertThat(console.isDiagnosticsEnabled(), is(true));
     }
 
 
@@ -76,7 +76,7 @@ public class PipedApplicationConsoleTest
         SimpleJavaApplicationSchema schema =
             new SimpleJavaApplicationSchema(SimpleApp.class.getCanonicalName()).setArgument("foo").setArgument("bar");
 
-        PipedApplicationConsole console = new PipedApplicationConsole(1024, true);
+        PipedApplicationConsole console = new PipedApplicationConsole(1024, false);
 
         SimpleJavaApplication   app     = LocalPlatform.getInstance().realize(schema, "App", console);
 
@@ -98,7 +98,7 @@ public class PipedApplicationConsoleTest
         SimpleJavaApplicationSchema schema =
             new SimpleJavaApplicationSchema(SimpleApp.class.getCanonicalName()).setArgument("foo").setArgument("bar");
 
-        PipedApplicationConsole console = new PipedApplicationConsole(1024, true);
+        PipedApplicationConsole console = new PipedApplicationConsole(1024, false);
 
         SimpleJavaApplication   app     = LocalPlatform.getInstance().realize(schema, "App", console);
 

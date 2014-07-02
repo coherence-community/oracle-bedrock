@@ -56,11 +56,14 @@ reverse chronological order.
     if an empty Iterable is passed to its constructor.
 
 *   [ORACLETOOLS-119](https://java.net/jira/browse/ORACLETOOLS-119): Added
-    Plain Mode to ApplicationConsole to allow consoles to indicate that they
-    want output from Applications not to be prefixed with details of the
-    Application name, PID and line number. This is useful especially for
-    tests that use PipedApplicationConsole to read and assert Application
-    output so that they do not need to parse the output to remove the prefix.
+    Diagnostic Mode to ApplicationConsole to allow consoles to indicate that they
+    want output from Applications to be prefixed with details of the
+    Application name, PID and line number. By default this is on for all
+    ApplicationConsole implementations except NullApplicationConsole. If
+    Diagnostic Mode is set to false then the raw application output is written
+    to the ApplicationConsole. This is useful especially for tests that use
+    PipedApplicationConsole to read and assert Application output so that
+    they do not need to parse the output to remove the application details prefix.
 
 *   [ORACLETOOLS-114](https://java.net/jira/browse/ORACLETOOLS-114): Introduced
     JavaVirtualMachine as an implementation of a Platform to represent the

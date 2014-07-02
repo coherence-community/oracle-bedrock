@@ -73,7 +73,7 @@ public class PipedApplicationConsole implements ApplicationConsole
     private PipedWriter    m_errorPipedWriter;
     private PipedReader    m_inputReader;
     private PrintWriter    m_inputWriter;
-    private boolean        m_plainMode;
+    private boolean        m_diagnosticMode;
 
     /**
      * Constructs {@link PipedApplicationConsole}.
@@ -90,7 +90,7 @@ public class PipedApplicationConsole implements ApplicationConsole
      */
     public PipedApplicationConsole() throws IOException
     {
-        this(DEFAULT_PIPE_SIZE, false);
+        this(DEFAULT_PIPE_SIZE, true);
     }
 
     /**
@@ -112,19 +112,21 @@ public class PipedApplicationConsole implements ApplicationConsole
     /**
      * Constructs {@link }PipedApplicationConsole}.
      *
-     * @param plainMode  if true, output to this console is not formatted
-     *                   with application details or line numbers
+     * @param pipeSize         the size of the buffers for the
+     *                         pipes used by this {@link PipedApplicationConsole}.
+     * @param diagnosticMode   if true, output to this console is formatted
+     *                         with application details and line numbers
      *
      * @see java.io.PipedReader
      * @see java.io.PipedWriter
      *
      * @throws IOException if an error occurs creating this {@link PipedApplicationConsole}
      */
-    public PipedApplicationConsole(int pipeSize, boolean plainMode) throws IOException
+    public PipedApplicationConsole(int pipeSize, boolean diagnosticMode) throws IOException
     {
         PipedReader pipedOutputReader = new PipedReader(pipeSize);
 
-        m_plainMode         = plainMode;
+        m_diagnosticMode = diagnosticMode;
 
         m_outputReader      = new BufferedReader(pipedOutputReader);
         m_outputPipedWriter = new PipedWriter(pipedOutputReader);
@@ -198,9 +200,9 @@ public class PipedApplicationConsole implements ApplicationConsole
     }
 
     @Override
-    public boolean isPlainMode()
+    public boolean isDiagnosticsEnabled()
     {
-        return m_plainMode;
+        return m_diagnosticMode;
     }
 
     @Override

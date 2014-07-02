@@ -122,18 +122,17 @@ public class SystemApplicationConsole implements ApplicationConsole
      * Obtains the flag indicating whether output to this {@link ApplicationConsole}
      * should not be formatted to include information about the application.
      * </p>
-     * This method always returns false as the {@link SystemApplicationConsole}
+     * This method always returns true as the {@link SystemApplicationConsole}
      * is writing to the controlling process StdOut or StdErr and the output
      * from {@link com.oracle.tools.runtime.Application}s should be differentiated
      * from the controlling process output.
      *
-     * @return true if output should be the plain output from the process, false if
-     *         the output is formatted to include application information
+     * @return true as the output should always be formatted to include application information
      */
     @Override
-    public boolean isPlainMode()
+    public boolean isDiagnosticsEnabled()
     {
-        return false;
+        return true;
     }
 
     /**

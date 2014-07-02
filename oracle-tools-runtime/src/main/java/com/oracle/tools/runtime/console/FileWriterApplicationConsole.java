@@ -68,21 +68,21 @@ public class FileWriterApplicationConsole implements ApplicationConsole
     private Reader m_inputReader;
 
     /**
-     * If true, application output should be plain text without
-     * being formatted to include application information.
+     * If true, application output should be formatted to
+     * include application information.
      */
-    private boolean m_plainMode;
+    private boolean m_diagnosticMode;
 
     /**
      * Constructs a {@link FileWriterApplicationConsole}.
      *
-     * @param fileWriter  the {@link FileWriter} to use for the console
-     * @param plainMode   if true, output to this console is not formatted
-     *                    with application details or line numbers
+     * @param fileWriter       the {@link FileWriter} to use for the console
+     * @param diagnosticMode   if true, output to this console is formatted
+     *                         with application details and line numbers
      */
-    public FileWriterApplicationConsole(FileWriter fileWriter, boolean plainMode)
+    public FileWriterApplicationConsole(FileWriter fileWriter, boolean diagnosticMode)
     {
-        m_plainMode    = plainMode;
+        m_diagnosticMode = diagnosticMode;
         m_fileWriter   = fileWriter;
 
         m_outputWriter = new PrintWriter(fileWriter);
@@ -98,7 +98,7 @@ public class FileWriterApplicationConsole implements ApplicationConsole
      */
     public FileWriterApplicationConsole(FileWriter fileWriter)
     {
-        this(fileWriter, false);
+        this(fileWriter, true);
     }
 
 
@@ -111,7 +111,7 @@ public class FileWriterApplicationConsole implements ApplicationConsole
      */
     public FileWriterApplicationConsole(String fileName) throws IOException
     {
-        this(new FileWriter(fileName, true), false);
+        this(new FileWriter(fileName, true), true);
     }
 
 
@@ -157,9 +157,9 @@ public class FileWriterApplicationConsole implements ApplicationConsole
     }
 
     @Override
-    public boolean isPlainMode()
+    public boolean isDiagnosticsEnabled()
     {
-        return m_plainMode;
+        return m_diagnosticMode;
     }
 
     /**

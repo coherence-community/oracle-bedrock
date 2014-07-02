@@ -68,11 +68,10 @@ public interface ApplicationConsole extends Closeable
     public void close();
 
     /**
-     * Obtains the flag indicating whether output to this {@link ApplicationConsole}
-     * should not be formatted to include information about the application.
+     * Determines if diagnostic information should be logged for {@link Application}s
+     * using this {@link ApplicationConsole}.
      *
-     * @return true if output should be the plain output from the process, false if
-     *         the output is formatted to include application information
+     * @return <code>true</code> to enable diagnostic logging
      */
-    public boolean isPlainMode();
+    public boolean isDiagnosticsEnabled();
 }
