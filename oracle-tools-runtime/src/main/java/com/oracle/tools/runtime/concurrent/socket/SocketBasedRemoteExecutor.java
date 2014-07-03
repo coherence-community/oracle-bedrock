@@ -34,6 +34,7 @@ import com.oracle.tools.util.CompletionListener;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -203,7 +204,7 @@ public class SocketBasedRemoteExecutor extends AbstractControllableRemoteExecuto
                             int    length = input.readInt();
                             byte[] bytes  = new byte[length];
 
-                            input.read(bytes);
+                            input.readFully(bytes, 0, length);
 
                             // attempt to instantiate, deserialize and schedule the operation for execution
                             try
@@ -232,7 +233,8 @@ public class SocketBasedRemoteExecutor extends AbstractControllableRemoteExecuto
                         }
                         catch (Exception e)
                         {
-                            // the stream has become corrupted / closed
+                            // the stream has become corrupted or was closed
+                            // (either way there's nothing else we can read or do)
                             isReadable.set(false);
                         }
                     }
@@ -260,9 +262,6 @@ public class SocketBasedRemoteExecutor extends AbstractControllableRemoteExecuto
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected void onClose()
     {
@@ -333,9 +332,6 @@ public class SocketBasedRemoteExecutor extends AbstractControllableRemoteExecuto
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public <T> void submit(RemoteCallable<T>     callable,
                            CompletionListener<T> listener) throws IllegalStateException
@@ -361,9 +357,6 @@ public class SocketBasedRemoteExecutor extends AbstractControllableRemoteExecuto
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void submit(RemoteRunnable runnable) throws IllegalStateException
     {
@@ -480,9 +473,6 @@ public class SocketBasedRemoteExecutor extends AbstractControllableRemoteExecuto
         }
 
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public String getType()
         {
@@ -490,9 +480,6 @@ public class SocketBasedRemoteExecutor extends AbstractControllableRemoteExecuto
         }
 
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public Operation execute(long sequence)
         {
@@ -520,9 +507,6 @@ public class SocketBasedRemoteExecutor extends AbstractControllableRemoteExecuto
         }
 
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public void read(ObjectInputStream input) throws IOException
         {
@@ -560,9 +544,6 @@ public class SocketBasedRemoteExecutor extends AbstractControllableRemoteExecuto
         }
 
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public void write(ObjectOutputStream output) throws IOException
         {
@@ -604,9 +585,6 @@ public class SocketBasedRemoteExecutor extends AbstractControllableRemoteExecuto
         }
 
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public void run()
         {
@@ -653,9 +631,6 @@ public class SocketBasedRemoteExecutor extends AbstractControllableRemoteExecuto
         }
 
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public String getType()
         {
@@ -663,9 +638,6 @@ public class SocketBasedRemoteExecutor extends AbstractControllableRemoteExecuto
         }
 
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public Operation execute(long sequence)
         {
@@ -686,7 +658,7 @@ public class SocketBasedRemoteExecutor extends AbstractControllableRemoteExecuto
                 }
                 catch (Exception e)
                 {
-                    // TODO: we ignore any exceptions that the listener may throw
+                    // we ignore any exceptions that the listener may throw
                 }
             }
 
@@ -694,9 +666,6 @@ public class SocketBasedRemoteExecutor extends AbstractControllableRemoteExecuto
         }
 
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public void read(ObjectInputStream input) throws IOException
         {
@@ -711,9 +680,6 @@ public class SocketBasedRemoteExecutor extends AbstractControllableRemoteExecuto
         }
 
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public void write(ObjectOutputStream output) throws IOException
         {
@@ -721,9 +687,6 @@ public class SocketBasedRemoteExecutor extends AbstractControllableRemoteExecuto
         }
 
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public String toString()
         {
@@ -777,9 +740,6 @@ public class SocketBasedRemoteExecutor extends AbstractControllableRemoteExecuto
         }
 
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public String getType()
         {
@@ -787,9 +747,6 @@ public class SocketBasedRemoteExecutor extends AbstractControllableRemoteExecuto
         }
 
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public Operation execute(long sequence)
         {
@@ -806,9 +763,6 @@ public class SocketBasedRemoteExecutor extends AbstractControllableRemoteExecuto
         }
 
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public void read(ObjectInputStream input) throws IOException
         {
@@ -843,9 +797,6 @@ public class SocketBasedRemoteExecutor extends AbstractControllableRemoteExecuto
         }
 
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public void write(ObjectOutputStream output) throws IOException
         {
@@ -893,9 +844,6 @@ public class SocketBasedRemoteExecutor extends AbstractControllableRemoteExecuto
         }
 
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public void run()
         {
@@ -903,31 +851,34 @@ public class SocketBasedRemoteExecutor extends AbstractControllableRemoteExecuto
             {
                 // create a temporary buffer in which to write serialize the operation
                 // (so we can't corrupt the actual output stream if an operation fails to serialize)
-                ByteArrayOutputStream buffer = new ByteArrayOutputStream(1024);
+                ByteArrayOutputStream buffer = new ByteArrayOutputStream(4096);    // 4k
                 ObjectOutputStream    stream = new ObjectOutputStream(buffer);
 
                 // serialize the operation
                 operation.write(stream);
 
                 // we're done writing (to the buffer)
-                stream.close();
+                stream.flush();
 
-                // serialize the operation type and operation sequence number (for responses)
+                // serialize the operation type
                 // (to the actual output stream)
                 output.writeUTF(operation.getType());
+
+                // serialize the operation sequence number (for responses)
                 output.writeLong(sequence);
 
                 // now send the buffer (to the actual output stream)
-                output.writeInt(buffer.size());
-                output.write(buffer.toByteArray());
+                byte[] array = buffer.toByteArray();
+
+                output.writeInt(array.length);
+                output.write(array, 0, array.length);
 
                 // ensure the buffer is flushed so that the server can read it
                 output.flush();
             }
             catch (IOException e)
             {
-                // TODO: we should do something here?
-                System.out.printf("Something horrible happened!\n%s\n", e);
+                System.err.println("Failed to send Operation [" + operation + "], Sequence #" + sequence);
                 e.printStackTrace();
             }
         }

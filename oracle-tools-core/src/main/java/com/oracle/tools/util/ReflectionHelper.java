@@ -133,21 +133,21 @@ public class ReflectionHelper
     /**
      * Obtains the {@link Method} that is compatible to the supplied parameter types.
      *
-     * @param clazz      the {@link Class} on which to find the {@link Method}
-     * @param arguments  the arguments for the {@link Method}
+     * @param clazz            the {@link Class} on which to find the {@link Method}
+     * @param actualArguments  the actual arguments for the {@link Method}
      *
      * @return a compatible {@link Method} or <code>null</code> if one can't be found
      */
     public static Method getCompatibleMethod(Class<?>  clazz,
                                              String    methodName,
-                                             Object... arguments)
+                                             Object... actualArguments)
     {
         // determine the types of the arguments
-        Class<?>[] argumentTypes = new Class<?>[arguments.length];
+        Class<?>[] argumentTypes = new Class<?>[actualArguments.length];
 
-        for (int i = 0; i < arguments.length; i++)
+        for (int i = 0; i < actualArguments.length; i++)
         {
-            argumentTypes[i] = arguments[i] == null ? null : arguments[i].getClass();
+            argumentTypes[i] = actualArguments[i] == null ? null : actualArguments[i].getClass();
         }
 
         // first attempt to find a method with the exact types
@@ -184,6 +184,10 @@ public class ReflectionHelper
                         else if (argumentType.isPrimitive())
                         {
                             parametersMatch = isAssignablePrimitive(argumentType, formalParameterType);
+                        }
+                        else if (formalParameterType.isPrimitive())
+                        {
+                            parametersMatch = isAssignablePrimitive(formalParameterType, argumentType);
                         }
                         else
                         {

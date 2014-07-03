@@ -27,9 +27,14 @@ package com.oracle.tools.runtime.java;
 
 import com.oracle.tools.deferred.Deferred;
 
+import com.oracle.tools.predicate.Predicate;
+
 import com.oracle.tools.runtime.Application;
 
+import com.oracle.tools.runtime.concurrent.RemoteCallable;
 import com.oracle.tools.runtime.concurrent.RemoteExecutor;
+
+import java.lang.reflect.Method;
 
 import java.util.Properties;
 import java.util.Set;
@@ -303,4 +308,26 @@ public interface JavaApplication extends Application, RemoteExecutor
      * @return {@link String} (<code>null</code> if not defined).
      */
     public String getRMIServerHostName();
+
+
+    /**
+     * Creates a local proxy of an application owned instance, afterwards the proxy may
+     * be used to interact with the application owned instance.
+     * <p>
+     * Note:  Only methods of the proxy interface that have serializable method parameters
+     * and return values may be called using the returned proxy.
+     *
+     * @param <T>  the type of the proxy
+     *
+     * @param classToProxy                the class of the proxy
+     * @param instanceProducer            a {@link RemoteCallable} that will provide the application instance
+     *                                    to which proxy method calls should be invoked
+     * @param unsupportedMethodPredicate  a {@link Predicate} to determine if a dynamically invoked
+     *                                    {@link Method} is unsupported.  <code>true</code> means calling the
+     *                                    {@link Method} should throw an {@link UnsupportedOperationException}
+     * @return  a proxy of an application instance
+     */
+    public <T> T getProxyFor(Class<T>          classToProxy,
+                             RemoteCallable<T> instanceProducer,
+                             Predicate<Method> unsupportedMethodPredicate);
 }

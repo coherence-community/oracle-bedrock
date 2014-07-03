@@ -191,11 +191,18 @@ public abstract class AbstractCoherenceCacheServerTest<B extends JavaApplication
 
             NamedCache namedCache = server.getCache("dist-example");
 
+            namedCache.clear();
+
             assertThat(namedCache.size(), is(0));
+
             namedCache.put("key", "hello");
 
             assertThat(namedCache.size(), is(1));
             assertThat(namedCache.get("key"), is("hello"));
+
+            namedCache.clear();
+
+            assertThat(namedCache.size(), is(0));
         }
     }
 }

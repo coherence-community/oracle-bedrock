@@ -39,6 +39,8 @@ import java.lang.reflect.Method;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 /**
  * Used to launch {@link JavaApplication}s that connect back to their "parent"
  * application so that they may be remotely controlled, request further information
@@ -79,6 +81,9 @@ public class JavaApplicationLauncher
             final Integer port         = Integer.getInteger(Settings.PARENT_PORT, null);
             final boolean isOrphanable = Boolean.getBoolean(Settings.ORPHANABLE);
 
+            // a flag indicating if this application is in the process of terminating
+            final AtomicBoolean isTerminating = new AtomicBoolean(false);
+
             if (address == null)
             {
                 // TODO: address can't be null
@@ -91,73 +96,41 @@ public class JavaApplicationLauncher
             }
             else if (arguments.length >= 1)
             {
-                String applicationClassName = arguments[0];
+                String               applicationClassName = arguments[0];
 
+                RemoteExecutorClient remoteExecutor       = null;
+
+                // attempt to connect to the parent application
                 try
                 {
-                    InetAddress          inetAddress    = InetAddress.getByName(address);
-                    RemoteExecutorClient remoteExecutor = new RemoteExecutorClient(inetAddress, port);
+                    // find the InetAddress of the host on which the parent is running
+                    InetAddress inetAddress = InetAddress.getByName(address);
+
+                    // establish a RemoteExecutorClient to handle and send requests to the parent
+                    remoteExecutor = new RemoteExecutorClient(inetAddress, port);
 
                     remoteExecutor.addListener(new RemoteExecutorListener()
                     {
                         @Override
                         public void onOpened(RemoteExecutor executor)
                         {
-                            // TODO: connected to the parent!
+                            // connected to the parent!
                         }
 
                         @Override
                         public void onClosed(RemoteExecutor executor)
                         {
-                            // TODO: disconnected from the parent!
-                            if (!isOrphanable)
+                            // disconnected from the parent so terminate
+                            // if we're not orphanable
+                            if (!isTerminating.get() &&!isOrphanable)
                             {
                                 System.exit(-2);
                             }
                         }
                     });
 
+                    // connect to the parent
                     remoteExecutor.open();
-
-                    // attempt to load the application class
-                    Class<?> applicationClass = Class.forName(applicationClassName);
-
-                    // create the real arguments for the application
-                    String[] realArguments = new String[arguments.length - 1];
-
-                    for (int i = 1; i < arguments.length; i++)
-                    {
-                        realArguments[i - 1] = arguments[i];
-                    }
-
-                    // now launch the application
-                    Method mainMethod = applicationClass.getMethod("main", String[].class);
-
-                    mainMethod.invoke(null, new Object[] {realArguments});
-
-                }
-                catch (ClassNotFoundException e)
-                {
-                    System.out.println("JavaApplicationLauncher: Could not load the class " + applicationClassName);
-                    e.printStackTrace(System.out);
-                }
-                catch (NoSuchMethodException e)
-                {
-                    System.out.println("JavaApplicationLauncher: Could not locate a main method for "
-                                       + applicationClassName);
-                    e.printStackTrace(System.out);
-                }
-                catch (IllegalAccessException e)
-                {
-                    System.out.println("JavaApplicationLauncher: Could not access the main method for "
-                                       + applicationClassName);
-                    e.printStackTrace(System.out);
-                }
-                catch (InvocationTargetException e)
-                {
-                    System.out.println("JavaApplicationLauncher: Failed to invoke the main method for "
-                                       + applicationClassName);
-                    e.printStackTrace(System.out);
                 }
                 catch (UnknownHostException e)
                 {
@@ -168,6 +141,72 @@ public class JavaApplicationLauncher
                 {
                     System.out.println("JavaApplicationLauncher: Failed to open a connection to parent");
                     e.printStackTrace(System.out);
+
+                    if (remoteExecutor != null)
+                    {
+                        remoteExecutor.close();
+                        remoteExecutor = null;
+                    }
+                }
+
+                if (remoteExecutor != null)
+                {
+                    // start the application
+                    try
+                    {
+                        // attempt to load the application class
+                        Class<?> applicationClass = Class.forName(applicationClassName);
+
+                        // create the real arguments for the application
+                        String[] realArguments = new String[arguments.length - 1];
+
+                        for (int i = 1; i < arguments.length; i++)
+                        {
+                            realArguments[i - 1] = arguments[i];
+                        }
+
+                        // now launch the application
+                        Method mainMethod = applicationClass.getMethod("main", String[].class);
+
+                        mainMethod.invoke(null, new Object[] {realArguments});
+                    }
+                    catch (ClassNotFoundException e)
+                    {
+                        System.out.println("JavaApplicationLauncher: Could not load the class " + applicationClassName);
+                        e.printStackTrace(System.out);
+                    }
+                    catch (NoSuchMethodException e)
+                    {
+                        System.out.println("JavaApplicationLauncher: Could not locate a main method for "
+                                           + applicationClassName);
+                        e.printStackTrace(System.out);
+                    }
+                    catch (IllegalAccessException e)
+                    {
+                        System.out.println("JavaApplicationLauncher: Could not access the main method for "
+                                           + applicationClassName);
+                        e.printStackTrace(System.out);
+                    }
+                    catch (InvocationTargetException e)
+                    {
+                        System.out.println("JavaApplicationLauncher: Failed to invoke the main method for "
+                                           + applicationClassName);
+                        e.printStackTrace(System.out);
+                    }
+                    finally
+                    {
+                        // we're now terminating!
+                        isTerminating.set(true);
+
+                        try
+                        {
+                            remoteExecutor.close();
+                        }
+                        catch (Exception e)
+                        {
+                            // don't care as we're terminating
+                        }
+                    }
                 }
             }
         }

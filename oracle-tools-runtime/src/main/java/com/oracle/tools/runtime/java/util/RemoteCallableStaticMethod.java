@@ -129,8 +129,8 @@ public class RemoteCallableStaticMethod<T> implements RemoteCallable<T>
         if (method == null)
         {
             throw new NoSuchMethodException("The specified method [" + className + "." + methodName
-                                            + "] for the arguments [" + Arrays.toString(args)
-                                            + "] could not be located");
+                                            + "] for the arguments " + Arrays.toString(args)
+                                            + " could not be located");
         }
         else
         {

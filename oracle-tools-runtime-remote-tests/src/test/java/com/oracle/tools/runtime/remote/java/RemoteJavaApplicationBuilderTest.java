@@ -60,7 +60,7 @@ public class RemoteJavaApplicationBuilderTest extends AbstractRemoteApplicationB
         SimpleJavaApplicationSchema schema = new SimpleJavaApplicationSchema(SleepingApplication.class.getName());
 
         // sleep only for 5 seconds
-        schema.setArgument("5");
+        schema.setArgument("3");
 
         RemoteJavaApplicationBuilder<SimpleJavaApplication> builder =
             new RemoteJavaApplicationBuilder<SimpleJavaApplication>(getRemoteHostName(),

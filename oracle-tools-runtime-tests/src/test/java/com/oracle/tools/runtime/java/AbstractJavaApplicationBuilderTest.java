@@ -31,16 +31,17 @@ import com.oracle.tools.junit.AbstractTest;
 
 import com.oracle.tools.lang.StringHelper;
 
+import com.oracle.tools.predicate.Predicates;
+
 import com.oracle.tools.runtime.ApplicationConsole;
 import com.oracle.tools.runtime.DummyApp;
 import com.oracle.tools.runtime.DummyClassPathApp;
-
-import com.oracle.tools.runtime.concurrent.RemoteCallable;
 
 import com.oracle.tools.runtime.console.PipedApplicationConsole;
 import com.oracle.tools.runtime.console.SystemApplicationConsole;
 
 import com.oracle.tools.runtime.java.applications.SleepingApplication;
+import com.oracle.tools.runtime.java.applications.TesterApplication;
 import com.oracle.tools.runtime.java.concurrent.GetSystemProperty;
 import com.oracle.tools.runtime.java.container.ContainerClassLoader;
 
@@ -54,7 +55,7 @@ import static org.hamcrest.core.StringContains.containsString;
 
 import static org.junit.Assert.assertThat;
 
-import java.io.IOException;
+import java.lang.reflect.Method;
 
 import java.util.UUID;
 
@@ -190,9 +191,39 @@ public abstract class AbstractJavaApplicationBuilderTest extends AbstractTest
 
         ApplicationConsole                      console = new SystemApplicationConsole();
 
-        application = builder.realize(schema, "sleeping", console);
+        application = builder.realize(schema, "application", console);
 
         Eventually.assertThat(application, new GetSystemProperty("uuid"), is(uuid));
+
+        application.close();
+    }
+
+
+    /**
+     * Ensure that we can create a local proxy of a {@link Tester} in an {@link JavaApplication}.
+     */
+    @Test
+    public void shouldProxyTesterInApplication() throws InterruptedException
+    {
+        SimpleJavaApplication application = null;
+
+        // define and start the SleepingApplication
+        SimpleJavaApplicationSchema schema = new SimpleJavaApplicationSchema(TesterApplication.class.getName());
+
+        JavaApplicationBuilder<JavaApplication> builder = newJavaApplicationBuilder();
+
+        ApplicationConsole                      console = new SystemApplicationConsole();
+
+        application = builder.realize(schema, "application", console);
+
+        Tester tester = application.getProxyFor(Tester.class, new TesterProducer(), Predicates.<Method>never());
+
+        tester.doNothing();
+
+        assertThat(tester.getMeaningOfLife(), is("42"));
+        assertThat(tester.identity(42), is(42));
+
+        application.waitFor();
 
         application.close();
     }

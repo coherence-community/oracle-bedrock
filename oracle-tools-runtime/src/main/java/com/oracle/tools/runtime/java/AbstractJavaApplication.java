@@ -356,23 +356,7 @@ public abstract class AbstractJavaApplication<A extends AbstractJavaApplication<
     }
 
 
-    /**
-     * Creates a local proxy of an application owned instance, afterwards the proxy may
-     * be used to interact with the application owned instance.
-     * <p>
-     * Note:  Only methods of the proxy interface that have serializable method parameters
-     * and return values may be called using the returned proxy.
-     *
-     * @param <T>  the type of the proxy
-     *
-     * @param classToProxy                the class of the proxy
-     * @param instanceProducer            a {@link RemoteCallable} that will provide the application instance
-     *                                    to which proxy method calls should be invoked
-     * @param unsupportedMethodPredicate  a {@link Predicate} to determine if a dynamically invoked
-     *                                    {@link Method} is unsupported.  <code>true</code> means calling the
-     *                                    {@link Method} should throw an {@link UnsupportedOperationException}
-     * @return  a proxy of an application instance
-     */
+    @Override
     public <T> T getProxyFor(Class<T>          classToProxy,
                              RemoteCallable<T> instanceProducer,
                              Predicate<Method> unsupportedMethodPredicate)
@@ -512,6 +496,7 @@ public abstract class AbstractJavaApplication<A extends AbstractJavaApplication<
                 }
                 else
                 {
+                    method.setAccessible(true);
                     return method.invoke(instance, args);
                 }
             }

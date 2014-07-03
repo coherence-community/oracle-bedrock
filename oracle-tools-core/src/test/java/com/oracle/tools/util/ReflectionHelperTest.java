@@ -28,11 +28,13 @@ package com.oracle.tools.util;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.lang.reflect.Method;
-import java.util.HashMap;
-
 import static org.hamcrest.core.IsNot.not;
+
 import static org.mockito.Matchers.isNull;
+
+import java.lang.reflect.Method;
+
+import java.util.HashMap;
 
 /**
  * Unit Tests for the {@link ReflectionHelper} class.
@@ -63,14 +65,96 @@ public class ReflectionHelperTest
     @Test
     public void shouldLocateStaticMainMethod()
     {
-        Method method = ReflectionHelper.getCompatibleMethod(this.getClass(), "main", (Object) new String[] {"hello"});
+        Method method = ReflectionHelper.getCompatibleMethod(ReflectionHelperMain.class,
+                                                             "main",
+                                                             (Object) new String[] {"hello"});
 
         Assert.assertThat(method, not(isNull()));
     }
 
 
-    public static void main(String[] args)
+    /**
+     * Ensure that we can find a void method with zero arguments.
+     */
+    @Test
+    public void shouldLocateVoidMethodWithZeroArguments()
     {
-        // for testing purposes
+        // find it on an interface
+        Method interfaceMethod = ReflectionHelper.getCompatibleMethod(ReflectionHelperInterface.class,
+                                                                      "voidMethodWithZeroArguments");
+
+        Assert.assertThat(interfaceMethod, not(isNull()));
+
+        // find it on a class
+        Method classMethod = ReflectionHelper.getCompatibleMethod(ReflectionHelperClass.class,
+                                                                  "voidMethodWithZeroArguments");
+
+        Assert.assertThat(classMethod, not(isNull()));
+    }
+
+
+    /**
+     * Ensure that we can find a void method with one primitive argument.
+     */
+    @Test
+    public void shouldLocateVoidMethodWithOnePrimitiveArgument()
+    {
+        // find it on an interface
+        Method interfaceMethod = ReflectionHelper.getCompatibleMethod(ReflectionHelperInterface.class,
+                                                                      "voidMethodWithOnePrimitiveArgument",
+                                                                      42);
+
+        Assert.assertThat(interfaceMethod, not(isNull()));
+
+        // find it on a class
+        Method classMethod = ReflectionHelper.getCompatibleMethod(ReflectionHelperClass.class,
+                                                                  "voidMethodWithOnePrimitiveArgument",
+                                                                  42);
+
+        Assert.assertThat(classMethod, not(isNull()));
+    }
+
+
+    /**
+     * Ensure that we can find a void method with one wrapper argument.
+     */
+    @Test
+    public void shouldLocateVoidMethodWithOneWrapperArgument()
+    {
+        // find it on an interface
+        Method interfaceMethod = ReflectionHelper.getCompatibleMethod(ReflectionHelperInterface.class,
+                                                                      "voidMethodWithOneWrapperArgument",
+                                                                      42L);
+
+        Assert.assertThat(interfaceMethod, not(isNull()));
+
+        // find it on a class
+        Method classMethod = ReflectionHelper.getCompatibleMethod(ReflectionHelperClass.class,
+                                                                  "voidMethodWithOneWrapperArgument",
+                                                                  42L);
+
+        Assert.assertThat(classMethod, not(isNull()));
+    }
+
+
+    /**
+     * Ensure that we can find a void method with one {@link String} argument.
+     */
+    @Test
+    public void shouldLocateVoidMethodWithOneStringArgument()
+    {
+        // find it on an interface
+        Method interfaceMethod = ReflectionHelper.getCompatibleMethod(ReflectionHelperInterface.class,
+                                                                      "voidMethodWithOneStringArgument",
+                                                                      "42");
+
+        Assert.assertThat(interfaceMethod, not(isNull()));
+
+        // find it on a class
+        Method classMethod = ReflectionHelper.getCompatibleMethod(ReflectionHelperClass.class,
+                                                                  "voidMethodWithOneStringArgument",
+                                                                  "42");
+
+        Assert.assertThat(classMethod, not(isNull()));
     }
 }

@@ -139,7 +139,7 @@ public class RemoteApplicationProcess implements ApplicationProcess
     {
         if (exitStatus == null)
         {
-            if (channel == null || session == null || channel.isClosed())
+            if (channel == null || session == null)
             {
                 throw new InterruptedException("The remote application has terminated.  No exit status is available");
             }
