@@ -26,11 +26,13 @@
 package com.oracle.tools.runtime;
 
 import java.io.File;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
+
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -107,6 +109,7 @@ public abstract class AbstractApplicationSchema<A extends Application, S extends
      */
     private Class<A> applicationType;
 
+
     /**
      * Constructs an {@link AbstractApplicationSchema}.
      *
@@ -114,7 +117,8 @@ public abstract class AbstractApplicationSchema<A extends Application, S extends
      * @param executableName   the name of the executable for the {@link Application}s
      *                         produced from this {@link ApplicationSchema}
      */
-    public AbstractApplicationSchema(Class<A> applicationType, String executableName)
+    public AbstractApplicationSchema(Class<A> applicationType,
+                                     String   executableName)
     {
         this.applicationType             = applicationType;
         this.executableName              = executableName;
@@ -128,6 +132,7 @@ public abstract class AbstractApplicationSchema<A extends Application, S extends
         this.lifecycleInterceptors       = new LinkedList<LifecycleEventInterceptor<? super A>>();
     }
 
+
     /**
      * {@inheritDoc}
      */
@@ -136,6 +141,7 @@ public abstract class AbstractApplicationSchema<A extends Application, S extends
     {
         return applicationType;
     }
+
 
     @Override
     public String getExecutableName()
@@ -157,11 +163,13 @@ public abstract class AbstractApplicationSchema<A extends Application, S extends
         return environmentVariablesBuilder;
     }
 
+
     @Override
     public Properties getEnvironmentVariables(Platform platform)
     {
         return getEnvironmentVariablesBuilder().realize();
     }
+
 
     /**
      * Sets the working directory in which the {@link Application} will start.
@@ -364,14 +372,60 @@ public abstract class AbstractApplicationSchema<A extends Application, S extends
     }
 
 
-    /**
-     * Adds an argument to use when starting the {@link Application}.
-     *
-     * @param argument The argument for the {@link Application}
-     */
-    public void addArgument(String argument)
+    @Override
+    public S addArgument(String argument)
     {
         applicationArguments.add(argument);
+
+        return (S) this;
+    }
+
+
+    @Override
+    public S addArguments(String... arguments)
+    {
+        if (arguments != null)
+        {
+            for (String argument : arguments)
+            {
+                applicationArguments.add(argument);
+            }
+        }
+
+        return (S) this;
+    }
+
+
+    @Override
+    public S addArguments(List<String> arguments)
+    {
+        if (arguments != null)
+        {
+            for (String argument : arguments)
+            {
+                applicationArguments.add(argument);
+            }
+        }
+
+        return (S) this;
+    }
+
+
+    @Override
+    public S setArguments(String... arguments)
+    {
+        applicationArguments.clear();
+
+        return addArguments(arguments);
+    }
+
+
+    @Override
+    public S setArguments(List<String> arguments)
+    {
+        applicationArguments.clear();
+
+        return addArguments(arguments);
     }
 
 
@@ -383,13 +437,15 @@ public abstract class AbstractApplicationSchema<A extends Application, S extends
 
 
     /**
-     * Adds an argument to use when starting the {@link Application}.
+     * Adds an additional argument to use when starting the {@link Application}.
      *
-     * @param argument  the argument for the {@link Application}
+     * @param argument  the additional argument for the {@link Application}
      *
      * @return  the {@link ApplicationSchema} (so that we can perform method chaining)
+     *
+     * @deprecated  use {@link #addArgument(String)} instead
      */
-    @SuppressWarnings("unchecked")
+    @Deprecated
     public S setArgument(String argument)
     {
         addArgument(argument);

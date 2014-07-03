@@ -488,7 +488,7 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication> extends Abst
 
         // ----- establish JVM options -----
 
-        for (String option : schema.getJVMOptions())
+        for (String option : schema.getJvmOptions())
         {
             processBuilder.command().add("-" + option);
         }

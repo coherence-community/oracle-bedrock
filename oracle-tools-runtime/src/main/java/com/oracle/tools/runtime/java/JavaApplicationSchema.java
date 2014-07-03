@@ -54,6 +54,7 @@ public interface JavaApplicationSchema<A extends JavaApplication> extends Applic
      */
     public PropertiesBuilder getSystemPropertiesBuilder();
 
+
     /**
      * Obtains the system {@link Properties} that will be used as a basis for
      * configuring the Java System Properties of the realized
@@ -65,12 +66,24 @@ public interface JavaApplicationSchema<A extends JavaApplication> extends Applic
      */
     public Properties getSystemProperties(Platform platform);
 
+
+    /**
+     * Obtains the JVM options to be used for starting the {@link JavaApplication}.
+     *
+     * @return A {@link List} of {@link String}s
+     *
+     * @deprecated  use {@link #getJvmOptions()} instead
+     */
+    @Deprecated
+    public List<String> getJVMOptions();
+
+
     /**
      * Obtains the JVM options to be used for starting the {@link JavaApplication}.
      *
      * @return A {@link List} of {@link String}s
      */
-    public List<String> getJVMOptions();
+    public List<String> getJvmOptions();
 
 
     /**

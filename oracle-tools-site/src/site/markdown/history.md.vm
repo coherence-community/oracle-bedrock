@@ -177,6 +177,16 @@ reverse chronological order.
     the ability to dynamically create a proxy of a JavaApplication owned and
     managed instance so that it may be called (remotely) via the JavaApplication.
 
+*   [ORACLETOOLS-126](https://java.net/jira/browse/ORACLETOOLS-126): Introduced
+    FluentJavaApplicationSchema addJvmOption, addJvmOptions, setJvmOptions and
+    getJvmOptions methods.  Deprecated AbstractJavaApplicationSchema
+    addOption, setOption and getJVMOptions methods.
+
+*   [ORACLETOOLS-127](https://java.net/jira/browse/ORACLETOOLS-127): Introduced
+    FluentApplicationSchema addArgument, addArguments and setArguments methods.
+    Deprecated AbstractApplicationSchema addArgument and setArgument methods.
+
+
 <h4>oracle-tools-runtime-remote</h4>
 
 *   [ORACLETOOLS-91](https://java.net/jira/browse/ORACLETOOLS-91): Introduced

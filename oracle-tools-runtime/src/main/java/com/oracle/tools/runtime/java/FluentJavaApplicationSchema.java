@@ -30,12 +30,13 @@ import com.oracle.tools.runtime.ApplicationConsole;
 import com.oracle.tools.runtime.ApplicationSchema;
 import com.oracle.tools.runtime.FluentApplicationSchema;
 
+import java.util.List;
 import java.util.Properties;
 
 /**
  * A {@link FluentJavaApplicationSchema} is a Java specific {@link ApplicationSchema}.
  * <p>
- * Copyright (c) 2011. All Rights Reserved. Oracle Corporation.<br>
+ * Copyright (c) 2014. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Brian Oliver
@@ -47,4 +48,47 @@ public interface FluentJavaApplicationSchema<A extends JavaApplication, S extend
     extends FluentApplicationSchema<A, S>,
             JavaApplicationSchema<A>
 {
+    /**
+     * Adds an additional JVM option to use when starting the Java application.
+     *
+     * @param option  the JVM option
+     * @return  the {@link JavaApplicationSchema}
+     */
+    public S addJvmOption(String option);
+
+
+    /**
+     * Adds multiple JVM options to use when starting the Java application.
+     *
+     * @param options  the JVM options
+     * @return  the {@link JavaApplicationSchema}
+     */
+    public S addJvmOptions(String... options);
+
+
+    /**
+     * Adds multiple JVM options to use when starting the Java application.
+     *
+     * @param options  the JVM options
+     * @return  the {@link JavaApplicationSchema}
+     */
+    public S addJvmOptions(List<String> options);
+
+
+    /**
+     * Sets (replaces) the JVM options to use when starting the Java application.
+     *
+     * @param options  the JVM options
+     * @return  the {@link JavaApplicationSchema}
+     */
+    public S setJvmOptions(String... options);
+
+
+    /**
+     * Sets (replaces) the JVM options to use when starting the Java application.
+     *
+     * @param options  the JVM options
+     * @return  the {@link JavaApplicationSchema}
+     */
+    public S setJvmOptions(List<String> options);
 }

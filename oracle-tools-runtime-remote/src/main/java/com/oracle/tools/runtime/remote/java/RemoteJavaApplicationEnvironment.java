@@ -27,27 +27,35 @@ package com.oracle.tools.runtime.remote.java;
 
 import com.oracle.tools.io.FileHelper;
 import com.oracle.tools.io.NetworkHelper;
+
 import com.oracle.tools.lang.StringHelper;
+
 import com.oracle.tools.predicate.Predicate;
+
 import com.oracle.tools.runtime.Platform;
 import com.oracle.tools.runtime.Settings;
+
 import com.oracle.tools.runtime.concurrent.ControllableRemoteExecutor;
 import com.oracle.tools.runtime.concurrent.socket.RemoteExecutorServer;
+
 import com.oracle.tools.runtime.java.ClassPath;
 import com.oracle.tools.runtime.java.JavaApplication;
 import com.oracle.tools.runtime.java.JavaApplicationSchema;
+
 import com.oracle.tools.runtime.remote.AbstractRemoteApplicationEnvironment;
 import com.oracle.tools.runtime.remote.DeploymentArtifact;
 
+import static com.oracle.tools.predicate.Predicates.allOf;
+
 import java.io.File;
 import java.io.IOException;
+
 import java.net.InetAddress;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Properties;
 import java.util.Set;
-
-import static com.oracle.tools.predicate.Predicates.allOf;
 
 /**
  * A Java-based implementation of a {@link RemoteJavaApplicationEnvironment}.
@@ -303,7 +311,7 @@ public class RemoteJavaApplicationEnvironment<A extends JavaApplication>
 
         // ----- establish JVM options -----
 
-        for (String option : schema.getJVMOptions())
+        for (String option : schema.getJvmOptions())
         {
             builder.append(" ");
             builder.append("-" + option);

@@ -29,12 +29,9 @@ import com.oracle.tools.runtime.AbstractApplicationSchema;
 import com.oracle.tools.runtime.LocalPlatform;
 import com.oracle.tools.runtime.Platform;
 import com.oracle.tools.runtime.PropertiesBuilder;
+
 import com.oracle.tools.runtime.network.AvailablePortIterator;
 import com.oracle.tools.runtime.network.Constants;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
 
 import static com.oracle.tools.runtime.java.JavaApplication.JAVA_AWT_HEADLESS;
 import static com.oracle.tools.runtime.java.JavaApplication.JAVA_NET_PREFER_IPV4_STACK;
@@ -43,6 +40,10 @@ import static com.oracle.tools.runtime.java.JavaApplication.SUN_MANAGEMENT_JMXRE
 import static com.oracle.tools.runtime.java.JavaApplication.SUN_MANAGEMENT_JMXREMOTE_AUTHENTICATE;
 import static com.oracle.tools.runtime.java.JavaApplication.SUN_MANAGEMENT_JMXREMOTE_PORT;
 import static com.oracle.tools.runtime.java.JavaApplication.SUN_MANAGEMENT_JMXREMOTE_SSL;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Properties;
 
 /**
  * An {@link AbstractJavaApplicationSchema} is a base implementation of a {@link JavaApplicationSchema}.
@@ -91,7 +92,8 @@ public abstract class AbstractJavaApplicationSchema<A extends JavaApplication,
      *                             that this schema defines
      * @param applicationClassName The fully qualified class name of the Java application.
      */
-    public AbstractJavaApplicationSchema(Class<A> applicationType, String applicationClassName)
+    public AbstractJavaApplicationSchema(Class<A> applicationType,
+                                         String   applicationClassName)
     {
         this(applicationType, "java", applicationClassName, System.getProperty("java.class.path"));
     }
@@ -106,8 +108,9 @@ public abstract class AbstractJavaApplicationSchema<A extends JavaApplication,
      * @param applicationClassName The fully qualified class name of the Java application.
      * @param classPath            The class path for the Java application.
      */
-    public AbstractJavaApplicationSchema(Class<A> applicationType, String applicationClassName,
-                                         String classPath)
+    public AbstractJavaApplicationSchema(Class<A> applicationType,
+                                         String   applicationClassName,
+                                         String   classPath)
     {
         this(applicationType, "java", applicationClassName, classPath);
     }
@@ -123,9 +126,9 @@ public abstract class AbstractJavaApplicationSchema<A extends JavaApplication,
      * @param classPath            The class path for the Java application.
      */
     public AbstractJavaApplicationSchema(Class<A> applicationType,
-                                         String executableName,
-                                         String applicationClassName,
-                                         String classPath)
+                                         String   executableName,
+                                         String   applicationClassName,
+                                         String   classPath)
     {
         super(applicationType, executableName);
 
@@ -151,11 +154,13 @@ public abstract class AbstractJavaApplicationSchema<A extends JavaApplication,
         return m_systemPropertiesBuilder;
     }
 
+
     @Override
     public Properties getSystemProperties(Platform platform)
     {
         return getSystemPropertiesBuilder().realize();
     }
+
 
     @Override
     public ClassPath getClassPath()
@@ -318,14 +323,8 @@ public abstract class AbstractJavaApplicationSchema<A extends JavaApplication,
     }
 
 
-    /**
-     * Adds a JVM Option to use when starting the Java application.
-     *
-     * @param option The JVM option
-     * @return the {@link JavaApplicationSchema}
-     */
-    @SuppressWarnings("unchecked")
-    public S addOption(String option)
+    @Override
+    public S addJvmOption(String option)
     {
         // drop the "-" if specified
         m_jvmOptions.add(option.startsWith("-") ? option.substring(1) : option);
@@ -334,23 +333,94 @@ public abstract class AbstractJavaApplicationSchema<A extends JavaApplication,
     }
 
 
-    /**
-     * Adds a JVM Option to use when starting the Java application.
-     *
-     * @param option The JVM option
-     * @return the {@link JavaApplicationSchema}
-     */
-    @SuppressWarnings("unchecked")
-    public S setOption(String option)
+    @Override
+    public S addJvmOptions(String... options)
     {
-        addOption(option);
+        if (options != null)
+        {
+            for (String option : options)
+            {
+                addJvmOption(option);
+            }
+        }
 
         return (S) this;
     }
 
 
     @Override
+    public S addJvmOptions(List<String> options)
+    {
+        if (options != null)
+        {
+            for (String option : options)
+            {
+                addJvmOption(option);
+            }
+        }
+
+        return (S) this;
+    }
+
+
+    @Override
+    public S setJvmOptions(String... options)
+    {
+        m_jvmOptions.clear();
+
+        return addJvmOptions(options);
+    }
+
+
+    @Override
+    public S setJvmOptions(List<String> options)
+    {
+        m_jvmOptions.clear();
+
+        return addJvmOptions(options);
+    }
+
+
+    /**
+     * Adds an additional JVM Option to use when starting the Java application.
+     *
+     * @param option  the JVM option
+     * @return  the {@link JavaApplicationSchema}
+     *
+     * @deprecated  use {@link #addJvmOption(String)} instead
+     */
+    @Deprecated
+    public S addOption(String option)
+    {
+        return addJvmOption(option);
+    }
+
+
+    /**
+     * Adds an additional JVM Option to use when starting the Java application.
+     *
+     * @param option The JVM option
+     * @return the {@link JavaApplicationSchema}
+     *
+     * @deprecated  use {@link #addJvmOption(String)} instead
+     */
+    @Deprecated
+    public S setOption(String option)
+    {
+        return addJvmOption(option);
+    }
+
+
+    @Override
+    @Deprecated
     public List<String> getJVMOptions()
+    {
+        return getJvmOptions();
+    }
+
+
+    @Override
+    public List<String> getJvmOptions()
     {
         return m_jvmOptions;
     }

@@ -25,6 +25,8 @@
 
 package com.oracle.tools.runtime;
 
+import java.util.List;
+
 /**
  * An {@link ApplicationSchema} extension defining {@link ApplicationSchema} specific
  * fluent-methods.
@@ -63,4 +65,44 @@ public interface FluentApplicationSchema<A extends Application, S extends Fluent
      * @return  the {@link FluentApplicationSchema}
      */
     public S addLifecycleInterceptor(LifecycleEventInterceptor<? super A> interceptor);
+
+
+    /**
+     * Adds an additional argument to use when starting the {@link Application}.
+     *
+     * @param argument  the additional argument for the {@link Application}
+     */
+    public S addArgument(String argument);
+
+
+    /**
+     * Adds multiple arguments to use when starting the {@link Application}.
+     *
+     * @param arguments  the additional arguments for the {@link Application}
+     */
+    public S addArguments(String... arguments);
+
+
+    /**
+     * Adds multiple arguments to use when starting the {@link Application}.
+     *
+     * @param arguments  the additional arguments for the {@link Application}
+     */
+    public S addArguments(List<String> arguments);
+
+
+    /**
+     * Sets (and replaces) the arguments to use when starting the {@link Application}.
+     *
+     * @param arguments  the arguments for the {@link Application}
+     */
+    public S setArguments(String... arguments);
+
+
+    /**
+     * Sets (and replaces) the arguments to use when starting the {@link Application}.
+     *
+     * @param arguments  the arguments for the {@link Application}
+     */
+    public S setArguments(List<String> arguments);
 }
