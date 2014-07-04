@@ -186,6 +186,13 @@ reverse chronological order.
     FluentApplicationSchema addArgument, addArguments and setArguments methods.
     Deprecated AbstractApplicationSchema addArgument and setArgument methods.
 
+*   [ORACLETOOLS-129](https://java.net/jira/browse/ORACLETOOLS-129): Introduced
+    CapturingApplicationConsole. This allows lines from the stdout and stderr
+    streams from an application to be captured to a LinkedList so that the output
+    can then easily be asserted in tests by evaluating the contents of the list.
+    The CapturingApplicationConsole also allows data to be piped in to the
+    Application's stdin stream.
+
 
 <h4>oracle-tools-runtime-remote</h4>
 

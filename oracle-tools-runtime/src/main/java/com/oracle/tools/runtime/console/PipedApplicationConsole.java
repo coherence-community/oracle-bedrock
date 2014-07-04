@@ -29,10 +29,7 @@ import com.oracle.tools.runtime.ApplicationConsole;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.PipedReader;
-import java.io.PipedWriter;
 import java.io.PrintWriter;
-import java.io.Reader;
 
 /**
  * An {@link com.oracle.tools.runtime.ApplicationConsole} pipes all output to
@@ -61,20 +58,8 @@ import java.io.Reader;
  * @see java.io.PipedReader
  * @see java.io.PipedWriter
  */
-public class PipedApplicationConsole implements ApplicationConsole
+public class PipedApplicationConsole extends AbstractPipedApplicationConsole
 {
-    public static final int DEFAULT_PIPE_SIZE = 1024;
-
-    private BufferedReader m_outputReader;
-    private PrintWriter    m_outputWriter;
-    private PipedWriter    m_outputPipedWriter;
-    private BufferedReader m_errorReader;
-    private PrintWriter    m_errorWriter;
-    private PipedWriter    m_errorPipedWriter;
-    private PipedReader    m_inputReader;
-    private PrintWriter    m_inputWriter;
-    private boolean        m_diagnosticMode;
-
     /**
      * Constructs {@link PipedApplicationConsole}.
      * </p>
@@ -124,32 +109,8 @@ public class PipedApplicationConsole implements ApplicationConsole
      */
     public PipedApplicationConsole(int pipeSize, boolean diagnosticMode) throws IOException
     {
-        PipedReader pipedOutputReader = new PipedReader(pipeSize);
-
-        m_diagnosticMode = diagnosticMode;
-
-        m_outputReader      = new BufferedReader(pipedOutputReader);
-        m_outputPipedWriter = new PipedWriter(pipedOutputReader);
-        m_outputWriter      = new PrintWriter(m_outputPipedWriter);
-
-        PipedReader pipedErrorReader = new PipedReader(pipeSize);
-
-        m_errorReader      = new BufferedReader(pipedErrorReader);
-        m_errorPipedWriter = new PipedWriter(pipedErrorReader);
-        m_errorWriter      = new PrintWriter(m_errorPipedWriter);
-
-        m_inputReader      = new PipedReader(pipeSize);
-        m_inputWriter      = new PrintWriter(new PipedWriter(m_inputReader));
+        super(pipeSize, diagnosticMode);
     }
-
-
-    @Override
-    public PrintWriter getOutputWriter()
-    {
-        return m_outputWriter;
-    }
-
-
     /**
      * Obtains a {@link BufferedReader} that can be used to read the stdout
      * from an {@link ApplicationConsole}.
@@ -159,13 +120,6 @@ public class PipedApplicationConsole implements ApplicationConsole
     public BufferedReader getOutputReader()
     {
         return m_outputReader;
-    }
-
-
-    @Override
-    public PrintWriter getErrorWriter()
-    {
-        return m_errorWriter;
     }
 
 
@@ -181,13 +135,6 @@ public class PipedApplicationConsole implements ApplicationConsole
     }
 
 
-    @Override
-    public Reader getInputReader()
-    {
-        return m_inputReader;
-    }
-
-
     /**
      * Obtains a {@link PrintWriter} that can be used to write to the stdin
      * of an {@link ApplicationConsole}.
@@ -197,42 +144,5 @@ public class PipedApplicationConsole implements ApplicationConsole
     public PrintWriter getInputWriter()
     {
         return m_inputWriter;
-    }
-
-    @Override
-    public boolean isDiagnosticsEnabled()
-    {
-        return m_diagnosticMode;
-    }
-
-    @Override
-    public void close()
-    {
-        try
-        {
-            m_inputReader.close();
-        }
-        catch (IOException e)
-        {
-            // SKIP: ignore exceptions
-        }
-
-        try
-        {
-            m_outputPipedWriter.close();
-        }
-        catch (IOException e)
-        {
-            // SKIP: ignore exceptions
-        }
-
-        try
-        {
-            m_errorPipedWriter.close();
-        }
-        catch (IOException e)
-        {
-            // SKIP: ignore exceptions
-        }
     }
 }
