@@ -1,5 +1,5 @@
 /*
- * File: GetSystemProperty.java
+ * File: SimpleTester.java
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
@@ -23,40 +23,35 @@
  * "Portions Copyright [year] [name of copyright owner]"
  */
 
-package com.oracle.tools.runtime.java.concurrent;
-
-import com.oracle.tools.runtime.concurrent.RemoteCallable;
+package classloader.applications;
 
 /**
- * A {@link RemoteCallable} to return a {@link System#getProperty(String)}.
+ * A simple implementation of a {@link Tester}.
  * <p>
  * Copyright (c) 2014. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Brian Oliver
  */
-public class GetSystemProperty implements RemoteCallable<String>
+public class SimpleTester implements Tester
 {
-    /**
-     * The name of the {@link System#getProperty(String)} to return.
-     */
-    private String propertyName;
-
-
-    /**
-     * Constructs a {@link GetSystemProperty}.
-     *
-     * @param propertyName the name of the system property
-     */
-    public GetSystemProperty(String propertyName)
+    @Override
+    public void doNothing()
     {
-        this.propertyName = propertyName;
+        // skip
     }
 
 
     @Override
-    public String call() throws Exception
+    public String getMeaningOfLife()
     {
-        return System.getProperty(propertyName);
+        return "42";
+    }
+
+
+    @Override
+    public int identity(int value)
+    {
+        return value;
     }
 }

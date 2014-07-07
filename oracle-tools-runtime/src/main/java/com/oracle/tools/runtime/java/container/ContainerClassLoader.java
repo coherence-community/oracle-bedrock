@@ -27,14 +27,18 @@ package com.oracle.tools.runtime.java.container;
 
 import com.oracle.tools.runtime.LocalPlatform;
 import com.oracle.tools.runtime.PropertiesBuilder;
+
 import com.oracle.tools.runtime.java.ClassPath;
+
 import com.oracle.tools.runtime.network.AvailablePortIterator;
 
 import java.net.URL;
+
 import java.security.AllPermission;
 import java.security.CodeSource;
 import java.security.PermissionCollection;
 import java.security.Permissions;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -83,32 +87,39 @@ public class ContainerClassLoader extends ContainerScopeClassLoader
      * The names of the packages (as prefixes) to load from the parent
      * {@link ClassLoader}.  ie: these are the "shared" packages.
      */
-    private Set<String> m_packagesToLoadFromParent = new HashSet<String>();
+    private Set<String> packagesToLoadFromParent = new HashSet<String>();
+
+    /**
+     * The names of the packages (as prefixes) the must be loaded by this container
+     * {@link ClassLoader}.  These override the classes that may be
+     * declared as loading from the parent.
+     */
+    private Set<String> packagesToLoadInContainer = new HashSet<String>();
 
     /**
      * The {@link Class}es currently loaded by the {@link ContainerClassLoader}.
      */
-    private Map<String, Class<?>> m_loadedClasses = new HashMap<String, Class<?>>();
+    private Map<String, Class<?>> loadedClasses = new HashMap<String, Class<?>>();
 
     /**
      * The currently loaded resources.
      */
-    private Map<String, URL> m_loadedResources = new HashMap<String, URL>();
+    private Map<String, URL> loadedResources = new HashMap<String, URL>();
 
     /**
      * The root {@link ClassLoader}.
      */
-    private ClassLoader m_rootClassLoader;
+    private ClassLoader rootClassLoader;
 
     /**
      * The parent {@link ClassLoader}.
      */
-    private ClassLoader m_parentClassLoader;
+    private ClassLoader parentClassLoader;
 
     /**
      * The {@link ClassPath} of the {@link ContainerClassLoader}.
      */
-    private ClassPath m_classPath;
+    private ClassPath classPath;
 
 
     /**
@@ -123,13 +134,13 @@ public class ContainerClassLoader extends ContainerScopeClassLoader
                                  ContainerScope scope)
     {
         super(classPath, null, scope);
-        m_parentClassLoader = parent;
-        m_classPath         = classPath;
+        parentClassLoader = parent;
+        this.classPath    = classPath;
 
         while (parent.getParent() != null)
         {
-            m_rootClassLoader = parent.getParent();
-            parent            = parent.getParent();
+            rootClassLoader = parent.getParent();
+            parent          = parent.getParent();
         }
     }
 
@@ -218,7 +229,8 @@ public class ContainerClassLoader extends ContainerScopeClassLoader
         Scope platformScope = Container.getPlatformScope();
 
         // establish an MBeanServerBuilder
-        ContainerMBeanServerBuilder mBeanServerBuilder = new ContainerMBeanServerBuilder(LocalPlatform.getInstance().getAvailablePorts());
+        ContainerMBeanServerBuilder mBeanServerBuilder =
+            new ContainerMBeanServerBuilder(LocalPlatform.getInstance().getAvailablePorts());
 
         // establish the Scope for the application
         ContainerScope scope = new ContainerScope(applicationName,
@@ -257,6 +269,10 @@ public class ContainerClassLoader extends ContainerScopeClassLoader
         loader.addPackageToLoadFromParent("com.oracle.tools.runtime.java.container");
         loader.addPackageToLoadFromParent("com.oracle.tools.runtime.java");
 
+        // certain classes must be loaded by the container
+        loader.addPackageToLoadInContainer("com.oracle.tools.runtime.java.concurrent");
+        loader.addPackageToLoadInContainer("com.oracle.tools.runtime.java.util");
+
         return loader;
     }
 
@@ -268,7 +284,7 @@ public class ContainerClassLoader extends ContainerScopeClassLoader
      */
     public ClassPath getClassPath()
     {
-        return m_classPath;
+        return classPath;
     }
 
 
@@ -280,22 +296,31 @@ public class ContainerClassLoader extends ContainerScopeClassLoader
      */
     public void addPackageToLoadFromParent(String packagePrefix)
     {
-        m_packagesToLoadFromParent.add(packagePrefix);
+        packagesToLoadFromParent.add(packagePrefix);
     }
 
 
     /**
-     * {@inheritDoc}
+     * Adds the specified package prefix to the list of packages that
+     * must be loaded by this {@link ClassLoader}.
+     *
+     * @param packagePrefix  the name of the package (prefix without class name)
      */
+    public void addPackageToLoadInContainer(String packagePrefix)
+    {
+        packagesToLoadInContainer.add(packagePrefix);
+    }
+
+
     @Override
     public Class<?> loadClass(String name) throws ClassNotFoundException
     {
-        if (shouldLoadFromParent(name) && m_parentClassLoader != null)
+        if (shouldLoadFromParent(name) && parentClassLoader != null)
         {
-            return m_parentClassLoader.loadClass(name);
+            return parentClassLoader.loadClass(name);
         }
 
-        Class<?> c = m_loadedClasses.get(name);
+        Class<?> c = loadedClasses.get(name);
 
         if (c == null)
         {
@@ -305,10 +330,10 @@ public class ContainerClassLoader extends ContainerScopeClassLoader
             }
             catch (Throwable t)
             {
-                c = m_rootClassLoader.loadClass(name);
+                c = rootClassLoader.loadClass(name);
             }
 
-            m_loadedClasses.put(name, c);
+            loadedClasses.put(name, c);
         }
 
         return c;
@@ -331,7 +356,15 @@ public class ContainerClassLoader extends ContainerScopeClassLoader
             return true;
         }
 
-        for (String prefix : m_packagesToLoadFromParent)
+        for (String prefix : packagesToLoadInContainer)
+        {
+            if (className.startsWith(prefix))
+            {
+                return false;
+            }
+        }
+
+        for (String prefix : packagesToLoadFromParent)
         {
             if (className.startsWith(prefix))
             {
@@ -343,9 +376,6 @@ public class ContainerClassLoader extends ContainerScopeClassLoader
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected PermissionCollection getPermissions(CodeSource codeSource)
     {
@@ -357,18 +387,15 @@ public class ContainerClassLoader extends ContainerScopeClassLoader
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public URL getResource(String name)
     {
-        URL c = m_loadedResources.get(name);
+        URL c = loadedResources.get(name);
 
         if (c == null)
         {
             c = findResource(name);
-            m_loadedResources.put(name, c);
+            loadedResources.put(name, c);
         }
 
         if (c == null)

@@ -31,6 +31,8 @@ import com.tangosol.net.NamedCache;
 
 import com.tangosol.util.UID;
 
+import java.io.NotSerializableException;
+
 import java.util.Set;
 
 /**
@@ -104,6 +106,16 @@ public interface CoherenceClusterMember extends JavaApplication
     /**
      * Obtains a proxy of the specified {@link NamedCache} available in the
      * {@link CoherenceClusterMember}.
+     * <p>
+     * WARNING: Some methods on the returned {@link NamedCache} proxy are not
+     * available for remote execution and are thus not supported.  Attempts to
+     * use such methods will thrown {@link UnsupportedOperationException}.
+     * <p>
+     * The unsupported methods are: getCacheService, addMapListener,
+     * removeMapListener, entrySet, values, addIndex and removeIndex.
+     * <p>
+     * Additionally note that method invocations taking unserializable parameters
+     * or returning unserializable values will throw {@link NotSerializableException}s.
      *
      * @param cacheName  the name of the {@link NamedCache}
      *

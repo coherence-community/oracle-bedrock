@@ -1,5 +1,5 @@
 /*
- * File: Tester.java
+ * File: TesterProducer.java
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
@@ -23,37 +23,24 @@
  * "Portions Copyright [year] [name of copyright owner]"
  */
 
-package com.oracle.tools.runtime.java;
+package classloader.applications;
+
+import com.oracle.tools.runtime.concurrent.RemoteCallable;
 
 /**
- * A simple class that returns values passed to it.
+ * A {@link RemoteCallable} for testing purposes, that returns the
+ * {@link Tester} of a {@link TesterApplication}.
  * <p>
  * Copyright (c) 2014. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Brian Oliver
  */
-public interface Tester
+public class TesterProducer implements RemoteCallable<Tester>
 {
-    /**
-     * Does nothing and returns nothing.
-     */
-    public void doNothing();
-
-
-    /**
-     * Obtain the meaning of life.
-     *
-     * @return  the meaning of life (42)
-     */
-    public String getMeaningOfLife();
-
-
-    /**
-     * An identity function for integers.
-     *
-     * @param value  the value to be returned
-     * @return the value passed to the method
-     */
-    public int identity(int value);
+    @Override
+    public Tester call() throws Exception
+    {
+        return TesterApplication.getTester();
+    }
 }

@@ -29,9 +29,13 @@ import com.oracle.tools.deferred.AbstractDeferred;
 import com.oracle.tools.deferred.DeferredHelper;
 import com.oracle.tools.deferred.InstanceUnavailableException;
 import com.oracle.tools.deferred.UnresolvableInstanceException;
+
 import com.oracle.tools.io.NetworkHelper;
+
 import com.oracle.tools.lang.StringHelper;
+
 import com.oracle.tools.predicate.Predicate;
+
 import com.oracle.tools.runtime.Application;
 import com.oracle.tools.runtime.ApplicationConsole;
 import com.oracle.tools.runtime.ApplicationSchema;
@@ -40,22 +44,27 @@ import com.oracle.tools.runtime.LocalPlatform;
 import com.oracle.tools.runtime.Platform;
 import com.oracle.tools.runtime.PropertiesBuilder;
 import com.oracle.tools.runtime.Settings;
+
 import com.oracle.tools.runtime.concurrent.ControllableRemoteExecutor;
 import com.oracle.tools.runtime.concurrent.RemoteCallable;
 import com.oracle.tools.runtime.concurrent.RemoteExecutor;
 import com.oracle.tools.runtime.concurrent.RemoteRunnable;
 import com.oracle.tools.runtime.concurrent.socket.RemoteExecutorServer;
+
 import com.oracle.tools.util.CompletionListener;
+
+import static com.oracle.tools.predicate.Predicates.allOf;
 
 import java.io.File;
 import java.io.IOException;
+
 import java.net.InetAddress;
+
 import java.util.Iterator;
 import java.util.Properties;
+
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import static com.oracle.tools.predicate.Predicates.allOf;
 
 /**
  * A {@link JavaApplicationBuilder} that realizes {@link JavaApplication}s as
@@ -418,9 +427,18 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication> extends Abst
         }
 
         // set the class path (it's an environment variable)
-        String classPath = schema.getClassPath().toString();
+        ClassPath classPath;
 
-        processBuilder.environment().put("CLASSPATH", classPath);
+        try
+        {
+            classPath = new ClassPath(schema.getClassPath(), ClassPath.ofClass(JavaApplicationLauncher.class));
+        }
+        catch (IOException e)
+        {
+            throw new RuntimeException("Failed to locate required classes for the class path", e);
+        }
+
+        processBuilder.environment().put("CLASSPATH", classPath.toString());
 
         // ----- establish the command to start java -----
 

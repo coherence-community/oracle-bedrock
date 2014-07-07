@@ -27,14 +27,13 @@ package com.oracle.tools.runtime.java;
 
 import com.oracle.tools.deferred.Deferred;
 
-import com.oracle.tools.predicate.Predicate;
-
 import com.oracle.tools.runtime.Application;
 
 import com.oracle.tools.runtime.concurrent.RemoteCallable;
 import com.oracle.tools.runtime.concurrent.RemoteExecutor;
+import com.oracle.tools.runtime.concurrent.callable.RemoteMethodInvocation;
 
-import java.lang.reflect.Method;
+import java.io.NotSerializableException;
 
 import java.util.Properties;
 import java.util.Set;
@@ -315,19 +314,22 @@ public interface JavaApplication extends Application, RemoteExecutor
      * be used to interact with the application owned instance.
      * <p>
      * Note:  Only methods of the proxy interface that have serializable method parameters
-     * and return values may be called using the returned proxy.
+     * and return values should be called using the returned proxy.  Attempts to invoke
+     * methods with non-serializable parameters or methods returning non-serializable results
+     * may result in {@link NotSerializableException}s being thrown. (depending on
+     * the ability for a provided {@link RemoteMethodInvocation.Interceptor} to
+     * transform said values)
      *
      * @param <T>  the type of the proxy
      *
-     * @param classToProxy                the class of the proxy
-     * @param instanceProducer            a {@link RemoteCallable} that will provide the application instance
-     *                                    to which proxy method calls should be invoked
-     * @param unsupportedMethodPredicate  a {@link Predicate} to determine if a dynamically invoked
-     *                                    {@link Method} is unsupported.  <code>true</code> means calling the
-     *                                    {@link Method} should throw an {@link UnsupportedOperationException}
+     * @param classToProxy      the class of the proxy
+     * @param instanceProducer  a {@link RemoteCallable} that will provide the application instance
+     *                          to which proxy method calls should be invoked
+     * @param interceptor       an optional (may be null) {@link RemoteMethodInvocation.Interceptor}
+     *                          to transform values used by the returned proxy
      * @return  a proxy of an application instance
      */
-    public <T> T getProxyFor(Class<T>          classToProxy,
-                             RemoteCallable<T> instanceProducer,
-                             Predicate<Method> unsupportedMethodPredicate);
+    public <T> T getProxyFor(Class<T>                           classToProxy,
+                             RemoteCallable<T>                  instanceProducer,
+                             RemoteMethodInvocation.Interceptor interceptor);
 }

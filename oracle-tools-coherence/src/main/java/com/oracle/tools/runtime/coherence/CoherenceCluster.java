@@ -28,8 +28,6 @@ package com.oracle.tools.runtime.coherence;
 import com.oracle.tools.runtime.AbstractAssembly;
 import com.oracle.tools.runtime.Assembly;
 
-import com.oracle.tools.runtime.java.util.RemoteCallableStaticMethod;
-
 import com.tangosol.net.NamedCache;
 
 import com.tangosol.util.UID;

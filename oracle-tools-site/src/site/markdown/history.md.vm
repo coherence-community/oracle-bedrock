@@ -193,6 +193,24 @@ reverse chronological order.
     The CapturingApplicationConsole also allows data to be piped in to the
     Application's stdin stream.
 
+*   [ORACLETOOLS-130](https://java.net/jira/browse/ORACLETOOLS-130): Introduced
+    the ability to intercept remote method invocation, including the ability
+    to transform method arguments, return results and exceptions.
+
+*   [ORACLETOOLS-131](https://java.net/jira/browse/ORACLETOOLS-131): Refactored
+    (moved) RemoteCallable and RemoteRunnable implementations to be outside of the
+    com.oracle.tools.runtime.java package to resolve intermittent Container-based
+    test failures (during serialization).
+
+    *BREAKING CHANGE:*  This is a breaking change for anyone that has created
+    customized JavaApplicationSchemas specifically designed for using
+    ContainerBasedJavaApplicationBuilders with customized RemoteCallableStaticMethods
+    (should basically be no one!)
+
+*   [ORACLETOOLS-132](https://java.net/jira/browse/ORACLETOOLS-132): Resolved
+    issue where specifying a custom class path for a JavaApplicationSchema
+    may result in a Java Application failing to launch
+    (with JavaApplicationLauncher Class Not Found errors).
 
 <h4>oracle-tools-runtime-remote</h4>
 
@@ -241,7 +259,11 @@ reverse chronological order.
     applications and via a CoherenceCluster instance.
 
 *   [ORACLETOOLS-117](https://java.net/jira/browse/ORACLETOOLS-117): Removed
-    unused and incorrect custom namespaces from Coherence-based tests
+    unused and incorrect custom namespaces from Coherence-based tests.
+
+*   [ORACLETOOLS-130](https://java.net/jira/browse/ORACLETOOLS-130): Created
+    a specialized remote method interceptor for NamedCaches so that method
+    results are made serializable where necessary.
 
 <h4>oracle-tools-coherence-testing-support</h4>
 

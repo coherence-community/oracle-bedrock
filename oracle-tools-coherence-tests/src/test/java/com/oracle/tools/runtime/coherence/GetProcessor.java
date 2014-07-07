@@ -1,5 +1,5 @@
 /*
- * File: SimpleTester.java
+ * File: GetProcessor.java
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
@@ -23,35 +23,33 @@
  * "Portions Copyright [year] [name of copyright owner]"
  */
 
-package com.oracle.tools.runtime.java;
+package com.oracle.tools.runtime.coherence;
+
+import com.tangosol.util.InvocableMap;
+
+import com.tangosol.util.processor.AbstractProcessor;
 
 /**
- * A simple implementation of a {@link Tester}.
+ * An {@link InvocableMap.EntryProcessor} to return the value of an entry.
  * <p>
  * Copyright (c) 2014. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Brian Oliver
  */
-public class SimpleTester implements Tester
+public class GetProcessor extends AbstractProcessor
 {
-    @Override
-    public void doNothing()
+    /**
+     * Constructs a {@link GetProcessor}.
+     */
+    public GetProcessor()
     {
-        // skip
     }
 
 
     @Override
-    public String getMeaningOfLife()
+    public Object process(InvocableMap.Entry entry)
     {
-        return "42";
-    }
-
-
-    @Override
-    public int identity(int value)
-    {
-        return value;
+        return entry.isPresent() ? entry.getValue() : null;
     }
 }

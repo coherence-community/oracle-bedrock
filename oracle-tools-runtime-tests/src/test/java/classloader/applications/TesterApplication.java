@@ -1,5 +1,5 @@
 /*
- * File: SleepingApplication.java
+ * File: TesterApplication.java
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
@@ -23,35 +23,66 @@
  * "Portions Copyright [year] [name of copyright owner]"
  */
 
-package com.oracle.tools.runtime.java.applications;
+package classloader.applications;
 
 import java.io.IOException;
+
 import java.net.UnknownHostException;
+
 import java.util.concurrent.TimeUnit;
 
 /**
- * A simple application that sleeps and then terminates.
+ * A simple application defines a {@link Tester} instance that can be
+ * interacted with remotely.
  * <p>
- * Copyright (c) 2013. All Rights Reserved. Oracle Corporation.<br>
+ * Copyright (c) 2014. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Brian Oliver
  */
-public class SleepingApplication
+public class TesterApplication
 {
     /**
-     * Entry Point of the Application
+     * The {@link Tester} for the application.
+     */
+    private static Tester tester;
+
+
+    /**
+     * Obtains the {@link Tester} for the application.
+     *
+     * @return  the {@link Tester}
+     */
+    public static Tester getTester()
+    {
+        return tester;
+    }
+
+
+    /**
+     * Obtains the meaning of life.
+     *
+     * @return the answer is 42
+     */
+    public static int getMeaningOfLife()
+    {
+        return 42;
+    }
+
+
+    /**
+     * Entry Point of the Application.
      *
      * @param arguments
      */
     public static void main(String[] arguments) throws UnknownHostException, IOException, InterruptedException
     {
-        System.out.printf("%s started\n", SleepingApplication.class.getName());
+        System.out.printf("%s started\n", TesterApplication.class.getName());
 
         System.out.printf("Using java.home: %s\n", System.getProperty("java.home"));
 
         // determine the number of seconds to sleep
-        int secondsToSleep = 30;
+        int secondsToSleep = 5;
 
         if (arguments.length == 1)
         {
@@ -72,5 +103,11 @@ public class SleepingApplication
         Thread.sleep(TimeUnit.SECONDS.toMillis(secondsToSleep));
 
         System.out.println("Finished sleeping... now terminating");
+    }
+
+
+    static
+    {
+        tester = new SimpleTester();
     }
 }

@@ -23,13 +23,17 @@
  * "Portions Copyright [year] [name of copyright owner]"
  */
 
-package com.oracle.tools.runtime.java.util;
+package com.oracle.tools.runtime.concurrent.callable;
 
 import com.oracle.tools.runtime.concurrent.RemoteCallable;
+
 import com.oracle.tools.util.ReflectionHelper;
+
+import java.io.Serializable;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -43,6 +47,11 @@ import java.util.Arrays;
  */
 public class RemoteCallableStaticMethod<T> implements RemoteCallable<T>
 {
+    /**
+     * Required for {@link Serializable}.
+     */
+    private static final long serialVersionUID = 201407070813L;
+
     /**
      * The name of the {@link Class} on which the static method is defined.
      */
@@ -88,7 +97,7 @@ public class RemoteCallableStaticMethod<T> implements RemoteCallable<T>
 
         argumentList.toArray(argumentArray);
 
-        this.args = new Object[]{argumentArray};
+        this.args = new Object[] {argumentArray};
     }
 
 
@@ -114,7 +123,6 @@ public class RemoteCallableStaticMethod<T> implements RemoteCallable<T>
     }
 
 
-
     @Override
     public T call() throws Exception
     {
@@ -129,8 +137,7 @@ public class RemoteCallableStaticMethod<T> implements RemoteCallable<T>
         if (method == null)
         {
             throw new NoSuchMethodException("The specified method [" + className + "." + methodName
-                                            + "] for the arguments " + Arrays.toString(args)
-                                            + " could not be located");
+                                            + "] for the arguments " + Arrays.toString(args) + " could not be located");
         }
         else
         {

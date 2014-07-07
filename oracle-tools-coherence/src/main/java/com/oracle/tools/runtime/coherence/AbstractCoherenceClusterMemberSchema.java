@@ -27,13 +27,17 @@ package com.oracle.tools.runtime.coherence;
 
 import com.oracle.tools.runtime.LocalPlatform;
 import com.oracle.tools.runtime.Platform;
+
 import com.oracle.tools.runtime.concurrent.RemoteCallable;
+import com.oracle.tools.runtime.concurrent.callable.RemoteCallableStaticMethod;
+
 import com.oracle.tools.runtime.java.AbstractJavaApplicationSchema;
 import com.oracle.tools.runtime.java.ContainerBasedJavaApplicationBuilder;
-import com.oracle.tools.runtime.java.util.RemoteCallableStaticMethod;
+
 import com.oracle.tools.util.CompletionListener;
 
 import java.net.InetAddress;
+
 import java.util.Iterator;
 import java.util.Properties;
 
@@ -58,7 +62,8 @@ public abstract class AbstractCoherenceClusterMemberSchema<A extends CoherenceCl
      *                              that this schema defines
      * @param applicationClassName  the fully qualified class name of the Java application
      */
-    public AbstractCoherenceClusterMemberSchema(Class<A> applicationType, String applicationClassName)
+    public AbstractCoherenceClusterMemberSchema(Class<A> applicationType,
+                                                String   applicationClassName)
     {
         super(applicationType, applicationClassName);
     }
@@ -73,8 +78,9 @@ public abstract class AbstractCoherenceClusterMemberSchema<A extends CoherenceCl
      * @param applicationClassName  the fully qualified class name of the Java application
      * @param classPath             the class path for the Java application.
      */
-    public AbstractCoherenceClusterMemberSchema(Class<A> applicationType, String applicationClassName,
-                                                String classPath)
+    public AbstractCoherenceClusterMemberSchema(Class<A> applicationType,
+                                                String   applicationClassName,
+                                                String   classPath)
     {
         super(applicationType, applicationClassName, classPath);
     }
@@ -90,17 +96,19 @@ public abstract class AbstractCoherenceClusterMemberSchema<A extends CoherenceCl
      * @param classPath             the class path for the Java application
      */
     public AbstractCoherenceClusterMemberSchema(Class<A> applicationType,
-                                                String executableName,
-                                                String applicationClassName,
-                                                String classPath)
+                                                String   executableName,
+                                                String   applicationClassName,
+                                                String   classPath)
     {
         super(applicationType, executableName, applicationClassName, classPath);
     }
+
 
     @Override
     public Properties getSystemProperties(Platform platform)
     {
         Properties properties = super.getSystemProperties(platform);
+
         if (platform == null)
         {
             return properties;
@@ -109,9 +117,11 @@ public abstract class AbstractCoherenceClusterMemberSchema<A extends CoherenceCl
         if (!properties.containsKey(CoherenceCacheServerSchema.PROPERTY_LOCALHOST_ADDRESS))
         {
             InetAddress inetAddress = platform.getPublicInetAddress();
+
             if (inetAddress != null)
             {
-                properties.setProperty(CoherenceClusterMemberSchema.PROPERTY_LOCALHOST_ADDRESS, inetAddress.getHostName());
+                properties.setProperty(CoherenceClusterMemberSchema.PROPERTY_LOCALHOST_ADDRESS,
+                                       inetAddress.getHostName());
             }
         }
 
@@ -122,6 +132,7 @@ public abstract class AbstractCoherenceClusterMemberSchema<A extends CoherenceCl
 
         return properties;
     }
+
 
     @Override
     public void start(ContainerBasedJavaApplicationBuilder.ControllableApplication application,

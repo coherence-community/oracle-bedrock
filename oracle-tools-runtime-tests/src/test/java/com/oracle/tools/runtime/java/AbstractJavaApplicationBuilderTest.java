@@ -25,25 +25,29 @@
 
 package com.oracle.tools.runtime.java;
 
+import classloader.applications.SleepingApplication;
+import classloader.applications.Tester;
+import classloader.applications.TesterApplication;
+import classloader.applications.TesterProducer;
+
 import com.oracle.tools.deferred.Eventually;
 
 import com.oracle.tools.junit.AbstractTest;
 
 import com.oracle.tools.lang.StringHelper;
 
-import com.oracle.tools.predicate.Predicates;
-
 import com.oracle.tools.runtime.ApplicationConsole;
 import com.oracle.tools.runtime.DummyApp;
 import com.oracle.tools.runtime.DummyClassPathApp;
 
+import com.oracle.tools.runtime.concurrent.RemoteCallable;
+import com.oracle.tools.runtime.concurrent.callable.GetSystemProperty;
+import com.oracle.tools.runtime.concurrent.callable.RemoteCallableStaticMethod;
+
 import com.oracle.tools.runtime.console.PipedApplicationConsole;
 import com.oracle.tools.runtime.console.SystemApplicationConsole;
 
-import com.oracle.tools.runtime.java.applications.SleepingApplication;
-import com.oracle.tools.runtime.java.applications.TesterApplication;
-import com.oracle.tools.runtime.java.concurrent.GetSystemProperty;
-import com.oracle.tools.runtime.java.container.ContainerClassLoader;
+import com.oracle.tools.util.FutureCompletionListener;
 
 import org.junit.Test;
 
@@ -55,9 +59,9 @@ import static org.hamcrest.core.StringContains.containsString;
 
 import static org.junit.Assert.assertThat;
 
-import java.lang.reflect.Method;
-
 import java.util.UUID;
+
+import java.util.concurrent.ExecutionException;
 
 /**
  * Functional Tests for {@link JavaApplicationBuilder}s.
@@ -139,13 +143,12 @@ public abstract class AbstractJavaApplicationBuilderTest extends AbstractTest
         Class<Mock> knownClass        = Mock.class;
 
         ClassPath   path1             = ClassPath.ofClass(DummyClassPathApp.class);
-        ClassPath   path2             = ClassPath.ofClass(ContainerClassLoader.class);
-        ClassPath   path3             = ClassPath.ofClass(StringHelper.class);
-        ClassPath   classPath         = new ClassPath(knownJarClassPath, path1, path2, path3);
+        ClassPath   path2             = ClassPath.ofClass(StringHelper.class);
+        ClassPath   classPath         = new ClassPath(knownJarClassPath, path1, path2);
 
         SimpleJavaApplicationSchema schema =
             new SimpleJavaApplicationSchema(DummyClassPathApp.class.getCanonicalName()).setClassPath(classPath)
-                .setArgument(knownClass.getCanonicalName()).setDiagnosticsEnabled(true);
+                .addArgument(knownClass.getCanonicalName()).setDiagnosticsEnabled(true);
 
         JavaApplicationBuilder<JavaApplication> builder     = newJavaApplicationBuilder();
 
@@ -200,6 +203,38 @@ public abstract class AbstractJavaApplicationBuilderTest extends AbstractTest
 
 
     /**
+     * Ensure that we can use a {@link RemoteCallableStaticMethod} with a {@link JavaApplication}.
+     */
+    @Test
+    public void shouldCallRemoteStaticMethodsInAnApplication() throws InterruptedException, ExecutionException
+    {
+        SimpleJavaApplication application = null;
+
+        // define and start the SleepingApplication
+        SimpleJavaApplicationSchema schema = new SimpleJavaApplicationSchema(TesterApplication.class.getName());
+
+        JavaApplicationBuilder<JavaApplication> builder = newJavaApplicationBuilder();
+
+        ApplicationConsole                      console = new SystemApplicationConsole();
+
+        application = builder.realize(schema, "application", console);
+
+        RemoteCallable<Integer> callable = new RemoteCallableStaticMethod<Integer>(TesterApplication.class.getName(),
+                                                                                   "getMeaningOfLife");
+
+        FutureCompletionListener<Integer> future = new FutureCompletionListener<Integer>();
+
+        application.submit(callable, future);
+
+        assertThat(future.get(), is(42));
+
+        application.waitFor();
+
+        application.close();
+    }
+
+
+    /**
      * Ensure that we can create a local proxy of a {@link Tester} in an {@link JavaApplication}.
      */
     @Test
@@ -216,7 +251,7 @@ public abstract class AbstractJavaApplicationBuilderTest extends AbstractTest
 
         application = builder.realize(schema, "application", console);
 
-        Tester tester = application.getProxyFor(Tester.class, new TesterProducer(), Predicates.<Method>never());
+        Tester tester = application.getProxyFor(Tester.class, new TesterProducer(), null);
 
         tester.doNothing();
 

@@ -26,22 +26,39 @@
 package com.oracle.tools.runtime.coherence;
 
 import com.oracle.tools.junit.AbstractTest;
+
 import com.oracle.tools.runtime.LocalPlatform;
+
 import com.oracle.tools.runtime.coherence.callables.GetClusterName;
 import com.oracle.tools.runtime.coherence.callables.GetClusterSize;
 import com.oracle.tools.runtime.coherence.callables.GetLocalMemberId;
 import com.oracle.tools.runtime.coherence.callables.GetServiceStatus;
+
 import com.oracle.tools.runtime.console.SystemApplicationConsole;
+
 import com.oracle.tools.runtime.java.JavaApplicationBuilder;
+
 import com.oracle.tools.runtime.network.AvailablePortIterator;
+
 import com.tangosol.net.NamedCache;
+
+import com.tangosol.util.filter.PresentFilter;
+
 import org.junit.Test;
 
-import javax.management.ObjectName;
-
 import static com.oracle.tools.deferred.DeferredHelper.invoking;
+
 import static com.oracle.tools.deferred.Eventually.assertThat;
+
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
+
+import java.util.AbstractMap;
+import java.util.Collection;
+import java.util.Map;
+import java.util.Set;
+
+import javax.management.ObjectName;
 
 /**
  * Functional Tests for {@link CoherenceCacheServer}s.
@@ -199,6 +216,30 @@ public abstract class AbstractCoherenceCacheServerTest<B extends JavaApplication
 
             assertThat(namedCache.size(), is(1));
             assertThat(namedCache.get("key"), is("hello"));
+
+            Map map = namedCache.invokeAll(PresentFilter.INSTANCE, new GetProcessor());
+
+            assertThat(map, notNullValue());
+            assertThat(map.size(), is(1));
+            assertThat(map.get("key"), is("hello"));
+
+            Set keySet = namedCache.keySet();
+
+            assertThat(keySet, notNullValue());
+            assertThat(keySet.size(), is(1));
+            assertThat(keySet.contains("key"), is(true));
+
+            Set entrySet = namedCache.entrySet();
+
+            assertThat(entrySet, notNullValue());
+            assertThat(entrySet.size(), is(1));
+            assertThat(entrySet.contains(new AbstractMap.SimpleEntry("key", "hello")), is(true));
+
+            Collection values = namedCache.values();
+
+            assertThat(values, notNullValue());
+            assertThat(values.size(), is(1));
+            assertThat(values.contains("hello"), is(true));
 
             namedCache.clear();
 

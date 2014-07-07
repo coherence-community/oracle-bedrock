@@ -1,5 +1,5 @@
 /*
- * File: ChildApplication.java
+ * File: SleepingApplication.java
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
@@ -23,26 +23,23 @@
  * "Portions Copyright [year] [name of copyright owner]"
  */
 
-package com.oracle.tools.runtime.java.applications;
-
-import com.oracle.tools.runtime.concurrent.socket.RemoteExecutorClient;
+package classloader.applications;
 
 import java.io.IOException;
 
-import java.net.InetAddress;
 import java.net.UnknownHostException;
 
 import java.util.concurrent.TimeUnit;
 
 /**
- * An application that is started by a {@link ParentApplication}.
+ * A simple application that sleeps and then terminates.
  * <p>
  * Copyright (c) 2013. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Brian Oliver
  */
-public class ChildApplication
+public class SleepingApplication
 {
     /**
      * Entry Point of the Application
@@ -51,27 +48,31 @@ public class ChildApplication
      */
     public static void main(String[] arguments) throws UnknownHostException, IOException, InterruptedException
     {
-        System.out.printf("%s started\n", ChildApplication.class.getName());
+        System.out.printf("%s started\n", SleepingApplication.class.getName());
 
-        System.out.printf("server.address: %s\n", System.getProperty("server.address"));
-        System.out.printf("server.port   : %s\n", System.getProperty("server.port"));
+        System.out.printf("Using java.home: %s\n", System.getProperty("java.home"));
 
-        System.out.printf("Connecting to the specified server");
+        // determine the number of seconds to sleep
+        int secondsToSleep = 30;
 
-        RemoteExecutorClient channel =
-            new RemoteExecutorClient(InetAddress.getByName(System.getProperty("server.address")),
-                                     Integer.getInteger("server.port"));
+        if (arguments.length == 1)
+        {
+            try
+            {
+                secondsToSleep = Integer.parseInt(arguments[0]);
+            }
+            catch (NumberFormatException e)
+            {
+                System.out.println("Argument [" + arguments[0]
+                                   + "] is not a number representing seconds, defaulting to 5 seconds");
+                secondsToSleep = 5;
+            }
+        }
 
-        channel.open();
+        System.out.println("Now sleeping for " + secondsToSleep + " seconds");
 
-        System.out.printf("Connected... now sleeping");
+        Thread.sleep(TimeUnit.SECONDS.toMillis(secondsToSleep));
 
-        Thread.sleep(TimeUnit.MINUTES.toMillis(1));
-
-        System.out.printf("Finished sleeping... now disconnecting");
-
-        channel.close();
-
-        System.out.printf("Disconnecting from the specified server");
+        System.out.println("Finished sleeping... now terminating");
     }
 }

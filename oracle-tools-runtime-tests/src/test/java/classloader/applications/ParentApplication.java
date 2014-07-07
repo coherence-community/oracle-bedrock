@@ -23,7 +23,7 @@
  * "Portions Copyright [year] [name of copyright owner]"
  */
 
-package com.oracle.tools.runtime.java.applications;
+package classloader.applications;
 
 import com.oracle.tools.runtime.ApplicationConsole;
 
@@ -36,7 +36,7 @@ import com.oracle.tools.runtime.java.SimpleJavaApplicationSchema;
 import java.io.IOException;
 
 /**
- * An application that starts a {@link com.oracle.tools.runtime.java.applications.ChildApplication}.
+ * An application that starts a {@link ChildApplication}.
  * <p>
  * Copyright (c) 2013. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.

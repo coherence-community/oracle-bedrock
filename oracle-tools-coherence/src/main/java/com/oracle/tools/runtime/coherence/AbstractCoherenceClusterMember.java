@@ -25,8 +25,6 @@
 
 package com.oracle.tools.runtime.coherence;
 
-import com.oracle.tools.predicate.Predicate;
-
 import com.oracle.tools.runtime.Application;
 import com.oracle.tools.runtime.ApplicationConsole;
 import com.oracle.tools.runtime.LifecycleEventInterceptor;
@@ -41,10 +39,12 @@ import com.oracle.tools.runtime.coherence.callables.GetLocalMemberUID;
 import com.oracle.tools.runtime.coherence.callables.GetServiceStatus;
 import com.oracle.tools.runtime.coherence.callables.IsServiceRunning;
 
+import com.oracle.tools.runtime.concurrent.callable.RemoteCallableStaticMethod;
+import com.oracle.tools.runtime.concurrent.callable.RemoteMethodInvocation;
+
 import com.oracle.tools.runtime.java.AbstractJavaApplication;
 import com.oracle.tools.runtime.java.JavaApplication;
 import com.oracle.tools.runtime.java.JavaProcess;
-import com.oracle.tools.runtime.java.util.RemoteCallableStaticMethod;
 
 import com.tangosol.net.NamedCache;
 
@@ -52,6 +52,12 @@ import com.tangosol.util.UID;
 
 import java.lang.reflect.Method;
 
+import java.util.AbstractMap;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
@@ -234,22 +240,11 @@ public abstract class AbstractCoherenceClusterMember<A extends AbstractCoherence
     @Override
     public NamedCache getCache(String cacheName)
     {
-        // some methods can't be proxied!
-        final Predicate<Method> unsupportedMethodsPredicate = new Predicate<Method>()
-        {
-            @Override
-            public boolean evaluate(Method method)
-            {
-                return method.getName().equals("getCacheService") || method.getName().equals("addMapListener")
-                       || method.getName().equals("removeMapListener");
-            }
-        };
-
         return getProxyFor(NamedCache.class,
                            new RemoteCallableStaticMethod<NamedCache>("com.tangosol.net.CacheFactory",
                                                                       "getCache",
                                                                       cacheName),
-                           unsupportedMethodsPredicate);
+                           new NamedCacheMethodInterceptor());
     }
 
 
@@ -264,5 +259,110 @@ public abstract class AbstractCoherenceClusterMember<A extends AbstractCoherence
     public ServiceStatus getServiceStatus(String serviceName)
     {
         return submit(new GetServiceStatus(serviceName));
+    }
+
+
+    /**
+     * A Coherence specific {@link RemoteMethodInvocation.Interceptor} for NamedCache methods.
+     */
+    public static class NamedCacheMethodInterceptor implements RemoteMethodInvocation.Interceptor
+    {
+        @Override
+        public void onBeforeRemoteInvocation(Method   method,
+                                             Object[] arguments)
+        {
+            // ensure that the method can be invoked remotely
+            String name = method.getName();
+
+            if (name.equals("getCacheService") || name.equals("addMapListener") || name.equals("removeMapListener")
+                || name.equals("addIndex") || name.equals("removeIndex"))
+            {
+                throw new UnsupportedOperationException("The method NamedCache." + name
+                                                        + " is not supported for remote execution");
+            }
+        }
+
+
+        @Override
+        public Object onAfterRemoteInvocation(Method   method,
+                                              Object[] arguments,
+                                              Object   result)
+        {
+            return result;
+        }
+
+
+        @Override
+        public Exception onRemoteInvocationException(Method    method,
+                                                     Object[]  arguments,
+                                                     Exception exception)
+        {
+            return exception;
+        }
+
+
+        @Override
+        public void onBeforeInvocation(Object   instance,
+                                       Method   method,
+                                       Object[] arguments)
+        {
+            // nothing to do before invocation
+        }
+
+
+        @Override
+        public Object onAfterInvocation(Object   instance,
+                                        Method   method,
+                                        Object[] arguments,
+                                        Object   result)
+        {
+            // ensure that the result of the method is serializable, including transforming it if necessary
+            String name = method.getName();
+
+            if (name.equals("invokeAll"))
+            {
+                // the result of invokeAll may not be serializable,
+                // so copy them into a serializable map
+                result = new HashMap((Map) result);
+            }
+            else if (name.equals("keySet"))
+            {
+                // the result of keySet may not be serializable,
+                // so copy them into a serializable set
+                result = new HashSet((Set) result);
+            }
+            else if (name.equals("entrySet"))
+            {
+                // the result of entrySet may not be serializable,
+                // so copy the entries into a serializable set
+                Set<Map.Entry> set       = (Set<Map.Entry>) result;
+                Set<Map.Entry> resultSet = new HashSet();
+
+                for (Map.Entry entry : set)
+                {
+                    resultSet.add(new AbstractMap.SimpleEntry(entry.getKey(), entry.getValue()));
+                }
+
+                result = resultSet;
+            }
+            else if (name.equals("values"))
+            {
+                // the result of values may not be serializable,
+                // so copy them into a serializable set
+                result = new ArrayList((Collection) result);
+            }
+
+            return result;
+        }
+
+
+        @Override
+        public Exception onInvocationException(Object    instance,
+                                               Method    method,
+                                               Object[]  arguments,
+                                               Exception exception)
+        {
+            return exception;
+        }
     }
 }

@@ -1,5 +1,5 @@
 /*
- * File: SystemExit.java
+ * File: GetSystemProperty.java
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
@@ -23,53 +23,40 @@
  * "Portions Copyright [year] [name of copyright owner]"
  */
 
-package com.oracle.tools.runtime.java.concurrent;
+package com.oracle.tools.runtime.concurrent.callable;
 
 import com.oracle.tools.runtime.concurrent.RemoteCallable;
-import com.oracle.tools.runtime.concurrent.RemoteRunnable;
 
 /**
- * A {@link RemoteRunnable} to perform a {@link System#exit(int)}.
+ * A {@link RemoteCallable} to return a {@link System#getProperty(String)}.
  * <p>
  * Copyright (c) 2014. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Brian Oliver
  */
-public class SystemExit implements RemoteRunnable
+public class GetSystemProperty implements RemoteCallable<String>
 {
     /**
-     * The desired system exit code (by default 0);
+     * The name of the {@link System#getProperty(String)} to return.
      */
-    private int exitCode;
+    private String propertyName;
 
 
     /**
-     * Constructs a {@link SystemExit}
-     * (using the default exit code 0).
-     */
-    public SystemExit()
-    {
-        this(0);
-    }
-
-
-    /**
-     * Constructs a {@link SystemExit} for a specific exit code.
+     * Constructs a {@link GetSystemProperty}.
      *
-     * @param exitCode  the desired exit code
+     * @param propertyName the name of the system property
      */
-    public SystemExit(int exitCode)
+    public GetSystemProperty(String propertyName)
     {
-        this.exitCode = exitCode;
+        this.propertyName = propertyName;
     }
 
 
     @Override
-    public void run()
+    public String call() throws Exception
     {
-        System.out.println("Terminating Application (due to SystemExit) [exitcode=" + exitCode + "]");
-
-        System.exit(exitCode);
+        return System.getProperty(propertyName);
     }
 }

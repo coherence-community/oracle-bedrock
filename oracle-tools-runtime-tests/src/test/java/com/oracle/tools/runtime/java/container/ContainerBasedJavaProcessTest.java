@@ -27,8 +27,9 @@ package com.oracle.tools.runtime.java.container;
 
 import com.oracle.tools.junit.AbstractTest;
 
+import com.oracle.tools.runtime.concurrent.callable.RemoteCallableStaticMethod;
+
 import com.oracle.tools.runtime.java.ContainerBasedJavaApplicationBuilder;
-import com.oracle.tools.runtime.java.util.RemoteCallableStaticMethod;
 
 import org.junit.Before;
 import org.junit.Test;

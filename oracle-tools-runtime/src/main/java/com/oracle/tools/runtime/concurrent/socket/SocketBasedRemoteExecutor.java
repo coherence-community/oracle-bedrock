@@ -34,8 +34,8 @@ import com.oracle.tools.util.CompletionListener;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.EOFException;
 import java.io.IOException;
+import java.io.NotSerializableException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
@@ -855,7 +855,20 @@ public class SocketBasedRemoteExecutor extends AbstractControllableRemoteExecuto
                 ObjectOutputStream    stream = new ObjectOutputStream(buffer);
 
                 // serialize the operation
-                operation.write(stream);
+                try
+                {
+                    operation.write(stream);
+                }
+                catch (NotSerializableException e)
+                {
+                    // when we can't serialize the operation
+                    // we send back the exception as the response
+                    buffer.reset();
+                    stream    = new ObjectOutputStream(buffer);
+
+                    operation = new ResponseOperation(e);
+                    operation.write(stream);
+                }
 
                 // we're done writing (to the buffer)
                 stream.flush();

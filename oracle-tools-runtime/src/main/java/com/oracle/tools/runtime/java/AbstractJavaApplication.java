@@ -35,9 +35,6 @@ import com.oracle.tools.deferred.jmx.DeferredMBeanAttribute;
 import com.oracle.tools.deferred.jmx.DeferredMBeanInfo;
 import com.oracle.tools.deferred.jmx.DeferredMBeanProxy;
 
-import com.oracle.tools.predicate.Predicate;
-import com.oracle.tools.predicate.Predicates;
-
 import com.oracle.tools.runtime.AbstractApplication;
 import com.oracle.tools.runtime.Application;
 import com.oracle.tools.runtime.ApplicationConsole;
@@ -45,6 +42,7 @@ import com.oracle.tools.runtime.LifecycleEventInterceptor;
 
 import com.oracle.tools.runtime.concurrent.RemoteCallable;
 import com.oracle.tools.runtime.concurrent.RemoteRunnable;
+import com.oracle.tools.runtime.concurrent.callable.RemoteMethodInvocation;
 
 import com.oracle.tools.runtime.network.Constants;
 
@@ -357,14 +355,19 @@ public abstract class AbstractJavaApplication<A extends AbstractJavaApplication<
 
 
     @Override
-    public <T> T getProxyFor(Class<T>          classToProxy,
-                             RemoteCallable<T> instanceProducer,
-                             Predicate<Method> unsupportedMethodPredicate)
+    public <T> T getProxyFor(Class<T>                           classToProxy,
+                             RemoteCallable<T>                  instanceProducer,
+                             RemoteMethodInvocation.Interceptor interceptor)
     {
-        return ReflectionHelper.createProxyOf(classToProxy, new ProxyMethodInterceptor(instanceProducer));
+        return ReflectionHelper.createProxyOf(classToProxy, new ProxyMethodInterceptor(instanceProducer, interceptor));
     }
 
 
+    /**
+     * The {@link MethodInterceptor} for remotely proxied classes.
+     *
+     * @param <T>  the type of the proxied class
+     */
     private class ProxyMethodInterceptor<T> implements MethodInterceptor
     {
         /**
@@ -374,38 +377,26 @@ public abstract class AbstractJavaApplication<A extends AbstractJavaApplication<
         private RemoteCallable<T> instanceProducer;
 
         /**
-         * A {@link Predicate} to determine if a {@link Method} invocation
-         * is supported or not. When evaluating to <code>true</code> the
-         * {@link Method} is unsupported.
+         * An optional {@link RemoteMethodInvocation.Interceptor} to
+         * intercept remote {@link Method} invocations.
          */
-        private Predicate<Method> unsupportedMethodPredicate;
-
-
-        /**
-         * Constructs a {@link ProxyMethodInterceptor}.
-         *
-         * @param instanceProducer  the {@link RemoteCallable} that produces the instance on which
-         *                          proxied methods should be invoked
-         */
-        public ProxyMethodInterceptor(RemoteCallable<T> instanceProducer)
-        {
-            this(instanceProducer, Predicates.<Method>never());
-        }
+        private RemoteMethodInvocation.Interceptor interceptor;
 
 
         /**
          * Constructs a {@link ProxyMethodInterceptor} with the ability to raise
          * {@link UnsupportedOperationException}s for {@link Method}s that can't be implemented.
          *
-         * @param instanceProducer            the {@link RemoteCallable} that produces the instance on which
-         *                                    proxied methods should be invoked
-         * @param unsupportedMethodPredicate  a {@link Predicate} to evaluate when a {@link Method} is unsupported
+         * @param instanceProducer  the {@link RemoteCallable} that produces the instance on which
+         *                          proxied methods should be invoked
+         * @param interceptor       the optional {@link RemoteMethodInvocation.Interceptor} to
+         *                          intercept remote {@link Method} invocations
          */
-        public ProxyMethodInterceptor(RemoteCallable<T> instanceProducer,
-                                      Predicate<Method> unsupportedMethodPredicate)
+        public ProxyMethodInterceptor(RemoteCallable<T>                  instanceProducer,
+                                      RemoteMethodInvocation.Interceptor interceptor)
         {
-            this.instanceProducer           = instanceProducer;
-            this.unsupportedMethodPredicate = unsupportedMethodPredicate;
+            this.instanceProducer = instanceProducer;
+            this.interceptor      = interceptor;
         }
 
 
@@ -415,89 +406,39 @@ public abstract class AbstractJavaApplication<A extends AbstractJavaApplication<
                                 Object[]    args,
                                 MethodProxy methodProxy) throws Throwable
         {
-            if (unsupportedMethodPredicate.evaluate(method))
+            if (interceptor != null)
             {
-                throw new UnsupportedOperationException("The method: " + method.getName() + " is not supported");
+                interceptor.onBeforeRemoteInvocation(method, args);
             }
-            else
+
+            FutureCompletionListener listener = new FutureCompletionListener();
+
+            AbstractJavaApplication.this.submit(new RemoteMethodInvocation<T>(instanceProducer,
+                                                                              method.getName(),
+                                                                              args,
+                                                                              interceptor), listener);
+
+            try
             {
-                FutureCompletionListener listener = new FutureCompletionListener();
+                Object result = listener.get();
 
-                AbstractJavaApplication.this.submit(new RemoteMethodInvocation<T>(instanceProducer,
-                                                                                  method.getName(),
-                                                                                  args), listener);
-
-                return listener.get();
-            }
-        }
-    }
-
-
-    /**
-     * A {@link RemoteCallable} representing a remote method invocation against
-     * a remote instance (also represented by a {@link RemoteCallable}.
-     *
-     * @param <T>  the type of the instance on which the method will be invoked
-     */
-    public static class RemoteMethodInvocation<T> implements RemoteCallable
-    {
-        /**
-         * The {@link RemoteCallable} that will produce the instance on which
-         * to invoke the specified method.
-         */
-        private RemoteCallable<T> instanceProducer;
-
-        /**
-         * The name of the method to invoke on the instance.
-         */
-        private String methodName;
-
-        /**
-         * The arguments for the method invocation.
-         */
-        private Object[] args;
-
-
-        /**
-         * Constructs a {@link RemoteMethodInvocation}.
-         *
-         * @param instanceProducer  the {@link RemoteCallable} that produces the instance
-         *                          on which the method should be invoked
-         * @param methodName        the name of the method to invoke
-         * @param args              the arguments to the instance
-         */
-        public RemoteMethodInvocation(RemoteCallable<T> instanceProducer,
-                                      String            methodName,
-                                      Object[]          args)
-        {
-            this.instanceProducer = instanceProducer;
-            this.methodName       = methodName;
-            this.args             = args;
-        }
-
-
-        @Override
-        public Object call() throws Exception
-        {
-            T instance = instanceProducer.call();
-
-            if (instance == null)
-            {
-                throw new NullPointerException("Remote Instance is null");
-            }
-            else
-            {
-                // find the compatible method on the instance
-                Method method = ReflectionHelper.getCompatibleMethod(instance.getClass(), methodName, args);
-
-                if (method == null)
+                if (interceptor != null)
                 {
-                    throw new NoSuchMethodException(methodName);
+                    result = interceptor.onAfterRemoteInvocation(method, args, result);
+                }
+
+                return result;
+
+            }
+            catch (Exception e)
+            {
+                if (interceptor == null)
+                {
+                    throw e;
                 }
                 else
                 {
-                    method.setAccessible(true);
-                    return method.invoke(instance, args);
+                    throw interceptor.onRemoteInvocationException(method, args, e);
                 }
             }
         }

@@ -25,6 +25,9 @@
 
 package com.oracle.tools.runtime.java;
 
+import classloader.applications.ParentApplication;
+import classloader.applications.SleepingApplication;
+
 import com.oracle.tools.deferred.Eventually;
 
 import com.oracle.tools.deferred.listener.DeferredCompletionListener;
@@ -35,15 +38,12 @@ import com.oracle.tools.runtime.ApplicationConsole;
 
 import com.oracle.tools.runtime.concurrent.RemoteExecutor;
 import com.oracle.tools.runtime.concurrent.RemoteExecutorListener;
+import com.oracle.tools.runtime.concurrent.callable.GetSystemProperty;
+import com.oracle.tools.runtime.concurrent.runnable.SystemExit;
 import com.oracle.tools.runtime.concurrent.socket.RemoteExecutorServer;
 import com.oracle.tools.runtime.concurrent.socket.SocketBasedRemoteExecutorTests;
 
 import com.oracle.tools.runtime.console.SystemApplicationConsole;
-
-import com.oracle.tools.runtime.java.applications.ParentApplication;
-import com.oracle.tools.runtime.java.applications.SleepingApplication;
-import com.oracle.tools.runtime.java.concurrent.GetSystemProperty;
-import com.oracle.tools.runtime.java.concurrent.SystemExit;
 
 import org.junit.Test;
 
