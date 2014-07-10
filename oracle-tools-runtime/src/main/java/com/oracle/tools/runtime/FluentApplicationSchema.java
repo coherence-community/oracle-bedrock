@@ -43,19 +43,6 @@ public interface FluentApplicationSchema<A extends Application, S extends Fluent
     extends ApplicationSchema<A>
 {
     /**
-     * Obtains the {@link LifecycleEventInterceptor}s that the {@link FluentApplicationSchema} will
-     * attach to {@link Application}s produced by the said {@link FluentApplicationSchema}.
-     * <p>
-     * {@link LifecycleEventInterceptor}s are typically used by {@link Application}s
-     * and {@link ApplicationBuilder}s to raise {@link LifecycleEvent}s pertaining
-     * to the life-cycle of an {@link Application}.
-     *
-     * @return  the {@link LifecycleEventInterceptor}s
-     */
-    public Iterable<LifecycleEventInterceptor<? super A>> getLifecycleInterceptors();
-
-
-    /**
      * Adds an {@link LifecycleEventInterceptor} to the {@link FluentApplicationSchema}
      * those of which will be executed when certain {@link LifecycleEvent}s
      * occur on {@link Application}s created with the {@link ApplicationSchema}.

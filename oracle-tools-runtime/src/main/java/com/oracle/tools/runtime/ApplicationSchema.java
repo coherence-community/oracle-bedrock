@@ -26,8 +26,10 @@
 package com.oracle.tools.runtime;
 
 import java.io.File;
+
 import java.util.List;
 import java.util.Properties;
+
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -51,6 +53,7 @@ public interface ApplicationSchema<A extends Application>
      *         that this {@link ApplicationSchema} defines
      */
     public Class<A> getApplicationClass();
+
 
     /**
      * Obtains the name of the application executable.
@@ -78,6 +81,7 @@ public interface ApplicationSchema<A extends Application>
      */
     public PropertiesBuilder getEnvironmentVariablesBuilder();
 
+
     /**
      * Obtains the custom, {@link Application}-specific operating
      * system environment variables with any modifications and additions
@@ -91,6 +95,7 @@ public interface ApplicationSchema<A extends Application>
      *         and additions based on the specified {@link Platform}
      */
     public Properties getEnvironmentVariables(Platform platform);
+
 
     /**
      * Determines the standard error stream will be redirected to the standard
@@ -152,4 +157,17 @@ public interface ApplicationSchema<A extends Application>
      * @return the {@link TimeUnit} for {@link Application} timeouts
      */
     public TimeUnit getDefaultTimeoutUnits();
+
+
+    /**
+     * Obtains the {@link LifecycleEventInterceptor}s that the {@link FluentApplicationSchema} will
+     * attach to {@link Application}s produced by the said {@link FluentApplicationSchema}.
+     * <p>
+     * {@link LifecycleEventInterceptor}s are typically used by {@link Application}s
+     * and {@link ApplicationBuilder}s to raise {@link LifecycleEvent}s pertaining
+     * to the life-cycle of an {@link Application}.
+     *
+     * @return  the {@link LifecycleEventInterceptor}s
+     */
+    public Iterable<LifecycleEventInterceptor<? super A>> getLifecycleInterceptors();
 }

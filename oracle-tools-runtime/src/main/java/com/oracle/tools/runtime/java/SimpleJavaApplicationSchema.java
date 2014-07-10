@@ -42,6 +42,30 @@ public class SimpleJavaApplicationSchema
     extends AbstractJavaApplicationSchema<SimpleJavaApplication, SimpleJavaApplicationSchema>
 {
     /**
+     * Constructs a {@link SimpleJavaApplicationSchema} based on
+     * a {@link JavaApplicationSchema}.
+     *
+     * @param schema  the {@link JavaApplicationSchema}
+     */
+    public SimpleJavaApplicationSchema(JavaApplicationSchema schema)
+    {
+        super(schema);
+    }
+
+
+    /**
+     * Constructs a {@link SimpleJavaApplicationSchema} based on
+     * a {@link SimpleJavaApplicationSchema}.
+     *
+     * @param schema  the {@link SimpleJavaApplicationSchema}
+     */
+    public SimpleJavaApplicationSchema(SimpleJavaApplicationSchema schema)
+    {
+        super(schema);
+    }
+
+
+    /**
      * Construct a {@link SimpleJavaApplicationSchema} with a given application
      * class name, defaulting to use the class path of the executing application.
      *
@@ -49,7 +73,7 @@ public class SimpleJavaApplicationSchema
      */
     public SimpleJavaApplicationSchema(String applicationClassName)
     {
-        super(SimpleJavaApplication.class, applicationClassName);
+        super(applicationClassName);
     }
 
 
@@ -62,7 +86,7 @@ public class SimpleJavaApplicationSchema
     public SimpleJavaApplicationSchema(String applicationClassName,
                                        String classPath)
     {
-        super(SimpleJavaApplication.class, applicationClassName, classPath);
+        super(applicationClassName, classPath);
     }
 
 
@@ -89,5 +113,12 @@ public class SimpleJavaApplicationSchema
     public void configureDefaults()
     {
         // we don't establish any defaults
+    }
+
+
+    @Override
+    public Class<SimpleJavaApplication> getApplicationClass()
+    {
+        return SimpleJavaApplication.class;
     }
 }

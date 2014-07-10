@@ -26,6 +26,8 @@
 package com.oracle.tools.runtime.coherence;
 
 import com.oracle.tools.runtime.ApplicationConsole;
+
+import com.oracle.tools.runtime.java.JavaApplicationSchema;
 import com.oracle.tools.runtime.java.JavaProcess;
 
 import java.util.Properties;
@@ -48,7 +50,47 @@ public class CoherenceCacheServerSchema
      */
     public CoherenceCacheServerSchema()
     {
-        super(CoherenceCacheServer.class, DEFAULT_CACHE_SERVER_CLASSNAME);
+        super(DEFAULT_CACHE_SERVER_CLASSNAME);
+    }
+
+
+    /**
+     * Constructs a {@link CoherenceCacheServerSchema} based on a
+     * {@link CoherenceCacheServerSchema}.
+     *
+     * @param schema  the other {@link CoherenceCacheServerSchema}
+     */
+    public CoherenceCacheServerSchema(CoherenceCacheServerSchema schema)
+    {
+        super(schema);
+    }
+
+
+    /**
+     * Constructs a {@link CoherenceCacheServerSchema} based on a
+     * {@link CoherenceClusterMemberSchema}.
+     *
+     * @param schema  the {@link CoherenceClusterMemberSchema}
+     */
+    public CoherenceCacheServerSchema(CoherenceClusterMemberSchema schema)
+    {
+        super(schema);
+
+        setApplicationClassName(DEFAULT_CACHE_SERVER_CLASSNAME);
+    }
+
+
+    /**
+     * Constructs a {@link CoherenceCacheServerSchema} based on a
+     * {@link JavaApplicationSchema}.
+     *
+     * @param schema  the {@link JavaApplicationSchema}
+     */
+    public CoherenceCacheServerSchema(JavaApplicationSchema schema)
+    {
+        super(schema);
+
+        setApplicationClassName(DEFAULT_CACHE_SERVER_CLASSNAME);
     }
 
 
@@ -60,7 +102,7 @@ public class CoherenceCacheServerSchema
      */
     public CoherenceCacheServerSchema(String applicationClassName)
     {
-        super(CoherenceCacheServer.class, applicationClassName);
+        super(applicationClassName);
     }
 
 
@@ -74,7 +116,7 @@ public class CoherenceCacheServerSchema
     public CoherenceCacheServerSchema(String applicationClassName,
                                       String classPath)
     {
-        super(CoherenceCacheServer.class, applicationClassName, classPath);
+        super(applicationClassName, classPath);
     }
 
 
@@ -89,7 +131,7 @@ public class CoherenceCacheServerSchema
                                       String applicationClassName,
                                       String classPath)
     {
-        super(CoherenceCacheServer.class, executableName, applicationClassName, classPath);
+        super(executableName, applicationClassName, classPath);
     }
 
 
@@ -109,5 +151,12 @@ public class CoherenceCacheServerSchema
                                         getDefaultTimeout(),
                                         getDefaultTimeoutUnits(),
                                         getLifecycleInterceptors());
+    }
+
+
+    @Override
+    public Class<CoherenceCacheServer> getApplicationClass()
+    {
+        return CoherenceCacheServer.class;
     }
 }

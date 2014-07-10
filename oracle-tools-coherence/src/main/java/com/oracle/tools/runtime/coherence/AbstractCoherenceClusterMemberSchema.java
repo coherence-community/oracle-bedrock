@@ -33,6 +33,7 @@ import com.oracle.tools.runtime.concurrent.callable.RemoteCallableStaticMethod;
 
 import com.oracle.tools.runtime.java.AbstractJavaApplicationSchema;
 import com.oracle.tools.runtime.java.ContainerBasedJavaApplicationBuilder;
+import com.oracle.tools.runtime.java.JavaApplicationSchema;
 
 import com.oracle.tools.util.CompletionListener;
 
@@ -55,17 +56,38 @@ public abstract class AbstractCoherenceClusterMemberSchema<A extends CoherenceCl
                                                            ContainerBasedJavaApplicationBuilder.ApplicationController
 {
     /**
+     * Constructs an {@link AbstractCoherenceClusterMemberSchema} based on
+     * a {@link CoherenceClusterMemberSchema}.
+     *
+     * @param schema  the other {@link CoherenceClusterMemberSchema}
+     */
+    public AbstractCoherenceClusterMemberSchema(CoherenceClusterMemberSchema<A> schema)
+    {
+        super(schema);
+    }
+
+
+    /**
+     * Constructs an {@link AbstractCoherenceClusterMemberSchema} based on
+     * a {@link JavaApplicationSchema}.
+     *
+     * @param schema  the {@link JavaApplicationSchema}
+     */
+    public AbstractCoherenceClusterMemberSchema(JavaApplicationSchema<A> schema)
+    {
+        super(schema);
+    }
+
+
+    /**
      * Construct a {@link AbstractCoherenceClusterMemberSchema} with a given application class name,
      * using the class path of the executing application.
      *
-     * @param applicationType       the type of {@link com.oracle.tools.runtime.Application}
-     *                              that this schema defines
      * @param applicationClassName  the fully qualified class name of the Java application
      */
-    public AbstractCoherenceClusterMemberSchema(Class<A> applicationType,
-                                                String   applicationClassName)
+    public AbstractCoherenceClusterMemberSchema(String applicationClassName)
     {
-        super(applicationType, applicationClassName);
+        super(applicationClassName);
     }
 
 
@@ -73,34 +95,28 @@ public abstract class AbstractCoherenceClusterMemberSchema<A extends CoherenceCl
      * Construct a {@link AbstractCoherenceClusterMemberSchema} with a given application class name,
      * but using the class path of the executing application.
      *
-     * @param applicationType       the type of {@link com.oracle.tools.runtime.Application}
-     *                              that this schema defines
      * @param applicationClassName  the fully qualified class name of the Java application
      * @param classPath             the class path for the Java application.
      */
-    public AbstractCoherenceClusterMemberSchema(Class<A> applicationType,
-                                                String   applicationClassName,
-                                                String   classPath)
+    public AbstractCoherenceClusterMemberSchema(String applicationClassName,
+                                                String classPath)
     {
-        super(applicationType, applicationClassName, classPath);
+        super(applicationClassName, classPath);
     }
 
 
     /**
      * Construct a {@link AbstractCoherenceClusterMemberSchema}.
      *
-     * @param applicationType       the type of {@link com.oracle.tools.runtime.Application}
-     *                              that this schema defines
      * @param executableName        the executable name to run
      * @param applicationClassName  the fully qualified class name of the Java application
      * @param classPath             the class path for the Java application
      */
-    public AbstractCoherenceClusterMemberSchema(Class<A> applicationType,
-                                                String   executableName,
-                                                String   applicationClassName,
-                                                String   classPath)
+    public AbstractCoherenceClusterMemberSchema(String executableName,
+                                                String applicationClassName,
+                                                String classPath)
     {
-        super(applicationType, executableName, applicationClassName, classPath);
+        super(executableName, applicationClassName, classPath);
     }
 
 

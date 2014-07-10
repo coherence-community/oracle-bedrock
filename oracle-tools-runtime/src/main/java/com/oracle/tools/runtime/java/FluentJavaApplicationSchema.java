@@ -49,6 +49,15 @@ public interface FluentJavaApplicationSchema<A extends JavaApplication, S extend
             JavaApplicationSchema<A>
 {
     /**
+     * Sets the fully-qualified class name of the class containing the main method
+     * for the desired application.
+     *
+     * @param className  the fully-qualified class name of the "main" class
+     */
+    public S setApplicationClassName(String className);
+
+
+    /**
      * Adds an additional JVM option to use when starting the Java application.
      *
      * @param option  the JVM option

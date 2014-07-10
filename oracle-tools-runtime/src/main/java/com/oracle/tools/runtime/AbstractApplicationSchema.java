@@ -104,23 +104,41 @@ public abstract class AbstractApplicationSchema<A extends Application, S extends
      */
     private LinkedList<LifecycleEventInterceptor<? super A>> lifecycleInterceptors;
 
+
     /**
-     * The type of {@link Application} that this {@link ApplicationSchema} defines
+     * Constructs an {@link AbstractApplicationSchema} based on another
+     * {@link ApplicationSchema}.
+     *
+     * @param schema  the other {@link ApplicationSchema}
      */
-    private Class<A> applicationType;
+    public AbstractApplicationSchema(ApplicationSchema<A> schema)
+    {
+        this.executableName              = schema.getExecutableName();
+        this.workingDirectory            = schema.getWorkingDirectory();
+        this.environmentVariablesBuilder = new PropertiesBuilder(schema.getEnvironmentVariablesBuilder());
+        this.isErrorStreamRedirected     = schema.isErrorStreamRedirected();
+        this.isDiagnosticsEnabled        = schema.isDiagnosticsEnabled();
+        this.defaultTimeout              = schema.getDefaultTimeout();
+        this.defaultTimeoutUnits         = schema.getDefaultTimeoutUnits();
+        this.isEnvironmentInherited      = schema.isEnvironmentInherited();
+        this.applicationArguments        = new ArrayList<String>(schema.getArguments());
+        this.lifecycleInterceptors       = new LinkedList<LifecycleEventInterceptor<? super A>>();
+
+        for (LifecycleEventInterceptor<? super A> interceptor : schema.getLifecycleInterceptors())
+        {
+            this.lifecycleInterceptors.add(interceptor);
+        }
+    }
 
 
     /**
      * Constructs an {@link AbstractApplicationSchema}.
      *
-     * @param applicationType  the type of {@link Application} that this schema defines
      * @param executableName   the name of the executable for the {@link Application}s
      *                         produced from this {@link ApplicationSchema}
      */
-    public AbstractApplicationSchema(Class<A> applicationType,
-                                     String   executableName)
+    public AbstractApplicationSchema(String executableName)
     {
-        this.applicationType             = applicationType;
         this.executableName              = executableName;
         this.environmentVariablesBuilder = new PropertiesBuilder();
         this.isEnvironmentInherited      = false;
@@ -130,16 +148,6 @@ public abstract class AbstractApplicationSchema<A extends Application, S extends
         this.defaultTimeout              = 1;
         this.defaultTimeoutUnits         = TimeUnit.MINUTES;
         this.lifecycleInterceptors       = new LinkedList<LifecycleEventInterceptor<? super A>>();
-    }
-
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Class<A> getApplicationClass()
-    {
-        return applicationType;
     }
 
 

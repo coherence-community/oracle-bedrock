@@ -212,6 +212,10 @@ reverse chronological order.
     may result in a Java Application failing to launch
     (with JavaApplicationLauncher Class Not Found errors).
 
+*   [ORACLETOOLS-133](https://java.net/jira/browse/ORACLETOOLS-133): Introduced copy
+    constructors for ApplicationSchema implementations.
+
+
 <h4>oracle-tools-runtime-remote</h4>
 
 *   [ORACLETOOLS-91](https://java.net/jira/browse/ORACLETOOLS-91): Introduced

@@ -60,22 +60,22 @@ public abstract class AbstractJavaApplicationSchema<A extends JavaApplication,
     /**
      * The class name for the {@link JavaApplication}.
      */
-    private String m_applicationClassName;
+    private String applicationClassName;
 
     /**
      * The {@link ClassPath} for the {@link JavaApplication}.
      */
-    private ClassPath m_classPath;
+    private ClassPath classPath;
 
     /**
      * The JVM options for the {@link JavaApplication}.
      */
-    private ArrayList<String> m_jvmOptions;
+    private ArrayList<String> jvmOptions;
 
     /**
      * The system properties for the {@link JavaApplication}.
      */
-    private PropertiesBuilder m_systemPropertiesBuilder;
+    private PropertiesBuilder systemPropertiesBuilder;
 
     /**
      * The value of the JAVA_HOME environment variable
@@ -85,17 +85,20 @@ public abstract class AbstractJavaApplicationSchema<A extends JavaApplication,
 
 
     /**
-     * Construct a {@link JavaApplicationSchema} with a given application class name,
-     * but using the class path of the executing application.
+     * Constructs an {@link AbstractJavaApplicationSchema} based on another
+     * {@link JavaApplicationSchema}.
      *
-     * @param applicationType      the type of {@link com.oracle.tools.runtime.Application}
-     *                             that this schema defines
-     * @param applicationClassName The fully qualified class name of the Java application.
+     * @param schema  the other {@link JavaApplicationSchema}
      */
-    public AbstractJavaApplicationSchema(Class<A> applicationType,
-                                         String   applicationClassName)
+    public AbstractJavaApplicationSchema(JavaApplicationSchema<A> schema)
     {
-        this(applicationType, "java", applicationClassName, System.getProperty("java.class.path"));
+        super(schema);
+
+        this.applicationClassName    = schema.getApplicationClassName();
+        this.classPath               = new ClassPath(schema.getClassPath());
+        this.jvmOptions              = new ArrayList<String>(schema.getJvmOptions());
+        this.systemPropertiesBuilder = new PropertiesBuilder(schema.getSystemPropertiesBuilder());
+        this.javaHome                = schema.getJavaHome();
     }
 
 
@@ -103,40 +106,46 @@ public abstract class AbstractJavaApplicationSchema<A extends JavaApplication,
      * Construct a {@link JavaApplicationSchema} with a given application class name,
      * but using the class path of the executing application.
      *
-     * @param applicationType      the type of {@link com.oracle.tools.runtime.Application}
-     *                             that this schema defines
+     * @param applicationClassName The fully qualified class name of the Java application.
+     */
+    public AbstractJavaApplicationSchema(String applicationClassName)
+    {
+        this("java", applicationClassName, System.getProperty("java.class.path"));
+    }
+
+
+    /**
+     * Construct a {@link JavaApplicationSchema} with a given application class name,
+     * but using the class path of the executing application.
+     *
      * @param applicationClassName The fully qualified class name of the Java application.
      * @param classPath            The class path for the Java application.
      */
-    public AbstractJavaApplicationSchema(Class<A> applicationType,
-                                         String   applicationClassName,
-                                         String   classPath)
+    public AbstractJavaApplicationSchema(String applicationClassName,
+                                         String classPath)
     {
-        this(applicationType, "java", applicationClassName, classPath);
+        this("java", applicationClassName, classPath);
     }
 
 
     /**
      * Construct a {@link JavaApplicationSchema}.
      *
-     * @param applicationType      the type of {@link com.oracle.tools.runtime.Application}
-     *                             that this schema defines
      * @param executableName       The executable name to run
      * @param applicationClassName The fully qualified class name of the Java application.
      * @param classPath            The class path for the Java application.
      */
-    public AbstractJavaApplicationSchema(Class<A> applicationType,
-                                         String   executableName,
-                                         String   applicationClassName,
-                                         String   classPath)
+    public AbstractJavaApplicationSchema(String executableName,
+                                         String applicationClassName,
+                                         String classPath)
     {
-        super(applicationType, executableName);
+        super(executableName);
 
-        m_applicationClassName    = applicationClassName;
-        m_classPath               = new ClassPath(classPath);
-        m_jvmOptions              = new ArrayList<String>();
-        m_systemPropertiesBuilder = new PropertiesBuilder();
-        javaHome                  = null;
+        this.applicationClassName    = applicationClassName;
+        this.classPath               = new ClassPath(classPath);
+        this.jvmOptions              = new ArrayList<String>();
+        this.systemPropertiesBuilder = new PropertiesBuilder();
+        this.javaHome                = null;
 
         configureDefaults();
     }
@@ -151,7 +160,7 @@ public abstract class AbstractJavaApplicationSchema<A extends JavaApplication,
     @Override
     public PropertiesBuilder getSystemPropertiesBuilder()
     {
-        return m_systemPropertiesBuilder;
+        return systemPropertiesBuilder;
     }
 
 
@@ -165,14 +174,23 @@ public abstract class AbstractJavaApplicationSchema<A extends JavaApplication,
     @Override
     public ClassPath getClassPath()
     {
-        return m_classPath;
+        return classPath;
     }
 
 
     @Override
     public String getApplicationClassName()
     {
-        return m_applicationClassName;
+        return applicationClassName;
+    }
+
+
+    @Override
+    public S setApplicationClassName(String className)
+    {
+        this.applicationClassName = className;
+
+        return (S) this;
     }
 
 
@@ -204,7 +222,7 @@ public abstract class AbstractJavaApplicationSchema<A extends JavaApplication,
     @SuppressWarnings("unchecked")
     public S setClassPath(String classPath)
     {
-        m_classPath = new ClassPath(classPath);
+        this.classPath = new ClassPath(classPath);
 
         return (S) this;
     }
@@ -219,7 +237,7 @@ public abstract class AbstractJavaApplicationSchema<A extends JavaApplication,
     @SuppressWarnings("unchecked")
     public S setClassPath(ClassPath classPath)
     {
-        m_classPath = classPath;
+        this.classPath = classPath;
 
         return (S) this;
     }
@@ -236,7 +254,7 @@ public abstract class AbstractJavaApplicationSchema<A extends JavaApplication,
     public S setSystemProperty(String name,
                                Object value)
     {
-        m_systemPropertiesBuilder.setProperty(name, value);
+        systemPropertiesBuilder.setProperty(name, value);
 
         return (S) this;
     }
@@ -259,9 +277,9 @@ public abstract class AbstractJavaApplicationSchema<A extends JavaApplication,
                                    Class<T> propertyClass,
                                    T        defaultValue)
     {
-        if (m_systemPropertiesBuilder.containsProperty(name))
+        if (systemPropertiesBuilder.containsProperty(name))
         {
-            Object property = m_systemPropertiesBuilder.getProperty(name);
+            Object property = systemPropertiesBuilder.getProperty(name);
 
             return propertyClass.cast(property);
         }
@@ -284,7 +302,7 @@ public abstract class AbstractJavaApplicationSchema<A extends JavaApplication,
     public S setSystemPropertyIfAbsent(String name,
                                        Object value)
     {
-        m_systemPropertiesBuilder.setPropertyIfAbsent(name, value);
+        systemPropertiesBuilder.setPropertyIfAbsent(name, value);
 
         return (S) this;
     }
@@ -302,7 +320,7 @@ public abstract class AbstractJavaApplicationSchema<A extends JavaApplication,
     public S setDefaultSystemProperty(String name,
                                       Object value)
     {
-        m_systemPropertiesBuilder.setDefaultProperty(name, value);
+        systemPropertiesBuilder.setDefaultProperty(name, value);
 
         return (S) this;
     }
@@ -317,7 +335,7 @@ public abstract class AbstractJavaApplicationSchema<A extends JavaApplication,
     @SuppressWarnings("unchecked")
     public S setSystemProperties(PropertiesBuilder systemProperties)
     {
-        m_systemPropertiesBuilder.addProperties(systemProperties);
+        systemPropertiesBuilder.addProperties(systemProperties);
 
         return (S) this;
     }
@@ -327,7 +345,7 @@ public abstract class AbstractJavaApplicationSchema<A extends JavaApplication,
     public S addJvmOption(String option)
     {
         // drop the "-" if specified
-        m_jvmOptions.add(option.startsWith("-") ? option.substring(1) : option);
+        jvmOptions.add(option.startsWith("-") ? option.substring(1) : option);
 
         return (S) this;
     }
@@ -366,7 +384,7 @@ public abstract class AbstractJavaApplicationSchema<A extends JavaApplication,
     @Override
     public S setJvmOptions(String... options)
     {
-        m_jvmOptions.clear();
+        jvmOptions.clear();
 
         return addJvmOptions(options);
     }
@@ -375,7 +393,7 @@ public abstract class AbstractJavaApplicationSchema<A extends JavaApplication,
     @Override
     public S setJvmOptions(List<String> options)
     {
-        m_jvmOptions.clear();
+        jvmOptions.clear();
 
         return addJvmOptions(options);
     }
@@ -422,7 +440,7 @@ public abstract class AbstractJavaApplicationSchema<A extends JavaApplication,
     @Override
     public List<String> getJvmOptions()
     {
-        return m_jvmOptions;
+        return jvmOptions;
     }
 
 
@@ -475,11 +493,11 @@ public abstract class AbstractJavaApplicationSchema<A extends JavaApplication,
         }
         else
         {
-            m_systemPropertiesBuilder.removeProperty(SUN_MANAGEMENT_JMXREMOTE);
-            m_systemPropertiesBuilder.removeProperty(SUN_MANAGEMENT_JMXREMOTE_PORT);
-            m_systemPropertiesBuilder.removeProperty(SUN_MANAGEMENT_JMXREMOTE_AUTHENTICATE);
-            m_systemPropertiesBuilder.removeProperty(SUN_MANAGEMENT_JMXREMOTE_SSL);
-            m_systemPropertiesBuilder.removeProperty(JAVA_RMI_SERVER_HOSTNAME);
+            systemPropertiesBuilder.removeProperty(SUN_MANAGEMENT_JMXREMOTE);
+            systemPropertiesBuilder.removeProperty(SUN_MANAGEMENT_JMXREMOTE_PORT);
+            systemPropertiesBuilder.removeProperty(SUN_MANAGEMENT_JMXREMOTE_AUTHENTICATE);
+            systemPropertiesBuilder.removeProperty(SUN_MANAGEMENT_JMXREMOTE_SSL);
+            systemPropertiesBuilder.removeProperty(JAVA_RMI_SERVER_HOSTNAME);
         }
 
         return (S) this;
@@ -502,9 +520,9 @@ public abstract class AbstractJavaApplicationSchema<A extends JavaApplication,
     @Override
     public boolean isIPv4Preferred()
     {
-        if (m_systemPropertiesBuilder.containsProperty(JAVA_NET_PREFER_IPV4_STACK))
+        if (systemPropertiesBuilder.containsProperty(JAVA_NET_PREFER_IPV4_STACK))
         {
-            Object isIPv4Preferred = m_systemPropertiesBuilder.getProperty(JAVA_NET_PREFER_IPV4_STACK);
+            Object isIPv4Preferred = systemPropertiesBuilder.getProperty(JAVA_NET_PREFER_IPV4_STACK);
 
             return isIPv4Preferred == null ? false : Boolean.valueOf(isIPv4Preferred.toString());
         }
@@ -592,7 +610,7 @@ public abstract class AbstractJavaApplicationSchema<A extends JavaApplication,
      */
     public boolean isHeadless()
     {
-        Object value = m_systemPropertiesBuilder.getProperty(JAVA_AWT_HEADLESS);
+        Object value = systemPropertiesBuilder.getProperty(JAVA_AWT_HEADLESS);
 
         return value instanceof Boolean && ((Boolean) value);
     }

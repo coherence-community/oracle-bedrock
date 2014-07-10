@@ -210,7 +210,7 @@ public class ClusterMemberSchema extends AbstractCoherenceClusterMemberSchema<Cl
      */
     public ClusterMemberSchema(String applicationClassName)
     {
-        super(ClusterMember.class, applicationClassName);
+        super(applicationClassName);
     }
 
 
@@ -223,7 +223,7 @@ public class ClusterMemberSchema extends AbstractCoherenceClusterMemberSchema<Cl
     public ClusterMemberSchema(String applicationClassName,
                                String classPath)
     {
-        super(ClusterMember.class, applicationClassName, classPath);
+        super(applicationClassName, classPath);
     }
 
 
@@ -257,9 +257,6 @@ public class ClusterMemberSchema extends AbstractCoherenceClusterMemberSchema<Cl
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public ClusterMember createJavaApplication(JavaProcess        process,
                                                String             name,
@@ -279,9 +276,6 @@ public class ClusterMemberSchema extends AbstractCoherenceClusterMemberSchema<Cl
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void start(ContainerBasedJavaApplicationBuilder.ControllableApplication application,
                       CompletionListener<Void>                                     listener)
@@ -293,9 +287,6 @@ public class ClusterMemberSchema extends AbstractCoherenceClusterMemberSchema<Cl
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void destroy(ContainerBasedJavaApplicationBuilder.ControllableApplication application,
                         CompletionListener<Void>                                     listener)
@@ -304,5 +295,12 @@ public class ClusterMemberSchema extends AbstractCoherenceClusterMemberSchema<Cl
                                                                              "shutdown");
 
         application.submit(callable, listener);
+    }
+
+
+    @Override
+    public Class<ClusterMember> getApplicationClass()
+    {
+        return ClusterMember.class;
     }
 }

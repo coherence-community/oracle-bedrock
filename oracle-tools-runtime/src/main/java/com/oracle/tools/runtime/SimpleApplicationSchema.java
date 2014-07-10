@@ -37,13 +37,19 @@ package com.oracle.tools.runtime;
 public class SimpleApplicationSchema extends AbstractApplicationSchema<SimpleApplication, SimpleApplicationSchema>
 {
     /**
-     * Construct a {@link SimpleApplicationSchema} for the specified
-     * executable.
+     * Construct a {@link SimpleApplicationSchema} for the specified executable.
      *
      * @param executableName  the name of the executable for the {@link Application}.
      */
     public SimpleApplicationSchema(String executableName)
     {
-        super(SimpleApplication.class, executableName);
+        super(executableName);
+    }
+
+
+    @Override
+    public Class<SimpleApplication> getApplicationClass()
+    {
+        return SimpleApplication.class;
     }
 }

@@ -95,9 +95,10 @@ public interface JavaApplicationSchema<A extends JavaApplication> extends Applic
 
 
     /**
-     * Obtain the application main class name.
+     * Obtain the fully-qualified class name of the class containing the main method
+     * for the desired application.
      *
-     * @return {@link String}
+     * @return  the fully-qualified class name of the "main" class
      */
     public String getApplicationClassName();
 
