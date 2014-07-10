@@ -23,17 +23,14 @@
  * "Portions Copyright [year] [name of copyright owner]"
  */
 
-package com.oracle.tools.runtime.java;
-
-import com.oracle.tools.runtime.LocalPlatform;
-import com.oracle.tools.runtime.PlatformSchema;
+package com.oracle.tools.runtime;
 
 /**
  * A {@link PlatformSchema} encapsulating configuration and operational settings that a
  * {@link com.oracle.tools.runtime.PlatformBuilder} will use to realize a
  * {@link LocalPlatform} platform.
  * <p>
- * Copyright (c) 2011. All Rights Reserved. Oracle Corporation.<br>
+ * Copyright (c) 2014. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Jonathan Knight
@@ -41,7 +38,7 @@ import com.oracle.tools.runtime.PlatformSchema;
 public class LocalPlatformSchema implements PlatformSchema<LocalPlatform>
 {
     /**
-     * The singleton instance of the {@link com.oracle.tools.runtime.java.LocalPlatformSchema}.
+     * The singleton instance of the {@link LocalPlatformSchema}.
      */
     public static LocalPlatformSchema INSTANCE = new LocalPlatformSchema();
 
