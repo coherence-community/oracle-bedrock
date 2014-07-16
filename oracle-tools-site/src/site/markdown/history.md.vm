@@ -140,6 +140,11 @@ reverse chronological order.
 *   [ORACLETOOLS-106](https://java.net/jira/browse/ORACLETOOLS-106): Introduced
     the concept of an Assembly.  This replaces the concept of an ApplicationGroup.
 
+*   [ORACLETOOLS-112](https://java.net/jira/browse/ORACLETOOLS-112): Introduced
+    the ability to specify remote debugging settings for processes. Remote debug
+    mode is automatically enabled foe local processes if the controlling process
+    (typically an IDE) is running in debug mode.
+
 *   [ORACLETOOLS-114](https://java.net/jira/browse/ORACLETOOLS-114): Introduced
     JavaVirtualMachine as an implementation of a Platform to represent the
     current JVM process.
