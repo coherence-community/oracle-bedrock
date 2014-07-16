@@ -26,7 +26,6 @@
 package com.oracle.tools.runtime;
 
 import java.util.Properties;
-
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -45,6 +44,7 @@ public class SimpleApplication extends AbstractApplication<SimpleApplication, Ap
      * @param process               the {@link ApplicationProcess} representing the
      *                              {@link Application}
      * @param name                  the name of the application
+     * @param platform              the {@link Platform} that this {@link Application} is running on
      * @param console               the {@link ApplicationConsole} that will be
      *                              used for I/O by the {@link Application}
      * @param environmentVariables  the environment variables used when
@@ -56,6 +56,7 @@ public class SimpleApplication extends AbstractApplication<SimpleApplication, Ap
      */
     public SimpleApplication(ApplicationProcess                                             process,
                              String                                                         name,
+                             Platform                                                       platform,
                              ApplicationConsole                                             console,
                              Properties                                                     environmentVariables,
                              boolean                                                        isDiagnosticsEnabled,
@@ -65,6 +66,7 @@ public class SimpleApplication extends AbstractApplication<SimpleApplication, Ap
     {
         super(process,
               name,
+              platform,
               console,
               environmentVariables,
               isDiagnosticsEnabled,

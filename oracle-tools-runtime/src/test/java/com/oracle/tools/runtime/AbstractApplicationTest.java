@@ -26,24 +26,19 @@
 package com.oracle.tools.runtime;
 
 import com.oracle.tools.runtime.console.NullApplicationConsole;
-
 import com.oracle.tools.runtime.java.ContainerBasedJavaApplicationBuilder;
-
 import org.junit.Test;
-
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.sameInstance;
-
-import static org.junit.Assert.assertThat;
-
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import java.io.InputStream;
 import java.io.OutputStream;
-
 import java.util.Properties;
+
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.sameInstance;
+import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * Unit Tests for {@link AbstractApplication}s.
@@ -229,7 +224,7 @@ public class AbstractApplicationTest
                                         ApplicationConsole console,
                                         Properties         environmentVariables)
         {
-            super(process, name, console, environmentVariables);
+            super(process, name, LocalPlatform.getInstance(), console, environmentVariables);
         }
     }
 }

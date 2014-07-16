@@ -28,9 +28,9 @@ package com.oracle.tools.runtime.java;
 import com.oracle.tools.runtime.Application;
 import com.oracle.tools.runtime.ApplicationConsole;
 import com.oracle.tools.runtime.LifecycleEventInterceptor;
+import com.oracle.tools.runtime.Platform;
 
 import java.util.Properties;
-
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -48,6 +48,7 @@ public class SimpleJavaApplication extends AbstractJavaApplication<SimpleJavaApp
      *
      * @param process               the {@link JavaProcess} representing the {@link SimpleJavaApplication}
      * @param name                  the name of the {@link JavaApplication}
+     * @param platform              the {@link Platform} that this {@link Application} is running on
      * @param console               the {@link ApplicationConsole} that will be used for I/O by the
      *                              realized {@link Application}. This may be <code>null</code> if not required
      * @param environmentVariables  the environment variables used when starting the {@link JavaApplication}
@@ -56,25 +57,31 @@ public class SimpleJavaApplication extends AbstractJavaApplication<SimpleJavaApp
      * @param defaultTimeout        the default timeout duration
      * @param defaultTimeoutUnits   the default timeout duration {@link TimeUnit}
      * @param interceptors          the {@link LifecycleEventInterceptor}s
+     * @param remoteDebuggingPort   the port this process is listening on for remote debugger connections if
+     *                              enabled, or <= 0 if disabled
      */
     public SimpleJavaApplication(JavaProcess                                                        process,
                                  String                                                             name,
+                                 Platform                                                           platform,
                                  ApplicationConsole                                                 console,
                                  Properties                                                         environmentVariables,
                                  Properties                                                         systemProperties,
                                  boolean                                                            isDiagnosticsEnabled,
                                  long                                                               defaultTimeout,
                                  TimeUnit                                                           defaultTimeoutUnits,
-                                 Iterable<LifecycleEventInterceptor<? super SimpleJavaApplication>> interceptors)
+                                 Iterable<LifecycleEventInterceptor<? super SimpleJavaApplication>> interceptors,
+                                 int                                                                remoteDebuggingPort)
     {
         super(process,
               name,
+              platform,
               console,
               environmentVariables,
               systemProperties,
               isDiagnosticsEnabled,
               defaultTimeout,
               defaultTimeoutUnits,
-              interceptors);
+              interceptors,
+              remoteDebuggingPort);
     }
 }

@@ -291,6 +291,11 @@ public class InfrastructureAssemblyBuilderTest
             return null;
         }
 
+        @Override
+        public Platform getPlatform()
+        {
+            return null;
+        }
 
         @Override
         public int destroy()

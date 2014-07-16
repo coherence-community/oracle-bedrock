@@ -26,7 +26,7 @@
 package com.oracle.tools.runtime.coherence;
 
 import com.oracle.tools.runtime.ApplicationConsole;
-
+import com.oracle.tools.runtime.Platform;
 import com.oracle.tools.runtime.java.JavaApplicationSchema;
 import com.oracle.tools.runtime.java.JavaProcess;
 
@@ -138,19 +138,23 @@ public class CoherenceCacheServerSchema
     @Override
     public CoherenceCacheServer createJavaApplication(JavaProcess        process,
                                                       String             name,
+                                                      Platform           platform,
                                                       ApplicationConsole console,
                                                       Properties         environmentVariables,
-                                                      Properties         systemProperties)
+                                                      Properties         systemProperties,
+                                                      int                remoteDebuggingPort)
     {
         return new CoherenceCacheServer(process,
                                         name,
+                                        platform,
                                         console,
                                         environmentVariables,
                                         systemProperties,
                                         isDiagnosticsEnabled(),
                                         getDefaultTimeout(),
                                         getDefaultTimeoutUnits(),
-                                        getLifecycleInterceptors());
+                                        getLifecycleInterceptors(),
+                                        remoteDebuggingPort);
     }
 
 

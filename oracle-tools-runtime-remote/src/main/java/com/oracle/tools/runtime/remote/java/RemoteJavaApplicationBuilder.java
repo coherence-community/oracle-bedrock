@@ -282,7 +282,8 @@ public class RemoteJavaApplicationBuilder<A extends JavaApplication>
 
 
     @Override
-    protected <T extends A, S extends ApplicationSchema<T>> T createApplication(S                                   schema,
+    protected <T extends A, S extends ApplicationSchema<T>> T createApplication(Platform                            platform,
+                                                                                S                                   schema,
                                                                                 RemoteJavaApplicationEnvironment<A> environment,
                                                                                 String                              applicationName,
                                                                                 RemoteApplicationProcess            process,
@@ -295,9 +296,11 @@ public class RemoteJavaApplicationBuilder<A extends JavaApplication>
 
         return javaSchema.createJavaApplication(remoteJavaProcess,
                                                 applicationName,
+                                                platform,
                                                 console,
                                                 environment.getRemoteEnvironmentVariables(),
-                                                environment.getRemoteSystemProperties());
+                                                environment.getRemoteSystemProperties(),
+                                                environment.getRemoteDebugPort());
     }
 
 

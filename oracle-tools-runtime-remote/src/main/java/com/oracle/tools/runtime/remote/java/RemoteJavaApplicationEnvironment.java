@@ -27,35 +27,29 @@ package com.oracle.tools.runtime.remote.java;
 
 import com.oracle.tools.io.FileHelper;
 import com.oracle.tools.io.NetworkHelper;
-
 import com.oracle.tools.lang.StringHelper;
-
 import com.oracle.tools.predicate.Predicate;
-
+import com.oracle.tools.runtime.LocalPlatform;
 import com.oracle.tools.runtime.Platform;
 import com.oracle.tools.runtime.Settings;
-
 import com.oracle.tools.runtime.concurrent.ControllableRemoteExecutor;
 import com.oracle.tools.runtime.concurrent.socket.RemoteExecutorServer;
-
 import com.oracle.tools.runtime.java.ClassPath;
 import com.oracle.tools.runtime.java.JavaApplication;
 import com.oracle.tools.runtime.java.JavaApplicationSchema;
-
+import com.oracle.tools.runtime.java.RemoteDebuggingMode;
 import com.oracle.tools.runtime.remote.AbstractRemoteApplicationEnvironment;
 import com.oracle.tools.runtime.remote.DeploymentArtifact;
 
-import static com.oracle.tools.predicate.Predicates.allOf;
-
 import java.io.File;
 import java.io.IOException;
-
 import java.net.InetAddress;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Properties;
 import java.util.Set;
+
+import static com.oracle.tools.predicate.Predicates.allOf;
 
 /**
  * A Java-based implementation of a {@link RemoteJavaApplicationEnvironment}.
@@ -105,6 +99,10 @@ public class RemoteJavaApplicationEnvironment<A extends JavaApplication>
      */
     private char remotePathSeparator;
 
+    /**
+     * The remote debugging port assigned to the remote {@link JavaApplication}.
+     */
+    private int remoteDebugPort;
 
     /**
      * Constructs a {@link RemoteJavaApplicationEnvironment}.
@@ -317,6 +315,31 @@ public class RemoteJavaApplicationEnvironment<A extends JavaApplication>
             builder.append("-" + option);
         }
 
+        // ----- establish remote debugging JVM options -----
+
+        if (schema.isRemoteDebuggingEnabled())
+        {
+            RemoteDebuggingMode debugMode     = schema.getRemoteDebuggingMode();
+            boolean             isDebugServer = debugMode == RemoteDebuggingMode.LISTEN_FOR_DEBUGGER;
+            boolean             suspend       = schema.isRemoteDebuggingStartSuspended();
+
+            remoteDebugPort = isDebugServer ? schema.getRemoteDebugListenPort() : schema.getRemoteDebugAttachPort();
+            if (remoteDebugPort <= 0)
+            {
+                remoteDebugPort = LocalPlatform.getInstance().getAvailablePorts().next();
+            }
+
+            String debugAddress   = isDebugServer ? String.valueOf(remoteDebugPort)
+                                                  : LocalPlatform.getInstance().getHostName() + ":" + remoteDebugPort;
+
+            String debugOption    = String.format(" -agentlib:jdwp=transport=dt_socket,server=%s,suspend=%s,address=%s",
+                                                  (isDebugServer ? "y" : "n"),
+                                                  (suspend ? "y" : "n"),
+                                                  debugAddress);
+
+            builder.append(debugOption);
+        }
+
         // ----- establish the system properties for the java application -----
 
         // add the system properties to the command
@@ -381,6 +404,11 @@ public class RemoteJavaApplicationEnvironment<A extends JavaApplication>
         return deploymentArtifacts;
     }
 
+
+    public int getRemoteDebugPort()
+    {
+        return remoteDebugPort;
+    }
 
     @Override
     public void close()

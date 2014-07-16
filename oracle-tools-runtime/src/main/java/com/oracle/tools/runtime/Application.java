@@ -26,9 +26,7 @@
 package com.oracle.tools.runtime;
 
 import java.io.Closeable;
-
 import java.util.Properties;
-
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -67,6 +65,15 @@ public interface Application extends Closeable
      */
     public String getName();
 
+
+    /**
+     * Obtains the {@link Platform} that this {@link Application}
+     * is running on.
+     *
+     * @return the {@link Platform} that this {@link Application}
+     *         is running on
+     */
+    public Platform getPlatform();
 
     /**
      * <b>WARNING:</b>This method is now deprecated.  It is replaced by {@link #close()}.

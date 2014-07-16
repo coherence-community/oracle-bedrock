@@ -28,30 +28,11 @@ package com.oracle.tools.runtime.coherence;
 import com.oracle.tools.runtime.Application;
 import com.oracle.tools.runtime.ApplicationConsole;
 import com.oracle.tools.runtime.LifecycleEventInterceptor;
-
-import com.oracle.tools.runtime.coherence.callables.GetClusterMemberUIDs;
-import com.oracle.tools.runtime.coherence.callables.GetClusterName;
-import com.oracle.tools.runtime.coherence.callables.GetClusterSize;
-import com.oracle.tools.runtime.coherence.callables.GetLocalMemberId;
-import com.oracle.tools.runtime.coherence.callables.GetLocalMemberRoleName;
-import com.oracle.tools.runtime.coherence.callables.GetLocalMemberSiteName;
-import com.oracle.tools.runtime.coherence.callables.GetLocalMemberUID;
-import com.oracle.tools.runtime.coherence.callables.GetServiceStatus;
-import com.oracle.tools.runtime.coherence.callables.IsServiceRunning;
-
-import com.oracle.tools.runtime.java.AbstractJavaApplication;
-import com.oracle.tools.runtime.java.JavaApplication;
+import com.oracle.tools.runtime.Platform;
 import com.oracle.tools.runtime.java.JavaProcess;
 
-import com.tangosol.util.UID;
-
 import java.util.Properties;
-import java.util.Set;
-
 import java.util.concurrent.TimeUnit;
-
-import javax.management.MBeanInfo;
-import javax.management.ObjectName;
 
 /**
  * A {@link ClusterMember} is a specialized {@link com.oracle.tools.runtime.java.SimpleJavaApplication} to
@@ -70,6 +51,7 @@ public class ClusterMember extends AbstractCoherenceClusterMember<ClusterMember>
      *
      * @param process               the {@link Process} representing the {@link ClusterMember}
      * @param name                  the name of the {@link ClusterMember}
+     * @param platform              the {@link Platform} that this {@link Application} is running on
      * @param console               the {@link ApplicationConsole} that will be used for I/O by the
      *                              realized {@link Application}. This may be <code>null</code> if not required
      * @param environmentVariables  the environment variables used when starting the {@link ClusterMember}
@@ -78,25 +60,31 @@ public class ClusterMember extends AbstractCoherenceClusterMember<ClusterMember>
      * @param defaultTimeout        the default timeout duration
      * @param defaultTimeoutUnits   the default timeout duration {@link TimeUnit}
      * @param interceptors          the {@link LifecycleEventInterceptor}s
+     * @param remoteDebuggingPort   the port this process is listening on for remote debugger connections if
+     *                              enabled, or <= 0 if disabled
      */
     ClusterMember(JavaProcess                                                process,
                   String                                                     name,
+                  Platform                                                   platform,
                   ApplicationConsole                                         console,
                   Properties                                                 environmentVariables,
                   Properties                                                 systemProperties,
                   boolean                                                    isDiagnosticsEnabled,
                   long                                                       defaultTimeout,
                   TimeUnit                                                   defaultTimeoutUnits,
-                  Iterable<LifecycleEventInterceptor<? super ClusterMember>> interceptors)
+                  Iterable<LifecycleEventInterceptor<? super ClusterMember>> interceptors,
+                  int                                                        remoteDebuggingPort)
     {
         super(process,
               name,
+              platform,
               console,
               environmentVariables,
               systemProperties,
               isDiagnosticsEnabled,
               defaultTimeout,
               defaultTimeoutUnits,
-              interceptors);
+              interceptors,
+              remoteDebuggingPort);
     }
 }

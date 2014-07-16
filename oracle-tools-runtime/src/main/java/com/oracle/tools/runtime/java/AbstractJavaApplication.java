@@ -29,49 +29,41 @@ import com.oracle.tools.deferred.Cached;
 import com.oracle.tools.deferred.Deferred;
 import com.oracle.tools.deferred.NeverAvailable;
 import com.oracle.tools.deferred.UnresolvableInstanceException;
-
 import com.oracle.tools.deferred.jmx.DeferredJMXConnector;
 import com.oracle.tools.deferred.jmx.DeferredMBeanAttribute;
 import com.oracle.tools.deferred.jmx.DeferredMBeanInfo;
 import com.oracle.tools.deferred.jmx.DeferredMBeanProxy;
-
 import com.oracle.tools.runtime.AbstractApplication;
 import com.oracle.tools.runtime.Application;
 import com.oracle.tools.runtime.ApplicationConsole;
 import com.oracle.tools.runtime.LifecycleEventInterceptor;
-
+import com.oracle.tools.runtime.Platform;
 import com.oracle.tools.runtime.concurrent.RemoteCallable;
 import com.oracle.tools.runtime.concurrent.RemoteRunnable;
 import com.oracle.tools.runtime.concurrent.callable.RemoteMethodInvocation;
-
 import com.oracle.tools.runtime.network.Constants;
-
 import com.oracle.tools.util.CompletionListener;
 import com.oracle.tools.util.FutureCompletionListener;
 import com.oracle.tools.util.ReflectionHelper;
-
 import net.sf.cglib.proxy.MethodInterceptor;
 import net.sf.cglib.proxy.MethodProxy;
-
-import static com.oracle.tools.deferred.DeferredHelper.cached;
-import static com.oracle.tools.deferred.DeferredHelper.ensured;
-
-import java.io.IOException;
-
-import java.lang.reflect.Method;
-
-import java.util.Properties;
-import java.util.Set;
-
-import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
 
 import javax.management.MBeanInfo;
 import javax.management.ObjectInstance;
 import javax.management.ObjectName;
 import javax.management.QueryExp;
-
 import javax.management.remote.JMXConnector;
+import java.io.IOException;
+import java.lang.reflect.Method;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.util.Properties;
+import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
+
+import static com.oracle.tools.deferred.DeferredHelper.cached;
+import static com.oracle.tools.deferred.DeferredHelper.ensured;
 
 /**
  * A {@link AbstractJavaApplication} is a base implementation of a {@link JavaApplication} that has
@@ -96,12 +88,18 @@ public abstract class AbstractJavaApplication<A extends AbstractJavaApplication<
      */
     protected Cached<JMXConnector> m_cachedJMXConnector;
 
+    /**
+     * The port this process is listening on for remote debug connections
+     * or <= 0 if remote debugging is disabled
+     */
+    private int m_remoteDebuggingPort;
 
     /**
      * Construct a {@link AbstractJavaApplication}.
      *
      * @param process               the {@link Process} representing the {@link JavaApplication}
      * @param name                  the name of the {@link JavaApplication}
+     * @param platform              the {@link Platform} that this {@link Application} is running on
      * @param console               the {@link ApplicationConsole} that will be used for I/O by the
      *                              realized {@link Application}. This may be <code>null</code> if not required
      * @param environmentVariables  the environment variables used when starting the {@link JavaApplication}
@@ -110,19 +108,24 @@ public abstract class AbstractJavaApplication<A extends AbstractJavaApplication<
      * @param defaultTimeout        the default timeout duration
      * @param defaultTimeoutUnits   the default timeout duration {@link TimeUnit}
      * @param interceptors          the {@link LifecycleEventInterceptor}s
+     * @param remoteDebuggingPort   the port this process is listening on for remote debugger connections if
+     *                              enabled, or <= 0 if disabled
      */
     public AbstractJavaApplication(P                                              process,
                                    String                                         name,
+                                   Platform                                       platform,
                                    ApplicationConsole                             console,
                                    Properties                                     environmentVariables,
                                    Properties                                     systemProperties,
                                    boolean                                        isDiagnosticsEnabled,
                                    long                                           defaultTimeout,
                                    TimeUnit                                       defaultTimeoutUnits,
-                                   Iterable<LifecycleEventInterceptor<? super A>> interceptors)
+                                   Iterable<LifecycleEventInterceptor<? super A>> interceptors,
+                                   int                                            remoteDebuggingPort)
     {
         super(process,
               name,
+              platform,
               console,
               environmentVariables,
               isDiagnosticsEnabled,
@@ -130,7 +133,8 @@ public abstract class AbstractJavaApplication<A extends AbstractJavaApplication<
               defaultTimeoutUnits,
               interceptors);
 
-        m_systemProperties = systemProperties;
+        m_systemProperties    = systemProperties;
+        m_remoteDebuggingPort = remoteDebuggingPort;
 
         // ensure that the RMI server doesn't eagerly load JMX classes
         System.setProperty("java.rmi.server.useCodebaseOnly", "true");
@@ -353,6 +357,23 @@ public abstract class AbstractJavaApplication<A extends AbstractJavaApplication<
         super.close();
     }
 
+    @Override
+    public InetSocketAddress getRemoteDebugSocket()
+    {
+        if (m_remoteDebuggingPort <= 0)
+        {
+            return null;
+        }
+
+        Platform platform = getPlatform();
+        if (platform == null)
+        {
+            return null;
+        }
+
+        InetAddress address = platform.getPublicInetAddress();
+        return new InetSocketAddress(address, m_remoteDebuggingPort);
+    }
 
     @Override
     public <T> T getProxyFor(Class<T>                           classToProxy,

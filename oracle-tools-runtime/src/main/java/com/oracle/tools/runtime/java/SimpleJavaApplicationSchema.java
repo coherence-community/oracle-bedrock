@@ -26,6 +26,7 @@
 package com.oracle.tools.runtime.java;
 
 import com.oracle.tools.runtime.ApplicationConsole;
+import com.oracle.tools.runtime.Platform;
 
 import java.util.Properties;
 
@@ -93,19 +94,23 @@ public class SimpleJavaApplicationSchema
     @Override
     public SimpleJavaApplication createJavaApplication(JavaProcess        process,
                                                        String             name,
+                                                       Platform           platform,
                                                        ApplicationConsole console,
                                                        Properties         environmentVariables,
-                                                       Properties         systemProperties)
+                                                       Properties         systemProperties,
+                                                       int                remoteDebuggingPort)
     {
         return new SimpleJavaApplication(process,
                                          name,
+                                         platform,
                                          console,
                                          environmentVariables,
                                          systemProperties,
                                          this.isDiagnosticsEnabled(),
                                          this.getDefaultTimeout(),
                                          this.getDefaultTimeoutUnits(),
-                                         this.getLifecycleInterceptors());
+                                         this.getLifecycleInterceptors(),
+                                         remoteDebuggingPort);
     }
 
 

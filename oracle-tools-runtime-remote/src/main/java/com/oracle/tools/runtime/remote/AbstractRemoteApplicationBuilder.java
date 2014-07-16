@@ -366,6 +366,7 @@ public abstract class AbstractRemoteApplicationBuilder<A extends Application, E 
      * Creates the {@link Application} representing the underlying
      * {@link RemoteApplicationProcess}.
      *
+     * @param platform         the {@link Platform} that this {@link Application} is running on
      * @param schema           the {@link ApplicationSchema} used to define the application
      * @param environment      the {@link RemoteApplicationEnvironment} for the application
      * @param applicationName  the name of the application
@@ -375,7 +376,8 @@ public abstract class AbstractRemoteApplicationBuilder<A extends Application, E 
      *
      * @return the {@link Application}
      */
-    protected abstract <T extends A, S extends ApplicationSchema<T>> T createApplication(S                        schema,
+    protected abstract <T extends A, S extends ApplicationSchema<T>> T createApplication(Platform                 platform,
+                                                                                         S                        schema,
                                                                                          E                        environment,
                                                                                          String                   applicationName,
                                                                                          RemoteApplicationProcess process,
@@ -570,7 +572,7 @@ public abstract class AbstractRemoteApplicationBuilder<A extends Application, E 
             execChannel.connect(timeout);
 
             // create the Application based on the RemoteApplicationProcess
-            T application = createApplication(applicationSchema, environment, applicationName, process, console);
+            T application = createApplication(platform, applicationSchema, environment, applicationName, process, console);
 
             // ----- notify all of the lifecycle listeners -----
 

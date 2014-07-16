@@ -26,24 +26,20 @@
 package com.oracle.tools.runtime.java;
 
 import com.oracle.tools.deferred.Deferred;
-
 import com.oracle.tools.runtime.Application;
-
 import com.oracle.tools.runtime.concurrent.RemoteCallable;
 import com.oracle.tools.runtime.concurrent.RemoteExecutor;
 import com.oracle.tools.runtime.concurrent.callable.RemoteMethodInvocation;
-
-import java.io.NotSerializableException;
-
-import java.util.Properties;
-import java.util.Set;
 
 import javax.management.MBeanInfo;
 import javax.management.ObjectInstance;
 import javax.management.ObjectName;
 import javax.management.QueryExp;
-
 import javax.management.remote.JMXConnector;
+import java.io.NotSerializableException;
+import java.net.InetSocketAddress;
+import java.util.Properties;
+import java.util.Set;
 
 /**
  * An {@link Application} specifically representing Java-based applications.
@@ -332,4 +328,13 @@ public interface JavaApplication extends Application, RemoteExecutor
     public <T> T getProxyFor(Class<T>                           classToProxy,
                              RemoteCallable<T>                  instanceProducer,
                              RemoteMethodInvocation.Interceptor interceptor);
+
+    /**
+     * Obtain the socket that the {@link JavaApplication} is listening on for remote
+     * debugging.
+     *
+     * @return the socket that the {@link JavaApplication} is listening on for remote
+     *         debugging, or null if remote debugging is not enabled
+     */
+    public InetSocketAddress getRemoteDebugSocket();
 }

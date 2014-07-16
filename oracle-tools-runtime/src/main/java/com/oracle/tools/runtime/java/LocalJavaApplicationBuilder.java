@@ -29,13 +29,9 @@ import com.oracle.tools.deferred.AbstractDeferred;
 import com.oracle.tools.deferred.DeferredHelper;
 import com.oracle.tools.deferred.InstanceUnavailableException;
 import com.oracle.tools.deferred.UnresolvableInstanceException;
-
 import com.oracle.tools.io.NetworkHelper;
-
 import com.oracle.tools.lang.StringHelper;
-
 import com.oracle.tools.predicate.Predicate;
-
 import com.oracle.tools.runtime.Application;
 import com.oracle.tools.runtime.ApplicationConsole;
 import com.oracle.tools.runtime.ApplicationSchema;
@@ -44,27 +40,22 @@ import com.oracle.tools.runtime.LocalPlatform;
 import com.oracle.tools.runtime.Platform;
 import com.oracle.tools.runtime.PropertiesBuilder;
 import com.oracle.tools.runtime.Settings;
-
 import com.oracle.tools.runtime.concurrent.ControllableRemoteExecutor;
 import com.oracle.tools.runtime.concurrent.RemoteCallable;
 import com.oracle.tools.runtime.concurrent.RemoteExecutor;
 import com.oracle.tools.runtime.concurrent.RemoteRunnable;
 import com.oracle.tools.runtime.concurrent.socket.RemoteExecutorServer;
-
 import com.oracle.tools.util.CompletionListener;
-
-import static com.oracle.tools.predicate.Predicates.allOf;
 
 import java.io.File;
 import java.io.IOException;
-
 import java.net.InetAddress;
-
 import java.util.Iterator;
 import java.util.Properties;
-
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import static com.oracle.tools.predicate.Predicates.allOf;
 
 /**
  * A {@link JavaApplicationBuilder} that realizes {@link JavaApplication}s as
@@ -512,14 +503,30 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication> extends Abst
         }
 
         // add debug option
-        if (this.isRemoteDebuggingEnabled)
+        boolean             debugEnabled = this.isRemoteDebuggingEnabled || schema.isRemoteDebuggingEnabled();
+        RemoteDebuggingMode debugMode    = schema.getRemoteDebuggingMode();
+        int                 debugPort    = -1;
+
+        if (debugEnabled)
         {
-            // determine a free debug port
-            int debugPort = LocalPlatform.getInstance().getAvailablePorts().next();
+            debugPort = (debugMode == RemoteDebuggingMode.LISTEN_FOR_DEBUGGER)
+                        ? schema.getRemoteDebugListenPort()
+                        : schema.getRemoteDebugAttachPort();
+
+            if (debugPort <= 0)
+            {
+                debugPort = LocalPlatform.getInstance().getAvailablePorts().next();
+            }
+
+            boolean suspend       = isRemoteStartSuspended || schema.isRemoteDebuggingStartSuspended();
+
+            boolean isDebugServer = debugMode == RemoteDebuggingMode.LISTEN_FOR_DEBUGGER;
 
             // construct the Java option
-            String option = String.format("-agentlib:jdwp=transport=dt_socket,server=y,suspend=%s,address=%d",
-                                          (isRemoteStartSuspended ? "y" : "n"),
+            String option = String.format("-agentlib:jdwp=transport=dt_socket,server=%s,suspend=%s,address=%s:%d",
+                                          (isDebugServer ? "y" : "n"),
+                                          (suspend ? "y" : "n"),
+                                          LocalPlatform.getInstance().getHostName(),
                                           debugPort);
 
             processBuilder.command().add(option);
@@ -578,26 +585,31 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication> extends Abst
         // delegate Application creation to the Schema
         final T application = schema.createJavaApplication(localJavaProcess,
                                                            applicationName,
+                                                           platform,
                                                            console,
                                                            environmentVariables,
-                                                           systemProperties);
+                                                           systemProperties,
+                                                           debugPort);
 
         // ensure that the launcher process connects back
-        DeferredHelper.ensure(new AbstractDeferred<Boolean>()
+        if (!schema.isRemoteDebuggingStartSuspended())
         {
-            @Override
-            public Boolean get() throws UnresolvableInstanceException, InstanceUnavailableException
+            DeferredHelper.ensure(new AbstractDeferred<Boolean>()
             {
-                if (!server.getRemoteExecutors().iterator().hasNext())
+                @Override
+                public Boolean get() throws UnresolvableInstanceException, InstanceUnavailableException
                 {
-                    throw new InstanceUnavailableException(this);
+                    if (!server.getRemoteExecutors().iterator().hasNext())
+                    {
+                        throw new InstanceUnavailableException(this);
+                    }
+                    else
+                    {
+                        return true;
+                    }
                 }
-                else
-                {
-                    return true;
-                }
-            }
-        });
+            });
+        }
 
         // ----- notify all of the lifecycle listeners -----
 
@@ -606,7 +618,6 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication> extends Abst
 
         return application;
     }
-
 
     /**
      * A {@link LocalApplicationProcess} specifically for Java-based applications.

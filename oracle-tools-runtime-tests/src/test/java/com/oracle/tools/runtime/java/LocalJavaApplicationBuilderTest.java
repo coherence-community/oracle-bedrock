@@ -27,38 +27,41 @@ package com.oracle.tools.runtime.java;
 
 import classloader.applications.ParentApplication;
 import classloader.applications.SleepingApplication;
-
 import com.oracle.tools.deferred.Eventually;
-
 import com.oracle.tools.deferred.listener.DeferredCompletionListener;
-
 import com.oracle.tools.io.NetworkHelper;
-
 import com.oracle.tools.runtime.ApplicationConsole;
-
+import com.oracle.tools.runtime.LocalPlatform;
+import com.oracle.tools.runtime.SimpleApplication;
+import com.oracle.tools.runtime.SimpleApplicationSchema;
 import com.oracle.tools.runtime.concurrent.RemoteExecutor;
 import com.oracle.tools.runtime.concurrent.RemoteExecutorListener;
 import com.oracle.tools.runtime.concurrent.callable.GetSystemProperty;
 import com.oracle.tools.runtime.concurrent.runnable.SystemExit;
 import com.oracle.tools.runtime.concurrent.socket.RemoteExecutorServer;
 import com.oracle.tools.runtime.concurrent.socket.SocketBasedRemoteExecutorTests;
-
+import com.oracle.tools.runtime.console.CapturingApplicationConsole;
 import com.oracle.tools.runtime.console.SystemApplicationConsole;
-
+import com.oracle.tools.util.Capture;
+import org.junit.Assume;
 import org.junit.Test;
 
-import static com.oracle.tools.deferred.DeferredHelper.invoking;
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.atomic.AtomicBoolean;
 
+import static com.oracle.tools.deferred.DeferredHelper.invoking;
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
-
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.CoreMatchers.nullValue;
+import static org.hamcrest.CoreMatchers.startsWith;
 import static org.junit.Assert.assertThat;
-
-import java.io.IOException;
-
-import java.util.UUID;
-
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Functional Tests for {@link LocalJavaApplicationBuilder}s.
@@ -88,6 +91,232 @@ public class LocalJavaApplicationBuilderTest extends AbstractJavaApplicationBuil
         assertThat(newJavaApplicationBuilder(), is(instanceOf(LocalJavaApplicationBuilder.class)));
     }
 
+
+    /**
+     * Should run the application with remote debug enabled if set in schema
+     * with start suspended set to false.
+     */
+    @Test
+    public void shouldSetRemoteDebugEnabledSuspendedIsFalse() throws Exception
+    {
+        SimpleJavaApplicationSchema schema = new SimpleJavaApplicationSchema(SleepingApplication.class.getName())
+                                                    .setRemoteDebuggingEnabled(true)
+                                                    .setRemoteDebuggingStartSuspended(false)
+                                                    .setRemoteDebugPorts(LocalPlatform.getInstance().getAvailablePorts());
+
+        SimpleJavaApplication app = LocalPlatform.getInstance().realize(schema, "TestApp", new SystemApplicationConsole());
+
+        List<String> args = app.submit(new GetProgramArgs());
+
+        app.close();
+
+        String debugArg = null;
+        for (String arg : args)
+        {
+            if (arg.startsWith("-agentlib:jdwp="))
+            {
+                debugArg = arg.toLowerCase();
+                break;
+            }
+        }
+
+        assertThat(debugArg, is(notNullValue()));
+        assertThat(debugArg, startsWith("-agentlib:jdwp=transport=dt_socket,"));
+        assertThat(debugArg, containsString(String.format(",address=%s", LocalPlatform.getInstance().getHostName())));
+        assertThat(debugArg, containsString(",suspend=n"));
+        assertThat(debugArg, containsString(",server=y"));
+    }
+
+
+    /**
+     * Should run the application with remote debug enabled if set in schema
+     * with start suspended set to false.
+     */
+    @Test
+    public void shouldSetRemoteDebugEnabledSuspendedIsTrue() throws Exception
+    {
+        // Make sure we can run the JDB debugger otherwise we cannot run this test
+        Assume.assumeThat(hasJDB(), is(true));
+
+
+        SimpleJavaApplicationSchema schema  = new SimpleJavaApplicationSchema(SleepingApplication.class.getName())
+                                                    .setRemoteDebuggingEnabled(true)
+                                                    .setRemoteDebuggingStartSuspended(true)
+                                                    .setRemoteDebugPorts(LocalPlatform.getInstance().getAvailablePorts());
+
+        CapturingApplicationConsole console = new CapturingApplicationConsole();
+        LinkedList<String>          lines   = console.getCapturedOutputLines();
+
+        SimpleJavaApplication       app     = LocalPlatform.getInstance().realize(schema, "TestApp", console);
+
+
+        assertCanConnectDebuggerToApplication(app);
+
+        Eventually.assertThat(lines, hasItem(startsWith("Now sleeping")));
+
+        List<String> args     = app.submit(new GetProgramArgs());
+        String       debugArg = null;
+
+        for (String arg : args)
+        {
+            if (arg.startsWith("-agentlib:jdwp="))
+            {
+                debugArg = arg.toLowerCase();
+                break;
+            }
+        }
+
+        app.close();
+
+        assertThat(debugArg, is(notNullValue()));
+        assertThat(debugArg, startsWith("-agentlib:jdwp=transport=dt_socket,"));
+        assertThat(debugArg, containsString(String.format(",address=%s", LocalPlatform.getInstance().getHostName())));
+        assertThat(debugArg, containsString(",suspend=y"));
+        assertThat(debugArg, containsString(",server=y"));
+    }
+
+
+    /**
+     * Start the application with remote debugging enabled and mode set to
+     * {@link com.oracle.tools.runtime.java.RemoteDebuggingMode#ATTACH_TO_DEBUGGER}
+     * and assert the process connects back to the debugger
+     */
+    @Test
+    public void shouldEnableRemoteDebugAndConnectBackToDebugger() throws Exception
+    {
+        // Make sure we can run the JDB debugger otherwise we cannot run this test
+        Assume.assumeThat(hasJDB(), is(true));
+
+        Capture<Integer>           debugPort    = new Capture<Integer>(LocalPlatform.getInstance().getAvailablePorts());
+
+        SimpleApplicationSchema    jdbSchema    = new SimpleApplicationSchema("jdb")
+                                                        .addArgument("-listen")
+                                                        .addArgument(String.valueOf(debugPort.get()));
+
+        CapturingApplicationConsole jdbConsole  = new CapturingApplicationConsole();
+        LinkedList<String>          jdbOutput   = jdbConsole.getCapturedOutputLines();
+
+        SimpleApplication           jdb         = LocalPlatform.getInstance().realize(jdbSchema, "JDB", jdbConsole);
+        try
+        {
+            Eventually.assertThat("JDB did not start properly", jdbOutput, hasItem(startsWith("Listening at address:")));
+
+
+            SimpleJavaApplicationSchema schema  = new SimpleJavaApplicationSchema(SleepingApplication.class.getName())
+                                                            .setRemoteDebuggingEnabled(true)
+                                                            .setRemoteDebuggingStartSuspended(false)
+                                                            .setRemoteDebugPort(debugPort.get())
+                                                            .setRemoteDebuggingMode(RemoteDebuggingMode.ATTACH_TO_DEBUGGER);
+
+            CapturingApplicationConsole console = new CapturingApplicationConsole();
+            LinkedList<String>          lines   = console.getCapturedOutputLines();
+
+            SimpleJavaApplication       app     = LocalPlatform.getInstance().realize(schema, "TestApp", console);
+
+            try
+            {
+                Eventually.assertThat(lines, hasItem(startsWith("Now sleeping")));
+                Eventually.assertThat("Application did not connect back to JDB", jdbOutput, hasItem(containsString("VM Started:")));
+            }
+            finally
+            {
+                app.close();
+            }
+        }
+        finally
+        {
+            jdb.close();
+        }
+    }
+
+
+    protected void assertCanConnectDebuggerToApplication(JavaApplication application) throws Exception
+    {
+        InetSocketAddress socket = application.getRemoteDebugSocket();
+        assertThat(socket, is(notNullValue()));
+
+        SimpleApplicationSchema    schema   = new SimpleApplicationSchema("jdb")
+                                                    .addArgument("-attach")
+                                                    .addArgument(socket.getHostName() + ":" + socket.getPort());
+
+        CapturingApplicationConsole console = new CapturingApplicationConsole();
+        LinkedList<String>          lines   = console.getCapturedOutputLines();
+
+        SimpleApplication           jdb     = LocalPlatform.getInstance().realize(schema, "JDB", console);
+
+        try
+        {
+            Eventually.assertThat(lines, hasItem(startsWith("VM Started")));
+
+            console.getInputWriter().println("run");
+            console.getInputWriter().println("quit");
+        }
+        finally
+        {
+            jdb.close();
+        }
+    }
+
+    protected boolean hasJDB() throws Exception
+    {
+        SimpleApplicationSchema    schema   = new SimpleApplicationSchema("jdb")
+                                                    .addArgument("-version");
+
+        CapturingApplicationConsole console = new CapturingApplicationConsole();
+        LinkedList<String>          lines   = console.getCapturedOutputLines();
+        SimpleApplication           jdb     = LocalPlatform.getInstance().realize(schema, "JDB", console);
+
+        try
+        {
+            Eventually.assertThat(lines, hasItem(startsWith("This is jdb version")));
+            return true;
+        }
+        catch (Throwable t)
+        {
+            // ignored
+        }
+        finally
+        {
+            jdb.close();
+        }
+
+
+        return true;
+    }
+
+    /**
+     * Should run the application with remote debug disabled.
+     *
+     * NOTE: This test is ignored when running in an IDE in debug mode
+     * as the JavaVirtualMachine class will pick up the debug settings
+     * and pass them on to the process causing the test to fail
+     */
+    @Test
+    public void shouldSetRemoteDebugDisabled() throws Exception
+    {
+        Assume.assumeThat(JavaVirtualMachine.getInstance().shouldEnabledRemoteDebug(), is(false));
+
+        SimpleJavaApplicationSchema schema = new SimpleJavaApplicationSchema(SleepingApplication.class.getName())
+                                                    .setRemoteDebuggingEnabled(false);
+
+        SimpleJavaApplication app = LocalPlatform.getInstance().realize(schema, "TestApp", new SystemApplicationConsole());
+
+        List<String> args = app.submit(new GetProgramArgs());
+
+        app.close();
+
+        String debugArg = null;
+        for (String arg : args)
+        {
+            if (arg.startsWith("-agentlib:jdwp="))
+            {
+                debugArg = arg.toLowerCase();
+                break;
+            }
+        }
+
+        assertThat(debugArg, is(nullValue()));
+    }
 
     /**
      * Ensure that {@link LocalJavaApplicationBuilder}s in orphan mode

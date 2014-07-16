@@ -252,6 +252,7 @@ public class SimpleApplicationBuilder extends AbstractApplicationBuilder<SimpleA
 
         final T application = (T) new SimpleApplication(new LocalApplicationProcess(process),
                                                         applicationName,
+                                                        platform,
                                                         console,
                                                         environmentVariables,
                                                         schema.isDiagnosticsEnabled(),

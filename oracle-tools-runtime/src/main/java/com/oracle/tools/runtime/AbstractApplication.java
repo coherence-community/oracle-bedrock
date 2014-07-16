@@ -80,6 +80,11 @@ public abstract class AbstractApplication<A extends AbstractApplication<A, P>, P
     private String m_name;
 
     /**
+     * The {@link Platform} that this {@link Application} is running on.
+     */
+    private Platform m_platform;
+
+    /**
      * The {@link ApplicationConsole} that will be used for the {@link Application} I/O.
      */
     private final ApplicationConsole m_console;
@@ -131,15 +136,17 @@ public abstract class AbstractApplication<A extends AbstractApplication<A, P>, P
      *
      * @param process               the {@link ApplicationProcess} representing the {@link Application}
      * @param name                  the name of the application
+     * @param platform              the {@link Platform} that this {@link Application} is running on
      * @param console               the {@link ApplicationConsole} that will be used for I/O by the {@link Application}
      * @param environmentVariables  the environment variables used when establishing the {@link Application}
      */
     public AbstractApplication(P                  process,
                                String             name,
+                               Platform           platform,
                                ApplicationConsole console,
                                Properties         environmentVariables)
     {
-        this(process, name, console, environmentVariables, false, DEFAULT_TIMEOUT, DEFAULT_TIMEOUT_UNIT, null);
+        this(process, name, platform, console, environmentVariables, false, DEFAULT_TIMEOUT, DEFAULT_TIMEOUT_UNIT, null);
     }
 
 
@@ -148,6 +155,7 @@ public abstract class AbstractApplication<A extends AbstractApplication<A, P>, P
      *
      * @param process               the {@link ApplicationProcess} representing the {@link Application}
      * @param name                  the name of the application
+     * @param platform              the {@link Platform} that this {@link Application} is running on
      * @param console               the {@link ApplicationConsole} that will be used for I/O by the {@link Application}
      * @param environmentVariables  the environment variables used when establishing the {@link Application}
      * @param isDiagnosticsEnabled  should diagnostic information be logged/output
@@ -157,6 +165,7 @@ public abstract class AbstractApplication<A extends AbstractApplication<A, P>, P
      */
     public AbstractApplication(P                                              process,
                                String                                         name,
+                               Platform                                       platform,
                                ApplicationConsole                             console,
                                Properties                                     environmentVariables,
                                boolean                                        isDiagnosticsEnabled,
@@ -166,6 +175,7 @@ public abstract class AbstractApplication<A extends AbstractApplication<A, P>, P
     {
         m_process              = process;
         m_name                 = name;
+        m_platform             = platform;
         m_console              = console == null ? new SystemApplicationConsole() : console;
         m_environmentVariables = environmentVariables;
         m_isDiagnosticsEnabled = Settings.isDiagnosticsEnabled(isDiagnosticsEnabled);
@@ -227,6 +237,11 @@ public abstract class AbstractApplication<A extends AbstractApplication<A, P>, P
         return m_name;
     }
 
+    @Override
+    public Platform getPlatform()
+    {
+        return m_platform;
+    }
 
     @Override
     public void close()

@@ -28,7 +28,7 @@ package com.oracle.tools.runtime.coherence;
 import com.oracle.tools.runtime.Application;
 import com.oracle.tools.runtime.ApplicationConsole;
 import com.oracle.tools.runtime.LifecycleEventInterceptor;
-
+import com.oracle.tools.runtime.Platform;
 import com.oracle.tools.runtime.coherence.callables.GetClusterMemberUIDs;
 import com.oracle.tools.runtime.coherence.callables.GetClusterName;
 import com.oracle.tools.runtime.coherence.callables.GetClusterSize;
@@ -38,20 +38,17 @@ import com.oracle.tools.runtime.coherence.callables.GetLocalMemberSiteName;
 import com.oracle.tools.runtime.coherence.callables.GetLocalMemberUID;
 import com.oracle.tools.runtime.coherence.callables.GetServiceStatus;
 import com.oracle.tools.runtime.coherence.callables.IsServiceRunning;
-
 import com.oracle.tools.runtime.concurrent.callable.RemoteCallableStaticMethod;
 import com.oracle.tools.runtime.concurrent.callable.RemoteMethodInvocation;
-
 import com.oracle.tools.runtime.java.AbstractJavaApplication;
 import com.oracle.tools.runtime.java.JavaApplication;
 import com.oracle.tools.runtime.java.JavaProcess;
-
 import com.tangosol.net.NamedCache;
-
 import com.tangosol.util.UID;
 
+import javax.management.MBeanInfo;
+import javax.management.ObjectName;
 import java.lang.reflect.Method;
-
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -60,11 +57,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-
 import java.util.concurrent.TimeUnit;
-
-import javax.management.MBeanInfo;
-import javax.management.ObjectName;
 
 /**
  * An abstract implementation of a {@link CoherenceClusterMember}.
@@ -96,26 +89,32 @@ public abstract class AbstractCoherenceClusterMember<A extends AbstractCoherence
      * @param defaultTimeout        the default timeout duration
      * @param defaultTimeoutUnits   the default timeout duration {@link TimeUnit}
      * @param interceptors          the {@link LifecycleEventInterceptor}s
+     * @param remoteDebuggingPort   the port this process is listening on for remote debugger connections if
+     *                              enabled, or <= 0 if disabled
      */
     public AbstractCoherenceClusterMember(JavaProcess                                    process,
                                           String                                         name,
+                                          Platform                                       platform,
                                           ApplicationConsole                             console,
                                           Properties                                     environmentVariables,
                                           Properties                                     systemProperties,
                                           boolean                                        isDiagnosticsEnabled,
                                           long                                           defaultTimeout,
                                           TimeUnit                                       defaultTimeoutUnits,
-                                          Iterable<LifecycleEventInterceptor<? super A>> interceptors)
+                                          Iterable<LifecycleEventInterceptor<? super A>> interceptors,
+                                          int                                            remoteDebuggingPort)
     {
         super(process,
               name,
+              platform,
               console,
               environmentVariables,
               systemProperties,
               isDiagnosticsEnabled,
               defaultTimeout,
               defaultTimeoutUnits,
-              interceptors);
+              interceptors,
+              remoteDebuggingPort);
     }
 
 

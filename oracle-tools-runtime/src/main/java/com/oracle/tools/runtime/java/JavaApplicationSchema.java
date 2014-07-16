@@ -127,16 +127,74 @@ public interface JavaApplicationSchema<A extends JavaApplication> extends Applic
      *
      * @param process               the {@link JavaProcess} representing the {@link JavaApplication}
      * @param name                  the name of the {@link JavaApplication}
+     * @param platform              the {@link Platform} that this {@link Application} is running on
      * @param console               the {@link ApplicationConsole} that will be used for I/O by the
      *                              realized {@link Application}. This may be <code>null</code> if not required
      * @param environmentVariables  the environment variables used when starting the {@link JavaApplication}
      * @param systemProperties      the system properties provided to the {@link JavaApplication}
+     * @param remoteDebuggingPort   the port this process is listening on for remote debugger connections if
+     *                              enabled, or <= 0 if disabled
      *
      * @return a {@link JavaApplication}
      */
     public A createJavaApplication(JavaProcess        process,
                                    String             name,
+                                   Platform           platform,
                                    ApplicationConsole console,
                                    Properties         environmentVariables,
-                                   Properties         systemProperties);
+                                   Properties         systemProperties,
+                                   int                remoteDebuggingPort);
+
+    /**
+     * Determines if the next {@link JavaApplication} should be started in
+     * remote debugging mode.
+     *
+     * @return <code>true</code> if remote debugging is enabled
+     */
+    public boolean isRemoteDebuggingEnabled();
+
+    /**
+     * Determines if a remotely debugged {@link JavaApplication} will be started
+     * in suspend mode.
+     *
+     * @return <code>true</code> if started in suspend mode
+     */
+    public boolean isRemoteDebuggingStartSuspended();
+
+    /**
+     * Obtain the port that {@link JavaApplication}s realized from this schema will listen on
+     * for remote debugger connections if started with remote debug enabled and remote debugging
+     * mode of {@link RemoteDebuggingMode#LISTEN_FOR_DEBUGGER}.
+     * </p>
+     * If this value is not set and remote debug is enabled with a mode of
+     * {@link RemoteDebuggingMode#LISTEN_FOR_DEBUGGER} then a random free port will be chosen.
+     *
+     * @return the port that {@link JavaApplication}s realized from this schema will listen on
+     *         for remote debugger connections. A different value may be returned each time this
+     *         method is called.
+     */
+    public int getRemoteDebugListenPort();
+
+    /**
+     * Obtain the port that {@link JavaApplication}s realized from this schema will use to
+     * connect back to a remote debugger if started with remote debug enabled and remote debugging
+     * mode of {@link RemoteDebuggingMode#ATTACH_TO_DEBUGGER}.
+     * </p>
+     * If this value is not set and remote debug is enabled with a mode of
+     * {@link RemoteDebuggingMode#ATTACH_TO_DEBUGGER} then a random free port will be chosen.
+     *
+     * @return the port that {@link JavaApplication}s realized from this schema will listen on
+     *         for remote debugger connections. The same value will be returned each time this
+     *         method is called.
+     */
+    public int getRemoteDebugAttachPort();
+
+    /**
+     * Obtain the mode that remote debugging (if enabled) will run in for {@link JavaApplication}s
+     * realized from this schema.
+     *
+     * @return the mode that remote debugging (if enabled) will run in for {@link JavaApplication}s
+     *         realized from this schema
+     */
+    public RemoteDebuggingMode getRemoteDebuggingMode();
 }

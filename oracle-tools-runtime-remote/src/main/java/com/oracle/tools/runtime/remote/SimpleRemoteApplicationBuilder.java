@@ -88,7 +88,8 @@ public class SimpleRemoteApplicationBuilder
 
     @Override
     @SuppressWarnings("unchecked")
-    protected <T extends SimpleApplication, S extends ApplicationSchema<T>> T createApplication(S                                  schema,
+    protected <T extends SimpleApplication, S extends ApplicationSchema<T>> T createApplication(Platform                           platform,
+                                                                                                S                                  schema,
                                                                                                 SimpleRemoteApplicationEnvironment environment,
                                                                                                 String                             applicationName,
                                                                                                 RemoteApplicationProcess           process,
@@ -96,6 +97,7 @@ public class SimpleRemoteApplicationBuilder
     {
         return (T) new SimpleApplication(process,
                                          applicationName,
+                                         platform,
                                          console,
                                          environment.getRemoteEnvironmentVariables(),
                                          schema.isDiagnosticsEnabled(),

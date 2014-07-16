@@ -29,12 +29,20 @@ import com.oracle.tools.runtime.ApplicationBuilder;
 import com.oracle.tools.runtime.LocalPlatform;
 import com.oracle.tools.runtime.Platform;
 import com.oracle.tools.runtime.SimpleApplication;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
+
+import java.lang.management.RuntimeMXBean;
+import java.util.Arrays;
+import java.util.List;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.IsInstanceOf.instanceOf;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * Unit tests for {@link JavaVirtualMachine}s.
@@ -74,4 +82,104 @@ public class JavaVirtualMachineTest
 
         assertThat(builder, is(nullValue()));
     }
+
+    @Test
+    public void shouldSetDebugModeToFalseBasedOnProcessArguments() throws Exception
+    {
+        JavaVirtualMachine jvm           = JavaVirtualMachine.getInstance();
+        RuntimeMXBean      runtimeMXBean = mock(RuntimeMXBean.class);
+        List<String>       args          = Arrays.asList("foo", "bar");
+
+        when(jvm.getRuntimeMXBean()).thenReturn(runtimeMXBean);
+        when(runtimeMXBean.getInputArguments()).thenReturn(args);
+
+        assertThat(jvm.isRunningWithDebugger(), is(false));
+    }
+
+    @Test
+    public void shouldSetDebugModeToTrueBasedOnProcessArguments() throws Exception
+    {
+        JavaVirtualMachine jvm           = JavaVirtualMachine.getInstance();
+        RuntimeMXBean      runtimeMXBean = mock(RuntimeMXBean.class);
+        List<String>       args          = Arrays.asList("foo",
+                                                         "-agentlib:jdwp=transport=dt_socket,address=127.0.0.1:52429,suspend=y,server=n",
+                                                         "bar");
+
+        when(jvm.getRuntimeMXBean()).thenReturn(runtimeMXBean);
+        when(runtimeMXBean.getInputArguments()).thenReturn(args);
+
+        assertThat(jvm.isRunningWithDebugger(), is(true));
+    }
+
+    @Test
+    public void shouldNotRunWithDebugMode() throws Exception
+    {
+        JavaVirtualMachine jvm           = JavaVirtualMachine.getInstance();
+        RuntimeMXBean      runtimeMXBean = mock(RuntimeMXBean.class);
+        List<String>       args          = Arrays.asList("foo", "bar");
+
+        when(jvm.getRuntimeMXBean()).thenReturn(runtimeMXBean);
+        when(runtimeMXBean.getInputArguments()).thenReturn(args);
+
+        assertThat(jvm.shouldEnabledRemoteDebug(), is(false));
+    }
+
+    @Test
+    public void shouldRunWithDebugMode() throws Exception
+    {
+        JavaVirtualMachine jvm           = JavaVirtualMachine.getInstance();
+        RuntimeMXBean      runtimeMXBean = mock(RuntimeMXBean.class);
+        List<String>       args          = Arrays.asList("foo",
+                                                         "-agentlib:jdwp=transport=dt_socket,address=127.0.0.1:52429,suspend=y,server=n",
+                                                         "bar");
+
+        when(jvm.getRuntimeMXBean()).thenReturn(runtimeMXBean);
+        when(runtimeMXBean.getInputArguments()).thenReturn(args);
+
+        assertThat(jvm.shouldEnabledRemoteDebug(), is(true));
+    }
+
+    @Test
+    public void shouldNotRunWithDebugModeIfAutoDebugModeIsFalse() throws Exception
+    {
+        JavaVirtualMachine jvm           = JavaVirtualMachine.getInstance();
+        RuntimeMXBean      runtimeMXBean = mock(RuntimeMXBean.class);
+        List<String>       args          = Arrays.asList("foo",
+                                                         "-agentlib:jdwp=transport=dt_socket,address=127.0.0.1:52429,suspend=y,server=n",
+                                                         "bar");
+
+        when(jvm.getRuntimeMXBean()).thenReturn(runtimeMXBean);
+        when(runtimeMXBean.getInputArguments()).thenReturn(args);
+
+        jvm.setAutoDebugEnabled(false);
+        try
+        {
+            assertThat(jvm.shouldEnabledRemoteDebug(), is(false));
+        }
+        finally
+        {
+            jvm.setAutoDebugEnabled(true);
+        }
+    }
+
+    /**
+     * Mock out the {@link JavaVirtualMachine#INSTANCE} so we can
+     * mock its methods
+     */
+    @Before
+    public void mockJavaVirtualMachine() throws Exception
+    {
+        JavaVirtualMachineMockHelper.mockJavaVirtualMachine();
+    }
+
+
+    /**
+     * Restore the {@link JavaVirtualMachine#INSTANCE}
+     */
+    @After
+    public void restoreJavaVirtualMachine() throws Exception
+    {
+        JavaVirtualMachineMockHelper.restoreJavaVirtualMachine();
+    }
+
 }
