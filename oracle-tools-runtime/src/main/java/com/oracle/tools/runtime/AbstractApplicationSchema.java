@@ -26,13 +26,11 @@
 package com.oracle.tools.runtime;
 
 import java.io.File;
-
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
-
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -175,7 +173,7 @@ public abstract class AbstractApplicationSchema<A extends Application, S extends
     @Override
     public Properties getEnvironmentVariables(Platform platform)
     {
-        return getEnvironmentVariablesBuilder().realize();
+        return getEnvironmentVariablesBuilder().realize(null, platform);
     }
 
 

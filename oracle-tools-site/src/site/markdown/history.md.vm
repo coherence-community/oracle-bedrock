@@ -220,6 +220,11 @@ reverse chronological order.
 *   [ORACLETOOLS-133](https://java.net/jira/browse/ORACLETOOLS-133): Introduced copy
     constructors for ApplicationSchema implementations.
 
+*   [ORACLETOOLS-135](https://java.net/jira/browse/ORACLETOOLS-135): Introduced
+    the ability to add Platform aware values as environment variables when configuring
+    a schema that extends AbstractApplicationSchema and also as system properties when
+    configuring a JavaApplicationSchema. The actual value used for the property can then
+    be determined based on the Platform that a JavaApplication is being relaized on.
 
 <h4>oracle-tools-runtime-remote</h4>
 

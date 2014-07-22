@@ -26,9 +26,7 @@
 package com.oracle.tools.runtime;
 
 import java.io.IOException;
-
 import java.net.URL;
-
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -494,6 +492,28 @@ public class PropertiesBuilder
      */
     public Properties realize(PropertiesBuilder overrides)
     {
+        return realize(overrides, null);
+    }
+
+    /**
+     * Creates a new {@link Properties} instance containing name, value pairs
+     * defined by the {@link PropertiesBuilder}.
+     * <p>
+     * If a property with in the {@link PropertiesBuilder} is defined as an
+     * {@link Iterator}, the next value from the said {@link Iterator} is used
+     * as a value for the property.
+     *
+     * @param overrides  (optional may be <code>null</code>) a
+     *                   {@link PropertiesBuilder} specifying properties that
+     *                   will must be used to override those present in this
+     *                   {@link PropertiesBuilder} when realizing the
+     *                   {@link Properties}
+     * @param platform   the {@link Platform} that the {@link Properties} are being realized for
+     *
+     * @return a new {@link Properties} instance as defined by the {@link PropertiesBuilder}
+     */
+    public Properties realize(PropertiesBuilder overrides, Platform platform)
+    {
         Properties properties = new Properties();
 
         // add all of the override properties first
@@ -507,6 +527,11 @@ public class PropertiesBuilder
             if (!properties.containsKey(name))
             {
                 Object value = getProperty(name);
+
+                if (value instanceof PlatformAware)
+                {
+                    ((PlatformAware) value).setPlatform(platform);
+                }
 
                 if (value != null)
                 {

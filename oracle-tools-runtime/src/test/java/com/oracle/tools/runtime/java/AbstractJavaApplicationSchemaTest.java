@@ -27,6 +27,7 @@ package com.oracle.tools.runtime.java;
 
 import com.oracle.tools.runtime.ApplicationConsole;
 import com.oracle.tools.runtime.Platform;
+import com.oracle.tools.runtime.PlatformAware;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -35,7 +36,9 @@ import java.util.Properties;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.same;
 import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -91,6 +94,30 @@ public class AbstractJavaApplicationSchemaTest
         assertThat(schema.isRemoteDebuggingEnabled(), is(true));
         verify(jvm, atLeastOnce()).shouldEnabledRemoteDebug();
     }
+
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void shouldUsePlatformAwarePropertyValue() throws Exception
+    {
+        AbstractJavaApplicationSchema schema = new AbstractJavaApplicationSchemaStub(SimpleJavaApplication.class,
+                                                                                     "TestExe",
+                                                                                     "TestApp",
+                                                                                     "classpath");
+
+        Platform      platform = mock(Platform.class);
+        PlatformAware property = mock(PlatformAware.class);
+
+        when(property.toString()).thenReturn("my-property-value");
+
+        schema.setSystemProperty("my.property", property);
+
+        Properties properties = schema.getSystemProperties(platform);
+        assertThat(properties.getProperty("my.property"), is("my-property-value"));
+
+        verify(property).setPlatform(same(platform));
+    }
+
 
     /**
      * Mock out the {@link JavaVirtualMachine#INSTANCE} so we can

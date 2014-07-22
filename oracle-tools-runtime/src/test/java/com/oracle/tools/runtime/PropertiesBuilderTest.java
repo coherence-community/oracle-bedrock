@@ -37,6 +37,10 @@ import java.util.Properties;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.same;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * Unit Tests for {@link PropertiesBuilder}s.
@@ -493,4 +497,27 @@ public class PropertiesBuilderTest
         assertThat(properties1.getProperty("Key-1"), is("one"));
         assertThat(properties2.getProperty("Key-1"), is("two"));
     }
+
+    /**
+     * Ensure property values that are {@link PlatformAware} work correctly
+     */
+    @Test
+    public void shouldPassPlatformToPlatformAwareProperties() throws Exception
+    {
+        Platform      platform = mock(Platform.class);
+        PlatformAware property = mock(PlatformAware.class);
+
+        PropertiesBuilder builder = new PropertiesBuilder();
+
+        when(property.toString()).thenReturn("my-property-value");
+
+        builder.setProperty("my.property", property);
+
+        Properties properties = builder.realize(null, platform);
+
+        assertThat(properties.getProperty("my.property"), is("my-property-value"));
+
+        verify(property).setPlatform(same(platform));
+    }
+
 }

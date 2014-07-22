@@ -209,7 +209,7 @@ public abstract class AbstractJavaApplicationSchema<A extends JavaApplication,
     @Override
     public Properties getSystemProperties(Platform platform)
     {
-        return getSystemPropertiesBuilder().realize();
+        return getSystemPropertiesBuilder().realize(null, platform);
     }
 
 
