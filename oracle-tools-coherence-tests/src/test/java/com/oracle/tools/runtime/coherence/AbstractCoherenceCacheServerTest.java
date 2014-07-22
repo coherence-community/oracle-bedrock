@@ -243,7 +243,7 @@ public abstract class AbstractCoherenceCacheServerTest<B extends JavaApplication
 
             namedCache.clear();
 
-            assertThat(namedCache.size(), is(0));
+            assertThat(invoking(namedCache).size(), is(0));
         }
     }
 }
