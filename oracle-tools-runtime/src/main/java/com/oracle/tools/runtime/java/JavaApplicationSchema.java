@@ -122,10 +122,10 @@ public interface JavaApplicationSchema<A extends JavaApplication> extends Applic
 
     /**
      * Instantiates a suitable {@link JavaApplication} to control the underlying
-     * {@link JavaProcess}.  It's through this {@link JavaApplication}
+     * {@link JavaApplicationProcess}.  It's through this {@link JavaApplication}
      * that developers will interact with the underlying Java {@link Process}.
      *
-     * @param process               the {@link JavaProcess} representing the {@link JavaApplication}
+     * @param process               the {@link JavaApplicationProcess} representing the {@link JavaApplication}
      * @param name                  the name of the {@link JavaApplication}
      * @param platform              the {@link Platform} that this {@link Application} is running on
      * @param console               the {@link ApplicationConsole} that will be used for I/O by the
@@ -137,13 +137,14 @@ public interface JavaApplicationSchema<A extends JavaApplication> extends Applic
      *
      * @return a {@link JavaApplication}
      */
-    public A createJavaApplication(JavaProcess        process,
-                                   String             name,
-                                   Platform           platform,
-                                   ApplicationConsole console,
-                                   Properties         environmentVariables,
-                                   Properties         systemProperties,
-                                   int                remoteDebuggingPort);
+    public A createJavaApplication(JavaApplicationProcess process,
+                                   String                 name,
+                                   Platform               platform,
+                                   ApplicationConsole     console,
+                                   Properties             environmentVariables,
+                                   Properties             systemProperties,
+                                   int                    remoteDebuggingPort);
+
 
     /**
      * Determines if the next {@link JavaApplication} should be started in
@@ -153,6 +154,7 @@ public interface JavaApplicationSchema<A extends JavaApplication> extends Applic
      */
     public boolean isRemoteDebuggingEnabled();
 
+
     /**
      * Determines if a remotely debugged {@link JavaApplication} will be started
      * in suspend mode.
@@ -160,6 +162,7 @@ public interface JavaApplicationSchema<A extends JavaApplication> extends Applic
      * @return <code>true</code> if started in suspend mode
      */
     public boolean isRemoteDebuggingStartSuspended();
+
 
     /**
      * Obtain the port that {@link JavaApplication}s realized from this schema will listen on
@@ -175,6 +178,7 @@ public interface JavaApplicationSchema<A extends JavaApplication> extends Applic
      */
     public int getRemoteDebugListenPort();
 
+
     /**
      * Obtain the port that {@link JavaApplication}s realized from this schema will use to
      * connect back to a remote debugger if started with remote debug enabled and remote debugging
@@ -188,6 +192,7 @@ public interface JavaApplicationSchema<A extends JavaApplication> extends Applic
      *         method is called.
      */
     public int getRemoteDebugAttachPort();
+
 
     /**
      * Obtain the mode that remote debugging (if enabled) will run in for {@link JavaApplication}s

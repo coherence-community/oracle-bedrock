@@ -26,25 +26,36 @@
 package com.oracle.tools.runtime.coherence;
 
 import com.oracle.tools.junit.AbstractTest;
+
 import com.oracle.tools.predicate.Predicate;
+
 import com.oracle.tools.runtime.ApplicationConsole;
 import com.oracle.tools.runtime.LocalPlatform;
+
 import com.oracle.tools.runtime.actions.InteractiveActionExecutor;
 import com.oracle.tools.runtime.actions.PerpetualAction;
+
 import com.oracle.tools.runtime.coherence.actions.RestartClusterMemberAction;
+
 import com.oracle.tools.runtime.console.SystemApplicationConsole;
+
 import com.oracle.tools.runtime.java.JavaApplicationBuilder;
+
 import com.oracle.tools.runtime.network.AvailablePortIterator;
 import com.oracle.tools.runtime.network.Constants;
+
 import com.oracle.tools.util.Capture;
+
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.util.HashSet;
-
 import static com.oracle.tools.deferred.DeferredHelper.invoking;
+
 import static com.oracle.tools.deferred.Eventually.assertThat;
+
 import static org.hamcrest.CoreMatchers.is;
+
+import java.util.HashSet;
 
 /**
  * Functional Tests for the {@link com.oracle.tools.runtime.coherence.ClusterBuilder} class.
@@ -80,9 +91,10 @@ public abstract class AbstractClusterBuilderTest extends AbstractTest
         AvailablePortIterator availablePorts = LocalPlatform.getInstance().getAvailablePorts();
         Capture<Integer>      clusterPort    = new Capture<Integer>(availablePorts);
 
-        ClusterMemberSchema   schema         = new ClusterMemberSchema().useLocalHostMode().setClusterPort(clusterPort);
+        ClusterMemberSchema schema =
+            new ClusterMemberSchema().useLocalHostMode().setClusterPort(clusterPort).setClusterName("Storage-Cluster");
 
-        Cluster               cluster        = null;
+        Cluster cluster = null;
 
         try
         {
@@ -123,12 +135,13 @@ public abstract class AbstractClusterBuilderTest extends AbstractTest
 
         ClusterMemberSchema storageSchema =
             new ClusterMemberSchema().setClusterPort(clusterPort).setStorageEnabled(true)
-                .setCacheConfigURI("test-cache-config.xml").useLocalHostMode();
+                .setCacheConfigURI("test-cache-config.xml").useLocalHostMode().setClusterName("Storage-Proxy-Cluster");
 
         ClusterMemberSchema extendSchema =
             new ClusterMemberSchema().setStorageEnabled(false).setClusterPort(clusterPort)
-                .setCacheConfigURI("test-extend-proxy-config.xml").setSystemProperty("coherence.extend.port",
-                                                                                     availablePorts).useLocalHostMode();
+                .setClusterName("Storage-Proxy-Cluster").setCacheConfigURI("test-extend-proxy-config.xml")
+                .setSystemProperty("coherence.extend.port",
+                                   availablePorts).useLocalHostMode();
 
         Cluster cluster = null;
 
@@ -187,11 +200,14 @@ public abstract class AbstractClusterBuilderTest extends AbstractTest
     public void shouldBuilderWKABasedStorageCluster() throws Exception
     {
         Capture<Integer> wkaPort   = new Capture<Integer>(LocalPlatform.getInstance().getAvailablePorts());
+        Capture<Integer> clusterPort = new Capture<Integer>(LocalPlatform.getInstance().getAvailablePorts());
+
         String           localHost = Constants.getLocalHost();
 
         ClusterMemberSchema memberSchema =
-            new ClusterMemberSchema().setStorageEnabled(true).setWellKnownAddress(localHost)
-                .setWellKnownAddressPort(wkaPort).setLocalHostAddress(localHost).setLocalHostPort(wkaPort);
+            new ClusterMemberSchema().setStorageEnabled(true).setWellKnownAddress(localHost).setClusterPort(clusterPort)
+                .setWellKnownAddressPort(wkaPort).setLocalHostAddress(localHost).setLocalHostPort(wkaPort)
+                .setClusterName("WKA-Cluster");
 
         SystemApplicationConsole console            = new SystemApplicationConsole();
 
@@ -231,16 +247,18 @@ public abstract class AbstractClusterBuilderTest extends AbstractTest
     @Test
     public void shouldPerformRollingRestartOfCluster() throws Exception
     {
-        final int                             CLUSTER_SIZE   = 3;
+        final int             CLUSTER_SIZE   = 3;
 
-        AvailablePortIterator                 availablePorts = LocalPlatform.getInstance().getAvailablePorts();
-        Capture<Integer>                      clusterPort    = new Capture<Integer>(availablePorts);
+        AvailablePortIterator availablePorts = LocalPlatform.getInstance().getAvailablePorts();
+        Capture<Integer>      clusterPort    = new Capture<Integer>(availablePorts);
 
-        ClusterMemberSchema schema = new ClusterMemberSchema().useLocalHostMode().setClusterPort(clusterPort);
+        ClusterMemberSchema schema =
+            new ClusterMemberSchema().useLocalHostMode().setClusterPort(clusterPort)
+                .setClusterName("Rolling-Restart-Cluster");
 
-        Cluster                               cluster        = null;
-        ApplicationConsole                    console        = new SystemApplicationConsole();
-        JavaApplicationBuilder<ClusterMember> memberBuilder  = newJavaApplicationBuilder();
+        Cluster                               cluster       = null;
+        ApplicationConsole                    console       = new SystemApplicationConsole();
+        JavaApplicationBuilder<ClusterMember> memberBuilder = newJavaApplicationBuilder();
 
         try
         {

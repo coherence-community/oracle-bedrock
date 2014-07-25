@@ -28,19 +28,23 @@ package com.oracle.tools.runtime.java;
 import com.oracle.tools.runtime.ApplicationConsole;
 import com.oracle.tools.runtime.Platform;
 import com.oracle.tools.runtime.PlatformAware;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.Properties;
-
 import static org.hamcrest.CoreMatchers.is;
+
 import static org.junit.Assert.assertThat;
+
 import static org.mockito.Matchers.same;
+
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import java.util.Properties;
 
 /**
  * Unit tests for {@link AbstractJavaApplicationSchema}.
@@ -113,6 +117,7 @@ public class AbstractJavaApplicationSchemaTest
         schema.setSystemProperty("my.property", property);
 
         Properties properties = schema.getSystemProperties(platform);
+
         assertThat(properties.getProperty("my.property"), is("my-property-value"));
 
         verify(property).setPlatform(same(platform));
@@ -149,6 +154,16 @@ public class AbstractJavaApplicationSchemaTest
     {
         private Class<A> applicationType;
 
+
+        /**
+         * Constructs ...
+         *
+         *
+         * @param applicationType
+         * @param executableName
+         * @param applicationClassName
+         * @param classPath
+         */
         public AbstractJavaApplicationSchemaStub(Class<A> applicationType,
                                                  String   executableName,
                                                  String   applicationClassName,
@@ -166,14 +181,17 @@ public class AbstractJavaApplicationSchemaTest
 
 
         @Override
-        public A createJavaApplication(JavaProcess process,
-                                       String name,
-                                       Platform platform, ApplicationConsole console,
-                                       Properties environmentVariables,
-                                       Properties systemProperties, int remoteDebuggingPort)
+        public A createJavaApplication(JavaApplicationProcess process,
+                                       String                 name,
+                                       Platform               platform,
+                                       ApplicationConsole     console,
+                                       Properties             environmentVariables,
+                                       Properties             systemProperties,
+                                       int                    remoteDebuggingPort)
         {
             return null;
         }
+
 
         @Override
         public Class<A> getApplicationClass()

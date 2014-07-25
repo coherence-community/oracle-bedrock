@@ -25,9 +25,6 @@
 
 package com.oracle.tools.runtime;
 
-import java.util.Properties;
-import java.util.concurrent.TimeUnit;
-
 /**
  * A {@link SimpleApplication} is a simple implementation of an {@link Application}.
  * <p>
@@ -36,42 +33,18 @@ import java.util.concurrent.TimeUnit;
  *
  * @author Jonathan Knight
  */
-public class SimpleApplication extends AbstractApplication<SimpleApplication, ApplicationProcess>
+public class SimpleApplication
+    extends AbstractApplication<SimpleApplication, ApplicationProcess, SimpleApplicationRuntime>
 {
     /**
      * Construct a {@link SimpleApplication}.
      *
-     * @param process               the {@link ApplicationProcess} representing the
-     *                              {@link Application}
-     * @param name                  the name of the application
-     * @param platform              the {@link Platform} that this {@link Application} is running on
-     * @param console               the {@link ApplicationConsole} that will be
-     *                              used for I/O by the {@link Application}
-     * @param environmentVariables  the environment variables used when
-     *                              establishing the {@link Application}
-     * @param isDiagnosticsEnabled  should diagnostic information be logged/output
-     * @param defaultTimeout        the default timeout duration
-     * @param defaultTimeoutUnits   the default timeout duration {@link TimeUnit}
-     * @param interceptors          the {@link LifecycleEventInterceptor}s
+     * @param runtime   the {@link SimpleApplicationRuntime}
+     * @param interceptors  the {@link LifecycleEventInterceptor}s
      */
-    public SimpleApplication(ApplicationProcess                                             process,
-                             String                                                         name,
-                             Platform                                                       platform,
-                             ApplicationConsole                                             console,
-                             Properties                                                     environmentVariables,
-                             boolean                                                        isDiagnosticsEnabled,
-                             long                                                           defaultTimeout,
-                             TimeUnit                                                       defaultTimeoutUnits,
+    public SimpleApplication(SimpleApplicationRuntime                                       runtime,
                              Iterable<LifecycleEventInterceptor<? super SimpleApplication>> interceptors)
     {
-        super(process,
-              name,
-              platform,
-              console,
-              environmentVariables,
-              isDiagnosticsEnabled,
-              defaultTimeout,
-              defaultTimeoutUnits,
-              interceptors);
+        super(runtime, interceptors);
     }
 }

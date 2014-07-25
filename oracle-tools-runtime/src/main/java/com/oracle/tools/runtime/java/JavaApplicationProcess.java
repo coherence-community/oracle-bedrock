@@ -1,5 +1,5 @@
 /*
- * File: JavaProcess.java
+ * File: JavaApplicationProcess.java
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
@@ -30,7 +30,7 @@ import com.oracle.tools.runtime.ApplicationProcess;
 import com.oracle.tools.runtime.concurrent.RemoteExecutor;
 
 /**
- * A specialized [@link ApplicationProcess}, suitable for managing Java-based
+ * A {@link ApplicationProcess} specifically for managing Java-based
  * Applications at runtime.
  * <p>
  * Copyright (c) 2013. All Rights Reserved. Oracle Corporation.<br>
@@ -38,6 +38,6 @@ import com.oracle.tools.runtime.concurrent.RemoteExecutor;
  *
  * @author Brian Oliver
  */
-public interface JavaProcess extends ApplicationProcess, RemoteExecutor
+public interface JavaApplicationProcess extends ApplicationProcess, RemoteExecutor
 {
 }

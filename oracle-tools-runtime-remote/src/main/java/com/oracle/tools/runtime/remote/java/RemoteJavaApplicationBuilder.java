@@ -28,23 +28,28 @@ package com.oracle.tools.runtime.remote.java;
 import com.oracle.tools.runtime.ApplicationConsole;
 import com.oracle.tools.runtime.ApplicationSchema;
 import com.oracle.tools.runtime.Platform;
+
 import com.oracle.tools.runtime.concurrent.ControllableRemoteExecutor;
 import com.oracle.tools.runtime.concurrent.RemoteCallable;
 import com.oracle.tools.runtime.concurrent.RemoteExecutor;
 import com.oracle.tools.runtime.concurrent.RemoteRunnable;
+
 import com.oracle.tools.runtime.java.ClassPath;
 import com.oracle.tools.runtime.java.JavaApplication;
 import com.oracle.tools.runtime.java.JavaApplicationBuilder;
+import com.oracle.tools.runtime.java.JavaApplicationProcess;
 import com.oracle.tools.runtime.java.JavaApplicationSchema;
-import com.oracle.tools.runtime.java.JavaProcess;
+
 import com.oracle.tools.runtime.remote.AbstractRemoteApplicationBuilder;
 import com.oracle.tools.runtime.remote.Authentication;
 import com.oracle.tools.runtime.remote.RemoteApplicationProcess;
+
 import com.oracle.tools.util.CompletionListener;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+
 import java.util.HashSet;
 
 /**
@@ -259,7 +264,8 @@ public class RemoteJavaApplicationBuilder<A extends JavaApplication>
     @Override
     @SuppressWarnings("unchecked")
     protected <T extends A,
-        S extends ApplicationSchema<T>> RemoteJavaApplicationEnvironment<A> getRemoteApplicationEnvironment(S applicationSchema, Platform platform)
+        S extends ApplicationSchema<T>> RemoteJavaApplicationEnvironment<A> getRemoteApplicationEnvironment(S applicationSchema,
+        Platform                                                                                              platform)
     {
         JavaApplicationSchema<A> schema = (JavaApplicationSchema) applicationSchema;
 
@@ -292,7 +298,9 @@ public class RemoteJavaApplicationBuilder<A extends JavaApplication>
         JavaApplicationSchema<T> javaSchema = (JavaApplicationSchema) schema;
 
         // create a JavaProcess representation of the RemoteApplicationProcess
-        RemoteJavaProcess remoteJavaProcess = new RemoteJavaProcess(process, environment.getRemoteExecutor());
+        RemoteJavaApplicationProcess remoteJavaProcess = new RemoteJavaApplicationProcess(process,
+                                                                                          environment
+                                                                                              .getRemoteExecutor());
 
         return javaSchema.createJavaApplication(remoteJavaProcess,
                                                 applicationName,
@@ -305,10 +313,10 @@ public class RemoteJavaApplicationBuilder<A extends JavaApplication>
 
 
     /**
-     * A {@link RemoteJavaProcess} is an adapter for a {@link RemoteApplicationProcess},
+     * A {@link RemoteJavaApplicationProcess} is an adapter for a {@link RemoteApplicationProcess},
      * specifically for Java-based applications.
      */
-    public static class RemoteJavaProcess implements JavaProcess
+    public static class RemoteJavaApplicationProcess implements JavaApplicationProcess
     {
         /**
          * The {@link RemoteApplicationProcess} being adapted.
@@ -316,19 +324,19 @@ public class RemoteJavaApplicationBuilder<A extends JavaApplication>
         private RemoteApplicationProcess process;
 
         /**
-         * The {@link RemoteExecutor} for the {@link RemoteJavaProcess}.
+         * The {@link RemoteExecutor} for the {@link RemoteJavaApplicationProcess}.
          */
         private ControllableRemoteExecutor remoteExecutor;
 
 
         /**
-         * Constructs a {@link RemoteJavaProcess}.
+         * Constructs a {@link RemoteJavaApplicationProcess}.
          *
          * @param process         the underlying {@link RemoteApplicationProcess}
          * @param remoteExecutor  the {@link RemoteExecutor} for executing remote requests
          */
-        public RemoteJavaProcess(RemoteApplicationProcess   process,
-                                 ControllableRemoteExecutor remoteExecutor)
+        public RemoteJavaApplicationProcess(RemoteApplicationProcess   process,
+                                            ControllableRemoteExecutor remoteExecutor)
         {
             this.process        = process;
             this.remoteExecutor = remoteExecutor;

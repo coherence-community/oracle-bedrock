@@ -226,6 +226,12 @@ reverse chronological order.
     configuring a JavaApplicationSchema. The actual value used for the property can then
     be determined based on the Platform that a JavaApplication is being relaized on.
 
+*   [ORACLETOOLS-137](https://java.net/jira/browse/ORACLETOOLS-137): Introduced
+    the concept of an ApplicationRuntime, a class encapsulating internal
+    runtime information concerning an Application.  Refactored all internal
+    Application implementations to take an ApplicationRuntime parameter,
+    replacing numerous constructor parameters with a single structure.
+
 <h4>oracle-tools-runtime-remote</h4>
 
 *   [ORACLETOOLS-91](https://java.net/jira/browse/ORACLETOOLS-91): Introduced

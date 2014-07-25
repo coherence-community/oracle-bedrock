@@ -92,25 +92,26 @@ public class SimpleJavaApplicationSchema
 
 
     @Override
-    public SimpleJavaApplication createJavaApplication(JavaProcess        process,
-                                                       String             name,
-                                                       Platform           platform,
-                                                       ApplicationConsole console,
-                                                       Properties         environmentVariables,
-                                                       Properties         systemProperties,
-                                                       int                remoteDebuggingPort)
+    public SimpleJavaApplication createJavaApplication(JavaApplicationProcess process,
+                                                       String                 displayName,
+                                                       Platform               platform,
+                                                       ApplicationConsole     console,
+                                                       Properties             environmentVariables,
+                                                       Properties             systemProperties,
+                                                       int                    remoteDebuggingPort)
     {
-        return new SimpleJavaApplication(process,
-                                         name,
-                                         platform,
-                                         console,
-                                         environmentVariables,
-                                         systemProperties,
-                                         this.isDiagnosticsEnabled(),
-                                         this.getDefaultTimeout(),
-                                         this.getDefaultTimeoutUnits(),
-                                         this.getLifecycleInterceptors(),
-                                         remoteDebuggingPort);
+        SimpleJavaApplicationRuntime environment = new SimpleJavaApplicationRuntime(displayName,
+                                                                                    platform,
+                                                                                    process,
+                                                                                    console,
+                                                                                    environmentVariables,
+                                                                                    this.isDiagnosticsEnabled(),
+                                                                                    this.getDefaultTimeout(),
+                                                                                    this.getDefaultTimeoutUnits(),
+                                                                                    systemProperties,
+                                                                                    remoteDebuggingPort);
+
+        return new SimpleJavaApplication(environment, this.getLifecycleInterceptors());
     }
 
 

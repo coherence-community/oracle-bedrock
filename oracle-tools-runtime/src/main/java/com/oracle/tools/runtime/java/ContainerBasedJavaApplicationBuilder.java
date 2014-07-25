@@ -30,26 +30,32 @@ import com.oracle.tools.runtime.ApplicationConsole;
 import com.oracle.tools.runtime.ApplicationSchema;
 import com.oracle.tools.runtime.Platform;
 import com.oracle.tools.runtime.PropertiesBuilder;
+
 import com.oracle.tools.runtime.concurrent.RemoteCallable;
 import com.oracle.tools.runtime.concurrent.RemoteExecutor;
 import com.oracle.tools.runtime.concurrent.RemoteRunnable;
 import com.oracle.tools.runtime.concurrent.callable.RemoteCallableStaticMethod;
+
 import com.oracle.tools.runtime.java.container.Container;
 import com.oracle.tools.runtime.java.container.ContainerClassLoader;
 import com.oracle.tools.runtime.java.io.Serialization;
+
 import com.oracle.tools.util.CompletionListener;
 import com.oracle.tools.util.FutureCompletionListener;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -59,7 +65,7 @@ import java.util.logging.Logger;
  * Virtual Machine in the same manner as a regular Java EE application server
  * or container.
  * <p>
- * Scope of Application occurs through the use of a {@link ContainerBasedJavaProcess}
+ * Scope of Application occurs through the use of a {@link ContainerBasedJavaApplicationProcess}
  * and a specialized child-first class loader provided by a {@link com.oracle.tools.runtime.java.container.ContainerClassLoader}.
  * <p>
  * <strong>Caution:</strong> Care should be taken using this {@link com.oracle.tools.runtime.java.JavaApplicationBuilder}
@@ -194,7 +200,8 @@ public class ContainerBasedJavaApplicationBuilder<A extends JavaApplication> ext
             }
 
             // establish the ContainerBasedJavaProcess
-            ContainerBasedJavaProcess process = new ContainerBasedJavaProcess(classLoader, controller);
+            ContainerBasedJavaApplicationProcess process = new ContainerBasedJavaApplicationProcess(classLoader,
+                                                                                                    controller);
 
             // start the process
             process.start();
@@ -277,11 +284,11 @@ public class ContainerBasedJavaApplicationBuilder<A extends JavaApplication> ext
 
 
     /**
-     * An implementation of a {@link JavaProcess} to represent and control a
+     * An implementation of a {@link JavaApplicationProcess} to represent and control a
      * Java application running with in a Java Virtual Machine, as part of a
      * container, much like a Java EE application.
      */
-    public static class ContainerBasedJavaProcess implements JavaProcess, ControllableApplication
+    public static class ContainerBasedJavaApplicationProcess implements JavaApplicationProcess, ControllableApplication
     {
         /**
          * An {@link ExecutorService} to use for requesting asynchronous
@@ -316,13 +323,13 @@ public class ContainerBasedJavaApplicationBuilder<A extends JavaApplication> ext
 
 
         /**
-         * Constructs an {@link ContainerBasedJavaProcess}.
+         * Constructs an {@link ContainerBasedJavaApplicationProcess}.
          *
          * @param classLoader           the {@link ClassLoader} in which to run the application
          * @param controller            the {@link ApplicationController}
          */
-        public ContainerBasedJavaProcess(ContainerClassLoader  classLoader,
-                                         ApplicationController controller)
+        public ContainerBasedJavaApplicationProcess(ContainerClassLoader  classLoader,
+                                                    ApplicationController controller)
         {
             if (controller == null)
             {
@@ -622,7 +629,7 @@ public class ContainerBasedJavaApplicationBuilder<A extends JavaApplication> ext
 
     /**
      * An {@link ApplicationController} that will call specific methods to start
-     * and destroy a {@link ContainerBasedJavaProcess}.
+     * and destroy a {@link ContainerBasedJavaApplicationProcess}.
      */
     public static class CustomController implements ApplicationController
     {
@@ -705,7 +712,7 @@ public class ContainerBasedJavaApplicationBuilder<A extends JavaApplication> ext
 
     /**
      * An {@link ApplicationController} that does nothing to a
-     * {@link ContainerBasedJavaProcess}.
+     * {@link ContainerBasedJavaApplicationProcess}.
      */
     public static class NullController implements ApplicationController
     {

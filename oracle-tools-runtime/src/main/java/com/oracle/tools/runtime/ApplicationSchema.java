@@ -160,8 +160,8 @@ public interface ApplicationSchema<A extends Application>
 
 
     /**
-     * Obtains the {@link LifecycleEventInterceptor}s that the {@link FluentApplicationSchema} will
-     * attach to {@link Application}s produced by the said {@link FluentApplicationSchema}.
+     * Obtains the {@link LifecycleEventInterceptor}s that will be attached to
+     * {@link Application}s produced by this {@link ApplicationSchema}.
      * <p>
      * {@link LifecycleEventInterceptor}s are typically used by {@link Application}s
      * and {@link ApplicationBuilder}s to raise {@link LifecycleEvent}s pertaining

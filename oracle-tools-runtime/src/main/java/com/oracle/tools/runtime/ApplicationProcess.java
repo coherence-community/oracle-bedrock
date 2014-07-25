@@ -30,7 +30,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 /**
- * Represents an executing or previously executed Application.
+ * An internal interface used to represent an executing or previously executed
+ * {@link Application}.
  * <p>
  * This interface is inspired by the {@link java.lang.Process} class, but is
  * represented as an interface so that we can provide multiple implementations,

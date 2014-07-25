@@ -1,5 +1,5 @@
 /*
- * File: ContainerBasedJavaProcessTest.java
+ * File: ContainerBasedJavaApplicationProcessTest.java
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
@@ -34,7 +34,7 @@ import com.oracle.tools.runtime.java.ContainerBasedJavaApplicationBuilder;
 import org.junit.Before;
 import org.junit.Test;
 
-import static com.oracle.tools.runtime.java.ContainerBasedJavaApplicationBuilder.ContainerBasedJavaProcess;
+import static com.oracle.tools.runtime.java.ContainerBasedJavaApplicationBuilder.ContainerBasedJavaApplicationProcess;
 import static com.oracle.tools.runtime.java.container.InvocationTracingApplication.MethodInvocation;
 
 import static org.hamcrest.CoreMatchers.instanceOf;
@@ -53,7 +53,7 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * Functional Tests for {@link ContainerBasedJavaProcess}es.
+ * Functional Tests for {@link ContainerBasedJavaApplicationProcess}es.
  * <p>
  * Copyright (c) 2013. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
@@ -61,7 +61,7 @@ import java.util.List;
  * @author Jonathan Knight
  * @author Brian Oliver
  */
-public class ContainerBasedJavaProcessTest extends AbstractTest
+public class ContainerBasedJavaApplicationProcessTest extends AbstractTest
 {
     /**
      * Setup to occur before each test method.
@@ -87,10 +87,10 @@ public class ContainerBasedJavaProcessTest extends AbstractTest
         String               methodName  = InvocationTracingApplication.METHOD_STATIC_MAIN;
         List<String>         arguments   = Arrays.asList("1", "2");
 
-        try (ContainerBasedJavaProcess process = new ContainerBasedJavaProcess(classLoader,
-                                                                               new ContainerBasedJavaApplicationBuilder
-                                                                                   .StandardController(className,
-                                                                                                       arguments)))
+        try (ContainerBasedJavaApplicationProcess process = new ContainerBasedJavaApplicationProcess(classLoader,
+                                                                                                     new ContainerBasedJavaApplicationBuilder
+                                                                                                         .StandardController(className,
+                arguments)))
         {
             process.start();
             process.waitFor();
@@ -126,9 +126,10 @@ public class ContainerBasedJavaProcessTest extends AbstractTest
                                                                                          methodName,
                                                                                          arguments);
 
-        try (ContainerBasedJavaProcess process = new ContainerBasedJavaProcess(classLoader,
-                                                                               new ContainerBasedJavaApplicationBuilder
-                                                                                   .CustomController(callable)))
+        try (ContainerBasedJavaApplicationBuilder.ContainerBasedJavaApplicationProcess process =
+            new ContainerBasedJavaApplicationBuilder.ContainerBasedJavaApplicationProcess(classLoader,
+                                                                                          new ContainerBasedJavaApplicationBuilder
+                                                                                              .CustomController(callable)))
         {
             process.start();
             process.waitFor();
@@ -162,9 +163,10 @@ public class ContainerBasedJavaProcessTest extends AbstractTest
         String                           methodName = InvocationTracingApplication.METHOD_STATIC_START_NO_ARGS;
         RemoteCallableStaticMethod<Void> callable   = new RemoteCallableStaticMethod<Void>(className, methodName);
 
-        try (ContainerBasedJavaProcess process = new ContainerBasedJavaProcess(classLoader,
-                                                                               new ContainerBasedJavaApplicationBuilder
-                                                                                   .CustomController(callable)))
+        try (ContainerBasedJavaApplicationBuilder.ContainerBasedJavaApplicationProcess process =
+            new ContainerBasedJavaApplicationBuilder.ContainerBasedJavaApplicationProcess(classLoader,
+                                                                                          new ContainerBasedJavaApplicationBuilder
+                                                                                              .CustomController(callable)))
         {
             process.start();
             process.waitFor();
@@ -198,10 +200,10 @@ public class ContainerBasedJavaProcessTest extends AbstractTest
         String                           methodName = InvocationTracingApplication.METHOD_STATIC_STOP_NO_ARGS;
         RemoteCallableStaticMethod<Void> callable   = new RemoteCallableStaticMethod<Void>(className, methodName);
 
-        try (ContainerBasedJavaProcess process = new ContainerBasedJavaProcess(classLoader,
-                                                                               new ContainerBasedJavaApplicationBuilder
-                                                                                   .CustomController(null,
-                                                                                                     callable)))
+        try (ContainerBasedJavaApplicationBuilder.ContainerBasedJavaApplicationProcess process =
+            new ContainerBasedJavaApplicationBuilder.ContainerBasedJavaApplicationProcess(classLoader,
+                                                                                          new ContainerBasedJavaApplicationBuilder
+                                                                                              .CustomController(null, callable)))
         {
             process.start();
 
@@ -236,9 +238,10 @@ public class ContainerBasedJavaProcessTest extends AbstractTest
         String                           methodName = "method_does_not_exist";
         RemoteCallableStaticMethod<Void> callable   = new RemoteCallableStaticMethod<Void>(className, methodName);
 
-        try (ContainerBasedJavaProcess process = new ContainerBasedJavaProcess(classLoader,
-                                                                               new ContainerBasedJavaApplicationBuilder
-                                                                                   .CustomController(callable)))
+        try (ContainerBasedJavaApplicationBuilder.ContainerBasedJavaApplicationProcess process =
+            new ContainerBasedJavaApplicationBuilder.ContainerBasedJavaApplicationProcess(classLoader,
+                                                                                          new ContainerBasedJavaApplicationBuilder
+                                                                                              .CustomController(callable)))
         {
             process.start();
             process.waitFor();

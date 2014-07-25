@@ -27,6 +27,7 @@ package com.oracle.tools.runtime;
 
 import java.io.File;
 import java.io.IOException;
+
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
@@ -250,14 +251,18 @@ public class SimpleApplicationBuilder extends AbstractApplicationBuilder<SimpleA
             throw new RuntimeException("Failed to build the underlying native process for the application", e);
         }
 
-        final T application = (T) new SimpleApplication(new LocalApplicationProcess(process),
-                                                        applicationName,
-                                                        platform,
-                                                        console,
-                                                        environmentVariables,
-                                                        schema.isDiagnosticsEnabled(),
-                                                        schema.getDefaultTimeout(),
-                                                        schema.getDefaultTimeoutUnits(),
+        // construct an ApplicationEnvironment for the SimpleApplication
+        SimpleApplicationRuntime environment = new SimpleApplicationRuntime(applicationName,
+                                                                            platform,
+                                                                            new LocalApplicationProcess(process),
+                                                                            console,
+                                                                            environmentVariables,
+                                                                            schema.isDiagnosticsEnabled(),
+                                                                            schema.getDefaultTimeout(),
+                                                                            schema.getDefaultTimeoutUnits());
+
+        // create the SimpleApplication
+        final T application = (T) new SimpleApplication(environment,
                                                         schema instanceof FluentApplicationSchema
                                                         ? ((FluentApplicationSchema<SimpleApplication, ?>) schema)
                                                             .getLifecycleInterceptors() : null);

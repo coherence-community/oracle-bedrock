@@ -36,6 +36,7 @@ import com.oracle.tools.junit.AbstractTest;
 
 import com.oracle.tools.lang.StringHelper;
 
+import com.oracle.tools.runtime.AbstractApplication;
 import com.oracle.tools.runtime.ApplicationConsole;
 import com.oracle.tools.runtime.DummyApp;
 import com.oracle.tools.runtime.DummyClassPathApp;
@@ -84,20 +85,6 @@ public abstract class AbstractJavaApplicationBuilderTest extends AbstractTest
 
 
     /**
-     * Obtains the internal Application Process Id for the specified Application
-     * (without using the application.getId() method)
-     *
-     * @param application  the application
-     *
-     * @return the process id
-     */
-    public long getProcessIdFor(JavaApplication application)
-    {
-        return ((AbstractJavaApplication) application).getJavaProcess().getId();
-    }
-
-
-    /**
      * Ensure that we can start and terminate a {@link JavaApplication}.
      *
      * @throws Exception
@@ -123,8 +110,6 @@ public abstract class AbstractJavaApplicationBuilderTest extends AbstractTest
         stdout = console.getOutputReader().readLine();
 
         assertThat(stdout, containsString("test.prop.1=value.1"));
-
-        assertThat(application.getId(), is(getProcessIdFor(application)));
 
         application.close();
     }
@@ -166,8 +151,6 @@ public abstract class AbstractJavaApplicationBuilderTest extends AbstractTest
         stdout = console.getOutputReader().readLine();
 
         assertThat(stdout, containsString(path2.iterator().next()));
-
-        assertThat(application.getId(), is(getProcessIdFor(application)));
 
         application.close();
     }

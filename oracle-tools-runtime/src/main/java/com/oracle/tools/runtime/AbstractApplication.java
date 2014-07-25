@@ -25,7 +25,6 @@
 
 package com.oracle.tools.runtime;
 
-import com.oracle.tools.runtime.console.SystemApplicationConsole;
 import com.oracle.tools.runtime.java.container.Container;
 
 import java.io.BufferedInputStream;
@@ -36,15 +35,15 @@ import java.io.InterruptedIOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.Reader;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+
 import java.util.concurrent.TimeUnit;
 
 /**
- * A base implementation of an {@link Application} that internally uses an
- * {@link ApplicationProcess} as a means of representing and controlling the said
- * {@link Application}.
+ * A base implementation of an {@link Application}.
  * <p>
  * Copyright (c) 2011. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
@@ -55,204 +54,128 @@ import java.util.concurrent.TimeUnit;
  * @param <A>  the type of {@link AbstractApplication} to permit fluent method calls
  * @param <P>  the type of {@link ApplicationProcess} used to internally represent
  *             the underlying {@link Application} at runtime
+ * @param <R>  the type of {@link ApplicationRuntime}
  */
-public abstract class AbstractApplication<A extends AbstractApplication<A, P>, P extends ApplicationProcess>
-    implements FluentApplication<A>
+public abstract class AbstractApplication<A extends AbstractApplication<A, P, R>, P extends ApplicationProcess,
+                                          R extends ApplicationRuntime<P>> implements FluentApplication<A>
 {
     /**
-     * The default timeout for the {@link Application}.
+     * The {@link ApplicationRuntime} for the {@link Application}.
      */
-    public static final long DEFAULT_TIMEOUT = 60;
-
-    /**
-     * The default timeout {@link TimeUnit} for the {@link Application}.
-     */
-    public static final TimeUnit DEFAULT_TIMEOUT_UNIT = TimeUnit.SECONDS;
-
-    /**
-     * The {@link ApplicationProcess} of the executing {@link Application}.
-     */
-    private final P m_process;
-
-    /**
-     * The name of the {@link Application}.
-     */
-    private String m_name;
-
-    /**
-     * The {@link Platform} that this {@link Application} is running on.
-     */
-    private Platform m_platform;
-
-    /**
-     * The {@link ApplicationConsole} that will be used for the {@link Application} I/O.
-     */
-    private final ApplicationConsole m_console;
-
-    /**
-     * Should diagnostic information be enabled for the {@link Application}.
-     */
-    private boolean m_isDiagnosticsEnabled;
-
-    /**
-     * The environment variables used when establishing the {@link Application}.
-     */
-    private Properties m_environmentVariables;
+    protected final R runtime;
 
     /**
      * The {@link Thread} that is used to capture standard output from the underlying {@link Process}.
      */
-    private Thread m_outThread;
+    private final Thread stdoutThread;
 
     /**
      * The {@link Thread} that is used to capture standard error from the underlying {@link Process}.
      */
-    private Thread m_errThread;
+    private final Thread stderrThread;
 
     /**
      * The {@link Thread} that is used to pipe standard in into the underlying {@link Process}.
      */
-    private Thread m_inThread;
-
-    /**
-     * The default timeout duration.
-     */
-    private long m_defaultTimeout;
-
-    /**
-     * The default timeout duration {@link TimeUnit}.
-     */
-    private TimeUnit m_defaultTimeoutUnits;
+    private final Thread stdinThread;
 
     /**
      * The {@link LifecycleEventInterceptor}s that must be executed for
      * {@link LifecycleEvent}s on the {@link Application}.
      */
-    private List<LifecycleEventInterceptor<? super A>> m_interceptors;
+    private List<LifecycleEventInterceptor<? super A>> interceptors;
 
 
     /**
      * Construct an {@link AbstractApplication}.
      *
-     * @param process               the {@link ApplicationProcess} representing the {@link Application}
-     * @param name                  the name of the application
-     * @param platform              the {@link Platform} that this {@link Application} is running on
-     * @param console               the {@link ApplicationConsole} that will be used for I/O by the {@link Application}
-     * @param environmentVariables  the environment variables used when establishing the {@link Application}
+     * @param runtime       the {@link ApplicationRuntime}
+     * @param interceptors  the {@link LifecycleEventInterceptor}s
      */
-    public AbstractApplication(P                  process,
-                               String             name,
-                               Platform           platform,
-                               ApplicationConsole console,
-                               Properties         environmentVariables)
-    {
-        this(process, name, platform, console, environmentVariables, false, DEFAULT_TIMEOUT, DEFAULT_TIMEOUT_UNIT, null);
-    }
-
-
-    /**
-     * Construct an {@link AbstractApplication}.
-     *
-     * @param process               the {@link ApplicationProcess} representing the {@link Application}
-     * @param name                  the name of the application
-     * @param platform              the {@link Platform} that this {@link Application} is running on
-     * @param console               the {@link ApplicationConsole} that will be used for I/O by the {@link Application}
-     * @param environmentVariables  the environment variables used when establishing the {@link Application}
-     * @param isDiagnosticsEnabled  should diagnostic information be logged/output
-     * @param defaultTimeout        the default timeout duration
-     * @param defaultTimeoutUnits   the default timeout duration {@link TimeUnit}
-     * @param interceptors          the {@link LifecycleEventInterceptor}s
-     */
-    public AbstractApplication(P                                              process,
-                               String                                         name,
-                               Platform                                       platform,
-                               ApplicationConsole                             console,
-                               Properties                                     environmentVariables,
-                               boolean                                        isDiagnosticsEnabled,
-                               long                                           defaultTimeout,
-                               TimeUnit                                       defaultTimeoutUnits,
+    public AbstractApplication(R                                              runtime,
                                Iterable<LifecycleEventInterceptor<? super A>> interceptors)
     {
-        m_process              = process;
-        m_name                 = name;
-        m_platform             = platform;
-        m_console              = console == null ? new SystemApplicationConsole() : console;
-        m_environmentVariables = environmentVariables;
-        m_isDiagnosticsEnabled = Settings.isDiagnosticsEnabled(isDiagnosticsEnabled);
-        m_defaultTimeout       = defaultTimeout;
-        m_defaultTimeoutUnits  = defaultTimeoutUnits;
+        this.runtime = runtime;
 
         // make a copy of the interceptors
-        m_interceptors = new ArrayList<LifecycleEventInterceptor<? super A>>();
+        this.interceptors = new ArrayList<LifecycleEventInterceptor<? super A>>();
 
         if (interceptors != null)
         {
             for (LifecycleEventInterceptor<? super A> interceptor : interceptors)
             {
-                m_interceptors.add(interceptor);
+                this.interceptors.add(interceptor);
             }
         }
 
+        // establish the standard input, output and error redirection threads
+        String             displayName        = runtime.getApplicationName();
+        P                  process            = runtime.getApplicationProcess();
+        ApplicationConsole console            = runtime.getApplicationConsole();
+        boolean            diagnosticsEnabled = runtime.isDiagnosticsEnabled();
+
         // start a thread to redirect standard out to the console
-        m_outThread = new Thread(new OutputRedirector(m_name,
-                                                      "out",
-                                                      m_process.getInputStream(),
-                                                      m_console.getOutputWriter(),
-                                                      m_process.getId(),
-                                                      m_isDiagnosticsEnabled,
-                                                      m_console.isDiagnosticsEnabled()));
-        m_outThread.setDaemon(true);
-        m_outThread.setName(name + " StdOut Thread");
-        m_outThread.start();
+        stdoutThread = new Thread(new OutputRedirector(displayName,
+                                                       "out",
+                                                       process.getInputStream(),
+                                                       console.getOutputWriter(),
+                                                       process.getId(),
+                                                       diagnosticsEnabled,
+                                                       console.isDiagnosticsEnabled()));
+        stdoutThread.setDaemon(true);
+        stdoutThread.setName(displayName + " StdOut Thread");
+        stdoutThread.start();
 
         // start a thread to redirect standard err to the console
-        m_errThread = new Thread(new OutputRedirector(m_name,
-                                                      "err",
-                                                      m_process.getErrorStream(),
-                                                      m_console.getErrorWriter(),
-                                                      m_process.getId(),
-                                                      m_isDiagnosticsEnabled,
-                                                      m_console.isDiagnosticsEnabled()));
-        m_errThread.setDaemon(true);
-        m_errThread.setName(name + " StdErr Thread");
-        m_errThread.start();
+        stderrThread = new Thread(new OutputRedirector(displayName,
+                                                       "err",
+                                                       process.getErrorStream(),
+                                                       console.getErrorWriter(),
+                                                       process.getId(),
+                                                       diagnosticsEnabled,
+                                                       console.isDiagnosticsEnabled()));
+        stderrThread.setDaemon(true);
+        stderrThread.setName(displayName + " StdErr Thread");
+        stderrThread.start();
 
-        m_inThread = new Thread(new InputRedirector(m_console.getInputReader(), m_process.getOutputStream()));
-        m_inThread.setDaemon(true);
-        m_inThread.setName(name + " StdIn Thread");
-        m_inThread.start();
+        stdinThread = new Thread(new InputRedirector(console.getInputReader(), process.getOutputStream()));
+        stdinThread.setDaemon(true);
+        stdinThread.setName(displayName + " StdIn Thread");
+        stdinThread.start();
     }
 
 
     @Override
     public Properties getEnvironmentVariables()
     {
-        return m_environmentVariables;
+        return runtime.getEnvironmentVariables();
     }
 
 
     @Override
     public String getName()
     {
-        return m_name;
+        return runtime.getApplicationName();
     }
+
 
     @Override
     public Platform getPlatform()
     {
-        return m_platform;
+        return runtime.getPlatform();
     }
+
 
     @Override
     public void close()
     {
         // close the process
-        m_process.close();
+        runtime.getApplicationProcess().close();
 
         // terminate the thread that is writing to the process standard in
         try
         {
-            m_inThread.interrupt();
+            stdinThread.interrupt();
         }
         catch (Exception e)
         {
@@ -262,7 +185,7 @@ public abstract class AbstractApplication<A extends AbstractApplication<A, P>, P
         // terminate the thread that is reading from the process standard out
         try
         {
-            m_outThread.interrupt();
+            stdoutThread.interrupt();
         }
         catch (Exception e)
         {
@@ -271,7 +194,7 @@ public abstract class AbstractApplication<A extends AbstractApplication<A, P>, P
 
         try
         {
-            m_outThread.join();
+            stdoutThread.join();
         }
         catch (InterruptedException e)
         {
@@ -281,7 +204,7 @@ public abstract class AbstractApplication<A extends AbstractApplication<A, P>, P
         // terminate the thread that is reading from the process standard err
         try
         {
-            m_errThread.interrupt();
+            stderrThread.interrupt();
         }
         catch (Exception e)
         {
@@ -290,7 +213,7 @@ public abstract class AbstractApplication<A extends AbstractApplication<A, P>, P
 
         try
         {
-            m_errThread.join();
+            stderrThread.join();
         }
         catch (InterruptedException e)
         {
@@ -299,7 +222,7 @@ public abstract class AbstractApplication<A extends AbstractApplication<A, P>, P
 
         try
         {
-            m_console.close();
+            runtime.getApplicationConsole().close();
         }
         catch (Exception e)
         {
@@ -310,7 +233,7 @@ public abstract class AbstractApplication<A extends AbstractApplication<A, P>, P
         {
             // wait for the process to actually terminate (because the above statements may not finish for a while)
             // (if we don't wait the process may be left hanging/orphaned)
-            m_process.waitFor();
+            runtime.getApplicationProcess().waitFor();
         }
         catch (InterruptedException e)
         {
@@ -354,65 +277,42 @@ public abstract class AbstractApplication<A extends AbstractApplication<A, P>, P
     @Override
     public long getId()
     {
-        return m_process.getId();
+        return runtime.getApplicationProcess().getId();
     }
 
 
     @Override
     public long getDefaultTimeout()
     {
-        return m_defaultTimeout;
+        return runtime.getDefaultTimeout();
     }
 
 
     @Override
     public TimeUnit getDefaultTimeoutUnits()
     {
-        return m_defaultTimeoutUnits;
+        return runtime.getDefaultTimeoutUnits();
     }
 
 
     @Override
     public Iterable<LifecycleEventInterceptor<? super A>> getLifecycleInterceptors()
     {
-        return m_interceptors;
-    }
-
-
-    /**
-     * Obtains the underlying {@link ApplicationProcess} that controls the
-     * {@link Application}.
-     *
-     * @return the {@link ApplicationProcess} for the {@link Application}
-     */
-    protected P getApplicationProcess()
-    {
-        return m_process;
-    }
-
-
-    /**
-     * Obtains the default timeout duration in milliseconds.
-     *
-     * @return  the default timeout in milliseconds
-     */
-    protected long getDefaultTimeoutMS()
-    {
-        return m_defaultTimeoutUnits.toMillis(m_defaultTimeout);
+        return interceptors;
     }
 
 
     @Override
     public int waitFor() throws InterruptedException
     {
-        return m_process.waitFor();
+        return runtime.getApplicationProcess().waitFor();
     }
 
 
     @Override
     public int exitValue()
     {
-        return m_process.exitValue();
+        return runtime.getApplicationProcess().exitValue();
     }
 
 
@@ -425,26 +325,26 @@ public abstract class AbstractApplication<A extends AbstractApplication<A, P>, P
         /**
          * The {@link Reader} from which content will be read.
          */
-        private Reader m_inputReader;
+        private Reader reader;
 
         /**
          * The {@link OutputStream} to which the content read from the
          * {@link Reader} will be written.
          */
-        private OutputStream m_outputStream;
+        private OutputStream outputStream;
 
 
         /**
          * Constructs an {@link OutputRedirector}.
          *
-         * @param inputStream      the {@link InputStream} from which to read content
-         * @param outputStream     the {@link PrintWriter} to which to write content
+         * @param reader        the {@link Reader} from which to read content
+         * @param outputStream  the {@link OutputStream} to which to write content
          */
-        private InputRedirector(Reader       inputStream,
+        private InputRedirector(Reader       reader,
                                 OutputStream outputStream)
         {
-            m_inputReader  = inputStream;
-            m_outputStream = outputStream;
+            this.reader       = reader;
+            this.outputStream = outputStream;
         }
 
 
@@ -453,20 +353,20 @@ public abstract class AbstractApplication<A extends AbstractApplication<A, P>, P
         {
             try
             {
-                BufferedReader reader = new BufferedReader(m_inputReader);
-                PrintWriter    writer = new PrintWriter(m_outputStream);
+                BufferedReader bufferedReader = new BufferedReader(reader);
+                PrintWriter    printWriter    = new PrintWriter(outputStream);
 
                 while (true)
                 {
-                    String line = reader.readLine();
+                    String line = bufferedReader.readLine();
 
                     if (line == null)
                     {
                         break;
                     }
 
-                    writer.println(line);
-                    writer.flush();
+                    printWriter.println(line);
+                    printWriter.flush();
                 }
             }
             catch (Exception exception)
@@ -480,73 +380,74 @@ public abstract class AbstractApplication<A extends AbstractApplication<A, P>, P
 
     /**
      * An {@link OutputRedirector} pipes output from an {@link InputStream},
-     * typically of some {@link Process} to an {@link ApplicationConsole}.
+     * typically of some {@link ApplicationProcess} to an {@link ApplicationConsole}.
      */
     static class OutputRedirector implements Runnable
     {
-        private String m_ApplicationName;
+        private String applicationName;
 
         /**
          * The prefix to write in-front of lines sent to the {@link ApplicationConsole}.
          */
-        private String m_prefix;
+        private String prefix;
 
         /**
          * The {@link ApplicationProcess} identifier.
          */
-        private long m_processId;
+        private long processId;
 
         /**
          * Should diagnostic information be logged/output.
          */
-        private boolean m_isDiagnosticsEnabled;
+        private boolean diagnosticsEnabled;
 
         /**
          * The {@link InputStream} from which context will be read.
          */
-        private InputStream m_inputStream;
+        private InputStream inputStream;
 
         /**
          * The {@link PrintWriter} to which the content read from the
          * {@link InputStream} will be written.
          */
-        private PrintWriter m_outputWriter;
+        private PrintWriter printWriter;
 
         /**
          * Flag indicating whether output to the {@link ApplicationConsole}
          * should be prefixed with details of the application.
          */
-        private boolean m_isConsoleDiagnosticsEnabled;
+        private boolean consoleDiagnosticsEnabled;
+
 
         /**
          * Constructs an {@link OutputRedirector}.
          *
-         * @param applicationName              the name of the application
-         * @param prefix                       the prefix to output on each console line
-         *                                     (typically this is the abbreviation of the stream
-         *                                     like "stderr" or "stdout")
-         * @param inputStream                  the {@link InputStream} from which to read content
-         * @param outputWriter                 the {@link PrintWriter} to which to write content
-         * @param processId                    the {@link ApplicationProcess} identifier
-         * @param isDiagnosticsEnabled         should diagnostic information be logged/output
-         * @param isConsoleDiagnosticsEnabled  if false then the process output is redirected
-         *                                     without prefixing with application information
+         * @param applicationName            the name of the application
+         * @param prefix                     the prefix to output on each console line
+         *                                   (typically this is the abbreviation of the stream
+         *                                   like "stderr" or "stdout")
+         * @param inputStream                the {@link InputStream} from which to read content
+         * @param printWriter                the {@link PrintWriter} to which to write content
+         * @param processId                  the {@link ApplicationProcess} identifier
+         * @param diagnosticsEnabled         should diagnostic information be logged/output
+         * @param consoleDiagnosticsEnabled  if false then the process output is redirected
+         *                                   without prefixing with application information
          */
         OutputRedirector(String      applicationName,
                          String      prefix,
                          InputStream inputStream,
-                         PrintWriter outputWriter,
+                         PrintWriter printWriter,
                          long        processId,
-                         boolean     isDiagnosticsEnabled,
-                         boolean     isConsoleDiagnosticsEnabled)
+                         boolean     diagnosticsEnabled,
+                         boolean     consoleDiagnosticsEnabled)
         {
-            m_ApplicationName            = applicationName;
-            m_prefix                     = prefix;
-            m_inputStream                = inputStream;
-            m_outputWriter               = outputWriter;
-            m_processId                  = processId;
-            m_isDiagnosticsEnabled       = isDiagnosticsEnabled;
-            m_isConsoleDiagnosticsEnabled = isConsoleDiagnosticsEnabled;
+            this.applicationName           = applicationName;
+            this.prefix                    = prefix;
+            this.inputStream               = inputStream;
+            this.printWriter               = printWriter;
+            this.processId                 = processId;
+            this.diagnosticsEnabled        = diagnosticsEnabled;
+            this.consoleDiagnosticsEnabled = consoleDiagnosticsEnabled;
         }
 
 
@@ -557,10 +458,10 @@ public abstract class AbstractApplication<A extends AbstractApplication<A, P>, P
 
             try
             {
-                BufferedReader reader =
-                    new BufferedReader(new InputStreamReader(new BufferedInputStream(m_inputStream)));
+                BufferedReader reader  =
+                    new BufferedReader(new InputStreamReader(new BufferedInputStream(inputStream)));
 
-                boolean running = true;
+                boolean        running = true;
 
                 while (running || reader.ready())
                 {
@@ -573,24 +474,23 @@ public abstract class AbstractApplication<A extends AbstractApplication<A, P>, P
                             break;
                         }
 
-                        String diagnosticOutput = (m_isDiagnosticsEnabled || m_isConsoleDiagnosticsEnabled)
-                                    ? String.format("[%s:%s%s] %4d: %s",
-                                                    m_ApplicationName,
-                                                    m_prefix,
-                                                    m_processId < 0 ? "" : ":" + m_processId,
-                                                    lineNumber++,
-                                                    line)
-                                    : null;
+                        String diagnosticOutput = (diagnosticsEnabled || consoleDiagnosticsEnabled)
+                                                  ? String.format("[%s:%s%s] %4d: %s",
+                                                                  applicationName,
+                                                                  prefix,
+                                                                  processId < 0 ? "" : ":" + processId,
+                                                                  lineNumber++,
+                                                                  line) : null;
 
-                        String output = m_isConsoleDiagnosticsEnabled ? diagnosticOutput : line;
+                        String output = consoleDiagnosticsEnabled ? diagnosticOutput : line;
 
-                        if (m_isDiagnosticsEnabled)
+                        if (diagnosticsEnabled)
                         {
                             Container.getPlatformScope().getStandardOutput().println(output);
                         }
 
-                        m_outputWriter.println(output);
-                        m_outputWriter.flush();
+                        printWriter.println(output);
+                        printWriter.flush();
                     }
                     catch (InterruptedIOException e)
                     {
@@ -606,23 +506,22 @@ public abstract class AbstractApplication<A extends AbstractApplication<A, P>, P
 
             try
             {
-                String diagnosticOutput = (m_isDiagnosticsEnabled || m_isConsoleDiagnosticsEnabled)
-                                    ? String.format("[%s:%s%s] %4d: (terminated)",
-                                                    m_ApplicationName,
-                                                    m_prefix,
-                                                    m_processId < 0 ? "" : ":" + m_processId,
-                                                    lineNumber)
-                                    : null;
+                String diagnosticOutput = (diagnosticsEnabled || consoleDiagnosticsEnabled)
+                                          ? String.format("[%s:%s%s] %4d: (terminated)",
+                                                          applicationName,
+                                                          prefix,
+                                                          processId < 0 ? "" : ":" + processId,
+                                                          lineNumber) : null;
 
-                String output = m_isConsoleDiagnosticsEnabled ? diagnosticOutput : "(terminated)";
+                String output = consoleDiagnosticsEnabled ? diagnosticOutput : "(terminated)";
 
-                if (m_isDiagnosticsEnabled)
+                if (diagnosticsEnabled)
                 {
                     Container.getPlatformScope().getStandardOutput().println(output);
                 }
 
-                m_outputWriter.println(output);
-                m_outputWriter.flush();
+                printWriter.println(output);
+                printWriter.flush();
             }
             catch (Exception e)
             {

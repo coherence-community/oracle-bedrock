@@ -27,14 +27,20 @@ package com.oracle.tools.runtime.coherence;
 
 import com.oracle.tools.runtime.ApplicationConsole;
 import com.oracle.tools.runtime.Platform;
+
 import com.oracle.tools.runtime.concurrent.RemoteCallable;
 import com.oracle.tools.runtime.concurrent.callable.RemoteCallableStaticMethod;
+
 import com.oracle.tools.runtime.java.ContainerBasedJavaApplicationBuilder;
 import com.oracle.tools.runtime.java.JavaApplicationBuilder;
+import com.oracle.tools.runtime.java.JavaApplicationProcess;
 import com.oracle.tools.runtime.java.JavaApplicationSchema;
-import com.oracle.tools.runtime.java.JavaProcess;
+import com.oracle.tools.runtime.java.SimpleJavaApplicationRuntime;
+
 import com.oracle.tools.util.CompletionListener;
+
 import com.tangosol.coherence.component.net.Management;
+
 import com.tangosol.net.DefaultCacheServer;
 
 import java.util.Properties;
@@ -254,24 +260,26 @@ public class ClusterMemberSchema extends AbstractCoherenceClusterMemberSchema<Cl
 
 
     @Override
-    public ClusterMember createJavaApplication(JavaProcess        process,
-                                               String             name,
-                                               Platform           platform,
-                                               ApplicationConsole console,
-                                               Properties         environmentVariables,
-                                               Properties         systemProperties,
-                                               int                remoteDebuggingPort)
+    public ClusterMember createJavaApplication(JavaApplicationProcess process,
+                                               String                 name,
+                                               Platform               platform,
+                                               ApplicationConsole     console,
+                                               Properties             environmentVariables,
+                                               Properties             systemProperties,
+                                               int                    remoteDebuggingPort)
     {
-        return new ClusterMember(process,
-                                 name,
-                                 platform, console,
-                                 environmentVariables,
-                                 systemProperties,
-                                 isDiagnosticsEnabled(),
-                                 getDefaultTimeout(),
-                                 getDefaultTimeoutUnits(),
-                                 getLifecycleInterceptors(),
-                                 remoteDebuggingPort);
+        SimpleJavaApplicationRuntime environment = new SimpleJavaApplicationRuntime(name,
+                                                                                    platform,
+                                                                                    process,
+                                                                                    console,
+                                                                                    environmentVariables,
+                                                                                    isDiagnosticsEnabled(),
+                                                                                    getDefaultTimeout(),
+                                                                                    getDefaultTimeoutUnits(),
+                                                                                    systemProperties,
+                                                                                    remoteDebuggingPort);
+
+        return new ClusterMember(environment, getLifecycleInterceptors());
     }
 
 

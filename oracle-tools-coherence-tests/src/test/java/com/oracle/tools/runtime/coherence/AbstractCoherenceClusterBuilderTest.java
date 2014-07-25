@@ -26,27 +26,39 @@
 package com.oracle.tools.runtime.coherence;
 
 import com.oracle.tools.junit.AbstractTest;
+
 import com.oracle.tools.predicate.Predicate;
+
 import com.oracle.tools.runtime.ApplicationConsole;
 import com.oracle.tools.runtime.LocalPlatform;
 import com.oracle.tools.runtime.Platform;
+
 import com.oracle.tools.runtime.actions.InteractiveActionExecutor;
 import com.oracle.tools.runtime.actions.PerpetualAction;
+
 import com.oracle.tools.runtime.coherence.actions.RestartCoherenceClusterMemberAction;
+
 import com.oracle.tools.runtime.console.SystemApplicationConsole;
+
 import com.oracle.tools.runtime.java.JavaApplicationBuilder;
+
 import com.oracle.tools.runtime.network.AvailablePortIterator;
 import com.oracle.tools.runtime.network.Constants;
+
 import com.oracle.tools.util.Capture;
+
 import com.tangosol.net.NamedCache;
+
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.util.HashSet;
-
 import static com.oracle.tools.deferred.DeferredHelper.invoking;
+
 import static com.oracle.tools.deferred.Eventually.assertThat;
+
 import static org.hamcrest.CoreMatchers.is;
+
+import java.util.HashSet;
 
 /**
  * Functional Tests for the {@link CoherenceClusterBuilder} class.
@@ -79,7 +91,8 @@ public abstract class AbstractCoherenceClusterBuilderTest extends AbstractTest
         Capture<Integer>      clusterPort    = new Capture<Integer>(availablePorts);
 
         CoherenceCacheServerSchema schema =
-            new CoherenceCacheServerSchema().useLocalHostMode().setClusterPort(clusterPort);
+            new CoherenceCacheServerSchema().useLocalHostMode().setClusterPort(clusterPort)
+                .setClusterName("Storage-Only");
 
         CoherenceClusterBuilder builder = new CoherenceClusterBuilder();
 
@@ -109,12 +122,13 @@ public abstract class AbstractCoherenceClusterBuilderTest extends AbstractTest
 
         CoherenceCacheServerSchema storageSchema =
             new CoherenceCacheServerSchema().setClusterPort(clusterPort).setStorageEnabled(true)
-                .setCacheConfigURI("test-cache-config.xml").useLocalHostMode();
+                .setCacheConfigURI("test-cache-config.xml").useLocalHostMode().setClusterName("Storage-Proxy");
 
         CoherenceCacheServerSchema extendSchema =
             new CoherenceCacheServerSchema().setStorageEnabled(false).setClusterPort(clusterPort)
-                .setCacheConfigURI("test-extend-proxy-config.xml").setSystemProperty("coherence.extend.port",
-                                                                                     availablePorts).useLocalHostMode();
+                .setClusterName("Storage-Proxy").setCacheConfigURI("test-extend-proxy-config.xml")
+                .setSystemProperty("coherence.extend.port",
+                                   availablePorts).useLocalHostMode();
 
         CoherenceClusterBuilder builder = new CoherenceClusterBuilder();
 
@@ -159,12 +173,14 @@ public abstract class AbstractCoherenceClusterBuilderTest extends AbstractTest
     @Test
     public void shouldBuilderWKABasedStorageCluster()
     {
-        Capture<Integer> wkaPort   = new Capture<Integer>(LocalPlatform.getInstance().getAvailablePorts());
-        String           localHost = Constants.getLocalHost();
+        Capture<Integer> wkaPort     = new Capture<Integer>(LocalPlatform.getInstance().getAvailablePorts());
+        Capture<Integer> clusterPort = new Capture<Integer>(LocalPlatform.getInstance().getAvailablePorts());
+        String           localHost   = Constants.getLocalHost();
 
         CoherenceCacheServerSchema schema =
             new CoherenceCacheServerSchema().setStorageEnabled(true).setWellKnownAddress(localHost)
-                .setWellKnownAddressPort(wkaPort).setLocalHostAddress(localHost).setLocalHostPort(wkaPort);
+                .setClusterName("WKA").setWellKnownAddressPort(wkaPort).setLocalHostAddress(localHost)
+                .setLocalHostPort(wkaPort).setClusterPort(clusterPort);
 
         SystemApplicationConsole console            = new SystemApplicationConsole();
         int                      desiredClusterSize = 4;
@@ -196,12 +212,12 @@ public abstract class AbstractCoherenceClusterBuilderTest extends AbstractTest
         Capture<Integer>      clusterPort    = new Capture<Integer>(availablePorts);
 
         CoherenceCacheServerSchema schema =
-            new CoherenceCacheServerSchema().useLocalHostMode().setClusterPort(clusterPort);
+            new CoherenceCacheServerSchema().useLocalHostMode().setClusterPort(clusterPort).setClusterName("Rolling");
 
-        ApplicationConsole                           console       = new SystemApplicationConsole();
-        Platform                                     memberBuilder = getPlatform();
+        ApplicationConsole      console       = new SystemApplicationConsole();
+        Platform                memberBuilder = getPlatform();
 
-        CoherenceClusterBuilder                      builder       = new CoherenceClusterBuilder();
+        CoherenceClusterBuilder builder       = new CoherenceClusterBuilder();
 
         builder.addApplication(memberBuilder, schema, "DCS", CLUSTER_SIZE);
 
@@ -259,7 +275,7 @@ public abstract class AbstractCoherenceClusterBuilderTest extends AbstractTest
         Capture<Integer>      clusterPort    = new Capture<Integer>(availablePorts);
 
         CoherenceCacheServerSchema schema =
-            new CoherenceCacheServerSchema().useLocalHostMode().setClusterPort(clusterPort);
+            new CoherenceCacheServerSchema().useLocalHostMode().setClusterPort(clusterPort).setClusterName("Access");
 
         CoherenceClusterBuilder builder = new CoherenceClusterBuilder();
 

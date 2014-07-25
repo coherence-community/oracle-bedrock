@@ -30,6 +30,7 @@ import com.oracle.tools.runtime.ApplicationSchema;
 import com.oracle.tools.runtime.FluentApplicationSchema;
 import com.oracle.tools.runtime.Platform;
 import com.oracle.tools.runtime.SimpleApplication;
+import com.oracle.tools.runtime.SimpleApplicationRuntime;
 import com.oracle.tools.runtime.SimpleApplicationSchema;
 
 /**
@@ -78,7 +79,8 @@ public class SimpleRemoteApplicationBuilder
 
     @Override
     protected <T extends SimpleApplication,
-        S extends ApplicationSchema<T>> SimpleRemoteApplicationEnvironment getRemoteApplicationEnvironment(S applicationSchema, Platform platform)
+        S extends ApplicationSchema<T>> SimpleRemoteApplicationEnvironment getRemoteApplicationEnvironment(S applicationSchema,
+        Platform                                                                                             platform)
     {
         SimpleApplicationSchema schema = (SimpleApplicationSchema) applicationSchema;
 
@@ -95,14 +97,16 @@ public class SimpleRemoteApplicationBuilder
                                                                                                 RemoteApplicationProcess           process,
                                                                                                 ApplicationConsole                 console)
     {
-        return (T) new SimpleApplication(process,
-                                         applicationName,
-                                         platform,
-                                         console,
-                                         environment.getRemoteEnvironmentVariables(),
-                                         schema.isDiagnosticsEnabled(),
-                                         schema.getDefaultTimeout(),
-                                         schema.getDefaultTimeoutUnits(),
+        SimpleApplicationRuntime runtime = new SimpleApplicationRuntime(applicationName,
+                                                                        platform,
+                                                                        process,
+                                                                        console,
+                                                                        environment.getRemoteEnvironmentVariables(),
+                                                                        schema.isDiagnosticsEnabled(),
+                                                                        schema.getDefaultTimeout(),
+                                                                        schema.getDefaultTimeoutUnits());
+
+        return (T) new SimpleApplication(runtime,
                                          schema instanceof FluentApplicationSchema
                                          ? ((FluentApplicationSchema<SimpleApplication,
                                                                      ?>) schema).getLifecycleInterceptors() : null);

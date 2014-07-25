@@ -26,27 +26,35 @@
 package com.oracle.tools.runtime.coherence.actions;
 
 import com.oracle.tools.deferred.DeferredPredicate;
+
 import com.oracle.tools.predicate.Predicate;
+
 import com.oracle.tools.runtime.ApplicationConsole;
 import com.oracle.tools.runtime.Platform;
+
 import com.oracle.tools.runtime.actions.CustomAction;
+
 import com.oracle.tools.runtime.coherence.CoherenceCluster;
 import com.oracle.tools.runtime.coherence.CoherenceClusterMember;
 import com.oracle.tools.runtime.coherence.CoherenceClusterMemberSchema;
-import com.oracle.tools.runtime.java.JavaApplicationBuilder;
-import com.tangosol.util.UID;
 
-import java.util.Iterator;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import com.oracle.tools.runtime.java.JavaApplicationBuilder;
+
+import com.tangosol.util.UID;
 
 import static com.oracle.tools.deferred.DeferredHelper.ensure;
 import static com.oracle.tools.deferred.DeferredHelper.eventually;
 import static com.oracle.tools.deferred.DeferredHelper.invoking;
+
 import static com.oracle.tools.predicate.Predicates.contains;
 import static com.oracle.tools.predicate.Predicates.doesNotContain;
 import static com.oracle.tools.predicate.Predicates.greaterThan;
 import static com.oracle.tools.predicate.Predicates.is;
+
+import java.util.Iterator;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * A {@link CustomAction} to destroy a {@link CoherenceClusterMember} that is defined as part
@@ -185,6 +193,10 @@ public class RestartCoherenceClusterMemberAction<A extends CoherenceClusterMembe
                             // ensure that the cluster no longer contains the closed member
                             ensure(eventually(invoking(cluster).getClusterMemberUIDs()), doesNotContain(memberUID));
 
+                            // ensure that the predicate is satisfied (using a deferred)
+                            ensure(new DeferredPredicate<CoherenceClusterMember>(clusterMembers.next(),
+                                                                                 closePredicate));
+
                             // start a new ClusterMember (with the same name as the old member)
                             member = platform.realize(schema, name, console);
 
@@ -198,6 +210,9 @@ public class RestartCoherenceClusterMemberAction<A extends CoherenceClusterMembe
 
                             // ensure that the new member is a member of the cluster
                             ensure(eventually(invoking(cluster).getClusterMemberUIDs()), contains(memberUID));
+
+                            // ensure that the predicate is satisfied (using a deferred)
+                            ensure(new DeferredPredicate<CoherenceClusterMember>(member, closePredicate));
 
                             if (LOGGER.isLoggable(Level.INFO))
                             {

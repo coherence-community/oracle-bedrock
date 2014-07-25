@@ -29,41 +29,51 @@ import com.oracle.tools.deferred.Cached;
 import com.oracle.tools.deferred.Deferred;
 import com.oracle.tools.deferred.NeverAvailable;
 import com.oracle.tools.deferred.UnresolvableInstanceException;
+
 import com.oracle.tools.deferred.jmx.DeferredJMXConnector;
 import com.oracle.tools.deferred.jmx.DeferredMBeanAttribute;
 import com.oracle.tools.deferred.jmx.DeferredMBeanInfo;
 import com.oracle.tools.deferred.jmx.DeferredMBeanProxy;
+
 import com.oracle.tools.runtime.AbstractApplication;
 import com.oracle.tools.runtime.Application;
-import com.oracle.tools.runtime.ApplicationConsole;
 import com.oracle.tools.runtime.LifecycleEventInterceptor;
 import com.oracle.tools.runtime.Platform;
+
 import com.oracle.tools.runtime.concurrent.RemoteCallable;
 import com.oracle.tools.runtime.concurrent.RemoteRunnable;
 import com.oracle.tools.runtime.concurrent.callable.RemoteMethodInvocation;
+
 import com.oracle.tools.runtime.network.Constants;
+
 import com.oracle.tools.util.CompletionListener;
 import com.oracle.tools.util.FutureCompletionListener;
 import com.oracle.tools.util.ReflectionHelper;
+
 import net.sf.cglib.proxy.MethodInterceptor;
 import net.sf.cglib.proxy.MethodProxy;
+
+import static com.oracle.tools.deferred.DeferredHelper.cached;
+import static com.oracle.tools.deferred.DeferredHelper.ensured;
+
+import java.io.IOException;
+
+import java.lang.reflect.Method;
+
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+
+import java.util.Properties;
+import java.util.Set;
+
+import java.util.concurrent.Callable;
 
 import javax.management.MBeanInfo;
 import javax.management.ObjectInstance;
 import javax.management.ObjectName;
 import javax.management.QueryExp;
-import javax.management.remote.JMXConnector;
-import java.io.IOException;
-import java.lang.reflect.Method;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.util.Properties;
-import java.util.Set;
-import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
 
-import static com.oracle.tools.deferred.DeferredHelper.cached;
-import static com.oracle.tools.deferred.DeferredHelper.ensured;
+import javax.management.remote.JMXConnector;
 
 /**
  * A {@link AbstractJavaApplication} is a base implementation of a {@link JavaApplication} that has
@@ -74,67 +84,26 @@ import static com.oracle.tools.deferred.DeferredHelper.ensured;
  *
  * @author Brian Oliver
  */
-public abstract class AbstractJavaApplication<A extends AbstractJavaApplication<A, P>, P extends JavaProcess>
-    extends AbstractApplication<A, P> implements FluentJavaApplication<A>
+public abstract class AbstractJavaApplication<A extends AbstractJavaApplication<A, P, R>,
+                                              P extends JavaApplicationProcess, R extends JavaApplicationRuntime<P>>
+    extends AbstractApplication<A, P, R> implements FluentJavaApplication<A>
 {
-    /**
-     * The System Properties used to create the underlying {@link Process} represented by
-     * the {@link AbstractJavaApplication}.
-     */
-    protected Properties m_systemProperties;
-
     /**
      * The {@link Cached} representing the {@link JMXConnector}.
      */
-    protected Cached<JMXConnector> m_cachedJMXConnector;
+    protected Cached<JMXConnector> cachedJmxConnector;
 
-    /**
-     * The port this process is listening on for remote debug connections
-     * or <= 0 if remote debugging is disabled
-     */
-    private int m_remoteDebuggingPort;
 
     /**
      * Construct a {@link AbstractJavaApplication}.
      *
-     * @param process               the {@link Process} representing the {@link JavaApplication}
-     * @param name                  the name of the {@link JavaApplication}
-     * @param platform              the {@link Platform} that this {@link Application} is running on
-     * @param console               the {@link ApplicationConsole} that will be used for I/O by the
-     *                              realized {@link Application}. This may be <code>null</code> if not required
-     * @param environmentVariables  the environment variables used when starting the {@link JavaApplication}
-     * @param systemProperties      the system properties provided to the {@link JavaApplication}
-     * @param isDiagnosticsEnabled  should diagnostic information be logged/output
-     * @param defaultTimeout        the default timeout duration
-     * @param defaultTimeoutUnits   the default timeout duration {@link TimeUnit}
-     * @param interceptors          the {@link LifecycleEventInterceptor}s
-     * @param remoteDebuggingPort   the port this process is listening on for remote debugger connections if
-     *                              enabled, or <= 0 if disabled
+     * @param runtime   the {@link JavaApplicationRuntime} for the {@link JavaApplication}
+     * @param interceptors  the {@link LifecycleEventInterceptor}s
      */
-    public AbstractJavaApplication(P                                              process,
-                                   String                                         name,
-                                   Platform                                       platform,
-                                   ApplicationConsole                             console,
-                                   Properties                                     environmentVariables,
-                                   Properties                                     systemProperties,
-                                   boolean                                        isDiagnosticsEnabled,
-                                   long                                           defaultTimeout,
-                                   TimeUnit                                       defaultTimeoutUnits,
-                                   Iterable<LifecycleEventInterceptor<? super A>> interceptors,
-                                   int                                            remoteDebuggingPort)
+    public AbstractJavaApplication(R                                              runtime,
+                                   Iterable<LifecycleEventInterceptor<? super A>> interceptors)
     {
-        super(process,
-              name,
-              platform,
-              console,
-              environmentVariables,
-              isDiagnosticsEnabled,
-              defaultTimeout,
-              defaultTimeoutUnits,
-              interceptors);
-
-        m_systemProperties    = systemProperties;
-        m_remoteDebuggingPort = remoteDebuggingPort;
+        super(runtime, interceptors);
 
         // ensure that the RMI server doesn't eagerly load JMX classes
         System.setProperty("java.rmi.server.useCodebaseOnly", "true");
@@ -151,11 +120,11 @@ public abstract class AbstractJavaApplication<A extends AbstractJavaApplication<
 
             // use a CachedResource as once the JMXConnector is established
             // we don't want to create another JMXConnector for the application
-            m_cachedJMXConnector = cached(new DeferredJMXConnector(url));
+            cachedJmxConnector = cached(new DeferredJMXConnector(url));
         }
         else
         {
-            m_cachedJMXConnector = cached(new NeverAvailable<JMXConnector>(JMXConnector.class));
+            cachedJmxConnector = cached(new NeverAvailable<JMXConnector>(JMXConnector.class));
         }
     }
 
@@ -189,36 +158,24 @@ public abstract class AbstractJavaApplication<A extends AbstractJavaApplication<
     }
 
 
-    /**
-     * Obtains the underlying {@link com.oracle.tools.runtime.ApplicationProcess} that controls the
-     * {@link Application}.
-     *
-     * @return the {@link com.oracle.tools.runtime.ApplicationProcess} for the {@link Application}
-     */
-    P getJavaProcess()
-    {
-        return super.getApplicationProcess();
-    }
-
-
     @Override
     public Properties getSystemProperties()
     {
-        return m_systemProperties;
+        return runtime.getSystemProperties();
     }
 
 
     @Override
     public String getSystemProperty(String name)
     {
-        return m_systemProperties.getProperty(name);
+        return getSystemProperties().getProperty(name);
     }
 
 
     @Override
     public boolean isJMXEnabled()
     {
-        return m_systemProperties.containsKey(SUN_MANAGEMENT_JMXREMOTE_PORT);
+        return getSystemProperties().containsKey(SUN_MANAGEMENT_JMXREMOTE_PORT);
     }
 
 
@@ -227,7 +184,7 @@ public abstract class AbstractJavaApplication<A extends AbstractJavaApplication<
     {
         if (isJMXEnabled())
         {
-            return Integer.parseInt(m_systemProperties.getProperty(SUN_MANAGEMENT_JMXREMOTE_PORT));
+            return Integer.parseInt(getSystemProperties().getProperty(SUN_MANAGEMENT_JMXREMOTE_PORT));
         }
         else
         {
@@ -239,7 +196,7 @@ public abstract class AbstractJavaApplication<A extends AbstractJavaApplication<
     @Override
     public String getRMIServerHostName()
     {
-        String hostname = m_systemProperties.getProperty(JAVA_RMI_SERVER_HOSTNAME);
+        String hostname = getSystemProperties().getProperty(JAVA_RMI_SERVER_HOSTNAME);
 
         return hostname == null ? Constants.getLocalHost() : hostname;
     }
@@ -248,7 +205,7 @@ public abstract class AbstractJavaApplication<A extends AbstractJavaApplication<
     @Override
     public Deferred<JMXConnector> getDeferredJMXConnector()
     {
-        return m_cachedJMXConnector;
+        return cachedJmxConnector;
     }
 
 
@@ -256,7 +213,7 @@ public abstract class AbstractJavaApplication<A extends AbstractJavaApplication<
     public <T> Deferred<T> getDeferredMBeanProxy(ObjectName objectName,
                                                  Class<T>   proxyClass)
     {
-        return new Cached<T>(new DeferredMBeanProxy<T>(m_cachedJMXConnector, objectName, proxyClass));
+        return new Cached<T>(new DeferredMBeanProxy<T>(cachedJmxConnector, objectName, proxyClass));
     }
 
 
@@ -273,7 +230,7 @@ public abstract class AbstractJavaApplication<A extends AbstractJavaApplication<
     @Override
     public Deferred<MBeanInfo> getDeferredMBeanInfo(ObjectName objectName)
     {
-        return new DeferredMBeanInfo(m_cachedJMXConnector, objectName);
+        return new DeferredMBeanInfo(cachedJmxConnector, objectName);
     }
 
 
@@ -289,7 +246,7 @@ public abstract class AbstractJavaApplication<A extends AbstractJavaApplication<
                                                      String     attributeName,
                                                      Class<T>   attributeClass)
     {
-        return new DeferredMBeanAttribute<T>(m_cachedJMXConnector, objectName, attributeName, attributeClass);
+        return new DeferredMBeanAttribute<T>(cachedJmxConnector, objectName, attributeName, attributeClass);
     }
 
 
@@ -325,14 +282,14 @@ public abstract class AbstractJavaApplication<A extends AbstractJavaApplication<
     public <T> void submit(RemoteCallable<T>     callable,
                            CompletionListener<T> listener)
     {
-        getJavaProcess().submit(callable, listener);
+        runtime.getApplicationProcess().submit(callable, listener);
     }
 
 
     @Override
     public void submit(RemoteRunnable runnable) throws IllegalStateException
     {
-        getJavaProcess().submit(runnable);
+        runtime.getApplicationProcess().submit(runnable);
     }
 
 
@@ -340,7 +297,7 @@ public abstract class AbstractJavaApplication<A extends AbstractJavaApplication<
     public void close()
     {
         // close the JMXConnector (if we've got one)
-        JMXConnector jmxConnector = m_cachedJMXConnector.release();
+        JMXConnector jmxConnector = cachedJmxConnector.release();
 
         if (jmxConnector != null)
         {
@@ -357,23 +314,29 @@ public abstract class AbstractJavaApplication<A extends AbstractJavaApplication<
         super.close();
     }
 
+
     @Override
     public InetSocketAddress getRemoteDebugSocket()
     {
-        if (m_remoteDebuggingPort <= 0)
+        int remoteDebuggingPort = runtime.getRemoteDebuggingPort();
+
+        if (remoteDebuggingPort <= 0)
         {
             return null;
         }
 
         Platform platform = getPlatform();
+
         if (platform == null)
         {
             return null;
         }
 
         InetAddress address = platform.getPublicInetAddress();
-        return new InetSocketAddress(address, m_remoteDebuggingPort);
+
+        return new InetSocketAddress(address, remoteDebuggingPort);
     }
+
 
     @Override
     public <T> T getProxyFor(Class<T>                           classToProxy,

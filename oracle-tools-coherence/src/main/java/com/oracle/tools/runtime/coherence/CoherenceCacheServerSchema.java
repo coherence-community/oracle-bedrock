@@ -27,8 +27,10 @@ package com.oracle.tools.runtime.coherence;
 
 import com.oracle.tools.runtime.ApplicationConsole;
 import com.oracle.tools.runtime.Platform;
+
+import com.oracle.tools.runtime.java.JavaApplicationProcess;
 import com.oracle.tools.runtime.java.JavaApplicationSchema;
-import com.oracle.tools.runtime.java.JavaProcess;
+import com.oracle.tools.runtime.java.SimpleJavaApplicationRuntime;
 
 import java.util.Properties;
 
@@ -136,25 +138,26 @@ public class CoherenceCacheServerSchema
 
 
     @Override
-    public CoherenceCacheServer createJavaApplication(JavaProcess        process,
-                                                      String             name,
-                                                      Platform           platform,
-                                                      ApplicationConsole console,
-                                                      Properties         environmentVariables,
-                                                      Properties         systemProperties,
-                                                      int                remoteDebuggingPort)
+    public CoherenceCacheServer createJavaApplication(JavaApplicationProcess process,
+                                                      String                 name,
+                                                      Platform               platform,
+                                                      ApplicationConsole     console,
+                                                      Properties             environmentVariables,
+                                                      Properties             systemProperties,
+                                                      int                    remoteDebuggingPort)
     {
-        return new CoherenceCacheServer(process,
-                                        name,
-                                        platform,
-                                        console,
-                                        environmentVariables,
-                                        systemProperties,
-                                        isDiagnosticsEnabled(),
-                                        getDefaultTimeout(),
-                                        getDefaultTimeoutUnits(),
-                                        getLifecycleInterceptors(),
-                                        remoteDebuggingPort);
+        SimpleJavaApplicationRuntime environment = new SimpleJavaApplicationRuntime(name,
+                                                                                    platform,
+                                                                                    process,
+                                                                                    console,
+                                                                                    environmentVariables,
+                                                                                    isDiagnosticsEnabled(),
+                                                                                    getDefaultTimeout(),
+                                                                                    getDefaultTimeoutUnits(),
+                                                                                    systemProperties,
+                                                                                    remoteDebuggingPort);
+
+        return new CoherenceCacheServer(environment, getLifecycleInterceptors());
     }
 
 

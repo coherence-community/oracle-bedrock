@@ -25,10 +25,7 @@
 
 package com.oracle.tools.runtime.coherence;
 
-import com.oracle.tools.runtime.Application;
-import com.oracle.tools.runtime.ApplicationConsole;
 import com.oracle.tools.runtime.LifecycleEventInterceptor;
-import com.oracle.tools.runtime.Platform;
 
 import com.oracle.tools.runtime.coherence.callables.GetClusterMemberUIDs;
 import com.oracle.tools.runtime.coherence.callables.GetClusterName;
@@ -40,29 +37,16 @@ import com.oracle.tools.runtime.coherence.callables.GetLocalMemberUID;
 import com.oracle.tools.runtime.coherence.callables.GetServiceStatus;
 import com.oracle.tools.runtime.coherence.callables.IsServiceRunning;
 
-import com.oracle.tools.runtime.concurrent.callable.RemoteCallableStaticMethod;
-import com.oracle.tools.runtime.concurrent.callable.RemoteMethodInvocation;
-
 import com.oracle.tools.runtime.java.AbstractJavaApplication;
 import com.oracle.tools.runtime.java.JavaApplication;
-import com.oracle.tools.runtime.java.JavaProcess;
+import com.oracle.tools.runtime.java.JavaApplicationProcess;
+import com.oracle.tools.runtime.java.JavaApplicationRuntime;
 
 import com.tangosol.net.NamedCache;
 
 import com.tangosol.util.UID;
 
-import java.lang.reflect.Method;
-
-import java.util.AbstractMap;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
-
-import java.util.concurrent.TimeUnit;
 
 import javax.management.MBeanInfo;
 import javax.management.ObjectName;
@@ -76,7 +60,8 @@ import javax.management.ObjectName;
  * @author Brian Oliver
  */
 public abstract class AbstractCoherenceClusterMember<A extends AbstractCoherenceClusterMember<A>>
-    extends AbstractJavaApplication<A, JavaProcess> implements CoherenceClusterMember
+    extends AbstractJavaApplication<A, JavaApplicationProcess, JavaApplicationRuntime<JavaApplicationProcess>>
+    implements CoherenceClusterMember
 {
     /**
      * The MBean name of the Coherence Cluster MBean.
@@ -87,42 +72,13 @@ public abstract class AbstractCoherenceClusterMember<A extends AbstractCoherence
     /**
      * Construct a {@link AbstractCoherenceClusterMember}.
      *
-     * @param process               the {@link Process} representing the {@link AbstractCoherenceClusterMember}
-     * @param name                  the name of the {@link AbstractCoherenceClusterMember}
-     * @param console               the {@link ApplicationConsole} that will be used for I/O by the
-     *                              realized {@link Application}. This may be <code>null</code> if not required
-     * @param environmentVariables  the environment variables used when starting the {@link AbstractCoherenceClusterMember}
-     * @param systemProperties      the system properties provided to the {@link AbstractCoherenceClusterMember}
-     * @param isDiagnosticsEnabled  should diagnostic information be logged/output
-     * @param defaultTimeout        the default timeout duration
-     * @param defaultTimeoutUnits   the default timeout duration {@link TimeUnit}
-     * @param interceptors          the {@link LifecycleEventInterceptor}s
-     * @param remoteDebuggingPort   the port this process is listening on for remote debugger connections if
-     *                              enabled, or <= 0 if disabled
+     * @param runtime   the {@link JavaApplicationRuntime} for the {@link CoherenceClusterMember}
+     * @param interceptors  the {@link LifecycleEventInterceptor}s
      */
-    public AbstractCoherenceClusterMember(JavaProcess                                    process,
-                                          String                                         name,
-                                          Platform                                       platform,
-                                          ApplicationConsole                             console,
-                                          Properties                                     environmentVariables,
-                                          Properties                                     systemProperties,
-                                          boolean                                        isDiagnosticsEnabled,
-                                          long                                           defaultTimeout,
-                                          TimeUnit                                       defaultTimeoutUnits,
-                                          Iterable<LifecycleEventInterceptor<? super A>> interceptors,
-                                          int                                            remoteDebuggingPort)
+    public AbstractCoherenceClusterMember(JavaApplicationRuntime<JavaApplicationProcess> runtime,
+                                          Iterable<LifecycleEventInterceptor<? super A>> interceptors)
     {
-        super(process,
-              name,
-              platform,
-              console,
-              environmentVariables,
-              systemProperties,
-              isDiagnosticsEnabled,
-              defaultTimeout,
-              defaultTimeoutUnits,
-              interceptors,
-              remoteDebuggingPort);
+        super(runtime, interceptors);
     }
 
 

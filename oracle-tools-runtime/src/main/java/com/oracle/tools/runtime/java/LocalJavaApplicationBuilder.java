@@ -29,9 +29,13 @@ import com.oracle.tools.deferred.AbstractDeferred;
 import com.oracle.tools.deferred.DeferredHelper;
 import com.oracle.tools.deferred.InstanceUnavailableException;
 import com.oracle.tools.deferred.UnresolvableInstanceException;
+
 import com.oracle.tools.io.NetworkHelper;
+
 import com.oracle.tools.lang.StringHelper;
+
 import com.oracle.tools.predicate.Predicate;
+
 import com.oracle.tools.runtime.Application;
 import com.oracle.tools.runtime.ApplicationConsole;
 import com.oracle.tools.runtime.ApplicationSchema;
@@ -40,22 +44,27 @@ import com.oracle.tools.runtime.LocalPlatform;
 import com.oracle.tools.runtime.Platform;
 import com.oracle.tools.runtime.PropertiesBuilder;
 import com.oracle.tools.runtime.Settings;
+
 import com.oracle.tools.runtime.concurrent.ControllableRemoteExecutor;
 import com.oracle.tools.runtime.concurrent.RemoteCallable;
 import com.oracle.tools.runtime.concurrent.RemoteExecutor;
 import com.oracle.tools.runtime.concurrent.RemoteRunnable;
 import com.oracle.tools.runtime.concurrent.socket.RemoteExecutorServer;
+
 import com.oracle.tools.util.CompletionListener;
+
+import static com.oracle.tools.predicate.Predicates.allOf;
 
 import java.io.File;
 import java.io.IOException;
+
 import java.net.InetAddress;
+
 import java.util.Iterator;
 import java.util.Properties;
+
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import static com.oracle.tools.predicate.Predicates.allOf;
 
 /**
  * A {@link JavaApplicationBuilder} that realizes {@link JavaApplication}s as
@@ -510,8 +519,7 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication> extends Abst
         if (debugEnabled)
         {
             debugPort = (debugMode == RemoteDebuggingMode.LISTEN_FOR_DEBUGGER)
-                        ? schema.getRemoteDebugListenPort()
-                        : schema.getRemoteDebugAttachPort();
+                        ? schema.getRemoteDebugListenPort() : schema.getRemoteDebugAttachPort();
 
             if (debugPort <= 0)
             {
@@ -580,7 +588,7 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication> extends Abst
         // ----- create the local process and application -----
 
         // establish a LocalJavaProcess to represent the underlying Process
-        LocalJavaProcess localJavaProcess = new LocalJavaProcess(process, server);
+        LocalJavaApplicationProcess localJavaProcess = new LocalJavaApplicationProcess(process, server);
 
         // delegate Application creation to the Schema
         final T application = schema.createJavaApplication(localJavaProcess,
@@ -619,26 +627,27 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication> extends Abst
         return application;
     }
 
+
     /**
      * A {@link LocalApplicationProcess} specifically for Java-based applications.
      */
-    public static class LocalJavaProcess extends LocalApplicationProcess implements JavaProcess
+    public static class LocalJavaApplicationProcess extends LocalApplicationProcess implements JavaApplicationProcess
     {
         /**
-         * The {@link RemoteExecutor} for the {@link LocalJavaProcess}.
+         * The {@link RemoteExecutor} for the {@link LocalJavaApplicationProcess}.
          */
         private ControllableRemoteExecutor remoteExecutor;
 
 
         /**
-         * Constructs a {@link LocalJavaProcess}.
+         * Constructs a {@link LocalJavaApplicationProcess}.
          *
          * @param process         the underlying operating system {@link Process}
          * @param remoteExecutor  the {@link ControllableRemoteExecutor} that may be used
          *                        to submit and control the process remotely
          */
-        public LocalJavaProcess(Process                    process,
-                                ControllableRemoteExecutor remoteExecutor)
+        public LocalJavaApplicationProcess(Process                    process,
+                                           ControllableRemoteExecutor remoteExecutor)
         {
             super(process);
 
