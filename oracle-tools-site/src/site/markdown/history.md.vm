@@ -65,6 +65,10 @@ reverse chronological order.
     issues with the ReflectionHelper.getCompatibleMethod/Constructor failing
     to locate methods using primitive and/or wrapped values.
 
+*   [ORACLETOOLS-138](https://java.net/jira/browse/ORACLETOOLS-138): Introduced
+    the concept of a Deferred/Ensured TimoutConstraint to simplify Ensured
+    constructors and Eventually.assertThat methods.
+
 <h4>oracle-tools-runtime</h4>
 
 *   [ORACLETOOLS-61](https://java.net/jira/browse/ORACLETOOLS-61): Introduced
@@ -251,6 +255,13 @@ reverse chronological order.
 
 *   [ORACLETOOLS-84](https://java.net/jira/browse/ORACLETOOLS-84): Introduced
     missing Eventually.assertThat methods to support timeouts.
+
+*   [ORACLETOOLS-138](https://java.net/jira/browse/ORACLETOOLS-138):Refactored
+    Eventually.assertThat methods to take TimeoutConstraints.  Deprecated
+    previous methods that took millisecond-based parameters.  Introduced
+    helper methods to create TimeoutConstraints, eg:
+
+    Eventually.within(5, TimeUnit.SECONDS);
 
 <h4>oracle-tools-coherence</h4>
 

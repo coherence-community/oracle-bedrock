@@ -30,6 +30,8 @@ import com.oracle.tools.util.StopWatch;
 import org.junit.Assert;
 import org.junit.Test;
 
+import static com.oracle.tools.deferred.DeferredHelper.within;
+
 import static org.hamcrest.core.Is.is;
 
 import java.util.concurrent.TimeUnit;
@@ -97,8 +99,7 @@ public class EventuallyTest
             stopWatch.start();
             Eventually.assertThat(new NotAvailable<String>(String.class),
                                   is("hello world"),
-                                  retryDurationSECS,
-                                  TimeUnit.SECONDS);
+                                  within(retryDurationSECS, TimeUnit.SECONDS));
         }
         catch (AssertionError e)
         {
@@ -163,7 +164,7 @@ public class EventuallyTest
 
         try
         {
-            Eventually.assertThat(deferred, is("Gudday"), 1, TimeUnit.SECONDS);
+            Eventually.assertThat(deferred, is("Gudday"), within(1, TimeUnit.SECONDS));
         }
         catch (AssertionError e)
         {

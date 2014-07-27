@@ -26,28 +26,31 @@
 package com.oracle.tools.deferred;
 
 import java.util.Iterator;
+
 import java.util.concurrent.TimeUnit;
 
 /**
- * An {@link Ensured} is a specialized {@link Deferred} implementation that
- * does it's best to guarantee a non-<code>null</code> object will be
- * returned when a call to {@link Ensured#get()} is made.
+ * A specialized {@link Deferred} implementation that attempts to guarantee a
+ * non-<code>null</code> object reference will be returned when a call to
+ * {@link Ensured#get()} is made.  ie: "ensuring that an object is available".
  * <p>
- * {@link Ensured} will suitably wait and retry until the object becomes
- * available, for some maximum amount of time.
+ * An {@link Ensured} will repetitively attempt to acquire a
+ * non-<code>null</code> object reference from an associated {@link Deferred},
+ * giving only after the conditions defined by a {@link TimeoutConstraint} is
+ * met or an unexpected exception occurs.
  * <p>
- * ie: An {@link Ensured} is a {@link Deferred} adapter.
+ * If a non-<code>null</code> object reference can not be acquired with in the
+ * specified constraints, an {@link UnresolvableInstanceException} will be thrown.
  * <p>
- * If a non-<code>null</code> reference can not be acquired with in a specified
- * period of time, or the adapted {@link Deferred} throws an
- * {@link UnresolvableInstanceException}, the {@link UnresolvableInstanceException}
- * is immediately (re-)thrown.
+ * If the underlying {@link Deferred} throws an {@link UnresolvableInstanceException},
+ * while attempting to acquire the object reference, the said exception will be
+ * immediately rethrown.
  * <p>
  * The default behavior of {@link #get()} is to attempt to acquire the
  * underlying resource from the specified {@link Deferred}, retrying a number
  * of times, waiting for at most the configured duration.   The delay
  * between subsequent failures and corresponding retries is specified by an
- * {@link Iterator}.
+ * {@link Iterator}, defined by the {@link TimeoutConstraint}.
  * <p>
  * Copyright (c) 2013. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
@@ -59,43 +62,76 @@ public class Ensured<T> implements Deferred<T>
     /**
      * The {@link Deferred} being adapted.
      */
-    private Deferred<T> m_deferred;
+    private Deferred<T>    deferred;
+    private long           initialDelayDurationMS;
+    private long           maximumRetryDurationMS;
+    private Iterator<Long> retryDurationsMSIterator;
+
 
     /**
-     * The total duration (in milliseconds) allowed possibly wait when
-     * attempting to acquire the {@link Deferred}.
+     * Constructs an {@link Ensured} using default {@link TimeoutConstraint}.
+     *
+     * @param deferred           the {@link Deferred} to ensure
      */
-    private long m_totalDurationMS;
+    public Ensured(Deferred<T> deferred)
+    {
+        this(deferred, null);
+    }
+
 
     /**
-     * An {@link Iterator} that provides the next retry duration
-     * to use (in milliseconds).  Each of these are the
-     * represent the duration to wait between attempts to acquire
-     * the {@link Deferred}.
+     * Constructs an {@link Ensured}.
+     *
+     * @param deferred           the {@link Deferred} to ensure
+     * @param timeoutConstraint  the {@link TimeoutConstraint} for the {@link Ensured}
+     *                           (<code>null</code> means use the default)
      */
-    private Iterator<Long> m_retryDurationsMS;
+    public Ensured(Deferred<T>       deferred,
+                   TimeoutConstraint timeoutConstraint)
+    {
+        // when we're ensuring an ensured, use the adapted deferred
+        // (this is to ensure that we don't attempt to ensure another ensured)
+        this.deferred = deferred instanceof Ensured ? ((Ensured<T>) deferred).getDeferred() : deferred;
+
+        if (timeoutConstraint == null)
+        {
+            this.initialDelayDurationMS   = 0;
+            this.maximumRetryDurationMS   = DeferredHelper.getDefaultEnsuredTimeoutMS();
+            this.retryDurationsMSIterator = DeferredHelper.getDefaultEnsuredRetryDurationsMSIterable().iterator();
+        }
+        else
+        {
+            this.initialDelayDurationMS   = timeoutConstraint.getInitialDelayMilliseconds();
+            this.maximumRetryDurationMS   = timeoutConstraint.getMaximumRetryMilliseconds();
+            this.retryDurationsMSIterator = timeoutConstraint.getRetryDelayMillisecondsIterable().iterator();
+        }
+    }
 
 
     /**
      * Construct an {@link Ensured} adapting the specified {@link Deferred}.
      *
-     * @param deferred          the {@link Deferred} to adapt
-     * @param retryDurationsMS  an {@link Iterator} providing individual retry
-     *                          durations (in milliseconds) for each time the
-     *                          {@link Ensured} needs to wait
-     * @param totalDurationMS   the maximum duration (in milliseconds) to wait
-     *                          for the {@link Deferred} to become available
+     * @param deferred                  the {@link Deferred} to ensure
+     * @param retryDurationsMSIterator  an {@link Iterator} providing individual retry
+     *                                  durations (in milliseconds) for each time the
+     *                                  {@link Ensured} needs to wait
+     * @param maximumRetryDurationMS    the maximum duration (in milliseconds) to wait
+     *                                  for the {@link Deferred} to become available
+     *
+     * @deprecated  Use {@link #Ensured(Deferred, TimeoutConstraint)} instead
      */
+    @Deprecated
     public Ensured(Deferred<T>    deferred,
-                   Iterator<Long> retryDurationsMS,
-                   long           totalDurationMS)
+                   Iterator<Long> retryDurationsMSIterator,
+                   long           maximumRetryDurationMS)
     {
         // when we're ensuring an ensured, use the adapted deferred
         // (this is to ensure that we don't attempt to ensure another ensured)
-        m_deferred         = deferred instanceof Ensured ? ((Ensured<T>) deferred).getDeferred() : deferred;
+        this.deferred                 = deferred instanceof Ensured ? ((Ensured<T>) deferred).getDeferred() : deferred;
 
-        m_retryDurationsMS = retryDurationsMS;
-        m_totalDurationMS  = totalDurationMS < 0 ? 0 : totalDurationMS;
+        this.initialDelayDurationMS   = 0;
+        this.maximumRetryDurationMS   = maximumRetryDurationMS;
+        this.retryDurationsMSIterator = retryDurationsMSIterator;
     }
 
 
@@ -106,21 +142,37 @@ public class Ensured<T> implements Deferred<T>
      */
     public Deferred<T> getDeferred()
     {
-        return m_deferred;
+        return deferred;
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public T get() throws UnresolvableInstanceException, InstanceUnavailableException
     {
         // determine the maximum time we can wait
-        long remainingRetryDurationMS = m_totalDurationMS;
+        long remainingRetryDurationMS = maximumRetryDurationMS;
 
         do
         {
+            // wait the initial duration
+            if (initialDelayDurationMS > 0)
+            {
+                try
+                {
+                    Thread.sleep(initialDelayDurationMS);
+                }
+                catch (InterruptedException e)
+                {
+                    throw new UnresolvableInstanceException(deferred, e);
+                }
+
+                // reduce the remaining time
+                remainingRetryDurationMS -= initialDelayDurationMS;
+
+                // NOTE: even if there's no time remaining we'll at least
+                // attempt to acquire the object reference just once!
+            }
+
             // the time the most recent acquisition took
             long acquisitionDurationMS = 0;
 
@@ -128,7 +180,7 @@ public class Ensured<T> implements Deferred<T>
             {
                 long started = System.currentTimeMillis();
 
-                T    object  = m_deferred.get();
+                T    object  = deferred.get();
 
                 long stopped = System.currentTimeMillis();
 
@@ -167,14 +219,14 @@ public class Ensured<T> implements Deferred<T>
             }
 
             // as no object was produced we should wait before retrying
-            if (m_totalDurationMS < 0 || remainingRetryDurationMS > 0)
+            if (maximumRetryDurationMS < 0 || remainingRetryDurationMS > 0)
             {
                 // we can only retry while we have retry durations
-                if (m_retryDurationsMS.hasNext())
+                if (retryDurationsMSIterator.hasNext())
                 {
                     try
                     {
-                        long durationMS = m_retryDurationsMS.next();
+                        long durationMS = retryDurationsMSIterator.next();
 
                         if (remainingRetryDurationMS - durationMS < 0)
                         {
@@ -190,34 +242,28 @@ public class Ensured<T> implements Deferred<T>
                     }
                     catch (InterruptedException e)
                     {
-                        throw new UnresolvableInstanceException(m_deferred, e);
+                        throw new UnresolvableInstanceException(deferred, e);
                     }
                 }
                 else
                 {
-                    throw new UnresolvableInstanceException(m_deferred);
+                    throw new UnresolvableInstanceException(deferred);
                 }
             }
         }
-        while (m_totalDurationMS < 0 || remainingRetryDurationMS > 0);
+        while (maximumRetryDurationMS < 0 || remainingRetryDurationMS > 0);
 
-        throw new UnresolvableInstanceException(m_deferred);
+        throw new UnresolvableInstanceException(deferred);
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Class<T> getDeferredClass()
     {
-        return m_deferred.getDeferredClass();
+        return deferred.getDeferredClass();
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String toString()
     {

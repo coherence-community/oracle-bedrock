@@ -61,6 +61,5 @@ public class DeferredMatchTest
         {
             Assert.assertEquals("Hello World", deferredMatch.getLastUsedMatchValue());
         }
-
     }
 }
