@@ -69,6 +69,11 @@ reverse chronological order.
     the concept of a Deferred/Ensured TimoutConstraint to simplify Ensured
     constructors and Eventually.assertThat methods.
 
+*   [ORACLETOOLS-139](https://java.net/jira/browse/ORACLETOOLS-139): Introduced
+    the UnavailableException, PermanentlyUnavailableException and
+    TemporarilyUnavailableExceptions to replace the deprecated
+    InstanceUnavailableException and UnresolvableInstanceExceptions.
+
 <h4>oracle-tools-runtime</h4>
 
 *   [ORACLETOOLS-61](https://java.net/jira/browse/ORACLETOOLS-61): Introduced

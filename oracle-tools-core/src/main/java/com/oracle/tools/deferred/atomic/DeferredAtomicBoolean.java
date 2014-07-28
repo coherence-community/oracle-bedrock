@@ -26,8 +26,8 @@
 package com.oracle.tools.deferred.atomic;
 
 import com.oracle.tools.deferred.Deferred;
-import com.oracle.tools.deferred.InstanceUnavailableException;
-import com.oracle.tools.deferred.UnresolvableInstanceException;
+import com.oracle.tools.deferred.PermanentlyUnavailableException;
+import com.oracle.tools.deferred.TemporarilyUnavailableException;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -45,7 +45,7 @@ public class DeferredAtomicBoolean implements Deferred<Boolean>
     /**
      * The atomic value being deferred.
      */
-    private AtomicBoolean m_atomic;
+    private AtomicBoolean atomic;
 
 
     /**
@@ -56,23 +56,17 @@ public class DeferredAtomicBoolean implements Deferred<Boolean>
      */
     public DeferredAtomicBoolean(AtomicBoolean atomic)
     {
-        m_atomic = atomic;
+        this.atomic = atomic;
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public Boolean get() throws UnresolvableInstanceException, InstanceUnavailableException
+    public Boolean get() throws TemporarilyUnavailableException, PermanentlyUnavailableException
     {
-        return m_atomic.get();
+        return atomic.get();
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Class<Boolean> getDeferredClass()
     {

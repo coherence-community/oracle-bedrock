@@ -43,12 +43,12 @@ public class Future<T> implements Deferred<T>
     /**
      * The {@link java.util.concurrent.Future} to represent as a {@link Deferred}.
      */
-    private java.util.concurrent.Future<T> m_future;
+    private java.util.concurrent.Future<T> future;
 
     /**
      * The {@link Class} of the result of the {@link java.util.concurrent.Future}.
      */
-    private Class<T> m_clzOfResult;
+    private Class<T> classOfResult;
 
 
     /**
@@ -56,45 +56,39 @@ public class Future<T> implements Deferred<T>
      *
      * @param future  the Java {@link java.util.concurrent.Future}
      */
-    public Future(Class<T>                       clzOfResult,
+    public Future(Class<T>                       classOfResult,
                   java.util.concurrent.Future<T> future)
     {
-        m_clzOfResult = clzOfResult;
-        m_future      = future;
+        this.classOfResult = classOfResult;
+        this.future        = future;
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public T get() throws UnresolvableInstanceException, InstanceUnavailableException
+    public T get() throws TemporarilyUnavailableException, PermanentlyUnavailableException
     {
         try
         {
-            return m_future.get(0, TimeUnit.SECONDS);
+            return future.get(0, TimeUnit.SECONDS);
         }
         catch (InterruptedException e)
         {
-            throw new UnresolvableInstanceException(this, e);
+            throw new PermanentlyUnavailableException(this, e);
         }
         catch (ExecutionException e)
         {
-            throw new UnresolvableInstanceException(this, e);
+            throw new PermanentlyUnavailableException(this, e);
         }
         catch (TimeoutException e)
         {
-            throw new UnresolvableInstanceException(this, e);
+            throw new PermanentlyUnavailableException(this, e);
         }
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Class<T> getDeferredClass()
     {
-        return m_clzOfResult;
+        return classOfResult;
     }
 }

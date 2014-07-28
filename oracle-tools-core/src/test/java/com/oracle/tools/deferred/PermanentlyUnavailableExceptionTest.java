@@ -1,5 +1,5 @@
 /*
- * File: UnresolvableInstanceExceptionTest.java
+ * File: PermanentlyUnavailableExceptionTest.java
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
@@ -35,22 +35,22 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
 /**
- * Unit tests for {@link UnresolvableInstanceException}s.
+ * Unit tests for {@link PermanentlyUnavailableException}s.
  * <p>
- * Copyright (c) 2012. All Rights Reserved. Oracle Corporation.<br>
+ * Copyright (c) 2014. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Brian Oliver
  */
-public class UnresolvableInstanceExceptionTest
+public class PermanentlyUnavailableExceptionTest
 {
     /**
-     * Ensure that {@link UnresolvableInstanceException}s are {@link Serializable}.
+     * Ensure that {@link PermanentlyUnavailableException}s are {@link Serializable}.
      */
     @Test
-    public void thatObjectNotAvailableExceptionsAreSerializable() throws Exception
+    public void shouldSerializePermanentlyUnavailableExceptions() throws Exception
     {
-        Exception             out  = new UnresolvableInstanceException(new Existing<String>("Hello World"));
+        Exception             out  = new PermanentlyUnavailableException(new Existing<String>("Hello World"));
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         ObjectOutputStream    oos  = new ObjectOutputStream(baos);

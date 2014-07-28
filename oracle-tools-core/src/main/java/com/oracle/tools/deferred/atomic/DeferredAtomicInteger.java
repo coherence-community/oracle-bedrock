@@ -26,8 +26,8 @@
 package com.oracle.tools.deferred.atomic;
 
 import com.oracle.tools.deferred.Deferred;
-import com.oracle.tools.deferred.InstanceUnavailableException;
-import com.oracle.tools.deferred.UnresolvableInstanceException;
+import com.oracle.tools.deferred.PermanentlyUnavailableException;
+import com.oracle.tools.deferred.TemporarilyUnavailableException;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -45,7 +45,7 @@ public class DeferredAtomicInteger implements Deferred<Integer>
     /**
      * The atomic value being deferred.
      */
-    private AtomicInteger m_atomic;
+    private AtomicInteger atomic;
 
 
     /**
@@ -56,23 +56,17 @@ public class DeferredAtomicInteger implements Deferred<Integer>
      */
     public DeferredAtomicInteger(AtomicInteger atomic)
     {
-        m_atomic = atomic;
+        this.atomic = atomic;
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public Integer get() throws UnresolvableInstanceException, InstanceUnavailableException
+    public Integer get() throws TemporarilyUnavailableException, PermanentlyUnavailableException
     {
-        return m_atomic.get();
+        return atomic.get();
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Class<Integer> getDeferredClass()
     {

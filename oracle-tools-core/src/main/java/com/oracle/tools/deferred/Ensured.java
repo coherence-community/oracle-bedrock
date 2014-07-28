@@ -82,18 +82,18 @@ public class Ensured<T> implements Deferred<T>
     /**
      * Constructs an {@link Ensured}.
      *
-     * @param deferred           the {@link Deferred} to ensure
-     * @param timeoutConstraint  the {@link TimeoutConstraint} for the {@link Ensured}
-     *                           (<code>null</code> means use the default)
+     * @param deferred    the {@link Deferred} to ensure
+     * @param constraint  the {@link TimeoutConstraint} for the {@link Ensured}
+     *                    (<code>null</code> means use the default)
      */
     public Ensured(Deferred<T>       deferred,
-                   TimeoutConstraint timeoutConstraint)
+                   TimeoutConstraint constraint)
     {
         // when we're ensuring an ensured, use the adapted deferred
         // (this is to ensure that we don't attempt to ensure another ensured)
         this.deferred = deferred instanceof Ensured ? ((Ensured<T>) deferred).getDeferred() : deferred;
 
-        if (timeoutConstraint == null)
+        if (constraint == null)
         {
             this.initialDelayDurationMS   = 0;
             this.maximumRetryDurationMS   = DeferredHelper.getDefaultEnsuredTimeoutMS();
@@ -101,9 +101,9 @@ public class Ensured<T> implements Deferred<T>
         }
         else
         {
-            this.initialDelayDurationMS   = timeoutConstraint.getInitialDelayMilliseconds();
-            this.maximumRetryDurationMS   = timeoutConstraint.getMaximumRetryMilliseconds();
-            this.retryDurationsMSIterator = timeoutConstraint.getRetryDelayMillisecondsIterable().iterator();
+            this.initialDelayDurationMS   = constraint.getInitialDelayMilliseconds();
+            this.maximumRetryDurationMS   = constraint.getMaximumRetryMilliseconds();
+            this.retryDurationsMSIterator = constraint.getRetryDelayMillisecondsIterable().iterator();
         }
     }
 
@@ -147,7 +147,7 @@ public class Ensured<T> implements Deferred<T>
 
 
     @Override
-    public T get() throws UnresolvableInstanceException, InstanceUnavailableException
+    public T get() throws TemporarilyUnavailableException, PermanentlyUnavailableException
     {
         // determine the maximum time we can wait
         long remainingRetryDurationMS = maximumRetryDurationMS;
@@ -163,7 +163,7 @@ public class Ensured<T> implements Deferred<T>
                 }
                 catch (InterruptedException e)
                 {
-                    throw new UnresolvableInstanceException(deferred, e);
+                    throw new PermanentlyUnavailableException(deferred, e);
                 }
 
                 // reduce the remaining time
@@ -191,26 +191,26 @@ public class Ensured<T> implements Deferred<T>
 
                 if (object == null)
                 {
-                    throw new InstanceUnavailableException(this);
+                    throw new TemporarilyUnavailableException(this);
                 }
                 else
                 {
                     return object;
                 }
             }
-            catch (UnresolvableInstanceException e)
+            catch (PermanentlyUnavailableException e)
             {
-                // give up immediately and rethrow an UnresolvableInstanceException
+                // give up immediately!
                 throw e;
             }
             catch (UnsupportedOperationException e)
             {
                 // give up immediately when an operation is not supported
-                throw new UnresolvableInstanceException(this, e);
+                throw new PermanentlyUnavailableException(this, e);
             }
-            catch (InstanceUnavailableException e)
+            catch (TemporarilyUnavailableException e)
             {
-                // SKIP: we will retry if the instance was unavailable
+                // SKIP: we will retry if the instance is temporarily unavailable
             }
             catch (RuntimeException e)
             {
@@ -242,18 +242,18 @@ public class Ensured<T> implements Deferred<T>
                     }
                     catch (InterruptedException e)
                     {
-                        throw new UnresolvableInstanceException(deferred, e);
+                        throw new PermanentlyUnavailableException(deferred, e);
                     }
                 }
                 else
                 {
-                    throw new UnresolvableInstanceException(deferred);
+                    throw new PermanentlyUnavailableException(deferred);
                 }
             }
         }
         while (maximumRetryDurationMS < 0 || remainingRetryDurationMS > 0);
 
-        throw new UnresolvableInstanceException(deferred);
+        throw new PermanentlyUnavailableException(deferred);
     }
 
 

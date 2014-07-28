@@ -26,8 +26,9 @@
 package com.oracle.tools.deferred.jmx;
 
 import com.oracle.tools.deferred.Deferred;
-import com.oracle.tools.deferred.InstanceUnavailableException;
-import com.oracle.tools.deferred.UnresolvableInstanceException;
+import com.oracle.tools.deferred.PermanentlyUnavailableException;
+import com.oracle.tools.deferred.TemporarilyUnavailableException;
+import com.oracle.tools.deferred.UnavailableException;
 
 import java.io.IOException;
 
@@ -52,22 +53,22 @@ public class DeferredMBeanAttribute<T> implements Deferred<T>
      * A {@link Deferred} for the {@link JMXConnector}
      * that should be used to determine the MBean attribute.
      */
-    private Deferred<JMXConnector> m_deferredJMXConnector;
+    private Deferred<JMXConnector> deferredJMXConnector;
 
     /**
      * The {@link ObjectName} for the required MBean.
      */
-    private ObjectName m_objectName;
+    private ObjectName objectName;
 
     /**
      * The attribute name of the MBean to retrieve.
      */
-    private String m_attributeName;
+    private String attributeName;
 
     /**
      * The {@link Class} of the MBean attribute value.
      */
-    private Class<T> m_attributeClass;
+    private Class<T> attributeClass;
 
 
     /**
@@ -86,33 +87,30 @@ public class DeferredMBeanAttribute<T> implements Deferred<T>
                                   String                 attributeName,
                                   Class<T>               attributeClass)
     {
-        m_deferredJMXConnector = deferredJMXConnector;
-        m_objectName           = objectName;
-        m_attributeName        = attributeName;
-        m_attributeClass       = attributeClass;
+        this.deferredJMXConnector = deferredJMXConnector;
+        this.objectName           = objectName;
+        this.attributeName        = attributeName;
+        this.attributeClass       = attributeClass;
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public T get() throws UnresolvableInstanceException, InstanceUnavailableException
+    public T get() throws TemporarilyUnavailableException, PermanentlyUnavailableException
     {
         try
         {
-            JMXConnector connector = m_deferredJMXConnector.get();
+            JMXConnector connector = deferredJMXConnector.get();
 
             if (connector == null)
             {
-                throw new InstanceUnavailableException(this);
+                throw new TemporarilyUnavailableException(this);
             }
             else
             {
                 MBeanServerConnection connection = connector.getMBeanServerConnection();
-                Object                attribute  = connection.getAttribute(m_objectName, m_attributeName);
+                Object                attribute  = connection.getAttribute(objectName, attributeName);
 
-                return m_attributeClass.cast(attribute);
+                return attributeClass.cast(attribute);
             }
         }
         catch (IOException e)
@@ -120,67 +118,56 @@ public class DeferredMBeanAttribute<T> implements Deferred<T>
             // when an IOException occurs it represents a failed attempt to use a
             // connector that was previously available, which inevitably means that
             // the previous connection has now failed and so must this mbean
-            throw new UnresolvableInstanceException(this, e);
+            throw new PermanentlyUnavailableException(this, e);
         }
         catch (NullPointerException e)
         {
             // when an NPE occurs it means the server isn't available, but
             // we can retry
-            throw new InstanceUnavailableException(this, e);
+            throw new TemporarilyUnavailableException(this, e);
         }
         catch (ClassCastException e)
         {
             // when we can't cast to the required type, we can't ever acquire
             // the result
-            throw new UnresolvableInstanceException(this, e);
+            throw new PermanentlyUnavailableException(this, e);
         }
         catch (InstanceNotFoundException e)
         {
             // when the instance is not found, it may be found later,
             // so we should be able to retry
-            throw new InstanceUnavailableException(this, e);
+            throw new TemporarilyUnavailableException(this, e);
         }
-        catch (InstanceUnavailableException e)
+        catch (UnavailableException e)
         {
             // when the connector is unavailable, so is the attribute
             throw e;
         }
-        catch (UnresolvableInstanceException e)
-        {
-            // when the connection is unresolvable, so is the attribute
-            throw e;
-        }
         catch (RuntimeException e)
         {
-            throw new InstanceUnavailableException(this, e);
+            throw new TemporarilyUnavailableException(this, e);
         }
         catch (Exception e)
         {
-            throw new InstanceUnavailableException(this, e);
+            throw new TemporarilyUnavailableException(this, e);
         }
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Class<T> getDeferredClass()
     {
-        return m_attributeClass;
+        return attributeClass;
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String toString()
     {
         return String.format("Deferred<MBeanAttribute>{on=%s, object=%s, attribute=%s, class=%s}",
-                             m_deferredJMXConnector,
-                             m_objectName,
-                             m_attributeName,
-                             m_attributeClass);
+                             deferredJMXConnector,
+                             objectName,
+                             attributeName,
+                             attributeClass);
     }
 }

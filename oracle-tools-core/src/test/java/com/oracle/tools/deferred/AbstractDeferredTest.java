@@ -28,6 +28,7 @@ package com.oracle.tools.deferred;
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.equalTo;
+
 import static org.hamcrest.MatcherAssert.assertThat;
 
 /**
@@ -49,14 +50,14 @@ public class AbstractDeferredTest
         Deferred<String> deferred = new AbstractDeferred<String>()
         {
             @Override
-            public String get() throws UnresolvableInstanceException, InstanceUnavailableException
+            public String get() throws TemporarilyUnavailableException, PermanentlyUnavailableException
             {
                 return "Hello";
             }
         };
 
-        Class<String> clazz = deferred.getDeferredClass();
+        Class<String> classOfDeferred = deferred.getDeferredClass();
 
-        assertThat(clazz, equalTo(String.class));
+        assertThat(classOfDeferred, equalTo(String.class));
     }
 }

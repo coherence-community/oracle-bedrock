@@ -40,7 +40,7 @@ public class Existing<T> implements Deferred<T>
     /**
      * The object to return on {@link #get()}.
      */
-    private T m_object;
+    private T object;
 
 
     /**
@@ -50,34 +50,24 @@ public class Existing<T> implements Deferred<T>
      */
     public Existing(T object)
     {
-        m_object = object;
+        this.object = object;
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public T get() throws UnresolvableInstanceException, InstanceUnavailableException
+    public T get() throws TemporarilyUnavailableException, PermanentlyUnavailableException
     {
-        return m_object;
+        return object;
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    @SuppressWarnings("unchecked")
     public Class<T> getDeferredClass()
     {
-        return (Class<T>) m_object.getClass();
+        return (Class<T>) object.getClass();
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String toString()
     {

@@ -26,8 +26,9 @@
 package com.oracle.tools.deferred.jmx;
 
 import com.oracle.tools.deferred.Deferred;
-import com.oracle.tools.deferred.InstanceUnavailableException;
-import com.oracle.tools.deferred.UnresolvableInstanceException;
+import com.oracle.tools.deferred.PermanentlyUnavailableException;
+import com.oracle.tools.deferred.TemporarilyUnavailableException;
+import com.oracle.tools.deferred.UnavailableException;
 
 import java.io.IOException;
 
@@ -52,12 +53,12 @@ public class DeferredMBeanInfo implements Deferred<MBeanInfo>
      * A {@link Deferred} for the {@link JMXConnector}
      * that should be used to determine the {@link MBeanInfo}.
      */
-    private Deferred<JMXConnector> m_deferredJMXConnector;
+    private Deferred<JMXConnector> deferredJMXConnector;
 
     /**
      * The {@link ObjectName} for the required {@link MBeanInfo}.
      */
-    private ObjectName m_objectName;
+    private ObjectName objectName;
 
 
     /**
@@ -72,66 +73,56 @@ public class DeferredMBeanInfo implements Deferred<MBeanInfo>
     public DeferredMBeanInfo(Deferred<JMXConnector> deferredJMXConnector,
                              ObjectName             objectName)
     {
-        m_deferredJMXConnector = deferredJMXConnector;
-        m_objectName           = objectName;
+        this.deferredJMXConnector = deferredJMXConnector;
+        this.objectName           = objectName;
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public MBeanInfo get() throws UnresolvableInstanceException, InstanceUnavailableException
+    public MBeanInfo get() throws TemporarilyUnavailableException, PermanentlyUnavailableException
     {
         try
         {
-            JMXConnector connector = m_deferredJMXConnector.get();
+            JMXConnector connector = deferredJMXConnector.get();
 
             if (connector == null)
             {
-                throw new InstanceUnavailableException(this);
+                throw new TemporarilyUnavailableException(this);
             }
             else
             {
                 MBeanServerConnection connection = connector.getMBeanServerConnection();
 
-                return connection.getMBeanInfo(m_objectName);
+                return connection.getMBeanInfo(objectName);
             }
         }
         catch (IOException e)
         {
             // an IOException represents a failed connection attempt
-            throw new InstanceUnavailableException(this, e);
+            throw new TemporarilyUnavailableException(this, e);
         }
         catch (NullPointerException e)
         {
             // an NPE would only occur when the server connection isn't available
-            throw new InstanceUnavailableException(this, e);
+            throw new TemporarilyUnavailableException(this, e);
         }
         catch (InstanceNotFoundException e)
         {
             // although the mbean isn't currently registered by the server,
             // it may be registered in the future
-            throw new InstanceUnavailableException(this, e);
+            throw new TemporarilyUnavailableException(this, e);
         }
-        catch (InstanceUnavailableException e)
-        {
-            throw e;
-        }
-        catch (UnresolvableInstanceException e)
+        catch (UnavailableException e)
         {
             throw e;
         }
         catch (Exception e)
         {
-            throw new UnresolvableInstanceException(this, e);
+            throw new PermanentlyUnavailableException(this, e);
         }
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Class<MBeanInfo> getDeferredClass()
     {
@@ -139,12 +130,9 @@ public class DeferredMBeanInfo implements Deferred<MBeanInfo>
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String toString()
     {
-        return String.format("Deferred<MBeanInfo>{on=%s, object=%s}", m_deferredJMXConnector, m_objectName);
+        return String.format("Deferred<MBeanInfo>{on=%s, object=%s}", deferredJMXConnector, objectName);
     }
 }

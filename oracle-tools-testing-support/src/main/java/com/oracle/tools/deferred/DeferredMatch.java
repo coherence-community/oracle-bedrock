@@ -45,12 +45,12 @@ public class DeferredMatch<T> implements Deferred<Boolean>
     /**
      * The {@link Deferred} that we want to match with a {@link Matcher}.
      */
-    private Deferred<T> m_deferred;
+    private Deferred<T> deferred;
 
     /**
      * The {@link Matcher} to use against the {@link Deferred}.
      */
-    private Matcher<?> m_matcher;
+    private Matcher<?> matcher;
 
     /**
      * The last {@link Deferred} value use when attempting the match.
@@ -58,7 +58,7 @@ public class DeferredMatch<T> implements Deferred<Boolean>
      * This is useful for reporting why a {@link DeferredMatch} may have
      * failed.
      */
-    private T m_lastUsedMatchValue;
+    private T lastUsedMatchValue;
 
 
     /**
@@ -71,9 +71,9 @@ public class DeferredMatch<T> implements Deferred<Boolean>
     public DeferredMatch(Deferred<T> deferred,
                          Matcher<?>  matcher)
     {
-        m_deferred           = deferred;
-        m_matcher            = matcher;
-        m_lastUsedMatchValue = null;
+        this.deferred           = deferred;
+        this.matcher            = matcher;
+        this.lastUsedMatchValue = null;
     }
 
 
@@ -84,7 +84,7 @@ public class DeferredMatch<T> implements Deferred<Boolean>
      */
     public Deferred<T> getDeferred()
     {
-        return m_deferred;
+        return deferred;
     }
 
 
@@ -95,7 +95,7 @@ public class DeferredMatch<T> implements Deferred<Boolean>
      */
     public Matcher<?> getMatcher()
     {
-        return m_matcher;
+        return matcher;
     }
 
 
@@ -108,47 +108,37 @@ public class DeferredMatch<T> implements Deferred<Boolean>
      */
     public T getLastUsedMatchValue()
     {
-        return m_lastUsedMatchValue;
+        return lastUsedMatchValue;
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public Boolean get() throws UnresolvableInstanceException, InstanceUnavailableException
+    public Boolean get() throws TemporarilyUnavailableException, PermanentlyUnavailableException
     {
         try
         {
-            m_lastUsedMatchValue = m_deferred.get();
+            lastUsedMatchValue = deferred.get();
 
-            if (m_matcher.matches(m_lastUsedMatchValue))
+            if (matcher.matches(lastUsedMatchValue))
             {
                 return true;
             }
             else
             {
-                throw new InstanceUnavailableException(this);
+                throw new TemporarilyUnavailableException(this);
             }
         }
-        catch (InstanceUnavailableException e)
-        {
-            throw e;
-        }
-        catch (UnresolvableInstanceException e)
+        catch (UnavailableException e)
         {
             throw e;
         }
         catch (Exception e)
         {
-            throw new UnresolvableInstanceException(this, e);
+            throw new PermanentlyUnavailableException(this, e);
         }
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Class<Boolean> getDeferredClass()
     {
@@ -156,15 +146,12 @@ public class DeferredMatch<T> implements Deferred<Boolean>
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String toString()
     {
         return String.format("DeferredMatch{deferred=%s, matcher=%s, lastUsedMatchValue=%s}",
-                             m_deferred,
-                             m_matcher,
-                             m_lastUsedMatchValue);
+                             deferred,
+                             matcher,
+                             lastUsedMatchValue);
     }
 }

@@ -1,5 +1,5 @@
 /*
- * File: UnresolvableInstanceException.java
+ * File: TemporarilyUnavailableException.java
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
@@ -26,48 +26,48 @@
 package com.oracle.tools.deferred;
 
 /**
- * A {@link UnresolvableInstanceException} is thrown by a {@link Deferred}
- * when an attempt to resolve and acquire an underlying object fails due to
- * it not being available and for intensive purposes, will never become
- * available, regardless of the number of retries.
+ * An {@link TemporarilyUnavailableException} is thrown by a {@link Deferred}
+ * when an attempt to resolve and acquire an underlying object was unsuccessful
+ * however it may be retried at some point in the future.
  * <p>
- * When this happens all attempts to acquire the object from the
- * {@link Deferred} should be abandoned.
- * <p>
- * Copyright (c) 2013. All Rights Reserved. Oracle Corporation.<br>
+ * Copyright (c) 2014. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Brian Oliver
- *
- * @deprecated use {@link PermanentlyUnavailableException} instead
  */
-@Deprecated
-public class UnresolvableInstanceException extends PermanentlyUnavailableException
+@SuppressWarnings("serial")
+public class TemporarilyUnavailableException extends UnavailableException
 {
     /**
-     * Constructs a {@link UnresolvableInstanceException} for the
-     * specified {@link Deferred}.
+     * Constructs a {@link TemporarilyUnavailableException} for the specified
+     * {@link Deferred}.
      *
-     * @param deferred  the {@link com.oracle.tools.deferred.Deferred}
+     * @param deferred  the {@link Deferred}
      */
-    public UnresolvableInstanceException(Deferred<?> deferred)
+    public TemporarilyUnavailableException(Deferred<?> deferred)
     {
         super(deferred);
     }
 
 
     /**
-     * Constructs a {@link UnresolvableInstanceException} for the
-     * specified {@link Deferred}, with the specified causing
-     * {@link Throwable}.
+     * Constructs a {@link TemporarilyUnavailableException} for the specified
+     * {@link Deferred}, with the specified causing {@link Throwable}.
      *
-     * @param deferred  the {@link com.oracle.tools.deferred.Deferred}
+     * @param deferred  the {@link Deferred}
      * @param cause     the {@link Throwable} that may have caused the
      *                  object to be unavailable
      */
-    public UnresolvableInstanceException(Deferred<?> deferred,
-                                         Throwable   cause)
+    public TemporarilyUnavailableException(Deferred<?> deferred,
+                                           Throwable   cause)
     {
         super(deferred, cause);
+    }
+
+
+    @Override
+    public String toString()
+    {
+        return String.format("TemporarilyUnavailableException: %s\n%s", getMessage(), super.toString());
     }
 }

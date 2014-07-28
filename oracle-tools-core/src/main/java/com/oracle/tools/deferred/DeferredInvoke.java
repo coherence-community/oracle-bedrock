@@ -44,17 +44,17 @@ public class DeferredInvoke<T> implements Deferred<T>
     /**
      * The {@link Deferred} on which the {@link Method} should be invoked.
      */
-    private Deferred<?> m_deferred;
+    private Deferred<?> deferred;
 
     /**
      * The {@link Method} to invoke to produce a {@link Deferred} result.
      */
-    private Method m_method;
+    private Method method;
 
     /**
      * The arguments for the {@link Method} invocation.
      */
-    private Object[] m_arguments;
+    private Object[] arguments;
 
 
     /**
@@ -69,9 +69,9 @@ public class DeferredInvoke<T> implements Deferred<T>
                           Method      method,
                           Object...   arguments)
     {
-        m_deferred  = deferred;
-        m_method    = method;
-        m_arguments = arguments;
+        this.deferred  = deferred;
+        this.method    = method;
+        this.arguments = arguments;
     }
 
 
@@ -90,36 +90,34 @@ public class DeferredInvoke<T> implements Deferred<T>
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @SuppressWarnings("unchecked")
     @Override
-    public T get() throws UnresolvableInstanceException, InstanceUnavailableException
+    public T get() throws TemporarilyUnavailableException, PermanentlyUnavailableException
     {
         // first try to get the object on which to perform the invocation
-        Object object = m_deferred.get();
+        Object object = deferred.get();
 
         if (object == null)
         {
-            throw new UnresolvableInstanceException(this, new NullPointerException("The underlying deferred was null"));
+            throw new PermanentlyUnavailableException(this,
+                                                      new NullPointerException("The underlying deferred was null"));
         }
         else
         {
             try
             {
                 // now perform the invocation
-                return (T) invoke(m_method, object, m_arguments);
+                return (T) invoke(method, object, arguments);
             }
             catch (IllegalAccessException e)
             {
                 // when we can't access the method, we're doomed
-                throw new UnresolvableInstanceException(this, e);
+                throw new PermanentlyUnavailableException(this, e);
             }
             catch (IllegalArgumentException e)
             {
                 // when the method arguments are incorrect, we're doomed
-                throw new UnresolvableInstanceException(this, e);
+                throw new PermanentlyUnavailableException(this, e);
             }
             catch (InvocationTargetException e)
             {
@@ -131,21 +129,18 @@ public class DeferredInvoke<T> implements Deferred<T>
                 else
                 {
                     // wrap other exceptions as runtime exceptions
-                    throw new InstanceUnavailableException(this, e);
+                    throw new TemporarilyUnavailableException(this, e);
                 }
             }
         }
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @SuppressWarnings("unchecked")
     @Override
     public Class<T> getDeferredClass()
     {
-        return (Class<T>) m_method.getReturnType();
+        return (Class<T>) method.getReturnType();
     }
 
 
@@ -202,24 +197,21 @@ public class DeferredInvoke<T> implements Deferred<T>
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String toString()
     {
         StringBuilder arguments = new StringBuilder();
 
-        for (int i = 0; i < m_arguments.length; i++)
+        for (int i = 0; i < this.arguments.length; i++)
         {
             if (i > 0)
             {
                 arguments.append(", ");
             }
 
-            arguments.append(m_arguments[i]);
+            arguments.append(this.arguments[i]);
         }
 
-        return String.format("DeferredInvoke{%s.%s(%s)}", getDeferredClass(), m_method.getName(), arguments);
+        return String.format("DeferredInvoke{%s.%s(%s)}", getDeferredClass(), method.getName(), arguments);
     }
 }

@@ -34,16 +34,12 @@ package com.oracle.tools.deferred;
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Brian Oliver
+ *
+ * @deprecated use {@link TemporarilyUnavailableException} instead
  */
-@SuppressWarnings("serial")
-public class InstanceUnavailableException extends RuntimeException
+@Deprecated
+public class InstanceUnavailableException extends TemporarilyUnavailableException
 {
-    /**
-     * The {@link Deferred} that was not available to provide a object.
-     */
-    private transient Deferred<?> m_deferred;
-
-
     /**
      * Constructs a {@link InstanceUnavailableException} for the specified
      * {@link Deferred}.
@@ -52,9 +48,7 @@ public class InstanceUnavailableException extends RuntimeException
      */
     public InstanceUnavailableException(Deferred<?> deferred)
     {
-        super(deferred.toString());
-
-        m_deferred = deferred;
+        super(deferred);
     }
 
 
@@ -69,33 +63,6 @@ public class InstanceUnavailableException extends RuntimeException
     public InstanceUnavailableException(Deferred<?> deferred,
                                         Throwable   cause)
     {
-        super(deferred.toString(), cause);
-        m_deferred = deferred;
-    }
-
-
-    /**
-     * Obtain the {@link Deferred}, for which the underlying object was not available.
-     * <p>
-     * Note: It is possible that this method will return <code>null</code>
-     * if the {@link InstanceUnavailableException} was serialized.   A {@link String}
-     * representation of the {@link Deferred} is always available by
-     * calling {@link #getMessage()}.
-     *
-     * @return the {@link Deferred}
-     */
-    public Deferred<?> getDeferred()
-    {
-        return m_deferred;
-    }
-
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public String toString()
-    {
-        return String.format("InstanceUnavailableException: %s\n%s", getMessage(), super.toString());
+        super(deferred, cause);
     }
 }

@@ -139,7 +139,7 @@ public class DeferredPredicate<T> implements Deferred<Boolean>
 
 
     @Override
-    public Boolean get() throws UnresolvableInstanceException, InstanceUnavailableException
+    public Boolean get() throws TemporarilyUnavailableException, PermanentlyUnavailableException
     {
         try
         {
@@ -151,20 +151,16 @@ public class DeferredPredicate<T> implements Deferred<Boolean>
             }
             else
             {
-                throw new InstanceUnavailableException(this);
+                throw new TemporarilyUnavailableException(this);
             }
         }
-        catch (InstanceUnavailableException e)
-        {
-            throw e;
-        }
-        catch (UnresolvableInstanceException e)
+        catch (UnavailableException e)
         {
             throw e;
         }
         catch (Exception e)
         {
-            throw new UnresolvableInstanceException(this, e);
+            throw new PermanentlyUnavailableException(this, e);
         }
     }
 

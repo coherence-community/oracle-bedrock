@@ -26,8 +26,8 @@
 package com.oracle.tools.deferred.listener;
 
 import com.oracle.tools.deferred.Deferred;
-import com.oracle.tools.deferred.InstanceUnavailableException;
-import com.oracle.tools.deferred.UnresolvableInstanceException;
+import com.oracle.tools.deferred.PermanentlyUnavailableException;
+import com.oracle.tools.deferred.TemporarilyUnavailableException;
 
 import com.oracle.tools.util.CompletionListener;
 
@@ -77,9 +77,6 @@ public class DeferredCompletionListener<T> implements Deferred<T>, CompletionLis
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void onCompletion(T result)
     {
@@ -100,9 +97,6 @@ public class DeferredCompletionListener<T> implements Deferred<T>, CompletionLis
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void onException(Exception exception)
     {
@@ -123,11 +117,8 @@ public class DeferredCompletionListener<T> implements Deferred<T>, CompletionLis
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public T get() throws UnresolvableInstanceException, InstanceUnavailableException
+    public T get() throws TemporarilyUnavailableException, PermanentlyUnavailableException
     {
         synchronized (this)
         {
@@ -139,20 +130,17 @@ public class DeferredCompletionListener<T> implements Deferred<T>, CompletionLis
                 }
                 else
                 {
-                    throw new UnresolvableInstanceException(this, exception);
+                    throw new PermanentlyUnavailableException(this, exception);
                 }
             }
             else
             {
-                throw new InstanceUnavailableException(this);
+                throw new TemporarilyUnavailableException(this);
             }
         }
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Class<T> getDeferredClass()
     {
@@ -160,9 +148,6 @@ public class DeferredCompletionListener<T> implements Deferred<T>, CompletionLis
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String toString()
     {

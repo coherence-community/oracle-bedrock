@@ -229,7 +229,7 @@ public class Eventually
         {
             ensure(deferredMatch, constraint);
         }
-        catch (UnresolvableInstanceException e)
+        catch (PermanentlyUnavailableException e)
         {
             AssertionError error;
 

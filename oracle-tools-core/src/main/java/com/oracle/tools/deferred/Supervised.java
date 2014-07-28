@@ -51,24 +51,24 @@ public class Supervised<T> implements Deferred<T>
      * The {@link Deferred} being adapted and protected by the
      * {@link Supervised}.
      */
-    private Deferred<T> m_deferred;
+    private Deferred<T> deferred;
 
     /**
      * The instant in time (since the epoc) when the last attempt to acquire
      * the object failed.
      */
-    private volatile long m_instantOfLastFailure;
+    private volatile long instantOfLastFailure;
 
     /**
      * The duration that must pass before attempting to acquire a object
      * (since the last failed attempt)
      */
-    private long m_retryDelayDuration;
+    private long retryDelayDuration;
 
     /**
-     * The {@link TimeUnit} for the {@link #m_retryDelayDuration}.
+     * The {@link TimeUnit} for the {@link #retryDelayDuration}.
      */
-    private TimeUnit m_retryDelayTimeUnit;
+    private TimeUnit retryDelayTimeUnit;
 
 
     /**
@@ -78,11 +78,10 @@ public class Supervised<T> implements Deferred<T>
      */
     public Supervised(Deferred<T> deferred)
     {
-        m_deferred             = deferred;
-
-        m_instantOfLastFailure = -1;
-        m_retryDelayDuration   = 250L;
-        m_retryDelayTimeUnit   = TimeUnit.MILLISECONDS;
+        this.deferred             = deferred;
+        this.instantOfLastFailure = -1;
+        this.retryDelayDuration   = 250L;
+        this.retryDelayTimeUnit   = TimeUnit.MILLISECONDS;
     }
 
 
@@ -93,7 +92,7 @@ public class Supervised<T> implements Deferred<T>
      */
     public Deferred<T> getDeferred()
     {
-        return m_deferred;
+        return deferred;
     }
 
 
@@ -106,9 +105,8 @@ public class Supervised<T> implements Deferred<T>
      */
     public boolean isAccessible()
     {
-        return m_instantOfLastFailure < 0
-               || System.currentTimeMillis()
-                  > m_instantOfLastFailure + m_retryDelayTimeUnit.toMillis(m_retryDelayDuration);
+        return instantOfLastFailure < 0
+               || System.currentTimeMillis() > instantOfLastFailure + retryDelayTimeUnit.toMillis(retryDelayDuration);
     }
 
 
@@ -122,15 +120,12 @@ public class Supervised<T> implements Deferred<T>
      */
     public void resourceNoLongerAvailable()
     {
-        m_instantOfLastFailure = System.currentTimeMillis();
+        instantOfLastFailure = System.currentTimeMillis();
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public T get() throws UnresolvableInstanceException, InstanceUnavailableException
+    public T get() throws TemporarilyUnavailableException, PermanentlyUnavailableException
     {
         if (isAccessible())
         {
@@ -145,9 +140,9 @@ public class Supervised<T> implements Deferred<T>
                     try
                     {
                         // attempt to get the object
-                        return m_deferred.get();
+                        return deferred.get();
                     }
-                    catch (UnresolvableInstanceException e)
+                    catch (PermanentlyUnavailableException e)
                     {
                         // when a object is unavailable, we must re-throw it
                         resourceNoLongerAvailable();
@@ -175,19 +170,13 @@ public class Supervised<T> implements Deferred<T>
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Class<T> getDeferredClass()
     {
-        return m_deferred.getDeferredClass();
+        return deferred.getDeferredClass();
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String toString()
     {

@@ -64,8 +64,8 @@ public class EventuallyTest
         }
         catch (AssertionError e)
         {
-            Assert.assertTrue("Failed to throw an UnresolvableInstanceException as expected",
-                              e.getCause() instanceof UnresolvableInstanceException);
+            Assert.assertTrue("Failed to throw an PermanentlyUnavailableException as expected",
+                              e.getCause() instanceof PermanentlyUnavailableException);
 
             stopWatch.stop();
 
@@ -103,8 +103,8 @@ public class EventuallyTest
         }
         catch (AssertionError e)
         {
-            Assert.assertTrue("Failed to throw an UnresolvableInstanceException as expected",
-                              e.getCause() instanceof UnresolvableInstanceException);
+            Assert.assertTrue("Failed to throw an PermanentlyUnavailableException as expected",
+                              e.getCause() instanceof PermanentlyUnavailableException);
 
             stopWatch.stop();
 
@@ -122,7 +122,7 @@ public class EventuallyTest
 
     /**
      * Ensure that a {@link Eventually#assertThat(Deferred, org.hamcrest.Matcher)}
-     * fails fast when the {@link Deferred} throws an {@link UnresolvableInstanceException}.
+     * fails fast when the {@link Deferred} throws an {@link PermanentlyUnavailableException}.
      */
     @Test
     public void shouldFailFast()
@@ -136,8 +136,8 @@ public class EventuallyTest
         }
         catch (AssertionError e)
         {
-            Assert.assertTrue("Failed to throw an UnresolvableInstanceException as expected",
-                              e.getCause() instanceof UnresolvableInstanceException);
+            Assert.assertTrue("Failed to throw an PermanentlyUnavailableException as expected",
+                              e.getCause() instanceof PermanentlyUnavailableException);
 
             stopWatch.stop();
 
@@ -168,8 +168,8 @@ public class EventuallyTest
         }
         catch (AssertionError e)
         {
-            Assert.assertTrue("Failed to throw an UnresolvableInstanceException as expected",
-                              e.getCause() instanceof UnresolvableInstanceException);
+            Assert.assertTrue("Failed to throw an PermanentlyUnavailableException as expected",
+                              e.getCause() instanceof PermanentlyUnavailableException);
 
             Assert.assertTrue(e.getMessage().contains("Hello World"));
         }

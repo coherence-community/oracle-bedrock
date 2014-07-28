@@ -28,7 +28,7 @@ package com.oracle.tools.runtime.java;
 import com.oracle.tools.deferred.Cached;
 import com.oracle.tools.deferred.Deferred;
 import com.oracle.tools.deferred.NeverAvailable;
-import com.oracle.tools.deferred.UnresolvableInstanceException;
+import com.oracle.tools.deferred.PermanentlyUnavailableException;
 
 import com.oracle.tools.deferred.jmx.DeferredJMXConnector;
 import com.oracle.tools.deferred.jmx.DeferredMBeanAttribute;
@@ -273,7 +273,7 @@ public abstract class AbstractJavaApplication<A extends AbstractJavaApplication<
         }
         catch (IOException e)
         {
-            throw new UnresolvableInstanceException(getDeferredJMXConnector(), e);
+            throw new PermanentlyUnavailableException(getDeferredJMXConnector(), e);
         }
     }
 

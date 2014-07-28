@@ -27,7 +27,8 @@ package com.oracle.tools.deferred;
 
 /**
  * A {@link NotAvailable} is a specialized {@link Deferred} that
- * always returns <code>null</code> when attempting to call {@link #get()}.
+ * always throw an {@link TemporarilyUnavailableException} exception
+ * when calling {@link #get()}.
  * <p>
  * Copyright (c) 2012. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
@@ -39,7 +40,7 @@ public class NotAvailable<T> implements Deferred<T>
     /**
      * The class of the {@link Deferred} object.
      */
-    private Class<T> m_deferredClass;
+    private Class<T> deferredClass;
 
 
     /**
@@ -49,33 +50,24 @@ public class NotAvailable<T> implements Deferred<T>
      */
     public NotAvailable(Class<T> deferredClass)
     {
-        m_deferredClass = deferredClass;
+        this.deferredClass = deferredClass;
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public T get() throws UnresolvableInstanceException, InstanceUnavailableException
+    public T get() throws TemporarilyUnavailableException, PermanentlyUnavailableException
     {
-        throw new InstanceUnavailableException(this);
+        throw new TemporarilyUnavailableException(this);
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Class<T> getDeferredClass()
     {
-        return m_deferredClass;
+        return deferredClass;
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String toString()
     {

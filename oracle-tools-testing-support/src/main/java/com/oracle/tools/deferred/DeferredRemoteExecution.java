@@ -118,9 +118,6 @@ public class DeferredRemoteExecution<T> implements Deferred<T>, CompletionListen
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void onException(Exception exception)
     {
@@ -140,11 +137,8 @@ public class DeferredRemoteExecution<T> implements Deferred<T>, CompletionListen
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public T get() throws UnresolvableInstanceException, InstanceUnavailableException
+    public T get() throws TemporarilyUnavailableException, PermanentlyUnavailableException
     {
         synchronized (this)
         {
@@ -159,14 +153,14 @@ public class DeferredRemoteExecution<T> implements Deferred<T>, CompletionListen
                 }
                 else
                 {
-                    throw new InstanceUnavailableException(this, exception);
+                    throw new TemporarilyUnavailableException(this, exception);
                 }
             }
             else
             {
                 if (hasSubmittedCallable)
                 {
-                    throw new InstanceUnavailableException(this);
+                    throw new TemporarilyUnavailableException(this);
                 }
                 else
                 {
@@ -181,20 +175,17 @@ public class DeferredRemoteExecution<T> implements Deferred<T>, CompletionListen
                     }
                     catch (Exception e)
                     {
-                        throw new UnresolvableInstanceException(this, e);
+                        throw new PermanentlyUnavailableException(this, e);
                     }
 
                     // we throw an instance unavailable exception immediately as we have to wait for the result
-                    throw new InstanceUnavailableException(this);
+                    throw new TemporarilyUnavailableException(this);
                 }
             }
         }
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Class<T> getDeferredClass()
     {

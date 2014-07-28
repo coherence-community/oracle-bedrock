@@ -44,12 +44,12 @@ public class Cached<T> implements Deferred<T>
     /**
      * The {@link Deferred} that will provide us with an object to cache.
      */
-    private Deferred<T> m_deferred;
+    private Deferred<T> deferred;
 
     /**
-     * The last successfully resolved object from the {@link #m_deferred}.
+     * The last successfully resolved object from the {@link #deferred}.
      */
-    private AtomicReference<T> m_object;
+    private AtomicReference<T> object;
 
 
     /**
@@ -59,8 +59,8 @@ public class Cached<T> implements Deferred<T>
      */
     public Cached(Deferred<T> deferred)
     {
-        m_deferred = deferred;
-        m_object   = null;
+        this.deferred = deferred;
+        this.object   = null;
     }
 
 
@@ -71,55 +71,45 @@ public class Cached<T> implements Deferred<T>
      */
     public Deferred<T> getDeferred()
     {
-        return m_deferred;
+        return deferred;
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public T get() throws UnresolvableInstanceException, InstanceUnavailableException
+    public T get() throws TemporarilyUnavailableException, PermanentlyUnavailableException
     {
-        if (m_object == null)
+        if (object == null)
         {
             synchronized (this)
             {
-                if (m_object == null)
+                if (object == null)
                 {
                     try
                     {
-                        T deferred = m_deferred.get();
+                        T deferred = this.deferred.get();
 
-                        m_object = new AtomicReference<T>(deferred);
+                        object = new AtomicReference<T>(deferred);
                     }
-                    catch (InstanceUnavailableException e)
-                    {
-                        throw e;
-                    }
-                    catch (UnresolvableInstanceException e)
+                    catch (UnavailableException e)
                     {
                         throw e;
                     }
                     catch (RuntimeException e)
                     {
-                        throw new InstanceUnavailableException(this, e);
+                        throw new TemporarilyUnavailableException(this, e);
                     }
                 }
             }
         }
 
-        return m_object.get();
+        return object.get();
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Class<T> getDeferredClass()
     {
-        return m_deferred.getDeferredClass();
+        return deferred.getDeferredClass();
     }
 
 
@@ -130,17 +120,14 @@ public class Cached<T> implements Deferred<T>
      */
     public synchronized T release()
     {
-        T object = m_object == null ? null : m_object.get();
+        T object = this.object == null ? null : this.object.get();
 
-        m_object = null;
+        this.object = null;
 
         return object;
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String toString()
     {

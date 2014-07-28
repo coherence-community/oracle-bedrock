@@ -90,20 +90,20 @@ public interface Deferred<T>
      *
      * @return the object of type T including <code>null</code>.
      *
-     * @throws UnresolvableInstanceException  when the {@link Deferred}
+     * @throws PermanentlyUnavailableException  when the {@link Deferred}
      *         implementation can't and will never produce an instance of the
      *         underlying object.  When this exception is thrown a program
      *         may safely assume that the required object <strong>will never</strong>
      *         become available
      *
-     * @throws InstanceUnavailableException   when the {@link Deferred}
+     * @throws TemporarilyUnavailableException  when the {@link Deferred}
      *         implementation encountered some other project, but it is recoverable
      *         by retrying.  When this exception is thrown a program may
      *         safely assume that the object <strong>may eventually</strong>
      *         become available, and thus re-issuing a call to {@link #get()},
      *         after some reasonable delay, is ok.
      */
-    public T get() throws UnresolvableInstanceException, InstanceUnavailableException;
+    public T get() throws TemporarilyUnavailableException, PermanentlyUnavailableException;
 
 
     /**

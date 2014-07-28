@@ -26,8 +26,8 @@
 package com.oracle.tools.deferred.jmx;
 
 import com.oracle.tools.deferred.Deferred;
-import com.oracle.tools.deferred.InstanceUnavailableException;
-import com.oracle.tools.deferred.UnresolvableInstanceException;
+import com.oracle.tools.deferred.PermanentlyUnavailableException;
+import com.oracle.tools.deferred.TemporarilyUnavailableException;
 
 import java.io.IOException;
 
@@ -53,12 +53,12 @@ public class DeferredJMXConnector implements Deferred<JMXConnector>
     /**
      * The url that specifies the JMX connection.
      */
-    private String m_jmxConnectionURL;
+    private String jmxConnectionURL;
 
     /**
      * The {@link JMXConnectorBuilder} for the specified url.
      */
-    private JMXConnectorBuilder m_jmxConnectorBuilder;
+    private JMXConnectorBuilder jmxConnectorBuilder;
 
 
     /**
@@ -70,23 +70,23 @@ public class DeferredJMXConnector implements Deferred<JMXConnector>
      */
     public DeferredJMXConnector(String jmxConnectionURL)
     {
-        m_jmxConnectionURL    = jmxConnectionURL;
-        m_jmxConnectorBuilder = new StandardJMXConnectorBuilder();
+        this.jmxConnectionURL = jmxConnectionURL;
+        jmxConnectorBuilder   = new StandardJMXConnectorBuilder();
     }
 
 
     /**
      * Constructs a {@link DeferredJMXConnector}.
      *
-     * @param jmxConnectionURL  the JMX connection url
-     * @param builder           the {@link JMXConnectorBuilder} to realize
+     * @param jmxConnectionURL     the JMX connection url
+     * @param jmxConnectorBuilder  the {@link JMXConnectorBuilder} to realize
      *                          {@link JMXConnector}s
      */
     public DeferredJMXConnector(String              jmxConnectionURL,
-                                JMXConnectorBuilder builder)
+                                JMXConnectorBuilder jmxConnectorBuilder)
     {
-        m_jmxConnectionURL    = jmxConnectionURL;
-        m_jmxConnectorBuilder = builder;
+        this.jmxConnectionURL    = jmxConnectionURL;
+        this.jmxConnectorBuilder = jmxConnectorBuilder;
     }
 
 
@@ -97,15 +97,12 @@ public class DeferredJMXConnector implements Deferred<JMXConnector>
      */
     public String getJMXConnectionURL()
     {
-        return m_jmxConnectionURL;
+        return jmxConnectionURL;
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public JMXConnector get() throws UnresolvableInstanceException, InstanceUnavailableException
+    public JMXConnector get() throws TemporarilyUnavailableException, PermanentlyUnavailableException
     {
         String              username    = "";
         String              password    = "";
@@ -119,26 +116,23 @@ public class DeferredJMXConnector implements Deferred<JMXConnector>
         {
             JMXConnector connector;
 
-            connector = m_jmxConnectorBuilder.realize(new JMXServiceURL(m_jmxConnectionURL), env);
+            connector = jmxConnectorBuilder.realize(new JMXServiceURL(jmxConnectionURL), env);
             connector.connect();
 
             return connector;
         }
         catch (IOException e)
         {
-            throw new InstanceUnavailableException(this, e);
+            throw new PermanentlyUnavailableException(this, e);
         }
         catch (Exception e)
         {
             // we assume any exception means we should retry
-            throw new InstanceUnavailableException(this, e);
+            throw new TemporarilyUnavailableException(this, e);
         }
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Class<JMXConnector> getDeferredClass()
     {
@@ -146,13 +140,10 @@ public class DeferredJMXConnector implements Deferred<JMXConnector>
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String toString()
     {
-        return String.format("Deferred<JMXConnector>{%s}", m_jmxConnectionURL);
+        return String.format("Deferred<JMXConnector>{%s}", jmxConnectionURL);
     }
 
 
@@ -184,9 +175,6 @@ public class DeferredJMXConnector implements Deferred<JMXConnector>
      */
     public static class StandardJMXConnectorBuilder implements JMXConnectorBuilder
     {
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public JMXConnector realize(JMXServiceURL  url,
                                     Map<String, ?> env) throws IOException
