@@ -50,6 +50,8 @@ import com.oracle.tools.runtime.console.SystemApplicationConsole;
 
 import com.oracle.tools.util.FutureCompletionListener;
 
+import org.hamcrest.CoreMatchers;
+
 import org.junit.Test;
 
 import org.mockito.Mock;
@@ -60,6 +62,9 @@ import static org.hamcrest.core.StringContains.containsString;
 
 import static org.junit.Assert.assertThat;
 
+import static org.mockito.Mockito.mock;
+
+import java.util.Collections;
 import java.util.UUID;
 
 import java.util.concurrent.ExecutionException;
@@ -93,25 +98,26 @@ public abstract class AbstractJavaApplicationBuilderTest extends AbstractTest
     public void shouldRunApplication() throws Exception
     {
         SimpleJavaApplicationSchema schema =
-            new SimpleJavaApplicationSchema(DummyApp.class.getCanonicalName()).setArgument("arg1").setArgument("arg2")
-                .setSystemProperty("test.prop.1",
-                                   "value.1").setSystemProperty("test.prop.2", "value.2").setDiagnosticsEnabled(true);
+            new SimpleJavaApplicationSchema(DummyApp.class.getCanonicalName()).addArguments("arg1",
+                                                                                            "arg2").setSystemProperty("test.prop.1",
+            "value.1").setSystemProperty("test.prop.2",
+                                         "value.2").setDiagnosticsEnabled(true);
 
-        JavaApplicationBuilder<JavaApplication> builder     = newJavaApplicationBuilder();
+        JavaApplicationBuilder<JavaApplication> builder = newJavaApplicationBuilder();
 
-        PipedApplicationConsole                 console     = new PipedApplicationConsole();
-        JavaApplication                         application = builder.realize(schema, "java-app", console);
+        PipedApplicationConsole                 console = new PipedApplicationConsole();
 
-        String                                  stdout      = console.getOutputReader().readLine();
+        try (JavaApplication application = builder.realize(schema, "java-app", console))
+        {
+            String stdout = console.getOutputReader().readLine();
 
-        assertThat(stdout.startsWith("[java-app:"), is(true));
-        assertThat(stdout, containsString("arg1,arg2"));
+            assertThat(stdout.startsWith("[java-app:"), is(true));
+            assertThat(stdout, containsString("arg1,arg2"));
 
-        stdout = console.getOutputReader().readLine();
+            stdout = console.getOutputReader().readLine();
 
-        assertThat(stdout, containsString("test.prop.1=value.1"));
-
-        application.close();
+            assertThat(stdout, containsString("test.prop.1=value.1"));
+        }
     }
 
 
@@ -135,24 +141,24 @@ public abstract class AbstractJavaApplicationBuilderTest extends AbstractTest
             new SimpleJavaApplicationSchema(DummyClassPathApp.class.getCanonicalName()).setClassPath(classPath)
                 .addArgument(knownClass.getCanonicalName()).setDiagnosticsEnabled(true);
 
-        JavaApplicationBuilder<JavaApplication> builder     = newJavaApplicationBuilder();
+        JavaApplicationBuilder<JavaApplication> builder = newJavaApplicationBuilder();
 
-        PipedApplicationConsole                 console     = new PipedApplicationConsole();
-        JavaApplication                         application = builder.realize(schema, "java-app", console);
+        PipedApplicationConsole                 console = new PipedApplicationConsole();
 
-        String                                  stdout      = console.getOutputReader().readLine();
+        try (JavaApplication application = builder.realize(schema, "java-app", console))
+        {
+            String stdout = console.getOutputReader().readLine();
 
-        assertThat(stdout, containsString(knownJarClassPath.iterator().next()));
+            assertThat(stdout, containsString(knownJarClassPath.iterator().next()));
 
-        stdout = console.getOutputReader().readLine();
+            stdout = console.getOutputReader().readLine();
 
-        assertThat(stdout, containsString(path1.iterator().next()));
+            assertThat(stdout, containsString(path1.iterator().next()));
 
-        stdout = console.getOutputReader().readLine();
+            stdout = console.getOutputReader().readLine();
 
-        assertThat(stdout, containsString(path2.iterator().next()));
-
-        application.close();
+            assertThat(stdout, containsString(path2.iterator().next()));
+        }
     }
 
 
@@ -163,8 +169,6 @@ public abstract class AbstractJavaApplicationBuilderTest extends AbstractTest
     @Test
     public void shouldExecuteCallable() throws InterruptedException
     {
-        SimpleJavaApplication application = null;
-
         // define and start the SleepingApplication
         SimpleJavaApplicationSchema schema = new SimpleJavaApplicationSchema(SleepingApplication.class.getName());
 
@@ -177,11 +181,11 @@ public abstract class AbstractJavaApplicationBuilderTest extends AbstractTest
 
         ApplicationConsole                      console = new SystemApplicationConsole();
 
-        application = builder.realize(schema, "application", console);
+        try (JavaApplication application = builder.realize(schema, "application", console))
+        {
+            Eventually.assertThat(application, new GetSystemProperty("uuid"), is(uuid));
 
-        Eventually.assertThat(application, new GetSystemProperty("uuid"), is(uuid));
-
-        application.close();
+        }
     }
 
 
@@ -191,8 +195,6 @@ public abstract class AbstractJavaApplicationBuilderTest extends AbstractTest
     @Test
     public void shouldCallRemoteStaticMethodsInAnApplication() throws InterruptedException, ExecutionException
     {
-        SimpleJavaApplication application = null;
-
         // define and start the SleepingApplication
         SimpleJavaApplicationSchema schema = new SimpleJavaApplicationSchema(TesterApplication.class.getName());
 
@@ -200,20 +202,20 @@ public abstract class AbstractJavaApplicationBuilderTest extends AbstractTest
 
         ApplicationConsole                      console = new SystemApplicationConsole();
 
-        application = builder.realize(schema, "application", console);
+        try (JavaApplication application = builder.realize(schema, "application", console))
+        {
+            RemoteCallable<Integer> callable =
+                new RemoteCallableStaticMethod<Integer>(TesterApplication.class.getName(),
+                                                        "getMeaningOfLife");
 
-        RemoteCallable<Integer> callable = new RemoteCallableStaticMethod<Integer>(TesterApplication.class.getName(),
-                                                                                   "getMeaningOfLife");
+            FutureCompletionListener<Integer> future = new FutureCompletionListener<Integer>();
 
-        FutureCompletionListener<Integer> future = new FutureCompletionListener<Integer>();
+            application.submit(callable, future);
 
-        application.submit(callable, future);
+            assertThat(future.get(), is(42));
 
-        assertThat(future.get(), is(42));
-
-        application.waitFor();
-
-        application.close();
+            application.waitFor();
+        }
     }
 
 
@@ -223,8 +225,6 @@ public abstract class AbstractJavaApplicationBuilderTest extends AbstractTest
     @Test
     public void shouldProxyTesterInApplication() throws InterruptedException
     {
-        SimpleJavaApplication application = null;
-
         // define and start the SleepingApplication
         SimpleJavaApplicationSchema schema = new SimpleJavaApplicationSchema(TesterApplication.class.getName());
 
@@ -232,18 +232,17 @@ public abstract class AbstractJavaApplicationBuilderTest extends AbstractTest
 
         ApplicationConsole                      console = new SystemApplicationConsole();
 
-        application = builder.realize(schema, "application", console);
+        try (JavaApplication application = builder.realize(schema, "application", console))
+        {
+            Tester tester = application.getProxyFor(Tester.class, new TesterProducer(), null);
 
-        Tester tester = application.getProxyFor(Tester.class, new TesterProducer(), null);
+            tester.doNothing();
 
-        tester.doNothing();
+            assertThat(tester.getMeaningOfLife(), is("42"));
+            assertThat(tester.identity(42), is(42));
 
-        assertThat(tester.getMeaningOfLife(), is("42"));
-        assertThat(tester.identity(42), is(42));
-
-        application.waitFor();
-
-        application.close();
+            application.waitFor();
+        }
     }
 
 
@@ -257,16 +256,15 @@ public abstract class AbstractJavaApplicationBuilderTest extends AbstractTest
         SimpleJavaApplicationSchema schema = new SimpleJavaApplicationSchema(SleepingApplication.class.getName());
 
         // we'll wait at most 5 seconds in the application
-        schema.setArgument("5");
+        schema.addArgument("5");
 
-        JavaApplicationBuilder<JavaApplication> builder     = newJavaApplicationBuilder();
+        JavaApplicationBuilder<JavaApplication> builder = newJavaApplicationBuilder();
 
-        ApplicationConsole                      console     = new SystemApplicationConsole();
+        ApplicationConsole                      console = new SystemApplicationConsole();
 
-        SimpleJavaApplication                   application = builder.realize(schema, "sleeping", console);
-
-        application.waitFor();
-
-        application.close();
+        try (JavaApplication application = builder.realize(schema, "sleeping", console))
+        {
+            application.waitFor();
+        }
     }
 }

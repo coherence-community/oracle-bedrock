@@ -235,6 +235,11 @@ reverse chronological order.
     configuring a JavaApplicationSchema. The actual value used for the property can then
     be determined based on the Platform that a JavaApplication is being relaized on.
 
+*   [ORACLETOOLS-136](https://java.net/jira/browse/ORACLETOOLS-136): Resolved potential
+    race-condition when submitting RemoteCallables/RemoteRunnables to a
+    JavaApplication using debugging and suspend-on-start mode.  Such submissions
+    will now throw an IllegalStateException.
+
 *   [ORACLETOOLS-137](https://java.net/jira/browse/ORACLETOOLS-137): Introduced
     the concept of an ApplicationRuntime, a class encapsulating internal
     runtime information concerning an Application.  Refactored all internal

@@ -124,8 +124,6 @@ public class RemoteJavaApplicationBuilderTest extends AbstractRemoteApplicationB
 
             List<String> args = application.submit(new GetProgramArgs());
 
-            application.close();
-
             String debugArg = null;
 
             for (String arg : args)
@@ -183,8 +181,6 @@ public class RemoteJavaApplicationBuilderTest extends AbstractRemoteApplicationB
                     break;
                 }
             }
-
-            application.close();
 
             Assert.assertThat(debugArg, is(notNullValue()));
             Assert.assertThat(debugArg, startsWith("-agentlib:jdwp=transport=dt_socket,"));
@@ -283,8 +279,6 @@ public class RemoteJavaApplicationBuilderTest extends AbstractRemoteApplicationB
                                                                              new SystemApplicationConsole()))
         {
             List<String> args = app.submit(new GetProgramArgs());
-
-            app.close();
 
             String debugArg = null;
 

@@ -30,6 +30,7 @@ import com.oracle.tools.deferred.Eventually;
 import com.oracle.tools.deferred.listener.DeferredCompletionListener;
 
 import com.oracle.tools.runtime.concurrent.RemoteCallable;
+import com.oracle.tools.runtime.concurrent.RemoteRunnable;
 
 import com.oracle.tools.runtime.java.container.Container;
 
@@ -101,8 +102,8 @@ public class SocketBasedRemoteExecutorTests
 
 
     /**
-     * Ensure a {@link com.oracle.tools.runtime.concurrent.socket.RemoteExecutorServer} can submit and receive a
-     * {@link Callable}.
+     * Ensure a {@link com.oracle.tools.runtime.concurrent.socket.RemoteExecutorServer} won't accept
+     * inner class submissions.
      */
     @Test
     public void shouldNotPermitInnerClassSubmissions() throws InterruptedException
@@ -157,13 +158,75 @@ public class SocketBasedRemoteExecutorTests
 
 
     /**
+     * Ensure a {@link RemoteExecutorServer} won't accept submissions without connected clients.
+     */
+    @Test
+    public void shouldNotSubmitWithoutClients() throws InterruptedException
+    {
+        RemoteExecutorServer server = null;
+        RemoteExecutorClient client = null;
+
+        try
+        {
+            server = new RemoteExecutorServer();
+
+            DeferredCompletionListener<String> clientResponse = new DeferredCompletionListener<String>(String.class);
+
+            try
+            {
+                server.submit(new PingPong(), clientResponse);
+
+                Assert.fail("Should not be able to submit a RemoteCallable without a connected client");
+            }
+            catch (IllegalStateException e)
+            {
+                // success!
+            }
+
+            try
+            {
+                server.submit(new Ping());
+
+                Assert.fail("Should not be able to submit a RemoteRunnable without a connected client");
+            }
+            catch (IllegalStateException e)
+            {
+                // success!
+            }
+        }
+        finally
+        {
+            if (client != null)
+            {
+                client.close();
+            }
+
+            if (server != null)
+            {
+                server.close();
+            }
+        }
+    }
+
+
+    /**
+     * A simple ping {@link RemoteRunnable}.
+     */
+    public static class Ping implements RemoteRunnable
+    {
+        @Override
+        public void run()
+        {
+            System.out.println("PING");
+        }
+    }
+
+
+    /**
      * A simple ping-pong {@link RemoteCallable}.
      */
     public static class PingPong implements RemoteCallable<String>
     {
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public String call() throws Exception
         {

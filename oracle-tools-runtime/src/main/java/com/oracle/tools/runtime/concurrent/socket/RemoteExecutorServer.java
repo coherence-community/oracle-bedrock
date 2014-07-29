@@ -245,9 +245,18 @@ public class RemoteExecutorServer extends AbstractControllableRemoteExecutor
         {
             if (isOpen() &&!isTerminating.get())
             {
+                int submissionCount = 0;
+
                 for (SocketBasedRemoteExecutor executor : remoteExecutors.values())
                 {
                     executor.submit(callable, listener);
+                    submissionCount++;
+                }
+
+                if (submissionCount == 0)
+                {
+                    throw new IllegalStateException("Failed to submit the request [" + callable
+                                                    + "].  There are no RemoteExecutors connected");
                 }
             }
             else
@@ -266,9 +275,18 @@ public class RemoteExecutorServer extends AbstractControllableRemoteExecutor
         {
             if (isOpen() &&!isTerminating.get())
             {
+                int submissionCount = 0;
+
                 for (SocketBasedRemoteExecutor executor : remoteExecutors.values())
                 {
                     executor.submit(runnable);
+                    submissionCount++;
+                }
+
+                if (submissionCount == 0)
+                {
+                    throw new IllegalStateException("Failed to submit the request [" + runnable
+                                                    + "].  There are no RemoteExecutors connected");
                 }
             }
             else

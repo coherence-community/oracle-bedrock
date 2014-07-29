@@ -55,7 +55,8 @@ public interface RemoteExecutor
      *                  completed execution of the {@link Callable}
      * @param <T>       the return type of the {@link Callable}
      *
-     * @throws IllegalStateException  if the {@link RemoteExecutor} is closed
+     * @throws IllegalStateException  if the {@link RemoteExecutor} is closed or
+     *                                is unable to accept the submission
      */
     public <T> void submit(RemoteCallable<T>     callable,
                            CompletionListener<T> listener) throws IllegalStateException;
@@ -66,7 +67,8 @@ public interface RemoteExecutor
      *
      * @param runnable  the {@link Runnable} to asynchronously execute remotely
      *
-     * @throws IllegalStateException  if the {@link RemoteExecutor} is closed
+     * @throws IllegalStateException  if the {@link RemoteExecutor} is closed or
+     *                                is unable to accept the submission
      */
     public void submit(RemoteRunnable runnable) throws IllegalStateException;
 }

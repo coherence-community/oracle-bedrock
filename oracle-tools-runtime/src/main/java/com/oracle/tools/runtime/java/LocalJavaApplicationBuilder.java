@@ -26,12 +26,15 @@
 package com.oracle.tools.runtime.java;
 
 import com.oracle.tools.deferred.AbstractDeferred;
-import com.oracle.tools.deferred.DeferredHelper;
 import com.oracle.tools.deferred.PermanentlyUnavailableException;
 import com.oracle.tools.deferred.TemporarilyUnavailableException;
+
 import com.oracle.tools.io.NetworkHelper;
+
 import com.oracle.tools.lang.StringHelper;
+
 import com.oracle.tools.predicate.Predicate;
+
 import com.oracle.tools.runtime.Application;
 import com.oracle.tools.runtime.ApplicationConsole;
 import com.oracle.tools.runtime.ApplicationSchema;
@@ -40,22 +43,30 @@ import com.oracle.tools.runtime.LocalPlatform;
 import com.oracle.tools.runtime.Platform;
 import com.oracle.tools.runtime.PropertiesBuilder;
 import com.oracle.tools.runtime.Settings;
+
 import com.oracle.tools.runtime.concurrent.ControllableRemoteExecutor;
 import com.oracle.tools.runtime.concurrent.RemoteCallable;
 import com.oracle.tools.runtime.concurrent.RemoteExecutor;
 import com.oracle.tools.runtime.concurrent.RemoteRunnable;
 import com.oracle.tools.runtime.concurrent.socket.RemoteExecutorServer;
+
 import com.oracle.tools.util.CompletionListener;
+
+import static com.oracle.tools.deferred.DeferredHelper.ensure;
+import static com.oracle.tools.deferred.DeferredHelper.within;
+
+import static com.oracle.tools.predicate.Predicates.allOf;
 
 import java.io.File;
 import java.io.IOException;
+
 import java.net.InetAddress;
+
 import java.util.Iterator;
 import java.util.Properties;
+
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import static com.oracle.tools.predicate.Predicates.allOf;
 
 /**
  * A {@link JavaApplicationBuilder} that realizes {@link JavaApplication}s as
@@ -590,10 +601,11 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication> extends Abst
                                                            systemProperties,
                                                            debugPort);
 
-        // ensure that the launcher process connects back
-        if (!schema.isRemoteDebuggingStartSuspended())
+        // ensure that the launcher process connects back to the server to
+        // know that the application has started
+        if (!(schema.isRemoteDebuggingEnabled() && schema.isRemoteDebuggingStartSuspended()))
         {
-            DeferredHelper.ensure(new AbstractDeferred<Boolean>()
+            ensure(new AbstractDeferred<Boolean>()
             {
                 @Override
                 public Boolean get() throws TemporarilyUnavailableException, PermanentlyUnavailableException
@@ -607,7 +619,7 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication> extends Abst
                         return true;
                     }
                 }
-            });
+            }, within(schema.getDefaultTimeout(), schema.getDefaultTimeoutUnits()));
         }
 
         // ----- notify all of the lifecycle listeners -----
