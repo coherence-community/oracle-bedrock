@@ -246,6 +246,9 @@ reverse chronological order.
     Application implementations to take an ApplicationRuntime parameter,
     replacing numerous constructor parameters with a single structure.
 
+*   [ORACLETOOLS-140](https://java.net/jira/browse/ORACLETOOLS-140): Made
+    Socket-based Controllable RemoteExecutors Closeable.
+
 *   [ORACLETOOLS-141](https://java.net/jira/browse/ORACLETOOLS-141): Removed
     the requirement for Application.waitFor() method to throw an InterruptedException.
 

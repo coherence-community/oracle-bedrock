@@ -69,9 +69,6 @@ public abstract class AbstractControllableRemoteExecutor implements Controllable
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public final synchronized void close()
     {
@@ -107,9 +104,6 @@ public abstract class AbstractControllableRemoteExecutor implements Controllable
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public synchronized void addListener(RemoteExecutorListener listener)
     {

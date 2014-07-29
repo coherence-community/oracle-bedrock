@@ -219,7 +219,14 @@ public class RemoteExecutorServer extends AbstractControllableRemoteExecutor
 
         for (SocketBasedRemoteExecutor executor : remoteExecutors.values())
         {
-            executor.close();
+            try
+            {
+                executor.close();
+            }
+            catch (Exception e)
+            {
+                // we don't care about exceptions for clients when we close
+            }
         }
 
         try

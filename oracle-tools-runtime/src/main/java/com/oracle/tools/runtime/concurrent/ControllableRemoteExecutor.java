@@ -25,6 +25,8 @@
 
 package com.oracle.tools.runtime.concurrent;
 
+import java.io.Closeable;
+
 /**
  * A {@link RemoteExecutor} that may have its lifecycle controlled and observed.
  * <p>
@@ -35,7 +37,7 @@ package com.oracle.tools.runtime.concurrent;
  *
  * @see RemoteExecutor
  */
-public interface ControllableRemoteExecutor extends RemoteExecutor
+public interface ControllableRemoteExecutor extends RemoteExecutor, Closeable
 {
     /**
      * Closes the {@link ControllableRemoteExecutor}.
