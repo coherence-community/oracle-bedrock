@@ -28,6 +28,7 @@ package com.oracle.tools.runtime.virtual.vagrant;
 import com.oracle.tools.runtime.Application;
 import com.oracle.tools.runtime.LocalPlatform;
 import com.oracle.tools.runtime.SimpleApplicationSchema;
+
 import com.oracle.tools.runtime.console.PipedApplicationConsole;
 
 import java.util.regex.Matcher;
@@ -46,12 +47,13 @@ import java.util.regex.Pattern;
  */
 public class VagrantChecker
 {
-    /** 
+    /**
      * The RegEx pattern to use to match the expected output from running the
      * Vagrant --version command.
      */
     public static final String VAGRANT_REGEX =
         "^\\[Vagrant:out:(\\d)*\\](\\s)*(\\d)*:(\\s)*Vagrant\\s(\\d)*(\\.(\\d)*)*$";
+
 
     /**
      * Attempt to run the Vagrant --version command and
@@ -63,18 +65,19 @@ public class VagrantChecker
     public synchronized static boolean vagrantExists()
     {
         boolean noVagrantProperty = Boolean.getBoolean("no.vagrant");
+
         if (noVagrantProperty)
         {
             return false;
         }
 
-        try
+        String                  command = VagrantPlatform.getDefaultVagrantCommand();
+        SimpleApplicationSchema schema  = new SimpleApplicationSchema(command).setArgument("--version");
+
+        try (PipedApplicationConsole console = new PipedApplicationConsole();
+            Application application = LocalPlatform.getInstance().realize(schema, "Vagrant", console);)
         {
-            String                  command     = VagrantPlatform.getDefaultVagrantCommand();
-            SimpleApplicationSchema schema      = new SimpleApplicationSchema(command).setArgument("--version");
-            PipedApplicationConsole console     = new PipedApplicationConsole();
-            Application             application = LocalPlatform.getInstance().realize(schema, "Vagrant", console);
-            int                     exitCode    = application.waitFor();
+            int exitCode = application.waitFor();
 
             if (exitCode != 0)
             {

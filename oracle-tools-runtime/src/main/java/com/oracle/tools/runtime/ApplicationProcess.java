@@ -130,8 +130,7 @@ public interface ApplicationProcess extends Closeable
      * @return the exit code of the {@link ApplicationProcess}. By convention,
      *         the value 0 indicates normal termination
      *
-     * @throws InterruptedException  if the current thread is interrupted while
-     *                               while waiting
+     * @throws RuntimeException  if there was a problem wait for termination
      */
-    public int waitFor() throws InterruptedException;
+    public int waitFor();
 }

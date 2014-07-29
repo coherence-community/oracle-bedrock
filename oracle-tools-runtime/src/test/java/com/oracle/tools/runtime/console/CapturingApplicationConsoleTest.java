@@ -25,20 +25,35 @@
 
 package com.oracle.tools.runtime.console;
 
+import com.oracle.tools.deferred.DeferredHelper;
+
+import com.oracle.tools.predicate.Predicates;
+
 import com.oracle.tools.runtime.LocalPlatform;
+
 import com.oracle.tools.runtime.java.SimpleJavaApplication;
 import com.oracle.tools.runtime.java.SimpleJavaApplicationSchema;
+
 import org.junit.Test;
 
-import java.io.PrintWriter;
-import java.util.LinkedList;
+import static com.oracle.tools.deferred.DeferredHelper.eventually;
+import static com.oracle.tools.deferred.DeferredHelper.invoking;
 
 import static org.hamcrest.CoreMatchers.is;
+
 import static org.hamcrest.collection.IsIterableContainingInOrder.contains;
+
 import static org.junit.Assert.assertThat;
+
+import java.io.PrintWriter;
+
+import java.util.LinkedList;
 
 /**
  * Tests for {@link CapturingApplicationConsole}.
+ * <p>
+ * Copyright (c) 2014. All Rights Reserved. Oracle Corporation.<br>
+ * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Jonathan Knight
  */
@@ -50,13 +65,16 @@ public class CapturingApplicationConsoleTest
         CapturingApplicationConsole console = new CapturingApplicationConsole(5, false);
 
         SimpleJavaApplicationSchema schema =
-            new SimpleJavaApplicationSchema(SimpleApp.class.getCanonicalName()).setArgument("1").setArgument("2")
-                .setArgument("3").setArgument("4").setArgument("5");
+            new SimpleJavaApplicationSchema(SimpleApp.class.getCanonicalName()).addArguments("1",
+                                                                                             "2",
+                                                                                             "3",
+                                                                                             "4",
+                                                                                             "5");
 
-        SimpleJavaApplication app = LocalPlatform.getInstance().realize(schema, "App", console);
-
-        app.waitFor();
-        app.close();
+        try (SimpleJavaApplication app = LocalPlatform.getInstance().realize(schema, "App", console))
+        {
+            app.waitFor();
+        }
 
         console.close();
 
@@ -79,13 +97,16 @@ public class CapturingApplicationConsoleTest
         CapturingApplicationConsole console = new CapturingApplicationConsole(5, false);
 
         SimpleJavaApplicationSchema schema =
-            new SimpleJavaApplicationSchema(SimpleApp.class.getCanonicalName()).setArgument("1").setArgument("2")
-                .setArgument("3").setArgument("4").setArgument("5");
+            new SimpleJavaApplicationSchema(SimpleApp.class.getCanonicalName()).addArguments("1",
+                                                                                             "2",
+                                                                                             "3",
+                                                                                             "4",
+                                                                                             "5");
 
-        SimpleJavaApplication app = LocalPlatform.getInstance().realize(schema, "App", console);
-
-        app.waitFor();
-        app.close();
+        try (SimpleJavaApplication app = LocalPlatform.getInstance().realize(schema, "App", console))
+        {
+            app.waitFor();
+        }
 
         console.close();
 
@@ -110,78 +131,30 @@ public class CapturingApplicationConsoleTest
 
         SimpleJavaApplicationSchema schema  = new SimpleJavaApplicationSchema(EchoApp.class.getCanonicalName());
 
-        SimpleJavaApplication       app     = LocalPlatform.getInstance().realize(schema, "App", console);
-
-        try
+        try (SimpleJavaApplication app = LocalPlatform.getInstance().realize(schema, "App", console))
         {
             LinkedList<String> lines = console.getCapturedOutputLines();
 
             stdIn.println("Foo");
-            assertEventually(lines, 1);
+
+            DeferredHelper.ensure(eventually(invoking(lines).size()), Predicates.is(1));
+
             assertThat(lines, contains("Echo: Foo"));
+
             stdIn.println("Bar");
-            assertEventually(lines, 2);
+
+            DeferredHelper.ensure(eventually(invoking(lines).size()), Predicates.is(2));
+
             assertThat(lines, contains("Echo: Foo", "Echo: Bar"));
 
             lines.clear();
 
             assertThat(lines.isEmpty(), is(true));
             stdIn.println("Foo2");
-            assertEventually(lines, 1);
+
+            DeferredHelper.ensure(eventually(invoking(lines).size()), Predicates.is(1));
+
             assertThat(lines, contains("Echo: Foo2"));
-        }
-        finally
-        {
-            app.close();
-        }
-    }
-
-    /**
-     *
-     */
-    @Test
-    public void shouldBeAbleToWaitForOutput() throws Exception
-    {
-
-    }
-
-
-    /**
-     * A hacky assert eventually as we cannot use the Eventually class in the Test Support module.
-     */
-    public static void assertEventually(LinkedList<String> lines,
-                                        int                expected)
-    {
-        long start = System.currentTimeMillis();
-
-        while (true)
-        {
-            long end = System.currentTimeMillis();
-
-            if (end - start > 30000)
-            {
-                assertThat(lines.size(), is(expected));
-                break;
-            }
-            else
-            {
-                try
-                {
-                    assertThat(lines.size(), is(expected));
-                    break;
-                }
-                catch (Throwable t)
-                {
-                    try
-                    {
-                        Thread.sleep(500);
-                    }
-                    catch (InterruptedException e1)
-                    {
-                        // ignored
-                    }
-                }
-            }
         }
     }
 }

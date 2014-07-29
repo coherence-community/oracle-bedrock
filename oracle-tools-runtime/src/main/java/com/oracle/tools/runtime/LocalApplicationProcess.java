@@ -25,6 +25,7 @@
 
 package com.oracle.tools.runtime;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
@@ -170,8 +171,15 @@ public class LocalApplicationProcess implements ApplicationProcess
 
 
     @Override
-    public int waitFor() throws InterruptedException
+    public int waitFor()
     {
-        return process.waitFor();
+        try
+        {
+            return process.waitFor();
+        }
+        catch (InterruptedException e)
+        {
+            throw new RuntimeException("Interrupted while waiting for application to terminate", e);
+        }
     }
 }

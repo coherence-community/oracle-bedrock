@@ -26,7 +26,9 @@
 package com.oracle.tools.runtime;
 
 import java.io.Closeable;
+
 import java.util.Properties;
+
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -75,6 +77,7 @@ public interface Application extends Closeable
      */
     public Platform getPlatform();
 
+
     /**
      * <b>WARNING:</b>This method is now deprecated.  It is replaced by {@link #close()}.
      * <p>
@@ -114,11 +117,10 @@ public interface Application extends Closeable
      * @return the exit value of the {@link Application}
      *         (by convention <code>0</code> indicates normal termination)
      *
-     * @throws InterruptedException if the calling {@link Thread} is
-     *                              {@linkplain Thread#interrupt() interrupted}
-     *                              by another thread while it is waiting.
+     * @throws RuntimeException  if it wasn't possible to wait for the
+     *                           termination.
      */
-    public int waitFor() throws InterruptedException;
+    public int waitFor();
 
 
     /**

@@ -460,7 +460,7 @@ public class LocalJavaApplicationBuilderTest extends AbstractJavaApplicationBuil
      * can have {@link java.util.concurrent.Callable}s submitted to them and executed.
      */
     @Test
-    public void shouldExecuteCallable() throws InterruptedException
+    public void shouldExecuteCallable()
     {
         // define the SleepingApplication
         SimpleJavaApplicationSchema schema = new SimpleJavaApplicationSchema(SleepingApplication.class.getName());

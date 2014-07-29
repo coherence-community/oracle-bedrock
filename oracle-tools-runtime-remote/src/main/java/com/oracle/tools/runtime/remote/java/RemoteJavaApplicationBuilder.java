@@ -394,7 +394,7 @@ public class RemoteJavaApplicationBuilder<A extends JavaApplication>
 
 
         @Override
-        public int waitFor() throws InterruptedException
+        public int waitFor()
         {
             return process.waitFor();
         }

@@ -167,7 +167,7 @@ public abstract class AbstractJavaApplicationBuilderTest extends AbstractTest
      * submitted to them and executed.
      */
     @Test
-    public void shouldExecuteCallable() throws InterruptedException
+    public void shouldExecuteCallable()
     {
         // define and start the SleepingApplication
         SimpleJavaApplicationSchema schema = new SimpleJavaApplicationSchema(SleepingApplication.class.getName());
@@ -223,7 +223,7 @@ public abstract class AbstractJavaApplicationBuilderTest extends AbstractTest
      * Ensure that we can create a local proxy of a {@link Tester} in an {@link JavaApplication}.
      */
     @Test
-    public void shouldProxyTesterInApplication() throws InterruptedException
+    public void shouldProxyTesterInApplication()
     {
         // define and start the SleepingApplication
         SimpleJavaApplicationSchema schema = new SimpleJavaApplicationSchema(TesterApplication.class.getName());
@@ -250,7 +250,7 @@ public abstract class AbstractJavaApplicationBuilderTest extends AbstractTest
      * Ensure that we can wait for applications to terminate.
      */
     @Test(timeout = 10000)
-    public void shouldWaitFor() throws InterruptedException
+    public void shouldWaitFor()
     {
         // define and start the SleepingApplication
         SimpleJavaApplicationSchema schema = new SimpleJavaApplicationSchema(SleepingApplication.class.getName());

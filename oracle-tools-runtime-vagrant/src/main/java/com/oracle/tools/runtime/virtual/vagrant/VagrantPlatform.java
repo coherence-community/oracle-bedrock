@@ -31,18 +31,23 @@ import com.oracle.tools.runtime.LocalPlatform;
 import com.oracle.tools.runtime.SimpleApplication;
 import com.oracle.tools.runtime.SimpleApplicationBuilder;
 import com.oracle.tools.runtime.SimpleApplicationSchema;
+
 import com.oracle.tools.runtime.console.PipedApplicationConsole;
 import com.oracle.tools.runtime.console.SystemApplicationConsole;
+
 import com.oracle.tools.runtime.remote.AbstractRemoteApplicationBuilder;
 import com.oracle.tools.runtime.remote.SecureKeys;
+
 import com.oracle.tools.runtime.virtual.CloseAction;
 import com.oracle.tools.runtime.virtual.VirtualPlatform;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+
 import java.util.Properties;
 
 /**
@@ -205,19 +210,19 @@ public class VagrantPlatform extends VirtualPlatform
         }
     }
 
+
     /**
      * Detect the SSH settings for the NAT port forwarding that Vagrant
      * has configured on the VM and set them into this {@link VagrantPlatform}.
      */
     protected void detecteSSH()
     {
-        try
-        {
-            SimpleApplicationSchema  schema      = instantiateSchema().setArgument("ssh-config");
-            SimpleApplicationBuilder builder     = new SimpleApplicationBuilder();
-            PipedApplicationConsole  console     = new PipedApplicationConsole();
-            Application              application = builder.realize(schema, "Vagrant", console);
+        SimpleApplicationSchema  schema  = instantiateSchema().setArgument("ssh-config");
+        SimpleApplicationBuilder builder = new SimpleApplicationBuilder();
 
+        try (PipedApplicationConsole console = new PipedApplicationConsole();
+            Application application = builder.realize(schema, "Vagrant", console);)
+        {
             application.waitFor();
             application.close();
 
@@ -310,6 +315,7 @@ public class VagrantPlatform extends VirtualPlatform
     {
         return new SimpleApplicationSchema(vagrantCommand).setWorkingDirectory(vagrantFile);
     }
+
 
     /**
      * Get the default Vagrant command to use to execute the Vagrant CLI commands.

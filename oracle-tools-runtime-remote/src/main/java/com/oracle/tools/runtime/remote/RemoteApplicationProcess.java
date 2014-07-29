@@ -135,13 +135,13 @@ public class RemoteApplicationProcess implements ApplicationProcess
 
 
     @Override
-    public int waitFor() throws InterruptedException
+    public int waitFor()
     {
         if (exitStatus == null)
         {
             if (channel == null || session == null)
             {
-                throw new InterruptedException("The remote application has terminated.  No exit status is available");
+                throw new RuntimeException("The remote application has terminated.  No exit status is available");
             }
             else
             {
@@ -149,8 +149,16 @@ public class RemoteApplicationProcess implements ApplicationProcess
 
                 while (status == -1)
                 {
-                    Thread.sleep(500);
-                    status = channel.getExitStatus();
+                    try
+                    {
+                        Thread.sleep(500);
+
+                        status = channel.getExitStatus();
+                    }
+                    catch (InterruptedException e)
+                    {
+                        throw new RuntimeException("Interrupted while waiting for application to terminate", e);
+                    }
                 }
 
                 exitStatus = status;

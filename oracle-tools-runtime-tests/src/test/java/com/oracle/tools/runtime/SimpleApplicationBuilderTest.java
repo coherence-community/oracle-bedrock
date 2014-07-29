@@ -93,24 +93,26 @@ public class SimpleApplicationBuilderTest extends AbstractTest
 
         schema.addArgument("-help");
 
-        SimpleApplicationBuilder builder     = new SimpleApplicationBuilder();
-        PipedApplicationConsole  console     = new PipedApplicationConsole();
-        SimpleApplication        application = builder.realize(schema, "java", console);
+        SimpleApplicationBuilder builder = new SimpleApplicationBuilder();
+        PipedApplicationConsole  console = new PipedApplicationConsole();
 
-        Mockito.verify(interceptor, Mockito.times(1)).onEvent(Mockito.any(LifecycleEvent.class));
+        try (SimpleApplication application = builder.realize(schema, "java", console))
+        {
+            Mockito.verify(interceptor, Mockito.times(1)).onEvent(Mockito.any(LifecycleEvent.class));
 
-        String stdout = console.getOutputReader().readLine();
+            String stdout = console.getOutputReader().readLine();
 
-        assertThat(stdout, containsString("Usage: java [-options] class [args...]"));
+            assertThat(stdout, containsString("Usage: java [-options] class [args...]"));
 
-        application.waitFor();
+            application.waitFor();
 
-        application.close();
+            application.close();
 
-        Mockito.verify(interceptor, Mockito.times(2)).onEvent(Mockito.any(LifecycleEvent.class));
+            Mockito.verify(interceptor, Mockito.times(2)).onEvent(Mockito.any(LifecycleEvent.class));
 
-        int exitCode = application.exitValue();
+            int exitCode = application.exitValue();
 
-        assertThat(exitCode, is(0));
+            assertThat(exitCode, is(0));
+        }
     }
 }

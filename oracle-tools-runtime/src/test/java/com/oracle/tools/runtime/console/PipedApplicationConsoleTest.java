@@ -26,18 +26,24 @@
 package com.oracle.tools.runtime.console;
 
 import com.oracle.tools.runtime.LocalPlatform;
+
 import com.oracle.tools.runtime.java.SimpleJavaApplication;
 import com.oracle.tools.runtime.java.SimpleJavaApplicationSchema;
-import org.junit.Test;
 
-import java.io.BufferedReader;
+import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
+
 import static org.junit.Assert.assertThat;
+
+import java.io.BufferedReader;
 
 /**
  * Tests for {@link PipedApplicationConsole}
+ * <p>
+ * Copyright (c) 2014. All Rights Reserved. Oracle Corporation.<br>
+ * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Jonathan Knight
  */
@@ -74,16 +80,17 @@ public class PipedApplicationConsoleTest
     public void shouldBeAbleToReadPipedStdOutAfterConsoleClosed() throws Exception
     {
         SimpleJavaApplicationSchema schema =
-            new SimpleJavaApplicationSchema(SimpleApp.class.getCanonicalName()).setArgument("foo").setArgument("bar");
+            new SimpleJavaApplicationSchema(SimpleApp.class.getCanonicalName()).addArguments("foo",
+                                                                                             "bar");
 
         PipedApplicationConsole console = new PipedApplicationConsole(1024, false);
 
-        SimpleJavaApplication   app     = LocalPlatform.getInstance().realize(schema, "App", console);
+        try (SimpleJavaApplication app = LocalPlatform.getInstance().realize(schema, "App", console))
+        {
+            app.waitFor();
+        }
 
-        BufferedReader          reader  = console.getOutputReader();
-
-        app.waitFor();
-        app.close();
+        BufferedReader reader = console.getOutputReader();
 
         assertThat(reader.readLine(), is("Out: foo"));
         assertThat(reader.readLine(), is("Out: bar"));
@@ -100,12 +107,12 @@ public class PipedApplicationConsoleTest
 
         PipedApplicationConsole console = new PipedApplicationConsole(1024, false);
 
-        SimpleJavaApplication   app     = LocalPlatform.getInstance().realize(schema, "App", console);
+        try (SimpleJavaApplication app = LocalPlatform.getInstance().realize(schema, "App", console))
+        {
+            app.waitFor();
+        }
 
-        BufferedReader          reader  = console.getErrorReader();
-
-        app.waitFor();
-        app.close();
+        BufferedReader reader = console.getErrorReader();
 
         assertThat(reader.readLine(), is("Err: foo"));
         assertThat(reader.readLine(), is("Err: bar"));

@@ -26,6 +26,7 @@
 package com.oracle.tools.runtime.virtual.vagrant;
 
 import com.oracle.tools.deferred.Eventually;
+
 import com.oracle.tools.runtime.Application;
 import com.oracle.tools.runtime.ApplicationSchema;
 import com.oracle.tools.runtime.Assembly;
@@ -35,30 +36,41 @@ import com.oracle.tools.runtime.InfrastructureBuilder;
 import com.oracle.tools.runtime.LocalPlatform;
 import com.oracle.tools.runtime.Platform;
 import com.oracle.tools.runtime.SimpleAssembly;
+
 import com.oracle.tools.runtime.coherence.CoherenceCacheServer;
 import com.oracle.tools.runtime.coherence.CoherenceCacheServerSchema;
+
 import com.oracle.tools.runtime.console.SystemApplicationConsole;
+
 import com.oracle.tools.runtime.java.SimpleJavaApplicationSchema;
+
 import com.oracle.tools.runtime.remote.Authentication;
 import com.oracle.tools.runtime.remote.RemotePlatform;
+
 import com.oracle.tools.runtime.virtual.HostAddressIterator;
+
 import com.tangosol.util.Resources;
+
 import org.junit.AfterClass;
 import org.junit.Assume;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Test;
+
 import org.junit.rules.TemporaryFolder;
+
+import static com.oracle.tools.deferred.DeferredHelper.invoking;
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
+
+import static org.junit.Assert.assertThat;
 
 import java.io.Closeable;
 import java.io.File;
+
 import java.net.InetAddress;
 import java.net.URL;
-
-import static com.oracle.tools.deferred.DeferredHelper.invoking;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.junit.Assert.assertThat;
 
 /**
  * Functional tests for the Vagrant platform.
@@ -73,13 +85,13 @@ import static org.junit.Assert.assertThat;
  */
 public class VagrantFunctionalTest
 {
-    /** 
+    /**
      * A JUnit rule to create temporary folders for use in tests
      */
     @ClassRule
     public static TemporaryFolder temporaryFolder = new TemporaryFolder();
 
-    /** 
+    /**
      * The {@link Infrastructure} to use in the test methods
      */
     public static Infrastructure<Platform> infrastructure;
@@ -98,8 +110,11 @@ public class VagrantFunctionalTest
         File                vmRoot    = temporaryFolder.newFolder();
         HostAddressIterator addresses = new HostAddressIterator("192.168.56.200");
 
-        VagrantPlatformSchema schema = new VagrantPlatformSchema("VM", vmRoot, "rel65-java")
-                                            .addNetworkAdapter(new VagrantHostOnlyNetworkSchema("eth1", addresses));
+        VagrantPlatformSchema schema = new VagrantPlatformSchema("VM",
+                                                                 vmRoot,
+                                                                 "rel65-java")
+                                                                     .addNetworkAdapter(new VagrantHostOnlyNetworkSchema("eth1",
+            addresses));
 
         InfrastructureBuilder<Platform> builder = new InfrastructureBuilder<Platform>();
 
@@ -107,6 +122,7 @@ public class VagrantFunctionalTest
 
         infrastructure = builder.realize();
     }
+
 
     @AfterClass
     public static void closeInfrastructure() throws Exception
@@ -133,7 +149,7 @@ public class VagrantFunctionalTest
             {
                 app.waitFor();
             }
-            catch (InterruptedException e)
+            catch (RuntimeException e)
             {
                 // ignored
             }
@@ -218,9 +234,9 @@ public class VagrantFunctionalTest
 
             Eventually.assertThat(invoking(cacheServer).getClusterSize(), is(expectedSize));
 
-            CoherenceCacheServerSchema schema = new CoherenceCacheServerSchema()
-                                                        .setCacheConfigURI("coherence-cache-config.xml")
-                                                        .setLocalHostAddress("192.168.56.1");
+            CoherenceCacheServerSchema schema =
+                new CoherenceCacheServerSchema().setCacheConfigURI("coherence-cache-config.xml")
+                    .setLocalHostAddress("192.168.56.1");
 
             localMember = LocalPlatform.getInstance().realize(schema, "Data-1@Local", new SystemApplicationConsole());
             Eventually.assertThat(invoking(localMember).getClusterSize(), is(expectedSize + 1));
@@ -237,7 +253,7 @@ public class VagrantFunctionalTest
     public void shouldCreateVagrantPlatformFromFile() throws Exception
     {
         File vmRoot = temporaryFolder.newFolder();
-        URL url     = Resources.findFileOrResource("Single-VM-Vagrantfile.rb", null);
+        URL  url    = Resources.findFileOrResource("Single-VM-Vagrantfile.rb", null);
         VagrantFilePlatformSchema schema = new VagrantFilePlatformSchema("VM-3",
                                                                          vmRoot,
                                                                          url).setPublicHostName("192.168.56.210");
@@ -275,7 +291,7 @@ public class VagrantFunctionalTest
         InetAddress     address1        = vagrant1.getPrivateInetAddress();
         int             port1           = vagrant1.getPort();
         String          userName1       = vagrant1.getUserName();
-        Authentication auth1           = vagrant1.getAuthentication();
+        Authentication  auth1           = vagrant1.getAuthentication();
 
         VagrantPlatform vagrant2        = (VagrantPlatform) infrastructure.getPlatform("VM-2");
         InetAddress     address2        = vagrant2.getPrivateInetAddress();
@@ -283,7 +299,7 @@ public class VagrantFunctionalTest
         String          userName2       = vagrant2.getUserName();
         Authentication  auth2           = vagrant2.getAuthentication();
 
-        RemotePlatform remotePlatform1 = new RemotePlatform("Remote-1", address1, port1, userName1, auth1);
+        RemotePlatform  remotePlatform1 = new RemotePlatform("Remote-1", address1, port1, userName1, auth1);
         RemotePlatform  remotePlatform2 = new RemotePlatform("Remote-2", address2, port2, userName2, auth2);
 
         remotePlatform1.setPublicAddress(vagrant1.getPublicInetAddress());
@@ -343,6 +359,7 @@ public class VagrantFunctionalTest
         return builder.realize(infra, new SystemApplicationConsole());
     }
 
+
     /**
      * Close a {@link java.io.Closeable} and catch any exception
      *
@@ -364,5 +381,4 @@ public class VagrantFunctionalTest
             e.printStackTrace();
         }
     }
-
 }

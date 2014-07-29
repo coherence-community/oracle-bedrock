@@ -70,12 +70,13 @@ public class SimpleRemoteApplicationBuilderTest extends AbstractRemoteApplicatio
 
         builder.setStrictHostChecking(false).addDeploymentArtifact(new DeploymentArtifact(testFile));
 
-        SimpleApplication application = builder.realize(schema, "Java", new SystemApplicationConsole());
+        try (SimpleApplication application = builder.realize(schema, "Java", new SystemApplicationConsole()))
+        {
+            assertThat(application.waitFor(), is(0));
 
-        assertThat(application.waitFor(), is(0));
+            application.close();
 
-        application.close();
-
-        assertThat(application.exitValue(), is(0));
+            assertThat(application.exitValue(), is(0));
+        }
     }
 }

@@ -26,20 +26,28 @@
 package com.oracle.tools.runtime;
 
 import com.oracle.tools.predicate.Predicate;
+
 import org.junit.Test;
+
 import org.mockito.invocation.InvocationOnMock;
+
 import org.mockito.stubbing.Answer;
 
-import java.util.Properties;
-import java.util.concurrent.TimeUnit;
-
 import static org.hamcrest.CoreMatchers.is;
+
 import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInAnyOrder;
+
 import static org.junit.Assert.assertThat;
+
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
+
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+
+import java.util.Properties;
+
+import java.util.concurrent.TimeUnit;
 
 /**
  * Tests for the {@link InfrastructureAssemblyBuilder} class.
@@ -99,16 +107,31 @@ public class InfrastructureAssemblyBuilderTest
                                                                                                    console3);
 
         assertThat(result.size(), is(7));
-        assertThat(result, containsInAnyOrder(
-                new ApplicationStub("P-1", "A-1@P-1", console3, schema1),
-                new ApplicationStub("P-1", "A-2@P-1", console3, schema1),
-                new ApplicationStub("P-2", "A-1@P-2", console3, schema1),
-                new ApplicationStub("P-2", "A-2@P-2", console3, schema1),
-                new ApplicationStub("P-1", "C-1@P-1", console3, schema3),
-                new ApplicationStub("P-1", "C-2@P-1", console3, schema3),
-                new ApplicationStub("P-1", "C-3@P-1", console3, schema3)
-                                             ));
+        assertThat(result,
+                   containsInAnyOrder(new ApplicationStub("P-1",
+                                                          "A-1@P-1",
+                                                          console3,
+                                                          schema1), new ApplicationStub("P-1",
+                                                                                        "A-2@P-1",
+                                                                                        console3,
+                                                                                        schema1), new ApplicationStub("P-2",
+            "A-1@P-2",
+            console3,
+            schema1), new ApplicationStub("P-2",
+                                          "A-2@P-2",
+                                          console3,
+                                          schema1), new ApplicationStub("P-1",
+                                                                        "C-1@P-1",
+                                                                        console3,
+                                                                        schema3), new ApplicationStub("P-1",
+                                                                                                      "C-2@P-1",
+                                                                                                      console3,
+                                                                                                      schema3), new ApplicationStub("P-1",
+            "C-3@P-1",
+            console3,
+            schema3)));
     }
+
 
     @Test
     @SuppressWarnings("unchecked")
@@ -156,16 +179,31 @@ public class InfrastructureAssemblyBuilderTest
         SimpleAssembly<ApplicationStub> result = (SimpleAssembly<ApplicationStub>) builder.realize(infrastructure);
 
         assertThat(result.size(), is(7));
-        assertThat(result, containsInAnyOrder(
-                new ApplicationStub("P-1", "A-1@P-1", console1, schema1),
-                new ApplicationStub("P-1", "A-2@P-1", console1, schema1),
-                new ApplicationStub("P-2", "A-1@P-2", console1, schema1),
-                new ApplicationStub("P-2", "A-2@P-2", console1, schema1),
-                new ApplicationStub("P-1", "C-1@P-1", console2, schema3),
-                new ApplicationStub("P-1", "C-2@P-1", console2, schema3),
-                new ApplicationStub("P-1", "C-3@P-1", console2, schema3)
-                                             ));
+        assertThat(result,
+                   containsInAnyOrder(new ApplicationStub("P-1",
+                                                          "A-1@P-1",
+                                                          console1,
+                                                          schema1), new ApplicationStub("P-1",
+                                                                                        "A-2@P-1",
+                                                                                        console1,
+                                                                                        schema1), new ApplicationStub("P-2",
+            "A-1@P-2",
+            console1,
+            schema1), new ApplicationStub("P-2",
+                                          "A-2@P-2",
+                                          console1,
+                                          schema1), new ApplicationStub("P-1",
+                                                                        "C-1@P-1",
+                                                                        console2,
+                                                                        schema3), new ApplicationStub("P-1",
+                                                                                                      "C-2@P-1",
+                                                                                                      console2,
+                                                                                                      schema3), new ApplicationStub("P-1",
+            "C-3@P-1",
+            console2,
+            schema3)));
     }
+
 
     /**
      * A Mockito {@link Answer} class to provide a stub {@link Application}
@@ -176,10 +214,17 @@ public class InfrastructureAssemblyBuilderTest
         private String platformName;
 
 
+        /**
+         * Constructs ...
+         *
+         *
+         * @param platformName
+         */
         public ApplicationAnswer(String platformName)
         {
             this.platformName = platformName;
         }
+
 
         @Override
         public Application answer(InvocationOnMock invocationOnMock) throws Throwable
@@ -206,6 +251,15 @@ public class InfrastructureAssemblyBuilderTest
         private final ApplicationSchema  schema;
 
 
+        /**
+         * Constructs ...
+         *
+         *
+         * @param platform
+         * @param name
+         * @param console
+         * @param schema
+         */
         public ApplicationStub(String             platform,
                                String             name,
                                ApplicationConsole console,
@@ -291,11 +345,13 @@ public class InfrastructureAssemblyBuilderTest
             return null;
         }
 
+
         @Override
         public Platform getPlatform()
         {
             return null;
         }
+
 
         @Override
         public int destroy()
@@ -311,7 +367,7 @@ public class InfrastructureAssemblyBuilderTest
 
 
         @Override
-        public int waitFor() throws InterruptedException
+        public int waitFor()
         {
             return 0;
         }

@@ -68,9 +68,11 @@ public class ParentApplication
 
         builder.setOrphansPermitted(Boolean.getBoolean("orphan.children"));
 
-        ApplicationConsole    console     = new SystemApplicationConsole();
-        SimpleJavaApplication application = builder.realize(schema, "client", console);
+        ApplicationConsole console = new SystemApplicationConsole();
 
-        application.waitFor();
+        try (SimpleJavaApplication application = builder.realize(schema, "client", console))
+        {
+            application.waitFor();
+        }
     }
 }

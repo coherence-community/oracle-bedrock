@@ -235,7 +235,7 @@ public abstract class AbstractApplication<A extends AbstractApplication<A, P, R>
             // (if we don't wait the process may be left hanging/orphaned)
             runtime.getApplicationProcess().waitFor();
         }
-        catch (InterruptedException e)
+        catch (RuntimeException e)
         {
             // nothing to do here as we don't care
         }
@@ -303,7 +303,7 @@ public abstract class AbstractApplication<A extends AbstractApplication<A, P, R>
 
 
     @Override
-    public int waitFor() throws InterruptedException
+    public int waitFor()
     {
         return runtime.getApplicationProcess().waitFor();
     }

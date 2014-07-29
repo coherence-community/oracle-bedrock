@@ -381,7 +381,7 @@ public class ContainerBasedJavaApplicationBuilder<A extends JavaApplication> ext
 
 
         @Override
-        public int waitFor() throws InterruptedException
+        public int waitFor()
         {
             // when there's no application controller we don't have to wait to terminate
             // (as we've already been terminated)
@@ -398,7 +398,7 @@ public class ContainerBasedJavaApplicationBuilder<A extends JavaApplication> ext
                 }
                 catch (InterruptedException e)
                 {
-                    throw e;
+                    throw new RuntimeException("Interrupted while waiting for application to terminate", e);
                 }
                 catch (ExecutionException e)
                 {

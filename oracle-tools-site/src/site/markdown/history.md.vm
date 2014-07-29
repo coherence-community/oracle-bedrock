@@ -246,6 +246,9 @@ reverse chronological order.
     Application implementations to take an ApplicationRuntime parameter,
     replacing numerous constructor parameters with a single structure.
 
+*   [ORACLETOOLS-141](https://java.net/jira/browse/ORACLETOOLS-141): Removed
+    the requirement for Application.waitFor() method to throw an InterruptedException.
+
 <h4>oracle-tools-runtime-remote</h4>
 
 *   [ORACLETOOLS-91](https://java.net/jira/browse/ORACLETOOLS-91): Introduced
