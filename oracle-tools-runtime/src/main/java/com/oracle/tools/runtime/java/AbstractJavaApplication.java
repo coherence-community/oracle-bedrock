@@ -55,6 +55,7 @@ import net.sf.cglib.proxy.MethodProxy;
 
 import static com.oracle.tools.deferred.DeferredHelper.cached;
 import static com.oracle.tools.deferred.DeferredHelper.ensured;
+import static com.oracle.tools.deferred.DeferredHelper.within;
 
 import java.io.IOException;
 
@@ -221,9 +222,7 @@ public abstract class AbstractJavaApplication<A extends AbstractJavaApplication<
     public <T> T getMBeanProxy(ObjectName objectName,
                                Class<T>   proxyClass)
     {
-        return ensured(getDeferredMBeanProxy(objectName, proxyClass),
-                       getDefaultTimeout(),
-                       getDefaultTimeoutUnits()).get();
+        return ensured(getDeferredMBeanProxy(objectName, proxyClass), within(getDefaultTimeout())).get();
     }
 
 
@@ -237,7 +236,7 @@ public abstract class AbstractJavaApplication<A extends AbstractJavaApplication<
     @Override
     public MBeanInfo getMBeanInfo(ObjectName objectName)
     {
-        return ensured(getDeferredMBeanInfo(objectName), getDefaultTimeout(), getDefaultTimeoutUnits()).get();
+        return ensured(getDeferredMBeanInfo(objectName), within(getDefaultTimeout())).get();
     }
 
 
@@ -256,8 +255,7 @@ public abstract class AbstractJavaApplication<A extends AbstractJavaApplication<
                                    Class<T>   attributeClass)
     {
         return ensured(getDeferredMBeanAttribute(objectName, attributeName, attributeClass),
-                       getDefaultTimeout(),
-                       getDefaultTimeoutUnits()).get();
+                       within(getDefaultTimeout())).get();
     }
 
 
@@ -268,8 +266,7 @@ public abstract class AbstractJavaApplication<A extends AbstractJavaApplication<
         try
         {
             return ensured(getDeferredJMXConnector(),
-                           getDefaultTimeout(),
-                           getDefaultTimeoutUnits()).get().getMBeanServerConnection().queryMBeans(name, query);
+                           within(getDefaultTimeout())).get().getMBeanServerConnection().queryMBeans(name, query);
         }
         catch (IOException e)
         {

@@ -25,6 +25,8 @@
 
 package com.oracle.tools.runtime;
 
+import com.oracle.tools.options.Timeout;
+
 import com.oracle.tools.predicate.Predicate;
 
 import org.junit.Test;
@@ -388,16 +390,9 @@ public class InfrastructureAssemblyBuilderTest
 
 
         @Override
-        public long getDefaultTimeout()
+        public Timeout getDefaultTimeout()
         {
-            return 0;
-        }
-
-
-        @Override
-        public TimeUnit getDefaultTimeoutUnits()
-        {
-            return null;
+            return Timeout.autoDetect();
         }
     }
 }

@@ -30,6 +30,8 @@ import com.oracle.tools.runtime.SimpleApplicationSchema;
 
 import com.oracle.tools.runtime.console.SystemApplicationConsole;
 
+import com.oracle.tools.runtime.remote.options.CustomDeployment;
+
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -52,7 +54,7 @@ import java.net.URL;
 public class SimpleRemoteApplicationBuilderTest extends AbstractRemoteApplicationBuilderTest
 {
     /**
-     * Ensure that we can launch Java remotely.
+     * Ensure that we can launch deploy a test file.
      */
     @Test
     public void shouldLaunchSimpleApplicationRemotely() throws IOException, InterruptedException
@@ -68,9 +70,14 @@ public class SimpleRemoteApplicationBuilderTest extends AbstractRemoteApplicatio
         URL  testFileURL = Thread.currentThread().getContextClassLoader().getResource("test.txt");
         File testFile    = new File(testFileURL.getFile());
 
-        builder.setStrictHostChecking(false).addDeploymentArtifact(new DeploymentArtifact(testFile));
+        builder.setStrictHostChecking(false);
 
-        try (SimpleApplication application = builder.realize(schema, "Java", new SystemApplicationConsole()))
+        try (SimpleApplication application = builder.realize(schema,
+                                                             "Java",
+                                                             new SystemApplicationConsole(),
+                                                             null,
+                                                             CustomDeployment
+                                                                 .including(new DeploymentArtifact(testFile))))
         {
             assertThat(application.waitFor(), is(0));
 

@@ -121,7 +121,7 @@ public class JavaVirtualMachineTest
         when(jvm.getRuntimeMXBean()).thenReturn(runtimeMXBean);
         when(runtimeMXBean.getInputArguments()).thenReturn(args);
 
-        assertThat(jvm.shouldEnabledRemoteDebug(), is(false));
+        assertThat(jvm.shouldEnableRemoteDebugging(), is(false));
     }
 
     @Test
@@ -136,7 +136,7 @@ public class JavaVirtualMachineTest
         when(jvm.getRuntimeMXBean()).thenReturn(runtimeMXBean);
         when(runtimeMXBean.getInputArguments()).thenReturn(args);
 
-        assertThat(jvm.shouldEnabledRemoteDebug(), is(true));
+        assertThat(jvm.shouldEnableRemoteDebugging(), is(true));
     }
 
     @Test
@@ -154,7 +154,7 @@ public class JavaVirtualMachineTest
         jvm.setAutoDebugEnabled(false);
         try
         {
-            assertThat(jvm.shouldEnabledRemoteDebug(), is(false));
+            assertThat(jvm.shouldEnableRemoteDebugging(), is(false));
         }
         finally
         {

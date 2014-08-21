@@ -25,7 +25,10 @@
 
 package com.oracle.tools.runtime.coherence;
 
+import com.oracle.tools.runtime.Platform;
+
 import com.oracle.tools.runtime.java.ContainerBasedJavaApplicationBuilder;
+import com.oracle.tools.runtime.java.JavaVirtualMachine;
 
 /**
  * Functional Test for {@link CoherenceCacheServer}s using a {@link ContainerBasedJavaApplicationBuilder}.
@@ -35,12 +38,11 @@ import com.oracle.tools.runtime.java.ContainerBasedJavaApplicationBuilder;
  *
  * @author Brian Oliver
  */
-public class ContainerBasedCoherenceCacheServerTest
-    extends AbstractCoherenceCacheServerTest<ContainerBasedJavaApplicationBuilder<CoherenceCacheServer>>
+public class ContainerBasedCoherenceCacheServerTest extends AbstractCoherenceCacheServerTest
 {
     @Override
-    public ContainerBasedJavaApplicationBuilder<CoherenceCacheServer> newJavaApplicationBuilder()
+    public Platform getPlatform()
     {
-        return new ContainerBasedJavaApplicationBuilder<CoherenceCacheServer>();
+        return JavaVirtualMachine.getInstance();
     }
 }

@@ -3,7 +3,7 @@
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * The contents of this file are subject to the terms and conditions of
+ * The contents of this file are subject to the terms and conditions of 
  * the Common Development and Distribution License 1.0 (the "License").
  *
  * You may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import com.oracle.tools.runtime.Platform;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
+
 import java.net.InetAddress;
 
 /**
@@ -49,9 +50,10 @@ public class JavaVirtualMachine extends AbstractPlatform
     /**
      * The singleton instance of {@link JavaVirtualMachine}.
      */
-    private static JavaVirtualMachine INSTANCE = new JavaVirtualMachine();
+    private static JavaVirtualMachine INSTANCE           = new JavaVirtualMachine();
 
-    private boolean isAutoDebugEnabled = true;
+    private boolean                   isAutoDebugEnabled = true;
+
 
     /**
      * Construct a new {@link JavaVirtualMachine}.
@@ -63,15 +65,14 @@ public class JavaVirtualMachine extends AbstractPlatform
         super("JVM");
     }
 
+
     @Override
     public InetAddress getPublicInetAddress()
     {
-        return  LocalPlatform.getInstance().getPrivateInetAddress();
+        return LocalPlatform.getInstance().getPrivateInetAddress();
     }
 
-    /**
-     * {@inheritDoc}
-     */
+
     @Override
     @SuppressWarnings("unchecked")
     public <A extends Application, B extends ApplicationBuilder<A>> B getApplicationBuilder(Class<A> applicationClass)
@@ -83,6 +84,7 @@ public class JavaVirtualMachine extends AbstractPlatform
 
         return null;
     }
+
 
     /**
      * Determine whether the current JVM is running with a debugger attached.
@@ -101,9 +103,11 @@ public class JavaVirtualMachine extends AbstractPlatform
         catch (Throwable t)
         {
             System.err.println("Error trying to determine debug status - " + t.getMessage());
+
             return false;
         }
     }
+
 
     /**
      * Obtain the managed bean for the runtime system of the Java virtual machine.
@@ -114,6 +118,7 @@ public class JavaVirtualMachine extends AbstractPlatform
     {
         return ManagementFactory.getRuntimeMXBean();
     }
+
 
     /**
      * Set whether {@link JavaApplication}s started from Oracle Tools will automatically
@@ -129,6 +134,7 @@ public class JavaVirtualMachine extends AbstractPlatform
         isAutoDebugEnabled = enabled;
     }
 
+
     /**
      * Obtain the flag indicating whether {@link JavaApplication}s started from Oracle Tools
      * should automatically be started with remote debugging enabled if the controlling JVM
@@ -143,6 +149,7 @@ public class JavaVirtualMachine extends AbstractPlatform
         return isAutoDebugEnabled;
     }
 
+
     /**
      * Returns true if {@link JavaApplication}s started from Oracle Tools
      * should run with remote debugging enabled.
@@ -150,10 +157,11 @@ public class JavaVirtualMachine extends AbstractPlatform
      * @return true if {@link JavaApplication}s started from Oracle Tools
      *         should run with remote debugging enabled.
      */
-    public boolean shouldEnabledRemoteDebug()
+    public boolean shouldEnableRemoteDebugging()
     {
         return getAutoDebugEnabled() && isRunningWithDebugger();
     }
+
 
     /**
      * Obtain the singleton instance of the {@link JavaVirtualMachine}.

@@ -25,11 +25,11 @@
 
 package com.oracle.tools.runtime;
 
+import com.oracle.tools.options.Timeout;
+
 import java.io.Closeable;
 
 import java.util.Properties;
-
-import java.util.concurrent.TimeUnit;
 
 /**
  * A platform and location independent mechanism to represent, access and
@@ -147,17 +147,9 @@ public interface Application extends Closeable
 
     /**
      * Obtains the default duration to used by the {@link Application}
-     * for timeout values that have not been specified.
+     * for timeouts.
      *
-     * @return the timeout duration (measured in {@link #getDefaultTimeoutUnits()})
+     * @return a {@link Timeout}
      */
-    public long getDefaultTimeout();
-
-
-    /**
-     * Obtains the default duration timeout {@link TimeUnit}.
-     *
-     * @return the {@link TimeUnit} for default {@link Application} timeouts
-     */
-    public TimeUnit getDefaultTimeoutUnits();
+    public Timeout getDefaultTimeout();
 }

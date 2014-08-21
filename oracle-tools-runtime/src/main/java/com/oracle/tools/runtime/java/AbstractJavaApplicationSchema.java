@@ -29,15 +29,11 @@ import com.oracle.tools.runtime.AbstractApplicationSchema;
 import com.oracle.tools.runtime.LocalPlatform;
 import com.oracle.tools.runtime.Platform;
 import com.oracle.tools.runtime.PropertiesBuilder;
+
 import com.oracle.tools.runtime.network.AvailablePortIterator;
 import com.oracle.tools.runtime.network.Constants;
-import com.oracle.tools.util.Capture;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Properties;
+import com.oracle.tools.util.Capture;
 
 import static com.oracle.tools.runtime.java.JavaApplication.JAVA_AWT_HEADLESS;
 import static com.oracle.tools.runtime.java.JavaApplication.JAVA_NET_PREFER_IPV4_STACK;
@@ -46,6 +42,12 @@ import static com.oracle.tools.runtime.java.JavaApplication.SUN_MANAGEMENT_JMXRE
 import static com.oracle.tools.runtime.java.JavaApplication.SUN_MANAGEMENT_JMXREMOTE_AUTHENTICATE;
 import static com.oracle.tools.runtime.java.JavaApplication.SUN_MANAGEMENT_JMXREMOTE_PORT;
 import static com.oracle.tools.runtime.java.JavaApplication.SUN_MANAGEMENT_JMXREMOTE_SSL;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Properties;
 
 /**
  * An {@link AbstractJavaApplicationSchema} is a base implementation of a {@link JavaApplicationSchema}.
@@ -80,42 +82,11 @@ public abstract class AbstractJavaApplicationSchema<A extends JavaApplication,
     private PropertiesBuilder systemPropertiesBuilder;
 
     /**
-     * The value of the JAVA_HOME environment variable
-     * (or <code>null</code> for the platform default)
+     * Are {@link JavaApplication}s created using this {@link JavaApplicationSchema}
+     * orphanable?
      */
-    private String javaHome;
+    private boolean isOrphanable;
 
-    /**
-     * Should processes be started in remote debug mode?
-     * <p>
-     * The default is <code>false</code>.
-     */
-    private boolean isRemoteDebuggingEnabled;
-
-    /**
-     * Should remote debugging processes be started in suspended mode?
-     * <p>
-     * The default is <code>false</code>.
-     */
-    private boolean isRemoteStartSuspended;
-
-    /**
-     * The remote debug port that will be used by {@link JavaApplication}s realized from
-     * this schema.
-     */
-    private Iterator<Integer> remoteDebugPorts;
-
-    /**
-     * A single value captured from the {@link #remoteDebugPorts} iterator
-     * which is used for the debug port if the debugging mode is
-     * {@link RemoteDebuggingMode#ATTACH_TO_DEBUGGER}
-     */
-    private Capture<Integer>  capturedRemoteDebuggingPort;
-
-    /**
-     * The mode that the process will run in if remote debugging is enabled.
-     */
-    private RemoteDebuggingMode remoteDebuggingMode = RemoteDebuggingMode.LISTEN_FOR_DEBUGGER;
 
     /**
      * Constructs an {@link AbstractJavaApplicationSchema} based on another
@@ -131,7 +102,9 @@ public abstract class AbstractJavaApplicationSchema<A extends JavaApplication,
         this.classPath               = new ClassPath(schema.getClassPath());
         this.jvmOptions              = new ArrayList<String>(schema.getJvmOptions());
         this.systemPropertiesBuilder = new PropertiesBuilder(schema.getSystemPropertiesBuilder());
-        this.javaHome                = schema.getJavaHome();
+        this.isOrphanable            = schema.isOrphanable();
+
+        configureDefaults();
     }
 
 
@@ -178,16 +151,9 @@ public abstract class AbstractJavaApplicationSchema<A extends JavaApplication,
         this.classPath               = new ClassPath(classPath);
         this.jvmOptions              = new ArrayList<String>();
         this.systemPropertiesBuilder = new PropertiesBuilder();
-        this.javaHome                = null;
 
-        // Default debug mode depending on whether the current process is running
-        // with an attached debugger
-        isRemoteDebuggingEnabled    = JavaVirtualMachine.getInstance().shouldEnabledRemoteDebug();
-        // don't suspend when in remote debug mode
-        isRemoteStartSuspended      = false;
-
-        remoteDebugPorts            = LocalPlatform.getInstance().getAvailablePorts();
-        capturedRemoteDebuggingPort = new Capture<Integer>(remoteDebugPorts);
+        // by default java applications are not orphanable
+        this.isOrphanable = false;
 
         configureDefaults();
     }
@@ -233,25 +199,6 @@ public abstract class AbstractJavaApplicationSchema<A extends JavaApplication,
         this.applicationClassName = className;
 
         return (S) this;
-    }
-
-
-    @Override
-    public String getJavaHome()
-    {
-        return javaHome;
-    }
-
-
-    /**
-     * Sets the value to use for JAVA_HOME or <code>null</code> to
-     * use the underlying platform setting.
-     *
-     * @param javaHome  the value of JAVA_HOME
-     */
-    public void setJavaHome(String javaHome)
-    {
-        this.javaHome = javaHome;
     }
 
 
@@ -657,93 +604,19 @@ public abstract class AbstractJavaApplicationSchema<A extends JavaApplication,
         return value instanceof Boolean && ((Boolean) value);
     }
 
-    @Override
-    public boolean isRemoteDebuggingEnabled()
-    {
-        return isRemoteDebuggingEnabled;
-    }
-
 
     @Override
-    @SuppressWarnings("unchecked")
-    public S setRemoteDebuggingEnabled(boolean remoteDebuggingEnabled)
+    public S setOrphanable(boolean orphanable)
     {
-        this.isRemoteDebuggingEnabled = remoteDebuggingEnabled;
-
-        return (S) this;
-    }
-
-    @Override
-    public boolean isRemoteDebuggingStartSuspended()
-    {
-        return isRemoteStartSuspended;
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public S setRemoteDebuggingStartSuspended(boolean startSuspended)
-    {
-        this.isRemoteStartSuspended = startSuspended;
+        this.isOrphanable = orphanable;
 
         return (S) this;
     }
 
 
     @Override
-    public int getRemoteDebugListenPort()
+    public boolean isOrphanable()
     {
-        return remoteDebugPorts != null && remoteDebugPorts.hasNext() ? remoteDebugPorts.next() : 0;
-    }
-
-
-    @Override
-    public int getRemoteDebugAttachPort()
-    {
-        return capturedRemoteDebuggingPort.get();
-    }
-
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public S setRemoteDebugPort(int remoteDebugPort)
-    {
-        setRemoteDebugPorts(Collections.singleton(remoteDebugPort).iterator());
-        return (S) this;
-    }
-
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public S setRemoteDebugPorts(Iterator<Integer> remoteDebugPorts)
-    {
-        if (remoteDebugPorts == null)
-        {
-            remoteDebugPorts = LocalPlatform.getInstance().getAvailablePorts();
-        }
-
-        this.remoteDebugPorts = remoteDebugPorts;
-        this.capturedRemoteDebuggingPort = new Capture<Integer>(remoteDebugPorts);
-
-        return (S) this;
-    }
-
-    @Override
-    public RemoteDebuggingMode getRemoteDebuggingMode()
-    {
-        return remoteDebuggingMode;
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public S setRemoteDebuggingMode(RemoteDebuggingMode remoteDebuggingMode)
-    {
-        if (remoteDebuggingMode == null)
-        {
-            remoteDebuggingMode = RemoteDebuggingMode.LISTEN_FOR_DEBUGGER;
-        }
-
-        this.remoteDebuggingMode = remoteDebuggingMode;
-
-        return (S) this;
+        return isOrphanable;
     }
 }

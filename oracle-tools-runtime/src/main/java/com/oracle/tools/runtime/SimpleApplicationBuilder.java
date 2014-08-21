@@ -25,6 +25,11 @@
 
 package com.oracle.tools.runtime;
 
+import com.oracle.tools.Option;
+import com.oracle.tools.Options;
+
+import com.oracle.tools.runtime.options.EnvironmentVariables;
+
 import java.io.File;
 import java.io.IOException;
 
@@ -44,135 +49,11 @@ import java.util.Properties;
 public class SimpleApplicationBuilder extends AbstractApplicationBuilder<SimpleApplication>
 {
     /**
-     * Should environment variables be inherited from the current executing process
-     * as the basis for {@link SimpleApplication}s produced by this {@link SimpleApplicationBuilder}.
-     */
-    private boolean isEnvironmentInherited;
-
-    /**
-     * The {@link PropertiesBuilder} defining custom environment variables to
-     * establish when realizing a {@link SimpleApplication}.
-     */
-    private PropertiesBuilder environmentVariablesBuilder;
-
-
-    /**
      * Constructs a {@link SimpleApplicationBuilder}.
      */
     public SimpleApplicationBuilder()
     {
         super();
-
-        // by default there are no custom environment variables
-        environmentVariablesBuilder = new PropertiesBuilder();
-
-        // by default we always inherit local environment variables
-        isEnvironmentInherited = true;
-    }
-
-
-    /**
-     * Obtains the {@link PropertiesBuilder} defining custom
-     * {@link SimpleApplication}-specific operating system environment
-     * variables to be established when realizing an {@link SimpleApplication}.
-     *
-     * @return {@link PropertiesBuilder}
-     */
-    public PropertiesBuilder getEnvironmentVariablesBuilder()
-    {
-        return environmentVariablesBuilder;
-    }
-
-
-    /**
-     * Sets whether the environment variables from the currently executing
-     * process should be inherited and used as the basis for environment variables
-     * when realizing an {@link SimpleApplication}.
-     *
-     * @param isEnvironmentInherited  <code>true</code> if the {@link SimpleApplicationBuilder}
-     *                                should inherit the environment variables from the
-     *                                currently executing process or <code>false</code>
-     *                                if a clean/empty environment should be used
-     *                                (containing only those custom variables defined by this
-     *                                {@link SimpleApplicationBuilder} and an
-     *                                {@link SimpleApplication})
-     *
-     * @return  the {@link ApplicationSchema} (so that we can perform method chaining)
-     */
-    public SimpleApplicationBuilder setEnvironmentInherited(boolean isEnvironmentInherited)
-    {
-        this.isEnvironmentInherited = isEnvironmentInherited;
-
-        return this;
-    }
-
-
-    /**
-     * Determines if the environment variables of the currently executing
-     * process will be inherited and used as a basis for environment variables
-     * when realizing a {@link SimpleApplication}.
-     *
-     * @return  <code>true</code> if environment variables are inherited from
-     *          the current process when realizing a {@link SimpleApplication} or
-     *          <code>false</code> if a clean environment is used instead
-     */
-    public boolean isEnvironmentInherited()
-    {
-        return isEnvironmentInherited;
-    }
-
-
-    /**
-     * Defines a custom environment variable for {@link SimpleApplication}s
-     * realized by this {@link SimpleApplicationBuilder} based on values
-     * returned by the {@link Iterator}.
-     *
-     * @param name      the name of the environment variable
-     * @param iterator  an {@link Iterator} providing values for the environment
-     *                  variable
-     *
-     * @return the {@link ApplicationSchema} (so that we can perform method chaining)
-     */
-    public SimpleApplicationBuilder setEnvironmentVariable(String      name,
-                                                           Iterator<?> iterator)
-    {
-        environmentVariablesBuilder.setProperty(name, iterator);
-
-        return this;
-    }
-
-
-    /**
-     * Defines a custom environment variable for {@link SimpleApplication}s
-     * realized by this {@link SimpleApplicationBuilder}.
-     *
-     * @param name   the name of the environment variable
-     * @param value  the value of the environment variable
-     *
-     * @return the {@link ApplicationSchema} (so that we can perform method chaining)
-     */
-    public SimpleApplicationBuilder setEnvironmentVariable(String name,
-                                                           Object value)
-    {
-        environmentVariablesBuilder.setProperty(name, value);
-
-        return this;
-    }
-
-
-    /**
-     * Sets if diagnostic information should be logged/output for {@link Application}s
-     * produced by this builder.
-     *
-     * @param isDiagnosticsEnabled  should diagnostics be output
-     *
-     * @return  the builder (so that we can perform method chaining)
-     */
-    public SimpleApplicationBuilder setDiagnosticsEnabled(boolean isDiagnosticsEnabled)
-    {
-        m_isDiagnosticsEnabled = isDiagnosticsEnabled;
-
-        return this;
     }
 
 
@@ -180,9 +61,12 @@ public class SimpleApplicationBuilder extends AbstractApplicationBuilder<SimpleA
     public <T extends SimpleApplication, S extends ApplicationSchema<T>> T realize(S                  applicationSchema,
                                                                                    String             applicationName,
                                                                                    ApplicationConsole console,
-                                                                                   Platform           platform)
+                                                                                   Platform           platform,
+                                                                                   Option...          applicationOptions)
     {
-        ApplicationSchema<T> schema = applicationSchema;
+        Options              options = new Options(applicationOptions);
+
+        ApplicationSchema<T> schema  = applicationSchema;
 
         // ---- establish the underlying ProcessBuilder -----
 
@@ -202,26 +86,29 @@ public class SimpleApplicationBuilder extends AbstractApplicationBuilder<SimpleA
 
         // ----- establish environment variables -----
 
+        EnvironmentVariables environmentVariables = options.get(EnvironmentVariables.class,
+                                                                EnvironmentVariables.inherited());
+
         // when not inheriting we need to clear the defined environment
-        if (!isEnvironmentInherited() &&!schema.isEnvironmentInherited())
+        if (!environmentVariables.areInherited() &&!schema.isEnvironmentInherited())
         {
             processBuilder.environment().clear();
         }
 
         // add the environment variables defined by the schema
-        Properties environmentVariables = schema.getEnvironmentVariablesBuilder().realize();
+        Properties variables = schema.getEnvironmentVariablesBuilder().realize();
 
-        for (String variableName : environmentVariables.stringPropertyNames())
+        for (String variableName : variables.stringPropertyNames())
         {
-            processBuilder.environment().put(variableName, environmentVariables.getProperty(variableName));
+            processBuilder.environment().put(variableName, variables.getProperty(variableName));
         }
 
-        // add the environment variables defined by the builder
-        environmentVariables = getEnvironmentVariablesBuilder().realize();
+        // realize and add the optionally defined environment variables
+        variables = environmentVariables.getBuilder().realize();
 
-        for (String variableName : environmentVariables.stringPropertyNames())
+        for (String variableName : variables.stringPropertyNames())
         {
-            processBuilder.environment().put(variableName, environmentVariables.getProperty(variableName));
+            processBuilder.environment().put(variableName, variables.getProperty(variableName));
         }
 
         // ----- establish the application command line to execute -----
@@ -254,12 +141,10 @@ public class SimpleApplicationBuilder extends AbstractApplicationBuilder<SimpleA
         // construct an ApplicationEnvironment for the SimpleApplication
         SimpleApplicationRuntime environment = new SimpleApplicationRuntime(applicationName,
                                                                             platform,
+                                                                            options,
                                                                             new LocalApplicationProcess(process),
                                                                             console,
-                                                                            environmentVariables,
-                                                                            schema.isDiagnosticsEnabled(),
-                                                                            schema.getDefaultTimeout(),
-                                                                            schema.getDefaultTimeoutUnits());
+                                                                            variables);
 
         // create the SimpleApplication
         final T application = (T) new SimpleApplication(environment,

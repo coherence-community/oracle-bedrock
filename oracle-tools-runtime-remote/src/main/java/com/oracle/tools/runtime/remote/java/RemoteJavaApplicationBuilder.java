@@ -25,6 +25,8 @@
 
 package com.oracle.tools.runtime.remote.java;
 
+import com.oracle.tools.Options;
+
 import com.oracle.tools.runtime.ApplicationConsole;
 import com.oracle.tools.runtime.ApplicationSchema;
 import com.oracle.tools.runtime.Platform;
@@ -66,37 +68,6 @@ public class RemoteJavaApplicationBuilder<A extends JavaApplication>
     implements JavaApplicationBuilder<A>
 {
     /**
-     * The path for the JAVA_HOME.
-     * <p>
-     * This is <code>null</code> if the JAVA_HOME of the {@link JavaApplicationSchema}
-     * should be used.
-     */
-    private String remoteJavaHome;
-
-    /**
-     * Are remote {@link JavaApplication}s produced by this builder allowed
-     * to become orphans (when their parent application process is destroyed/killed)?
-     * <p>
-     * The default is <code>false</code>.
-     */
-    private boolean areOrphansPermitted;
-
-    /**
-     * Should the builder deploy the {@link JavaApplication} artifacts?
-     * (including the specified {@link ClassPath} to the remote server)
-     * <p>
-     * The default is <code>true</code>
-     */
-    private boolean isAutoDeployEnabled;
-
-    /**
-     * The {@link HashSet} of filenames that must not be deployed
-     * (if auto-deploy is enabled).
-     */
-    private HashSet<String> doNotDeployFileNames;
-
-
-    /**
      * Constructs an {@link RemoteJavaApplicationBuilder} (using the default port).
      *
      * @param hostName       the remote host name
@@ -125,139 +96,6 @@ public class RemoteJavaApplicationBuilder<A extends JavaApplication>
                                         Authentication authentication)
     {
         super(hostName, port, userName, authentication);
-
-        // by default use the JAVA_HOME of the {@link JavaApplicationSchema}
-        remoteJavaHome = null;
-
-        // by default orphan remote processes are not permitted
-        areOrphansPermitted = false;
-
-        // by default the builder deploys the application classpath artifacts
-        isAutoDeployEnabled = true;
-
-        // set the default files not to deploy
-        doNotDeployFileNames = new HashSet<String>();
-
-        doNotDeployFileNames.add("apple_provider.jar");
-        doNotDeployFileNames.add("classes.jar");
-        doNotDeployFileNames.add("charsets.jar");
-        doNotDeployFileNames.add("deploy.jar");
-        doNotDeployFileNames.add("dt.jar");
-        doNotDeployFileNames.add("dnsns.jar");
-        doNotDeployFileNames.add("idea_rt.jar");
-        doNotDeployFileNames.add("localedata.jar");
-        doNotDeployFileNames.add("jsse.jar");
-        doNotDeployFileNames.add("jce.jar");
-        doNotDeployFileNames.add("javaws.jar");
-        doNotDeployFileNames.add("jconsole.jar");
-        doNotDeployFileNames.add("management-agent.jar");
-        doNotDeployFileNames.add("plugin.jar");
-        doNotDeployFileNames.add("sa-jdi.jar");
-        doNotDeployFileNames.add("sunjce_provider.jar");
-        doNotDeployFileNames.add("sunpkcs11.jar");
-        doNotDeployFileNames.add("ui.jar");
-    }
-
-
-    /**
-     * Sets the remote JAVA_HOME to be used when realizing the {@link JavaApplication}.
-     *
-     * @param remoteJavaHome  the value for the remote JAVA_HOME environment variable
-     *                        or <code>null</code> if {@link JavaApplicationSchema}
-     *                        value should be used instead
-     *
-     * @return  the builder (so that we can perform method chaining)
-     */
-    public RemoteJavaApplicationBuilder<A> setJavaHome(String remoteJavaHome)
-    {
-        this.remoteJavaHome = remoteJavaHome;
-
-        return this;
-    }
-
-
-    /**
-     * Sets if {@link JavaApplication}s produced by this {@link JavaApplicationBuilder}
-     * can be orphaned (left running without their parent running).  The default
-     * is <code>false</code>.
-     *
-     * @param areOrphansPermitted  <code>true</code> to allow for orphaned applications
-     *
-     * @return  the {@link RemoteJavaApplicationBuilder} to allow fluent-method calls
-     */
-    public RemoteJavaApplicationBuilder<A> setOrphansPermitted(boolean areOrphansPermitted)
-    {
-        this.areOrphansPermitted = areOrphansPermitted;
-
-        return this;
-    }
-
-
-    /**
-     * Determines if {@link JavaApplication}s produced by this {@link JavaApplicationBuilder}
-     * are allowed to be orphaned (to keep running if their parent is not running).
-     *
-     * @return  <code>true</code> if applications can be orphaned, <code>false</code> otherwise
-     */
-    public boolean areOrphansPermitted()
-    {
-        return areOrphansPermitted;
-    }
-
-
-    /**
-     * Sets if {@link JavaApplication}s produced by this {@link RemoteJavaApplicationBuilder}
-     * are automatically deployed onto the remote server prior to starting.
-     *
-     * @param isAutoDeployEnabled  <code>true</code> to have the {@link RemoteJavaApplicationBuilder}
-     *                             deploy the {@link JavaApplication}
-     *
-     * @return  the {@link RemoteJavaApplicationBuilder} to allow fluent-method calls
-     */
-    public RemoteJavaApplicationBuilder<A> setAutoDeployEnabled(boolean isAutoDeployEnabled)
-    {
-        this.isAutoDeployEnabled = isAutoDeployEnabled;
-
-        return this;
-    }
-
-
-    /**
-     * Determines if the {@link RemoteJavaApplicationBuilder} will automatically deploy
-     * an {@link JavaApplication} on the remote server prior to executing it as part of
-     * the realization process.
-     *
-     * @return  <code>true</code> if {@link JavaApplication}s will be deployed
-     */
-    public boolean isAutoDeployEnabled()
-    {
-        return isAutoDeployEnabled;
-    }
-
-
-    /**
-     * Adds a file to the set of files that should not be deployed (when autodeploy is enabled)
-     *
-     * @param fileName  the filename not to deploy
-     *
-     * @return  the {@link RemoteJavaApplicationBuilder} to allow fluent-method calls
-     */
-    public RemoteJavaApplicationBuilder<A> addDoNotDeployFileName(String fileName)
-    {
-        doNotDeployFileNames.add(fileName);
-
-        return this;
-    }
-
-
-    /**
-     * Obtains an {@link Iterable} over the filenames that must not be deployed.
-     *
-     * @return  the files not to be deployed
-     */
-    public Iterable<String> getDoNoDeployFileNames()
-    {
-        return doNotDeployFileNames;
     }
 
 
@@ -265,7 +103,8 @@ public class RemoteJavaApplicationBuilder<A extends JavaApplication>
     @SuppressWarnings("unchecked")
     protected <T extends A,
         S extends ApplicationSchema<T>> RemoteJavaApplicationEnvironment<A> getRemoteApplicationEnvironment(S applicationSchema,
-        Platform                                                                                              platform)
+        Platform                                                                                              platform,
+        Options                                                                                               options)
     {
         JavaApplicationSchema<A> schema = (JavaApplicationSchema) applicationSchema;
 
@@ -274,11 +113,8 @@ public class RemoteJavaApplicationBuilder<A extends JavaApplication>
             return new RemoteJavaApplicationEnvironment(schema,
                                                         remoteFileSeparatorChar,
                                                         remotePathSeparatorChar,
-                                                        areOrphansPermitted,
-                                                        isAutoDeployEnabled,
-                                                        doNotDeployFileNames,
-                                                        remoteJavaHome,
-                                                        platform);
+                                                        platform,
+                                                        options);
         }
         catch (IOException e)
         {
@@ -289,6 +125,7 @@ public class RemoteJavaApplicationBuilder<A extends JavaApplication>
 
     @Override
     protected <T extends A, S extends ApplicationSchema<T>> T createApplication(Platform                            platform,
+                                                                                Options                             options,
                                                                                 S                                   schema,
                                                                                 RemoteJavaApplicationEnvironment<A> environment,
                                                                                 String                              applicationName,
@@ -305,6 +142,7 @@ public class RemoteJavaApplicationBuilder<A extends JavaApplication>
         return javaSchema.createJavaApplication(remoteJavaProcess,
                                                 applicationName,
                                                 platform,
+                                                options,
                                                 console,
                                                 environment.getRemoteEnvironmentVariables(),
                                                 environment.getRemoteSystemProperties(),

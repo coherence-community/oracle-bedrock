@@ -25,10 +25,14 @@
 
 package com.oracle.tools.runtime.remote;
 
+import com.oracle.tools.Options;
+
 import com.oracle.tools.runtime.Application;
 import com.oracle.tools.runtime.ApplicationSchema;
 import com.oracle.tools.runtime.Platform;
 import com.oracle.tools.runtime.PropertiesBuilder;
+
+import com.oracle.tools.runtime.java.JavaApplication;
 
 import java.util.Collections;
 import java.util.Properties;
@@ -58,15 +62,25 @@ public abstract class AbstractRemoteApplicationEnvironment<A extends Application
     protected Platform platform;
 
     /**
+     * The {@link Options} for the remote {@link JavaApplication}.
+     */
+    protected Options options;
+
+
+    /**
      * Constructs an {@link AbstractRemoteApplicationEnvironment}.
      *
-     * @param schema    the {@link com.oracle.tools.runtime.ApplicationSchema}
-     * @param platform  the {@link Platform} representing the remoteO/S
+     * @param schema           the {@link com.oracle.tools.runtime.ApplicationSchema}
+     * @param platform         the {@link Platform} representing the remote O/S
+     * @param options  the {@link Options} for the remote O/S
      */
-    protected AbstractRemoteApplicationEnvironment(S schema, Platform platform)
+    protected AbstractRemoteApplicationEnvironment(S        schema,
+                                                   Platform platform,
+                                                   Options  options)
     {
         this.schema   = schema;
         this.platform = platform;
+        this.options  = options;
     }
 
 
@@ -74,13 +88,6 @@ public abstract class AbstractRemoteApplicationEnvironment<A extends Application
     public String getRemoteCommandToExecute()
     {
         return schema.getExecutableName();
-    }
-
-
-    @Override
-    public Iterable<DeploymentArtifact> getRemoteDeploymentArtifacts()
-    {
-        return Collections.EMPTY_LIST;
     }
 
 

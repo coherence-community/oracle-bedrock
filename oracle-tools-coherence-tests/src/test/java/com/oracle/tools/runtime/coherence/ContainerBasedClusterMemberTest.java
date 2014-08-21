@@ -25,8 +25,11 @@
 
 package com.oracle.tools.runtime.coherence;
 
+import com.oracle.tools.runtime.Platform;
+
 import com.oracle.tools.runtime.java.ContainerBasedJavaApplicationBuilder;
 import com.oracle.tools.runtime.java.JavaApplicationBuilder;
+import com.oracle.tools.runtime.java.JavaVirtualMachine;
 
 /**
  * Functional Test for {@link ClusterMember} using a {@link ContainerBasedJavaApplicationBuilder}.
@@ -37,12 +40,11 @@ import com.oracle.tools.runtime.java.JavaApplicationBuilder;
  * @author Brian Oliver
  */
 @Deprecated
-public class ContainerBasedClusterMemberTest
-    extends AbstractClusterMemberTest<ContainerBasedJavaApplicationBuilder<ClusterMember>>
+public class ContainerBasedClusterMemberTest extends AbstractClusterMemberTest
 {
     @Override
-    public ContainerBasedJavaApplicationBuilder<ClusterMember> newJavaApplicationBuilder()
+    public Platform getPlatform()
     {
-        return new ContainerBasedJavaApplicationBuilder<ClusterMember>();
+        return JavaVirtualMachine.getInstance();
     }
 }

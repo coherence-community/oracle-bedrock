@@ -25,6 +25,8 @@
 
 package com.oracle.tools.runtime.java;
 
+import com.oracle.tools.Options;
+
 import com.oracle.tools.runtime.ApplicationConsole;
 import com.oracle.tools.runtime.Platform;
 
@@ -95,6 +97,7 @@ public class SimpleJavaApplicationSchema
     public SimpleJavaApplication createJavaApplication(JavaApplicationProcess process,
                                                        String                 displayName,
                                                        Platform               platform,
+                                                       Options                options,
                                                        ApplicationConsole     console,
                                                        Properties             environmentVariables,
                                                        Properties             systemProperties,
@@ -102,12 +105,10 @@ public class SimpleJavaApplicationSchema
     {
         SimpleJavaApplicationRuntime environment = new SimpleJavaApplicationRuntime(displayName,
                                                                                     platform,
+                                                                                    options,
                                                                                     process,
                                                                                     console,
                                                                                     environmentVariables,
-                                                                                    this.isDiagnosticsEnabled(),
-                                                                                    this.getDefaultTimeout(),
-                                                                                    this.getDefaultTimeoutUnits(),
                                                                                     systemProperties,
                                                                                     remoteDebuggingPort);
 

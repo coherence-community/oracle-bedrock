@@ -1,5 +1,5 @@
 /*
- * File: RemoteApplicationEnvironment.java
+ * File: JavaHome.java
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
@@ -23,46 +23,59 @@
  * "Portions Copyright [year] [name of copyright owner]"
  */
 
-package com.oracle.tools.runtime.remote;
+package com.oracle.tools.runtime.java.options;
 
-import com.oracle.tools.runtime.Application;
+import com.oracle.tools.Option;
 
-import java.io.Closeable;
-
-import java.util.Properties;
+import com.oracle.tools.runtime.Platform;
 
 /**
- * Defines environmental requirements for a remote {@link Application}.
- * <p>
- * This interface is used by {@link AbstractRemoteApplicationBuilder}s to
- * provide information during the {@link Application} realization process.
+ * An {@link Option} to define the location of the Java Home.
  * <p>
  * Copyright (c) 2014. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Brian Oliver
  */
-public interface RemoteApplicationEnvironment extends Closeable
+public class JavaHome implements Option
 {
     /**
-     * Obtains the remote command to execute to launch the {@link Application}.
-     *
-     * @return  the remote command
+     * The {@link Platform} specific location of the Java Home.
      */
-    public String getRemoteCommandToExecute();
+    private String javaHome;
 
 
     /**
-     * Obtains the environment variables to use for the remote {@link Application}.
+     * Privately constructs a {@link JavaHome}
      *
-     * @return  a {@link Properties} representing the required remote environment variables
+     * @param javaHome  the {@link Platform} specific Java Home
      */
-    public Properties getRemoteEnvironmentVariables();
+    private JavaHome(String javaHome)
+    {
+        this.javaHome = javaHome;
+    }
 
 
     /**
-     * Closes the {@link RemoteApplicationEnvironment}.
+     * Obtains the {@link Platform} specific Java Home.
+     *
+     * @return  the Java Home
      */
-    @Override
-    public void close();
+    public String get()
+    {
+        return javaHome;
+    }
+
+
+    /**
+     * Constructs a {@link JavaHome} given a specified string.
+     *
+     * @param javaHome  the {@link Platform} specific Java Home
+     *
+     * @return  the {@link JavaHome}
+     */
+    public static JavaHome of(String javaHome)
+    {
+        return new JavaHome(javaHome);
+    }
 }

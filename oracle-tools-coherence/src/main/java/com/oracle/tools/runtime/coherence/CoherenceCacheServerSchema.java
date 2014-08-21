@@ -25,6 +25,8 @@
 
 package com.oracle.tools.runtime.coherence;
 
+import com.oracle.tools.Options;
+
 import com.oracle.tools.runtime.ApplicationConsole;
 import com.oracle.tools.runtime.Platform;
 
@@ -141,6 +143,7 @@ public class CoherenceCacheServerSchema
     public CoherenceCacheServer createJavaApplication(JavaApplicationProcess process,
                                                       String                 name,
                                                       Platform               platform,
+                                                      Options                options,
                                                       ApplicationConsole     console,
                                                       Properties             environmentVariables,
                                                       Properties             systemProperties,
@@ -148,12 +151,10 @@ public class CoherenceCacheServerSchema
     {
         SimpleJavaApplicationRuntime environment = new SimpleJavaApplicationRuntime(name,
                                                                                     platform,
+                                                                                    options,
                                                                                     process,
                                                                                     console,
                                                                                     environmentVariables,
-                                                                                    isDiagnosticsEnabled(),
-                                                                                    getDefaultTimeout(),
-                                                                                    getDefaultTimeoutUnits(),
                                                                                     systemProperties,
                                                                                     remoteDebuggingPort);
 

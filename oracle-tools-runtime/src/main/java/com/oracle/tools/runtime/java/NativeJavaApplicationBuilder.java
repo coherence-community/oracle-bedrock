@@ -48,49 +48,4 @@ public class NativeJavaApplicationBuilder<A extends JavaApplication, S extends J
     {
         super();
     }
-
-
-    @Override
-    public NativeJavaApplicationBuilder setDiagnosticsEnabled(boolean isDiagnosticsEnabled)
-    {
-        super.setDiagnosticsEnabled(isDiagnosticsEnabled());
-
-        return this;
-    }
-
-
-    @Override
-    public NativeJavaApplicationBuilder setJavaHome(String javaHome)
-    {
-        super.setJavaHome(javaHome);
-
-        return this;
-    }
-
-
-    @Override
-    public NativeJavaApplicationBuilder setRemoteDebuggingEnabled(boolean isRemoteDebuggingEnabled)
-    {
-        super.setRemoteDebuggingEnabled(isRemoteDebuggingEnabled());
-
-        return this;
-    }
-
-
-    @Override
-    public NativeJavaApplicationBuilder setRemoteDebuggingStartSuspended(boolean isRemoteStartSuspended)
-    {
-        super.setRemoteDebuggingStartSuspended(isRemoteStartSuspended);
-
-        return this;
-    }
-
-
-    @Override
-    public NativeJavaApplicationBuilder setOrphansPermitted(boolean areOrphansPermitted)
-    {
-        super.setOrphansPermitted(areOrphansPermitted);
-
-        return this;
-    }
 }

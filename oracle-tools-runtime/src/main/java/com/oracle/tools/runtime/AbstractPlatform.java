@@ -25,6 +25,8 @@
 
 package com.oracle.tools.runtime;
 
+import com.oracle.tools.Option;
+
 import java.net.InetAddress;
 
 /**
@@ -37,7 +39,9 @@ import java.net.InetAddress;
  */
 public abstract class AbstractPlatform implements Platform
 {
-    /** The name of this platform */
+    /**
+     * The name of this {@link Platform}.
+     */
     private String name;
 
 
@@ -69,7 +73,8 @@ public abstract class AbstractPlatform implements Platform
     @Override
     public <A extends Application, S extends ApplicationSchema<A>> A realize(S                  applicationSchema,
                                                                              String             applicationName,
-                                                                             ApplicationConsole console)
+                                                                             ApplicationConsole console,
+                                                                             Option...          options)
     {
         ApplicationBuilder<A> builder = getApplicationBuilder(applicationSchema.getApplicationClass());
 
@@ -78,6 +83,6 @@ public abstract class AbstractPlatform implements Platform
             return null;
         }
 
-        return builder.realize(applicationSchema, applicationName, console, this);
+        return builder.realize(applicationSchema, applicationName, console, this, options);
     }
 }

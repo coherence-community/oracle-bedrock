@@ -25,11 +25,14 @@
 
 package com.oracle.tools.runtime;
 
+import com.oracle.tools.Option;
+import com.oracle.tools.Options;
+
 import com.oracle.tools.runtime.console.SystemApplicationConsole;
 
-import java.util.Properties;
+import com.oracle.tools.runtime.options.Diagnostics;
 
-import java.util.concurrent.TimeUnit;
+import java.util.Properties;
 
 /**
  * An abstract internal implementation of an {@link ApplicationRuntime}.
@@ -55,6 +58,11 @@ public class AbstractApplicationRuntime<P extends ApplicationProcess> implements
     private final Platform platform;
 
     /**
+     * The {@link Option}s specified when the {@link Application} was realized.
+     */
+    private final Options options;
+
+    /**
      * The {@link ApplicationProcess} representing the running {@link Application}
      * on the {@link Platform}.
      */
@@ -66,26 +74,9 @@ public class AbstractApplicationRuntime<P extends ApplicationProcess> implements
     private final ApplicationConsole console;
 
     /**
-     * A flag indicating if diagnostics is enabled for the {@link Application},
-     * especially the {@link Application} lifecycle.
-     */
-    private boolean diagnosticsEnabled;
-
-    /**
      * The operating system environment variables established for the {@link Application}.
      */
     private Properties environmentVariables;
-
-    /**
-     * The default timeout duration to use for the {@link Application}, specified in
-     * {@link #getDefaultTimeoutUnits()}.
-     */
-    private long defaultTimeout;
-
-    /**
-     * The default timeout {@link TimeUnit}s.
-     */
-    private TimeUnit defaultTimeoutUnits;
 
 
     /**
@@ -93,30 +84,24 @@ public class AbstractApplicationRuntime<P extends ApplicationProcess> implements
      *
      * @param applicationName       the name of the {@link Application}
      * @param platform              the {@link Platform} on which the {@link ApplicationProcess} is running
+     * @param options               the {@link Options} specified for the {@link Application}
      * @param process               the {@link ApplicationProcess}
      * @param console               the {@link ApplicationConsole} for the {@link ApplicationProcess}
      * @param environmentVariables  the environment variables established for the {@link ApplicationProcess}
-     * @param diagnosticsEnabled    should diagnostics be enabled for the {@link Application}
-     * @param defaultTimeout        the default timeout duration
-     * @param defaultTimeoutUnits   the default timeout duration {@link TimeUnit}s
      */
     public AbstractApplicationRuntime(String             applicationName,
                                       Platform           platform,
+                                      Options            options,
                                       P                  process,
                                       ApplicationConsole console,
-                                      Properties         environmentVariables,
-                                      boolean            diagnosticsEnabled,
-                                      long               defaultTimeout,
-                                      TimeUnit           defaultTimeoutUnits)
+                                      Properties         environmentVariables)
     {
         this.applicationName      = applicationName;
         this.platform             = platform;
+        this.options              = options;
         this.process              = process;
         this.console              = console == null ? new SystemApplicationConsole() : console;
         this.environmentVariables = environmentVariables;
-        this.diagnosticsEnabled   = Settings.isDiagnosticsEnabled(diagnosticsEnabled);
-        this.defaultTimeout       = defaultTimeout;
-        this.defaultTimeoutUnits  = defaultTimeoutUnits;
     }
 
 
@@ -135,6 +120,13 @@ public class AbstractApplicationRuntime<P extends ApplicationProcess> implements
 
 
     @Override
+    public Options getOptions()
+    {
+        return options;
+    }
+
+
+    @Override
     public P getApplicationProcess()
     {
         return process;
@@ -145,27 +137,6 @@ public class AbstractApplicationRuntime<P extends ApplicationProcess> implements
     public ApplicationConsole getApplicationConsole()
     {
         return console;
-    }
-
-
-    @Override
-    public boolean isDiagnosticsEnabled()
-    {
-        return diagnosticsEnabled;
-    }
-
-
-    @Override
-    public long getDefaultTimeout()
-    {
-        return defaultTimeout;
-    }
-
-
-    @Override
-    public TimeUnit getDefaultTimeoutUnits()
-    {
-        return defaultTimeoutUnits;
     }
 
 

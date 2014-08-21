@@ -25,7 +25,11 @@
 
 package com.oracle.tools.runtime;
 
+import com.oracle.tools.options.Timeout;
+
 import com.oracle.tools.runtime.java.container.Container;
+
+import com.oracle.tools.runtime.options.Diagnostics;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
@@ -39,8 +43,6 @@ import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
-
-import java.util.concurrent.TimeUnit;
 
 /**
  * A base implementation of an {@link Application}.
@@ -85,6 +87,11 @@ public abstract class AbstractApplication<A extends AbstractApplication<A, P, R>
      */
     private List<LifecycleEventInterceptor<? super A>> interceptors;
 
+    /**
+     * The default {@link Timeout} to use for the {@link Application}.
+     */
+    private Timeout defaultTimeout;
+
 
     /**
      * Construct an {@link AbstractApplication}.
@@ -96,6 +103,9 @@ public abstract class AbstractApplication<A extends AbstractApplication<A, P, R>
                                Iterable<LifecycleEventInterceptor<? super A>> interceptors)
     {
         this.runtime = runtime;
+
+        // establish the default Timeout for the application
+        this.defaultTimeout = runtime.getOptions().get(Timeout.class, Timeout.autoDetect());
 
         // make a copy of the interceptors
         this.interceptors = new ArrayList<LifecycleEventInterceptor<? super A>>();
@@ -109,10 +119,10 @@ public abstract class AbstractApplication<A extends AbstractApplication<A, P, R>
         }
 
         // establish the standard input, output and error redirection threads
-        String             displayName        = runtime.getApplicationName();
-        P                  process            = runtime.getApplicationProcess();
-        ApplicationConsole console            = runtime.getApplicationConsole();
-        boolean            diagnosticsEnabled = runtime.isDiagnosticsEnabled();
+        String             displayName = runtime.getApplicationName();
+        P                  process     = runtime.getApplicationProcess();
+        ApplicationConsole console     = runtime.getApplicationConsole();
+        boolean diagnosticsEnabled = runtime.getOptions().get(Diagnostics.class, Diagnostics.autoDetect()).isEnabled();
 
         // start a thread to redirect standard out to the console
         stdoutThread = new Thread(new OutputRedirector(displayName,
@@ -142,6 +152,13 @@ public abstract class AbstractApplication<A extends AbstractApplication<A, P, R>
         stdinThread.setDaemon(true);
         stdinThread.setName(displayName + " StdIn Thread");
         stdinThread.start();
+    }
+
+
+    @Override
+    public Timeout getDefaultTimeout()
+    {
+        return defaultTimeout;
     }
 
 
@@ -278,20 +295,6 @@ public abstract class AbstractApplication<A extends AbstractApplication<A, P, R>
     public long getId()
     {
         return runtime.getApplicationProcess().getId();
-    }
-
-
-    @Override
-    public long getDefaultTimeout()
-    {
-        return runtime.getDefaultTimeout();
-    }
-
-
-    @Override
-    public TimeUnit getDefaultTimeoutUnits()
-    {
-        return runtime.getDefaultTimeoutUnits();
     }
 
 

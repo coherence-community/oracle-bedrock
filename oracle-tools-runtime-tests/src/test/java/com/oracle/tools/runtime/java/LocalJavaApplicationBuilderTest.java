@@ -36,6 +36,7 @@ import com.oracle.tools.io.NetworkHelper;
 
 import com.oracle.tools.runtime.ApplicationConsole;
 import com.oracle.tools.runtime.LocalPlatform;
+import com.oracle.tools.runtime.Platform;
 import com.oracle.tools.runtime.SimpleApplication;
 import com.oracle.tools.runtime.SimpleApplicationSchema;
 
@@ -48,6 +49,9 @@ import com.oracle.tools.runtime.concurrent.socket.SocketBasedRemoteExecutorTests
 
 import com.oracle.tools.runtime.console.CapturingApplicationConsole;
 import com.oracle.tools.runtime.console.SystemApplicationConsole;
+
+import com.oracle.tools.runtime.java.options.JavaHome;
+import com.oracle.tools.runtime.java.options.RemoteDebugging;
 
 import com.oracle.tools.util.Capture;
 
@@ -94,6 +98,13 @@ public class LocalJavaApplicationBuilderTest extends AbstractJavaApplicationBuil
     }
 
 
+    @Override
+    public Platform getPlatform()
+    {
+        return LocalPlatform.getInstance();
+    }
+
+
     /**
      * Ensure that the {@link #newJavaApplicationBuilder()} method is producing
      * the expected type of builder.
@@ -113,13 +124,14 @@ public class LocalJavaApplicationBuilderTest extends AbstractJavaApplicationBuil
     public void shouldSetRemoteDebugEnabledSuspendedIsFalse() throws Exception
     {
         // the LocalPlatform is where we'll run the debugger and applications
-        LocalPlatform platform = LocalPlatform.getInstance();
+        LocalPlatform               platform = LocalPlatform.getInstance();
 
-        SimpleJavaApplicationSchema schema =
-            new SimpleJavaApplicationSchema(SleepingApplication.class.getName()).setRemoteDebuggingEnabled(true)
-                .setRemoteDebuggingStartSuspended(false).setRemoteDebugPorts(platform.getAvailablePorts());
+        SimpleJavaApplicationSchema schema   = new SimpleJavaApplicationSchema(SleepingApplication.class.getName());
 
-        try (SimpleJavaApplication app = platform.realize(schema, "TestApp", new SystemApplicationConsole()))
+        try (SimpleJavaApplication app = platform.realize(schema,
+                                                          "TestApp",
+                                                          new SystemApplicationConsole(),
+                                                          RemoteDebugging.enabled().startSuspended(false)))
         {
             List<String> args     = app.submit(new GetProgramArgs());
             String       debugArg = null;
@@ -153,16 +165,17 @@ public class LocalJavaApplicationBuilderTest extends AbstractJavaApplicationBuil
         Assume.assumeThat(hasJDB(), is(true));
 
         // the LocalPlatform is where we'll run the debugger and applications
-        LocalPlatform platform = LocalPlatform.getInstance();
+        LocalPlatform               platform = LocalPlatform.getInstance();
 
-        SimpleJavaApplicationSchema schema =
-            new SimpleJavaApplicationSchema(SleepingApplication.class.getName()).setRemoteDebuggingEnabled(true)
-                .setRemoteDebuggingStartSuspended(true).setRemoteDebugPorts(platform.getAvailablePorts());
+        SimpleJavaApplicationSchema schema   = new SimpleJavaApplicationSchema(SleepingApplication.class.getName());
 
-        CapturingApplicationConsole console = new CapturingApplicationConsole();
-        LinkedList<String>          lines   = console.getCapturedOutputLines();
+        CapturingApplicationConsole console  = new CapturingApplicationConsole();
+        LinkedList<String>          lines    = console.getCapturedOutputLines();
 
-        try (SimpleJavaApplication app = platform.realize(schema, "TestApp", console))
+        try (SimpleJavaApplication app = platform.realize(schema,
+                                                          "TestApp",
+                                                          console,
+                                                          RemoteDebugging.enabled().startSuspended(true)))
         {
             assertCanConnectDebuggerToApplication(app);
 
@@ -191,7 +204,7 @@ public class LocalJavaApplicationBuilderTest extends AbstractJavaApplicationBuil
 
     /**
      * Start the application with remote debugging enabled and mode set to
-     * {@link com.oracle.tools.runtime.java.RemoteDebuggingMode#ATTACH_TO_DEBUGGER}
+     * {@link com.oracle.tools.runtime.java.options.RemoteDebugging.Behavior#ATTACH_TO_DEBUGGER}
      * and assert the process connects back to the debugger
      */
     @Test
@@ -201,12 +214,12 @@ public class LocalJavaApplicationBuilderTest extends AbstractJavaApplicationBuil
         Assume.assumeThat(hasJDB(), is(true));
 
         // the LocalPlatform is where we'll run applications and the debugger
-        LocalPlatform    platform  = LocalPlatform.getInstance();
+        LocalPlatform    platform     = LocalPlatform.getInstance();
 
-        Capture<Integer> debugPort = new Capture<Integer>(platform.getAvailablePorts());
+        Capture<Integer> debuggerPort = new Capture<Integer>(platform.getAvailablePorts());
 
         SimpleApplicationSchema jdbSchema =
-            new SimpleApplicationSchema("jdb").addArgument("-listen").addArgument(String.valueOf(debugPort.get()));
+            new SimpleApplicationSchema("jdb").addArgument("-listen").addArgument(String.valueOf(debuggerPort.get()));
 
         CapturingApplicationConsole jdbConsole = new CapturingApplicationConsole();
         LinkedList<String>          jdbOutput  = jdbConsole.getCapturedOutputLines();
@@ -217,15 +230,16 @@ public class LocalJavaApplicationBuilderTest extends AbstractJavaApplicationBuil
                                   jdbOutput,
                                   hasItem(startsWith("Listening at address:")));
 
-            SimpleJavaApplicationSchema schema =
-                new SimpleJavaApplicationSchema(SleepingApplication.class.getName()).setRemoteDebuggingEnabled(true)
-                    .setRemoteDebuggingStartSuspended(false).setRemoteDebugPort(debugPort.get())
-                    .setRemoteDebuggingMode(RemoteDebuggingMode.ATTACH_TO_DEBUGGER);
+            SimpleJavaApplicationSchema schema  = new SimpleJavaApplicationSchema(SleepingApplication.class.getName());
 
             CapturingApplicationConsole console = new CapturingApplicationConsole();
             LinkedList<String>          lines   = console.getCapturedOutputLines();
 
-            try (SimpleJavaApplication app = platform.realize(schema, "TestApp", console))
+            try (SimpleJavaApplication app = platform.realize(schema,
+                                                              "TestApp",
+                                                              console,
+                                                              RemoteDebugging.enabled().startSuspended(false)
+                                                                  .attachToDebugger(debuggerPort.get())))
             {
                 Eventually.assertThat(lines, hasItem(startsWith("Now sleeping")));
                 Eventually.assertThat("Application did not connect back to JDB",
@@ -289,14 +303,14 @@ public class LocalJavaApplicationBuilderTest extends AbstractJavaApplicationBuil
     @Test
     public void shouldSetRemoteDebugDisabled() throws Exception
     {
-        Assume.assumeThat(JavaVirtualMachine.getInstance().shouldEnabledRemoteDebug(), is(false));
+        Assume.assumeThat(JavaVirtualMachine.getInstance().shouldEnableRemoteDebugging(), is(false));
 
-        SimpleJavaApplicationSchema schema =
-            new SimpleJavaApplicationSchema(SleepingApplication.class.getName()).setRemoteDebuggingEnabled(false);
+        SimpleJavaApplicationSchema schema = new SimpleJavaApplicationSchema(SleepingApplication.class.getName());
 
         try (SimpleJavaApplication app = LocalPlatform.getInstance().realize(schema,
                                                                              "TestApp",
-                                                                             new SystemApplicationConsole()))
+                                                                             new SystemApplicationConsole(),
+                                                                             RemoteDebugging.disabled()))
         {
             List<String> args     = app.submit(new GetProgramArgs());
 
@@ -347,7 +361,7 @@ public class LocalJavaApplicationBuilderTest extends AbstractJavaApplicationBuil
             LocalJavaApplicationBuilder<SimpleJavaApplication> builder =
                 new LocalJavaApplicationBuilder<SimpleJavaApplication>();
 
-            builder.setOrphansPermitted(false);
+            schema.setOrphanable(false);
 
             ApplicationConsole console = new SystemApplicationConsole();
 
@@ -422,7 +436,7 @@ public class LocalJavaApplicationBuilderTest extends AbstractJavaApplicationBuil
             LocalJavaApplicationBuilder<SimpleJavaApplication> builder =
                 new LocalJavaApplicationBuilder<SimpleJavaApplication>();
 
-            builder.setOrphansPermitted(false);
+            schema.setOrphanable(false);
 
             ApplicationConsole console = new SystemApplicationConsole();
 
@@ -497,19 +511,18 @@ public class LocalJavaApplicationBuilderTest extends AbstractJavaApplicationBuil
         // define the SleepingApplication
         SimpleJavaApplicationSchema schema = new SimpleJavaApplicationSchema(SleepingApplication.class.getName());
 
-        // set the JAVA_HOME environment variable to be the same as this application
-        String javaHome = System.getProperty("java.home");
-
-        schema.setJavaHome(javaHome);
+        // determine the JAVA_HOME based on this process
+        String   javaHomePath = System.getProperty("java.home");
+        JavaHome javaHome     = JavaHome.of(javaHomePath);
 
         // build and start the SleepingApplication
         LocalJavaApplicationBuilder<JavaApplication> builder = new LocalJavaApplicationBuilder<JavaApplication>();
 
         ApplicationConsole                           console = new SystemApplicationConsole();
 
-        try (SimpleJavaApplication application = builder.realize(schema, "sleeping", console))
+        try (SimpleJavaApplication application = builder.realize(schema, "sleeping", console, null, javaHome))
         {
-            Eventually.assertThat(application, new GetSystemProperty("java.home"), is(javaHome));
+            Eventually.assertThat(application, new GetSystemProperty("java.home"), is(javaHomePath));
         }
     }
 

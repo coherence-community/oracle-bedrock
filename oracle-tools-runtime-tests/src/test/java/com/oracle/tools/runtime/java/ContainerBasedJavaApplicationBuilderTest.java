@@ -25,6 +25,8 @@
 
 package com.oracle.tools.runtime.java;
 
+import com.oracle.tools.runtime.Platform;
+
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.instanceOf;
@@ -43,12 +45,17 @@ import static org.junit.Assert.assertThat;
  */
 public class ContainerBasedJavaApplicationBuilderTest extends AbstractJavaApplicationBuilderTest
 {
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public JavaApplicationBuilder<JavaApplication> newJavaApplicationBuilder()
     {
         return new ContainerBasedJavaApplicationBuilder<JavaApplication>();
+    }
+
+
+    @Override
+    public Platform getPlatform()
+    {
+        return JavaVirtualMachine.getInstance();
     }
 
 

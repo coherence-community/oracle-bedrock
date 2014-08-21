@@ -25,6 +25,8 @@
 
 package com.oracle.tools.runtime.remote;
 
+import com.oracle.tools.Options;
+
 import com.oracle.tools.runtime.ApplicationConsole;
 import com.oracle.tools.runtime.ApplicationSchema;
 import com.oracle.tools.runtime.FluentApplicationSchema;
@@ -80,17 +82,19 @@ public class SimpleRemoteApplicationBuilder
     @Override
     protected <T extends SimpleApplication,
         S extends ApplicationSchema<T>> SimpleRemoteApplicationEnvironment getRemoteApplicationEnvironment(S applicationSchema,
-        Platform                                                                                             platform)
+        Platform                                                                                             platform,
+        Options                                                                                              options)
     {
         SimpleApplicationSchema schema = (SimpleApplicationSchema) applicationSchema;
 
-        return new SimpleRemoteApplicationEnvironment(schema, platform);
+        return new SimpleRemoteApplicationEnvironment(schema, platform, options);
     }
 
 
     @Override
     @SuppressWarnings("unchecked")
     protected <T extends SimpleApplication, S extends ApplicationSchema<T>> T createApplication(Platform                           platform,
+                                                                                                Options                            options,
                                                                                                 S                                  schema,
                                                                                                 SimpleRemoteApplicationEnvironment environment,
                                                                                                 String                             applicationName,
@@ -99,12 +103,10 @@ public class SimpleRemoteApplicationBuilder
     {
         SimpleApplicationRuntime runtime = new SimpleApplicationRuntime(applicationName,
                                                                         platform,
+                                                                        options,
                                                                         process,
                                                                         console,
-                                                                        environment.getRemoteEnvironmentVariables(),
-                                                                        schema.isDiagnosticsEnabled(),
-                                                                        schema.getDefaultTimeout(),
-                                                                        schema.getDefaultTimeoutUnits());
+                                                                        environment.getRemoteEnvironmentVariables());
 
         return (T) new SimpleApplication(runtime,
                                          schema instanceof FluentApplicationSchema

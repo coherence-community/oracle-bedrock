@@ -25,6 +25,9 @@
 
 package com.oracle.tools.runtime.java;
 
+import com.oracle.tools.Option;
+import com.oracle.tools.Options;
+
 import com.oracle.tools.deferred.AbstractDeferred;
 import com.oracle.tools.deferred.PermanentlyUnavailableException;
 import com.oracle.tools.deferred.TemporarilyUnavailableException;
@@ -32,6 +35,8 @@ import com.oracle.tools.deferred.TemporarilyUnavailableException;
 import com.oracle.tools.io.NetworkHelper;
 
 import com.oracle.tools.lang.StringHelper;
+
+import com.oracle.tools.options.Timeout;
 
 import com.oracle.tools.predicate.Predicate;
 
@@ -50,6 +55,11 @@ import com.oracle.tools.runtime.concurrent.RemoteExecutor;
 import com.oracle.tools.runtime.concurrent.RemoteRunnable;
 import com.oracle.tools.runtime.concurrent.socket.RemoteExecutorServer;
 
+import com.oracle.tools.runtime.java.options.JavaHome;
+import com.oracle.tools.runtime.java.options.RemoteDebugging;
+
+import com.oracle.tools.runtime.options.EnvironmentVariables;
+
 import com.oracle.tools.util.CompletionListener;
 
 import static com.oracle.tools.deferred.DeferredHelper.ensure;
@@ -61,6 +71,8 @@ import java.io.File;
 import java.io.IOException;
 
 import java.net.InetAddress;
+
+import java.rmi.Remote;
 
 import java.util.Iterator;
 import java.util.Properties;
@@ -85,48 +97,6 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication> extends Abst
      */
     private static Logger LOGGER = Logger.getLogger(LocalJavaApplicationBuilder.class.getName());
 
-    /**
-     * Should environment variables be inherited from the current executing process
-     * as the basis for {@link JavaApplication}s produced by this {@link LocalJavaApplicationBuilder}.
-     */
-    private boolean isEnvironmentInherited;
-
-    /**
-     * The {@link PropertiesBuilder} defining custom environment variables to
-     * establish when realizing a {@link JavaApplication}.
-     */
-    private PropertiesBuilder environmentVariablesBuilder;
-
-    /**
-     * The path for the JAVA_HOME.
-     * <p>
-     * This is <code>null</code> if the JAVA_HOME of the {@link JavaApplicationSchema}
-     * should be used.
-     */
-    private String javaHome;
-
-    /**
-     * Should processes be started in remote debug mode?
-     * <p>
-     * The default is <code>false</code>.
-     */
-    private boolean isRemoteDebuggingEnabled;
-
-    /**
-     * Should remote debugging processes be started in suspended mode?
-     * <p>
-     * The default is <code>false</code>.
-     */
-    private boolean isRemoteStartSuspended;
-
-    /**
-     * Should {@link JavaApplication}s produced by this builder allowed
-     * to become orphans (when their parent application process is destroyed/killed)?
-     * <p>
-     * The default is <code>false</code>.
-     */
-    private boolean areOrphansPermitted;
-
 
     /**
      * Constructs a {@link LocalJavaApplicationBuilder}.
@@ -134,230 +104,6 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication> extends Abst
     public LocalJavaApplicationBuilder()
     {
         super();
-
-        // by default there are no custom environment variables
-        environmentVariablesBuilder = new PropertiesBuilder();
-
-        // by default we always inherit local environment variables
-        isEnvironmentInherited = true;
-
-        // use the JAVA HOME of the {@link JavaApplicationSchema}
-        javaHome = null;
-
-        // don't start in remote debug mode
-        isRemoteDebuggingEnabled = false;
-
-        // don't suspend when in remote debug mode
-        isRemoteStartSuspended = false;
-
-        // don't permit orphaned applications
-        areOrphansPermitted = false;
-    }
-
-
-    /**
-     * Obtains the {@link PropertiesBuilder} defining custom
-     * {@link JavaApplication}-specific operating system environment
-     * variables to be established when realizing an {@link JavaApplication}.
-     *
-     * @return {@link PropertiesBuilder}
-     */
-    public PropertiesBuilder getEnvironmentVariablesBuilder()
-    {
-        return environmentVariablesBuilder;
-    }
-
-
-    /**
-     * Sets whether the environment variables from the currently executing
-     * process should be inherited and used as the basis for environment variables
-     * when realizing an {@link JavaApplication}.
-     *
-     * @param isEnvironmentInherited  <code>true</code> if the {@link LocalJavaApplicationBuilder}
-     *                                should inherit the environment variables from the
-     *                                currently executing process or <code>false</code>
-     *                                if a clean/empty environment should be used
-     *                                (containing only those custom variables defined by this
-     *                                {@link LocalJavaApplicationBuilder} and an
-     *                                {@link JavaApplicationSchema})
-     *
-     * @return this {@link LocalJavaApplicationBuilder} to permit fluent method calls
-     */
-    public LocalJavaApplicationBuilder setEnvironmentInherited(boolean isEnvironmentInherited)
-    {
-        this.isEnvironmentInherited = isEnvironmentInherited;
-
-        return this;
-    }
-
-
-    /**
-     * Determines if the environment variables of the currently executing
-     * process will be inherited and used as a basis for environment variables
-     * when realizing a {@link JavaApplication}.
-     *
-     * @return  <code>true</code> if environment variables are inherited from
-     *          the current process when realizing a {@link JavaApplication} or
-     *          <code>false</code> if a clean environment is used instead
-     */
-    public boolean isEnvironmentInherited()
-    {
-        return isEnvironmentInherited;
-    }
-
-
-    /**
-     * Defines a custom environment variable for {@link JavaApplication}s
-     * realized by this {@link LocalJavaApplicationBuilder} based on values
-     * returned by the {@link Iterator}.
-     *
-     * @param name      the name of the environment variable
-     * @param iterator  an {@link Iterator} providing values for the environment
-     *                  variable
-     *
-     * @return this {@link LocalJavaApplicationBuilder} to permit fluent method calls
-     */
-    public LocalJavaApplicationBuilder setEnvironmentVariable(String      name,
-                                                              Iterator<?> iterator)
-    {
-        environmentVariablesBuilder.setProperty(name, iterator);
-
-        return this;
-    }
-
-
-    /**
-     * Defines a custom environment variable for {@link JavaApplication}s
-     * realized by this {@link LocalJavaApplicationBuilder}.
-     *
-     * @param name   the name of the environment variable
-     * @param value  the value of the environment variable
-     *
-     * @return this {@link LocalJavaApplicationBuilder} to permit fluent method calls
-     */
-    public LocalJavaApplicationBuilder setEnvironmentVariable(String name,
-                                                              Object value)
-    {
-        environmentVariablesBuilder.setProperty(name, value);
-
-        return this;
-    }
-
-
-    /**
-     * Sets if diagnostic information should be logged/output for {@link Application}s
-     * produced by this builder.
-     *
-     * @param isDiagnosticsEnabled  should diagnostics be output
-     *
-     * @return  the builder (so that we can perform method chaining)
-     */
-    public LocalJavaApplicationBuilder setDiagnosticsEnabled(boolean isDiagnosticsEnabled)
-    {
-        this.m_isDiagnosticsEnabled = isDiagnosticsEnabled;
-
-        return this;
-    }
-
-
-    /**
-     * Sets the JAVA_HOME to be used to realize the {@link JavaApplication}.
-     *
-     * @param javaHome  the value for the JAVA_HOME environment variable
-     *                  or <code>null</code> if {@link JavaApplicationSchema}
-     *                  value should be used instead
-     *
-     * @return  the builder (so that we can perform method chaining)
-     */
-    public LocalJavaApplicationBuilder setJavaHome(String javaHome)
-    {
-        this.javaHome = javaHome;
-
-        return this;
-    }
-
-
-    /**
-     * Sets if remote Java debugging is enabled for the next {@link JavaApplication}
-     * produced by this builder.
-     *
-     * @param isRemoteDebuggingEnabled <code>true</code> to enable remote debugging
-     *
-     * @return  the {@link LocalJavaApplicationBuilder} to allow fluent-method calls
-     */
-    public LocalJavaApplicationBuilder setRemoteDebuggingEnabled(boolean isRemoteDebuggingEnabled)
-    {
-        this.isRemoteDebuggingEnabled = isRemoteDebuggingEnabled;
-
-        return this;
-    }
-
-
-    /**
-     * Determines if the next {@link JavaApplication} should be started in
-     * remote debugging mode.
-     *
-     * @return <code>true</code> if remote debugging is enabled
-     */
-    public boolean isRemoteDebuggingEnabled()
-    {
-        return isRemoteDebuggingEnabled;
-    }
-
-
-    /**
-     * Sets if a remote debugging process should be started in a suspended mode.
-     *
-     * @param isRemoteStartSuspended  <code>true</code> to start in a suspended mode
-     *
-     * @return  the {@link LocalJavaApplicationBuilder} to allow fluent-method calls
-     */
-    public LocalJavaApplicationBuilder setRemoteDebuggingStartSuspended(boolean isRemoteStartSuspended)
-    {
-        this.isRemoteStartSuspended = isRemoteStartSuspended;
-
-        return this;
-    }
-
-
-    /**
-     * Determines if a remotely debugged application will be started in suspend
-     * mode.
-     *
-     * @return <code>true</code> if started in suspend mode
-     */
-    public boolean isRemoteDebuggingStartSuspended()
-    {
-        return isRemoteStartSuspended;
-    }
-
-
-    /**
-     * Sets if {@link JavaApplication}s produced by this {@link JavaApplicationBuilder}
-     * can be orphaned (left running without their parent running).  The default
-     * is <code>false</code>.
-     *
-     * @param areOrphansPermitted  <code>true</code> to allow for orphaned applications
-     *
-     * @return  the {@link LocalJavaApplicationBuilder} to allow fluent-method calls
-     */
-    public LocalJavaApplicationBuilder setOrphansPermitted(boolean areOrphansPermitted)
-    {
-        this.areOrphansPermitted = areOrphansPermitted;
-
-        return this;
-    }
-
-
-    /**
-     * Determines if {@link JavaApplication}s produced by this {@link JavaApplicationBuilder}
-     * are allowed to be orphaned (to keep running if their parent is not running).
-     *
-     * @return  <code>true</code> if applications can be orphaned, <code>false</code> otherwise
-     */
-    public boolean areOrphansPermitted()
-    {
-        return areOrphansPermitted;
     }
 
 
@@ -365,8 +111,12 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication> extends Abst
     public <T extends A, S extends ApplicationSchema<T>> T realize(S                  applicationSchema,
                                                                    String             applicationName,
                                                                    ApplicationConsole console,
-                                                                   Platform           platform)
+                                                                   Platform           platform,
+                                                                   Option...          applicationOptions)
     {
+        // acquire the platform specific options
+        Options options = new Options(applicationOptions);
+
         // TODO: this should be a safe cast but we should also check to make sure
         JavaApplicationSchema<T> schema = (JavaApplicationSchema) applicationSchema;
 
@@ -387,45 +137,47 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication> extends Abst
         }
 
         // ----- establish environment variables -----
+        EnvironmentVariables environmentVariables = options.get(EnvironmentVariables.class,
+                                                                EnvironmentVariables.inherited());
 
         // when not inheriting we need to clear the defined environment
-        if (!isEnvironmentInherited() &&!schema.isEnvironmentInherited())
+        if (!environmentVariables.areInherited() &&!schema.isEnvironmentInherited())
         {
             processBuilder.environment().clear();
         }
 
         // add the environment variables defined by the schema
-        Properties environmentVariables = schema.getEnvironmentVariables(platform);
+        Properties variables = schema.getEnvironmentVariables(platform);
 
-        for (String variableName : environmentVariables.stringPropertyNames())
+        for (String variableName : variables.stringPropertyNames())
         {
-            processBuilder.environment().put(variableName, environmentVariables.getProperty(variableName));
+            processBuilder.environment().put(variableName, variables.getProperty(variableName));
         }
 
-        // add the environment variables defined by the builder
-        environmentVariables = getEnvironmentVariablesBuilder().realize();
+        // realize and add the optionally defined environment variables
+        variables = environmentVariables.getBuilder().realize();
 
-        for (String variableName : environmentVariables.stringPropertyNames())
+        for (String variableName : variables.stringPropertyNames())
         {
-            processBuilder.environment().put(variableName, environmentVariables.getProperty(variableName));
+            processBuilder.environment().put(variableName, variables.getProperty(variableName));
         }
 
         // ----- establish java specific environment variables -----
 
         // by default we use the java home defined by the schema.  if that's not
         // defined we'll attempt to use the java home defined by this builder.
-        String javaHome = this.javaHome == null ? schema.getJavaHome() : this.javaHome;
+        JavaHome javaHome = options.get(JavaHome.class);
 
         // when we still don't have a java home we use what this process defines
         // (using the system property)
         if (javaHome == null)
         {
-            javaHome = System.getProperty("java.home", null);
+            javaHome = JavaHome.of(System.getProperty("java.home", null));
         }
 
         if (javaHome != null)
         {
-            processBuilder.environment().put("JAVA_HOME", javaHome);
+            processBuilder.environment().put("JAVA_HOME", javaHome.get());
         }
 
         // set the class path (it's an environment variable)
@@ -452,14 +204,16 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication> extends Abst
         else
         {
             // when we have a java home, we prefix the executable name with the java.home/bin/
-            javaHome = javaHome.trim();
+            String javaHomePath = javaHome.get();
 
-            if (!javaHome.endsWith(File.separator))
+            javaHomePath = javaHomePath.trim();
+
+            if (!javaHomePath.endsWith(File.separator))
             {
-                javaHome = javaHome + File.separator;
+                javaHomePath = javaHomePath + File.separator;
             }
 
-            processBuilder.command(javaHome + "bin" + File.separator + schema.getExecutableName());
+            processBuilder.command(javaHomePath + "bin" + File.separator + schema.getExecutableName());
         }
 
         // ----- establish the system properties for the java application -----
@@ -504,7 +258,7 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication> extends Abst
         processBuilder.command().add("-D" + Settings.PARENT_ADDRESS + "="
                                      + server.getInetAddress(preferred).getHostAddress());
         processBuilder.command().add("-D" + Settings.PARENT_PORT + "=" + server.getPort());
-        processBuilder.command().add("-D" + Settings.ORPHANABLE + "=" + areOrphansPermitted());
+        processBuilder.command().add("-D" + Settings.ORPHANABLE + "=" + schema.isOrphanable());
 
         // ----- establish JVM options -----
 
@@ -513,29 +267,29 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication> extends Abst
             processBuilder.command().add("-" + option);
         }
 
-        // add debug option
-        boolean             debugEnabled = this.isRemoteDebuggingEnabled || schema.isRemoteDebuggingEnabled();
-        RemoteDebuggingMode debugMode    = schema.getRemoteDebuggingMode();
-        int                 debugPort    = -1;
+        // ----- establish remote debugging JVM options -----
 
-        if (debugEnabled)
+        // TODO: also consider getting this from the schema (if it only had "default" options ;)
+        RemoteDebugging remoteDebugging = options.get(RemoteDebugging.class, RemoteDebugging.autoDetect());
+
+        int             debugPort       = -1;
+
+        if (remoteDebugging.isEnabled())
         {
-            debugPort = (debugMode == RemoteDebuggingMode.LISTEN_FOR_DEBUGGER)
-                        ? schema.getRemoteDebugListenPort() : schema.getRemoteDebugAttachPort();
+            debugPort = remoteDebugging.getBehavior() == RemoteDebugging.Behavior.LISTEN_FOR_DEBUGGER
+                        ? remoteDebugging.getListenPort() : remoteDebugging.getAttachPort();
 
             if (debugPort <= 0)
             {
                 debugPort = LocalPlatform.getInstance().getAvailablePorts().next();
             }
 
-            boolean suspend       = isRemoteStartSuspended || schema.isRemoteDebuggingStartSuspended();
-
-            boolean isDebugServer = debugMode == RemoteDebuggingMode.LISTEN_FOR_DEBUGGER;
+            boolean isDebugServer = remoteDebugging.getBehavior() == RemoteDebugging.Behavior.LISTEN_FOR_DEBUGGER;
 
             // construct the Java option
             String option = String.format("-agentlib:jdwp=transport=dt_socket,server=%s,suspend=%s,address=%s:%d",
                                           (isDebugServer ? "y" : "n"),
-                                          (suspend ? "y" : "n"),
+                                          (remoteDebugging.isStartSuspended() ? "y" : "n"),
                                           LocalPlatform.getInstance().getHostName(),
                                           debugPort);
 
@@ -596,15 +350,18 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication> extends Abst
         final T application = schema.createJavaApplication(localJavaProcess,
                                                            applicationName,
                                                            platform,
+                                                           options,
                                                            console,
-                                                           environmentVariables,
+                                                           variables,
                                                            systemProperties,
                                                            debugPort);
 
         // ensure that the launcher process connects back to the server to
         // know that the application has started
-        if (!(schema.isRemoteDebuggingEnabled() && schema.isRemoteDebuggingStartSuspended()))
+        if (!(remoteDebugging.isEnabled() && remoteDebugging.isStartSuspended()))
         {
+            Timeout timeout = options.get(Timeout.class, Timeout.autoDetect());
+
             ensure(new AbstractDeferred<Boolean>()
             {
                 @Override
@@ -619,7 +376,7 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication> extends Abst
                         return true;
                     }
                 }
-            }, within(schema.getDefaultTimeout(), schema.getDefaultTimeoutUnits()));
+            }, within(timeout));
         }
 
         // ----- notify all of the lifecycle listeners -----

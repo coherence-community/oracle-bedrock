@@ -25,6 +25,8 @@
 
 package com.oracle.tools.runtime.java;
 
+import com.oracle.tools.Options;
+
 import com.oracle.tools.runtime.AbstractApplicationRuntime;
 import com.oracle.tools.runtime.ApplicationConsole;
 import com.oracle.tools.runtime.Platform;
@@ -65,35 +67,24 @@ public abstract class AbstractJavaApplicationRuntime<P extends JavaApplicationPr
      *
      * @param applicationName       the name of the {@link JavaApplication}
      * @param platform              the {@link Platform} on which the {@link JavaApplicationProcess} is running
+     * @param options               the {@link Options} for the {@link JavaApplication}
      * @param process               the {@link JavaApplicationProcess}
      * @param console               the {@link ApplicationConsole} for the {@link JavaApplicationProcess}
      * @param environmentVariables  the environment variables established for the {@link JavaApplicationProcess}
-     * @param diagnosticsEnabled    should diagnostics be enabled for the {@link JavaApplication}
-     * @param defaultTimeout        the default timeout duration
-     * @param defaultTimeoutUnits   the default timeout duration {@link TimeUnit}s
      * @param systemProperties      the system properties for the {@link JavaApplication}
      * @param remoteDebuggingPort   the port the {@link JavaApplication} should connect back to for remote debugging
      *                              (< 0 if remote debugging is not required)
      */
     public AbstractJavaApplicationRuntime(String             applicationName,
                                           Platform           platform,
+                                          Options            options,
                                           P                  process,
                                           ApplicationConsole console,
                                           Properties         environmentVariables,
-                                          boolean            diagnosticsEnabled,
-                                          long               defaultTimeout,
-                                          TimeUnit           defaultTimeoutUnits,
                                           Properties         systemProperties,
                                           int                remoteDebuggingPort)
     {
-        super(applicationName,
-              platform,
-              process,
-              console,
-              environmentVariables,
-              diagnosticsEnabled,
-              defaultTimeout,
-              defaultTimeoutUnits);
+        super(applicationName, platform, options, process, console, environmentVariables);
 
         this.systemProperties    = systemProperties;
         this.remoteDebuggingPort = remoteDebuggingPort;

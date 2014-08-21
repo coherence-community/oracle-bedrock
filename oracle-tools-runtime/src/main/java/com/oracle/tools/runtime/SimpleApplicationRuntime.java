@@ -25,6 +25,8 @@
 
 package com.oracle.tools.runtime;
 
+import com.oracle.tools.Options;
+
 import java.util.Properties;
 
 import java.util.concurrent.TimeUnit;
@@ -44,29 +46,18 @@ public class SimpleApplicationRuntime extends AbstractApplicationRuntime<Applica
      *
      * @param applicationName       the name of the {@link Application}
      * @param platform              the {@link Platform} on which the {@link ApplicationProcess} is running
+     * @param options               the {@link Options} for the {@link Application}
      * @param process               the {@link ApplicationProcess}
      * @param console               the {@link ApplicationConsole} for the {@link ApplicationProcess}
      * @param environmentVariables  the environment variables established for the {@link ApplicationProcess}
-     * @param diagnosticsEnabled    should diagnostics be enabled for the {@link Application}
-     * @param defaultTimeout        the default timeout duration
-     * @param defaultTimeoutUnits   the default timeout duration {@link TimeUnit}s
      */
     public SimpleApplicationRuntime(String             applicationName,
                                     Platform           platform,
+                                    Options            options,
                                     ApplicationProcess process,
                                     ApplicationConsole console,
-                                    Properties         environmentVariables,
-                                    boolean            diagnosticsEnabled,
-                                    long               defaultTimeout,
-                                    TimeUnit           defaultTimeoutUnits)
+                                    Properties         environmentVariables)
     {
-        super(applicationName,
-              platform,
-              process,
-              console,
-              environmentVariables,
-              diagnosticsEnabled,
-              defaultTimeout,
-              defaultTimeoutUnits);
+        super(applicationName, platform, options, process, console, environmentVariables);
     }
 }

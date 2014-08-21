@@ -29,6 +29,8 @@ import com.oracle.tools.deferred.atomic.DeferredAtomicBoolean;
 import com.oracle.tools.deferred.atomic.DeferredAtomicInteger;
 import com.oracle.tools.deferred.atomic.DeferredAtomicLong;
 
+import com.oracle.tools.options.Timeout;
+
 import com.oracle.tools.predicate.Predicate;
 
 import com.oracle.tools.util.ExponentialIterator;
@@ -542,6 +544,22 @@ public class DeferredHelper
                                                  TimeUnit units)
     {
         return new SimpleTimeoutConstraint(0, units.toMillis(duration), ensuredRetryDurationsMSIterable);
+    }
+
+
+    /**
+     * Obtains a {@link TimeoutConstraint} based on the specified
+     * {@link Timeout}, no initial duration and using the default ensured strategy.
+     *
+     * @param timeout  the {@link Timeout}
+     *
+     * @return  a {@link TimeoutConstraint}
+     */
+    public static SimpleTimeoutConstraint within(Timeout timeout)
+    {
+        return new SimpleTimeoutConstraint(0,
+                                           timeout.getUnits().toMillis(timeout.getDuration()),
+                                           ensuredRetryDurationsMSIterable);
     }
 
 

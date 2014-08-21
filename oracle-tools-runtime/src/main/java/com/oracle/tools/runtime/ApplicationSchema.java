@@ -33,8 +33,8 @@ import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
 /**
- * A schema encapsulating configuration and operational settings that an
- * {@link ApplicationBuilder} will use to realize an {@link Application}.
+ * An {@link ApplicationSchema} encapsulates {@link Platform} <strong>agnostic</strong>
+ * configuration and operational settings required to realize an {@link Application}.
  * <p>
  * Copyright (c) 2011. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
@@ -122,41 +122,11 @@ public interface ApplicationSchema<A extends Application>
 
 
     /**
-     * Determines if diagnostic information will be logged for {@link Application}s
-     * produced using the {@link ApplicationSchema}.
-     *
-     * @return <code>true</code> to enable diagnostic logging
-     */
-    public boolean isDiagnosticsEnabled();
-
-
-    /**
      * Obtains the arguments for the {@link Application}.
      *
      * @return a {@link List} of {@link String}s
      */
     public List<String> getArguments();
-
-
-    /**
-     * Obtains the default duration to used for {@link Application} timeouts.
-     * <p>
-     * Many programs require timeouts when accessing resources, especially
-     * those that are remote or may require waiting for some period of time.
-     * In those circumstances, the default timeout is used, unless of course
-     * an explicit timeout is specified.
-     *
-     * @return the timeout duration (measured in {@link #getDefaultTimeoutUnits()})
-     */
-    public long getDefaultTimeout();
-
-
-    /**
-     * Obtains the default duration timeout {@link TimeUnit}.
-     *
-     * @return the {@link TimeUnit} for {@link Application} timeouts
-     */
-    public TimeUnit getDefaultTimeoutUnits();
 
 
     /**

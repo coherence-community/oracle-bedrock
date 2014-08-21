@@ -42,31 +42,10 @@ import java.util.UUID;
 public abstract class AbstractApplicationBuilder<A extends Application> implements ApplicationBuilder<A>
 {
     /**
-     * Should diagnostic information be enabled for the {@link Application}s
-     * produced by this {@link ApplicationBuilder}.
-     */
-    protected boolean m_isDiagnosticsEnabled;
-
-
-    /**
      * Constructs an {@link AbstractApplicationBuilder} with default {@link ApplicationSchema}.
      */
     public AbstractApplicationBuilder()
     {
-        m_isDiagnosticsEnabled = false;
-    }
-
-
-    /**
-     * Determines if diagnostics are enabled for the {@link ApplicationBuilder},
-     * meaning that information concerning the construction of {@link Application}s
-     * will be output/logged.
-     *
-     * @return <code>true</code> if diagnostics are enabled.
-     */
-    public boolean isDiagnosticsEnabled()
-    {
-        return m_isDiagnosticsEnabled;
     }
 
 
@@ -84,6 +63,7 @@ public abstract class AbstractApplicationBuilder<A extends Application> implemen
         return realize(applicationSchema, applicationName, new NullApplicationConsole());
     }
 
+
     @Override
     public <T extends A, S extends ApplicationSchema<T>> T realize(S                  applicationSchema,
                                                                    String             applicationName,
@@ -91,6 +71,7 @@ public abstract class AbstractApplicationBuilder<A extends Application> implemen
     {
         return realize(applicationSchema, applicationName, console, null);
     }
+
 
     /**
      * Raises a specific type of {@link Application} {@link LifecycleEvent} for

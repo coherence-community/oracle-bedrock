@@ -29,6 +29,8 @@ import com.oracle.tools.junit.AbstractTest;
 
 import com.oracle.tools.runtime.console.PipedApplicationConsole;
 
+import com.oracle.tools.runtime.options.Diagnostics;
+
 import org.junit.Test;
 
 import org.mockito.Mockito;
@@ -58,15 +60,19 @@ public class SimpleApplicationBuilderTest extends AbstractTest
     @Test
     public void shouldRunApplication() throws Exception
     {
-        SimpleApplicationSchema schema =
-            new SimpleApplicationSchema("java").setErrorStreamRedirected(true).setDiagnosticsEnabled(true);
+        SimpleApplicationSchema schema = new SimpleApplicationSchema("java").setErrorStreamRedirected(true);
 
         schema.addArgument("-help");
 
         SimpleApplicationBuilder builder     = new SimpleApplicationBuilder();
         PipedApplicationConsole  console     = new PipedApplicationConsole();
+        Platform                 platform    = LocalPlatform.getInstance();
 
-        SimpleApplication        application = builder.realize(schema, "java", console);
+        SimpleApplication        application = builder.realize(schema,
+                                                               "java",
+                                                               console,
+                                                               platform,
+                                                               Diagnostics.enabled());
 
         String                   stdout      = console.getOutputReader().readLine();
 
@@ -84,8 +90,7 @@ public class SimpleApplicationBuilderTest extends AbstractTest
     @Test
     public void shouldInvokeLifecycleInterceptor() throws Exception
     {
-        SimpleApplicationSchema schema =
-            new SimpleApplicationSchema("java").setErrorStreamRedirected(true).setDiagnosticsEnabled(true);
+        SimpleApplicationSchema schema = new SimpleApplicationSchema("java").setErrorStreamRedirected(true);
 
         LifecycleEventInterceptor<SimpleApplication> interceptor = Mockito.mock(LifecycleEventInterceptor.class);
 
@@ -93,10 +98,11 @@ public class SimpleApplicationBuilderTest extends AbstractTest
 
         schema.addArgument("-help");
 
-        SimpleApplicationBuilder builder = new SimpleApplicationBuilder();
-        PipedApplicationConsole  console = new PipedApplicationConsole();
+        SimpleApplicationBuilder builder  = new SimpleApplicationBuilder();
+        PipedApplicationConsole  console  = new PipedApplicationConsole();
+        Platform                 platform = LocalPlatform.getInstance();
 
-        try (SimpleApplication application = builder.realize(schema, "java", console))
+        try (SimpleApplication application = builder.realize(schema, "java", console, platform, Diagnostics.enabled()))
         {
             Mockito.verify(interceptor, Mockito.times(1)).onEvent(Mockito.any(LifecycleEvent.class));
 

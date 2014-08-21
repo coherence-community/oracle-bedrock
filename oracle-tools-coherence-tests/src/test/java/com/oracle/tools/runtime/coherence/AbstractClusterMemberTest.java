@@ -28,6 +28,7 @@ package com.oracle.tools.runtime.coherence;
 import com.oracle.tools.junit.AbstractTest;
 
 import com.oracle.tools.runtime.LocalPlatform;
+import com.oracle.tools.runtime.Platform;
 
 import com.oracle.tools.runtime.coherence.ClusterMemberSchema.JMXManagementMode;
 import com.oracle.tools.runtime.coherence.callables.GetClusterName;
@@ -37,9 +38,9 @@ import com.oracle.tools.runtime.coherence.callables.GetServiceStatus;
 
 import com.oracle.tools.runtime.console.SystemApplicationConsole;
 
-import com.oracle.tools.runtime.java.JavaApplicationBuilder;
-
 import com.oracle.tools.runtime.network.AvailablePortIterator;
+
+import com.oracle.tools.runtime.options.Diagnostics;
 
 import org.junit.Test;
 
@@ -60,15 +61,14 @@ import javax.management.ObjectName;
  * @author Brian Oliver
  */
 @Deprecated
-public abstract class AbstractClusterMemberTest<B extends JavaApplicationBuilder<ClusterMember>> extends AbstractTest
+public abstract class AbstractClusterMemberTest extends AbstractTest
 {
     /**
-     * Creates a new {@link com.oracle.tools.runtime.java.JavaApplicationBuilder}
-     * to use for a tests in this class and/or sub-classes.
+     * Obtains the {@link Platform} on which to realize applications being tested.
      *
-     * @return the {@link com.oracle.tools.runtime.java.JavaApplicationBuilder}
+     * @return  the {@link Platform}
      */
-    public abstract B newJavaApplicationBuilder();
+    public abstract Platform getPlatform();
 
 
     /**
@@ -89,9 +89,9 @@ public abstract class AbstractClusterMemberTest<B extends JavaApplicationBuilder
 
         try
         {
-            B builder = newJavaApplicationBuilder();
+            Platform platform = getPlatform();
 
-            member = builder.realize(schema, "TEST", new SystemApplicationConsole());
+            member = platform.realize(schema, "TEST", new SystemApplicationConsole());
 
             assertThat(invoking(member).getClusterSize(), is(1));
             assertThat(member.getRoleName(), is("test-role"));
@@ -127,17 +127,18 @@ public abstract class AbstractClusterMemberTest<B extends JavaApplicationBuilder
 
         ClusterMemberSchema schema =
             new ClusterMemberSchema().setClusterPort(availablePorts).useLocalHostMode().setRoleName("test-role")
-                .setSiteName("test-site").setDiagnosticsEnabled(true);
+                .setSiteName("test-site");
 
-        ClusterMember member  = null;
-        B             builder = newJavaApplicationBuilder();
+        ClusterMember member   = null;
+
+        Platform      platform = getPlatform();
 
         for (int i = 1; i <= 10; i++)
         {
             try
             {
                 System.out.println("Building Instance: " + i);
-                member = builder.realize(schema, "TEST");
+                member = platform.realize(schema, "TEST", new SystemApplicationConsole(), Diagnostics.enabled());
 
                 assertThat(invoking(member).getClusterSize(), is(1));
                 assertThat(member.getRoleName(), is("test-role"));
@@ -164,15 +165,14 @@ public abstract class AbstractClusterMemberTest<B extends JavaApplicationBuilder
     {
         AvailablePortIterator availablePorts = LocalPlatform.getInstance().getAvailablePorts();
 
-        ClusterMemberSchema schema =
-            new ClusterMemberSchema().setClusterPort(availablePorts).useLocalHostMode().setDiagnosticsEnabled(true);
+        ClusterMemberSchema   schema = new ClusterMemberSchema().setClusterPort(availablePorts).useLocalHostMode();
 
-        B             builder = newJavaApplicationBuilder();
-        ClusterMember member  = null;
+        Platform              platform       = getPlatform();
+        ClusterMember         member         = null;
 
         try
         {
-            member = builder.realize(schema, "TEST");
+            member = platform.realize(schema, "TEST", new SystemApplicationConsole(), Diagnostics.enabled());
 
             assertThat(member, new GetLocalMemberId(), is(1));
             assertThat(member, new GetClusterSize(), is(1));
@@ -201,15 +201,14 @@ public abstract class AbstractClusterMemberTest<B extends JavaApplicationBuilder
 
         ClusterMemberSchema schema =
             new ClusterMemberSchema().setClusterPort(availablePorts)
-                .setOperationalOverrideURI("test-operational-override.xml").useLocalHostMode()
-                .setDiagnosticsEnabled(true);
+                .setOperationalOverrideURI("test-operational-override.xml").useLocalHostMode();
 
-        B             builder = newJavaApplicationBuilder();
-        ClusterMember member  = null;
+        Platform      platform = getPlatform();
+        ClusterMember member   = null;
 
         try
         {
-            member = builder.realize(schema, "TEST");
+            member = platform.realize(schema, "TEST", new SystemApplicationConsole(), Diagnostics.enabled());
 
             assertThat(member, new GetLocalMemberId(), is(1));
             assertThat(member, new GetClusterSize(), is(1));

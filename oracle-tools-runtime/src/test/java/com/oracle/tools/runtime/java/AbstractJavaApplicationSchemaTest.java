@@ -25,9 +25,13 @@
 
 package com.oracle.tools.runtime.java;
 
+import com.oracle.tools.Options;
+
 import com.oracle.tools.runtime.ApplicationConsole;
 import com.oracle.tools.runtime.Platform;
 import com.oracle.tools.runtime.PlatformAware;
+
+import com.oracle.tools.runtime.java.options.RemoteDebugging;
 
 import org.junit.After;
 import org.junit.Before;
@@ -44,6 +48,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.rmi.Remote;
+
 import java.util.Properties;
 
 /**
@@ -58,7 +64,7 @@ public class AbstractJavaApplicationSchemaTest
 {
     /**
      * Test that remote debug mode is set to the value returned
-     * from {@link JavaVirtualMachine#shouldEnabledRemoteDebug()}
+     * from {@link JavaVirtualMachine#shouldEnableRemoteDebugging()}
      */
     @Test
     @SuppressWarnings("unchecked")
@@ -66,21 +72,18 @@ public class AbstractJavaApplicationSchemaTest
     {
         JavaVirtualMachine jvm = JavaVirtualMachine.getInstance();
 
-        when(jvm.shouldEnabledRemoteDebug()).thenReturn(false);
+        when(jvm.shouldEnableRemoteDebugging()).thenReturn(false);
 
-        AbstractJavaApplicationSchema schema = new AbstractJavaApplicationSchemaStub(SimpleJavaApplication.class,
-                                                                                     "TestExe",
-                                                                                     "TestApp",
-                                                                                     "classpath");
+        RemoteDebugging remoteDebugging = RemoteDebugging.autoDetect();
 
-        assertThat(schema.isRemoteDebuggingEnabled(), is(false));
-        verify(jvm, atLeastOnce()).shouldEnabledRemoteDebug();
+        assertThat(remoteDebugging.isEnabled(), is(false));
+        verify(jvm, atLeastOnce()).shouldEnableRemoteDebugging();
     }
 
 
     /**
      * Test that remote debug mode is set to the value returned
-     * from {@link JavaVirtualMachine#shouldEnabledRemoteDebug()}
+     * from {@link JavaVirtualMachine#shouldEnableRemoteDebugging()}
      */
     @Test
     @SuppressWarnings("unchecked")
@@ -88,15 +91,12 @@ public class AbstractJavaApplicationSchemaTest
     {
         JavaVirtualMachine jvm = JavaVirtualMachine.getInstance();
 
-        when(jvm.shouldEnabledRemoteDebug()).thenReturn(true);
+        when(jvm.shouldEnableRemoteDebugging()).thenReturn(true);
 
-        AbstractJavaApplicationSchema schema = new AbstractJavaApplicationSchemaStub(SimpleJavaApplication.class,
-                                                                                     "TestExe",
-                                                                                     "TestApp",
-                                                                                     "classpath");
+        RemoteDebugging remoteDebugging = RemoteDebugging.autoDetect();
 
-        assertThat(schema.isRemoteDebuggingEnabled(), is(true));
-        verify(jvm, atLeastOnce()).shouldEnabledRemoteDebug();
+        assertThat(remoteDebugging.isEnabled(), is(true));
+        verify(jvm, atLeastOnce()).shouldEnableRemoteDebugging();
     }
 
 
@@ -184,6 +184,7 @@ public class AbstractJavaApplicationSchemaTest
         public A createJavaApplication(JavaApplicationProcess process,
                                        String                 name,
                                        Platform               platform,
+                                       Options                options,
                                        ApplicationConsole     console,
                                        Properties             environmentVariables,
                                        Properties             systemProperties,

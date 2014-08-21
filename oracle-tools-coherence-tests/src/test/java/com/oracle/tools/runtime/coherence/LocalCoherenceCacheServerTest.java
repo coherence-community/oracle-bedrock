@@ -25,6 +25,9 @@
 
 package com.oracle.tools.runtime.coherence;
 
+import com.oracle.tools.runtime.LocalPlatform;
+import com.oracle.tools.runtime.Platform;
+
 import com.oracle.tools.runtime.java.LocalJavaApplicationBuilder;
 
 /**
@@ -35,12 +38,11 @@ import com.oracle.tools.runtime.java.LocalJavaApplicationBuilder;
  *
  * @author Brian Oliver
  */
-public class LocalCoherenceCacheServerTest
-    extends AbstractCoherenceCacheServerTest<LocalJavaApplicationBuilder<CoherenceCacheServer>>
+public class LocalCoherenceCacheServerTest extends AbstractCoherenceCacheServerTest
 {
     @Override
-    public LocalJavaApplicationBuilder<CoherenceCacheServer> newJavaApplicationBuilder()
+    public Platform getPlatform()
     {
-        return new LocalJavaApplicationBuilder<CoherenceCacheServer>();
+        return LocalPlatform.getInstance();
     }
 }

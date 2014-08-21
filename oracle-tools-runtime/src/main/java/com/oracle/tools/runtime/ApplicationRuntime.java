@@ -25,6 +25,9 @@
 
 package com.oracle.tools.runtime;
 
+import com.oracle.tools.Option;
+import com.oracle.tools.Options;
+
 import java.util.Properties;
 
 import java.util.concurrent.TimeUnit;
@@ -48,17 +51,6 @@ import java.util.concurrent.TimeUnit;
 public interface ApplicationRuntime<P extends ApplicationProcess>
 {
     /**
-     * The default timeout for the {@link Application}s.
-     */
-    public static final long DEFAULT_TIMEOUT = 60;
-
-    /**
-     * The default timeout {@link TimeUnit} for the {@link Application}s.
-     */
-    public static final TimeUnit DEFAULT_TIMEOUT_UNIT = TimeUnit.SECONDS;
-
-
-    /**
      * Obtains the name of the {@link Application}.  This is used
      * for logging, diagnostic and runtime reporting purposes.
      *
@@ -73,6 +65,15 @@ public interface ApplicationRuntime<P extends ApplicationProcess>
      * @return  the {@link Platform}
      */
     public Platform getPlatform();
+
+
+    /**
+     * Obtains the {@link Option}s that were specified when the {@link Application}
+     * was realized.
+     *
+     * @return  the {@link Options}
+     */
+    public Options getOptions();
 
 
     /**
@@ -100,31 +101,4 @@ public interface ApplicationRuntime<P extends ApplicationProcess>
      * @return  the operating system environment variables
      */
     public Properties getEnvironmentVariables();
-
-
-    /**
-     * Determines if diagnostics are enabled for the {@link Application}.  This
-     * includes the ability to automatically output/dump diagnostic information
-     * about the running {@link Application} during its lifecycle.
-     *
-     * @return  <code>true</code> if diagnostics are enabled, <code>false</code> otherwise
-     */
-    public boolean isDiagnosticsEnabled();
-
-
-    /**
-     * Obtains the default timeout duration to use for the {@link Application}, based on
-     * the units specified by {@link #getDefaultTimeoutUnits()}.
-     *
-     * @return  the default timeout duration
-     */
-    public long getDefaultTimeout();
-
-
-    /**
-     * Obtains the {@link TimeUnit}s to use for the {@link #getDefaultTimeout()}.
-     *
-     * @return  the {@link TimeUnit}s for {@link #getDefaultTimeout()}
-     */
-    public TimeUnit getDefaultTimeoutUnits();
 }

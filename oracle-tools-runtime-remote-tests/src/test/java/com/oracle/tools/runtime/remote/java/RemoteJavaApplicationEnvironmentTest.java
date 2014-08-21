@@ -25,19 +25,26 @@
 
 package com.oracle.tools.runtime.remote.java;
 
+import com.oracle.tools.Options;
+
 import com.oracle.tools.runtime.LocalPlatform;
-import com.oracle.tools.runtime.java.RemoteDebuggingMode;
+
 import com.oracle.tools.runtime.java.SimpleJavaApplicationSchema;
+import com.oracle.tools.runtime.java.options.RemoteDebugging;
+
 import com.oracle.tools.runtime.remote.RemotePlatform;
 import com.oracle.tools.runtime.remote.java.applications.SleepingApplication;
-import org.junit.Test;
 
-import java.util.Collections;
+import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.not;
+
 import static org.junit.Assert.assertThat;
+
 import static org.mockito.Mockito.mock;
+
+import java.util.Collections;
 
 /**
  * @author jk 2014.07.04
@@ -51,27 +58,26 @@ public class RemoteJavaApplicationEnvironmentTest
     @SuppressWarnings("unchecked")
     public void shouldAddDebugOptionWithDefaultModeAsServer() throws Exception
     {
-        int                         port     = 5005;
-        RemotePlatform              platform = mock(RemotePlatform.class);
-        SimpleJavaApplicationSchema schema  = new SimpleJavaApplicationSchema(SleepingApplication.class.getName())
-                                                 .setRemoteDebuggingEnabled(true)
-                                                 .setRemoteDebugPort(port);
+        RemoteDebugging                  remoteDebugging = RemoteDebugging.enabled();
+
+        Options                          options         = new Options(remoteDebugging);
+
+        RemotePlatform                   platform        = mock(RemotePlatform.class);
+        SimpleJavaApplicationSchema      schema = new SimpleJavaApplicationSchema(SleepingApplication.class.getName());
 
         RemoteJavaApplicationEnvironment env = new RemoteJavaApplicationEnvironment(schema,
                                                                                     '/',
                                                                                     ':',
-                                                                                    false,
-                                                                                    true,
-                                                                                    Collections.emptySet(),
-                                                                                    "/java_home",
-                                                                                    platform);
+                                                                                    platform,
+                                                                                    options);
 
-        String command = env.getRemoteCommandToExecute();
+        String command      = env.getRemoteCommandToExecute();
 
-        String debugCommand = String.format("-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=%d", port);
+        String debugCommand = "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n";
 
         assertThat(command, containsString(debugCommand));
     }
+
 
     /**
      * Should add the remote debug options if enabled on the schema
@@ -80,30 +86,28 @@ public class RemoteJavaApplicationEnvironmentTest
     @SuppressWarnings("unchecked")
     public void shouldAddDebugOptionWithModeAsAttachToDebugger() throws Exception
     {
-        int                         port     = 5005;
-        RemotePlatform              platform = mock(RemotePlatform.class);
-        SimpleJavaApplicationSchema schema  = new SimpleJavaApplicationSchema(SleepingApplication.class.getName())
-                                                 .setRemoteDebuggingEnabled(true)
-                                                 .setRemoteDebugPort(port)
-                                                 .setRemoteDebuggingMode(RemoteDebuggingMode.ATTACH_TO_DEBUGGER);
+        int                              debuggerPort    = 5005;
+        RemoteDebugging                  remoteDebugging = RemoteDebugging.enabled().attachToDebugger(debuggerPort);
+        Options                          options         = new Options(remoteDebugging);
+
+        RemotePlatform                   platform        = mock(RemotePlatform.class);
+        SimpleJavaApplicationSchema      schema = new SimpleJavaApplicationSchema(SleepingApplication.class.getName());
 
         RemoteJavaApplicationEnvironment env = new RemoteJavaApplicationEnvironment(schema,
                                                                                     '/',
                                                                                     ':',
-                                                                                    false,
-                                                                                    true,
-                                                                                    Collections.emptySet(),
-                                                                                    "/java_home",
-                                                                                    platform);
+                                                                                    platform,
+                                                                                    options);
 
         String command = env.getRemoteCommandToExecute();
 
         String debugCommand = String.format("-agentlib:jdwp=transport=dt_socket,server=n,suspend=n,address=%s:%d",
                                             LocalPlatform.getInstance().getHostName(),
-                                            port);
+                                            debuggerPort);
 
         assertThat(command, containsString(debugCommand));
     }
+
 
     /**
      * Should add the remote debug options if enabled on the schema
@@ -112,28 +116,25 @@ public class RemoteJavaApplicationEnvironmentTest
     @SuppressWarnings("unchecked")
     public void shouldAddDebugOptionWithModeAsListenForDebugger() throws Exception
     {
-        int                         port     = 5005;
-        RemotePlatform              platform = mock(RemotePlatform.class);
-        SimpleJavaApplicationSchema schema  = new SimpleJavaApplicationSchema(SleepingApplication.class.getName())
-                                                 .setRemoteDebuggingEnabled(true)
-                                                 .setRemoteDebugPort(port)
-                                                 .setRemoteDebuggingMode(RemoteDebuggingMode.LISTEN_FOR_DEBUGGER);
+        RemoteDebugging                  remoteDebugging = RemoteDebugging.enabled().listenForDebugger();
+        Options                          options         = new Options(remoteDebugging);
+
+        RemotePlatform                   platform        = mock(RemotePlatform.class);
+        SimpleJavaApplicationSchema      schema = new SimpleJavaApplicationSchema(SleepingApplication.class.getName());
 
         RemoteJavaApplicationEnvironment env = new RemoteJavaApplicationEnvironment(schema,
                                                                                     '/',
                                                                                     ':',
-                                                                                    false,
-                                                                                    true,
-                                                                                    Collections.emptySet(),
-                                                                                    "/java_home",
-                                                                                    platform);
+                                                                                    platform,
+                                                                                    options);
 
-        String command = env.getRemoteCommandToExecute();
+        String command      = env.getRemoteCommandToExecute();
 
-        String debugCommand = String.format("-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=%d", port);
+        String debugCommand = "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n";
 
         assertThat(command, containsString(debugCommand));
     }
+
 
     /**
      * Should add the remote debug options if enabled on the schema
@@ -142,28 +143,25 @@ public class RemoteJavaApplicationEnvironmentTest
     @SuppressWarnings("unchecked")
     public void shouldAddDebugOptionWithSuspend() throws Exception
     {
-        int                         port     = 5005;
-        RemotePlatform              platform = mock(RemotePlatform.class);
-        SimpleJavaApplicationSchema schema   = new SimpleJavaApplicationSchema(SleepingApplication.class.getName())
-                                                 .setRemoteDebuggingEnabled(true)
-                                                 .setRemoteDebuggingStartSuspended(true)
-                                                 .setRemoteDebugPort(port);
+        RemoteDebugging                  remoteDebugging = RemoteDebugging.enabled().startSuspended(true);
+        Options                          options         = new Options(remoteDebugging);
+
+        RemotePlatform                   platform        = mock(RemotePlatform.class);
+        SimpleJavaApplicationSchema      schema = new SimpleJavaApplicationSchema(SleepingApplication.class.getName());
 
         RemoteJavaApplicationEnvironment env = new RemoteJavaApplicationEnvironment(schema,
                                                                                     '/',
                                                                                     ':',
-                                                                                    false,
-                                                                                    true,
-                                                                                    Collections.emptySet(),
-                                                                                    "/java_home",
-                                                                                    platform);
+                                                                                    platform,
+                                                                                    options);
 
-        String command = env.getRemoteCommandToExecute();
+        String command      = env.getRemoteCommandToExecute();
 
-        String debugCommand = String.format("-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=%d", port);
+        String debugCommand = "-agentlib:jdwp=transport=dt_socket,server=y,suspend=y";
 
         assertThat(command, containsString(debugCommand));
     }
+
 
     /**
      * Should add the remote debug options if not enabled on the schema
@@ -172,20 +170,17 @@ public class RemoteJavaApplicationEnvironmentTest
     @SuppressWarnings("unchecked")
     public void shouldNotAddDebugOption() throws Exception
     {
-        int                         port     = 5005;
-        RemotePlatform              platform = mock(RemotePlatform.class);
-        SimpleJavaApplicationSchema schema  = new SimpleJavaApplicationSchema(SleepingApplication.class.getName())
-                                                 .setRemoteDebuggingEnabled(false)
-                                                 .setRemoteDebugPort(port);
+        RemoteDebugging                  remoteDebugging = RemoteDebugging.disabled();
+        Options                          options         = new Options(remoteDebugging);
+
+        RemotePlatform                   platform        = mock(RemotePlatform.class);
+        SimpleJavaApplicationSchema      schema = new SimpleJavaApplicationSchema(SleepingApplication.class.getName());
 
         RemoteJavaApplicationEnvironment env = new RemoteJavaApplicationEnvironment(schema,
                                                                                     '/',
                                                                                     ':',
-                                                                                    false,
-                                                                                    true,
-                                                                                    Collections.emptySet(),
-                                                                                    "/java_home",
-                                                                                    platform);
+                                                                                    platform,
+                                                                                    options);
 
         String command = env.getRemoteCommandToExecute();
 

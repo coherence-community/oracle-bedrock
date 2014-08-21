@@ -25,31 +25,43 @@
 
 package com.oracle.tools.runtime.remote.java;
 
+import com.oracle.tools.Options;
+
 import com.oracle.tools.io.FileHelper;
 import com.oracle.tools.io.NetworkHelper;
+
 import com.oracle.tools.lang.StringHelper;
+
 import com.oracle.tools.predicate.Predicate;
+
 import com.oracle.tools.runtime.LocalPlatform;
 import com.oracle.tools.runtime.Platform;
 import com.oracle.tools.runtime.Settings;
+
 import com.oracle.tools.runtime.concurrent.ControllableRemoteExecutor;
 import com.oracle.tools.runtime.concurrent.socket.RemoteExecutorServer;
+
 import com.oracle.tools.runtime.java.ClassPath;
 import com.oracle.tools.runtime.java.JavaApplication;
 import com.oracle.tools.runtime.java.JavaApplicationSchema;
-import com.oracle.tools.runtime.java.RemoteDebuggingMode;
+import com.oracle.tools.runtime.java.options.JavaHome;
+import com.oracle.tools.runtime.java.options.RemoteDebugging;
+
 import com.oracle.tools.runtime.remote.AbstractRemoteApplicationEnvironment;
 import com.oracle.tools.runtime.remote.DeploymentArtifact;
+import com.oracle.tools.runtime.remote.java.options.JavaDeployment;
+
+import static com.oracle.tools.predicate.Predicates.allOf;
 
 import java.io.File;
 import java.io.IOException;
+
 import java.net.InetAddress;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Properties;
 import java.util.Set;
-
-import static com.oracle.tools.predicate.Predicates.allOf;
 
 /**
  * A Java-based implementation of a {@link RemoteJavaApplicationEnvironment}.
@@ -79,17 +91,6 @@ public class RemoteJavaApplicationEnvironment<A extends JavaApplication>
     private ClassPath remoteClassPath;
 
     /**
-     * The {@link DeploymentArtifact}s for the remote {@link JavaApplication}.
-     */
-    private ArrayList<DeploymentArtifact> deploymentArtifacts;
-
-    /**
-     * The remote JAVA_HOME to use or <code>null</code> to use the
-     * schema java home (which if null means the platform defined JAVA HOME).
-     */
-    private String remoteJavaHome;
-
-    /**
      * The remote {@link File#separator}.
      */
     private char remoteFileSeparator;
@@ -104,27 +105,23 @@ public class RemoteJavaApplicationEnvironment<A extends JavaApplication>
      */
     private int remoteDebugPort;
 
+
     /**
      * Constructs a {@link RemoteJavaApplicationEnvironment}.
-     *  @param schema                the {@link com.oracle.tools.runtime.java.JavaApplicationSchema}
+     *
+     * @param schema                the {@link com.oracle.tools.runtime.java.JavaApplicationSchema}
      * @param remoteFileSeparator   the {@link java.io.File#separator} for the remote server
      * @param remotePathSeparator   the {@link java.io.File#pathSeparator} for the remote server
-     * @param areOrphansPermitted   are orphaned remote {@link com.oracle.tools.runtime.java.JavaApplication}s permitted
-     * @param isAutoDeployEnabled   automatically deploy {@link com.oracle.tools.runtime.java.JavaApplication}s
-     * @param doNotDeployFileNames  the names of files not to deploy (when deployment enabled)
-     * @param remoteJavaHome        the remote JAVA HOME (may be null for a default)
-     * @param platform              the {@link Platform} representing the remoteO/S
+     * @param platform              the {@link Platform} representing the remote O/S
+     * @param options       the {@link Options} for the remote O/S
      */
     public RemoteJavaApplicationEnvironment(JavaApplicationSchema<A> schema,
                                             char                     remoteFileSeparator,
                                             char                     remotePathSeparator,
-                                            boolean                  areOrphansPermitted,
-                                            boolean                  isAutoDeployEnabled,
-                                            Set<String>              doNotDeployFileNames,
-                                            String                   remoteJavaHome,
-                                            Platform                 platform) throws IOException
+                                            Platform                 platform,
+                                            Options                  options) throws IOException
     {
-        super(schema, platform);
+        super(schema, platform, options);
 
         this.remoteFileSeparator = remoteFileSeparator;
         this.remotePathSeparator = remotePathSeparator;
@@ -160,99 +157,33 @@ public class RemoteJavaApplicationEnvironment<A extends JavaApplication>
         remoteSystemProperties.setProperty(Settings.PARENT_ADDRESS,
                                            remoteExecutor.getInetAddress(preferred).getHostAddress());
         remoteSystemProperties.setProperty(Settings.PARENT_PORT, Integer.toString(remoteExecutor.getPort()));
-        remoteSystemProperties.setProperty(Settings.ORPHANABLE, Boolean.toString(areOrphansPermitted));
+        remoteSystemProperties.setProperty(Settings.ORPHANABLE, Boolean.toString(schema.isOrphanable()));
 
-        // ----- determine the remote classpath and deployment artifacts -----
+        // ----- determine the remote classpath based on the deployment option -----
 
-        ClassPath classPath = schema.getClassPath();
+        JavaDeployment deployment = options.get(JavaDeployment.class);
 
-        deploymentArtifacts = new ArrayList<DeploymentArtifact>();
-
-        if (isAutoDeployEnabled)
+        if (deployment == null)
         {
-            ArrayList<ClassPath> remoteClassPaths = new ArrayList<ClassPath>();
+            // when no deployment is specified we assume automatic
+            deployment = JavaDeployment.automatic();
 
-            for (String path : classPath)
-            {
-                // we ignore leading and trailing spaces
-                path = path.trim();
+            options.addIfAbsent(deployment);
+        }
 
-                if (path.endsWith("*"))
-                {
-                    // TODO: deal with wild-card based class paths
-                    // (we need to copy all of the jars in the directory)
-                }
-                else if (path.endsWith("."))
-                {
-                    // TODO: deal with current directory based class paths
-                    // (we need to copy all of the current directory, including sub-folders)
-                }
-                else if (path.endsWith(".."))
-                {
-                    // TODO: deal with parent directory based class paths
-                    // (is this even possible?)
-                }
-                else
-                {
-                    // create a file based on the path
-                    File file = new File(path);
-
-                    if (file.exists())
-                    {
-                        if (file.isFile())
-                        {
-                            String fileName = file.getName();
-
-                            // ensure that certain jars are not deployed
-                            if (!doNotDeployFileNames.contains(fileName.toLowerCase()))
-                            {
-                                String             destinationFile = file.getName();
-                                DeploymentArtifact artifact = new DeploymentArtifact(file, new File(destinationFile));
-
-                                deploymentArtifacts.add(artifact);
-                                remoteClassPaths.add(new ClassPath(destinationFile));
-                            }
-                        }
-                        else
-                        {
-                            // create a temporary file in which to zip the contents of the folder
-                            File temporaryFile = File.createTempFile("oracle-tools-deployment-", ".jar");
-
-                            FileHelper.zip(Collections.singletonList(file), "", temporaryFile.getAbsolutePath());
-
-                            DeploymentArtifact artifact = new DeploymentArtifact(temporaryFile,
-                                                                                 new File(temporaryFile.getName()));
-
-                            deploymentArtifacts.add(artifact);
-                            remoteClassPaths.add(new ClassPath(temporaryFile.getName()));
-                        }
-                    }
-                }
-            }
-
-            // the remote class-path includes all of the deployed jars
+        if (deployment.isAutoDeployEnabled())
+        {
+            // when an automatic deployment is specified,
+            // we use our modified class-path
+            // (which is where all of the deployed jars will be located)
             remoteClassPath = new ClassPath(".", "./*");
         }
         else
         {
-            // no deployment means no changes in class path are required
-            remoteClassPath = classPath;
+            // when a non-automatic deployment is specified
+            // we'll use what the schema defines
+            remoteClassPath = schema.getClassPath();
         }
-
-        // ----- establish the remote java home -----
-
-        if (remoteJavaHome != null)
-        {
-            // ensure that the java home ends with the remote file separator
-            remoteJavaHome = remoteJavaHome.trim();
-
-            if (!remoteJavaHome.endsWith(String.valueOf(remoteFileSeparator)))
-            {
-                remoteJavaHome = remoteJavaHome + remoteFileSeparator;
-            }
-        }
-
-        this.remoteJavaHome = remoteJavaHome;
     }
 
 
@@ -286,16 +217,25 @@ public class RemoteJavaApplicationEnvironment<A extends JavaApplication>
 
         // ----- establish the command to start java -----
 
-        if (remoteJavaHome == null)
+        JavaHome javaHome = options.get(JavaHome.class);
+
+        if (javaHome == null)
         {
             // when we don't have a java home we just use the defined executable
             builder.append(schema.getExecutableName());
         }
         else
         {
-            // when we have a java home, we prefix the executable name with the java.home/home/bin/
-            builder.append(remoteJavaHome);
-            builder.append(remoteFileSeparator);
+            // when we have a java home, we prefix the executable name with the java.home/bin/
+            String javaHomePath = javaHome.get().trim();
+
+            builder.append(javaHomePath);
+
+            if (!javaHomePath.endsWith(String.valueOf(remoteFileSeparator)))
+            {
+                builder.append(remoteFileSeparator);
+            }
+
             builder.append("bin");
             builder.append(remoteFileSeparator);
 
@@ -317,25 +257,29 @@ public class RemoteJavaApplicationEnvironment<A extends JavaApplication>
 
         // ----- establish remote debugging JVM options -----
 
-        if (schema.isRemoteDebuggingEnabled())
-        {
-            RemoteDebuggingMode debugMode     = schema.getRemoteDebuggingMode();
-            boolean             isDebugServer = debugMode == RemoteDebuggingMode.LISTEN_FOR_DEBUGGER;
-            boolean             suspend       = schema.isRemoteDebuggingStartSuspended();
+        // TODO: also consider getting this from the schema (if it only had "default" options ;)
+        RemoteDebugging remoteDebugging = options.get(RemoteDebugging.class, RemoteDebugging.autoDetect());
 
-            remoteDebugPort = isDebugServer ? schema.getRemoteDebugListenPort() : schema.getRemoteDebugAttachPort();
+        if (remoteDebugging.isEnabled())
+        {
+            boolean isDebugServer = remoteDebugging.getBehavior() == RemoteDebugging.Behavior.LISTEN_FOR_DEBUGGER;
+            boolean suspend       = remoteDebugging.isStartSuspended();
+
+            remoteDebugPort = isDebugServer ? remoteDebugging.getListenPort() : remoteDebugging.getAttachPort();
+
             if (remoteDebugPort <= 0)
             {
                 remoteDebugPort = LocalPlatform.getInstance().getAvailablePorts().next();
             }
 
-            String debugAddress   = isDebugServer ? String.valueOf(remoteDebugPort)
-                                                  : LocalPlatform.getInstance().getHostName() + ":" + remoteDebugPort;
+            String debugAddress = isDebugServer
+                                  ? String.valueOf(remoteDebugPort)
+                                  : LocalPlatform.getInstance().getHostName() + ":" + remoteDebugPort;
 
-            String debugOption    = String.format(" -agentlib:jdwp=transport=dt_socket,server=%s,suspend=%s,address=%s",
-                                                  (isDebugServer ? "y" : "n"),
-                                                  (suspend ? "y" : "n"),
-                                                  debugAddress);
+            String debugOption = String.format(" -agentlib:jdwp=transport=dt_socket,server=%s,suspend=%s,address=%s",
+                                               (isDebugServer ? "y" : "n"),
+                                               (suspend ? "y" : "n"),
+                                               debugAddress);
 
             builder.append(debugOption);
         }
@@ -387,21 +331,14 @@ public class RemoteJavaApplicationEnvironment<A extends JavaApplication>
 
         // ----- establish the java home -----
 
-        String javaHome = remoteJavaHome == null ? schema.getJavaHome() : remoteJavaHome;
+        JavaHome javaHome = options.get(JavaHome.class);
 
         if (javaHome != null)
         {
-            properties.put("JAVA_HOME", javaHome);
+            properties.put("JAVA_HOME", javaHome.get());
         }
 
         return properties;
-    }
-
-
-    @Override
-    public Iterable<DeploymentArtifact> getRemoteDeploymentArtifacts()
-    {
-        return deploymentArtifacts;
     }
 
 
@@ -409,6 +346,7 @@ public class RemoteJavaApplicationEnvironment<A extends JavaApplication>
     {
         return remoteDebugPort;
     }
+
 
     @Override
     public void close()

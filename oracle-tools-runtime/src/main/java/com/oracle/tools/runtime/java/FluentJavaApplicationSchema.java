@@ -99,77 +99,16 @@ public interface FluentJavaApplicationSchema<A extends JavaApplication, S extend
      */
     public S setJvmOptions(List<String> options);
 
-    /**
-     * Set whether {@link JavaApplication}s realized from this schema should have
-     * remote debugging enabled.
-     * </p>
-     * This will override any default value set if the controlling JVM, which defaults
-     * this value to true if running in debug mode and false if running normally.
-     *
-     * @param remoteDebuggingEnabled  true if remote debugging should be enabled
-     *
-     * @return the {@link FluentJavaApplicationSchema}
-     */
-    public S setRemoteDebuggingEnabled(boolean remoteDebuggingEnabled);
 
     /**
-     * Set the flag that determines whether {@link JavaApplication}s realized from this schema
-     * should start suspended if remote debugging is also enabled.
+     * Sets if {@link JavaApplication}s realized using this {@link JavaApplicationSchema}
+     * will be orphaned (left running) if the application that started them terminates, for what
+     * ever reason.   The default is <code>false</code>.
      *
-     * @param startSuspended true if the application should start suspended if remote
-     *                       debugging is also enabled
-     *
-     * @return the {@link FluentJavaApplicationSchema}
-     */
-    public S setRemoteDebuggingStartSuspended(boolean startSuspended);
-
-    /**
-     * Set the port that will be used for remote debugging if enabled for {@link JavaApplication}s
-     * realized from this schema.
-     * </p>
-     * If the remoteDebugPorts parameter is null, or the iterator is has no more elements then
-     * rather than failing to start the application a random port will be assigned for the debug port.
-     * </p>
-     * If the {@link #getRemoteDebuggingMode()} value is {@link RemoteDebuggingMode#LISTEN_FOR_DEBUGGER} then
-     * a different port will be taken from the iterator for each {@link JavaApplication} realized from this schema,
-     * and hence each application will listen for debugger connections on a different port.
-     * </p>
-     * If the {@link #getRemoteDebuggingMode()} value is {@link RemoteDebuggingMode#ATTACH_TO_DEBUGGER} then
-     * the first port will be taken from the iterator and used for all {@link JavaApplication}s realized from this
-     * schema, and hence each {@link JavaApplication} will attempt to connect back to the same debugger.
-     *
-     * @param remoteDebugPorts  the {@link java.util.Iterator} providing the ports to assign to the remote debug port
+     * @param orphanable  set to <code>true</code> if {@link JavaApplication}s are orphanable,
+     *                    <code>false</code> otherwise
      *
      * @return the {@link FluentJavaApplicationSchema}
      */
-    public S setRemoteDebugPorts(Iterator<Integer> remoteDebugPorts);
-
-    /**
-     * Set the port that will be used for remote debugging if enabled for {@link JavaApplication}s
-     * realized from this schema.
-     * </p>
-     * If the {@link #getRemoteDebuggingMode()} value is {@link RemoteDebuggingMode#LISTEN_FOR_DEBUGGER} then
-     * this port will be used for the first {@link JavaApplication} realized from this schema. If more
-     * {@link JavaApplication}s are subsequently realized from this schema then random ports will be assigned
-     * and hence each application will listen for debugger connections on a different port.
-     * </p>
-     * If the {@link #getRemoteDebuggingMode()} value is {@link RemoteDebuggingMode#ATTACH_TO_DEBUGGER} then
-     * the this port will be used for all {@link JavaApplication}s realized from this schema, and hence each
-     * {@link JavaApplication} will attempt to connect back to the same debugger.
-     *
-     * @param remoteDebugPort  the the port to assign to the remote debug port
-     *
-     * @return the {@link FluentJavaApplicationSchema}
-     */
-    public S setRemoteDebugPort(int remoteDebugPort);
-
-    /**
-     * Set the mode that the {@link JavaApplication} will run in if remote
-     * debugging is enabled.
-     *
-     * @param remoteDebuggingMode  the remote debugging mode
-     *
-     * @return the {@link FluentJavaApplicationSchema}
-     */
-    public S setRemoteDebuggingMode(RemoteDebuggingMode remoteDebuggingMode);
+    public S setOrphanable(boolean orphanable);
 }

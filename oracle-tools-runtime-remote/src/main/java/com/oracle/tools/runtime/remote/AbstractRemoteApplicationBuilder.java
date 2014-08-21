@@ -31,6 +31,12 @@ import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import com.jcraft.jsch.SftpException;
+
+import com.oracle.tools.Option;
+import com.oracle.tools.Options;
+
+import com.oracle.tools.options.Timeout;
+
 import com.oracle.tools.runtime.AbstractApplicationBuilder;
 import com.oracle.tools.runtime.Application;
 import com.oracle.tools.runtime.ApplicationConsole;
@@ -38,13 +44,18 @@ import com.oracle.tools.runtime.ApplicationSchema;
 import com.oracle.tools.runtime.Platform;
 import com.oracle.tools.runtime.PropertiesBuilder;
 
+import com.oracle.tools.runtime.remote.options.Deployment;
+
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Iterator;
 import java.util.Properties;
+
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -109,12 +120,6 @@ public abstract class AbstractRemoteApplicationBuilder<A extends Application, E 
     protected boolean strictHostChecking;
 
     /**
-     * The {@link DeploymentArtifact}s that the builder must deploy
-     * prior to the application being launched.
-     */
-    protected ArrayList<DeploymentArtifact> deploymentArtifacts;
-
-    /**
      * The {@link File} representing the location of the temporary directory
      * on the remote server.
      */
@@ -171,9 +176,6 @@ public abstract class AbstractRemoteApplicationBuilder<A extends Application, E 
 
         // by default there are no custom remote environment variables
         remoteEnvironmentVariablesBuilder = new PropertiesBuilder();
-
-        // by default the builder doesn't deploy any artifacts
-        deploymentArtifacts = new ArrayList<DeploymentArtifact>();
 
         // establish the JSch framework for the builder
         this.jsch = new JSch();
@@ -273,23 +275,6 @@ public abstract class AbstractRemoteApplicationBuilder<A extends Application, E 
 
 
     /**
-     * Adds a {@link DeploymentArtifact} that the builder must deploy for each
-     * application realized, regardless of the application schema.
-     *
-     * @param deploymentArtifact  the {@link DeploymentArtifact}
-     */
-    public B addDeploymentArtifact(DeploymentArtifact deploymentArtifact)
-    {
-        if (deploymentArtifact != null)
-        {
-            deploymentArtifacts.add(deploymentArtifact);
-        }
-
-        return (B) this;
-    }
-
-
-    /**
      * Creates a remote-platform specific filename, given a fileName
      * represented in a format for this platform.
      *
@@ -353,13 +338,15 @@ public abstract class AbstractRemoteApplicationBuilder<A extends Application, E 
      * Obtains the {@link RemoteApplicationBuilder} specific {@link RemoteApplicationEnvironment}
      * to be used for configuring and realizing a remote {@link Application}.
      *
-     * @param schema    the {@link com.oracle.tools.runtime.ApplicationSchema} defining the application
-     * @param platform  the {@link Platform} representing the remote O/S
+     * @param schema           the {@link com.oracle.tools.runtime.ApplicationSchema} defining the application
+     * @param platform         the {@link Platform} representing the remote O/S
+     * @param options  the {@link Options} for the {@link Platform}
      *
      * @return the {@link RemoteApplicationEnvironment}
      */
-    abstract protected <T extends A, S extends ApplicationSchema<T>> E getRemoteApplicationEnvironment(S schema,
-                                                                                                       Platform platform);
+    abstract protected <T extends A, S extends ApplicationSchema<T>> E getRemoteApplicationEnvironment(S        schema,
+                                                                                                       Platform platform,
+                                                                                                       Options  options);
 
 
     /**
@@ -377,6 +364,7 @@ public abstract class AbstractRemoteApplicationBuilder<A extends Application, E 
      * @return the {@link Application}
      */
     protected abstract <T extends A, S extends ApplicationSchema<T>> T createApplication(Platform                 platform,
+                                                                                         Options                  options,
                                                                                          S                        schema,
                                                                                          E                        environment,
                                                                                          String                   applicationName,
@@ -388,12 +376,15 @@ public abstract class AbstractRemoteApplicationBuilder<A extends Application, E 
     public <T extends A, S extends ApplicationSchema<T>> T realize(S                  applicationSchema,
                                                                    String             applicationName,
                                                                    ApplicationConsole console,
-                                                                   Platform           platform)
+                                                                   Platform           platform,
+                                                                   Option...          applicationOptions)
     {
-        Session              session = null;
+        Session session = null;
+
+        Options options = new Options(applicationOptions);
 
         // obtain the builder-specific remote application environment based on the schema
-        E environment = getRemoteApplicationEnvironment(applicationSchema, platform);
+        E environment = getRemoteApplicationEnvironment(applicationSchema, platform, options);
 
         try
         {
@@ -403,12 +394,12 @@ public abstract class AbstractRemoteApplicationBuilder<A extends Application, E 
             // the session should not cause the JVM not to exit
             session.setDaemonThread(true);
 
-            // determine the timeout (based on the schema)
-            int timeout = (int) applicationSchema.getDefaultTimeoutUnits().convert(applicationSchema.getDefaultTimeout(),
-                                                                        TimeUnit.MILLISECONDS);
+            // determine the timeout
+            Timeout timeout   = options.get(Timeout.class, Timeout.autoDetect());
+            int     timeoutMS = (int) timeout.getUnits().convert(timeout.getDuration(), TimeUnit.MILLISECONDS);
 
             // set the default session timeouts (in milliseconds)
-            session.setTimeout(timeout);
+            session.setTimeout(timeoutMS);
 
             // allow the authentication to configure the session
             if (authentication instanceof JSchBasedAuthentication)
@@ -432,13 +423,26 @@ public abstract class AbstractRemoteApplicationBuilder<A extends Application, E 
             String remoteDirectory = remoteDirectoryFile == null
                                      ? null : asRemotePlatformFileName(remoteDirectoryFile.toString());
 
-            // create a list of DeploymentArtifacts to deploy based on those specified by the builder
-            ArrayList<DeploymentArtifact> artifactsToDeploy = new ArrayList<DeploymentArtifact>(deploymentArtifacts);
+            // determine the DeploymentArtifacts based on those specified by the Deployment option
+            ArrayList<DeploymentArtifact> artifactsToDeploy = new ArrayList<DeploymentArtifact>();
 
-            // add any custom artifacts for the schema
-            for (DeploymentArtifact deploymentArtifact : environment.getRemoteDeploymentArtifacts())
+            Deployment<T, S>              deployment        = options.get(Deployment.class);
+
+            if (deployment != null)
             {
-                artifactsToDeploy.add(deploymentArtifact);
+                try
+                {
+                    for (DeploymentArtifact deploymentArtifact :
+                        deployment.getDeploymentArtifacts(applicationSchema, platform, options))
+                    {
+                        artifactsToDeploy.add(deploymentArtifact);
+                    }
+                }
+                catch (Exception e)
+                {
+                    throw new RuntimeException("Failed to determine artifacts to deploy", e);
+                }
+
             }
 
             if (artifactsToDeploy.size() > 0)
@@ -449,7 +453,7 @@ public abstract class AbstractRemoteApplicationBuilder<A extends Application, E 
                 {
                     // open an sftp channel that we can use to copy over the artifacts
                     sftpChannel = (ChannelSftp) session.openChannel("sftp");
-                    sftpChannel.connect(timeout);
+                    sftpChannel.connect(timeoutMS);
 
                     // create a temporary working folder (if there's no working folder set)
                     if (remoteDirectoryFile == null)
@@ -569,10 +573,16 @@ public abstract class AbstractRemoteApplicationBuilder<A extends Application, E 
             // ----- start the remote application -----
 
             // connect the channel
-            execChannel.connect(timeout);
+            execChannel.connect(timeoutMS);
 
             // create the Application based on the RemoteApplicationProcess
-            T application = createApplication(platform, applicationSchema, environment, applicationName, process, console);
+            T application = createApplication(platform,
+                                              options,
+                                              applicationSchema,
+                                              environment,
+                                              applicationName,
+                                              process,
+                                              console);
 
             // ----- notify all of the lifecycle listeners -----
 

@@ -25,6 +25,8 @@
 
 package com.oracle.tools.runtime.java;
 
+import com.oracle.tools.Options;
+
 import com.oracle.tools.runtime.Application;
 import com.oracle.tools.runtime.ApplicationConsole;
 import com.oracle.tools.runtime.ApplicationSchema;
@@ -104,15 +106,6 @@ public interface JavaApplicationSchema<A extends JavaApplication> extends Applic
 
 
     /**
-     * Obtain the value to be used for the JAVA_HOME.
-     * When <code>null</code> the platform default is assumed.
-     *
-     * @return  the value for JAVA_HOME or null for the platform default
-     */
-    public String getJavaHome();
-
-
-    /**
      * Obtain if IPv4 is preferred for the {@link JavaApplication}.
      *
      * @return  <code>true</code> if IPv4 is preferred or <code>false</code> if not
@@ -127,7 +120,8 @@ public interface JavaApplicationSchema<A extends JavaApplication> extends Applic
      *
      * @param process               the {@link JavaApplicationProcess} representing the {@link JavaApplication}
      * @param name                  the name of the {@link JavaApplication}
-     * @param platform              the {@link Platform} that this {@link Application} is running on
+     * @param platform              the {@link Platform} that this {@link JavaApplication} is running on
+     * @param options               the {@link Options} for the {@link JavaApplication}
      * @param console               the {@link ApplicationConsole} that will be used for I/O by the
      *                              realized {@link Application}. This may be <code>null</code> if not required
      * @param environmentVariables  the environment variables used when starting the {@link JavaApplication}
@@ -140,6 +134,7 @@ public interface JavaApplicationSchema<A extends JavaApplication> extends Applic
     public A createJavaApplication(JavaApplicationProcess process,
                                    String                 name,
                                    Platform               platform,
+                                   Options                options,
                                    ApplicationConsole     console,
                                    Properties             environmentVariables,
                                    Properties             systemProperties,
@@ -147,59 +142,12 @@ public interface JavaApplicationSchema<A extends JavaApplication> extends Applic
 
 
     /**
-     * Determines if the next {@link JavaApplication} should be started in
-     * remote debugging mode.
+     * Determines if {@link JavaApplication}s realized using this {@link JavaApplicationSchema}
+     * will be orphaned (left running) if the application that started them terminates, for what
+     * ever reason.   The default is <code>false</code>.
      *
-     * @return <code>true</code> if remote debugging is enabled
+     * @return  <code>true</code> if {@link JavaApplication}s are orphanable, <code>false</code>
+     *          otherwise
      */
-    public boolean isRemoteDebuggingEnabled();
-
-
-    /**
-     * Determines if a remotely debugged {@link JavaApplication} will be started
-     * in suspend mode.
-     *
-     * @return <code>true</code> if started in suspend mode
-     */
-    public boolean isRemoteDebuggingStartSuspended();
-
-
-    /**
-     * Obtain the port that {@link JavaApplication}s realized from this schema will listen on
-     * for remote debugger connections if started with remote debug enabled and remote debugging
-     * mode of {@link RemoteDebuggingMode#LISTEN_FOR_DEBUGGER}.
-     * </p>
-     * If this value is not set and remote debug is enabled with a mode of
-     * {@link RemoteDebuggingMode#LISTEN_FOR_DEBUGGER} then a random free port will be chosen.
-     *
-     * @return the port that {@link JavaApplication}s realized from this schema will listen on
-     *         for remote debugger connections. A different value may be returned each time this
-     *         method is called.
-     */
-    public int getRemoteDebugListenPort();
-
-
-    /**
-     * Obtain the port that {@link JavaApplication}s realized from this schema will use to
-     * connect back to a remote debugger if started with remote debug enabled and remote debugging
-     * mode of {@link RemoteDebuggingMode#ATTACH_TO_DEBUGGER}.
-     * </p>
-     * If this value is not set and remote debug is enabled with a mode of
-     * {@link RemoteDebuggingMode#ATTACH_TO_DEBUGGER} then a random free port will be chosen.
-     *
-     * @return the port that {@link JavaApplication}s realized from this schema will listen on
-     *         for remote debugger connections. The same value will be returned each time this
-     *         method is called.
-     */
-    public int getRemoteDebugAttachPort();
-
-
-    /**
-     * Obtain the mode that remote debugging (if enabled) will run in for {@link JavaApplication}s
-     * realized from this schema.
-     *
-     * @return the mode that remote debugging (if enabled) will run in for {@link JavaApplication}s
-     *         realized from this schema
-     */
-    public RemoteDebuggingMode getRemoteDebuggingMode();
+    public boolean isOrphanable();
 }

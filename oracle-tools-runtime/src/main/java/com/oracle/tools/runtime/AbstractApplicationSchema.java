@@ -26,11 +26,13 @@
 package com.oracle.tools.runtime;
 
 import java.io.File;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
+
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -70,22 +72,6 @@ public abstract class AbstractApplicationSchema<A extends Application, S extends
     private boolean isErrorStreamRedirected;
 
     /**
-     * Should diagnostic information be enabled for the {@link Application}s
-     * produced by this {@link ApplicationSchema}.
-     */
-    private boolean isDiagnosticsEnabled;
-
-    /**
-     * The default {@link Application} timeout duration.
-     */
-    private long defaultTimeout;
-
-    /**
-     * The default {@link Application} timeout units
-     */
-    private TimeUnit defaultTimeoutUnits;
-
-    /**
      * Should environment variables be inherited from the current executing process
      * for the {@link Application}s produced from this {@link ApplicationSchema}.
      */
@@ -115,9 +101,6 @@ public abstract class AbstractApplicationSchema<A extends Application, S extends
         this.workingDirectory            = schema.getWorkingDirectory();
         this.environmentVariablesBuilder = new PropertiesBuilder(schema.getEnvironmentVariablesBuilder());
         this.isErrorStreamRedirected     = schema.isErrorStreamRedirected();
-        this.isDiagnosticsEnabled        = schema.isDiagnosticsEnabled();
-        this.defaultTimeout              = schema.getDefaultTimeout();
-        this.defaultTimeoutUnits         = schema.getDefaultTimeoutUnits();
         this.isEnvironmentInherited      = schema.isEnvironmentInherited();
         this.applicationArguments        = new ArrayList<String>(schema.getArguments());
         this.lifecycleInterceptors       = new LinkedList<LifecycleEventInterceptor<? super A>>();
@@ -142,9 +125,6 @@ public abstract class AbstractApplicationSchema<A extends Application, S extends
         this.isEnvironmentInherited      = false;
         this.applicationArguments        = new ArrayList<String>();
         this.isErrorStreamRedirected     = false;
-        this.isDiagnosticsEnabled        = false;
-        this.defaultTimeout              = 1;
-        this.defaultTimeoutUnits         = TimeUnit.MINUTES;
         this.lifecycleInterceptors       = new LinkedList<LifecycleEventInterceptor<? super A>>();
     }
 
@@ -295,31 +275,6 @@ public abstract class AbstractApplicationSchema<A extends Application, S extends
     }
 
 
-    /**
-     * Sets if diagnostic information should be logged/output for {@link Application}s
-     * produced by this {@link ApplicationSchema}.
-     *
-     * @param isDiagnosticsEnabled  should diagnostics for the {@link Application}
-     *                              be enabled
-     *
-     * @return  the {@link ApplicationSchema} (so that we can perform method chaining)
-     */
-    @SuppressWarnings("unchecked")
-    public S setDiagnosticsEnabled(boolean isDiagnosticsEnabled)
-    {
-        this.isDiagnosticsEnabled = isDiagnosticsEnabled;
-
-        return (S) this;
-    }
-
-
-    @Override
-    public boolean isDiagnosticsEnabled()
-    {
-        return isDiagnosticsEnabled;
-    }
-
-
     @Override
     public boolean isErrorStreamRedirected()
     {
@@ -339,40 +294,6 @@ public abstract class AbstractApplicationSchema<A extends Application, S extends
     public S setErrorStreamRedirected(boolean isErrorStreamRedirected)
     {
         this.isErrorStreamRedirected = isErrorStreamRedirected;
-
-        return (S) this;
-    }
-
-
-    @Override
-    public long getDefaultTimeout()
-    {
-        return defaultTimeout;
-    }
-
-
-    @Override
-    public TimeUnit getDefaultTimeoutUnits()
-    {
-        return defaultTimeoutUnits;
-    }
-
-
-    /**
-     * Sets the timeout {@link Application}s produced using this
-     * {@link ApplicationSchema} will use as a default.
-     *
-     * @param defaultTimeout      the default timeout duration
-     * @param defaultTimeoutUnit  the default timeout duration {@link TimeUnit}
-     *
-     * @return  the {@link ApplicationSchema} (so that we can perform method chaining)
-     */
-    @SuppressWarnings("unchecked")
-    public S setDefaultTimeout(long     defaultTimeout,
-                               TimeUnit defaultTimeoutUnit)
-    {
-        this.defaultTimeout      = defaultTimeout;
-        this.defaultTimeoutUnits = defaultTimeoutUnit;
 
         return (S) this;
     }

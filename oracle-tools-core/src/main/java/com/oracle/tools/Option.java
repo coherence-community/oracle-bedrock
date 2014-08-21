@@ -1,5 +1,5 @@
 /*
- * File: RemoteDebuggingMode.java
+ * File: Option.java
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
@@ -23,26 +23,16 @@
  * "Portions Copyright [year] [name of copyright owner]"
  */
 
-package com.oracle.tools.runtime.java;
+package com.oracle.tools;
 
 /**
- * The different modes that a process can run if for
- * remote Java debugging.
+ * Encapsulates an immutable configuration option.
  * <p>
  * Copyright (c) 2014. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
- * @author Jonathan Knight
+ * @author Brian Oliver
  */
-public enum RemoteDebuggingMode
+public interface Option
 {
-    /**
-     * In this mode the process will listen for connections from a debugger
-     */
-    LISTEN_FOR_DEBUGGER,
-
-    /**
-     * In this mode the process will attempt to connect back to a debugger
-     */
-    ATTACH_TO_DEBUGGER
 }

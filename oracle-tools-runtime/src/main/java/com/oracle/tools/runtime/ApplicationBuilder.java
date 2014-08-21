@@ -25,11 +25,17 @@
 
 package com.oracle.tools.runtime;
 
+import com.oracle.tools.Option;
+
 import com.oracle.tools.runtime.console.NullApplicationConsole;
 import com.oracle.tools.runtime.console.SystemApplicationConsole;
 
 /**
- * An {@link ApplicationBuilder} is responsible the creation of {@link Application}s based on {@link ApplicationSchema}s.
+ * An {@link ApplicationBuilder} is an internal concept that provides facilities to create {@link Application}s
+ * based on {@link ApplicationSchema}s for specific {@link Platform}s.
+ * <p>
+ * Developers should generally avoid using instances of this class.  Instead they should use instances of specific
+ * {@link Platform}s.
  * <p>
  * Copyright (c) 2011. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
@@ -48,6 +54,7 @@ public interface ApplicationBuilder<A extends Application>
      * @param console            the {@link ApplicationConsole} that will be used for I/O by the
      *                           realized {@link Application}. This may be <code>null</code> if not required
      * @param platform           an optional {@link Platform} on which the {@link Application} will be realized
+     * @param options            the {@link Option}s to use when realizing the {@link Application}
      *
      * @return an {@link Application} representing the application realized by the {@link ApplicationBuilder}
      *
@@ -56,7 +63,9 @@ public interface ApplicationBuilder<A extends Application>
     public <T extends A, S extends ApplicationSchema<T>> T realize(S                  applicationSchema,
                                                                    String             applicationName,
                                                                    ApplicationConsole console,
-                                                                   Platform           platform);
+                                                                   Platform           platform,
+                                                                   Option...          options);
+
 
     /**
      * Realizes an instance of an {@link Application}.
@@ -73,6 +82,7 @@ public interface ApplicationBuilder<A extends Application>
     public <T extends A, S extends ApplicationSchema<T>> T realize(S                  applicationSchema,
                                                                    String             applicationName,
                                                                    ApplicationConsole console);
+
 
     /**
      * Realizes an instance of an {@link Application} (using a {@link SystemApplicationConsole}).

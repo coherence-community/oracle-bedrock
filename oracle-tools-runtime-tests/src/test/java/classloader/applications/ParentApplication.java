@@ -66,7 +66,7 @@ public class ParentApplication
         LocalJavaApplicationBuilder<SimpleJavaApplication> builder =
             new LocalJavaApplicationBuilder<SimpleJavaApplication>();
 
-        builder.setOrphansPermitted(Boolean.getBoolean("orphan.children"));
+        schema.setOrphanable(Boolean.getBoolean("orphan.children"));
 
         ApplicationConsole console = new SystemApplicationConsole();
 

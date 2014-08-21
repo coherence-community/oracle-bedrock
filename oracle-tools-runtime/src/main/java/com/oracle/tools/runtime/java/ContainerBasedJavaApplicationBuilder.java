@@ -25,6 +25,9 @@
 
 package com.oracle.tools.runtime.java;
 
+import com.oracle.tools.Option;
+import com.oracle.tools.Options;
+
 import com.oracle.tools.runtime.Application;
 import com.oracle.tools.runtime.ApplicationConsole;
 import com.oracle.tools.runtime.ApplicationSchema;
@@ -97,22 +100,6 @@ public class ContainerBasedJavaApplicationBuilder<A extends JavaApplication> ext
 
 
     /**
-     * Sets if diagnostic information should be logged/output for {@link Application}s
-     * produced by this builder.
-     *
-     * @param isDiagnosticsEnabled  should diagnostics be output
-     *
-     * @return  the builder (so that we can perform method chaining)
-     */
-    public ContainerBasedJavaApplicationBuilder setDiagnosticsEnabled(boolean isDiagnosticsEnabled)
-    {
-        this.m_isDiagnosticsEnabled = isDiagnosticsEnabled;
-
-        return this;
-    }
-
-
-    /**
      * Performs a sanity check on the specified {@link JavaApplicationSchema}.
      * <p>
      * It's particularly important to perform sanity checks on {@link JavaApplicationSchema}s
@@ -165,8 +152,11 @@ public class ContainerBasedJavaApplicationBuilder<A extends JavaApplication> ext
     public <T extends A, S extends ApplicationSchema<T>> T realize(S                  applicationSchema,
                                                                    String             applicationName,
                                                                    ApplicationConsole console,
-                                                                   Platform           platform)
+                                                                   Platform           platform,
+                                                                   Option...          applicationOptions)
     {
+        Options options = new Options(applicationOptions);
+
         // TODO: this should be a safe cast but we should also check to make sure
         JavaApplicationSchema<T> schema = (JavaApplicationSchema) applicationSchema;
 
@@ -214,6 +204,7 @@ public class ContainerBasedJavaApplicationBuilder<A extends JavaApplication> ext
             final T application = schema.createJavaApplication(process,
                                                                applicationName,
                                                                platform,
+                                                               options,
                                                                console,
                                                                environmentVariables,
                                                                systemProperties,

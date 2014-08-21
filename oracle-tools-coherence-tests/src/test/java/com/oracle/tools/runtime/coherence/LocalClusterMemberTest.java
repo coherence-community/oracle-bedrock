@@ -25,6 +25,9 @@
 
 package com.oracle.tools.runtime.coherence;
 
+import com.oracle.tools.runtime.LocalPlatform;
+import com.oracle.tools.runtime.Platform;
+
 import com.oracle.tools.runtime.java.LocalJavaApplicationBuilder;
 
 /**
@@ -37,11 +40,11 @@ import com.oracle.tools.runtime.java.LocalJavaApplicationBuilder;
  * @author Brian Oliver
  */
 @Deprecated
-public class LocalClusterMemberTest extends AbstractClusterMemberTest<LocalJavaApplicationBuilder<ClusterMember>>
+public class LocalClusterMemberTest extends AbstractClusterMemberTest
 {
     @Override
-    public LocalJavaApplicationBuilder<ClusterMember> newJavaApplicationBuilder()
+    public Platform getPlatform()
     {
-        return new LocalJavaApplicationBuilder<ClusterMember>();
+        return LocalPlatform.getInstance();
     }
 }

@@ -25,6 +25,8 @@
 
 package com.oracle.tools.runtime;
 
+import com.oracle.tools.Option;
+
 import java.net.InetAddress;
 
 /**
@@ -46,6 +48,7 @@ public interface Platform
      */
     public String getName();
 
+
     /**
      * Obtain the private InetAddress for this {@link Platform}, this is
      * the address that will be used internally by Oracle Tools to
@@ -54,6 +57,7 @@ public interface Platform
      * @return the private InetAddress for this {@link Platform}.
      */
     public InetAddress getPrivateInetAddress();
+
 
     /**
      * Obtain the public InetAddress for this {@link Platform}, this is
@@ -64,6 +68,7 @@ public interface Platform
      */
     public InetAddress getPublicInetAddress();
 
+
     /**
      * Realizes an instance of an {@link Application}.
      *
@@ -71,14 +76,18 @@ public interface Platform
      * @param applicationName    the name of the application
      * @param console            the {@link ApplicationConsole} that will be used for I/O by the
      *                           realized {@link Application}. This may be <code>null</code> if not required
+     * @param options            the {@link Platform} specific {@link Option}s to be used when realizing the
+     *                           {@link Application}
      *
      * @return an {@link Application} representing the realized application
      *
      * @throws RuntimeException when a problem occurs while starting the application
      */
-    public <A extends Application, S extends ApplicationSchema<A>> A realize(S applicationSchema,
-                                                                             String applicationName,
-                                                                             ApplicationConsole console);
+    public <A extends Application, S extends ApplicationSchema<A>> A realize(S                  applicationSchema,
+                                                                             String             applicationName,
+                                                                             ApplicationConsole console,
+                                                                             Option...          options);
+
 
     /**
      * Obtains a suitable {@link ApplicationBuilder} for a specific class of {@link Application}.

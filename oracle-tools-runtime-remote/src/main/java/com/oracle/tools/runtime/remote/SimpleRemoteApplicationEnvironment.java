@@ -25,6 +25,8 @@
 
 package com.oracle.tools.runtime.remote;
 
+import com.oracle.tools.Options;
+
 import com.oracle.tools.runtime.Platform;
 import com.oracle.tools.runtime.SimpleApplication;
 import com.oracle.tools.runtime.SimpleApplicationSchema;
@@ -43,11 +45,14 @@ public class SimpleRemoteApplicationEnvironment
     /**
      * Constructs a {@link SimpleRemoteApplicationEnvironment}
      *
-     * @param schema    the {@link com.oracle.tools.runtime.SimpleApplicationSchema}
-     * @param platform  the {@link Platform} representing the remoteO/S
+     * @param schema           the {@link com.oracle.tools.runtime.SimpleApplicationSchema}
+     * @param platform         the {@link Platform} representing the remote O/S
+     * @param options  the {@link Options} for the remote O/S
      */
-    public SimpleRemoteApplicationEnvironment(SimpleApplicationSchema schema, Platform platform)
+    public SimpleRemoteApplicationEnvironment(SimpleApplicationSchema schema,
+                                              Platform                platform,
+                                              Options                 options)
     {
-        super(schema, platform);
+        super(schema, platform, options);
     }
 }

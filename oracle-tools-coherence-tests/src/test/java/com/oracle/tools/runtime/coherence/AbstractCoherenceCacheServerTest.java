@@ -28,6 +28,7 @@ package com.oracle.tools.runtime.coherence;
 import com.oracle.tools.junit.AbstractTest;
 
 import com.oracle.tools.runtime.LocalPlatform;
+import com.oracle.tools.runtime.Platform;
 
 import com.oracle.tools.runtime.coherence.callables.GetClusterName;
 import com.oracle.tools.runtime.coherence.callables.GetClusterSize;
@@ -36,9 +37,9 @@ import com.oracle.tools.runtime.coherence.callables.GetServiceStatus;
 
 import com.oracle.tools.runtime.console.SystemApplicationConsole;
 
-import com.oracle.tools.runtime.java.JavaApplicationBuilder;
-
 import com.oracle.tools.runtime.network.AvailablePortIterator;
+
+import com.oracle.tools.runtime.options.Diagnostics;
 
 import com.tangosol.net.NamedCache;
 
@@ -68,16 +69,12 @@ import javax.management.ObjectName;
  *
  * @author Brian Oliver
  */
-public abstract class AbstractCoherenceCacheServerTest<B extends JavaApplicationBuilder<CoherenceCacheServer>>
-    extends AbstractTest
+public abstract class AbstractCoherenceCacheServerTest extends AbstractTest
 {
     /**
-     * Creates a new {@link JavaApplicationBuilder}
-     * to use for a tests in this class and/or sub-classes.
-     *
-     * @return the {@link JavaApplicationBuilder}
+     * Obtains the {@link Platform} to use when realizing applications.
      */
-    public abstract B newJavaApplicationBuilder();
+    public abstract Platform getPlatform();
 
 
     /**
@@ -94,9 +91,9 @@ public abstract class AbstractCoherenceCacheServerTest<B extends JavaApplication
             new CoherenceCacheServerSchema().setClusterPort(availablePorts).useLocalHostMode().setRoleName("test-role")
                 .setSiteName("test-site").setJMXManagementMode(JMXManagementMode.LOCAL_ONLY).setJMXPort(availablePorts);
 
-        B builder = newJavaApplicationBuilder();
+        Platform platform = getPlatform();
 
-        try (CoherenceCacheServer server = builder.realize(schema, "TEST", new SystemApplicationConsole()))
+        try (CoherenceCacheServer server = platform.realize(schema, "TEST", new SystemApplicationConsole()))
         {
             assertThat(invoking(server).getClusterSize(), is(1));
             assertThat(server.getRoleName(), is("test-role"));
@@ -121,15 +118,18 @@ public abstract class AbstractCoherenceCacheServerTest<B extends JavaApplication
 
         CoherenceCacheServerSchema schema =
             new CoherenceCacheServerSchema().setClusterPort(availablePorts).useLocalHostMode().setRoleName("test-role")
-                .setSiteName("test-site").setDiagnosticsEnabled(true);
+                .setSiteName("test-site");
 
-        B builder = newJavaApplicationBuilder();
+        Platform platform = getPlatform();
 
         for (int i = 1; i <= 10; i++)
         {
             System.out.println("Building Instance: " + i);
 
-            try (CoherenceCacheServer server = builder.realize(schema, "TEST"))
+            try (CoherenceCacheServer server = platform.realize(schema,
+                                                                "TEST",
+                                                                new SystemApplicationConsole(),
+                                                                Diagnostics.enabled()))
             {
                 assertThat(invoking(server).getClusterSize(), is(1));
                 assertThat(server.getRoleName(), is("test-role"));
@@ -148,12 +148,14 @@ public abstract class AbstractCoherenceCacheServerTest<B extends JavaApplication
         AvailablePortIterator availablePorts = LocalPlatform.getInstance().getAvailablePorts();
 
         CoherenceCacheServerSchema schema =
-            new CoherenceCacheServerSchema().setClusterPort(availablePorts).useLocalHostMode()
-                .setDiagnosticsEnabled(true);
+            new CoherenceCacheServerSchema().setClusterPort(availablePorts).useLocalHostMode();
 
-        B builder = newJavaApplicationBuilder();
+        Platform platform = getPlatform();
 
-        try (CoherenceCacheServer server = builder.realize(schema, "TEST"))
+        try (CoherenceCacheServer server = platform.realize(schema,
+                                                            "TEST",
+                                                            new SystemApplicationConsole(),
+                                                            Diagnostics.enabled()))
         {
             assertThat(server, new GetLocalMemberId(), is(1));
             assertThat(server, new GetClusterSize(), is(1));
@@ -173,12 +175,14 @@ public abstract class AbstractCoherenceCacheServerTest<B extends JavaApplication
 
         CoherenceCacheServerSchema schema =
             new CoherenceCacheServerSchema().setClusterPort(availablePorts)
-                .setOperationalOverrideURI("test-operational-override.xml").useLocalHostMode()
-                .setDiagnosticsEnabled(true);
+                .setOperationalOverrideURI("test-operational-override.xml").useLocalHostMode();
 
-        B builder = newJavaApplicationBuilder();
+        Platform platform = getPlatform();
 
-        try (CoherenceCacheServer server = builder.realize(schema, "TEST"))
+        try (CoherenceCacheServer server = platform.realize(schema,
+                                                            "TEST",
+                                                            new SystemApplicationConsole(),
+                                                            Diagnostics.enabled()))
         {
             assertThat(server, new GetLocalMemberId(), is(1));
             assertThat(server, new GetClusterSize(), is(1));
@@ -196,12 +200,14 @@ public abstract class AbstractCoherenceCacheServerTest<B extends JavaApplication
         AvailablePortIterator availablePorts = LocalPlatform.getInstance().getAvailablePorts();
 
         CoherenceCacheServerSchema schema =
-            new CoherenceCacheServerSchema().setClusterPort(availablePorts).useLocalHostMode()
-                .setDiagnosticsEnabled(true);
+            new CoherenceCacheServerSchema().setClusterPort(availablePorts).useLocalHostMode();
 
-        B builder = newJavaApplicationBuilder();
+        Platform platform = getPlatform();
 
-        try (CoherenceCacheServer server = builder.realize(schema, "TEST"))
+        try (CoherenceCacheServer server = platform.realize(schema,
+                                                            "TEST",
+                                                            new SystemApplicationConsole(),
+                                                            Diagnostics.enabled()))
         {
             assertThat(server, new GetLocalMemberId(), is(1));
             assertThat(server, new GetClusterSize(), is(1));

@@ -36,10 +36,10 @@ import com.oracle.tools.junit.AbstractTest;
 
 import com.oracle.tools.lang.StringHelper;
 
-import com.oracle.tools.runtime.AbstractApplication;
 import com.oracle.tools.runtime.ApplicationConsole;
 import com.oracle.tools.runtime.DummyApp;
 import com.oracle.tools.runtime.DummyClassPathApp;
+import com.oracle.tools.runtime.Platform;
 
 import com.oracle.tools.runtime.concurrent.RemoteCallable;
 import com.oracle.tools.runtime.concurrent.callable.GetSystemProperty;
@@ -48,9 +48,9 @@ import com.oracle.tools.runtime.concurrent.callable.RemoteCallableStaticMethod;
 import com.oracle.tools.runtime.console.PipedApplicationConsole;
 import com.oracle.tools.runtime.console.SystemApplicationConsole;
 
-import com.oracle.tools.util.FutureCompletionListener;
+import com.oracle.tools.runtime.options.Diagnostics;
 
-import org.hamcrest.CoreMatchers;
+import com.oracle.tools.util.FutureCompletionListener;
 
 import org.junit.Test;
 
@@ -64,7 +64,6 @@ import static org.junit.Assert.assertThat;
 
 import static org.mockito.Mockito.mock;
 
-import java.util.Collections;
 import java.util.UUID;
 
 import java.util.concurrent.ExecutionException;
@@ -90,6 +89,14 @@ public abstract class AbstractJavaApplicationBuilderTest extends AbstractTest
 
 
     /**
+     * Obtains the {@link Platform} on which to realize applications.
+     *
+     * @return  the {@link Platform} on which to realize applications
+     */
+    public abstract Platform getPlatform();
+
+
+    /**
      * Ensure that we can start and terminate a {@link JavaApplication}.
      *
      * @throws Exception
@@ -99,15 +106,19 @@ public abstract class AbstractJavaApplicationBuilderTest extends AbstractTest
     {
         SimpleJavaApplicationSchema schema =
             new SimpleJavaApplicationSchema(DummyApp.class.getCanonicalName()).addArguments("arg1",
-                                                                                            "arg2").setSystemProperty("test.prop.1",
-            "value.1").setSystemProperty("test.prop.2",
-                                         "value.2").setDiagnosticsEnabled(true);
+                                                                                            "arg2").setSystemProperty("test.prop.1", "value.1")
+                                                                                                .setSystemProperty("test.prop.2", "value.2");
 
-        JavaApplicationBuilder<JavaApplication> builder = newJavaApplicationBuilder();
+        JavaApplicationBuilder<JavaApplication> builder  = newJavaApplicationBuilder();
+        Platform                                platform = getPlatform();
 
-        PipedApplicationConsole                 console = new PipedApplicationConsole();
+        PipedApplicationConsole                 console  = new PipedApplicationConsole();
 
-        try (JavaApplication application = builder.realize(schema, "java-app", console))
+        try (JavaApplication application = builder.realize(schema,
+                                                           "java-app",
+                                                           console,
+                                                           platform,
+                                                           Diagnostics.enabled()))
         {
             String stdout = console.getOutputReader().readLine();
 
@@ -139,13 +150,18 @@ public abstract class AbstractJavaApplicationBuilderTest extends AbstractTest
 
         SimpleJavaApplicationSchema schema =
             new SimpleJavaApplicationSchema(DummyClassPathApp.class.getCanonicalName()).setClassPath(classPath)
-                .addArgument(knownClass.getCanonicalName()).setDiagnosticsEnabled(true);
+                .addArgument(knownClass.getCanonicalName());
 
-        JavaApplicationBuilder<JavaApplication> builder = newJavaApplicationBuilder();
+        JavaApplicationBuilder<JavaApplication> builder  = newJavaApplicationBuilder();
+        Platform                                platform = getPlatform();
 
-        PipedApplicationConsole                 console = new PipedApplicationConsole();
+        PipedApplicationConsole                 console  = new PipedApplicationConsole();
 
-        try (JavaApplication application = builder.realize(schema, "java-app", console))
+        try (JavaApplication application = builder.realize(schema,
+                                                           "java-app",
+                                                           console,
+                                                           platform,
+                                                           Diagnostics.enabled()))
         {
             String stdout = console.getOutputReader().readLine();
 
