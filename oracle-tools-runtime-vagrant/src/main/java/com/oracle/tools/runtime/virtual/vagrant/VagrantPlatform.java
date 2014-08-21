@@ -166,15 +166,15 @@ public class VagrantPlatform extends VirtualPlatform
             return;
 
         case PowerButton :
-            schema.setArgument("destroy").setArgument("--force");
+            schema.addArgument("destroy").addArgument("--force");
             break;
 
         case Shutdown :
-            schema.setArgument("halt");
+            schema.addArgument("halt");
             break;
 
         case SaveState :
-            schema.setArgument("suspend");
+            schema.addArgument("suspend");
             break;
 
         default :
@@ -192,7 +192,7 @@ public class VagrantPlatform extends VirtualPlatform
      */
     public void start()
     {
-        SimpleApplicationSchema schemaUp = instantiateSchema().setArgument("up");
+        SimpleApplicationSchema schemaUp = instantiateSchema().addArgument("up");
 
         execute(schemaUp);
         detecteSSH();
@@ -217,7 +217,7 @@ public class VagrantPlatform extends VirtualPlatform
      */
     protected void detecteSSH()
     {
-        SimpleApplicationSchema  schema  = instantiateSchema().setArgument("ssh-config");
+        SimpleApplicationSchema  schema  = instantiateSchema().addArgument("ssh-config");
         SimpleApplicationBuilder builder = new SimpleApplicationBuilder();
 
         try (PipedApplicationConsole console = new PipedApplicationConsole();

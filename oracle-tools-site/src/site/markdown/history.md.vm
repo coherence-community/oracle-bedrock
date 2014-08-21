@@ -272,6 +272,25 @@ reverse chronological order.
     *BREAKING CHANGE:*  This is a breaking change for anyone that relies on
     using ApplicationGroupBuilder.addApplication method.
 
+*   [ORACLETOOLS-144](https://java.net/jira/browse/ORACLETOOLS-144): Removed
+    deprecated interfaces and classes.
+
+    The following table outlines the old interfaces / classes and the replacement
+    ones for use.
+
+    *Old Interface* -> *New Interface*
+    ApplicationGroup -> Assembly
+    ApplicationGroupBuilder -> AssemblyBuilder
+    JavaApplicationGroup -> (no longer required)
+    JavaApplicationGroupBuilder -> (no longer required)
+
+    *Old Class* -> *New Class*
+    AbstractApplicationGroup -> AbstractAssembly
+    AbstractApplicationGroupBuilder -> AbstractAssemblyBuilder
+    ExternalJavaApplicationBuilder -> LocalJavaApplicationBuilder
+    NativeJavaApplicationBuilder -> LocalJavaApplicationBuilder
+    VirtualizedJavaApplicationBuilder -> ContainerBasedJavaApplicationBuilder
+
 <h4>oracle-tools-runtime-remote</h4>
 
 *   [ORACLETOOLS-91](https://java.net/jira/browse/ORACLETOOLS-91): Introduced
@@ -331,6 +350,18 @@ reverse chronological order.
 *   [ORACLETOOLS-130](https://java.net/jira/browse/ORACLETOOLS-130): Created
     a specialized remote method interceptor for NamedCaches so that method
     results are made serializable where necessary.
+
+*   [ORACLETOOLS-144](https://java.net/jira/browse/ORACLETOOLS-144): Removed
+    deprecated interfaces and classes.
+
+    The following table outlines the previous classes and new equivalent classes.
+
+    *Old Class* -> *New Class*
+    Cluster -> CoherenceCluster
+    ClusterBuilder  -> CoherenceClusterBuilder
+    ClusterMember -> CoherenceCacheServer
+    ClusterMemberSchema -> CoherenceCacheServerSchema
+    RestartClusterMemberAction -> RestartCoherenceClusterMemberAction
 
 <h4>oracle-tools-coherence-testing-support</h4>
 

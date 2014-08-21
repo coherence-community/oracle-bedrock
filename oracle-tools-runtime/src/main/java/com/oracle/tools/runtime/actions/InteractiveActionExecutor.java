@@ -26,7 +26,6 @@
 package com.oracle.tools.runtime.actions;
 
 import com.oracle.tools.runtime.Application;
-import com.oracle.tools.runtime.ApplicationGroup;
 import com.oracle.tools.runtime.Assembly;
 
 import java.io.IOException;

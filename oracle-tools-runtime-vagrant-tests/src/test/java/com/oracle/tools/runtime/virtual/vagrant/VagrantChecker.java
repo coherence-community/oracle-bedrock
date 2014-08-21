@@ -72,7 +72,7 @@ public class VagrantChecker
         }
 
         String                  command = VagrantPlatform.getDefaultVagrantCommand();
-        SimpleApplicationSchema schema  = new SimpleApplicationSchema(command).setArgument("--version");
+        SimpleApplicationSchema schema  = new SimpleApplicationSchema(command).addArgument("--version");
 
         try (PipedApplicationConsole console = new PipedApplicationConsole();
             Application application = LocalPlatform.getInstance().realize(schema, "Vagrant", console);)
