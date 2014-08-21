@@ -250,6 +250,15 @@ public abstract class AbstractCoherenceCacheServerTest extends AbstractTest
             namedCache.clear();
 
             assertThat(invoking(namedCache).size(), is(0));
+
+            namedCache.put("key", "hello");
+
+            assertThat(namedCache.size(), is(1));
+            assertThat(namedCache.get("key"), is("hello"));
+
+            namedCache.remove("key");
+
+            assertThat(namedCache.size(), is(0));
         }
     }
 }

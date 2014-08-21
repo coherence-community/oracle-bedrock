@@ -417,7 +417,7 @@ class CoherenceNamedCache implements NamedCache
     @Override
     public Object remove(Object key)
     {
-        return remotelyInvoke("remote", Object.class, key);
+        return remotelyInvoke("remove", Object.class, key);
     }
 
 
