@@ -215,7 +215,7 @@
 <p>The following sections outline Oracle Tools project changes in reverse chronological order.</p>
 
 <div class="section">
-<h3>Version 2.0.0-SNAPSHOT: 2014-08-21 11:38 <a name="Version_2.0.0-SNAPSHOT:_2014-08-21_11:38"></a></h3>
+<h3>Version 2.0.0-SNAPSHOT: 2014-08-21 16:05 <a name="Version_2.0.0-SNAPSHOT:_2014-08-21_16:05"></a></h3>
 
 <div class="section">
 <h4>Source and Documentation Contributors<a name="Source_and_Documentation_Contributors"></a></h4>
@@ -386,6 +386,12 @@
 <li>
 <p><a class="externalLink" href="https://java.net/jira/browse/ORACLETOOLS-143">ORACLETOOLS-143</a>: Renamed the AssemblyBuilder (ApplicationGroupBuilder) addApplication method to be addSchema (as it should be). Additionally re-ordered the parameters to allow for inclusion of Options introduced in <a class="externalLink" href="https://java.net/jira/browse/ORACLETOOLS-142">ORACLETOOLS-142</a></p>
 <p><i>BREAKING CHANGE:</i> This is a breaking change for anyone that relies on using ApplicationGroupBuilder.addApplication method.</p></li>
+  
+<li>
+<p><a class="externalLink" href="https://java.net/jira/browse/ORACLETOOLS-144">ORACLETOOLS-144</a>: Removed deprecated interfaces and classes.</p>
+<p>The following table outlines the old interfaces / classes and the replacement ones for use.</p>
+<p><i>Old Interface</i> -&gt; <i>New Interface</i> ApplicationGroup -&gt; Assembly ApplicationGroupBuilder -&gt; AssemblyBuilder JavaApplicationGroup -&gt; (no longer required) JavaApplicationGroupBuilder -&gt; (no longer required)</p>
+<p><i>Old Class</i> -&gt; <i>New Class</i> AbstractApplicationGroup -&gt; AbstractAssembly AbstractApplicationGroupBuilder -&gt; AbstractAssemblyBuilder ExternalJavaApplicationBuilder -&gt; LocalJavaApplicationBuilder NativeJavaApplicationBuilder -&gt; LocalJavaApplicationBuilder VirtualizedJavaApplicationBuilder -&gt; ContainerBasedJavaApplicationBuilder</p></li>
 </ul>
 </div>
 <div class="section">
@@ -449,6 +455,11 @@
   
 <li>
 <p><a class="externalLink" href="https://java.net/jira/browse/ORACLETOOLS-130">ORACLETOOLS-130</a>: Created a specialized remote method interceptor for NamedCaches so that method results are made serializable where necessary.</p></li>
+  
+<li>
+<p><a class="externalLink" href="https://java.net/jira/browse/ORACLETOOLS-144">ORACLETOOLS-144</a>: Removed deprecated interfaces and classes.</p>
+<p>The following table outlines the previous classes and new equivalent classes.</p>
+<p><i>Old Class</i> -&gt; <i>New Class</i> Cluster -&gt; CoherenceCluster ClusterBuilder -&gt; CoherenceClusterBuilder ClusterMember -&gt; CoherenceCacheServer ClusterMemberSchema -&gt; CoherenceCacheServerSchema RestartClusterMemberAction -&gt; RestartCoherenceClusterMemberAction</p></li>
 </ul>
 </div>
 <div class="section">
@@ -978,7 +989,7 @@
                                                                   
 <div class="copyright">Copyright © 2008-2013 Oracle Corporation. All rights reserved.</div>
                                                           
-<div class="version">Version 2.0.0-SNAPSHOT: 2014-08-21 11:38</div>
+<div class="version">Version 2.0.0-SNAPSHOT: 2014-08-21 16:05</div>
                   
         
                 </div>
