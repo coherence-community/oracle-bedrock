@@ -25,11 +25,15 @@
 
 package com.oracle.tools.runtime;
 
+import com.oracle.tools.Option;
+
 import com.oracle.tools.runtime.console.NullApplicationConsole;
 import com.oracle.tools.runtime.console.SingletonApplicationConsoleBuilder;
+
 import com.oracle.tools.util.Quadruple;
 
 import java.io.IOException;
+
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -49,41 +53,46 @@ public abstract class AbstractAssemblyBuilder<A extends Application, G extends A
     implements AssemblyBuilder<A, G>
 {
     /**
-     * The map of {@link ApplicationBuilder}s to create applications, keyed by application prefix name.
+     * The map of {@link Application} {@link Characteristics}s, keyed by application prefix name.
      */
-    protected LinkedHashMap<String, Quadruple<Platform, ApplicationSchema<A>, Integer, ApplicationConsoleBuilder>> m_schema;
+    protected LinkedHashMap<String, Characteristics<A>> characteristics;
+
 
     /**
      * Construct an {@link AbstractAssemblyBuilder}.
      */
     public AbstractAssemblyBuilder()
     {
-        m_schema   = new LinkedHashMap<String,
-                                       Quadruple<Platform, ApplicationSchema<A>, Integer,
-                                                 ApplicationConsoleBuilder>>();
+        characteristics = new LinkedHashMap<String, Characteristics<A>>();
     }
 
 
     @Override
-    public <T extends A, S extends ApplicationSchema<T>> void addApplication(Platform platform,
-                                                                             S        applicationSchema,
-                                                                             String   applicationNamePrefix,
-                                                                             int      count)
+    public <T extends A, S extends ApplicationSchema<T>> void addSchema(String    applicationNamePrefix,
+                                                                        S         applicationSchema,
+                                                                        int       count,
+                                                                        Platform  platform,
+                                                                        Option... options)
     {
-        addApplication(platform, applicationSchema, applicationNamePrefix, count, null);
+        addSchema(applicationNamePrefix, applicationSchema, count, null, platform, options);
     }
 
 
     @Override
     @SuppressWarnings("unchecked")
-    public <T extends A, S extends ApplicationSchema<T>> void addApplication(Platform                  platform,
-                                                                             S                         applicationSchema,
-                                                                             String                    applicationNamePrefix,
-                                                                             int                       count,
-                                                                             ApplicationConsoleBuilder consoleBuilder)
+    public <T extends A, S extends ApplicationSchema<T>> void addSchema(String                    applicationNamePrefix,
+                                                                        S                         applicationSchema,
+                                                                        int                       count,
+                                                                        ApplicationConsoleBuilder consoleBuilder,
+                                                                        Platform                  platform,
+                                                                        Option...                 options)
     {
-        m_schema.put(applicationNamePrefix,
-                     new Quadruple(platform, applicationSchema, count, consoleBuilder));
+        characteristics.put(applicationNamePrefix,
+                            new Characteristics<A>((ApplicationSchema<A>) applicationSchema,
+                                                   count,
+                                                   consoleBuilder,
+                                                   platform,
+                                                   options));
     }
 
 
@@ -95,7 +104,7 @@ public abstract class AbstractAssemblyBuilder<A extends Application, G extends A
 
         realizeApplicationFromSchema(applications, overridingConsoleBuilder);
 
-        return createApplicationGroup(applications);
+        return createAssembly(applications);
     }
 
 
@@ -120,16 +129,17 @@ public abstract class AbstractAssemblyBuilder<A extends Application, G extends A
      * @param overridingConsoleBuilder  the {@link ApplicationConsoleBuilder} to use to build {@link ApplicationConsole}s
      *                                  for each {@link Application}
      */
-    protected void realizeApplicationFromSchema(LinkedList<A> applications, ApplicationConsoleBuilder overridingConsoleBuilder)
+    protected void realizeApplicationFromSchema(LinkedList<A>             applications,
+                                                ApplicationConsoleBuilder overridingConsoleBuilder)
     {
-        for (String prefix : m_schema.keySet())
+        for (String prefix : characteristics.keySet())
         {
-            Quadruple<Platform, ApplicationSchema<A>, Integer, ApplicationConsoleBuilder> quadruple =
-                    m_schema.get(prefix);
-            Platform                  platform           = quadruple.getA();
-            ApplicationSchema<A>      schema             = quadruple.getB();
-            int                       cRequiredInstances = quadruple.getC();
-            ApplicationConsoleBuilder consoleBuilder     = quadruple.getD();
+            Characteristics<A>        characteristic = characteristics.get(prefix);
+            ApplicationSchema<A>      schema         = characteristic.getApplicationSchema();
+            int                       instanceCount  = characteristic.getInstanceCount();
+            ApplicationConsoleBuilder consoleBuilder = characteristic.getConsoleBuilder();
+            Platform                  platform       = characteristic.getPlatform();
+            Option[]                  options        = characteristic.getOptions();
 
             // override the application defined console builder when this method is provided with one
             if (overridingConsoleBuilder != null)
@@ -137,7 +147,7 @@ public abstract class AbstractAssemblyBuilder<A extends Application, G extends A
                 consoleBuilder = overridingConsoleBuilder;
             }
 
-            for (int i = 1; i <= cRequiredInstances; i++)
+            for (int i = 1; i <= instanceCount; i++)
             {
                 String             applicationName = String.format("%s-%d", prefix, i);
 
@@ -148,7 +158,7 @@ public abstract class AbstractAssemblyBuilder<A extends Application, G extends A
                     console = new NullApplicationConsole();
                 }
 
-                applications.add(platform.realize(schema, applicationName, console));
+                applications.add(platform.realize(schema, applicationName, console, options));
             }
         }
     }
@@ -161,5 +171,120 @@ public abstract class AbstractAssemblyBuilder<A extends Application, G extends A
      *
      * @return An {@link Assembly} implementation.
      */
-    abstract protected G createApplicationGroup(List<? extends A> applications);
+    abstract protected G createAssembly(List<? extends A> applications);
+
+
+    /**
+     * Encapsulates the characteristics for one or more specific types of {@link Application}
+     * to be created as part of an {@link Assembly} when it is realized.
+     *
+     * @param <A>  the type of the {@link Application}
+     */
+    protected static class Characteristics<A extends Application>
+    {
+        /**
+         * The {@link ApplicationSchema} for the {@link Application}s.
+         */
+        private ApplicationSchema<A> schema;
+
+        /**
+         * The number of {@link Application} instances to be created
+         */
+        private int count;
+
+        /**
+         * The {@link ApplicationConsoleBuilder} used to create {@link ApplicationConsole}s.
+         */
+        private ApplicationConsoleBuilder consoleBuilder;
+
+        /**
+         * The {@link Platform} to be used to realize the {@link Application}s.
+         */
+        private Platform platform;
+
+        /**
+         * The {@link Option}s for realizing the {@link Application}s.
+         */
+        private Option[] options;
+
+
+        /**
+         * Constructs an {@link Characteristics}.
+         *
+         * @param schema          the {@link ApplicationSchema} for the {@link Application}s
+         * @param count           the number of {@link Application} instances to be created
+         * @param consoleBuilder  the {@link ApplicationConsoleBuilder} used to create consoles
+         * @param platform        the {@link Platform} used to create the {@link Application}s
+         * @param options         the {@link Option}s for the {@link Platform}
+         */
+        public Characteristics(ApplicationSchema<A>      schema,
+                               int                       count,
+                               ApplicationConsoleBuilder consoleBuilder,
+                               Platform                  platform,
+                               Option...                 options)
+        {
+            this.schema         = schema;
+            this.count          = count;
+            this.consoleBuilder = consoleBuilder;
+            this.platform       = platform;
+            this.options        = options;
+        }
+
+
+        /**
+         * Obtains the {@link ApplicationSchema}.
+         *
+         * @return  the {@link ApplicationSchema}
+         */
+        public ApplicationSchema<A> getApplicationSchema()
+        {
+            return schema;
+        }
+
+
+        /**
+         * Obtains the number of {@link Application} instances to realize
+         * in the {@link Assembly}.
+         *
+         * @return  the instance count
+         */
+        public int getInstanceCount()
+        {
+            return count;
+        }
+
+
+        /**
+         * Obtains the {@link ApplicationConsoleBuilder} to use for realizing
+         * {@link ApplicationConsole}s for each {@link Application}.
+         *
+         * @return  the {@link ApplicationConsoleBuilder}
+         */
+        public ApplicationConsoleBuilder getConsoleBuilder()
+        {
+            return consoleBuilder;
+        }
+
+
+        /**
+         * Obtains the {@link Platform} on which to realize the {@link Application}s.
+         *
+         * @return  the {@link Platform}
+         */
+        public Platform getPlatform()
+        {
+            return platform;
+        }
+
+
+        /**
+         * Obtains the {@link Option}s to use when realizing the {@link Application}s.
+         *
+         * @return  the {@link Option}s
+         */
+        public Option[] getOptions()
+        {
+            return options;
+        }
+    }
 }

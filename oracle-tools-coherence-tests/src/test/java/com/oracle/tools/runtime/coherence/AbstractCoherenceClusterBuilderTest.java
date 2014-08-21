@@ -96,7 +96,7 @@ public abstract class AbstractCoherenceClusterBuilderTest extends AbstractTest
 
         CoherenceClusterBuilder builder = new CoherenceClusterBuilder();
 
-        builder.addApplication(getPlatform(), schema, "DCS", CLUSTER_SIZE);
+        builder.addSchema("DCS", schema, CLUSTER_SIZE, getPlatform());
 
         try (CoherenceCluster cluster = builder.realize(new SystemApplicationConsole()))
         {
@@ -132,8 +132,8 @@ public abstract class AbstractCoherenceClusterBuilderTest extends AbstractTest
 
         CoherenceClusterBuilder builder = new CoherenceClusterBuilder();
 
-        builder.addApplication(getPlatform(), storageSchema, "storage", 2);
-        builder.addApplication(getPlatform(), extendSchema, "extend", 1);
+        builder.addSchema("storage", storageSchema, 2, getPlatform());
+        builder.addSchema("extend", extendSchema, 1, getPlatform());
 
         try (CoherenceCluster cluster = builder.realize(new SystemApplicationConsole()))
         {
@@ -186,7 +186,7 @@ public abstract class AbstractCoherenceClusterBuilderTest extends AbstractTest
         int                      desiredClusterSize = 4;
         CoherenceClusterBuilder  clusterBuilder     = new CoherenceClusterBuilder();
 
-        clusterBuilder.addApplication(getPlatform(), schema, "storage", desiredClusterSize);
+        clusterBuilder.addSchema("storage", schema, desiredClusterSize, getPlatform());
 
         try (CoherenceCluster cluster = clusterBuilder.realize(console))
         {
@@ -214,12 +214,12 @@ public abstract class AbstractCoherenceClusterBuilderTest extends AbstractTest
         CoherenceCacheServerSchema schema =
             new CoherenceCacheServerSchema().useLocalHostMode().setClusterPort(clusterPort).setClusterName("Rolling");
 
-        ApplicationConsole      console       = new SystemApplicationConsole();
-        Platform                memberBuilder = getPlatform();
+        ApplicationConsole      console  = new SystemApplicationConsole();
+        Platform                platform = getPlatform();
 
-        CoherenceClusterBuilder builder       = new CoherenceClusterBuilder();
+        CoherenceClusterBuilder builder  = new CoherenceClusterBuilder();
 
-        builder.addApplication(memberBuilder, schema, "DCS", CLUSTER_SIZE);
+        builder.addSchema("DCS", schema, CLUSTER_SIZE, platform);
 
         try (CoherenceCluster cluster = builder.realize(console))
         {
@@ -227,7 +227,6 @@ public abstract class AbstractCoherenceClusterBuilderTest extends AbstractTest
 
             // construct the action to restart a cluster member (iff the DistributedCache is NODE_SAFE)
             RestartCoherenceClusterMemberAction restartAction = new RestartCoherenceClusterMemberAction("DCS",
-                                                                                                        memberBuilder,
                                                                                                         schema,
                                                                                                         console,
                                                                                                         new Predicate<CoherenceClusterMember>()
@@ -239,7 +238,8 @@ public abstract class AbstractCoherenceClusterBuilderTest extends AbstractTest
 
                     return status == ServiceStatus.NODE_SAFE;
                 }
-            });
+            },
+                                                                                                        platform);
 
             // let's perpetually restart a cluster member
             PerpetualAction<CoherenceClusterMember, CoherenceCluster> perpetualAction =
@@ -279,7 +279,7 @@ public abstract class AbstractCoherenceClusterBuilderTest extends AbstractTest
 
         CoherenceClusterBuilder builder = new CoherenceClusterBuilder();
 
-        builder.addApplication(getPlatform(), schema, "DCS", CLUSTER_SIZE);
+        builder.addSchema("DCS", schema, CLUSTER_SIZE, getPlatform());
 
         try (CoherenceCluster cluster = builder.realize(new SystemApplicationConsole()))
         {

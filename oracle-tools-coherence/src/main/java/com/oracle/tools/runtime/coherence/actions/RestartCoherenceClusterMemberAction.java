@@ -25,6 +25,8 @@
 
 package com.oracle.tools.runtime.coherence.actions;
 
+import com.oracle.tools.Option;
+
 import com.oracle.tools.deferred.DeferredPredicate;
 
 import com.oracle.tools.predicate.Predicate;
@@ -56,6 +58,8 @@ import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.swing.plaf.OptionPaneUI;
+
 /**
  * A {@link CustomAction} to destroy a {@link CoherenceClusterMember} that is defined as part
  * of a {@link CoherenceCluster} and then immediately restart a new {@link CoherenceClusterMember} given
@@ -86,11 +90,6 @@ public class RestartCoherenceClusterMemberAction<A extends CoherenceClusterMembe
     private S schema;
 
     /**
-     * The {@link JavaApplicationBuilder} to create a new {@link CoherenceClusterMember}.
-     */
-    private Platform platform;
-
-    /**
      * The {@link ApplicationConsole} to use for a new {@link CoherenceClusterMember}.
      */
     private ApplicationConsole console;
@@ -100,29 +99,42 @@ public class RestartCoherenceClusterMemberAction<A extends CoherenceClusterMembe
      */
     private Predicate<CoherenceClusterMember> closePredicate;
 
+    /**
+     * The {@link Platform} to realize the new {@link CoherenceClusterMember}.
+     */
+    private Platform platform;
+
+    /**
+     * The {@link Option}s to use when realizing the new {@link CoherenceClusterMember}.
+     */
+    private Option[] options;
+
 
     /**
      * Constructs a {@link RestartCoherenceClusterMemberAction}.
      *
      * @param prefix          the prefix that must match existing {@link CoherenceClusterMember} names
-     * @param platform        the {@link Platform} to realize new {@link CoherenceClusterMember}s on
      * @param schema          the {@link CoherenceClusterMemberSchema for new {@link CoherenceClusterMember}s
      * @param console         the {@link ApplicationConsole} for new {@link CoherenceClusterMember}s
      * @param closePredicate  the optional {@link Predicate} that must be satisfied before restarting a
      *                        {@link CoherenceClusterMember} (may be <code>null</code>)
+     * @param platform        the {@link Platform} to realize new {@link CoherenceClusterMember}s on
+     * @param options         the {@link Option}s to use when realizing the new {@link CoherenceClusterMember}
      */
     public RestartCoherenceClusterMemberAction(String                            prefix,
-                                               Platform                          platform,
                                                S                                 schema,
                                                ApplicationConsole                console,
-                                               Predicate<CoherenceClusterMember> closePredicate)
+                                               Predicate<CoherenceClusterMember> closePredicate,
+                                               Platform                          platform,
+                                               Option...                         options)
     {
-        this.prefix   = prefix;
-        this.platform = platform;
-        this.schema   = schema;
-        this.console  = console;
+        this.prefix  = prefix;
+        this.schema  = schema;
+        this.console = console;
         this.closePredicate = closePredicate == null
                               ? com.oracle.tools.predicate.Predicates.<CoherenceClusterMember>always() : closePredicate;
+        this.platform = platform;
+        this.options  = options;
     }
 
 
@@ -198,7 +210,7 @@ public class RestartCoherenceClusterMemberAction<A extends CoherenceClusterMembe
                                                                                  closePredicate));
 
                             // start a new ClusterMember (with the same name as the old member)
-                            member = platform.realize(schema, name, console);
+                            member = platform.realize(schema, name, console, options);
 
                             // ensure that the new member has joined the cluster
                             ensure(eventually(invoking(member).getClusterSize()), is(greaterThan(1)));

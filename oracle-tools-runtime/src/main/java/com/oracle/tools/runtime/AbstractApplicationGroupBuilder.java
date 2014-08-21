@@ -26,6 +26,7 @@
 package com.oracle.tools.runtime;
 
 import com.oracle.tools.runtime.console.NullApplicationConsole;
+
 import com.oracle.tools.util.Quadruple;
 
 import java.util.LinkedHashMap;
@@ -41,14 +42,14 @@ import java.util.LinkedList;
  */
 @Deprecated
 public abstract class AbstractApplicationGroupBuilder<A extends Application, S extends ApplicationSchema<A>,
-                                                      B extends ApplicationBuilder<A>,
-                                                      G extends ApplicationGroup<A>>
+                                                      B extends ApplicationBuilder<A>, G extends ApplicationGroup<A>>
     extends AbstractAssemblyBuilder<A, G> implements ApplicationGroupBuilder<A, S, B, G>
 {
     /**
      * The map of {@link ApplicationBuilder}s to create applications, keyed by application prefix name.
      */
     protected LinkedHashMap<String, Quadruple<ApplicationBuilder<A>, ApplicationSchema<A>, Integer, ApplicationConsoleBuilder>> m_builders;
+
 
     /**
      * Construct an {@link AbstractApplicationGroupBuilder}.
@@ -61,6 +62,7 @@ public abstract class AbstractApplicationGroupBuilder<A extends Application, S e
                                        Quadruple<ApplicationBuilder<A>, ApplicationSchema<A>, Integer,
                                                  ApplicationConsoleBuilder>>();
     }
+
 
     public <T extends A, S extends ApplicationSchema<T>,
             B extends ApplicationBuilder<T>> void addBuilder(B      applicationBuilder,
@@ -83,6 +85,7 @@ public abstract class AbstractApplicationGroupBuilder<A extends Application, S e
         m_builders.put(applicationNamePrefix,
                        new Quadruple(applicationBuilder, applicationSchema, count, consoleBuilder));
     }
+
 
     @Override
     public G realize(ApplicationConsoleBuilder overridingConsoleBuilder)
@@ -122,6 +125,6 @@ public abstract class AbstractApplicationGroupBuilder<A extends Application, S e
             }
         }
 
-        return createApplicationGroup(applications);
+        return createAssembly(applications);
     }
 }

@@ -45,7 +45,7 @@ import java.util.List;
 public class CoherenceClusterBuilder extends AbstractAssemblyBuilder<CoherenceClusterMember, CoherenceCluster>
 {
     @Override
-    protected CoherenceCluster createApplicationGroup(List<? extends CoherenceClusterMember> members)
+    protected CoherenceCluster createAssembly(List<? extends CoherenceClusterMember> members)
     {
         return new CoherenceCluster(members);
     }

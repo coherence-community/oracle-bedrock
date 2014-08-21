@@ -43,14 +43,14 @@ import java.util.List;
  */
 @Deprecated
 public class ClusterBuilder
-    extends AbstractApplicationGroupBuilder<ClusterMember, ClusterMemberSchema,
-                                            JavaApplicationBuilder<ClusterMember>, Cluster>
+    extends AbstractApplicationGroupBuilder<ClusterMember, ClusterMemberSchema, JavaApplicationBuilder<ClusterMember>,
+                                            Cluster>
 {
     /**
      * {@inheritDoc}
      */
     @Override
-    protected Cluster createApplicationGroup(List<? extends ClusterMember> members)
+    protected Cluster createAssembly(List<? extends ClusterMember> members)
     {
         return new Cluster(members);
     }

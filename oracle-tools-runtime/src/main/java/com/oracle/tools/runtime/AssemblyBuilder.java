@@ -25,6 +25,8 @@
 
 package com.oracle.tools.runtime;
 
+import com.oracle.tools.Option;
+
 import java.io.IOException;
 
 /**
@@ -50,18 +52,21 @@ public interface AssemblyBuilder<A extends Application, G extends Assembly<A>>
      * By default no {@link ApplicationConsole} will be used for the realized
      * {@link Application}s, unless one is specified when realizing the {@link Assembly}.
      *
-     * @param platform               the {@link Platform} on which to realize the {@link Application}s
-     * @param applicationSchema      the {@link ApplicationSchema} from which to
-     *                               realize/configure the {@link Application}s
      * @param applicationNamePrefix  the {@link Application} name prefix for each
      *                               of the realized {@link Application}
+     * @param applicationSchema      the {@link ApplicationSchema} from which to
+     *                               realize/configure the {@link Application}s
      * @param count                  the number of instances of the {@link Application} that should be realized for
      *                               the {@link Assembly} when {@link #realize(ApplicationConsole)} is called
+     * @param platform               the {@link Platform} on which to realize the {@link Application}s
+     * @param options                the {@link Option}s to use for realizing the {@link Application}s
      */
-    public <T extends A, S extends ApplicationSchema<T>> void addApplication(Platform platform,
-                                                                             S        applicationSchema,
-                                                                             String   applicationNamePrefix,
-                                                                             int      count);
+    public <T extends A, S extends ApplicationSchema<T>> void addSchema(String    applicationNamePrefix,
+                                                                        S         applicationSchema,
+                                                                        int       count,
+                                                                        Platform  platform,
+                                                                        Option... options);
+
 
     /**
      * Adds an {@link Application} to be realized by the {@link AssemblyBuilder}
@@ -73,21 +78,23 @@ public interface AssemblyBuilder<A extends Application, G extends Assembly<A>>
      * By default a new {@link ApplicationConsole} provided by the {@link ApplicationConsoleBuilder}
      * will used for each {@link Application} realized when creating the {@link Assembly}.
      *
-     * @param platform               the {@link Platform} on which to realize the {@link Application}s
-     * @param applicationSchema      the {@link ApplicationSchema} from which to
-     *                               realize/configure the {@link Application}s
      * @param applicationNamePrefix  the {@link Application} name prefix for each
      *                               of the realized {@link Application}
+     * @param applicationSchema      the {@link ApplicationSchema} from which to
+     *                               realize/configure the {@link Application}s
      * @param count                  the number of instances of the {@link Application} that should be realized for
      *                               the {@link Assembly} when {@link #realize(ApplicationConsole)} is called
      * @param consoleBuilder         the {@link ApplicationConsoleBuilder} to be used to provide
-     *                               {@link ApplicationConsole}s for realized {@link Application}s.
+     *                               {@link ApplicationConsole}s for realized {@link Application}s
+     * @param platform               the {@link Platform} on which to realize the {@link Application}s
+     * @param options                the {@link Option}s to use for realizing the {@link Application}s
      */
-    public <T extends A, S extends ApplicationSchema<T>> void addApplication(Platform                  platform,
-                                                                             S                         applicationSchema,
-                                                                             String                    applicationNamePrefix,
-                                                                             int                       count,
-                                                                             ApplicationConsoleBuilder consoleBuilder);
+    public <T extends A, S extends ApplicationSchema<T>> void addSchema(String                    applicationNamePrefix,
+                                                                        S                         applicationSchema,
+                                                                        int                       count,
+                                                                        ApplicationConsoleBuilder consoleBuilder,
+                                                                        Platform                  platform,
+                                                                        Option...                 options);
 
 
     /**
@@ -96,7 +103,7 @@ public interface AssemblyBuilder<A extends Application, G extends Assembly<A>>
      * @param overridingConsole  the {@link ApplicationConsole} that will be used for I/O by all of the
      *                           {@link Application}s realized in the {@link Assembly}, including
      *                           those that had a specific {@link ApplicationConsoleBuilder} specified for
-     *                           them using {@link #addApplication(Platform, ApplicationSchema, String, int, ApplicationConsoleBuilder)}
+     *                           them using {@link #addSchema(String, ApplicationSchema, int, Platform, Option...)}
      *                           When this is <code>null</code> the defined {@link ApplicationConsole}
      *                           will be used for each {@link Application} in the {@link Assembly}
      *
@@ -114,7 +121,7 @@ public interface AssemblyBuilder<A extends Application, G extends Assembly<A>>
      *                                  {@link ApplicationConsole}s for each of the realized {@link Application}s
      *                                  in the {@link Assembly}, overriding those that had a specific
      *                                  {@link ApplicationConsoleBuilder} specified for them using
-     *                                  {@link #addApplication(Platform, ApplicationSchema, String, int, ApplicationConsoleBuilder)}
+     *                                  {@link #addSchema(String, ApplicationSchema, int, ApplicationConsoleBuilder, Platform, Option...)}
      *                                  When this is <code>null</code> the defined {@link ApplicationConsole}
      *                                  will be used for each {@link Application} in the {@link Assembly}
      *

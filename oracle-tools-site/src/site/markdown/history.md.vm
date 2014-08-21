@@ -263,6 +263,15 @@ reverse chronological order.
     *BREAKING CHANGE:*  This is a breaking change for anyone that relies on
     using Builders / Schemas / Platform specific configuration options.
 
+*   [ORACLETOOLS-143](https://java.net/jira/browse/ORACLETOOLS-143): Renamed
+    the AssemblyBuilder (ApplicationGroupBuilder) addApplication method to
+    be addSchema (as it should be).  Additionally re-ordered the parameters
+    to allow for inclusion of Options introduced in
+    [ORACLETOOLS-142](https://java.net/jira/browse/ORACLETOOLS-142)
+
+    *BREAKING CHANGE:*  This is a breaking change for anyone that relies on
+    using ApplicationGroupBuilder.addApplication method.
+
 <h4>oracle-tools-runtime-remote</h4>
 
 *   [ORACLETOOLS-91](https://java.net/jira/browse/ORACLETOOLS-91): Introduced

@@ -153,7 +153,7 @@ public class AbstractApplicationGroupBuilderTest
 
         @SuppressWarnings({"unchecked"})
         @Override
-        protected ApplicationGroup createApplicationGroup(List applications)
+        protected ApplicationGroup createAssembly(List applications)
         {
             this.applications = applications;
 
