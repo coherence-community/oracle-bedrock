@@ -3,7 +3,7 @@
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * The contents of this file are subject to the terms and conditions of
+ * The contents of this file are subject to the terms and conditions of 
  * the Common Development and Distribution License 1.0 (the "License").
  *
  * You may not use this file except in compliance with the License.
@@ -35,10 +35,15 @@ import java.util.List;
  *
  * @author Jonathan Knight
  *
- * @param <A> the type of {@link Application} contained within this {@Link SimpleAssembly}
+ * @param <A> the type of {@link Application} contained within this {@link SimpleAssembly}
  */
 public class SimpleAssembly<A extends Application> extends AbstractAssembly<A>
 {
+    /**
+     * Constructs a {@link SimpleAssembly}
+     *
+     * @param applications  the {@link Application}s for the {@link Assembly}
+     */
     public SimpleAssembly(List<? extends A> applications)
     {
         super(applications);

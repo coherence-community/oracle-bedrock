@@ -49,7 +49,7 @@ public interface LifecycleEvent<T>
     /**
      * Obtains the object of the event
      *
-     * @return
+     * @return the object on which the event occurred
      */
     public T getObject();
 }

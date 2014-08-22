@@ -91,7 +91,7 @@ public class RemoteMethodInvocation<T> implements RemoteCallable
 
 
     /**
-     * Obtain the {@link Interceptor} for the {@Link RemoteMethodInvocation}.
+     * Obtain the {@link Interceptor} for the {@link RemoteMethodInvocation}.
      *
      * @return  the {@link Interceptor} or <code>null</code> if not defined
      */

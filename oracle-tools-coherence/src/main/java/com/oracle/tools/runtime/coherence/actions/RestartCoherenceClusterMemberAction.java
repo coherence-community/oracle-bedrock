@@ -114,7 +114,7 @@ public class RestartCoherenceClusterMemberAction<A extends CoherenceClusterMembe
      * Constructs a {@link RestartCoherenceClusterMemberAction}.
      *
      * @param prefix          the prefix that must match existing {@link CoherenceClusterMember} names
-     * @param schema          the {@link CoherenceClusterMemberSchema for new {@link CoherenceClusterMember}s
+     * @param schema          the {@link CoherenceClusterMemberSchema} for new {@link CoherenceClusterMember}s
      * @param console         the {@link ApplicationConsole} for new {@link CoherenceClusterMember}s
      * @param closePredicate  the optional {@link Predicate} that must be satisfied before restarting a
      *                        {@link CoherenceClusterMember} (may be <code>null</code>)

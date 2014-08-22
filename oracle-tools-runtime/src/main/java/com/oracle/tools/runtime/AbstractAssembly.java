@@ -46,12 +46,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public abstract class AbstractAssembly<A extends Application> implements Assembly<A>
 {
     /**
-     * The {@link Application}s that belong to the {@link ApplicationGroup}.
+     * The {@link Application}s that belong to the {@link Assembly}.
      */
     protected CopyOnWriteArraySet<A> applications;
 
     /**
-     * Is the {@link ApplicationGroup} closed?
+     * Is the {@link Assembly} closed?
      */
     protected AtomicBoolean isClosed;
 
@@ -59,7 +59,7 @@ public abstract class AbstractAssembly<A extends Application> implements Assembl
     /**
      * Constructs an {@link AbstractAssembly} given a list of {@link Application}s.
      *
-     * @param applications  the {@link Application}s in the {@link ApplicationGroup}.
+     * @param applications  the {@link Application}s in the {@link Assembly}.
      */
     public AbstractAssembly(List<? extends A> applications)
     {
@@ -69,9 +69,9 @@ public abstract class AbstractAssembly<A extends Application> implements Assembl
 
 
     /**
-     * Determine if the {@link ApplicationGroup} is closed.
+     * Determine if the {@link Assembly} is closed.
      *
-     * @return  <code>true</code> if the {@link ApplicationGroup} is closed
+     * @return  <code>true</code> if the {@link Assembly} is closed
      */
     public boolean isClosed()
     {
@@ -128,11 +128,11 @@ public abstract class AbstractAssembly<A extends Application> implements Assembl
 
 
     /**
-     * Adds the specified {@link Application} to the {@link ApplicationGroup}.
+     * Adds the specified {@link Application} to the {@link Assembly}.
      *
      * @param application  the {@link Application} to add
      *
-     * @throws IllegalStateException  when the {@link ApplicationGroup} {@link #isClosed}
+     * @throws IllegalStateException  when the {@link Assembly} {@link #isClosed}
      */
     public void addApplication(A application)
     {
@@ -150,14 +150,14 @@ public abstract class AbstractAssembly<A extends Application> implements Assembl
 
 
     /**
-     * Removes the specified {@link Application} to the {@link ApplicationGroup}.
+     * Removes the specified {@link Application} to the {@link Assembly}.
      *
      * @param application  the {@link Application} to remove
      *
      * @return <code>true</code> if the specified {@link Application} was removed
      *         <code>false</code> otherwise
      *
-     * @throws IllegalStateException  when the {@link ApplicationGroup} {@link #isClosed}
+     * @throws IllegalStateException  when the {@link Assembly} {@link #isClosed}
      */
     public boolean removeApplication(A application)
     {

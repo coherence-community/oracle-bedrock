@@ -95,7 +95,7 @@ public class PipedApplicationConsole extends AbstractPipedApplicationConsole
     }
 
     /**
-     * Constructs {@link }PipedApplicationConsole}.
+     * Constructs {@link PipedApplicationConsole}.
      *
      * @param pipeSize         the size of the buffers for the
      *                         pipes used by this {@link PipedApplicationConsole}.

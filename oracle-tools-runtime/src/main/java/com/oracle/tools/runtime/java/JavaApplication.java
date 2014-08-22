@@ -313,16 +313,15 @@ public interface JavaApplication extends Application, RemoteExecutor
      * and return values should be called using the returned proxy.  Attempts to invoke
      * methods with non-serializable parameters or methods returning non-serializable results
      * may result in {@link NotSerializableException}s being thrown. (depending on
-     * the ability for a provided {@link RemoteMethodInvocation.Interceptor} to
-     * transform said values)
+     * the ability for a provided interceptor to transform said values)
      *
      * @param <T>  the type of the proxy
      *
      * @param classToProxy      the class of the proxy
      * @param instanceProducer  a {@link RemoteCallable} that will provide the application instance
      *                          to which proxy method calls should be invoked
-     * @param interceptor       an optional (may be null) {@link RemoteMethodInvocation.Interceptor}
-     *                          to transform values used by the returned proxy
+     * @param interceptor       an optional (may be null) interceptor to transform values
+     *                          used and returned by the proxy
      * @return  a proxy of an application instance
      */
     public <T> T getProxyFor(Class<T>                           classToProxy,

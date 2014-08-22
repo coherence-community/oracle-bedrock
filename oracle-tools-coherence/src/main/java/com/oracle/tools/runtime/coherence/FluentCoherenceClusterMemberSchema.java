@@ -132,7 +132,7 @@ public interface FluentCoherenceClusterMemberSchema<A extends CoherenceClusterMe
      * is realized it will be running in local-host only mode, meaning that other cluster members
      * must be on the same host.
      * <p>
-     * This is typically used for running {@link ClusterMember}s locally.
+     * This is typically used for running {@link CoherenceClusterMember}s locally.
      *
      * @return  the {@link FluentCoherenceClusterMemberSchema}
      */

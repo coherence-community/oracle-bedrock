@@ -72,7 +72,8 @@ public interface CoherenceClusterMember extends JavaApplication
 
 
     /**
-     * Obtains the member {@link UID}s for the {@link Cluster} in which the {@link CoherenceClusterMember} is operating.
+     * Obtains the member {@link UID}s for the {@link CoherenceCluster} in which the
+     * {@link CoherenceClusterMember} is operating.
      *
      * @return  a {@link Set} of {@link UID}, one for each {@link CoherenceClusterMember}
      */

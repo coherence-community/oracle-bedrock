@@ -25,8 +25,6 @@
 
 package com.oracle.tools.deferred;
 
-import java.util.concurrent.Future;
-
 /**
  * A {@link Deferred} object represents a reference some well-known object, that
  * of which may yet not be available.
@@ -51,25 +49,33 @@ import java.util.concurrent.Future;
  * <p>
  * Once resolved, the referenced value of a {@link Deferred} will not change.
  * <p>
- * While similar to Java {@link Future}s, {@link Deferred}s are not Java
- * {@link Future}s.  In most circumstances, {@link Future}s are used to represent
- * the result of a computation that is occurring asynchronously and thus will be
- * produced in the future.  Calling either the {@link Future#get()}
- * or {@link Future#get(long, java.util.concurrent.TimeUnit)} blocks the calling
- * thread, at least for some period of time, to wait for a result.  More
- * specifically, how a thread waits for a result {@link Future} is in fact
- * encapsulated by the {@link Future} itself, with little option for a
- * developer to control the semantics.  However calling {@link Deferred#get()}
- * never blocks (with exception to attempt to acquire the object), unless of
- * course the {@link Deferred} implementation provides this facility
- * (see {@link Ensured} as an example).  ie: {@link Future}s essentially force
- * calling {@link Thread}s to block, {@link Deferred}s don't.  This difference
- * is significant as it allows {@link Deferred}s to present numerous types of
- * lazily evaluation (eg: deferred method invocation on deferred objects), that
- * of which is not easily possible with {@link Future}s.  Lastly {@link Future}
- * provides mechanisms to both {@link Future#cancel(boolean)} and determine
- * cancellation state.  This is because a {@link Future} represents some
- * background operation, where as a {@link Deferred} is simply a reference to
+ * While similar to Java {@link java.util.concurrent.Future}s, {@link Deferred}s
+ * are not Java {@link java.util.concurrent.Future}s.  In most circumstances,
+ * {@link java.util.concurrent.Future}s are used to represent a mechanism to
+ * control and acquire the result of a computation that is occurring asynchronously
+ * and thus will be produced in the future.  Calling either the
+ * {@link java.util.concurrent.Future#get()} or
+ * {@link java.util.concurrent.Future#get(long, java.util.concurrent.TimeUnit)}
+ * methods block the calling thread, at least for some period of time, to wait
+ * for a result.  More specifically, how a thread waits for a result
+ * {@link java.util.concurrent.Future} is in fact encapsulated by the
+ * {@link java.util.concurrent.Future} implementation itself, with little option for a
+ * developer to control the semantics.
+ * <p>
+ * However calling {@link Deferred#get()} never blocks (with exception to attempt
+ * to acquire the object), unless of course the {@link Deferred} implementation
+ * provides this facility (see {@link Ensured} as an example).  That is
+ * {@link java.util.concurrent.Future}s essentially force calling {@link Thread}s
+ * to block where as {@link Deferred}s don't.
+ * <p>
+ * This subtle but significant difference allows {@link Deferred}s to present
+ * numerous types of lazily evaluation (eg: deferred method invocation on deferred
+ * objects), that of which is not easily achievable with {@link java.util.concurrent.Future}s.
+ * <p>
+ * Lastly {@link java.util.concurrent.Future} provides mechanisms to both
+ * {@link java.util.concurrent.Future#cancel(boolean)} and determine cancellation state.
+ * This is simply because {@link java.util.concurrent.Future} are used to represent
+ * some background operation, where as a {@link Deferred} is simply a reference to
  * an object that may be available at a later point in time.
  * <p>
  * As there are many types of {@link Deferred}s, each with their own strategies

@@ -243,9 +243,6 @@ public class ContainerMBeanServerBuilder extends MBeanServerBuilder
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public synchronized MBeanServer newMBeanServer(String              domain,
                                                    MBeanServer         outer,
@@ -276,9 +273,6 @@ public class ContainerMBeanServerBuilder extends MBeanServerBuilder
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public MBeanServerDelegate newMBeanServerDelegate()
     {
@@ -446,7 +440,7 @@ public class ContainerMBeanServerBuilder extends MBeanServerBuilder
          * @param url          the {@link JMXServiceURL}
          * @param environment  the environment variables for the connector
          *
-         * @return
+         * @return the {@link JMXConnector}
          *
          * @throws IOException
          */
@@ -476,9 +470,6 @@ public class ContainerMBeanServerBuilder extends MBeanServerBuilder
      */
     public static class DefaultConnectorFactory implements ConnectorFactory
     {
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public JMXConnectorServer createJMXConnectorServer(JMXServiceURL  url,
                                                            Map<String, ?> environment,
@@ -488,9 +479,6 @@ public class ContainerMBeanServerBuilder extends MBeanServerBuilder
         }
 
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public JMXConnector createJMXConnector(JMXServiceURL  url,
                                                Map<String, ?> environment) throws IOException
@@ -505,9 +493,7 @@ public class ContainerMBeanServerBuilder extends MBeanServerBuilder
      */
     public static class DefaultRmiRegistryFactory implements RmiRegistryFactory
     {
-        /**
-         * {@inheritDoc}
-         */
+        @Override
         public void createRegistry(int port) throws RemoteException
         {
             try
