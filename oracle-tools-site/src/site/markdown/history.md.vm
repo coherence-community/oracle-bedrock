@@ -291,6 +291,13 @@ reverse chronological order.
     NativeJavaApplicationBuilder -> LocalJavaApplicationBuilder
     VirtualizedJavaApplicationBuilder -> ContainerBasedJavaApplicationBuilder
 
+*   [ORACLETOOLS-146](https://java.net/jira/browse/ORACLETOOLS-146): Refactored
+    Platform.realize(...) to reorder the parameters so that using Options
+    is permitted (in various other classes).
+
+*   [ORACLETOOLS-147](https://java.net/jira/browse/ORACLETOOLS-147): Refactored
+    AbstractAssembly.get/add/removeApplication methods to drop the term "Application".
+
 <h4>oracle-tools-runtime-remote</h4>
 
 *   [ORACLETOOLS-91](https://java.net/jira/browse/ORACLETOOLS-91): Introduced

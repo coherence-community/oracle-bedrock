@@ -71,8 +71,8 @@ public abstract class AbstractPlatform implements Platform
 
 
     @Override
-    public <A extends Application, S extends ApplicationSchema<A>> A realize(S                  applicationSchema,
-                                                                             String             applicationName,
+    public <A extends Application, S extends ApplicationSchema<A>> A realize(String             applicationName,
+                                                                             S                  applicationSchema,
                                                                              ApplicationConsole console,
                                                                              Option...          options)
     {
@@ -85,4 +85,19 @@ public abstract class AbstractPlatform implements Platform
 
         return builder.realize(applicationSchema, applicationName, console, this, options);
     }
+
+
+    /**
+     * Obtains a suitable {@link ApplicationBuilder} for a specific class of {@link Application}.
+     *
+     * @param <A>  the type of {@link Application}
+     * @param <B>  the type of {@link ApplicationBuilder}
+     *
+     * @param applicationClass  the {@link Class} of {@link Application} for which a {@link ApplicationBuilder}
+     *                          is required
+     * @return  the {@link ApplicationBuilder} or null if this {@link Platform} cannot supply a builder for
+     *          the specified {@link Application} {@link Class}
+     */
+    public abstract <A extends Application,
+                     B extends ApplicationBuilder<A>> B getApplicationBuilder(Class<A> applicationClass);
 }

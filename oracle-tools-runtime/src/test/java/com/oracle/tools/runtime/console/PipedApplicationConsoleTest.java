@@ -85,7 +85,7 @@ public class PipedApplicationConsoleTest
 
         PipedApplicationConsole console = new PipedApplicationConsole(1024, false);
 
-        try (SimpleJavaApplication app = LocalPlatform.getInstance().realize(schema, "App", console))
+        try (SimpleJavaApplication app = LocalPlatform.getInstance().realize("App", schema, console))
         {
             app.waitFor();
         }
@@ -103,11 +103,12 @@ public class PipedApplicationConsoleTest
     public void shouldBeAbleToReadPipedStdErrAfterConsoleClosed() throws Exception
     {
         SimpleJavaApplicationSchema schema =
-            new SimpleJavaApplicationSchema(SimpleApp.class.getCanonicalName()).setArgument("foo").setArgument("bar");
+            new SimpleJavaApplicationSchema(SimpleApp.class.getCanonicalName()).addArguments("foo",
+                                                                                             "bar");
 
         PipedApplicationConsole console = new PipedApplicationConsole(1024, false);
 
-        try (SimpleJavaApplication app = LocalPlatform.getInstance().realize(schema, "App", console))
+        try (SimpleJavaApplication app = LocalPlatform.getInstance().realize("App", schema, console))
         {
             app.waitFor();
         }

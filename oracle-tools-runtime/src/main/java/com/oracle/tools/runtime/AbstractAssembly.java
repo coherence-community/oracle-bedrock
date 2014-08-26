@@ -25,6 +25,8 @@
 
 package com.oracle.tools.runtime;
 
+import com.oracle.tools.predicate.Predicate;
+
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -80,16 +82,16 @@ public abstract class AbstractAssembly<A extends Application> implements Assembl
 
 
     /**
-     * Obtains an {@link Application} in this group with the given name.  If
-     * no such {@link Application} exists in the group, <code>null</code> will
-     * be returned.  If multiple {@link Application}s in the group have the
-     * given name, an arbitary {@link Application} of the name will be returned
+     * Obtains an {@link Application} in this {@link Assembly} with the given name.
+     * If no such {@link Application} exists in the {@link Assembly}, <code>null</code>
+     * will be returned.  If multiple {@link Application}s in the {@link Assembly}
+     * have the given name, an arbitary {@link Application} of the name will be returned
      *
      * @param name  the name of the application to get
-     * @return the application in this group with the given name or null
+     * @return the application in this {@link Assembly} with the given name or null
      *         if no application has been realized with the given name
      */
-    public A getApplication(String name)
+    public A get(String name)
     {
         for (A application : applications)
         {
@@ -104,14 +106,14 @@ public abstract class AbstractAssembly<A extends Application> implements Assembl
 
 
     /**
-     * Obtains the {@link Application}s in this group where by their
+     * Obtains the {@link Application}s in this {@link Assembly} where by their
      * {@link Application#getName()} starts with the specified prefix.
      *
      * @param prefix  the prefix of application names to return
-     * @return the application in this group with the given name or null
-     *         if no application has been realized with the given name
+     * @return an {@link Iterable} over the {@link Application}s starting
+     *         with the specified prefix
      */
-    public Iterable<A> getApplications(String prefix)
+    public Iterable<A> getAll(String prefix)
     {
         LinkedList<A> list = new LinkedList<A>();
 
@@ -128,13 +130,37 @@ public abstract class AbstractAssembly<A extends Application> implements Assembl
 
 
     /**
+     * Obtains the {@link Application}s in this {@link Assembly}
+     * satifying the specified {@link Predicate}.
+     *
+     * @param predicate  the {@link Predicate} to test {@link Application}s
+     * @return an {@link Iterable} over the {@link Application}s satisfying the
+     *         {@link Predicate}
+     */
+    public Iterable<A> getAll(Predicate<? super A> predicate)
+    {
+        LinkedList<A> list = new LinkedList<A>();
+
+        for (A application : applications)
+        {
+            if (predicate.evaluate(application))
+            {
+                list.add(application);
+            }
+        }
+
+        return list;
+    }
+
+
+    /**
      * Adds the specified {@link Application} to the {@link Assembly}.
      *
      * @param application  the {@link Application} to add
      *
      * @throws IllegalStateException  when the {@link Assembly} {@link #isClosed}
      */
-    public void addApplication(A application)
+    public void add(A application)
     {
         if (isClosed())
         {
@@ -159,7 +185,7 @@ public abstract class AbstractAssembly<A extends Application> implements Assembl
      *
      * @throws IllegalStateException  when the {@link Assembly} {@link #isClosed}
      */
-    public boolean removeApplication(A application)
+    public boolean remove(A application)
     {
         if (isClosed())
         {

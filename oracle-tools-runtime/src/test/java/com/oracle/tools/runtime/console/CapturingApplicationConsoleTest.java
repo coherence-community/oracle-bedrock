@@ -71,7 +71,7 @@ public class CapturingApplicationConsoleTest
                                                                                              "4",
                                                                                              "5");
 
-        try (SimpleJavaApplication app = LocalPlatform.getInstance().realize(schema, "App", console))
+        try (SimpleJavaApplication app = LocalPlatform.getInstance().realize("App", schema, console))
         {
             app.waitFor();
         }
@@ -103,7 +103,7 @@ public class CapturingApplicationConsoleTest
                                                                                              "4",
                                                                                              "5");
 
-        try (SimpleJavaApplication app = LocalPlatform.getInstance().realize(schema, "App", console))
+        try (SimpleJavaApplication app = LocalPlatform.getInstance().realize("App", schema, console))
         {
             app.waitFor();
         }
@@ -131,7 +131,7 @@ public class CapturingApplicationConsoleTest
 
         SimpleJavaApplicationSchema schema  = new SimpleJavaApplicationSchema(EchoApp.class.getCanonicalName());
 
-        try (SimpleJavaApplication app = LocalPlatform.getInstance().realize(schema, "App", console))
+        try (SimpleJavaApplication app = LocalPlatform.getInstance().realize("App", schema, console))
         {
             LinkedList<String> lines = console.getCapturedOutputLines();
 

@@ -75,7 +75,7 @@ public class VagrantChecker
         SimpleApplicationSchema schema  = new SimpleApplicationSchema(command).addArgument("--version");
 
         try (PipedApplicationConsole console = new PipedApplicationConsole();
-            Application application = LocalPlatform.getInstance().realize(schema, "Vagrant", console);)
+            Application application = LocalPlatform.getInstance().realize("Vagrant", schema, console);)
         {
             int exitCode = application.waitFor();
 

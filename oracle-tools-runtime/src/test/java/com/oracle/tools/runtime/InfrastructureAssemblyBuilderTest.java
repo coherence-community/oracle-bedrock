@@ -80,11 +80,11 @@ public class InfrastructureAssemblyBuilderTest
         ApplicationSchema  schema3    = mock(ApplicationSchema.class, "S-3");
 
         when(platform1.getName()).thenReturn("P-1");
-        when(platform1.realize(any(ApplicationSchema.class), anyString(),
+        when(platform1.realize(anyString(), any(ApplicationSchema.class),
                                any(ApplicationConsole.class))).thenAnswer(new ApplicationAnswer("P-1"));
 
         when(platform2.getName()).thenReturn("P-2");
-        when(platform2.realize(any(ApplicationSchema.class), anyString(),
+        when(platform2.realize(anyString(), any(ApplicationSchema.class),
                                any(ApplicationConsole.class))).thenAnswer(new ApplicationAnswer("P-2"));
 
         when(predicate1.evaluate(platform1)).thenReturn(true);
@@ -96,9 +96,9 @@ public class InfrastructureAssemblyBuilderTest
 
         InfrastructureAssemblyBuilder builder = new InfrastructureAssemblyBuilder();
 
-        builder.addApplication(predicate1, schema1, "A", 2, console1);
-        builder.addApplication(predicate2, schema2, "B", 1);
-        builder.addApplication(predicate3, schema3, "C", 3, console2);
+        builder.addApplication(predicate1, "A", schema1, 2, console1);
+        builder.addApplication(predicate2, "B", schema2, 1);
+        builder.addApplication(predicate3, "C", schema3, 3, console2);
 
         Infrastructure<Platform> infrastructure = new Infrastructure<>();
 
@@ -153,11 +153,11 @@ public class InfrastructureAssemblyBuilderTest
         ApplicationSchema  schema3    = mock(ApplicationSchema.class, "S-3");
 
         when(platform1.getName()).thenReturn("P-1");
-        when(platform1.realize(any(ApplicationSchema.class), anyString(),
+        when(platform1.realize(anyString(), any(ApplicationSchema.class),
                                any(ApplicationConsole.class))).thenAnswer(new ApplicationAnswer("P-1"));
 
         when(platform2.getName()).thenReturn("P-2");
-        when(platform2.realize(any(ApplicationSchema.class), anyString(),
+        when(platform2.realize(anyString(), any(ApplicationSchema.class),
                                any(ApplicationConsole.class))).thenAnswer(new ApplicationAnswer("P-2"));
 
         when(predicate1.evaluate(platform1)).thenReturn(true);
@@ -169,9 +169,9 @@ public class InfrastructureAssemblyBuilderTest
 
         InfrastructureAssemblyBuilder builder = new InfrastructureAssemblyBuilder();
 
-        builder.addApplication(predicate1, schema1, "A", 2, console1);
-        builder.addApplication(predicate2, schema2, "B", 1);
-        builder.addApplication(predicate3, schema3, "C", 3, console2);
+        builder.addApplication(predicate1, "A", schema1, 2, console1);
+        builder.addApplication(predicate2, "B", schema2, 1);
+        builder.addApplication(predicate3, "C", schema3, 3, console2);
 
         Infrastructure<Platform> infrastructure = new Infrastructure<>();
 
@@ -234,9 +234,9 @@ public class InfrastructureAssemblyBuilderTest
             Object[] args = invocationOnMock.getArguments();
 
             return new ApplicationStub(platformName,
-                                       (String) args[1],
+                                       (String) args[0],
                                        (ApplicationConsole) args[2],
-                                       (ApplicationSchema) args[0]);
+                                       (ApplicationSchema) args[1]);
         }
     }
 

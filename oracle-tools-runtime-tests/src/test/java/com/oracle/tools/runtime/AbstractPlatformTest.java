@@ -80,7 +80,7 @@ public class AbstractPlatformTest
         when(platform.getApplicationBuilder(SimpleJavaApplication.class)).thenReturn(builder);
         when(builder.realize(same(schema), eq("TestApp"), same(console), same(platform))).thenReturn(app);
 
-        SimpleJavaApplication result = platform.realize(schema, "TestApp", console);
+        SimpleJavaApplication result = platform.realize("TestApp", schema, console);
         assertThat(result, is(sameInstance(app)));
     }
 
@@ -95,7 +95,7 @@ public class AbstractPlatformTest
 
         when(platform.getApplicationBuilder(SimpleJavaApplication.class)).thenReturn(null);
 
-        SimpleJavaApplication result = platform.realize(schema, "TestApp", console);
+        SimpleJavaApplication result = platform.realize("TestApp", schema, console);
         assertThat(result, is(nullValue()));
     }
 

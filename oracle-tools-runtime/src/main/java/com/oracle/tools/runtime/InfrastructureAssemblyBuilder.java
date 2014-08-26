@@ -26,11 +26,14 @@
 package com.oracle.tools.runtime;
 
 import com.oracle.tools.predicate.Predicate;
+
 import com.oracle.tools.runtime.console.NullApplicationConsole;
 import com.oracle.tools.runtime.console.SingletonApplicationConsoleBuilder;
+
 import com.oracle.tools.util.Quadruple;
 
 import java.io.IOException;
+
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -68,8 +71,8 @@ public class InfrastructureAssemblyBuilder<P extends Platform, A extends Applica
      * Add an application based on the specified {@link ApplicationSchema} that will
      * be realized when the {@link Assembly} is realized.
      *
-     * @param applicationSchema      the {@link ApplicationSchema} that defines the application to be realized
      * @param applicationNamePrefix  the prefix for the application name
+     * @param applicationSchema      the {@link ApplicationSchema} that defines the application to be realized
      * @param instancesPerPlatform   the number of instances of the application to realize per {@link Platform} in the
      *                               {@link Infrastructure}
      *
@@ -77,13 +80,13 @@ public class InfrastructureAssemblyBuilder<P extends Platform, A extends Applica
      * @param <S>  the type of {@link ApplicationSchema}
      */
     @SuppressWarnings("unchecked")
-    public <T extends A, S extends ApplicationSchema<T>> void addApplication(S      applicationSchema,
-                                                                             String applicationNamePrefix,
+    public <T extends A, S extends ApplicationSchema<T>> void addApplication(String applicationNamePrefix,
+                                                                             S      applicationSchema,
                                                                              int    instancesPerPlatform)
     {
         addApplication(null,
-                       applicationSchema,
                        applicationNamePrefix,
+                       applicationSchema,
                        instancesPerPlatform,
                        (ApplicationConsoleBuilder) null);
     }
@@ -93,8 +96,8 @@ public class InfrastructureAssemblyBuilder<P extends Platform, A extends Applica
      * Add an application based on the specified {@link ApplicationSchema} that will
      * be realized when the {@link Assembly} is realized.
      *
-     * @param applicationSchema      the {@link ApplicationSchema} that defines the application to be realized
      * @param applicationNamePrefix  the prefix for the application name
+     * @param applicationSchema      the {@link ApplicationSchema} that defines the application to be realized
      * @param instancesPerPlatform   the number of instances of the application to realize per {@link Platform} in the
      *                               {@link Infrastructure}
      *
@@ -103,13 +106,13 @@ public class InfrastructureAssemblyBuilder<P extends Platform, A extends Applica
      */
     @SuppressWarnings("unchecked")
     public <T extends A, S extends ApplicationSchema<T>> void addApplication(Predicate<P> predicate,
-                                                                             S            applicationSchema,
                                                                              String       applicationNamePrefix,
+                                                                             S            applicationSchema,
                                                                              int          instancesPerPlatform)
     {
         addApplication(predicate,
-                       applicationSchema,
                        applicationNamePrefix,
+                       applicationSchema,
                        instancesPerPlatform,
                        (ApplicationConsoleBuilder) null);
     }
@@ -119,8 +122,8 @@ public class InfrastructureAssemblyBuilder<P extends Platform, A extends Applica
      * Add an application based on the specified {@link ApplicationSchema} that will
      * be realized when the {@link Assembly} is realized.
      *
-     * @param applicationSchema      the {@link ApplicationSchema} that defines the application to be realized
      * @param applicationNamePrefix  the prefix for the application name
+     * @param applicationSchema      the {@link ApplicationSchema} that defines the application to be realized
      * @param instancesPerPlatform   the number of instances of the application to realize per {@link Platform} in the
      *                               {@link Infrastructure}
      * @param consoleBuilder         the {@link ApplicationConsoleBuilder} to be used to provide
@@ -130,8 +133,8 @@ public class InfrastructureAssemblyBuilder<P extends Platform, A extends Applica
      * @param <S>  the type of {@link ApplicationSchema}
      */
     @SuppressWarnings("unchecked")
-    public <T extends A, S extends ApplicationSchema<T>> void addApplication(S                         applicationSchema,
-                                                                             String                    applicationNamePrefix,
+    public <T extends A, S extends ApplicationSchema<T>> void addApplication(String                    applicationNamePrefix,
+                                                                             S                         applicationSchema,
                                                                              int                       instancesPerPlatform,
                                                                              ApplicationConsoleBuilder consoleBuilder)
     {
@@ -145,8 +148,8 @@ public class InfrastructureAssemblyBuilder<P extends Platform, A extends Applica
      *
      * @param predicate              the {@link Predicate} that will be used to select which {@link Platform}s in
      *                               the {@link Infrastructure} will realize the application
-     * @param applicationSchema      the {@link ApplicationSchema} that defines the application to be realized
      * @param applicationNamePrefix  the prefix for the application name
+     * @param applicationSchema      the {@link ApplicationSchema} that defines the application to be realized
      * @param instancesPerPlatform   the number of instances of the application to realize per {@link Platform} in the
      *                               {@link Infrastructure}
      * @param console                the {@link ApplicationConsole} to be used to provide
@@ -157,15 +160,16 @@ public class InfrastructureAssemblyBuilder<P extends Platform, A extends Applica
      */
     @SuppressWarnings("unchecked")
     public <T extends A, S extends ApplicationSchema<T>> void addApplication(Predicate<P>       predicate,
-                                                                             S                  applicationSchema,
                                                                              String             applicationNamePrefix,
+                                                                             S                  applicationSchema,
                                                                              int                instancesPerPlatform,
                                                                              ApplicationConsole console)
     {
-        apps.put(applicationNamePrefix, new Quadruple(predicate,
-                                                      applicationSchema,
-                                                      instancesPerPlatform,
-                                                      new SingletonApplicationConsoleBuilder(console)));
+        apps.put(applicationNamePrefix,
+                 new Quadruple(predicate,
+                               applicationSchema,
+                               instancesPerPlatform,
+                               new SingletonApplicationConsoleBuilder(console)));
     }
 
 
@@ -175,8 +179,8 @@ public class InfrastructureAssemblyBuilder<P extends Platform, A extends Applica
      *
      * @param predicate              the {@link Predicate} that will be used to select which {@link Platform}s in
      *                               the {@link Infrastructure} will realize the application
-     * @param applicationSchema      the {@link ApplicationSchema} that defines the application to be realized
      * @param applicationNamePrefix  the prefix for the application name
+     * @param applicationSchema      the {@link ApplicationSchema} that defines the application to be realized
      * @param instancesPerPlatform   the number of instances of the application to realize per {@link Platform} in the
      *                               {@link Infrastructure}
      * @param consoleBuilder         the {@link ApplicationConsoleBuilder} to be used to provide
@@ -187,12 +191,13 @@ public class InfrastructureAssemblyBuilder<P extends Platform, A extends Applica
      */
     @SuppressWarnings("unchecked")
     public <T extends A, S extends ApplicationSchema<T>> void addApplication(Predicate<P>              predicate,
-                                                                             S                         applicationSchema,
                                                                              String                    applicationNamePrefix,
+                                                                             S                         applicationSchema,
                                                                              int                       instancesPerPlatform,
                                                                              ApplicationConsoleBuilder consoleBuilder)
     {
-        apps.put(applicationNamePrefix, new Quadruple(predicate, applicationSchema, instancesPerPlatform, consoleBuilder));
+        apps.put(applicationNamePrefix,
+                 new Quadruple(predicate, applicationSchema, instancesPerPlatform, consoleBuilder));
     }
 
 
@@ -204,7 +209,7 @@ public class InfrastructureAssemblyBuilder<P extends Platform, A extends Applica
      *                                  {@link ApplicationConsole}s for each of the realized {@link Application}s
      *                                  in the {@link Assembly}, overriding those that had a specific
      *                                  {@link ApplicationConsoleBuilder} specified for them using
-     *                                  {@link #addApplication(ApplicationSchema, String, int, ApplicationConsoleBuilder)}
+     *                                  {@link #addApplication(String, ApplicationSchema, int, ApplicationConsoleBuilder)}
      *                                  When this is <code>null</code> the defined {@link ApplicationConsole}
      *                                  will be used for each {@link Application} in the {@link Assembly}
      *
@@ -224,11 +229,12 @@ public class InfrastructureAssemblyBuilder<P extends Platform, A extends Applica
         {
             Quadruple<Predicate<P>, ApplicationSchema<A>, Integer, ApplicationConsoleBuilder> quad = entry.getValue();
 
-            String                    prefix         = entry.getKey();
-            Predicate<P>              predicate      = quad.getA();
-            ApplicationSchema<A>      schema         = quad.getB();
-            int                       count          = quad.getC();
-            ApplicationConsoleBuilder consoleBuilder = quad.getD();
+            String                                                                            prefix    =
+                entry.getKey();
+            Predicate<P>                                                                      predicate = quad.getA();
+            ApplicationSchema<A>                                                              schema    = quad.getB();
+            int                                                                               count     = quad.getC();
+            ApplicationConsoleBuilder consoleBuilder                                                    = quad.getD();
 
             if (overridingConsoleBuilder != null)
             {
@@ -250,7 +256,7 @@ public class InfrastructureAssemblyBuilder<P extends Platform, A extends Applica
                             console = new NullApplicationConsole();
                         }
 
-                        A application = platform.realize(schema, name, console);
+                        A application = platform.realize(name, schema, console);
 
                         applications.add(application);
                     }
@@ -261,6 +267,7 @@ public class InfrastructureAssemblyBuilder<P extends Platform, A extends Applica
         return (G) new SimpleAssembly<A>(applications);
     }
 
+
     /**
      * Realize the {@link Assembly} of {@link Application}s on the specified {@link Infrastructure}
      *
@@ -268,7 +275,7 @@ public class InfrastructureAssemblyBuilder<P extends Platform, A extends Applica
      * @param overridingConsole  the {@link ApplicationConsole} that will be used for I/O by all of the
      *                           {@link Application}s realized in the {@link Assembly}, including
      *                           those that had a specific {@link ApplicationConsoleBuilder} specified for
-     *                           them using {@link #addApplication(ApplicationSchema, String, int, ApplicationConsoleBuilder)}
+     *                           them using {@link #addApplication(String, ApplicationSchema, int, ApplicationConsoleBuilder)}
      *                           When this is <code>null</code> the defined {@link ApplicationConsole}
      *                           will be used for each {@link Application} in the {@link Assembly}
      *

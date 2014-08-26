@@ -72,8 +72,8 @@ public interface Platform
     /**
      * Realizes an instance of an {@link Application}.
      *
-     * @param applicationSchema  the {@link ApplicationSchema} to use for realizing the {@link Application}
      * @param applicationName    the name of the application
+     * @param applicationSchema  the {@link ApplicationSchema} to use for realizing the {@link Application}
      * @param console            the {@link ApplicationConsole} that will be used for I/O by the
      *                           realized {@link Application}. This may be <code>null</code> if not required
      * @param options            the {@link Platform} specific {@link Option}s to be used when realizing the
@@ -83,22 +83,8 @@ public interface Platform
      *
      * @throws RuntimeException when a problem occurs while starting the application
      */
-    public <A extends Application, S extends ApplicationSchema<A>> A realize(S                  applicationSchema,
-                                                                             String             applicationName,
+    public <A extends Application, S extends ApplicationSchema<A>> A realize(String             applicationName,
+                                                                             S                  applicationSchema,
                                                                              ApplicationConsole console,
                                                                              Option...          options);
-
-
-    /**
-     * Obtains a suitable {@link ApplicationBuilder} for a specific class of {@link Application}.
-     *
-     * @param <A>  the type of {@link Application}
-     * @param <B>  the type of {@link ApplicationBuilder}
-     *
-     * @param applicationClass  the {@link Class} of {@link Application} for which a {@link ApplicationBuilder}
-     *                          is required
-     * @return  the {@link ApplicationBuilder} or null if this {@link Platform} cannot supply a builder for
-     *          the specified {@link Application} {@link Class}
-     */
-    public <A extends Application, B extends ApplicationBuilder<A>> B getApplicationBuilder(Class<A> applicationClass);
 }

@@ -35,6 +35,8 @@ import com.oracle.tools.runtime.java.AbstractJavaApplicationSchema;
 import com.oracle.tools.runtime.java.ContainerBasedJavaApplicationBuilder;
 import com.oracle.tools.runtime.java.JavaApplicationSchema;
 
+import com.oracle.tools.runtime.remote.RemotePlatform;
+
 import com.oracle.tools.util.CompletionListener;
 
 import java.net.InetAddress;
@@ -130,20 +132,25 @@ public abstract class AbstractCoherenceClusterMemberSchema<A extends CoherenceCl
             return properties;
         }
 
-        if (!properties.containsKey(CoherenceCacheServerSchema.PROPERTY_LOCALHOST_ADDRESS))
+        if (platform instanceof RemotePlatform)
         {
-            InetAddress inetAddress = platform.getPublicInetAddress();
-
-            if (inetAddress != null)
+            // in the case of a remote platform, attempt to set the coherence localhost
+            // information to that as defined by the remote platform (when it's not defined)
+            if (!properties.containsKey(CoherenceCacheServerSchema.PROPERTY_LOCALHOST_ADDRESS))
             {
-                properties.setProperty(CoherenceClusterMemberSchema.PROPERTY_LOCALHOST_ADDRESS,
-                                       inetAddress.getHostName());
-            }
-        }
+                InetAddress inetAddress = platform.getPublicInetAddress();
 
-        if (!properties.containsKey(CoherenceCacheServerSchema.PROPERTY_MACHINE_NAME))
-        {
-            properties.setProperty(CoherenceClusterMemberSchema.PROPERTY_MACHINE_NAME, platform.getName());
+                if (inetAddress != null)
+                {
+                    properties.setProperty(CoherenceClusterMemberSchema.PROPERTY_LOCALHOST_ADDRESS,
+                                           inetAddress.getHostName());
+                }
+            }
+
+            if (!properties.containsKey(CoherenceCacheServerSchema.PROPERTY_MACHINE_NAME))
+            {
+                properties.setProperty(CoherenceClusterMemberSchema.PROPERTY_MACHINE_NAME, platform.getName());
+            }
         }
 
         return properties;

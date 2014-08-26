@@ -150,11 +150,11 @@ public abstract class AbstractCoherenceClusterBuilderTest extends AbstractTest
 
             Assert.assertEquals(3, memberIds.size());
 
-            CoherenceClusterMember extendMember = cluster.getApplication("extend-1");
+            CoherenceClusterMember extendMember = cluster.get("extend-1");
 
             assertThat(invoking(extendMember).isServiceRunning("ExtendTcpProxyService"), is(true));
 
-            for (CoherenceClusterMember storageMember : cluster.getApplications("storage"))
+            for (CoherenceClusterMember storageMember : cluster.getAll("storage"))
             {
                 assertThat(invoking(storageMember).isServiceRunning("ExtendTcpProxyService"), is(false));
             }

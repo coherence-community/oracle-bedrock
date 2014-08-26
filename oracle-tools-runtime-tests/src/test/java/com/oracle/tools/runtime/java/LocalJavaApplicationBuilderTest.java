@@ -128,8 +128,8 @@ public class LocalJavaApplicationBuilderTest extends AbstractJavaApplicationBuil
 
         SimpleJavaApplicationSchema schema   = new SimpleJavaApplicationSchema(SleepingApplication.class.getName());
 
-        try (SimpleJavaApplication app = platform.realize(schema,
-                                                          "TestApp",
+        try (SimpleJavaApplication app = platform.realize("TestApp",
+                                                          schema,
                                                           new SystemApplicationConsole(),
                                                           RemoteDebugging.enabled().startSuspended(false)))
         {
@@ -172,8 +172,8 @@ public class LocalJavaApplicationBuilderTest extends AbstractJavaApplicationBuil
         CapturingApplicationConsole console  = new CapturingApplicationConsole();
         LinkedList<String>          lines    = console.getCapturedOutputLines();
 
-        try (SimpleJavaApplication app = platform.realize(schema,
-                                                          "TestApp",
+        try (SimpleJavaApplication app = platform.realize("TestApp",
+                                                          schema,
                                                           console,
                                                           RemoteDebugging.enabled().startSuspended(true)))
         {
@@ -224,7 +224,7 @@ public class LocalJavaApplicationBuilderTest extends AbstractJavaApplicationBuil
         CapturingApplicationConsole jdbConsole = new CapturingApplicationConsole();
         LinkedList<String>          jdbOutput  = jdbConsole.getCapturedOutputLines();
 
-        try (SimpleApplication jdb = platform.realize(jdbSchema, "JDB", jdbConsole))
+        try (SimpleApplication jdb = platform.realize("JDB", jdbSchema, jdbConsole))
         {
             Eventually.assertThat("JDB did not start properly",
                                   jdbOutput,
@@ -235,8 +235,8 @@ public class LocalJavaApplicationBuilderTest extends AbstractJavaApplicationBuil
             CapturingApplicationConsole console = new CapturingApplicationConsole();
             LinkedList<String>          lines   = console.getCapturedOutputLines();
 
-            try (SimpleJavaApplication app = platform.realize(schema,
-                                                              "TestApp",
+            try (SimpleJavaApplication app = platform.realize("TestApp",
+                                                              schema,
                                                               console,
                                                               RemoteDebugging.enabled().startSuspended(false)
                                                                   .attachToDebugger(debuggerPort.get())))
@@ -263,7 +263,7 @@ public class LocalJavaApplicationBuilderTest extends AbstractJavaApplicationBuil
         CapturingApplicationConsole console = new CapturingApplicationConsole();
         LinkedList<String>          lines   = console.getCapturedOutputLines();
 
-        try (SimpleApplication jdb = LocalPlatform.getInstance().realize(schema, "JDB", console))
+        try (SimpleApplication jdb = LocalPlatform.getInstance().realize("JDB", schema, console))
         {
             Eventually.assertThat(lines, hasItem(startsWith("VM Started")));
 
@@ -280,7 +280,7 @@ public class LocalJavaApplicationBuilderTest extends AbstractJavaApplicationBuil
         CapturingApplicationConsole console = new CapturingApplicationConsole();
         LinkedList<String>          lines   = console.getCapturedOutputLines();
 
-        try (SimpleApplication jdb = LocalPlatform.getInstance().realize(schema, "JDB", console))
+        try (SimpleApplication jdb = LocalPlatform.getInstance().realize("JDB", schema, console))
         {
             Eventually.assertThat(lines, hasItem(startsWith("This is jdb version")));
 
@@ -307,8 +307,8 @@ public class LocalJavaApplicationBuilderTest extends AbstractJavaApplicationBuil
 
         SimpleJavaApplicationSchema schema = new SimpleJavaApplicationSchema(SleepingApplication.class.getName());
 
-        try (SimpleJavaApplication app = LocalPlatform.getInstance().realize(schema,
-                                                                             "TestApp",
+        try (SimpleJavaApplication app = LocalPlatform.getInstance().realize("TestApp",
+                                                                             schema,
                                                                              new SystemApplicationConsole(),
                                                                              RemoteDebugging.disabled()))
         {

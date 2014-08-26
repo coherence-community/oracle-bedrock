@@ -165,7 +165,7 @@ public class RemoteJavaApplicationBuilderTest extends AbstractRemoteApplicationB
 
         RemoteDebugging             remoteDebugging = RemoteDebugging.enabled().startSuspended(true);
 
-        try (SimpleJavaApplication application = platform.realize(schema, "Java", console, remoteDebugging))
+        try (SimpleJavaApplication application = platform.realize("Java", schema, console, remoteDebugging))
         {
             assertCanConnectDebuggerToApplication(application);
 
@@ -209,7 +209,7 @@ public class RemoteJavaApplicationBuilderTest extends AbstractRemoteApplicationB
         CapturingApplicationConsole jdbConsole = new CapturingApplicationConsole();
         LinkedList<String>          jdbOutput  = jdbConsole.getCapturedOutputLines();
 
-        try (SimpleApplication jdb = LocalPlatform.getInstance().realize(jdbSchema, "JDB", jdbConsole))
+        try (SimpleApplication jdb = LocalPlatform.getInstance().realize("JDB", jdbSchema, jdbConsole))
         {
             Eventually.assertThat("JDB did not start properly",
                                   jdbOutput,
@@ -225,7 +225,7 @@ public class RemoteJavaApplicationBuilderTest extends AbstractRemoteApplicationB
 
             RemotePlatform              platform = getRemotePlatform();
 
-            try (SimpleJavaApplication application = platform.realize(schema, "Java", console, remoteDebugging))
+            try (SimpleJavaApplication application = platform.realize("Java", schema, console, remoteDebugging))
             {
                 Eventually.assertThat(lines, hasItem(startsWith("Now sleeping")));
                 Eventually.assertThat("Application did not connect back to JDB",
@@ -249,7 +249,7 @@ public class RemoteJavaApplicationBuilderTest extends AbstractRemoteApplicationB
         CapturingApplicationConsole console = new CapturingApplicationConsole();
         LinkedList<String>          lines   = console.getCapturedOutputLines();
 
-        try (SimpleApplication jdb = LocalPlatform.getInstance().realize(schema, "JDB", console))
+        try (SimpleApplication jdb = LocalPlatform.getInstance().realize("JDB", schema, console))
         {
             Eventually.assertThat(lines, hasItem(startsWith("VM Started")));
 
@@ -272,8 +272,8 @@ public class RemoteJavaApplicationBuilderTest extends AbstractRemoteApplicationB
         SimpleJavaApplicationSchema schema =
             new SimpleJavaApplicationSchema(SleepingApplication.class.getName()).addArgument("30");
 
-        try (SimpleJavaApplication app = LocalPlatform.getInstance().realize(schema,
-                                                                             "TestApp",
+        try (SimpleJavaApplication app = LocalPlatform.getInstance().realize("TestApp",
+                                                                             schema,
                                                                              new SystemApplicationConsole(),
                                                                              RemoteDebugging.disabled()))
         {
@@ -307,7 +307,7 @@ public class RemoteJavaApplicationBuilderTest extends AbstractRemoteApplicationB
         CapturingApplicationConsole console = new CapturingApplicationConsole();
         LinkedList<String>          lines   = console.getCapturedOutputLines();
 
-        try (SimpleApplication jdb = LocalPlatform.getInstance().realize(schema, "JDB", console))
+        try (SimpleApplication jdb = LocalPlatform.getInstance().realize("JDB", schema, console))
         {
             Eventually.assertThat(lines, hasItem(startsWith("This is jdb version")));
 

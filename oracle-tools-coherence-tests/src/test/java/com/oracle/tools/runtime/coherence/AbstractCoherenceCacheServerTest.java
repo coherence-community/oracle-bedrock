@@ -93,7 +93,7 @@ public abstract class AbstractCoherenceCacheServerTest extends AbstractTest
 
         Platform platform = getPlatform();
 
-        try (CoherenceCacheServer server = platform.realize(schema, "TEST", new SystemApplicationConsole()))
+        try (CoherenceCacheServer server = platform.realize("TEST", schema, new SystemApplicationConsole()))
         {
             assertThat(invoking(server).getClusterSize(), is(1));
             assertThat(server.getRoleName(), is("test-role"));
@@ -126,8 +126,8 @@ public abstract class AbstractCoherenceCacheServerTest extends AbstractTest
         {
             System.out.println("Building Instance: " + i);
 
-            try (CoherenceCacheServer server = platform.realize(schema,
-                                                                "TEST",
+            try (CoherenceCacheServer server = platform.realize("TEST",
+                                                                schema,
                                                                 new SystemApplicationConsole(),
                                                                 Diagnostics.enabled()))
             {
@@ -152,8 +152,8 @@ public abstract class AbstractCoherenceCacheServerTest extends AbstractTest
 
         Platform platform = getPlatform();
 
-        try (CoherenceCacheServer server = platform.realize(schema,
-                                                            "TEST",
+        try (CoherenceCacheServer server = platform.realize("TEST",
+                                                            schema,
                                                             new SystemApplicationConsole(),
                                                             Diagnostics.enabled()))
         {
@@ -179,8 +179,8 @@ public abstract class AbstractCoherenceCacheServerTest extends AbstractTest
 
         Platform platform = getPlatform();
 
-        try (CoherenceCacheServer server = platform.realize(schema,
-                                                            "TEST",
+        try (CoherenceCacheServer server = platform.realize("TEST",
+                                                            schema,
                                                             new SystemApplicationConsole(),
                                                             Diagnostics.enabled()))
         {
@@ -204,8 +204,8 @@ public abstract class AbstractCoherenceCacheServerTest extends AbstractTest
 
         Platform platform = getPlatform();
 
-        try (CoherenceCacheServer server = platform.realize(schema,
-                                                            "TEST",
+        try (CoherenceCacheServer server = platform.realize("TEST",
+                                                            schema,
                                                             new SystemApplicationConsole(),
                                                             Diagnostics.enabled()))
         {

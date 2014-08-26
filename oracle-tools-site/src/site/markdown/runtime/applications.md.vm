@@ -53,13 +53,13 @@ Central to the operation of the framework are the following three concepts:
     The `com.oracle.tools.runtime.ApplicationSchema` interface defines the minimal
     requirements of a Schema.
 
-2.  **Builders:**  Create *Applications* from the characteristics defined by *Schemas*.
+2.  **Platforms:**  Create *Applications* from the characteristics defined by *Schemas*.
 
-    The `com.oracle.tools.runtime.ApplicationBuilder` interface defines the minimal
-    requirements of a Builder.
+    The `com.oracle.tools.runtime.Platform` interface defines the minimal
+    requirements of a Platform.
 
 3.  **Applications:**  Provide a runtime representation of *Applications*, created by
-    *Builders*, specified by *Schemas*.
+    *Platforms*, specified by *Schemas*.
 
     The `com.oracle.tools.runtime.Application` interface defines the minimal
     requirements of an Application.
@@ -72,6 +72,7 @@ together with tips for optimization in certain environments.
 Let's start with a simple example, defining, creating and waiting for a native
 operating application process to terminate.
 
+    import com.oracle.tools.runtime.LocalPlatform;
     import com.oracle.tools.runtime.SimpleApplication;
     import com.oracle.tools.runtime.SimpleApplicationBuilder;
     import com.oracle.tools.runtime.SimpleApplicationSchema;
@@ -84,17 +85,16 @@ operating application process to terminate.
             // STEP 1: Define an ApplicationSchema
             SimpleApplicationSchema schema =
                 new SimpleApplicationSchema("java")
-                    .setArgument("-version");
+                    .addArgument("-version");
 
-            // STEP 2: Define an ApplicationBuilder
-            SimpleApplicationBuilder builder
-                = new SimpleApplicationBuilder();
+            // STEP 2: Define a Platform on which to create the Application
+            Platform platform = LocalPlatform.getInstance();
 
             // STEP 3: Realize the Application
             SimpleApplication application
-                = builder.realize(schema,
-                                  "My Application",
-                                  new SystemApplicationConsole());
+                = platform.realize("My Application",
+                                   schema,
+                                   new SystemApplicationConsole());
 
             // STEP 4: Wait for the Application to Terminate
             int exitCode = application.waitFor();
@@ -102,16 +102,16 @@ operating application process to terminate.
     }
 
 In *Step 1* we instantiate a new `SimpleApplicationSchema` and set the
-operating-system process to execute, namely `java`, and set the arguments
+operating-system process to execute, namely `java`, and add the arguments
 for the process, namely `-version`.
 
-In *Step 2* we instantiate a new `SimpleApplicationBuilder` that we will
-use to build a `SimpleApplication` from a `SimpleApplicationSchema`.  The
-resulting `SimpleApplication` will represent a native operating-system
-process, running on the local machine.
+In *Step 2* we acquire a `Platform` that we will use to build a `SimpleApplication`
+from a `SimpleApplicationSchema`.  The resulting `SimpleApplication` will represent
+a native operating-system process, running on the local machine, hence the
+reason it is called a 'LocalPlatform'.
 
-In *Step 3* we realize (create) the `SimpleApplication` using previously
-created Builder and configured Schema.   For display and identification
+In *Step 3* we realize (create) the `SimpleApplication` using the Platform and
+configured Schema.   For display and identification
 purposes, we name the returned `SimpleApplication` "My Application".
 
 Additionally we specify that all of the standard input/output/error
@@ -150,16 +150,15 @@ Where by:
 >   (during `waitFor`).
 
 For more information concerning the features and characteristics of
-Applications, Schemas and Builders for simple applications, please refer to
-the  Java Documentation for the `com.oracle.tools.runtime.SimpleApplication`,
-`com.oracle.tools.runtime.SimpleApplicationSchema` and
-`com.oracle.tools.runtime.SimpleApplicationBuilder` classes.
+Applications, Schemas and Platforms for simple applications, please refer to
+the  Java Documentation for the `com.oracle.tools.runtime.SimpleApplication` and
+`com.oracle.tools.runtime.SimpleApplicationSchema` classes.
 
 <h4>Creating and Managing Java-based Applications</h4>
 
 In most cases Java developers will traditionally to create and manage
 Java-based applications and while it is possible to do so using the Applications,
-Schema and Builder classes described above, the Oracle Tools Runtime framework
+Schema and Platform classes described above, the Oracle Tools Runtime framework
 provides specific features and implementations to deal with Java-based Applications.
 These are defined by the `com.oracle.tools.runtime.java` package.
 
@@ -195,73 +194,38 @@ class.
 
 >   An alternative approach to defining Oracle Coherence-based applications
 >   is to use the Oracle Tools for Coherence module, that of which defines
->   specific Applications, Schemas and Builders to simplify managing
+>   specific Applications and Schemas to simplify managing
 >   Oracle Coherence-based applications.
 
-To build a Java Application based on a Java Application Schema, developers
-need to choose an appropriate Java Application Builder, of which there are
-currently two; the `NativeJavaApplicationBuilder` and the
-`ContainerBasedJavaApplicationBuilder`, both of which use `JavaApplicationSchema`
-to realize `JavaApplication`s.
+<h5>The JavaVirtualMachine Platform</h5>
 
-<h5>The Native Java-based Application Builder</h5>
+In addition to realizing Java-based Applications on a LocalPlatform, it's
+also possible to run them in the same Java Virtual Machine as the
+controlling application.
 
-The `com.oracle.tools.runtime.java.NativeJavaApplicationBuilder` class is
-a Java Application Builder that creates Java Applications that run as
-native operating-system processes.
-
-`NativeJavaApplicationBuilder`s are much like the previously covered
-`SimpleApplicationBuilder`s in that they create native operating-system
-processes, but they additionally produce `Application`s specifically
-representings `JavaApplication`s.  Developers may use these to then
-make Java-specific requests of the said applications, including:
-
-*   Request the running Class Path
-
-*   Request the System Properties (used to start the application)
-
-*   Making JMX requests (assuming JMX was enabled)
-
-For the most part using a `NativeJavaApplicationBuilder` is the same as other
-Application Builders; provide an appropriate Schema, name and Console when
-realizing the application.
-
-**Example: Using a Native Java Application Builder**
-
-    NativeJavaApplicationBuilder builder =
-        new NativeJavaApplicationBuilder();
-
-    JavaApplication application =
-        builder.realize(schema,
-                        "My Application",
-                        new SystemApplicationConsole());
-
-<h5>The Container-based Java-based Application Builder</h5>
-
-Another option for realizing Java-based Applications is to run them
-in the same Java Virtual Machine process as the controlling application.
-That is instead of creating a new native operating-system process
-for the realized Java Application, we instead run the application
+That is instead of creating a new local operating-system process
+for the realized Java Application, we instead can run the application
 in the same process, much like an Application Server or Container does
 when launching Enterprise Applications.
 
 To run an application in-process like an Application Server or Container,
-developers use the `com.oracle.tools.runtime.java.ContainerBasedJavaApplicationBuilder`
-instead of the `NativeJavaApplicationBuilder`.
+developers can use the `com.oracle.tools.runtime.java.JavaVirtualMachine`
+platform
 
-**Example: Using a Container-based Java Application Builder**
+**Example: Using the JavaVirtualMachine platform**
 
-    ContainerBasedJavaApplicationBuilder builder =
-        new ContainerBasedJavaApplicationBuilder();
+    import com.oracle.tools.runtime.java.JavaVirtualMachine;
+
+    Platform platform = JavaVirtualMachine.getInstance();
 
     JavaApplication application =
-        builder.realize(schema,
-                        "My Application",
-                        new SystemApplicationConsole());
+        platform.realize("My Application",
+                         schema,
+                         new SystemApplicationConsole());
 
->   The only difference between launching a Java Application as a native
+>   The only difference between launching a Java Application as a local
 >   operating-system process and a container-based application is the
->   choice of the Java Application Builder.
+>   choice of the Platform.
 
 One of the important benefits of the Container-based approach for
 launching applications is that it's very easy to resolve defects

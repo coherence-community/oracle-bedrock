@@ -58,8 +58,6 @@ import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.swing.plaf.OptionPaneUI;
-
 /**
  * A {@link CustomAction} to destroy a {@link CoherenceClusterMember} that is defined as part
  * of a {@link CoherenceCluster} and then immediately restart a new {@link CoherenceClusterMember} given
@@ -142,7 +140,7 @@ public class RestartCoherenceClusterMemberAction<A extends CoherenceClusterMembe
     public void perform(final CoherenceCluster cluster)
     {
         // obtain an iterator over the candidate cluster members
-        Iterator<CoherenceClusterMember> clusterMembers = cluster.getApplications(prefix).iterator();
+        Iterator<CoherenceClusterMember> clusterMembers = cluster.getAll(prefix).iterator();
 
         if (clusterMembers.hasNext())
         {
@@ -167,7 +165,7 @@ public class RestartCoherenceClusterMemberAction<A extends CoherenceClusterMembe
                 // ensure that the predicate is satisfied (using a deferred)
                 ensure(new DeferredPredicate<CoherenceClusterMember>(member, closePredicate));
 
-                if (cluster.removeApplication(member))
+                if (cluster.remove(member))
                 {
                     member.close();
                 }
@@ -210,7 +208,7 @@ public class RestartCoherenceClusterMemberAction<A extends CoherenceClusterMembe
                                                                                  closePredicate));
 
                             // start a new ClusterMember (with the same name as the old member)
-                            member = platform.realize(schema, name, console, options);
+                            member = platform.realize(name, schema, console, options);
 
                             // ensure that the new member has joined the cluster
                             ensure(eventually(invoking(member).getClusterSize()), is(greaterThan(1)));
@@ -218,7 +216,7 @@ public class RestartCoherenceClusterMemberAction<A extends CoherenceClusterMembe
                             memberUID = member.getLocalMemberUID();
 
                             // add the new ClusterMember into the Cluster
-                            cluster.addApplication(member);
+                            cluster.add(member);
 
                             // ensure that the new member is a member of the cluster
                             ensure(eventually(invoking(cluster).getClusterMemberUIDs()), contains(memberUID));

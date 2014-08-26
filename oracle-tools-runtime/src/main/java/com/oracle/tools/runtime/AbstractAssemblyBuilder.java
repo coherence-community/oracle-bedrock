@@ -53,7 +53,7 @@ public abstract class AbstractAssemblyBuilder<A extends Application, G extends A
     implements AssemblyBuilder<A, G>
 {
     /**
-     * The map of {@link Application} {@link Characteristics}s, keyed by application prefix name.
+     * The map of required {@link Assembly} {@link Characteristics}, keyed by application prefix name.
      */
     protected LinkedHashMap<String, Characteristics<A>> characteristics;
 
@@ -158,7 +158,7 @@ public abstract class AbstractAssemblyBuilder<A extends Application, G extends A
                     console = new NullApplicationConsole();
                 }
 
-                applications.add(platform.realize(schema, applicationName, console, options));
+                applications.add(platform.realize(applicationName, schema, console, options));
             }
         }
     }

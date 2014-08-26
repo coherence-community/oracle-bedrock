@@ -139,7 +139,7 @@ public class VagrantFunctionalTest
 
         ApplicationSchema appSchema = new SimpleJavaApplicationSchema(DoStuff.class.getCanonicalName());
 
-        assemblyBuilder.addApplication(appSchema, "Test", 1);
+        assemblyBuilder.addApplication("Test", appSchema, 1);
 
         Assembly<Application> assembly = assemblyBuilder.realize(infrastructure, new SystemApplicationConsole());
 
@@ -177,13 +177,13 @@ public class VagrantFunctionalTest
         {
             schema.setLocalHostAddress(platform1.getPublicInetAddress().getHostName());
 
-            app1 = platform1.realize(schema, "Data-1@VM-1", new SystemApplicationConsole());
-            app2 = platform1.realize(schema, "Data-2@VM-1", new SystemApplicationConsole());
+            app1 = platform1.realize("Data-1@VM-1", schema, new SystemApplicationConsole());
+            app2 = platform1.realize("Data-2@VM-1", schema, new SystemApplicationConsole());
 
             schema.setLocalHostAddress(platform2.getPublicInetAddress().getHostName());
 
-            app3 = platform2.realize(schema, "Data-1@VM-2", new SystemApplicationConsole());
-            app4 = platform2.realize(schema, "Data-2@VM-2", new SystemApplicationConsole());
+            app3 = platform2.realize("Data-1@VM-2", schema, new SystemApplicationConsole());
+            app4 = platform2.realize("Data-2@VM-2", schema, new SystemApplicationConsole());
 
             assertThat(app1, is(notNullValue()));
             Eventually.assertThat(invoking(app1).getClusterSize(), is(4));
@@ -207,7 +207,7 @@ public class VagrantFunctionalTest
 
         try
         {
-            CoherenceCacheServer cacheServer = assembly.getApplication("Data-1@VM-1");
+            CoherenceCacheServer cacheServer = assembly.get("Data-1@VM-1");
 
             Eventually.assertThat(invoking(cacheServer).getClusterSize(), is(4));
         }
@@ -230,7 +230,7 @@ public class VagrantFunctionalTest
         try
         {
             int                  expectedSize = membersPerVM * infrastructure.size();
-            CoherenceCacheServer cacheServer  = assembly.getApplication("Data-1@VM-1");
+            CoherenceCacheServer cacheServer  = assembly.get("Data-1@VM-1");
 
             Eventually.assertThat(invoking(cacheServer).getClusterSize(), is(expectedSize));
 
@@ -238,7 +238,7 @@ public class VagrantFunctionalTest
                 new CoherenceCacheServerSchema().setCacheConfigURI("coherence-cache-config.xml")
                     .setLocalHostAddress("192.168.56.1");
 
-            localMember = LocalPlatform.getInstance().realize(schema, "Data-1@Local", new SystemApplicationConsole());
+            localMember = LocalPlatform.getInstance().realize("Data-1@Local", schema, new SystemApplicationConsole());
             Eventually.assertThat(invoking(localMember).getClusterSize(), is(expectedSize + 1));
         }
         finally
@@ -322,7 +322,7 @@ public class VagrantFunctionalTest
 
         try
         {
-            CoherenceCacheServer cacheServer = assembly.getApplication("Data-1@Remote-1");
+            CoherenceCacheServer cacheServer = assembly.get("Data-1@Remote-1");
 
             assertThat(cacheServer, is(notNullValue()));
 
@@ -354,7 +354,7 @@ public class VagrantFunctionalTest
         InfrastructureAssemblyBuilder<Platform, CoherenceCacheServer, SimpleAssembly<CoherenceCacheServer>> builder =
             new InfrastructureAssemblyBuilder<Platform, CoherenceCacheServer, SimpleAssembly<CoherenceCacheServer>>();
 
-        builder.addApplication(schema, "Data", memberCount);
+        builder.addApplication("Data", schema, memberCount);
 
         return builder.realize(infra, new SystemApplicationConsole());
     }
