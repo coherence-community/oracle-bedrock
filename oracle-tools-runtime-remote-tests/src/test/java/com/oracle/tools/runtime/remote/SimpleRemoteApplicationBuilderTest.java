@@ -30,7 +30,10 @@ import com.oracle.tools.runtime.SimpleApplicationSchema;
 
 import com.oracle.tools.runtime.console.SystemApplicationConsole;
 
+import com.oracle.tools.runtime.options.EnvironmentVariables;
+
 import com.oracle.tools.runtime.remote.options.CustomDeployment;
+import com.oracle.tools.runtime.remote.options.StrictHostChecking;
 
 import org.junit.Test;
 
@@ -41,6 +44,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import java.io.File;
 import java.io.IOException;
 
+import java.net.InetAddress;
 import java.net.URL;
 
 /**
@@ -61,23 +65,20 @@ public class SimpleRemoteApplicationBuilderTest extends AbstractRemoteApplicatio
     {
         SimpleApplicationSchema schema = new SimpleApplicationSchema("ls -la");
 
-        schema.setEnvironmentInherited(false);
-
-        SimpleRemoteApplicationBuilder builder = new SimpleRemoteApplicationBuilder(getRemoteHostName(),
-                                                                                    getRemoteUserName(),
-                                                                                    getRemoteAuthentication());
+        RemotePlatform platform = new RemotePlatform(InetAddress.getByName(getRemoteHostName()),
+                                                     getRemoteUserName(),
+                                                     getRemoteAuthentication());
 
         URL  testFileURL = Thread.currentThread().getContextClassLoader().getResource("test.txt");
         File testFile    = new File(testFileURL.getFile());
 
-        builder.setStrictHostChecking(false);
-
-        try (SimpleApplication application = builder.realize(schema,
-                                                             "Java",
-                                                             new SystemApplicationConsole(),
-                                                             null,
-                                                             CustomDeployment
-                                                                 .including(new DeploymentArtifact(testFile))))
+        try (SimpleApplication application = platform.realize("Java",
+                                                              schema,
+                                                              new SystemApplicationConsole(),
+                                                              CustomDeployment
+                                                                  .including(new DeploymentArtifact(testFile)),
+                                                              StrictHostChecking.disabled(),
+                                                              EnvironmentVariables.areCleared()))
         {
             assertThat(application.waitFor(), is(0));
 

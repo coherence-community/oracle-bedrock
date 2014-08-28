@@ -42,6 +42,7 @@ import com.oracle.tools.runtime.java.options.RemoteDebugging;
 import com.oracle.tools.runtime.remote.AbstractRemoteApplicationBuilderTest;
 import com.oracle.tools.runtime.remote.RemotePlatform;
 import com.oracle.tools.runtime.remote.java.applications.SleepingApplication;
+import com.oracle.tools.runtime.remote.options.StrictHostChecking;
 
 import com.oracle.tools.util.Capture;
 
@@ -80,16 +81,19 @@ public class RemoteJavaApplicationBuilderTest extends AbstractRemoteApplicationB
      * Ensure that we can launch Java remotely.
      */
     @Test
-    public void shouldLaunchJavaApplicationRemotely() throws IOException, InterruptedException
+    public void shouldLaunchJavaApplicationRemotely() throws Exception
     {
         SimpleJavaApplicationSchema schema = new SimpleJavaApplicationSchema(SleepingApplication.class.getName());
 
         // sleep only for 3 seconds
         schema.addArgument("3");
 
-        RemoteJavaApplicationBuilder<SimpleJavaApplication> builder = createBuilder();
+        RemotePlatform platform = getRemotePlatform();
 
-        try (SimpleJavaApplication application = builder.realize(schema, "Java", new SystemApplicationConsole()))
+        try (SimpleJavaApplication application = platform.realize("Java",
+                                                                  schema,
+                                                                  new SystemApplicationConsole(),
+                                                                  StrictHostChecking.disabled()))
         {
             assertThat(application.waitFor(), is(0));
 
@@ -110,18 +114,18 @@ public class RemoteJavaApplicationBuilderTest extends AbstractRemoteApplicationB
         SimpleJavaApplicationSchema schema =
             new SimpleJavaApplicationSchema(SleepingApplication.class.getName()).addArgument("300");
 
-        CapturingApplicationConsole                         console = new CapturingApplicationConsole();
-        LinkedList<String>                                  lines   = console.getCapturedOutputLines();
+        CapturingApplicationConsole console  = new CapturingApplicationConsole();
+        LinkedList<String>          lines    = console.getCapturedOutputLines();
 
-        RemoteDebugging remoteDebugging = RemoteDebugging.enabled().startSuspended(false).listenForDebugger();
+        RemoteDebugging remoteDebugging      = RemoteDebugging.enabled().startSuspended(false).listenForDebugger();
 
-        RemoteJavaApplicationBuilder<SimpleJavaApplication> builder = createBuilder();
+        RemotePlatform              platform = getRemotePlatform();
 
-        try (SimpleJavaApplication application = builder.realize(schema,
-                                                                 "Java",
-                                                                 console,
-                                                                 getRemotePlatform(),
-                                                                 remoteDebugging))
+        try (SimpleJavaApplication application = platform.realize("Java",
+                                                                  schema,
+                                                                  console,
+                                                                  remoteDebugging,
+                                                                  StrictHostChecking.disabled()))
         {
             Eventually.assertThat(lines, hasItem(startsWith("Now sleeping")));
 
@@ -165,7 +169,11 @@ public class RemoteJavaApplicationBuilderTest extends AbstractRemoteApplicationB
 
         RemoteDebugging             remoteDebugging = RemoteDebugging.enabled().startSuspended(true);
 
-        try (SimpleJavaApplication application = platform.realize("Java", schema, console, remoteDebugging))
+        try (SimpleJavaApplication application = platform.realize("Java",
+                                                                  schema,
+                                                                  console,
+                                                                  remoteDebugging,
+                                                                  StrictHostChecking.disabled()))
         {
             assertCanConnectDebuggerToApplication(application);
 
@@ -225,7 +233,11 @@ public class RemoteJavaApplicationBuilderTest extends AbstractRemoteApplicationB
 
             RemotePlatform              platform = getRemotePlatform();
 
-            try (SimpleJavaApplication application = platform.realize("Java", schema, console, remoteDebugging))
+            try (SimpleJavaApplication application = platform.realize("Java",
+                                                                      schema,
+                                                                      console,
+                                                                      remoteDebugging,
+                                                                      StrictHostChecking.disabled()))
             {
                 Eventually.assertThat(lines, hasItem(startsWith("Now sleeping")));
                 Eventually.assertThat("Application did not connect back to JDB",
@@ -322,24 +334,10 @@ public class RemoteJavaApplicationBuilderTest extends AbstractRemoteApplicationB
     }
 
 
-    protected RemoteJavaApplicationBuilder<SimpleJavaApplication> createBuilder()
-    {
-        RemoteJavaApplicationBuilder<SimpleJavaApplication> builder =
-            new RemoteJavaApplicationBuilder<SimpleJavaApplication>(getRemoteHostName(),
-                                                                    getRemoteUserName(),
-                                                                    getRemoteAuthentication());
-
-        builder.setStrictHostChecking(false);
-
-        return builder;
-    }
-
-
     protected RemotePlatform getRemotePlatform() throws Exception
     {
         return new RemotePlatform("Remote",
                                   InetAddress.getByName(getRemoteHostName()),
-                                  22,
                                   getRemoteUserName(),
                                   getRemoteAuthentication());
     }

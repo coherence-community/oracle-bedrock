@@ -309,6 +309,14 @@ reverse chronological order.
     a RuntimeException (wrapping a ClassNotFoundException) eagerly when attempting
     to start an application and the application class can't be found.
 
+*   [ORACLETOOLS-150](https://java.net/jira/browse/ORACLETOOLS-150): Introduced
+    constructors for RemotePlatforms that use simple default values (making them
+    much simpler to use).
+
+*   [ORACLETOOLS-151](https://java.net/jira/browse/ORACLETOOLS-151): Introduced
+    StrictHostChecking option and removed previous setters/getters for
+    strict-host-checking across builders.
+
 <h4>oracle-tools-runtime-remote</h4>
 
 *   [ORACLETOOLS-91](https://java.net/jira/browse/ORACLETOOLS-91): Introduced

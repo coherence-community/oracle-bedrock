@@ -45,6 +45,7 @@ import com.oracle.tools.runtime.Platform;
 import com.oracle.tools.runtime.PropertiesBuilder;
 
 import com.oracle.tools.runtime.remote.options.Deployment;
+import com.oracle.tools.runtime.remote.options.StrictHostChecking;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -113,13 +114,6 @@ public abstract class AbstractRemoteApplicationBuilder<A extends Application, E 
     protected char remotePathSeparatorChar;
 
     /**
-     * Is strict host name checking enforced?
-     * <p>
-     * WARNING: By setting to false this may lower system security.
-     */
-    protected boolean strictHostChecking;
-
-    /**
      * The {@link File} representing the location of the temporary directory
      * on the remote server.
      */
@@ -172,7 +166,6 @@ public abstract class AbstractRemoteApplicationBuilder<A extends Application, E 
         this.remoteFileSeparatorChar      = '/';
         this.remotePathSeparatorChar      = ':';
         this.remoteTemporaryDirectoryFile = new File(remoteFileSeparatorChar + "tmp");
-        this.strictHostChecking           = true;
 
         // by default there are no custom remote environment variables
         remoteEnvironmentVariablesBuilder = new PropertiesBuilder();
@@ -253,22 +246,6 @@ public abstract class AbstractRemoteApplicationBuilder<A extends Application, E 
     public B setRemoteTemporaryDirectory(File directory)
     {
         this.remoteTemporaryDirectoryFile = directory;
-
-        return (B) this;
-    }
-
-
-    /**
-     * Sets whether strict host file checking is required (true by default).
-     * By setting to false security will be lowered.
-     *
-     * @param strictHostChecking  true to use strict host checking
-     *
-     * @return this {@link RemoteApplicationBuilder} to permit fluent method calls
-     */
-    public B setStrictHostChecking(boolean strictHostChecking)
-    {
-        this.strictHostChecking = strictHostChecking;
 
         return (B) this;
     }
@@ -407,10 +384,13 @@ public abstract class AbstractRemoteApplicationBuilder<A extends Application, E 
                 ((JSchBasedAuthentication) authentication).configureSession(session);
             }
 
-            // configure the session channel properties
+            // ----- configure the session channel properties -----
             Properties config = new Properties();
 
-            config.put("StrictHostKeyChecking", strictHostChecking ? "yes" : "no");
+            // are we to use strict-host-checking? (when it's not defined we enabled it by default)
+            StrictHostChecking strictHostChecking = options.get(StrictHostChecking.class, StrictHostChecking.enabled());
+
+            config.put("StrictHostKeyChecking", strictHostChecking.isEnabled() ? "yes" : "no");
             session.setConfig(config);
 
             // connect the session

@@ -25,8 +25,13 @@
 
 package com.oracle.tools.runtime.virtual.vagrant;
 
+import com.oracle.tools.Option;
+import com.oracle.tools.Options;
+
 import com.oracle.tools.runtime.Application;
 import com.oracle.tools.runtime.ApplicationBuilder;
+import com.oracle.tools.runtime.ApplicationConsole;
+import com.oracle.tools.runtime.ApplicationSchema;
 import com.oracle.tools.runtime.LocalPlatform;
 import com.oracle.tools.runtime.SimpleApplication;
 import com.oracle.tools.runtime.SimpleApplicationBuilder;
@@ -37,6 +42,7 @@ import com.oracle.tools.runtime.console.SystemApplicationConsole;
 
 import com.oracle.tools.runtime.remote.AbstractRemoteApplicationBuilder;
 import com.oracle.tools.runtime.remote.SecureKeys;
+import com.oracle.tools.runtime.remote.options.StrictHostChecking;
 
 import com.oracle.tools.runtime.virtual.CloseAction;
 import com.oracle.tools.runtime.virtual.VirtualPlatform;
@@ -271,13 +277,26 @@ public class VagrantPlatform extends VirtualPlatform
     }
 
 
+    @Override
+    public <A extends Application, S extends ApplicationSchema<A>> A realize(String             applicationName,
+                                                                             S                  applicationSchema,
+                                                                             ApplicationConsole console,
+                                                                             Option...          options)
+    {
+        // TODO: we need to use "default platform options" here to automatically turn off strict-host-checking
+        Options managedOptions = new Options(options);
+
+        managedOptions.addIfAbsent(StrictHostChecking.disabled());
+
+        return super.realize(applicationName, applicationSchema, console, managedOptions.asArray());
+    }
+
+
     @SuppressWarnings("unchecked")
     @Override
     public <A extends Application, B extends ApplicationBuilder<A>> B getApplicationBuilder(Class<A> applicationClass)
     {
         AbstractRemoteApplicationBuilder builder = super.getApplicationBuilder(applicationClass);
-
-        builder.setStrictHostChecking(false);
 
         return (B) builder;
     }
