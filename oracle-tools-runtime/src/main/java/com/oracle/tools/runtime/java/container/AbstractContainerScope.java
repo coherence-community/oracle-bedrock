@@ -44,7 +44,7 @@ public abstract class AbstractContainerScope extends AbstractScope
      * The {@link ContainerMBeanServerBuilder} to be used when an application
      * is in this {@link AbstractContainerScope}.
      */
-    private ContainerMBeanServerBuilder m_mBeanServerBuilder;
+    private ContainerMBeanServerBuilder mBeanServerBuilder;
 
 
     /**
@@ -68,11 +68,11 @@ public abstract class AbstractContainerScope extends AbstractScope
         // (instead of holding a strong reference)
         if (properties != null)
         {
-            m_properties.putAll(properties);
+            this.properties.putAll(properties);
         }
 
-        m_mBeanServerBuilder = mBeanServerBuilder == null
-                               ? new ContainerMBeanServerBuilder(m_availablePorts) : mBeanServerBuilder;
+        this.mBeanServerBuilder = mBeanServerBuilder == null
+                                  ? new ContainerMBeanServerBuilder(this.availablePorts) : mBeanServerBuilder;
     }
 
 
@@ -83,7 +83,7 @@ public abstract class AbstractContainerScope extends AbstractScope
      */
     public ContainerMBeanServerBuilder getMBeanServerBuilder()
     {
-        return m_mBeanServerBuilder;
+        return mBeanServerBuilder;
     }
 
 
@@ -95,7 +95,7 @@ public abstract class AbstractContainerScope extends AbstractScope
         if (super.close())
         {
             // close the MBeanServers created by the MBeanServerBuilder
-            m_mBeanServerBuilder.close();
+            mBeanServerBuilder.close();
 
             return true;
         }

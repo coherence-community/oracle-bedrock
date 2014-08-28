@@ -57,8 +57,8 @@ public class PlatformScope extends AbstractScope
     {
         super("(Java Virtual Machine)", System.getProperties(), portIterator);
 
-        m_stdout = System.out;
-        m_stderr = System.err;
-        m_stdin  = System.in;
+        stdout = System.out;
+        stderr = System.err;
+        stdin  = System.in;
     }
 }

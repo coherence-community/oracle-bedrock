@@ -1,5 +1,5 @@
 /*
- * File: DefaultScope.java
+ * File: SystemPropertyMutatingApplication.java
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
@@ -23,31 +23,38 @@
  * "Portions Copyright [year] [name of copyright owner]"
  */
 
-package com.oracle.tools.runtime.java.container;
+package com.oracle.tools.runtime.java;
+
+import java.io.IOException;
 
 /**
- * A {@link Scope} to use in a Container when a {@link ContainerScope} could
- * not be determined.
+ * A simple application to set the value of a system property.
  * <p>
- * Copyright (c) 2013. All Rights Reserved. Oracle Corporation.<br>
+ * Copyright (c) 2014. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Brian Oliver
  */
-public class DefaultScope extends AbstractContainerScope
+public class SystemPropertyMutatingApplication
 {
     /**
-     * Constructs a {@link DefaultScope}.
+     * A simple application to set the value of a specified system property to a particular value.
      *
-     * @param platformScope  the {@link PlatformScope} on which the {@link DefaultScope}
-     *                       will be based.
+     * @param args  arg[0] is the name of the property to set and arg[1] is the value to set.
      */
-    public DefaultScope(PlatformScope platformScope)
+    public static void main(String[] args) throws IOException
     {
-        super("(Default)", platformScope.getProperties(), platformScope.getAvailablePorts(), null);
+        String name  = args[0];
+        String value = args[1];
 
-        stdout = platformScope.getStandardOutput();
-        stderr = platformScope.getStandardError();
-        stdin  = platformScope.getStandardInput();
+        System.out.println("Existing: " + System.getProperty(name));
+
+        System.setProperty(name, value);
+
+        System.out.println("Now: " + System.getProperty(name));
+
+        System.out.println("(now waiting for some input to terminate)");
+
+        System.in.read();
     }
 }

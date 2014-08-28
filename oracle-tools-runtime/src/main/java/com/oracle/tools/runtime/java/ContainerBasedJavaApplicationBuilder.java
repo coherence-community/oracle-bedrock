@@ -41,6 +41,7 @@ import com.oracle.tools.runtime.concurrent.callable.RemoteCallableStaticMethod;
 
 import com.oracle.tools.runtime.java.container.Container;
 import com.oracle.tools.runtime.java.container.ContainerClassLoader;
+import com.oracle.tools.runtime.java.container.ContainerScope;
 import com.oracle.tools.runtime.java.io.Serialization;
 
 import com.oracle.tools.util.CompletionListener;
@@ -187,11 +188,17 @@ public class ContainerBasedJavaApplicationBuilder<A extends JavaApplication> ext
                 // standard approach of executing the "main" method on the
                 // specified Application Class
                 controller = new StandardController(schema.getApplicationClassName(), schema.getArguments());
+
+                // as a courtesy let's make sure the application class is accessible via the classloader
+                Class<?> applicationClass = classLoader.loadClass(schema.getApplicationClassName());
             }
 
             // establish the ContainerBasedJavaProcess
             ContainerBasedJavaApplicationProcess process = new ContainerBasedJavaApplicationProcess(classLoader,
                                                                                                     controller);
+
+            // notify the container of the scope to manage
+            Container.manage(classLoader.getContainerScope());
 
             // start the process
             process.start();
@@ -446,8 +453,13 @@ public class ContainerBasedJavaApplicationBuilder<A extends JavaApplication> ext
                 m_controller = null;
             }
 
+            ContainerScope scope = m_classLoader.getContainerScope();
+
             // close the scope
-            m_classLoader.getContainerScope().close();
+            scope.close();
+
+            // notify the container to stop managing the scope
+            Container.unmanage(scope);
         }
 
 

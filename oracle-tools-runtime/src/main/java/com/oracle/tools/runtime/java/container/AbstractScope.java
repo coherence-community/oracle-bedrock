@@ -48,42 +48,42 @@ public abstract class AbstractScope implements Scope
      * The name of the application scope.  This is primarily used for diagnostic
      * purposes.
      */
-    protected String m_name;
+    protected String name;
 
     /**
      * The System {@link java.util.Properties} to be used when an application is
      * running in this {@link Scope}.
      */
-    protected Properties m_properties;
+    protected Properties properties;
 
     /**
      * Is the {@link Scope} closed?  If it is, it can be used.
      */
-    protected AtomicBoolean m_isClosed;
+    protected AtomicBoolean closed;
 
     /**
      * The Standard Out {@link java.io.PrintStream} to be used when an application
      * is in this {@link Scope}.
      */
-    protected PrintStream m_stdout;
+    protected PrintStream stdout;
 
     /**
      * The Standard Error {@link java.io.PrintStream} to be used when an application
      * is in this {@link Scope}.
      */
-    protected PrintStream m_stderr;
+    protected PrintStream stderr;
 
     /**
      * The Standard Input {@link java.io.InputStream} to be used when an application
      * is in this {@link Scope}.
      */
-    protected InputStream m_stdin;
+    protected InputStream stdin;
 
     /**
      * The {@link AvailablePortIterator} that can be used by an application
      * to determine available ports in this {@link Scope}.
      */
-    protected AvailablePortIterator m_availablePorts;
+    protected AvailablePortIterator availablePorts;
 
 
     /**
@@ -98,77 +98,61 @@ public abstract class AbstractScope implements Scope
                          Properties            properties,
                          AvailablePortIterator availablePorts)
     {
-        m_name           = name;
-        m_properties     = properties;
-        m_availablePorts = availablePorts;
-        m_isClosed       = new AtomicBoolean(false);
-        m_stdout         = null;
-        m_stderr         = null;
-        m_stdin          = null;
+        this.name           = name;
+        this.properties     = properties;
+        this.availablePorts = availablePorts;
+        this.closed         = new AtomicBoolean(false);
+        this.stdout         = null;
+        this.stderr         = null;
+        this.stdin          = null;
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public String getName()
     {
-        return m_name;
+        return name;
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public Properties getProperties()
     {
-        return m_properties;
+        return properties;
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public PrintStream getStandardOutput()
     {
-        return m_stdout;
+        return stdout;
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public PrintStream getStandardError()
     {
-        return m_stderr;
+        return stderr;
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public InputStream getStandardInput()
     {
-        return m_stdin;
+        return stdin;
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public AvailablePortIterator getAvailablePorts()
     {
-        return m_availablePorts;
+        return availablePorts;
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public boolean close()
     {
-        return m_isClosed.compareAndSet(false, true);
+        return closed.compareAndSet(false, true);
     }
 }

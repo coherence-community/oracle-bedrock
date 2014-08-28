@@ -26,6 +26,7 @@
 package com.oracle.tools.runtime.java.container;
 
 import com.oracle.tools.runtime.LocalPlatform;
+
 import com.oracle.tools.runtime.network.AvailablePortIterator;
 
 import java.io.IOException;
@@ -34,6 +35,7 @@ import java.io.OutputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.io.PrintStream;
+
 import java.util.Properties;
 
 /**
@@ -54,7 +56,7 @@ public class ContainerScope extends AbstractContainerScope
      * NOTE: This will be <code>null</code> when the Scope represents the
      * underlying Java Virtual Machine resources.
      */
-    private PipedOutputStream m_stdoutPipedOutputStream;
+    private PipedOutputStream stdoutPipedOutputStream;
 
     /**
      * The {@link java.io.PipedInputStream} from which Standard Output written by an
@@ -63,12 +65,12 @@ public class ContainerScope extends AbstractContainerScope
      * NOTE: This will be <code>null</code> when the Scope represents the
      * underlying Java Virtual Machine resources.
      */
-    private PipedInputStream m_stdoutPipedInputStream;
+    private PipedInputStream stdoutPipedInputStream;
 
     /**
      * Is the Standard Error Stream redirected to the Standard Output?
      */
-    private boolean m_isErrorStreamRedirected;
+    private boolean redirectErrorStream;
 
     /**
      * The {@link java.io.PipedOutputStream} to which Standard Error will be written when
@@ -77,7 +79,7 @@ public class ContainerScope extends AbstractContainerScope
      * NOTE: This will be <code>null</code> when the Scope represents the
      * underlying Java Virtual Machine resources.
      */
-    private PipedOutputStream m_stderrPipedOutputStream;
+    private PipedOutputStream stderrPipedOutputStream;
 
     /**
      * The {@link java.io.PipedInputStream} from which Standard Error written by an
@@ -86,7 +88,7 @@ public class ContainerScope extends AbstractContainerScope
      * NOTE: This will be <code>null</code> when the Scope represents the
      * underlying Java Virtual Machine resources.
      */
-    private PipedInputStream m_stderrPipedInputStream;
+    private PipedInputStream stderrPipedInputStream;
 
     /**
      * The {@link java.io.PipedOutputStream} to which Standard Input to an application
@@ -95,7 +97,7 @@ public class ContainerScope extends AbstractContainerScope
      * NOTE: This will be <code>null</code> when the Scope represents the
      * underlying Java Virtual Machine resources.
      */
-    private PipedOutputStream m_stdinPipedOutputStream;
+    private PipedOutputStream stdinPipedOutputStream;
 
     /**
      * The {@link java.io.PipedInputStream} from which Standard Input for an
@@ -104,13 +106,13 @@ public class ContainerScope extends AbstractContainerScope
      * NOTE: This will be <code>null</code> when the Scope represents the
      * underlying Java Virtual Machine resources.
      */
-    private PipedInputStream m_stdinPipedInputStream;
+    private PipedInputStream stdinPipedInputStream;
 
     /**
      * The {@link ContainerMBeanServerBuilder} to be used when an application
      * is in this {@link ContainerScope}.
      */
-    private ContainerMBeanServerBuilder m_mBeanServerBuilder;
+    private ContainerMBeanServerBuilder mBeanServerBuilder;
 
 
     /**
@@ -120,7 +122,12 @@ public class ContainerScope extends AbstractContainerScope
      */
     public ContainerScope(String name)
     {
-        this(name, new Properties(), LocalPlatform.getInstance().getAvailablePorts(), null, false, Container.PIPE_BUFFER_SIZE_BYTES);
+        this(name,
+             new Properties(),
+             LocalPlatform.getInstance().getAvailablePorts(),
+             null,
+             false,
+             Container.PIPE_BUFFER_SIZE_BYTES);
     }
 
 
@@ -133,7 +140,12 @@ public class ContainerScope extends AbstractContainerScope
     public ContainerScope(String     name,
                           Properties properties)
     {
-        this(name, properties, LocalPlatform.getInstance().getAvailablePorts(), null, false, Container.PIPE_BUFFER_SIZE_BYTES);
+        this(name,
+             properties,
+             LocalPlatform.getInstance().getAvailablePorts(),
+             null,
+             false,
+             Container.PIPE_BUFFER_SIZE_BYTES);
     }
 
 
@@ -157,38 +169,38 @@ public class ContainerScope extends AbstractContainerScope
     {
         super(name, properties, availablePorts, mBeanServerBuilder);
 
-        m_isErrorStreamRedirected = redirectErrorStream;
+        this.redirectErrorStream = redirectErrorStream;
 
         try
         {
-            m_stdoutPipedOutputStream = new PipedOutputStream();
-            m_stdoutPipedInputStream  = new PipedInputStream(m_stdoutPipedOutputStream, pipeBufferSizeBytes);
-            m_stdout                  = new PrintStream(m_stdoutPipedOutputStream);
+            stdoutPipedOutputStream = new PipedOutputStream();
+            stdoutPipedInputStream  = new PipedInputStream(stdoutPipedOutputStream, pipeBufferSizeBytes);
+            stdout                  = new PrintStream(stdoutPipedOutputStream);
 
             if (redirectErrorStream)
             {
-                m_stderrPipedOutputStream = null;
-                m_stderrPipedInputStream  = null;
-                m_stderr                  = m_stdout;
+                stderrPipedOutputStream = null;
+                stderrPipedInputStream  = null;
+                stderr                  = stdout;
             }
             else
             {
-                m_stderrPipedOutputStream = new PipedOutputStream();
-                m_stderrPipedInputStream  = new PipedInputStream(m_stderrPipedOutputStream, pipeBufferSizeBytes);
-                m_stderr                  = new PrintStream(m_stderrPipedOutputStream);
+                stderrPipedOutputStream = new PipedOutputStream();
+                stderrPipedInputStream  = new PipedInputStream(stderrPipedOutputStream, pipeBufferSizeBytes);
+                stderr                  = new PrintStream(stderrPipedOutputStream);
             }
 
-            m_stdinPipedOutputStream = new PipedOutputStream();
-            m_stdinPipedInputStream  = new PipedInputStream(m_stdinPipedOutputStream, pipeBufferSizeBytes);
-            m_stdin                  = m_stdinPipedInputStream;
+            stdinPipedOutputStream = new PipedOutputStream();
+            stdinPipedInputStream  = new PipedInputStream(stdinPipedOutputStream, pipeBufferSizeBytes);
+            stdin                  = stdinPipedInputStream;
         }
         catch (IOException e)
         {
             throw new RuntimeException("Could not establish i/o pipes for the ContainerScope [" + getName() + "]", e);
         }
 
-        m_mBeanServerBuilder = mBeanServerBuilder == null
-                               ? new ContainerMBeanServerBuilder(m_availablePorts) : mBeanServerBuilder;
+        this.mBeanServerBuilder = mBeanServerBuilder == null
+                                  ? new ContainerMBeanServerBuilder(this.availablePorts) : mBeanServerBuilder;
     }
 
 
@@ -200,7 +212,7 @@ public class ContainerScope extends AbstractContainerScope
      */
     public InputStream getStandardOutputInputStream()
     {
-        return m_stdoutPipedInputStream;
+        return stdoutPipedInputStream;
     }
 
 
@@ -212,13 +224,13 @@ public class ContainerScope extends AbstractContainerScope
      */
     public InputStream getStandardErrorInputStream()
     {
-        if (m_isErrorStreamRedirected)
+        if (redirectErrorStream)
         {
             throw new UnsupportedOperationException("The Standard Error Stream has been redirected to the Standard Output Stream");
         }
         else
         {
-            return m_stderrPipedInputStream;
+            return stderrPipedInputStream;
         }
     }
 
@@ -231,20 +243,18 @@ public class ContainerScope extends AbstractContainerScope
      */
     public OutputStream getStandardInputOutputStream()
     {
-        return m_stdinPipedOutputStream;
+        return stdinPipedOutputStream;
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public boolean close()
     {
         if (super.close())
         {
             try
             {
-                m_stdoutPipedOutputStream.close();
+                stdoutPipedOutputStream.close();
             }
             catch (Exception e)
             {
@@ -253,7 +263,7 @@ public class ContainerScope extends AbstractContainerScope
 
             try
             {
-                m_stdoutPipedInputStream.close();
+                stdoutPipedInputStream.close();
             }
             catch (Exception e)
             {
@@ -262,18 +272,18 @@ public class ContainerScope extends AbstractContainerScope
 
             try
             {
-                m_stdout.close();
+                stdout.close();
             }
             catch (Exception e)
             {
                 // SKIP: we ignore exceptions
             }
 
-            if (!m_isErrorStreamRedirected)
+            if (!redirectErrorStream)
             {
                 try
                 {
-                    m_stderrPipedOutputStream.close();
+                    stderrPipedOutputStream.close();
                 }
                 catch (Exception e)
                 {
@@ -282,7 +292,7 @@ public class ContainerScope extends AbstractContainerScope
 
                 try
                 {
-                    m_stderrPipedInputStream.close();
+                    stderrPipedInputStream.close();
                 }
                 catch (Exception e)
                 {
@@ -291,7 +301,7 @@ public class ContainerScope extends AbstractContainerScope
 
                 try
                 {
-                    m_stderr.close();
+                    stderr.close();
                 }
                 catch (Exception e)
                 {
@@ -301,7 +311,7 @@ public class ContainerScope extends AbstractContainerScope
 
             try
             {
-                m_stdinPipedOutputStream.close();
+                stdinPipedOutputStream.close();
             }
             catch (Exception e)
             {
@@ -310,7 +320,7 @@ public class ContainerScope extends AbstractContainerScope
 
             try
             {
-                m_stdinPipedInputStream.close();
+                stdinPipedInputStream.close();
             }
             catch (Exception e)
             {
@@ -319,7 +329,7 @@ public class ContainerScope extends AbstractContainerScope
 
             try
             {
-                m_stdin.close();
+                stdin.close();
             }
             catch (Exception e)
             {

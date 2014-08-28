@@ -298,6 +298,17 @@ reverse chronological order.
 *   [ORACLETOOLS-147](https://java.net/jira/browse/ORACLETOOLS-147): Refactored
     AbstractAssembly.get/add/removeApplication methods to drop the term "Application".
 
+*   [ORACLETOOLS-148](https://java.net/jira/browse/ORACLETOOLS-148): Resolved
+    issue where Container-based Java Applications (created with the
+    ContainerBasedJavaApplicationBuilder or JavaVirtualMachine platform) would
+    not be isolated from each other unless Container.start() was called.  This
+    is no longer a requirement.
+
+*   [ORACLETOOLS-149](https://java.net/jira/browse/ORACLETOOLS-149): Made
+    ContainerBasedJavaApplicationBuilders / JavaVirtualMachine platforms throw
+    a RuntimeException (wrapping a ClassNotFoundException) eagerly when attempting
+    to start an application and the application class can't be found.
+
 <h4>oracle-tools-runtime-remote</h4>
 
 *   [ORACLETOOLS-91](https://java.net/jira/browse/ORACLETOOLS-91): Introduced

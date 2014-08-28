@@ -26,9 +26,12 @@
 package com.oracle.tools.runtime.java.container;
 
 import com.oracle.tools.runtime.LocalPlatform;
+
 import com.oracle.tools.runtime.network.AvailablePortIterator;
 
 import java.io.PrintStream;
+
+import java.util.HashSet;
 
 /**
  * The {@link Container} class provides mechanisms to establish and dismantal
@@ -53,19 +56,24 @@ public class Container
      * return the Java Virtual Machine runtime back to normal when we want to
      * stop running in a container-based mode.
      */
-    private static PlatformScope s_platformScope;
+    private static PlatformScope platformScope;
 
     /**
      * The {@link DefaultScope} to use when a suitable {@link ContainerScope}
      * can't be located.   This is primarily when a ClassLoader and/or Thread is
      * not associated with an {@link Scope}.
      */
-    private static DefaultScope s_defaultScope;
+    private static DefaultScope defaultScope;
 
     /**
      * The {@link ContainerScope} associated with the current {@link Thread}.
      */
-    private static InheritableThreadLocal<ContainerScope> s_threadScope;
+    private static InheritableThreadLocal<ContainerScope> threadScope;
+
+    /**
+     * The current set of {@link ContainerScope}s being managed by the {@link Container}.
+     */
+    private static HashSet<ContainerScope> scopes;
 
     /**
      * The number of bytes to reserve for i/o buffers used by
@@ -87,17 +95,20 @@ public class Container
         else
         {
             // establish the default scope to use when a thread isn't isolated
-            s_defaultScope = new DefaultScope(s_platformScope);
+            defaultScope = new DefaultScope(platformScope);
 
             // ensure that the JMX MBean Server for the default Scope is the
             // DelegatingMBeanServerBuilder so that we can isolate MBeanServers
-            s_defaultScope.getProperties().setProperty(ContainerMBeanServerBuilder.PROPERTY_JMX_MBEAN_SERVER_BUILDER,
-                                                       DelegatingMBeanServerBuilder.class.getCanonicalName());
+            defaultScope.getProperties().setProperty(ContainerMBeanServerBuilder.PROPERTY_JMX_MBEAN_SERVER_BUILDER,
+                                                     DelegatingMBeanServerBuilder.class.getCanonicalName());
 
-            System.setProperties(new DelegatingProperties(s_defaultScope.getProperties()));
-            System.setOut(new PrintStream(new DelegatingStdOutOutputStream(s_platformScope.getStandardOutput()), true));
-            System.setErr(new PrintStream(new DelegatingStdErrOutputStream(s_platformScope.getStandardError()), true));
-            System.setIn(new DelegatingStdInInputStream(s_platformScope.getStandardInput()));
+            System.setProperties(new DelegatingProperties(defaultScope.getProperties()));
+            System.setOut(new PrintStream(new DelegatingStdOutOutputStream(platformScope.getStandardOutput()), true));
+            System.setErr(new PrintStream(new DelegatingStdErrOutputStream(platformScope.getStandardError()), true));
+            System.setIn(new DelegatingStdInInputStream(platformScope.getStandardInput()));
+
+            // establish the scopes set to track the scopes being managed
+            scopes = new HashSet<ContainerScope>();
         }
     }
 
@@ -110,17 +121,53 @@ public class Container
         // are we running as a container?
         if (System.getProperties() instanceof DelegatingProperties)
         {
-            System.setProperties(s_platformScope.getProperties());
-            System.setOut(s_platformScope.getStandardOutput());
-            System.setErr(s_platformScope.getStandardError());
+            System.setProperties(platformScope.getProperties());
+            System.setOut(platformScope.getStandardOutput());
+            System.setErr(platformScope.getStandardError());
 
             // close and clear the default scope as we are no longer running in a container
-            s_defaultScope.close();
-            s_defaultScope = null;
+            defaultScope.close();
+            defaultScope = null;
         }
         else
         {
             // SKIP: we're not running as a container so do nothing!
+        }
+    }
+
+
+    /**
+     * Adds the specified {@link ContainerScope} to the {@link Container} for managing.
+     * <p>
+     * Should the {@link Container} not be {@link #start()}ed, it will automatically be started.
+     *
+     * @param scope  the {@link ContainerScope} to manage
+     */
+    public synchronized static void manage(ContainerScope scope)
+    {
+        // add the scope we're now managing
+        if (scopes.add(scope))
+        {
+            // ensure that the container is started
+            start();
+        }
+    }
+
+
+    /**
+     * Removes the specified {@link ContainerScope} from being managed.
+     * <p>
+     * Should the {@link ContainerScope} being unmanaged be the last known
+     * managed {@link ContainerScope}, the {@link Container} will automatically be {@link #stop()}ed.
+     *
+     * @param scope  the {@link ContainerScope} to unmanage
+     */
+
+    public synchronized static void unmanage(ContainerScope scope)
+    {
+        if (scopes.remove(scope))
+        {
+            stop();
         }
     }
 
@@ -138,7 +185,7 @@ public class Container
     public static ContainerScope getContainerScope()
     {
         // attempt to determine the scope based on the calling Thread
-        ContainerScope scope = s_threadScope.get();
+        ContainerScope scope = threadScope.get();
 
         if (scope == null)
         {
@@ -171,7 +218,7 @@ public class Container
      */
     public static PlatformScope getPlatformScope()
     {
-        return s_platformScope;
+        return platformScope;
     }
 
 
@@ -185,7 +232,7 @@ public class Container
      */
     public static DefaultScope getDefaultScope()
     {
-        return s_defaultScope;
+        return defaultScope;
     }
 
 
@@ -206,11 +253,11 @@ public class Container
         }
         else
         {
-            Scope existingScope = s_threadScope.get();
+            Scope existingScope = threadScope.get();
 
             if (existingScope == null)
             {
-                s_threadScope.set(scope);
+                threadScope.set(scope);
             }
             else
             {
@@ -232,13 +279,13 @@ public class Container
      */
     public static void dissociateThread()
     {
-        if (s_threadScope.get() == null)
+        if (threadScope.get() == null)
         {
             // SKIP: do nothing if the current thread is not isolated
         }
         else
         {
-            s_threadScope.remove();
+            threadScope.remove();
         }
     }
 
@@ -262,9 +309,12 @@ public class Container
     static
     {
         // establish the ability to track Scopes by thread
-        s_threadScope = new InheritableThreadLocal<ContainerScope>();
+        threadScope = new InheritableThreadLocal<ContainerScope>();
 
         // create a PlatformScope representing the platform itself
-        s_platformScope = new PlatformScope(getAvailablePorts());
+        platformScope = new PlatformScope(getAvailablePorts());
+
+        // establish the scopes set to track scopes being managed
+        scopes = new HashSet<ContainerScope>();
     }
 }
