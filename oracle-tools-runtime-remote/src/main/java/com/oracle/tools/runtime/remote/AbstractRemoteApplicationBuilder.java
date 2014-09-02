@@ -44,6 +44,9 @@ import com.oracle.tools.runtime.ApplicationSchema;
 import com.oracle.tools.runtime.Platform;
 import com.oracle.tools.runtime.PropertiesBuilder;
 
+import com.oracle.tools.runtime.options.PlatformSeparators;
+import com.oracle.tools.runtime.options.TemporaryDirectory;
+
 import com.oracle.tools.runtime.remote.options.Deployment;
 import com.oracle.tools.runtime.remote.options.StrictHostChecking;
 
@@ -102,24 +105,6 @@ public abstract class AbstractRemoteApplicationBuilder<A extends Application, E 
     protected String userName;
 
     /**
-     * The {@link File#separator} for the remote SSH-based session.
-     * (by default we assume the remote server is the same as this server)
-     */
-    protected char remoteFileSeparatorChar;
-
-    /**
-     * The {@link File#pathSeparator} for the remote SSH-based session.
-     * (by default we assume the remote server is the same as this server)
-     */
-    protected char remotePathSeparatorChar;
-
-    /**
-     * The {@link File} representing the location of the temporary directory
-     * on the remote server.
-     */
-    protected File remoteTemporaryDirectoryFile;
-
-    /**
      * The {@link PropertiesBuilder} defining custom environment variables to
      * establish when realizing a remote {@link Application}.
      */
@@ -160,12 +145,6 @@ public abstract class AbstractRemoteApplicationBuilder<A extends Application, E 
         this.port           = port;
         this.userName       = userName;
         this.authentication = authentication;
-
-        // establish the default remote server properties
-        // (we default to using unix-style separators as we're using SSH for remote execution)
-        this.remoteFileSeparatorChar      = '/';
-        this.remotePathSeparatorChar      = ':';
-        this.remoteTemporaryDirectoryFile = new File(remoteFileSeparatorChar + "tmp");
 
         // by default there are no custom remote environment variables
         remoteEnvironmentVariablesBuilder = new PropertiesBuilder();
@@ -220,38 +199,6 @@ public abstract class AbstractRemoteApplicationBuilder<A extends Application, E 
 
 
     /**
-     * Sets the file.separator character to be used with the remote SSH-session.
-     * This defaults to the file.separator of the current platform.
-     *
-     * @param fileSeparator  the file.separator
-     *
-     * @return this {@link RemoteApplicationBuilder} to permit fluent method calls
-     */
-    public B setRemoteFileSeparator(char fileSeparator)
-    {
-        this.remoteFileSeparatorChar = fileSeparator;
-
-        return (B) this;
-    }
-
-
-    /**
-     * Sets the location of the remote temporary directory.
-     * By default this is /tmp.
-     *
-     * @param directory  the temporary directory
-     *
-     * @return this {@link RemoteApplicationBuilder} to permit fluent method calls
-     */
-    public B setRemoteTemporaryDirectory(File directory)
-    {
-        this.remoteTemporaryDirectoryFile = directory;
-
-        return (B) this;
-    }
-
-
-    /**
      * Creates a remote-platform specific filename, given a fileName
      * represented in a format for this platform.
      *
@@ -259,9 +206,10 @@ public abstract class AbstractRemoteApplicationBuilder<A extends Application, E 
      *
      * @return the file as it would be represented by the remote platform
      */
-    protected String asRemotePlatformFileName(String fileName)
+    protected String asRemotePlatformFileName(String             fileName,
+                                              PlatformSeparators separators)
     {
-        return fileName == null ? null : fileName.replace(File.separatorChar, remoteFileSeparatorChar);
+        return fileName == null ? null : fileName.replace(File.separator, separators.getFileSeparator());
     }
 
 
@@ -274,7 +222,8 @@ public abstract class AbstractRemoteApplicationBuilder<A extends Application, E 
      *
      * @return  the sanitized file name
      */
-    protected String asSanitizedFileName(String fileName)
+    protected String asSanitizedFileName(String             fileName,
+                                         PlatformSeparators separators)
     {
         if (fileName == null)
         {
@@ -283,8 +232,9 @@ public abstract class AbstractRemoteApplicationBuilder<A extends Application, E 
         else
         {
             StringBuilder builder = new StringBuilder(fileName.length());
-            String valid = "1234567890abcdefghijklmnopqrstuvwxyz.~" + File.separatorChar + remoteFileSeparatorChar;
-            char          last    = '\0';
+            String valid = "1234567890abcdefghijklmnopqrstuvwxyz.~" + File.separatorChar
+                           + separators.getFileSeparator();
+            char last = '\0';
 
             fileName = fileName.toLowerCase();
 
@@ -360,6 +310,9 @@ public abstract class AbstractRemoteApplicationBuilder<A extends Application, E 
 
         Options options = new Options(applicationOptions);
 
+        // define the PlatformSeparators as Unix if they are not defined
+        options.addIfAbsent(PlatformSeparators.forUnix());
+
         // obtain the builder-specific remote application environment based on the schema
         E environment = getRemoteApplicationEnvironment(applicationSchema, platform, options);
 
@@ -398,10 +351,14 @@ public abstract class AbstractRemoteApplicationBuilder<A extends Application, E 
 
             // ----- deploy remote application artifacts (using sftp) -----
 
+            // determine the separators for the platform
+            PlatformSeparators separators = options.get(PlatformSeparators.class);
+
             // assume the remote directory is the working directory
             File remoteDirectoryFile = applicationSchema.getWorkingDirectory();
             String remoteDirectory = remoteDirectoryFile == null
-                                     ? null : asRemotePlatformFileName(remoteDirectoryFile.toString());
+                                     ? null : asRemotePlatformFileName(remoteDirectoryFile.toString(),
+                                                                       separators);
 
             // determine the DeploymentArtifacts based on those specified by the Deployment option
             ArrayList<DeploymentArtifact> artifactsToDeploy = new ArrayList<DeploymentArtifact>();
@@ -441,14 +398,20 @@ public abstract class AbstractRemoteApplicationBuilder<A extends Application, E 
                         // create deployment directory as the working directory
                         // (as applicationName-YYYYmmdd-HHMMSS-LLL)
 
-                        String   sanitizedApplicationName = asSanitizedFileName(applicationName);
+                        String   sanitizedApplicationName = asSanitizedFileName(applicationName, separators);
                         Calendar now                      = Calendar.getInstance();
                         String temporaryDirectoryName = String.format("%1$s-%2$tY%2$tm%2$td-%2$tH%2$tM%2$tS-%2$tL",
                                                                       sanitizedApplicationName,
                                                                       now);
 
-                        remoteDirectoryFile = new File(remoteTemporaryDirectoryFile, temporaryDirectoryName);
-                        remoteDirectory     = asRemotePlatformFileName(remoteDirectoryFile.toString());
+                        // determine the remote TemporaryDirectory
+                        TemporaryDirectory temporaryDirectory = options.get(TemporaryDirectory.class,
+                                                                            TemporaryDirectory
+                                                                                .at(separators.getFileSeparator()
+                                                                                    + "tmp"));
+
+                        remoteDirectoryFile = new File(temporaryDirectory.get().toFile(), temporaryDirectoryName);
+                        remoteDirectory     = asRemotePlatformFileName(remoteDirectoryFile.toString(), separators);
 
                         // create the remote directory
                         sftpChannel.mkdir(remoteDirectory);
@@ -472,7 +435,8 @@ public abstract class AbstractRemoteApplicationBuilder<A extends Application, E 
                         }
                         else
                         {
-                            String destinationFilePath = asRemotePlatformFileName(destinationFile.getParent());
+                            String destinationFilePath = asRemotePlatformFileName(destinationFile.getParent(),
+                                                                                  separators);
 
                             if (destinationFilePath == null)
                             {
@@ -480,7 +444,7 @@ public abstract class AbstractRemoteApplicationBuilder<A extends Application, E 
                             }
                             else
                             {
-                                sftpChannel.cd(asRemotePlatformFileName(destinationFile.getPath()));
+                                sftpChannel.cd(asRemotePlatformFileName(destinationFile.getPath(), separators));
                             }
 
                             destinationFileName = destinationFile.getName();

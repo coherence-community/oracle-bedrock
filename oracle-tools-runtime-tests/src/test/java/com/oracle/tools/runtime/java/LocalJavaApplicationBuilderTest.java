@@ -513,7 +513,7 @@ public class LocalJavaApplicationBuilderTest extends AbstractJavaApplicationBuil
 
         // determine the JAVA_HOME based on this process
         String   javaHomePath = System.getProperty("java.home");
-        JavaHome javaHome     = JavaHome.of(javaHomePath);
+        JavaHome javaHome     = JavaHome.at(javaHomePath);
 
         // build and start the SleepingApplication
         LocalJavaApplicationBuilder<JavaApplication> builder = new LocalJavaApplicationBuilder<JavaApplication>();

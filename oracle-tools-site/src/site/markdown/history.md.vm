@@ -309,13 +309,13 @@ reverse chronological order.
     a RuntimeException (wrapping a ClassNotFoundException) eagerly when attempting
     to start an application and the application class can't be found.
 
-*   [ORACLETOOLS-150](https://java.net/jira/browse/ORACLETOOLS-150): Introduced
-    constructors for RemotePlatforms that use simple default values (making them
-    much simpler to use).
+*   [ORACLETOOLS-153](https://java.net/jira/browse/ORACLETOOLS-153): Introduced
+    TemporaryDirectory Option support to replace setters/getters for temporary
+    folders.
 
-*   [ORACLETOOLS-151](https://java.net/jira/browse/ORACLETOOLS-151): Introduced
-    StrictHostChecking option and removed previous setters/getters for
-    strict-host-checking across builders.
+*   [ORACLETOOLS-154](https://java.net/jira/browse/ORACLETOOLS-154): Introduced
+    PlatformSeparators Option to replace setters/getters for File and Path
+    separators.
 
 <h4>oracle-tools-runtime-remote</h4>
 
@@ -325,6 +325,14 @@ reverse chronological order.
 
 *   [ORACLETOOLS-113](https://java.net/jira/browse/ORACLETOOLS-113): Introduced
     a RemotePlatform implementation of a Platform.
+
+*   [ORACLETOOLS-150](https://java.net/jira/browse/ORACLETOOLS-150): Introduced
+    constructors for RemotePlatforms that use simple default values (making them
+    much simpler to use).
+
+*   [ORACLETOOLS-151](https://java.net/jira/browse/ORACLETOOLS-151): Introduced
+    StrictHostChecking option and removed previous setters/getters for
+    strict-host-checking across builders.
 
 <h4>oracle-tools-runtime-virtual</h4>
 

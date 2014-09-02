@@ -110,11 +110,7 @@ public class RemoteJavaApplicationBuilder<A extends JavaApplication>
 
         try
         {
-            return new RemoteJavaApplicationEnvironment(schema,
-                                                        remoteFileSeparatorChar,
-                                                        remotePathSeparatorChar,
-                                                        platform,
-                                                        options);
+            return new RemoteJavaApplicationEnvironment(schema, platform, options);
         }
         catch (IOException e)
         {

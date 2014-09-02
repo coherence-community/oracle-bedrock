@@ -74,7 +74,7 @@ public class JavaHome implements Option
      *
      * @return  the {@link JavaHome}
      */
-    public static JavaHome of(String javaHome)
+    public static JavaHome at(String javaHome)
     {
         return new JavaHome(javaHome);
     }

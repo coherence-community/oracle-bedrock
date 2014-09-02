@@ -172,7 +172,7 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication> extends Abst
         // (using the system property)
         if (javaHome == null)
         {
-            javaHome = JavaHome.of(System.getProperty("java.home", null));
+            javaHome = JavaHome.at(System.getProperty("java.home", null));
         }
 
         if (javaHome != null)

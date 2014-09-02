@@ -47,6 +47,8 @@ import com.oracle.tools.runtime.java.JavaApplicationSchema;
 import com.oracle.tools.runtime.java.options.JavaHome;
 import com.oracle.tools.runtime.java.options.RemoteDebugging;
 
+import com.oracle.tools.runtime.options.PlatformSeparators;
+
 import com.oracle.tools.runtime.remote.AbstractRemoteApplicationEnvironment;
 import com.oracle.tools.runtime.remote.DeploymentArtifact;
 import com.oracle.tools.runtime.remote.java.options.JavaDeployment;
@@ -91,16 +93,6 @@ public class RemoteJavaApplicationEnvironment<A extends JavaApplication>
     private ClassPath remoteClassPath;
 
     /**
-     * The remote {@link File#separator}.
-     */
-    private char remoteFileSeparator;
-
-    /**
-     * The remote {@link File#pathSeparator}.
-     */
-    private char remotePathSeparator;
-
-    /**
      * The remote debugging port assigned to the remote {@link JavaApplication}.
      */
     private int remoteDebugPort;
@@ -110,21 +102,14 @@ public class RemoteJavaApplicationEnvironment<A extends JavaApplication>
      * Constructs a {@link RemoteJavaApplicationEnvironment}.
      *
      * @param schema                the {@link com.oracle.tools.runtime.java.JavaApplicationSchema}
-     * @param remoteFileSeparator   the {@link java.io.File#separator} for the remote server
-     * @param remotePathSeparator   the {@link java.io.File#pathSeparator} for the remote server
      * @param platform              the {@link Platform} representing the remote O/S
      * @param options       the {@link Options} for the remote O/S
      */
     public RemoteJavaApplicationEnvironment(JavaApplicationSchema<A> schema,
-                                            char                     remoteFileSeparator,
-                                            char                     remotePathSeparator,
                                             Platform                 platform,
                                             Options                  options) throws IOException
     {
         super(schema, platform, options);
-
-        this.remoteFileSeparator = remoteFileSeparator;
-        this.remotePathSeparator = remotePathSeparator;
 
         // configure a server that the remote process can communicate with
         remoteExecutor = new RemoteExecutorServer();
@@ -226,18 +211,21 @@ public class RemoteJavaApplicationEnvironment<A extends JavaApplication>
         }
         else
         {
+            // determine the PlatformSeparators (assume unix is not defined)
+            PlatformSeparators separators = options.get(PlatformSeparators.class, PlatformSeparators.forUnix());
+
             // when we have a java home, we prefix the executable name with the java.home/bin/
             String javaHomePath = javaHome.get().trim();
 
             builder.append(javaHomePath);
 
-            if (!javaHomePath.endsWith(String.valueOf(remoteFileSeparator)))
+            if (!javaHomePath.endsWith(separators.getFileSeparator()))
             {
-                builder.append(remoteFileSeparator);
+                builder.append(separators.getFileSeparator());
             }
 
             builder.append("bin");
-            builder.append(remoteFileSeparator);
+            builder.append(separators.getFileSeparator());
 
             builder.append(schema.getExecutableName());
         }

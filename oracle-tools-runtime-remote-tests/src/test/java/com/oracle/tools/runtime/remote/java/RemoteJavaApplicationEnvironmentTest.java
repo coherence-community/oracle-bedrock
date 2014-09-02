@@ -65,15 +65,11 @@ public class RemoteJavaApplicationEnvironmentTest
         RemotePlatform                   platform        = mock(RemotePlatform.class);
         SimpleJavaApplicationSchema      schema = new SimpleJavaApplicationSchema(SleepingApplication.class.getName());
 
-        RemoteJavaApplicationEnvironment env = new RemoteJavaApplicationEnvironment(schema,
-                                                                                    '/',
-                                                                                    ':',
-                                                                                    platform,
-                                                                                    options);
+        RemoteJavaApplicationEnvironment env = new RemoteJavaApplicationEnvironment(schema, platform, options);
 
-        String command      = env.getRemoteCommandToExecute();
+        String                           command         = env.getRemoteCommandToExecute();
 
-        String debugCommand = "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n";
+        String                           debugCommand    = "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n";
 
         assertThat(command, containsString(debugCommand));
     }
@@ -93,13 +89,9 @@ public class RemoteJavaApplicationEnvironmentTest
         RemotePlatform                   platform        = mock(RemotePlatform.class);
         SimpleJavaApplicationSchema      schema = new SimpleJavaApplicationSchema(SleepingApplication.class.getName());
 
-        RemoteJavaApplicationEnvironment env = new RemoteJavaApplicationEnvironment(schema,
-                                                                                    '/',
-                                                                                    ':',
-                                                                                    platform,
-                                                                                    options);
+        RemoteJavaApplicationEnvironment env = new RemoteJavaApplicationEnvironment(schema, platform, options);
 
-        String command = env.getRemoteCommandToExecute();
+        String                           command         = env.getRemoteCommandToExecute();
 
         String debugCommand = String.format("-agentlib:jdwp=transport=dt_socket,server=n,suspend=n,address=%s:%d",
                                             LocalPlatform.getInstance().getHostName(),
@@ -122,15 +114,11 @@ public class RemoteJavaApplicationEnvironmentTest
         RemotePlatform                   platform        = mock(RemotePlatform.class);
         SimpleJavaApplicationSchema      schema = new SimpleJavaApplicationSchema(SleepingApplication.class.getName());
 
-        RemoteJavaApplicationEnvironment env = new RemoteJavaApplicationEnvironment(schema,
-                                                                                    '/',
-                                                                                    ':',
-                                                                                    platform,
-                                                                                    options);
+        RemoteJavaApplicationEnvironment env = new RemoteJavaApplicationEnvironment(schema, platform, options);
 
-        String command      = env.getRemoteCommandToExecute();
+        String                           command         = env.getRemoteCommandToExecute();
 
-        String debugCommand = "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n";
+        String                           debugCommand    = "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n";
 
         assertThat(command, containsString(debugCommand));
     }
@@ -149,15 +137,11 @@ public class RemoteJavaApplicationEnvironmentTest
         RemotePlatform                   platform        = mock(RemotePlatform.class);
         SimpleJavaApplicationSchema      schema = new SimpleJavaApplicationSchema(SleepingApplication.class.getName());
 
-        RemoteJavaApplicationEnvironment env = new RemoteJavaApplicationEnvironment(schema,
-                                                                                    '/',
-                                                                                    ':',
-                                                                                    platform,
-                                                                                    options);
+        RemoteJavaApplicationEnvironment env = new RemoteJavaApplicationEnvironment(schema, platform, options);
 
-        String command      = env.getRemoteCommandToExecute();
+        String                           command         = env.getRemoteCommandToExecute();
 
-        String debugCommand = "-agentlib:jdwp=transport=dt_socket,server=y,suspend=y";
+        String                           debugCommand    = "-agentlib:jdwp=transport=dt_socket,server=y,suspend=y";
 
         assertThat(command, containsString(debugCommand));
     }
@@ -176,13 +160,9 @@ public class RemoteJavaApplicationEnvironmentTest
         RemotePlatform                   platform        = mock(RemotePlatform.class);
         SimpleJavaApplicationSchema      schema = new SimpleJavaApplicationSchema(SleepingApplication.class.getName());
 
-        RemoteJavaApplicationEnvironment env = new RemoteJavaApplicationEnvironment(schema,
-                                                                                    '/',
-                                                                                    ':',
-                                                                                    platform,
-                                                                                    options);
+        RemoteJavaApplicationEnvironment env = new RemoteJavaApplicationEnvironment(schema, platform, options);
 
-        String command = env.getRemoteCommandToExecute();
+        String                           command         = env.getRemoteCommandToExecute();
 
         assertThat(command, not(containsString("-agentlib:jdwp")));
     }
