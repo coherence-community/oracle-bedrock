@@ -64,9 +64,13 @@ public class SimpleApplicationBuilder extends AbstractApplicationBuilder<SimpleA
                                                                                    Platform           platform,
                                                                                    Option...          applicationOptions)
     {
-        Options              options = new Options(applicationOptions);
+        // add all of the default application schema options
+        Options options = new Options(applicationSchema.getOptions().asArray());
 
-        ApplicationSchema<T> schema  = applicationSchema;
+        // add all of the custom application options
+        options.addAll(applicationOptions);
+
+        ApplicationSchema<T> schema = applicationSchema;
 
         // ---- establish the underlying ProcessBuilder -----
 

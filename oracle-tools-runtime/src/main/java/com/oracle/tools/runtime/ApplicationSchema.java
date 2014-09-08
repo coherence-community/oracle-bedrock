@@ -25,12 +25,13 @@
 
 package com.oracle.tools.runtime;
 
+import com.oracle.tools.Option;
+import com.oracle.tools.Options;
+
 import java.io.File;
 
 import java.util.List;
 import java.util.Properties;
-
-import java.util.concurrent.TimeUnit;
 
 /**
  * An {@link ApplicationSchema} encapsulates {@link Platform} <strong>agnostic</strong>
@@ -140,4 +141,12 @@ public interface ApplicationSchema<A extends Application>
      * @return  the {@link LifecycleEventInterceptor}s
      */
     public Iterable<LifecycleEventInterceptor<? super A>> getLifecycleInterceptors();
+
+
+    /**
+     * Obtains the default {@link Option}s defined on the {@link ApplicationSchema}.
+     *
+     * @return  the default {@link Option}s
+     */
+    public Options getOptions();
 }

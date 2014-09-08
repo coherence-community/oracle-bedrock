@@ -1,5 +1,5 @@
 /*
- * File: Option.java
+ * File: JvmOption.java
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
@@ -23,16 +23,34 @@
  * "Portions Copyright [year] [name of copyright owner]"
  */
 
-package com.oracle.tools;
+package com.oracle.tools.runtime.java.options;
+
+import com.oracle.tools.Option;
+
+import com.oracle.tools.runtime.java.JavaApplicationBuilder;
 
 /**
- * Encapsulates a strictly immutable configuration option.
+ * An option that is used by a Java Virtual Machine.
+ * <p>
+ * This is an internal interface is used by {@link JavaApplicationBuilder}
+ * implementations to identify {@link Option} implementations that are specific
+ * for a Java Virtual Machine.
+ * <p>
+ * Implementations of this interface may optionally implement the Oracle Tools
+ * {@link Option} interface, but it is not a requirement.
  * <p>
  * Copyright (c) 2014. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Brian Oliver
  */
-public interface Option
+public interface JvmOption
 {
+    /**
+     * Obtains the Java Virtual Machine option as a {@link String}.
+     * eg: -Xms6m
+     *
+     * @return the Java Virtual Machine option
+     */
+    public String get();
 }

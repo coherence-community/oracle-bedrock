@@ -27,6 +27,7 @@ package com.oracle.tools;
 
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 
 import java.util.logging.Logger;
 
@@ -70,24 +71,14 @@ public class Options
         {
             for (Option option : options)
             {
-                // determine the class of the option
-                Class<Option> classOfOption = getClassOfOption(option);
-
-                // add the option
-                Option previousOption = this.options.put(classOfOption, option);
-
-                if (previousOption != null)
-                {
-                    LOGGER.warning("The option [" + option + "] will replace the previously defined option ["
-                                   + previousOption + "]");
-                }
+                add(option);
             }
         }
     }
 
 
     /**
-     * Adds an {@link Option} to the collection if and only if one of the
+     * Adds an {@link Option} to the collection if and only if an {@link Option} of the
      * same type is not already present.
      *
      * @param option  the {@link Option} to add
@@ -108,8 +99,10 @@ public class Options
 
 
     /**
-     * Adds an {@link Option} to the collection, overriding a previously existing
-     * {@link Option} of the same type.
+     * Adds an {@link Option} to the collection.  If the {@link Option} is composable
+     * (ie: it implements {@link ComposableOption}), the {@link Option} will be composed with
+     * an existing {@link Option} of the same type.  If the {@link Option} is not composable,
+     * it will replace the existing {@link Option} of the same type.
      *
      * @param option  the {@link Option} to add
      *
@@ -117,9 +110,75 @@ public class Options
      */
     public Options add(Option option)
     {
+        // determine the class of the option
         Class<Option> classOfOption = getClassOfOption(option);
 
+        // add the option, composing it with an existing option if necessary
+        Option existingOption = this.options.get(classOfOption);
+
+        if (existingOption instanceof ComposableOption)
+        {
+            Option composedOption = ((ComposableOption) existingOption).compose((ComposableOption) option);
+
+            options.put(classOfOption, composedOption);
+        }
+        else
+        {
+            Option previousOption = options.put(classOfOption, option);
+
+            if (previousOption != null)
+            {
+                LOGGER.warning("The option [" + option + "] will replace the previously defined option ["
+                               + previousOption + "]");
+            }
+        }
+
+        // make note that we're not using the option yet as it's new/changed
+        usedOptions.remove(option);
+
+        return this;
+    }
+
+
+    /**
+     * Adds a collection of {@link Option}s to the collection.  If an {@link Option} is composable
+     * (ie: it implements {@link ComposableOption}), the {@link Option} will be composed with
+     * an existing {@link Option} of the same type.  If an {@link Option} is not composable,
+     * it will replace the existing {@link Option} of the same type.
+     *
+     * @param options  the {@link Option}s to add
+     *
+     * @return  the {@link Options} to permit fluent-style method calls
+     */
+    public Options addAll(Option... options)
+    {
+        for (Option option : options)
+        {
+            add(option);
+        }
+
+        return this;
+    }
+
+
+    /**
+     * Replaces an existing type of {@link Option} with a new {@link Option}, regardless
+     * of whether it is composable or not (ie: it implements {@link ComposableOption}).
+     *
+     * @param option  the new {@link Option}, replacing any existing {@link Option}
+     *                of the same type
+     *
+     * @return  the {@link Options} to permit fluent-style method calls
+     */
+    public Options replace(Option option)
+    {
+        // determine the class of the option
+        Class<Option> classOfOption = getClassOfOption(option);
+
+        // overwrite the existing option (if there is one)
         options.put(classOfOption, option);
+
+        // make note that we're not using the option yet as it's new/changed
         usedOptions.remove(option);
 
         return this;
@@ -147,7 +206,7 @@ public class Options
 
 
     /**
-     * Obtains the first instance of a specific type of {@link Option} in the collection.
+     * Obtains the specific type of {@link Option} in the collection.
      *
      * @param optionClass  the type of {@link Option} to obtain
      *
@@ -162,7 +221,7 @@ public class Options
 
 
     /**
-     * Obtains the first instance of a specific type of {@link Option} in the collection.
+     * Obtains the specific type of {@link Option} in the collection.
      * Should the {@link Option} type not be in the collection, the specified default is returned.
      *
      * @param optionClass          the type of {@link Option} to obtain
@@ -220,6 +279,30 @@ public class Options
 
 
     /**
+     * Obtains an {@link Iterable} over all of the {@link Option}s
+     * that are currently an instance of the specified class.
+     *
+     * @param instanceOf  the type of the required {@link Option}s
+     *
+     * @return  the {@link Option}s of the specified class
+     */
+    public <T> Iterable<T> getAll(Class<T> instanceOf)
+    {
+        LinkedList<T> list = new LinkedList<T>();
+
+        for (Option option : options.values())
+        {
+            if (instanceOf.isInstance(option))
+            {
+                list.add((T) option);
+            }
+        }
+
+        return list;
+    }
+
+
+    /**
      * Obtains the current set of {@link Option}s as an array.
      *
      * @return  an array of {@link Option}
@@ -268,9 +351,9 @@ public class Options
         {
             for (Class<?> interfaceClass : aClass.getInterfaces())
             {
-                if (Option.class.equals(interfaceClass))
+                if (Option.class.equals(interfaceClass) || ComposableOption.class.equals(interfaceClass))
                 {
-                    // when the Option is directly implemented,
+                    // when the Option/ComposableOption is directly implemented,
                     // we return the class itself that's implementing it.
                     return (Class<Option>) aClass;
                 }
@@ -280,8 +363,8 @@ public class Options
                     // we return the interface that's directly extending it.
 
                     // TODO: we should search to find the directly-most interface
-                    // that is extending Option, not just assume that the
-                    // interfaceClass is directly implementing it
+                    // that is extending Option (that is not a ComposableOption),
+                    // and not just assume that the interfaceClass is directly implementing it
                     return (Class<Option>) interfaceClass;
                 }
             }

@@ -1,5 +1,5 @@
 /*
- * File: Option.java
+ * File: ComposableOption.java
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
@@ -26,13 +26,23 @@
 package com.oracle.tools;
 
 /**
- * Encapsulates a strictly immutable configuration option.
+ * An {@link Option} that may be composed with another {@link Option}
+ * of the same type to produce a new {@link Option}.
  * <p>
  * Copyright (c) 2014. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Brian Oliver
  */
-public interface Option
+public interface ComposableOption<T extends ComposableOption<T>> extends Option
 {
+    /**
+     * Composes an {@link Option} with this {@link Option} to produce a
+     * new {@link Option} instance of the same type.
+     *
+     * @param other  the other {@link Option} to compose with this {@link Option}
+     *
+     * @return  the new composed {@link Option} instance
+     */
+    public T compose(T other);
 }

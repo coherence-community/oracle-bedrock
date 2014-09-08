@@ -25,6 +25,9 @@
 
 package com.oracle.tools.runtime;
 
+import com.oracle.tools.ComposableOption;
+import com.oracle.tools.Option;
+
 import java.util.List;
 
 /**
@@ -49,7 +52,7 @@ public interface FluentApplicationSchema<A extends Application, S extends Fluent
      *
      * @param interceptor  the {@link LifecycleEventInterceptor}
      *
-     * @return  the {@link FluentApplicationSchema}
+     * @return  the {@link FluentApplicationSchema} to permit fluent-style method invocation
      */
     public S addLifecycleInterceptor(LifecycleEventInterceptor<? super A> interceptor);
 
@@ -58,6 +61,8 @@ public interface FluentApplicationSchema<A extends Application, S extends Fluent
      * Adds an additional argument to use when starting the {@link Application}.
      *
      * @param argument  the additional argument for the {@link Application}
+     *
+     * @return  the {@link FluentApplicationSchema} to permit fluent-style method invocation
      */
     public S addArgument(String argument);
 
@@ -66,6 +71,8 @@ public interface FluentApplicationSchema<A extends Application, S extends Fluent
      * Adds multiple arguments to use when starting the {@link Application}.
      *
      * @param arguments  the additional arguments for the {@link Application}
+     *
+     * @return  the {@link FluentApplicationSchema} to permit fluent-style method invocation
      */
     public S addArguments(String... arguments);
 
@@ -74,6 +81,8 @@ public interface FluentApplicationSchema<A extends Application, S extends Fluent
      * Adds multiple arguments to use when starting the {@link Application}.
      *
      * @param arguments  the additional arguments for the {@link Application}
+     *
+     * @return  the {@link FluentApplicationSchema} to permit fluent-style method invocation
      */
     public S addArguments(List<String> arguments);
 
@@ -82,6 +91,8 @@ public interface FluentApplicationSchema<A extends Application, S extends Fluent
      * Sets (and replaces) the arguments to use when starting the {@link Application}.
      *
      * @param arguments  the arguments for the {@link Application}
+     *
+     * @return  the {@link FluentApplicationSchema} to permit fluent-style method invocation
      */
     public S setArguments(String... arguments);
 
@@ -90,6 +101,57 @@ public interface FluentApplicationSchema<A extends Application, S extends Fluent
      * Sets (and replaces) the arguments to use when starting the {@link Application}.
      *
      * @param arguments  the arguments for the {@link Application}
+     *
+     * @return  the {@link FluentApplicationSchema} to permit fluent-style method invocation
      */
     public S setArguments(List<String> arguments);
+
+
+    /**
+     * Sets (and replaces all of) the default {@link Option}s to use when starting the {@link Application}.
+     *
+     * @param options  the {@link Option}s
+     *
+     * @return  the {@link FluentApplicationSchema} to permit fluent-style method invocation
+     */
+    public S setOptions(Option... options);
+
+
+    /**
+     * Adds default {@link Option}s to use when starting the {@link Application}.
+     * <p>
+     * {@link Option}s that are composable (ie: implement {@link ComposableOption})
+     * will be composed with existing {@link Option}s of the same type.  {@link Option}s
+     * that are not composable, will replace existing {@link Option}s of the same type.
+     *
+     * @param options  the {@link Option}s to add/compose
+     *
+     * @return  the {@link FluentApplicationSchema} to permit fluent-style method invocation
+     */
+    public S addOptions(Option... options);
+
+
+    /**
+     * Adds a default {@link Option} to use when starting the {@link Application}.
+     * <p>
+     * If the {@link Option} is composable (ie: implements {@link ComposableOption})
+     * it be composed with an existing {@link Option} of the same type.  If the
+     * {@link Option} is not composable, will replace existing {@link Option}s of the same type.
+     *
+     * @param option  the {@link Option} to add/compose
+     *
+     * @return  the {@link FluentApplicationSchema} to permit fluent-style method invocation
+     */
+    public S addOption(Option option);
+
+
+    /**
+     * Adds a default {@link Option} to use when starting the {@link Application},
+     * if an {@link Option} of the same type is not already defined.
+     *
+     * @param option  the {@link Option} to add
+     *
+     * @return  the {@link FluentApplicationSchema} to permit fluent-style method invocation
+     */
+    public S addOptionIfAbsent(Option option);
 }

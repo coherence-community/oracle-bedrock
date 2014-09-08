@@ -308,7 +308,11 @@ public abstract class AbstractRemoteApplicationBuilder<A extends Application, E 
     {
         Session session = null;
 
-        Options options = new Options(applicationOptions);
+        // add all of the default application schema options
+        Options options = new Options(applicationSchema.getOptions().asArray());
+
+        // add all of the custom application options
+        options.addAll(applicationOptions);
 
         // define the PlatformSeparators as Unix if they are not defined
         options.addIfAbsent(PlatformSeparators.forUnix());

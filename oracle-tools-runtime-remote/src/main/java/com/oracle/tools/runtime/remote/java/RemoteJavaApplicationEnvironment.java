@@ -27,7 +27,6 @@ package com.oracle.tools.runtime.remote.java;
 
 import com.oracle.tools.Options;
 
-import com.oracle.tools.io.FileHelper;
 import com.oracle.tools.io.NetworkHelper;
 
 import com.oracle.tools.lang.StringHelper;
@@ -45,25 +44,21 @@ import com.oracle.tools.runtime.java.ClassPath;
 import com.oracle.tools.runtime.java.JavaApplication;
 import com.oracle.tools.runtime.java.JavaApplicationSchema;
 import com.oracle.tools.runtime.java.options.JavaHome;
+import com.oracle.tools.runtime.java.options.JvmOption;
 import com.oracle.tools.runtime.java.options.RemoteDebugging;
 
 import com.oracle.tools.runtime.options.PlatformSeparators;
 
 import com.oracle.tools.runtime.remote.AbstractRemoteApplicationEnvironment;
-import com.oracle.tools.runtime.remote.DeploymentArtifact;
 import com.oracle.tools.runtime.remote.java.options.JavaDeployment;
 
 import static com.oracle.tools.predicate.Predicates.allOf;
 
-import java.io.File;
 import java.io.IOException;
 
 import java.net.InetAddress;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Properties;
-import java.util.Set;
 
 /**
  * A Java-based implementation of a {@link RemoteJavaApplicationEnvironment}.
@@ -235,12 +230,12 @@ public class RemoteJavaApplicationEnvironment<A extends JavaApplication>
         // set the remote classpath
         builder.append(" -cp " + remoteClassPath.toString());
 
-        // ----- establish JVM options -----
+        // ----- establish Java Virtual Machine options -----
 
-        for (String option : schema.getJvmOptions())
+        for (JvmOption option : options.getAll(JvmOption.class))
         {
             builder.append(" ");
-            builder.append("-" + option);
+            builder.append(option.get());
         }
 
         // ----- establish remote debugging JVM options -----

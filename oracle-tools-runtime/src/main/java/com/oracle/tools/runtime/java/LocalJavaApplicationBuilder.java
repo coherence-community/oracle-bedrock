@@ -46,7 +46,6 @@ import com.oracle.tools.runtime.ApplicationSchema;
 import com.oracle.tools.runtime.LocalApplicationProcess;
 import com.oracle.tools.runtime.LocalPlatform;
 import com.oracle.tools.runtime.Platform;
-import com.oracle.tools.runtime.PropertiesBuilder;
 import com.oracle.tools.runtime.Settings;
 
 import com.oracle.tools.runtime.concurrent.ControllableRemoteExecutor;
@@ -56,6 +55,7 @@ import com.oracle.tools.runtime.concurrent.RemoteRunnable;
 import com.oracle.tools.runtime.concurrent.socket.RemoteExecutorServer;
 
 import com.oracle.tools.runtime.java.options.JavaHome;
+import com.oracle.tools.runtime.java.options.JvmOption;
 import com.oracle.tools.runtime.java.options.RemoteDebugging;
 
 import com.oracle.tools.runtime.options.EnvironmentVariables;
@@ -72,9 +72,6 @@ import java.io.IOException;
 
 import java.net.InetAddress;
 
-import java.rmi.Remote;
-
-import java.util.Iterator;
 import java.util.Properties;
 
 import java.util.logging.Level;
@@ -114,8 +111,11 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication> extends Abst
                                                                    Platform           platform,
                                                                    Option...          applicationOptions)
     {
-        // acquire the platform specific options
-        Options options = new Options(applicationOptions);
+        // add all of the default application schema options
+        Options options = new Options(applicationSchema.getOptions().asArray());
+
+        // add all of the custom application options
+        options.addAll(applicationOptions);
 
         // TODO: this should be a safe cast but we should also check to make sure
         JavaApplicationSchema<T> schema = (JavaApplicationSchema) applicationSchema;
@@ -260,11 +260,11 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication> extends Abst
         processBuilder.command().add("-D" + Settings.PARENT_PORT + "=" + server.getPort());
         processBuilder.command().add("-D" + Settings.ORPHANABLE + "=" + schema.isOrphanable());
 
-        // ----- establish JVM options -----
+        // ----- establish Java Virtual Machine options -----
 
-        for (String option : schema.getJvmOptions())
+        for (JvmOption option : options.getAll(JvmOption.class))
         {
-            processBuilder.command().add("-" + option);
+            processBuilder.command().add(option.get());
         }
 
         // ----- establish remote debugging JVM options -----

@@ -25,6 +25,11 @@
 
 package com.oracle.tools.runtime;
 
+import com.oracle.tools.Option;
+import com.oracle.tools.Options;
+
+import com.oracle.tools.options.Timeout;
+
 import java.io.File;
 
 import java.util.ArrayList;
@@ -32,8 +37,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
-
-import java.util.concurrent.TimeUnit;
 
 /**
  * A base implementation of a {@link FluentApplicationSchema}.
@@ -88,6 +91,11 @@ public abstract class AbstractApplicationSchema<A extends Application, S extends
      */
     private LinkedList<LifecycleEventInterceptor<? super A>> lifecycleInterceptors;
 
+    /**
+     * The default {@link Option}s for use by {@link Application}s.
+     */
+    private Options options;
+
 
     /**
      * Constructs an {@link AbstractApplicationSchema} based on another
@@ -104,6 +112,7 @@ public abstract class AbstractApplicationSchema<A extends Application, S extends
         this.isEnvironmentInherited      = schema.isEnvironmentInherited();
         this.applicationArguments        = new ArrayList<String>(schema.getArguments());
         this.lifecycleInterceptors       = new LinkedList<LifecycleEventInterceptor<? super A>>();
+        this.options                     = new Options(schema.getOptions().asArray());
 
         for (LifecycleEventInterceptor<? super A> interceptor : schema.getLifecycleInterceptors())
         {
@@ -126,6 +135,10 @@ public abstract class AbstractApplicationSchema<A extends Application, S extends
         this.applicationArguments        = new ArrayList<String>();
         this.isErrorStreamRedirected     = false;
         this.lifecycleInterceptors       = new LinkedList<LifecycleEventInterceptor<? super A>>();
+        this.options                     = new Options();
+
+        // set default application options
+        this.options.add(Timeout.autoDetect());
     }
 
 
@@ -393,6 +406,55 @@ public abstract class AbstractApplicationSchema<A extends Application, S extends
     public S addLifecycleInterceptor(LifecycleEventInterceptor<? super A> interceptor)
     {
         lifecycleInterceptors.add(interceptor);
+
+        return (S) this;
+    }
+
+
+    @Override
+    public Options getOptions()
+    {
+        return options;
+    }
+
+
+    @Override
+    public S addOption(Option option)
+    {
+        options.add(option);
+
+        return (S) this;
+    }
+
+
+    @Override
+    public S addOptions(Option... options)
+    {
+        if (options != null)
+        {
+            for (Option option : options)
+            {
+                this.options.add(option);
+            }
+        }
+
+        return (S) this;
+    }
+
+
+    @Override
+    public S addOptionIfAbsent(Option option)
+    {
+        options.addIfAbsent(option);
+
+        return (S) this;
+    }
+
+
+    @Override
+    public S setOptions(Option... options)
+    {
+        this.options = new Options(options);
 
         return (S) this;
     }

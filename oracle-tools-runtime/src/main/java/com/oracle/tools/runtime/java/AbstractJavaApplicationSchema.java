@@ -33,8 +33,6 @@ import com.oracle.tools.runtime.PropertiesBuilder;
 import com.oracle.tools.runtime.network.AvailablePortIterator;
 import com.oracle.tools.runtime.network.Constants;
 
-import com.oracle.tools.util.Capture;
-
 import static com.oracle.tools.runtime.java.JavaApplication.JAVA_AWT_HEADLESS;
 import static com.oracle.tools.runtime.java.JavaApplication.JAVA_NET_PREFER_IPV4_STACK;
 import static com.oracle.tools.runtime.java.JavaApplication.JAVA_RMI_SERVER_HOSTNAME;
@@ -43,10 +41,6 @@ import static com.oracle.tools.runtime.java.JavaApplication.SUN_MANAGEMENT_JMXRE
 import static com.oracle.tools.runtime.java.JavaApplication.SUN_MANAGEMENT_JMXREMOTE_PORT;
 import static com.oracle.tools.runtime.java.JavaApplication.SUN_MANAGEMENT_JMXREMOTE_SSL;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Properties;
 
 /**
@@ -72,11 +66,6 @@ public abstract class AbstractJavaApplicationSchema<A extends JavaApplication,
     private ClassPath classPath;
 
     /**
-     * The JVM options for the {@link JavaApplication}.
-     */
-    private ArrayList<String> jvmOptions;
-
-    /**
      * The system properties for the {@link JavaApplication}.
      */
     private PropertiesBuilder systemPropertiesBuilder;
@@ -100,7 +89,6 @@ public abstract class AbstractJavaApplicationSchema<A extends JavaApplication,
 
         this.applicationClassName    = schema.getApplicationClassName();
         this.classPath               = new ClassPath(schema.getClassPath());
-        this.jvmOptions              = new ArrayList<String>(schema.getJvmOptions());
         this.systemPropertiesBuilder = new PropertiesBuilder(schema.getSystemPropertiesBuilder());
         this.isOrphanable            = schema.isOrphanable();
 
@@ -149,7 +137,6 @@ public abstract class AbstractJavaApplicationSchema<A extends JavaApplication,
 
         this.applicationClassName    = applicationClassName;
         this.classPath               = new ClassPath(classPath);
-        this.jvmOptions              = new ArrayList<String>();
         this.systemPropertiesBuilder = new PropertiesBuilder();
 
         // by default java applications are not orphanable
@@ -327,109 +314,6 @@ public abstract class AbstractJavaApplicationSchema<A extends JavaApplication,
         systemPropertiesBuilder.addProperties(systemProperties);
 
         return (S) this;
-    }
-
-
-    @Override
-    public S addJvmOption(String option)
-    {
-        // drop the "-" if specified
-        jvmOptions.add(option.startsWith("-") ? option.substring(1) : option);
-
-        return (S) this;
-    }
-
-
-    @Override
-    public S addJvmOptions(String... options)
-    {
-        if (options != null)
-        {
-            for (String option : options)
-            {
-                addJvmOption(option);
-            }
-        }
-
-        return (S) this;
-    }
-
-
-    @Override
-    public S addJvmOptions(List<String> options)
-    {
-        if (options != null)
-        {
-            for (String option : options)
-            {
-                addJvmOption(option);
-            }
-        }
-
-        return (S) this;
-    }
-
-
-    @Override
-    public S setJvmOptions(String... options)
-    {
-        jvmOptions.clear();
-
-        return addJvmOptions(options);
-    }
-
-
-    @Override
-    public S setJvmOptions(List<String> options)
-    {
-        jvmOptions.clear();
-
-        return addJvmOptions(options);
-    }
-
-
-    /**
-     * Adds an additional JVM Option to use when starting the Java application.
-     *
-     * @param option  the JVM option
-     * @return  the {@link JavaApplicationSchema}
-     *
-     * @deprecated  use {@link #addJvmOption(String)} instead
-     */
-    @Deprecated
-    public S addOption(String option)
-    {
-        return addJvmOption(option);
-    }
-
-
-    /**
-     * Adds an additional JVM Option to use when starting the Java application.
-     *
-     * @param option The JVM option
-     * @return the {@link JavaApplicationSchema}
-     *
-     * @deprecated  use {@link #addJvmOption(String)} instead
-     */
-    @Deprecated
-    public S setOption(String option)
-    {
-        return addJvmOption(option);
-    }
-
-
-    @Override
-    @Deprecated
-    public List<String> getJVMOptions()
-    {
-        return getJvmOptions();
-    }
-
-
-    @Override
-    public List<String> getJvmOptions()
-    {
-        return jvmOptions;
     }
 
 

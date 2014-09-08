@@ -317,6 +317,17 @@ reverse chronological order.
     PlatformSeparators Option to replace setters/getters for File and Path
     separators.
 
+*   [ORACLETOOLS-155](https://java.net/jira/browse/ORACLETOOLS-155): Refactored
+    and removed FluentJavaApplicationSchema.add/set/getJvmOption*s so that the
+    Platform-specific Options can be used.   Introduced HeapSize and JvmOptions
+    classes to support specifying Java Virtual Machine options.
+
+    eg:   schema.addOption(HeapSize.minimum(3, Units.MB));
+          platform.realize(name, schema, JvmOptions.include("-Xms3m"));
+
+*   [ORACLETOOLS-156](https://java.net/jira/browse/ORACLETOOLS-156): Introduced
+    the ability to add default platform specific Options to ApplicationSchema
+
 <h4>oracle-tools-runtime-remote</h4>
 
 *   [ORACLETOOLS-91](https://java.net/jira/browse/ORACLETOOLS-91): Introduced

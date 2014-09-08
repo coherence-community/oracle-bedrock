@@ -33,7 +33,6 @@ import com.oracle.tools.runtime.ApplicationSchema;
 import com.oracle.tools.runtime.Platform;
 import com.oracle.tools.runtime.PropertiesBuilder;
 
-import java.util.List;
 import java.util.Properties;
 
 /**
@@ -67,25 +66,6 @@ public interface JavaApplicationSchema<A extends JavaApplication> extends Applic
      * @return {@link PropertiesBuilder}
      */
     public Properties getSystemProperties(Platform platform);
-
-
-    /**
-     * Obtains the JVM options to be used for starting the {@link JavaApplication}.
-     *
-     * @return A {@link List} of {@link String}s
-     *
-     * @deprecated  use {@link #getJvmOptions()} instead
-     */
-    @Deprecated
-    public List<String> getJVMOptions();
-
-
-    /**
-     * Obtains the JVM options to be used for starting the {@link JavaApplication}.
-     *
-     * @return A {@link List} of {@link String}s
-     */
-    public List<String> getJvmOptions();
 
 
     /**

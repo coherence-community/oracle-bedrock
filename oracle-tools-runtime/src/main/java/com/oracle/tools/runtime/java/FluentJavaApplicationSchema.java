@@ -56,51 +56,6 @@ public interface FluentJavaApplicationSchema<A extends JavaApplication, S extend
 
 
     /**
-     * Adds an additional JVM option to use when starting the Java application.
-     *
-     * @param option  the JVM option
-     * @return  the {@link JavaApplicationSchema}
-     */
-    public S addJvmOption(String option);
-
-
-    /**
-     * Adds multiple JVM options to use when starting the Java application.
-     *
-     * @param options  the JVM options
-     * @return  the {@link JavaApplicationSchema}
-     */
-    public S addJvmOptions(String... options);
-
-
-    /**
-     * Adds multiple JVM options to use when starting the Java application.
-     *
-     * @param options  the JVM options
-     * @return  the {@link JavaApplicationSchema}
-     */
-    public S addJvmOptions(List<String> options);
-
-
-    /**
-     * Sets (replaces) the JVM options to use when starting the Java application.
-     *
-     * @param options  the JVM options
-     * @return  the {@link JavaApplicationSchema}
-     */
-    public S setJvmOptions(String... options);
-
-
-    /**
-     * Sets (replaces) the JVM options to use when starting the Java application.
-     *
-     * @param options  the JVM options
-     * @return  the {@link JavaApplicationSchema}
-     */
-    public S setJvmOptions(List<String> options);
-
-
-    /**
      * Sets if {@link JavaApplication}s realized using this {@link JavaApplicationSchema}
      * will be orphaned (left running) if the application that started them terminates, for what
      * ever reason.   The default is <code>false</code>.
