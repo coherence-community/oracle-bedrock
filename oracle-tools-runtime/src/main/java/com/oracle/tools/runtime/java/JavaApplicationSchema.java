@@ -119,15 +119,4 @@ public interface JavaApplicationSchema<A extends JavaApplication> extends Applic
                                    Properties             environmentVariables,
                                    Properties             systemProperties,
                                    int                    remoteDebuggingPort);
-
-
-    /**
-     * Determines if {@link JavaApplication}s realized using this {@link JavaApplicationSchema}
-     * will be orphaned (left running) if the application that started them terminates, for what
-     * ever reason.   The default is <code>false</code>.
-     *
-     * @return  <code>true</code> if {@link JavaApplication}s are orphanable, <code>false</code>
-     *          otherwise
-     */
-    public boolean isOrphanable();
 }

@@ -28,9 +28,6 @@ package com.oracle.tools.runtime.java;
 import com.oracle.tools.runtime.ApplicationSchema;
 import com.oracle.tools.runtime.FluentApplicationSchema;
 
-import java.util.Iterator;
-import java.util.List;
-
 /**
  * A {@link FluentJavaApplicationSchema} is a Java specific {@link ApplicationSchema}.
  * <p>
@@ -53,17 +50,4 @@ public interface FluentJavaApplicationSchema<A extends JavaApplication, S extend
      * @param className  the fully-qualified class name of the "main" class
      */
     public S setApplicationClassName(String className);
-
-
-    /**
-     * Sets if {@link JavaApplication}s realized using this {@link JavaApplicationSchema}
-     * will be orphaned (left running) if the application that started them terminates, for what
-     * ever reason.   The default is <code>false</code>.
-     *
-     * @param orphanable  set to <code>true</code> if {@link JavaApplication}s are orphanable,
-     *                    <code>false</code> otherwise
-     *
-     * @return the {@link FluentJavaApplicationSchema}
-     */
-    public S setOrphanable(boolean orphanable);
 }

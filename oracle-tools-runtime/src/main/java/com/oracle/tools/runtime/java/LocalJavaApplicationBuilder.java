@@ -59,6 +59,7 @@ import com.oracle.tools.runtime.java.options.JvmOption;
 import com.oracle.tools.runtime.java.options.RemoteDebugging;
 
 import com.oracle.tools.runtime.options.EnvironmentVariables;
+import com.oracle.tools.runtime.options.Orphanable;
 
 import com.oracle.tools.util.CompletionListener;
 
@@ -258,7 +259,11 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication> extends Abst
         processBuilder.command().add("-D" + Settings.PARENT_ADDRESS + "="
                                      + server.getInetAddress(preferred).getHostAddress());
         processBuilder.command().add("-D" + Settings.PARENT_PORT + "=" + server.getPort());
-        processBuilder.command().add("-D" + Settings.ORPHANABLE + "=" + schema.isOrphanable());
+
+        // add Orphanable configuration
+        Orphanable orphanable = options.get(Orphanable.class, Orphanable.disabled());
+
+        processBuilder.command().add("-D" + Settings.ORPHANABLE + "=" + orphanable.isOrphanable());
 
         // ----- establish Java Virtual Machine options -----
 

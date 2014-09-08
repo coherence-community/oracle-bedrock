@@ -70,12 +70,6 @@ public abstract class AbstractJavaApplicationSchema<A extends JavaApplication,
      */
     private PropertiesBuilder systemPropertiesBuilder;
 
-    /**
-     * Are {@link JavaApplication}s created using this {@link JavaApplicationSchema}
-     * orphanable?
-     */
-    private boolean isOrphanable;
-
 
     /**
      * Constructs an {@link AbstractJavaApplicationSchema} based on another
@@ -90,7 +84,6 @@ public abstract class AbstractJavaApplicationSchema<A extends JavaApplication,
         this.applicationClassName    = schema.getApplicationClassName();
         this.classPath               = new ClassPath(schema.getClassPath());
         this.systemPropertiesBuilder = new PropertiesBuilder(schema.getSystemPropertiesBuilder());
-        this.isOrphanable            = schema.isOrphanable();
 
         configureDefaults();
     }
@@ -138,9 +131,6 @@ public abstract class AbstractJavaApplicationSchema<A extends JavaApplication,
         this.applicationClassName    = applicationClassName;
         this.classPath               = new ClassPath(classPath);
         this.systemPropertiesBuilder = new PropertiesBuilder();
-
-        // by default java applications are not orphanable
-        this.isOrphanable = false;
 
         configureDefaults();
     }
@@ -486,21 +476,5 @@ public abstract class AbstractJavaApplicationSchema<A extends JavaApplication,
         Object value = systemPropertiesBuilder.getProperty(JAVA_AWT_HEADLESS);
 
         return value instanceof Boolean && ((Boolean) value);
-    }
-
-
-    @Override
-    public S setOrphanable(boolean orphanable)
-    {
-        this.isOrphanable = orphanable;
-
-        return (S) this;
-    }
-
-
-    @Override
-    public boolean isOrphanable()
-    {
-        return isOrphanable;
     }
 }

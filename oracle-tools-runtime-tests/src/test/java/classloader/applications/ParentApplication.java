@@ -26,12 +26,11 @@
 package classloader.applications;
 
 import com.oracle.tools.runtime.ApplicationConsole;
-
 import com.oracle.tools.runtime.console.SystemApplicationConsole;
-
 import com.oracle.tools.runtime.java.LocalJavaApplicationBuilder;
 import com.oracle.tools.runtime.java.SimpleJavaApplication;
 import com.oracle.tools.runtime.java.SimpleJavaApplicationSchema;
+import com.oracle.tools.runtime.options.Orphanable;
 
 import java.io.IOException;
 
@@ -66,7 +65,7 @@ public class ParentApplication
         LocalJavaApplicationBuilder<SimpleJavaApplication> builder =
             new LocalJavaApplicationBuilder<SimpleJavaApplication>();
 
-        schema.setOrphanable(Boolean.getBoolean("orphan.children"));
+        schema.addOption(Orphanable.enabled(Boolean.getBoolean("orphan.children")));
 
         ApplicationConsole console = new SystemApplicationConsole();
 

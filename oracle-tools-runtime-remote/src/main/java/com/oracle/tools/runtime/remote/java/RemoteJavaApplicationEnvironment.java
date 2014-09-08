@@ -47,6 +47,7 @@ import com.oracle.tools.runtime.java.options.JavaHome;
 import com.oracle.tools.runtime.java.options.JvmOption;
 import com.oracle.tools.runtime.java.options.RemoteDebugging;
 
+import com.oracle.tools.runtime.options.Orphanable;
 import com.oracle.tools.runtime.options.PlatformSeparators;
 
 import com.oracle.tools.runtime.remote.AbstractRemoteApplicationEnvironment;
@@ -137,7 +138,10 @@ public class RemoteJavaApplicationEnvironment<A extends JavaApplication>
         remoteSystemProperties.setProperty(Settings.PARENT_ADDRESS,
                                            remoteExecutor.getInetAddress(preferred).getHostAddress());
         remoteSystemProperties.setProperty(Settings.PARENT_PORT, Integer.toString(remoteExecutor.getPort()));
-        remoteSystemProperties.setProperty(Settings.ORPHANABLE, Boolean.toString(schema.isOrphanable()));
+
+        Orphanable orphanable = options.get(Orphanable.class, Orphanable.disabled());
+
+        remoteSystemProperties.setProperty(Settings.ORPHANABLE, Boolean.toString(orphanable.isOrphanable()));
 
         // ----- determine the remote classpath based on the deployment option -----
 
@@ -240,7 +244,6 @@ public class RemoteJavaApplicationEnvironment<A extends JavaApplication>
 
         // ----- establish remote debugging JVM options -----
 
-        // TODO: also consider getting this from the schema (if it only had "default" options ;)
         RemoteDebugging remoteDebugging = options.get(RemoteDebugging.class, RemoteDebugging.autoDetect());
 
         if (remoteDebugging.isEnabled())

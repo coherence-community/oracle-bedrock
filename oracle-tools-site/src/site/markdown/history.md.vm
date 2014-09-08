@@ -328,6 +328,10 @@ reverse chronological order.
 *   [ORACLETOOLS-156](https://java.net/jira/browse/ORACLETOOLS-156): Introduced
     the ability to add default platform specific Options to ApplicationSchema
 
+*   [ORACLETOOLS-158](https://java.net/jira/browse/ORACLETOOLS-158): Refactored
+    "orphanable" settings from JavaApplicationSchema as a Platform specific
+    Option (called Orphanable).
+
 <h4>oracle-tools-runtime-remote</h4>
 
 *   [ORACLETOOLS-91](https://java.net/jira/browse/ORACLETOOLS-91): Introduced

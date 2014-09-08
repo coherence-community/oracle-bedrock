@@ -53,6 +53,8 @@ import com.oracle.tools.runtime.console.SystemApplicationConsole;
 import com.oracle.tools.runtime.java.options.JavaHome;
 import com.oracle.tools.runtime.java.options.RemoteDebugging;
 
+import com.oracle.tools.runtime.options.Orphanable;
+
 import com.oracle.tools.util.Capture;
 
 import org.junit.Assume;
@@ -361,7 +363,7 @@ public class LocalJavaApplicationBuilderTest extends AbstractJavaApplicationBuil
             LocalJavaApplicationBuilder<SimpleJavaApplication> builder =
                 new LocalJavaApplicationBuilder<SimpleJavaApplication>();
 
-            schema.setOrphanable(false);
+            schema.addOption(Orphanable.disabled());
 
             ApplicationConsole console = new SystemApplicationConsole();
 
@@ -436,7 +438,7 @@ public class LocalJavaApplicationBuilderTest extends AbstractJavaApplicationBuil
             LocalJavaApplicationBuilder<SimpleJavaApplication> builder =
                 new LocalJavaApplicationBuilder<SimpleJavaApplication>();
 
-            schema.setOrphanable(false);
+            schema.addOption(Orphanable.disabled());
 
             ApplicationConsole console = new SystemApplicationConsole();
 
