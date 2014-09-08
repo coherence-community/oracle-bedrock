@@ -59,6 +59,7 @@ import com.oracle.tools.runtime.java.options.JvmOption;
 import com.oracle.tools.runtime.java.options.RemoteDebugging;
 
 import com.oracle.tools.runtime.options.EnvironmentVariables;
+import com.oracle.tools.runtime.options.ErrorStreamRedirection;
 import com.oracle.tools.runtime.options.Orphanable;
 
 import com.oracle.tools.util.CompletionListener;
@@ -318,7 +319,10 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication> extends Abst
         }
 
         // should the standard error be redirected to the standard out?
-        processBuilder.redirectErrorStream(schema.isErrorStreamRedirected());
+        ErrorStreamRedirection redirection = options.get(ErrorStreamRedirection.class,
+                                                         ErrorStreamRedirection.disabled());
+
+        processBuilder.redirectErrorStream(redirection.isEnabled());
 
         // ----- start the local process -----
 

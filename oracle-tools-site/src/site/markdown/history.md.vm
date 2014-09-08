@@ -338,9 +338,19 @@ reverse chronological order.
 *   [ORACLETOOLS-156](https://java.net/jira/browse/ORACLETOOLS-156): Introduced
     the ability to add default platform specific Options to ApplicationSchema
 
-*   [ORACLETOOLS-158](https://java.net/jira/browse/ORACLETOOLS-158): Refactored
-    "orphanable" settings from JavaApplicationSchema as a Platform specific
-    Option (called Orphanable).
+*   [ORACLETOOLS-158](https://java.net/jira/browse/ORACLETOOLS-158): Replaced
+    the JavaApplicationSchema.isOrphanable configuration and associated
+    setters/getters with the new Orphanable Option.
+
+    *BREAKING CHANGE:* To specify the orphanable characteristics of a Java
+    Application, developers should now use the new Orphanable Option.
+
+*   [ORACLETOOLS-159](https://java.net/jira/browse/ORACLETOOLS-159): Replaced
+    the ApplicationSchema.isErrorStreamRedirected and associated setters/getters
+    with the ErrorStreamRedirection Option.
+
+    *BREAKING CHANGE:* To specify error stream redirection developers should now
+    use the new ErrorStreamRedirection Option.
 
 <h4>oracle-tools-runtime-remote</h4>
 

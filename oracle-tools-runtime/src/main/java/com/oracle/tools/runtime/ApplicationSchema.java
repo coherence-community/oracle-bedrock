@@ -31,7 +31,6 @@ import com.oracle.tools.Options;
 import java.io.File;
 
 import java.util.List;
-import java.util.Properties;
 
 /**
  * An {@link ApplicationSchema} encapsulates {@link Platform} <strong>agnostic</strong>
@@ -71,15 +70,6 @@ public interface ApplicationSchema<A extends Application>
      * @return the directory in which the application will run
      */
     public File getWorkingDirectory();
-
-
-    /**
-     * Determines the standard error stream will be redirected to the standard
-     * output stream.
-     *
-     * @return <code>true</code> if the standard error stream is redirected
-     */
-    public boolean isErrorStreamRedirected();
 
 
     /**

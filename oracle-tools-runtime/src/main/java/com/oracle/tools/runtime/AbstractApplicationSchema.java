@@ -33,10 +33,8 @@ import com.oracle.tools.options.Timeout;
 import java.io.File;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Properties;
 
 /**
  * A base implementation of a {@link FluentApplicationSchema}.
@@ -63,11 +61,6 @@ public abstract class AbstractApplicationSchema<A extends Application, S extends
     private File workingDirectory;
 
     /**
-     * Should the Error Stream be redirected to the Standard Output stream?
-     */
-    private boolean isErrorStreamRedirected;
-
-    /**
      * The arguments for the {@link Application}.
      */
     private ArrayList<String> applicationArguments;
@@ -92,12 +85,11 @@ public abstract class AbstractApplicationSchema<A extends Application, S extends
      */
     public AbstractApplicationSchema(ApplicationSchema<A> schema)
     {
-        this.executableName          = schema.getExecutableName();
-        this.workingDirectory        = schema.getWorkingDirectory();
-        this.isErrorStreamRedirected = schema.isErrorStreamRedirected();
-        this.applicationArguments    = new ArrayList<String>(schema.getArguments());
-        this.lifecycleInterceptors   = new LinkedList<LifecycleEventInterceptor<? super A>>();
-        this.options                 = new Options(schema.getOptions().asArray());
+        this.executableName        = schema.getExecutableName();
+        this.workingDirectory      = schema.getWorkingDirectory();
+        this.applicationArguments  = new ArrayList<String>(schema.getArguments());
+        this.lifecycleInterceptors = new LinkedList<LifecycleEventInterceptor<? super A>>();
+        this.options               = new Options(schema.getOptions().asArray());
 
         for (LifecycleEventInterceptor<? super A> interceptor : schema.getLifecycleInterceptors())
         {
@@ -114,11 +106,10 @@ public abstract class AbstractApplicationSchema<A extends Application, S extends
      */
     public AbstractApplicationSchema(String executableName)
     {
-        this.executableName          = executableName;
-        this.applicationArguments    = new ArrayList<String>();
-        this.isErrorStreamRedirected = false;
-        this.lifecycleInterceptors   = new LinkedList<LifecycleEventInterceptor<? super A>>();
-        this.options                 = new Options();
+        this.executableName        = executableName;
+        this.applicationArguments  = new ArrayList<String>();
+        this.lifecycleInterceptors = new LinkedList<LifecycleEventInterceptor<? super A>>();
+        this.options               = new Options();
 
         // set default application options
         this.options.add(Timeout.autoDetect());
@@ -150,30 +141,6 @@ public abstract class AbstractApplicationSchema<A extends Application, S extends
     public S setWorkingDirectory(File workingDirectory)
     {
         this.workingDirectory = workingDirectory;
-
-        return (S) this;
-    }
-
-
-    @Override
-    public boolean isErrorStreamRedirected()
-    {
-        return isErrorStreamRedirected;
-    }
-
-
-    /**
-     * Sets whether the Standard Error Stream will be redirected to
-     * Standard Out for {@link Application}s produced by this schema.
-     *
-     * @param isErrorStreamRedirected  <code>true</code> means redirect stderr to stdout
-     *
-     * @return  the {@link ApplicationSchema} (so that we can perform method chaining)
-     */
-    @SuppressWarnings("unchecked")
-    public S setErrorStreamRedirected(boolean isErrorStreamRedirected)
-    {
-        this.isErrorStreamRedirected = isErrorStreamRedirected;
 
         return (S) this;
     }

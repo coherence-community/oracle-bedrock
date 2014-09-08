@@ -29,6 +29,7 @@ import com.oracle.tools.Option;
 import com.oracle.tools.Options;
 
 import com.oracle.tools.runtime.options.EnvironmentVariables;
+import com.oracle.tools.runtime.options.ErrorStreamRedirection;
 
 import java.io.File;
 import java.io.IOException;
@@ -126,7 +127,10 @@ public class SimpleApplicationBuilder extends AbstractApplicationBuilder<SimpleA
         }
 
         // should the standard error be redirected to the standard out?
-        processBuilder.redirectErrorStream(schema.isErrorStreamRedirected());
+        ErrorStreamRedirection redirection = options.get(ErrorStreamRedirection.class,
+                                                         ErrorStreamRedirection.disabled());
+
+        processBuilder.redirectErrorStream(redirection.isEnabled());
 
         // ----- start the process and establish the application -----
 

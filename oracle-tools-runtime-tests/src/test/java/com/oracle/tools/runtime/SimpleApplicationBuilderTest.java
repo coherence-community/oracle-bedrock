@@ -30,6 +30,7 @@ import com.oracle.tools.junit.AbstractTest;
 import com.oracle.tools.runtime.console.PipedApplicationConsole;
 
 import com.oracle.tools.runtime.options.Diagnostics;
+import com.oracle.tools.runtime.options.ErrorStreamRedirection;
 
 import org.junit.Test;
 
@@ -60,7 +61,8 @@ public class SimpleApplicationBuilderTest extends AbstractTest
     @Test
     public void shouldRunApplication() throws Exception
     {
-        SimpleApplicationSchema schema = new SimpleApplicationSchema("java").setErrorStreamRedirected(true);
+        SimpleApplicationSchema schema =
+            new SimpleApplicationSchema("java").addOption(ErrorStreamRedirection.enabled());
 
         schema.addArgument("-help");
 
@@ -90,7 +92,8 @@ public class SimpleApplicationBuilderTest extends AbstractTest
     @Test
     public void shouldInvokeLifecycleInterceptor() throws Exception
     {
-        SimpleApplicationSchema schema = new SimpleApplicationSchema("java").setErrorStreamRedirected(true);
+        SimpleApplicationSchema schema =
+            new SimpleApplicationSchema("java").addOption(ErrorStreamRedirection.enabled());
 
         LifecycleEventInterceptor<SimpleApplication> interceptor = Mockito.mock(LifecycleEventInterceptor.class);
 
