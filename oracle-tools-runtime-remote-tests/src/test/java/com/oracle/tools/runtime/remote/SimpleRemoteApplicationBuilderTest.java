@@ -77,8 +77,7 @@ public class SimpleRemoteApplicationBuilderTest extends AbstractRemoteApplicatio
                                                               new SystemApplicationConsole(),
                                                               CustomDeployment
                                                                   .including(new DeploymentArtifact(testFile)),
-                                                              StrictHostChecking.disabled(),
-                                                              EnvironmentVariables.areCleared()))
+                                                              StrictHostChecking.disabled()))
         {
             assertThat(application.waitFor(), is(0));
 

@@ -156,10 +156,10 @@ public class ContainerBasedJavaApplicationBuilder<A extends JavaApplication> ext
                                                                    Platform           platform,
                                                                    Option...          applicationOptions)
     {
-        // add all of the default application schema options
-        Options options = new Options(applicationSchema.getOptions().asArray());
+        // obtain the platform specific options from the schema
+        Options options = applicationSchema.getPlatformSpecificOptions(platform);
 
-        // add all of the custom application options
+        // add the custom application options
         options.addAll(applicationOptions);
 
         // TODO: this should be a safe cast but we should also check to make sure

@@ -44,6 +44,7 @@ import com.oracle.tools.runtime.ApplicationSchema;
 import com.oracle.tools.runtime.Platform;
 import com.oracle.tools.runtime.PropertiesBuilder;
 
+import com.oracle.tools.runtime.options.EnvironmentVariables;
 import com.oracle.tools.runtime.options.PlatformSeparators;
 import com.oracle.tools.runtime.options.TemporaryDirectory;
 
@@ -308,13 +309,13 @@ public abstract class AbstractRemoteApplicationBuilder<A extends Application, E 
     {
         Session session = null;
 
-        // add all of the default application schema options
-        Options options = new Options(applicationSchema.getOptions().asArray());
+        // obtain the platform specific options from the schema
+        Options options = applicationSchema.getPlatformSpecificOptions(platform);
 
-        // add all of the custom application options
+        // add the custom application options
         options.addAll(applicationOptions);
 
-        // define the PlatformSeparators as Unix if they are not defined
+        // define the PlatformSeparators as Unix if they are not already defined
         options.addIfAbsent(PlatformSeparators.forUnix());
 
         // obtain the builder-specific remote application environment based on the schema
@@ -482,16 +483,12 @@ public abstract class AbstractRemoteApplicationBuilder<A extends Application, E 
 
             // ----- establish the remote environment variables -----
 
-            // establish the remote environment variables (based on the schema)
-            Properties environmentVariables = environment.getRemoteEnvironmentVariables();
-
-            // override the schema defined environment variables with those from this builder
-            environmentVariables.putAll(remoteEnvironmentVariablesBuilder.realize());
-
             // define the remote environment variables in the remote channel
-            for (String variableName : environmentVariables.stringPropertyNames())
+            Properties variables = environment.getRemoteEnvironmentVariables();
+
+            for (String variableName : variables.stringPropertyNames())
             {
-                execChannel.setEnv(variableName, environmentVariables.getProperty(variableName));
+                execChannel.setEnv(variableName, variables.getProperty(variableName));
             }
 
             // ----- establish the application command line to execute -----

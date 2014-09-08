@@ -25,6 +25,7 @@
 
 package com.oracle.tools.runtime.options;
 
+import com.oracle.tools.ComposableOption;
 import com.oracle.tools.Option;
 
 import com.oracle.tools.runtime.PropertiesBuilder;
@@ -32,28 +33,51 @@ import com.oracle.tools.runtime.PropertiesBuilder;
 import java.util.Iterator;
 
 /**
- * An {@link Option} to define operating system environment variables
+ * An {@link Option} to define operating system environment variables, sourced
+ * from a specific location.
  * <p>
  * Copyright (c) 2014. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Brian Oliver
  */
-public class EnvironmentVariables implements Option
+public class EnvironmentVariables implements Option, ComposableOption<EnvironmentVariables>
 {
     /**
-     * Should environment variables be inherited from the current process?
-     * <p>
-     * When <code>true</code> environment variables from the current process
-     * should be used in addition to those defined by this instance.
-     * <p>
-     * When <code>false</code> a clean environment should be established,
-     * only containing those environment variables defined by this instance.
+     * The initial source of environment variables, upon which
+     * customizations may be made.
      */
-    private boolean inheritVariables;
+    public enum Source
+    {
+        /**
+         * The initial environment variables will be sourced and based upon
+         * those defined by this application, namely those defined by
+         * {@link System#getenv()}.
+         */
+        ThisApplication,
+
+        /**
+         * The initial environment variables will be sourced from and based upon
+         * those defined by the target platform.
+         */
+        TargetPlatform,
+
+        /**
+         * The initial environment variables provided to an application will
+         * be custom (thus starting with none).
+         */
+        Custom
+    }
+
 
     /**
-     * A {@link PropertiesBuilder} for the custom environment variables.
+     * The location from which initial environment variables will be extracted.
+     */
+    private Source source;
+
+    /**
+     * A {@link PropertiesBuilder} for the custom environment variables, in
+     * addition and/or replacing those defined by the {@link #source}.
      */
     private PropertiesBuilder variables;
 
@@ -61,26 +85,25 @@ public class EnvironmentVariables implements Option
     /**
      * Privately construct an {@link EnvironmentVariables} {@link Option}
      *
-     * @param inheritVariables  are the current process environment variables to be inherited
-     * @param variables         a {@link PropertiesBuilder} to produce the environment variables
+     * @param source     the {@link Source} of the environment variables
+     * @param variables  a {@link PropertiesBuilder} for custom environment variables
      */
-    private EnvironmentVariables(boolean           inheritVariables,
+    private EnvironmentVariables(Source            source,
                                  PropertiesBuilder variables)
     {
-        this.inheritVariables = inheritVariables;
-        this.variables        = variables;
+        this.source    = source;
+        this.variables = variables;
     }
 
 
     /**
-     * Determines if the {@link EnvironmentVariables} are to be inherited
-     * from the current process.
+     * Obtains the {@link Source} of the environment variables
      *
-     * @return  <code>true</code> if environment variables should be inherited
+     * @return  the {@link Source}
      */
-    public boolean areInherited()
+    public Source getSource()
     {
-        return inheritVariables;
+        return source;
     }
 
 
@@ -97,26 +120,40 @@ public class EnvironmentVariables implements Option
 
 
     /**
-     * Obtain an {@link EnvironmentVariables} {@link Option} indicating that
-     * environment variables should be inherited from the current process.
+     * Constructs an {@link Option} to create {@link EnvironmentVariables} based
+     * on a specific {@link Source}.
      *
-     * @return  an {@link EnvironmentVariables} {@link Option}
+     * @param source  the {@link Source} of the environment variables
+     *
+     * @return  an {@link EnvironmentVariables}
      */
-    public static EnvironmentVariables inherited()
+    public static EnvironmentVariables of(Source source)
     {
-        return new EnvironmentVariables(true, new PropertiesBuilder());
+        return new EnvironmentVariables(source, new PropertiesBuilder());
     }
 
 
     /**
-     * Obtain an {@link EnvironmentVariables} {@link Option} indicating that
-     * environment variables should be cleared / empty.
+     * Constructs a custom set of {@link EnvironmentVariables}, starting
+     * initially with a cleared environment.
      *
-     * @return  an {@link EnvironmentVariables} {@link Option}
+     * @return  an {@link EnvironmentVariables}
      */
-    public static EnvironmentVariables areCleared()
+    public static EnvironmentVariables custom()
     {
-        return new EnvironmentVariables(false, new PropertiesBuilder());
+        return new EnvironmentVariables(Source.Custom, new PropertiesBuilder());
+    }
+
+
+    /**
+     * Constructs a custom set of {@link EnvironmentVariables}, starting
+     * initially with the environment variables defined by this application.
+     *
+     * @return  an {@link EnvironmentVariables}
+     */
+    public static EnvironmentVariables inherited()
+    {
+        return new EnvironmentVariables(Source.ThisApplication, new PropertiesBuilder());
     }
 
 
@@ -190,5 +227,18 @@ public class EnvironmentVariables implements Option
         variables.setPropertyIfAbsent(name, iterator);
 
         return this;
+    }
+
+
+    @Override
+    public EnvironmentVariables compose(EnvironmentVariables other)
+    {
+        // make a copy of the environment variables
+        EnvironmentVariables environmentVariables = new EnvironmentVariables(source, new PropertiesBuilder(variables));
+
+        // add all of the other environment variables
+        environmentVariables.getBuilder().addProperties(other.getBuilder());
+
+        return environmentVariables;
     }
 }

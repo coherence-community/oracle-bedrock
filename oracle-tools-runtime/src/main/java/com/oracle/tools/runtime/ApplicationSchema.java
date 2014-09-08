@@ -74,52 +74,12 @@ public interface ApplicationSchema<A extends Application>
 
 
     /**
-     * Obtains the {@link PropertiesBuilder} defining custom,
-     * {@link Application}-specific operating system environment
-     * variables to be established when realizing an {@link Application}.
-     *
-     * @return {@link PropertiesBuilder}
-     */
-    public PropertiesBuilder getEnvironmentVariablesBuilder();
-
-
-    /**
-     * Obtains the custom, {@link Application}-specific operating
-     * system environment variables with any modifications and additions
-     * based on the specified {@link Platform}.
-     *
-     * @param platform  the {@link Platform} that the {@link Application}
-     *                  will be realized on
-     *
-     * @return the custom, {@link Application}-specific operating
-     *         system environment variables with any modifications
-     *         and additions based on the specified {@link Platform}
-     */
-    public Properties getEnvironmentVariables(Platform platform);
-
-
-    /**
      * Determines the standard error stream will be redirected to the standard
      * output stream.
      *
      * @return <code>true</code> if the standard error stream is redirected
      */
     public boolean isErrorStreamRedirected();
-
-
-    /**
-     * <strong>DEPRECATED:</strong>  This method should not be used.  How and
-     * when to inherit the underlying environment variables should be configured
-     * using an appropriate {@link ApplicationBuilder}.
-     *
-     * Determines if the environment variables for the {@link ApplicationSchema}
-     * should be inherited from the process in which the {@link ApplicationSchema}
-     * was created.
-     *
-     * @return true if the environment variables are inherited
-     */
-    @Deprecated
-    public boolean isEnvironmentInherited();
 
 
     /**
@@ -149,4 +109,18 @@ public interface ApplicationSchema<A extends Application>
      * @return  the default {@link Option}s
      */
     public Options getOptions();
+
+
+    /**
+     * Obtains the {@link Options} to be used when realizing an {@link Application} on
+     * the specified {@link Platform}.
+     * <p>
+     * Should there be no special {@link Options} for the specified {@link Platform},
+     * this method will return the {@link Options} defined by {@link #getOptions()}.
+     *
+     * @param platform  the {@link Platform}
+     *
+     * @return  {@link Options} for the specified {@link Platform}
+     */
+    public Options getPlatformSpecificOptions(Platform platform);
 }

@@ -34,6 +34,8 @@ import com.oracle.tools.runtime.PropertiesBuilder;
 
 import com.oracle.tools.runtime.java.JavaApplication;
 
+import com.oracle.tools.runtime.options.EnvironmentVariables;
+
 import java.util.Collections;
 import java.util.Properties;
 
@@ -70,9 +72,9 @@ public abstract class AbstractRemoteApplicationEnvironment<A extends Application
     /**
      * Constructs an {@link AbstractRemoteApplicationEnvironment}.
      *
-     * @param schema           the {@link com.oracle.tools.runtime.ApplicationSchema}
-     * @param platform         the {@link Platform} representing the remote O/S
-     * @param options  the {@link Options} for the remote O/S
+     * @param schema    the {@link com.oracle.tools.runtime.ApplicationSchema}
+     * @param platform  the {@link Platform} representing the remote O/S
+     * @param options   the {@link Options} for the remote O/S
      */
     protected AbstractRemoteApplicationEnvironment(S        schema,
                                                    Platform platform,
@@ -94,18 +96,29 @@ public abstract class AbstractRemoteApplicationEnvironment<A extends Application
     @Override
     public Properties getRemoteEnvironmentVariables()
     {
-        // when environment variables are inherited (from the current environment), we need to
-        // set our current environment variables in the remote application
-        if (schema.isEnvironmentInherited())
-        {
-            PropertiesBuilder environmentBuilder = PropertiesBuilder.fromCurrentEnvironmentVariables();
+        EnvironmentVariables environmentVariables = options.get(EnvironmentVariables.class,
+                                                                EnvironmentVariables
+                                                                    .of(EnvironmentVariables.Source.TargetPlatform));
 
-            return environmentBuilder.realize(schema.getEnvironmentVariablesBuilder());
-        }
-        else
+        Properties variables = new Properties();
+
+        switch (environmentVariables.getSource())
         {
-            return schema.getEnvironmentVariables(platform);
+        case Custom :
+            break;
+
+        case ThisApplication :
+            variables.putAll(System.getenv());
+            break;
+
+        case TargetPlatform :
+            break;
         }
+
+        // add the optionally defined environment variables
+        variables.putAll(environmentVariables.getBuilder().realize());
+
+        return variables;
     }
 
 

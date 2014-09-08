@@ -25,6 +25,8 @@
 
 package com.oracle.tools.runtime;
 
+import com.oracle.tools.runtime.options.EnvironmentVariables;
+
 import org.hamcrest.Matchers;
 
 import org.junit.Test;
@@ -39,6 +41,7 @@ import java.io.File;
 
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.Properties;
 
 /**
  * Unit Tests for {@link SimpleApplicationSchema}s.
@@ -88,9 +91,13 @@ public class SimpleApplicationSchemaTest
     @Test
     public void shouldSetEnvironmentVariable() throws Exception
     {
-        SimpleApplicationSchema schema = new SimpleApplicationSchema("test.sh").setEnvironmentVariable("test", "value");
+        EnvironmentVariables    environmentVariables = EnvironmentVariables.custom().set("test", "value");
 
-        assertThat((String) schema.getEnvironmentVariablesBuilder().getProperty("test"), Matchers.is("value"));
+        SimpleApplicationSchema schema = new SimpleApplicationSchema("test.sh").addOption(environmentVariables);
+
+        Properties              variables = schema.getOptions().get(EnvironmentVariables.class).getBuilder().realize();
+
+        assertThat(variables.getProperty("test"), Matchers.is("value"));
     }
 
 
@@ -102,13 +109,16 @@ public class SimpleApplicationSchemaTest
     @Test
     public void shouldSetEnvironmentVariables() throws Exception
     {
-        PropertiesBuilder environment = new PropertiesBuilder().setProperty("key-1",
-                                                                            "value-1").setProperty("key-2", "value-2");
+        EnvironmentVariables environmentVariables = EnvironmentVariables.custom().set("key-1",
+                                                                                      "value-1").set("key-2",
+                                                                                                     "value-2");
 
-        SimpleApplicationSchema schema = new SimpleApplicationSchema("test.sh").setEnvironmentVariables(environment);
+        SimpleApplicationSchema schema    = new SimpleApplicationSchema("test.sh").addOption(environmentVariables);
 
-        assertThat((String) schema.getEnvironmentVariablesBuilder().getProperty("key-1"), Matchers.is("value-1"));
-        assertThat((String) schema.getEnvironmentVariablesBuilder().getProperty("key-2"), Matchers.is("value-2"));
+        Properties              variables = schema.getOptions().get(EnvironmentVariables.class).getBuilder().realize();
+
+        assertThat(variables.getProperty("key-1"), Matchers.is("value-1"));
+        assertThat(variables.getProperty("key-2"), Matchers.is("value-2"));
     }
 
 
@@ -120,69 +130,15 @@ public class SimpleApplicationSchemaTest
     @Test
     public void shouldSetEnvironmentVariablesFromIterator() throws Exception
     {
-        SimpleApplicationSchema schema   = new SimpleApplicationSchema("test.sh");
+        Iterator                iterator             = Arrays.asList("value-1", "value-2").iterator();
 
-        Iterator                iterator = Arrays.asList("value-1", "value-2").iterator();
+        EnvironmentVariables    environmentVariables = EnvironmentVariables.custom().set("test", iterator);
 
-        schema.setEnvironmentVariable("test", iterator);
-        assertThat((Iterator) schema.getEnvironmentVariablesBuilder().getProperty("test"), Matchers.is(iterator));
-    }
+        SimpleApplicationSchema schema = new SimpleApplicationSchema("test.sh").addOption(environmentVariables);
 
+        Properties              variables = schema.getOptions().get(EnvironmentVariables.class).getBuilder().realize();
 
-    /**
-     * Ensure Environment Variables can be cleared.
-     *
-     * @throws Exception
-     */
-    @Test
-    public void shouldClearEnvironmentVariables() throws Exception
-    {
-        SimpleApplicationSchema schema = new SimpleApplicationSchema("test.sh").setEnvironmentVariable("test", "value");
-
-        schema.clearEnvironmentVariables();
-        assertThat(schema.getEnvironmentVariablesBuilder().size(), Matchers.is(0));
-    }
-
-
-    /**
-     * Ensure Environment Variables are not inherited (the default).
-     *
-     * @throws Exception
-     */
-    @Test
-    public void shouldNotInheritEnvironmentVariables() throws Exception
-    {
-        SimpleApplicationSchema schema = new SimpleApplicationSchema("test.sh");
-
-        assertThat(schema.isEnvironmentInherited(), Matchers.is(false));
-    }
-
-
-    /**
-     * Ensure Environment Variables can be inherited (explicitly set).
-     *
-     * @throws Exception
-     */
-    @Test
-    public void shouldInheritEnvironmentVariables() throws Exception
-    {
-        SimpleApplicationSchema schema = new SimpleApplicationSchema("test.sh").setEnvironmentInherited(true);
-
-        assertThat(schema.isEnvironmentInherited(), Matchers.is(true));
-    }
-
-
-    /**
-     * Ensure Environment Variables can not be inherited (by default)
-     *
-     * @throws Exception
-     */
-    @Test
-    public void shouldDefaultCloneEnvironmentFlagToTrue() throws Exception
-    {
-        SimpleApplicationSchema schema = new SimpleApplicationSchema("test.sh");
-
-        assertThat(schema.isEnvironmentInherited(), Matchers.is(false));
+        assertThat(variables.getProperty("test"), Matchers.is("value-1"));
     }
 
 
@@ -196,8 +152,8 @@ public class SimpleApplicationSchemaTest
     {
         SimpleApplicationSchema schema = new SimpleApplicationSchema("test.sh");
 
-        schema.setArgument("arg1");
-        schema.setArgument("arg2");
+        schema.addArgument("arg1");
+        schema.addArgument("arg2");
 
         assertThat(schema.getArguments(), contains("arg1", "arg2"));
     }

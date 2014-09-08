@@ -63,22 +63,9 @@ public abstract class AbstractApplicationSchema<A extends Application, S extends
     private File workingDirectory;
 
     /**
-     * The {@link PropertiesBuilder} defining custom environment variables to
-     * establish when realizing the {@link Application} using this
-     * {@link ApplicationSchema}.
-     */
-    private PropertiesBuilder environmentVariablesBuilder;
-
-    /**
      * Should the Error Stream be redirected to the Standard Output stream?
      */
     private boolean isErrorStreamRedirected;
-
-    /**
-     * Should environment variables be inherited from the current executing process
-     * for the {@link Application}s produced from this {@link ApplicationSchema}.
-     */
-    private boolean isEnvironmentInherited;
 
     /**
      * The arguments for the {@link Application}.
@@ -105,14 +92,12 @@ public abstract class AbstractApplicationSchema<A extends Application, S extends
      */
     public AbstractApplicationSchema(ApplicationSchema<A> schema)
     {
-        this.executableName              = schema.getExecutableName();
-        this.workingDirectory            = schema.getWorkingDirectory();
-        this.environmentVariablesBuilder = new PropertiesBuilder(schema.getEnvironmentVariablesBuilder());
-        this.isErrorStreamRedirected     = schema.isErrorStreamRedirected();
-        this.isEnvironmentInherited      = schema.isEnvironmentInherited();
-        this.applicationArguments        = new ArrayList<String>(schema.getArguments());
-        this.lifecycleInterceptors       = new LinkedList<LifecycleEventInterceptor<? super A>>();
-        this.options                     = new Options(schema.getOptions().asArray());
+        this.executableName          = schema.getExecutableName();
+        this.workingDirectory        = schema.getWorkingDirectory();
+        this.isErrorStreamRedirected = schema.isErrorStreamRedirected();
+        this.applicationArguments    = new ArrayList<String>(schema.getArguments());
+        this.lifecycleInterceptors   = new LinkedList<LifecycleEventInterceptor<? super A>>();
+        this.options                 = new Options(schema.getOptions().asArray());
 
         for (LifecycleEventInterceptor<? super A> interceptor : schema.getLifecycleInterceptors())
         {
@@ -129,13 +114,11 @@ public abstract class AbstractApplicationSchema<A extends Application, S extends
      */
     public AbstractApplicationSchema(String executableName)
     {
-        this.executableName              = executableName;
-        this.environmentVariablesBuilder = new PropertiesBuilder();
-        this.isEnvironmentInherited      = false;
-        this.applicationArguments        = new ArrayList<String>();
-        this.isErrorStreamRedirected     = false;
-        this.lifecycleInterceptors       = new LinkedList<LifecycleEventInterceptor<? super A>>();
-        this.options                     = new Options();
+        this.executableName          = executableName;
+        this.applicationArguments    = new ArrayList<String>();
+        this.isErrorStreamRedirected = false;
+        this.lifecycleInterceptors   = new LinkedList<LifecycleEventInterceptor<? super A>>();
+        this.options                 = new Options();
 
         // set default application options
         this.options.add(Timeout.autoDetect());
@@ -156,20 +139,6 @@ public abstract class AbstractApplicationSchema<A extends Application, S extends
     }
 
 
-    @Override
-    public PropertiesBuilder getEnvironmentVariablesBuilder()
-    {
-        return environmentVariablesBuilder;
-    }
-
-
-    @Override
-    public Properties getEnvironmentVariables(Platform platform)
-    {
-        return getEnvironmentVariablesBuilder().realize(null, platform);
-    }
-
-
     /**
      * Sets the working directory in which the {@link Application} will start.
      *
@@ -183,108 +152,6 @@ public abstract class AbstractApplicationSchema<A extends Application, S extends
         this.workingDirectory = workingDirectory;
 
         return (S) this;
-    }
-
-
-    /**
-     * Sets the specified environment variable to use an {@link Iterator} from
-     * which to retrieve it's values.
-     *
-     * @param name      the name of the environment variable
-     * @param iterator  an {@link Iterator} providing values for the environment
-     *                  variable
-     *
-     * @return the {@link ApplicationSchema} (so that we can perform method chaining)
-     */
-    @SuppressWarnings("unchecked")
-    public S setEnvironmentVariable(String      name,
-                                    Iterator<?> iterator)
-    {
-        environmentVariablesBuilder.setProperty(name, iterator);
-
-        return (S) this;
-    }
-
-
-    /**
-     * Sets the specified environment variable to the specified value.
-     *
-     * @param name   the name of the environment variable
-     * @param value  the value of the environment variable
-     *
-     * @return the {@link ApplicationSchema} (so that we can perform method chaining)
-     */
-    @SuppressWarnings("unchecked")
-    public S setEnvironmentVariable(String name,
-                                    Object value)
-    {
-        environmentVariablesBuilder.setProperty(name, value);
-
-        return (S) this;
-    }
-
-
-    /**
-     * Adds/Overrides the current environment variables with those specified by
-     * the {@link PropertiesBuilder}.
-     *
-     * @param environmentVariablesBuilder  the environment variables to
-     *                                     add/override on the {@link ApplicationBuilder}
-     *
-     * @return the {@link ApplicationSchema} (so that we can perform method chaining)
-     */
-    @SuppressWarnings("unchecked")
-    public S setEnvironmentVariables(PropertiesBuilder environmentVariablesBuilder)
-    {
-        this.environmentVariablesBuilder.addProperties(environmentVariablesBuilder);
-
-        return (S) this;
-    }
-
-
-    /**
-     * Clears the custom environment variables defined for the {@link ApplicationSchema}.
-     *
-     * @return  the {@link ApplicationSchema} (so that we can perform method chaining)
-     */
-    @Deprecated
-    @SuppressWarnings("unchecked")
-    public S clearEnvironmentVariables()
-    {
-        environmentVariablesBuilder.clear();
-
-        return (S) this;
-    }
-
-
-    /**
-     * Sets whether the environment variables from the currently executing
-     * process should be inherited and used as the base environment variables
-     * when realizing the {@link Application} from this {@link ApplicationSchema}.
-     *
-     * @param isInherited  <code>true</code> if the {@link ApplicationSchema}
-     *                     should inherit the environment variables from the
-     *                     currently executing process or <code>false</code>
-     *                     if a clean/empty environment should be used
-     *                     (containing only those variables defined by this
-     *                     {@link ApplicationSchema})
-     *
-     * @return  the {@link ApplicationSchema} (so that we can perform method chaining)
-     */
-    @Deprecated
-    @SuppressWarnings("unchecked")
-    public S setEnvironmentInherited(boolean isInherited)
-    {
-        this.isEnvironmentInherited = isInherited;
-
-        return (S) this;
-    }
-
-
-    @Deprecated
-    public boolean isEnvironmentInherited()
-    {
-        return isEnvironmentInherited;
     }
 
 
@@ -457,5 +324,12 @@ public abstract class AbstractApplicationSchema<A extends Application, S extends
         this.options = new Options(options);
 
         return (S) this;
+    }
+
+
+    @Override
+    public Options getPlatformSpecificOptions(Platform platform)
+    {
+        return new Options(options.asArray());
     }
 }

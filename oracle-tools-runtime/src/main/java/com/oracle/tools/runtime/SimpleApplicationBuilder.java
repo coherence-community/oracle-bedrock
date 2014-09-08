@@ -33,7 +33,6 @@ import com.oracle.tools.runtime.options.EnvironmentVariables;
 import java.io.File;
 import java.io.IOException;
 
-import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 
@@ -64,10 +63,10 @@ public class SimpleApplicationBuilder extends AbstractApplicationBuilder<SimpleA
                                                                                    Platform           platform,
                                                                                    Option...          applicationOptions)
     {
-        // add all of the default application schema options
-        Options options = new Options(applicationSchema.getOptions().asArray());
+        // obtain the platform specific options from the schema
+        Options options = applicationSchema.getPlatformSpecificOptions(platform);
 
-        // add all of the custom application options
+        // add the custom application options
         options.addAll(applicationOptions);
 
         ApplicationSchema<T> schema = applicationSchema;
@@ -93,22 +92,23 @@ public class SimpleApplicationBuilder extends AbstractApplicationBuilder<SimpleA
         EnvironmentVariables environmentVariables = options.get(EnvironmentVariables.class,
                                                                 EnvironmentVariables.inherited());
 
-        // when not inheriting we need to clear the defined environment
-        if (!environmentVariables.areInherited() &&!schema.isEnvironmentInherited())
+        switch (environmentVariables.getSource())
         {
+        case Custom :
             processBuilder.environment().clear();
+            break;
+
+        case ThisApplication :
+            processBuilder.environment().clear();
+            processBuilder.environment().putAll(System.getenv());
+            break;
+
+        case TargetPlatform :
+            break;
         }
 
-        // add the environment variables defined by the schema
-        Properties variables = schema.getEnvironmentVariablesBuilder().realize();
-
-        for (String variableName : variables.stringPropertyNames())
-        {
-            processBuilder.environment().put(variableName, variables.getProperty(variableName));
-        }
-
-        // realize and add the optionally defined environment variables
-        variables = environmentVariables.getBuilder().realize();
+        // add the optionally defined environment variables
+        Properties variables = environmentVariables.getBuilder().realize();
 
         for (String variableName : variables.stringPropertyNames())
         {

@@ -309,9 +309,19 @@ reverse chronological order.
     a RuntimeException (wrapping a ClassNotFoundException) eagerly when attempting
     to start an application and the application class can't be found.
 
-*   [ORACLETOOLS-153](https://java.net/jira/browse/ORACLETOOLS-153): Introduced
-    TemporaryDirectory Option support to replace setters/getters for temporary
-    folders.
+*   [ORACLETOOLS-152](https://java.net/jira/browse/ORACLETOOLS-152): Refactored
+    (and removed) ApplicationSchema Environment Variables Builder support.
+
+    *BREAKING CHANGE:*  To specify environment variables for an application
+    developers should now use the EnvironmentVariables Option, that provides
+    greater flexibility and semantics.
+
+*   [ORACLETOOLS-153](https://java.net/jira/browse/ORACLETOOLS-153): Refactored
+    (and removed) RemoteApplicationSchema/Builder temporary directory
+    configuration.
+
+    *BREAKING CHANGE:* To specify a temporary directory developers should now
+    use the new TemporaryDirectory Option, that provides improved semantics.
 
 *   [ORACLETOOLS-154](https://java.net/jira/browse/ORACLETOOLS-154): Introduced
     PlatformSeparators Option to replace setters/getters for File and Path
