@@ -23,18 +23,19 @@ reverse chronological order.
 
     Maven Compiler Plugin: Version 2.3.2 -> 3.1
     Maven Enforcer Plugin: Version 1.0.1 -> 1.3.1
-    Maven Install Plugin: Version 2.4 -> 2.5.1
-    Maven Javadoc Plugin: Version 2.8.1 -> 2.9.1
-    Maven Release Plugin: Version 2.4.2 -> 2.5
-    Maven Shade Plugin: Version 2.1 -> 2.3
-    Maven Source Plugin: Version 2.1.2 -> 2.2.1
+    Maven Install Plugin:  Version 2.4 -> 2.5.1
+    Maven Javadoc Plugin:  Version 2.8.1 -> 2.9.1
+    Maven Release Plugin:  Version 2.4.2 -> 2.5
+    Maven Shade Plugin:    Version 2.1 -> 2.3
+    Maven Source Plugin:   Version 2.1.2 -> 2.2.1
     Maven Surefire Plugin: Version 2.13 -> 2.17
 
-    ASM Dependency: Version (inherited) -> 5.0.3
-    CGLIB Dependency: Version 2.2.2 -> 3.1
-    JSCH Dependency: Version 0.1.50 -> 0.1.51
-    MOCKITO Dependency: Version 1.9.0 -> 1.9.5
-    OBJENESIS Dependency: Version 1.2 -> 2.1
+    ASM Dependency:        Version (inherited) -> 5.0.3
+    COHERENCE Dependency:  Version 3.7.1.11 -> 3.7.1.13
+    CGLIB Dependency:      Version 2.2.2 -> 3.1
+    JSCH Dependency:       Version 0.1.50 -> 0.1.51
+    MOCKITO Dependency:    Version 1.9.0 -> 1.9.5
+    OBJENESIS Dependency:  Version 1.2 -> 2.1
 
 <h4>oracle-tools-core</h4>
 
@@ -109,9 +110,9 @@ reverse chronological order.
     "implements RemoteCallable&lt;T&gt;".
 
 *   [ORACLETOOLS-93](https://java.net/jira/browse/ORACLETOOLS-93): Added the
-    ability to explicitly set the required JAVA_HOME to use for a Java Application
-    Schema and/or JavaApplicationBuilder.  When not set, the JAVA_HOME of the
-    executing process is assumed.
+    ability to explicitly specify the required JAVA_HOME through the use of
+    the JavaHome Option.  When not set, the JAVA_HOME of the executing process is
+    assumed.
 
 *   [ORACLETOOLS-94](https://java.net/jira/browse/ORACLETOOLS-94): Introduced
     Local(Java)ApplicationBuilder to replace and deprecate the
@@ -120,13 +121,8 @@ reverse chronological order.
 
 *   [ORACLETOOLS-96](https://java.net/jira/browse/ORACLETOOLS-96): Refactored how
     custom operating system environment variables may be defined.  They can now
-    be defined on ApplicationSchema and ApplicationBuilders, but only
-    ApplicationBuilders have the ability to "inherit" them from a local environment.
-    The ability for ApplicationSchemas to "inherit" environment variables has
-    been deprecated.
-
-    For the most part environment variables should be defined on ApplicationBuilders
-    and not ApplicationSchemas as they are usually an environment/builder setting.
+    be defined on ApplicationSchema and ApplicationBuilders using the new
+    EnvironmentVariables Option.
 
 *   [ORACLETOOLS-101](https://java.net/jira/browse/ORACLETOOLS-101): Introduced
     the ability to specify an ApplicationConsoleBuilder and thus ApplicationConsole
@@ -150,13 +146,14 @@ reverse chronological order.
     the concept of an Assembly.  This replaces the concept of an ApplicationGroup.
 
 *   [ORACLETOOLS-112](https://java.net/jira/browse/ORACLETOOLS-112): Introduced
-    the ability to specify remote debugging settings for processes. Remote debug
-    mode is automatically enabled foe local processes if the controlling process
+    the ability to specify a RemoteDebugging Option for Java Applications. Remote
+    debugging is automatically enabled for local processes if the controlling process
     (typically an IDE) is running in debug mode.
 
 *   [ORACLETOOLS-114](https://java.net/jira/browse/ORACLETOOLS-114): Introduced
     JavaVirtualMachine as an implementation of a Platform to represent the
-    current JVM process.
+    current JVM process.  This allows JavaApplications to be realized "inside"
+    the current JVM.
 
 *   [ORACLETOOLS-118](https://java.net/jira/browse/ORACLETOOLS-118): Resolved
     issues where not all output was readable from PipedApplicationConsole
@@ -191,14 +188,9 @@ reverse chronological order.
     the ability to dynamically create a proxy of a JavaApplication owned and
     managed instance so that it may be called (remotely) via the JavaApplication.
 
-*   [ORACLETOOLS-126](https://java.net/jira/browse/ORACLETOOLS-126): Introduced
-    FluentJavaApplicationSchema addJvmOption, addJvmOptions, setJvmOptions and
-    getJvmOptions methods.  Deprecated AbstractJavaApplicationSchema
-    addOption, setOption and getJVMOptions methods.
-
 *   [ORACLETOOLS-127](https://java.net/jira/browse/ORACLETOOLS-127): Introduced
     FluentApplicationSchema addArgument, addArguments and setArguments methods.
-    Deprecated AbstractApplicationSchema addArgument and setArgument methods.
+    Removed AbstractApplicationSchema addArgument and setArgument methods.
 
 *   [ORACLETOOLS-129](https://java.net/jira/browse/ORACLETOOLS-129): Introduced
     CapturingApplicationConsole. This allows lines from the stdout and stderr
@@ -230,10 +222,9 @@ reverse chronological order.
     constructors for ApplicationSchema implementations.
 
 *   [ORACLETOOLS-135](https://java.net/jira/browse/ORACLETOOLS-135): Introduced
-    the ability to add Platform aware values as environment variables when configuring
-    a schema that extends AbstractApplicationSchema and also as system properties when
-    configuring a JavaApplicationSchema. The actual value used for the property can then
-    be determined based on the Platform that a JavaApplication is being relaized on.
+    the ability to request Platform specific Options from an ApplicationSchema.
+    This allows individual ApplicationSchema's to customize the returned Options
+    based on a specific type of Platform.
 
 *   [ORACLETOOLS-136](https://java.net/jira/browse/ORACLETOOLS-136): Resolved potential
     race-condition when submitting RemoteCallables/RemoteRunnables to a
@@ -253,12 +244,13 @@ reverse chronological order.
     the requirement for Application.waitFor() method to throw an InterruptedException.
 
 *   [ORACLETOOLS-142](https://java.net/jira/browse/ORACLETOOLS-142): Introduced
-    the concept of an Option, something that encapsulates Builder/ Oracle Tools /
-    Platform specific configuration, those of which can be passed into
-    Platform.realize(...) methods to control Application creation.  Consequently
-    removed all Builder / Oracle Tools / Platform specific configurations from
-    Schemas and Builders, replacing all said uses with appropriate Option
-    implementations.
+    the concept of an Option, something that encapsulates custome *Builder,
+    Oracle Tools and Platform specific configuration, those of which can be
+    passed into Platform.realize(...) methods to control Application creation.
+
+    Consequently removed all *Builder, Oracle Tools and Platform specific
+    configurations from Schemas and Builders, replacing all said uses with
+    appropriate Option implementation.
 
     *BREAKING CHANGE:*  This is a breaking change for anyone that relies on
     using Builders / Schemas / Platform specific configuration options.
@@ -355,8 +347,7 @@ reverse chronological order.
 <h4>oracle-tools-runtime-remote</h4>
 
 *   [ORACLETOOLS-91](https://java.net/jira/browse/ORACLETOOLS-91): Introduced
-    experimental RemoteApplicationBuilders in the new oracle-tools-runtime-remote
-    module.
+    RemoteApplicationBuilders in the new oracle-tools-runtime-remote module.
 
 *   [ORACLETOOLS-113](https://java.net/jira/browse/ORACLETOOLS-113): Introduced
     a RemotePlatform implementation of a Platform.

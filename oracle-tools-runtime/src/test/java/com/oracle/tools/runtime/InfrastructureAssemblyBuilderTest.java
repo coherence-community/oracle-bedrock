@@ -356,13 +356,6 @@ public class InfrastructureAssemblyBuilderTest
 
 
         @Override
-        public int destroy()
-        {
-            return 0;
-        }
-
-
-        @Override
         public void close()
         {
         }

@@ -6,11 +6,10 @@ separate numbers, each separated by a full-stop in the form `x.y.z` where by
 the meaning of the individual numbers in the release number is as follows:
 
 **x**:  Changes in this number represents a major or new generation of the that
-of which introduces new functionality or removing existing functionality.
+of which introduces new functionality or removes previous functionality.
 
-In most cases, especially those where functionality is removed, this means
-maintaining complete backwards compatibility between releases is unlikely or
-impossible.
+In most cases, especially those where functionality is removed, maintaining complete
+backwards compatibility between releases is unlikely or impossible.
 
 **y**:  Changes in this number represents a minor upgrade.
 

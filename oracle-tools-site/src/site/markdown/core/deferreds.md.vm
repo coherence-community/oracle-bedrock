@@ -67,8 +67,8 @@ using the following:
     T t = deferredMBean.get();
 
 Should the underlying deferred resource, an MBean (of type T) not be available,
-an `InstanceUnavailableException` will be thrown.   Should it be determined
-that the MBean will never become available, an `UnresolvableInstanceException`
+a `TemporarilyUnavailableException` will be thrown.   Should it be determined
+that the MBean will never become available, a `PermanentlyUnavailableException`
 would be thrown.
 
 >   The mechanism to ensure that Deferred resources are available when requested,
@@ -135,8 +135,8 @@ be used.
 
 An *Ensured* Reference is a *Deferred* Reference implementation attempts to
 guarantee, through numerous strategies, that an underlying resource is
-available when requested by an application and if not an
-`UnresolvableInstanceException` is thrown.
+available when requested by an application and if not a
+`PermanentlyUnavailableException` is thrown.
 
 Naturally they are used in the same manner that Deferreds are used - they
 implement the `com.oracle.tools.deferred.Deferred` interface - with the
@@ -163,7 +163,7 @@ the `ensure` methods.
     Deferred<T> ensuredMBean = ensure(deferredMBean);
 
     // this will wait for the MBean to become registered or
-    // throw a UnresolvableInstanceException.
+    // throw a PermanentlyUnavailableException.
     T t = ensuredMBean.get();
 
 While it might seem strange to separate the concept of defining the resource
@@ -171,8 +171,8 @@ and that of attempting to guarantee the resource is available, doing so
 significantly increases the expressiveness of the API.
 
 >   The maximum amount of time an Ensured implementation will wait before an
->   `UnresolvableInstanceException` is thrown is configurable.  By default this
->   is 30 seconds.  Likewise the strategy used to determine when an underlying
+>   `PermanentlyUnavailableException` is thrown is configurable.  By default this
+>   is 60 seconds.  Likewise the strategy used to determine when an underlying
 >   resource is available, is also configurable - though somewhat dependent
 >   on the type of Deferred being ensured.  For more information refer to the
 >   Java Documentation for the `com.oracle.tools.deferred.Ensured` and

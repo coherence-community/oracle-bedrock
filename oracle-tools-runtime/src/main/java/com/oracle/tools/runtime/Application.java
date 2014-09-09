@@ -79,21 +79,6 @@ public interface Application extends Closeable
 
 
     /**
-     * <b>WARNING:</b>This method is now deprecated.  It is replaced by {@link #close()}.
-     * <p>
-     * Terminates and destroys the running {@link Application}.  Upon returning
-     * from this method you can safely assume the {@link Application} is no longer
-     * running.  All resources, including input / output streams will no longer
-     * be available or valid.
-     *
-     * @return the exit value of the {@link Application}
-     *         (by convention <code>0</code> indicates normal termination)
-     */
-    @Deprecated
-    public int destroy();
-
-
-    /**
      * Attempts to gracefully closes and terminate the running {@link Application}.
      * <p>
      * Upon returning it is safe to assume that the {@link Application}

@@ -280,17 +280,6 @@ public abstract class AbstractApplication<A extends AbstractApplication<A, P, R>
     }
 
 
-    @SuppressWarnings("unchecked")
-    @Override
-    @Deprecated
-    public int destroy()
-    {
-        close();
-
-        return exitValue();
-    }
-
-
     @Override
     public long getId()
     {
