@@ -57,12 +57,11 @@ import org.junit.Test;
 import org.mockito.Mock;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.nullValue;
 
 import static org.hamcrest.core.StringContains.containsString;
 
 import static org.junit.Assert.assertThat;
-
-import static org.mockito.Mockito.mock;
 
 import java.util.UUID;
 
@@ -281,6 +280,37 @@ public abstract class AbstractJavaApplicationBuilderTest extends AbstractTest
         try (JavaApplication application = builder.realize(schema, "sleeping", console))
         {
             application.waitFor();
+        }
+    }
+
+
+    /**
+     * Ensure that we can define a system property in the application
+     * (and it won't be defined in this process).
+     */
+    @Test
+    public void shouldDefineSystemPropertyInApplication()
+    {
+        // the custom property name and value
+        String propertyName  = "custom.property";
+        String propertyValue = "gudday";
+
+        // define and start the SleepingApplication
+        SimpleJavaApplicationSchema schema = new SimpleJavaApplicationSchema(SleepingApplication.class.getName());
+
+        schema.setSystemProperty(propertyName, propertyValue);
+
+        JavaApplicationBuilder<JavaApplication> builder = newJavaApplicationBuilder();
+
+        ApplicationConsole                      console = new SystemApplicationConsole();
+
+        try (JavaApplication application = builder.realize(schema, "sleeping", console))
+        {
+            // assert that the custom property is defined in the application
+            Eventually.assertThat(application, new GetSystemProperty(propertyName), is(propertyValue));
+
+            // assert that the custom property is not defined in the test
+            assertThat(System.getProperty(propertyName), is(nullValue()));
         }
     }
 }
