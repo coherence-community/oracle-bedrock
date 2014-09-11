@@ -73,21 +73,9 @@ public class JvmOptions implements JvmOption, ComposableOption<JvmOptions>
 
 
     @Override
-    public String get()
+    public Iterable<String> getOptions()
     {
-        StringBuilder builder = new StringBuilder();
-
-        for (String option : options)
-        {
-            if (builder.length() > 0)
-            {
-                builder.append(" ");
-            }
-
-            builder.append(option);
-        }
-
-        return builder.toString();
+        return options;
     }
 
 

@@ -344,6 +344,12 @@ reverse chronological order.
     *BREAKING CHANGE:* To specify error stream redirection developers should now
     use the new ErrorStreamRedirection Option.
 
+*   [ORACLETOOLS-160](https://java.net/jira/browse/ORACLETOOLS-160): Introduced
+    HeapSize.Unit.GB support.
+
+*   [ORACLETOOLS-163](https://java.net/jira/browse/ORACLETOOLS-163): Introduced
+    HotSpot.Mode Option to support the -server and -client JVM Options.
+
 <h4>oracle-tools-runtime-remote</h4>
 
 *   [ORACLETOOLS-91](https://java.net/jira/browse/ORACLETOOLS-91): Introduced

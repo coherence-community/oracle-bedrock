@@ -270,9 +270,12 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication> extends Abst
 
         // ----- establish Java Virtual Machine options -----
 
-        for (JvmOption option : options.getAll(JvmOption.class))
+        for (JvmOption jvmOption : options.getAll(JvmOption.class))
         {
-            processBuilder.command().add(option.get());
+            for (String option : jvmOption.getOptions())
+            {
+                processBuilder.command().add(option);
+            }
         }
 
         // ----- establish remote debugging JVM options -----

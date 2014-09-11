@@ -236,10 +236,13 @@ public class RemoteJavaApplicationEnvironment<A extends JavaApplication>
 
         // ----- establish Java Virtual Machine options -----
 
-        for (JvmOption option : options.getAll(JvmOption.class))
+        for (JvmOption jvmOption : options.getAll(JvmOption.class))
         {
-            builder.append(" ");
-            builder.append(option.get());
+            for (String option : jvmOption.getOptions())
+            {
+                builder.append(" ");
+                builder.append(option);
+            }
         }
 
         // ----- establish remote debugging JVM options -----

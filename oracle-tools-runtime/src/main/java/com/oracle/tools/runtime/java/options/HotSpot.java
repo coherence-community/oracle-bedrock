@@ -1,5 +1,5 @@
 /*
- * File: JvmOption.java
+ * File: HotSpot.java
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
@@ -25,33 +25,33 @@
 
 package com.oracle.tools.runtime.java.options;
 
+import com.oracle.tools.ComposableOption;
 import com.oracle.tools.Option;
 
-import com.oracle.tools.runtime.java.JavaApplicationBuilder;
+import java.util.Collections;
 
 /**
- * Represents one or more related Java Virtual Machine configuration options.
- * <p>
- * This is an internal interface is used by {@link JavaApplicationBuilder}s
- * to help identify {@link Option}s that are specific to Java Virtual Machine
- * configuration.  However it is not a requirement that implementations of
- * this interface also implement the {@link Option} interface.
- * <p>
+ * A Helper class for creating {@link JvmOption}s for HotSpot-based Java Virtual Machines.
  * <p>
  * Copyright (c) 2014. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Brian Oliver
  */
-public interface JvmOption
+public class HotSpot
 {
     /**
-     * Obtains the individual Java Virtual Machine option configuration
-     * strings for the {@link JvmOption}.
-     *
-     * eg: The heap size option may return two strings; ["-Xms256m", "-Xmx512m"]
-     *
-     * @return an {@link Iterable} over the configuration strings
+     * The {@link HotSpot} Mode (ie: -server or -client)
      */
-    public Iterable<String> getOptions();
+    public static enum Mode implements JvmOption, Option
+    {
+        SERVER,
+        CLIENT;
+
+        @Override
+        public Iterable<String> getOptions()
+        {
+            return Collections.singletonList("-" + this.toString().toLowerCase());
+        }
+    }
 }

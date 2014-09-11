@@ -50,6 +50,8 @@ import com.oracle.tools.runtime.concurrent.socket.SocketBasedRemoteExecutorTests
 import com.oracle.tools.runtime.console.CapturingApplicationConsole;
 import com.oracle.tools.runtime.console.SystemApplicationConsole;
 
+import com.oracle.tools.runtime.java.options.HeapSize;
+import com.oracle.tools.runtime.java.options.HotSpot;
 import com.oracle.tools.runtime.java.options.JavaHome;
 import com.oracle.tools.runtime.java.options.RemoteDebugging;
 
@@ -525,6 +527,32 @@ public class LocalJavaApplicationBuilderTest extends AbstractJavaApplicationBuil
         try (SimpleJavaApplication application = builder.realize(schema, "sleeping", console, null, javaHome))
         {
             Eventually.assertThat(application, new GetSystemProperty("java.home"), is(javaHomePath));
+        }
+    }
+
+
+    /**
+     * Ensure that {@link LocalJavaApplicationBuilder}s can set the {@link HeapSize}.
+     */
+    @Test
+    public void shouldSetHeapSize()
+    {
+        // define the SleepingApplication
+        SimpleJavaApplicationSchema schema = new SimpleJavaApplicationSchema(SleepingApplication.class.getName());
+
+        // build and start the SleepingApplication
+        LocalJavaApplicationBuilder<JavaApplication> builder = new LocalJavaApplicationBuilder<JavaApplication>();
+
+        ApplicationConsole                           console = new SystemApplicationConsole();
+
+        try (SimpleJavaApplication application = builder.realize(schema,
+                                                                 "sleeping",
+                                                                 console,
+                                                                 null,
+                                                                 HotSpot.Mode.SERVER,
+                                                                 HeapSize.initial(256, HeapSize.Units.MB),
+                                                                 HeapSize.maximum(1, HeapSize.Units.GB)))
+        {
         }
     }
 
