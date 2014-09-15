@@ -29,6 +29,7 @@ import com.oracle.tools.runtime.concurrent.callable.RemoteCallableStaticMethod;
 import com.oracle.tools.runtime.concurrent.callable.RemoteMethodInvocation;
 
 import com.oracle.tools.util.FutureCompletionListener;
+import com.oracle.tools.util.ReflectionHelper;
 
 import com.tangosol.net.CacheService;
 import com.tangosol.net.NamedCache;
@@ -36,6 +37,8 @@ import com.tangosol.net.NamedCache;
 import com.tangosol.util.Filter;
 import com.tangosol.util.MapListener;
 import com.tangosol.util.ValueExtractor;
+
+import java.io.Serializable;
 
 import java.lang.reflect.Method;
 
@@ -114,13 +117,21 @@ class CoherenceNamedCache implements NamedCache
     protected void remotelyInvoke(String    methodName,
                                   Object... arguments)
     {
+        // the listener for the remote invocation
         FutureCompletionListener listener = new FutureCompletionListener();
 
+        // notify the interceptor that we're about make a remote invocation
+        Method method = ReflectionHelper.getCompatibleMethod(NamedCache.class, methodName, arguments);
+
+        interceptor.onBeforeRemoteInvocation(method, arguments);
+
+        // submit the remote method invocation
         member.submit(new RemoteMethodInvocation(producer, methodName, arguments, interceptor), listener);
 
         try
         {
-            listener.get();
+            // intercept the result after the remote invocation
+            interceptor.onAfterRemoteInvocation(method, arguments, listener.get());
         }
         catch (RuntimeException e)
         {
@@ -131,7 +142,7 @@ class CoherenceNamedCache implements NamedCache
         {
             throw new RuntimeException("Failed to execute " + methodName + " with arguments "
                                        + Arrays.toString(arguments),
-                                       e);
+                                       interceptor.onRemoteInvocationException(method, arguments, e));
         }
     }
 
@@ -150,13 +161,21 @@ class CoherenceNamedCache implements NamedCache
                                    Class<T>  returnType,
                                    Object... arguments)
     {
+        // the listener for the remote invocation
         FutureCompletionListener<T> listener = new FutureCompletionListener<T>();
 
+        // notify the interceptor that we're about make a remote invocation
+        Method method = ReflectionHelper.getCompatibleMethod(NamedCache.class, methodName, arguments);
+
+        interceptor.onBeforeRemoteInvocation(method, arguments);
+
+        // submit the remote method invocation
         member.submit(new RemoteMethodInvocation(producer, methodName, arguments, interceptor), listener);
 
         try
         {
-            return listener.get();
+            // intercept the result after the remote invocation
+            return (T) interceptor.onAfterRemoteInvocation(method, arguments, listener.get());
         }
         catch (RuntimeException e)
         {
@@ -165,9 +184,7 @@ class CoherenceNamedCache implements NamedCache
         }
         catch (Exception e)
         {
-            throw new RuntimeException("Failed to execute " + methodName + " with arguments "
-                                       + Arrays.toString(arguments),
-                                       e);
+            throw new RuntimeException(interceptor.onRemoteInvocationException(method, arguments, e));
         }
     }
 
@@ -465,7 +482,19 @@ class CoherenceNamedCache implements NamedCache
         public void onBeforeRemoteInvocation(Method   method,
                                              Object[] arguments)
         {
-            // nothing to do before remote invocation
+            // ensure that the arguments for specific methods are serializable
+            String name = method.getName();
+
+            if ((name.equals("getAll") || name.equals("invokeAll") || name.equals("aggregate"))
+                &&!(arguments[0] instanceof Serializable))
+            {
+                // ensure invocations of NamedCache.getAll / invokeAll / aggregate using collections are serializable
+                arguments[0] = new ArrayList((Collection) arguments[0]);
+            }
+            else if (name.equals("putAll") &&!(arguments[0] instanceof Serializable))
+            {
+                arguments[0] = new HashMap((Map) arguments[0]);
+            }
         }
 
 
@@ -505,7 +534,7 @@ class CoherenceNamedCache implements NamedCache
             // ensure that the result of the method is serializable, including transforming it if necessary
             String name = method.getName();
 
-            if (name.equals("invokeAll"))
+            if (name.equals("invokeAll") || name.equals("getAll"))
             {
                 // the result of invokeAll may not be serializable,
                 // so copy them into a serializable map

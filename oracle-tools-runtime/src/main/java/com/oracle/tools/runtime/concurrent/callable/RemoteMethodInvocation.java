@@ -172,7 +172,7 @@ public class RemoteMethodInvocation<T> implements RemoteCallable
          * <p>
          * By implementing this {@link Method}, developers may change the
          * arguments submitted to the remote {@link Method}.  Furthermore developers
-         * may choose to throw unsupported exceptions should analysis the
+         * may choose to throw unsupported exceptions should analysis of the
          * planned invocation prove to be unsupported, for example if one or more
          * arguments aren't serializable.
          *
@@ -191,7 +191,7 @@ public class RemoteMethodInvocation<T> implements RemoteCallable
          * <p>
          * By implementing this {@link Method}, developers may change the
          * returned result of the {@link Method}.  Furthermore developers
-         * may choose to throw various runtime time exceptions should analysis the
+         * may choose to throw various runtime time exceptions should analysis of the
          * invocation result prove to be unsupported or invalid.
          *
          * @param method     the {@link Method} that was invoked

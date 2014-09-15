@@ -350,6 +350,10 @@ reverse chronological order.
 *   [ORACLETOOLS-163](https://java.net/jira/browse/ORACLETOOLS-163): Introduced
     HotSpot.Mode Option to support the -server and -client JVM Options.
 
+*   [ORACLETOOLS-165](https://java.net/jira/browse/ORACLETOOLS-165): Made
+    SocketBasedRemoteExecutor notify "local" CompletionListeners when they are
+    provided for submissions.
+
 <h4>oracle-tools-runtime-remote</h4>
 
 *   [ORACLETOOLS-91](https://java.net/jira/browse/ORACLETOOLS-91): Introduced
@@ -428,6 +432,10 @@ reverse chronological order.
     ClusterMember -> CoherenceCacheServer
     ClusterMemberSchema -> CoherenceCacheServerSchema
     RestartClusterMemberAction -> RestartCoherenceClusterMemberAction
+
+*   [ORACLETOOLS-164](https://java.net/jira/browse/ORACLETOOLS-164): Improved
+    internal CoherenceNamedCache implementation to respect and correctly
+    ensure arguments and returned method invocation results are serializable.
 
 <h4>oracle-tools-coherence-testing-support</h4>
 

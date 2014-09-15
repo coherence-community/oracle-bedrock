@@ -67,9 +67,6 @@ public class FutureCompletionListener<T> implements CompletionListener<T>, Futur
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void onCompletion(T result)
     {
@@ -91,9 +88,6 @@ public class FutureCompletionListener<T> implements CompletionListener<T>, Futur
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void onException(Exception exception)
     {
@@ -115,9 +109,6 @@ public class FutureCompletionListener<T> implements CompletionListener<T>, Futur
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public boolean cancel(boolean mayInterruptIfRunning)
     {
@@ -126,9 +117,6 @@ public class FutureCompletionListener<T> implements CompletionListener<T>, Futur
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public boolean isCancelled()
     {
@@ -137,9 +125,6 @@ public class FutureCompletionListener<T> implements CompletionListener<T>, Futur
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public boolean isDone()
     {
@@ -150,9 +135,6 @@ public class FutureCompletionListener<T> implements CompletionListener<T>, Futur
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public T get() throws InterruptedException, ExecutionException
     {
@@ -182,9 +164,6 @@ public class FutureCompletionListener<T> implements CompletionListener<T>, Futur
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public T get(long     timeout,
                  TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException

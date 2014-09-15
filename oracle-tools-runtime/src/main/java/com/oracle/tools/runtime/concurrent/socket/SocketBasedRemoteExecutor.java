@@ -849,45 +849,76 @@ public class SocketBasedRemoteExecutor extends AbstractControllableRemoteExecuto
         {
             try
             {
-                // create a temporary buffer in which to write serialize the operation
+                // create a temporary stream in which to serialize the operation
                 // (so we can't corrupt the actual output stream if an operation fails to serialize)
                 ByteArrayOutputStream buffer = new ByteArrayOutputStream(4096);    // 4k
                 ObjectOutputStream    stream = new ObjectOutputStream(buffer);
 
-                // serialize the operation
+                // serialize the operation and send the operation over the stream
+                // (assume we must send the operation)
+                boolean sendTemporaryStream;
+
                 try
                 {
+                    // attempt to write the operation to the temporary stream
+                    // (this may fail for numerous reasons,
+                    // but typically because of serialization issues)
                     operation.write(stream);
+
+                    // let's send the stream as we successfully serialized the operation!
+                    sendTemporaryStream = true;
                 }
                 catch (NotSerializableException e)
                 {
-                    // when we can't serialize the operation
-                    // we send back the exception as the response
-                    buffer.reset();
-                    stream    = new ObjectOutputStream(buffer);
+                    // determine if a "local" listener was provided with the operation
+                    CompletionListener<?> listener = pendingListeners.remove(sequence);
 
-                    operation = new ResponseOperation(e);
-                    operation.write(stream);
+                    if (listener == null)
+                    {
+                        // when there's no "local" listener, we assume we must send a response
+                        sendTemporaryStream = true;
+
+                        // while we failed to serialize the operation, that doesn't mean
+                        // we should fail silently.  send the result as an exception to
+                        // let the original caller know.
+                        buffer.reset();
+                        stream    = new ObjectOutputStream(buffer);
+
+                        operation = new ResponseOperation(e);
+                        operation.write(stream);
+                    }
+                    else
+                    {
+                        // when there's a "local" listener, we assume we don't need to
+                        // send a response to the original caller
+                        sendTemporaryStream = false;
+
+                        // notify the "local" listener of the exception
+                        listener.onException(e);
+                    }
                 }
 
-                // we're done writing (to the buffer)
-                stream.flush();
+                if (sendTemporaryStream)
+                {
+                    // we're done writing (to the buffer)
+                    stream.flush();
 
-                // serialize the operation type
-                // (to the actual output stream)
-                output.writeUTF(operation.getType());
+                    // serialize the operation type
+                    // (to the actual output stream)
+                    output.writeUTF(operation.getType());
 
-                // serialize the operation sequence number (for responses)
-                output.writeLong(sequence);
+                    // serialize the operation sequence number (for responses)
+                    output.writeLong(sequence);
 
-                // now send the buffer (to the actual output stream)
-                byte[] array = buffer.toByteArray();
+                    // now send the buffer (to the actual output stream)
+                    byte[] array = buffer.toByteArray();
 
-                output.writeInt(array.length);
-                output.write(array, 0, array.length);
+                    output.writeInt(array.length);
+                    output.write(array, 0, array.length);
 
-                // ensure the buffer is flushed so that the server can read it
-                output.flush();
+                    // ensure the buffer is flushed so that the server can read it
+                    output.flush();
+                }
             }
             catch (IOException e)
             {
