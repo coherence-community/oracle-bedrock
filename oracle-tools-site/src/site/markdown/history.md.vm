@@ -388,6 +388,12 @@ reverse chronological order.
 
     Eventually.within(5, TimeUnit.SECONDS);
 
+*   [ORACLETOOLS-167](https://java.net/jira/browse/ORACLETOOLS-167): Fixed
+    generic signatures of assertion methods that ise Matchers. This means that
+    the correct compile time checking will now be done for assertions. This
+    change could introduce compile time errors into existing code that does
+    not use the correct types in calls to assert methods.
+
 <h4>oracle-tools-coherence</h4>
 
 *   [ORACLETOOLS-92](https://java.net/jira/browse/ORACLETOOLS-92): Refactored

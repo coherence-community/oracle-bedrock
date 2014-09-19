@@ -26,15 +26,13 @@
 package com.oracle.tools.deferred;
 
 import com.oracle.tools.runtime.concurrent.RemoteCallable;
-
 import com.oracle.tools.runtime.java.JavaApplication;
-
 import org.hamcrest.Matcher;
+
+import java.util.concurrent.TimeUnit;
 
 import static com.oracle.tools.deferred.DeferredHelper.ensure;
 import static com.oracle.tools.deferred.DeferredHelper.eventually;
-
-import java.util.concurrent.TimeUnit;
 
 /**
  * A helper class that defines commonly used "assertThat" methods for the
@@ -62,8 +60,8 @@ public class Eventually
      *
      * @throws AssertionError if the assertion fails
      */
-    public static <T> void assertThat(T          value,
-                                      Matcher<?> matcher) throws AssertionError
+    public static <T> void assertThat(T                  value,
+                                      Matcher<? super T> matcher) throws AssertionError
     {
         assertThat(null, eventually(value), matcher);
     }
@@ -84,9 +82,9 @@ public class Eventually
      *
      * @throws AssertionError if the assertion fails
      */
-    public static <T> void assertThat(T                 value,
-                                      Matcher<?>        matcher,
-                                      TimeoutConstraint constraint) throws AssertionError
+    public static <T> void assertThat(T                  value,
+                                      Matcher<? super T> matcher,
+                                      TimeoutConstraint  constraint) throws AssertionError
     {
         assertThat(null, eventually(value), matcher, constraint);
     }
@@ -107,9 +105,9 @@ public class Eventually
      *
      * @throws AssertionError if the assertion fails
      */
-    public static <T> void assertThat(String     message,
-                                      T          value,
-                                      Matcher<?> matcher) throws AssertionError
+    public static <T> void assertThat(String             message,
+                                      T                  value,
+                                      Matcher<? super T> matcher) throws AssertionError
     {
         assertThat(message, eventually(value), matcher);
     }
@@ -131,10 +129,10 @@ public class Eventually
      *
      * @throws AssertionError if the assertion fails
      */
-    public static <T> void assertThat(String            message,
-                                      T                 value,
-                                      Matcher<?>        matcher,
-                                      TimeoutConstraint constraint) throws AssertionError
+    public static <T> void assertThat(String             message,
+                                      T                  value,
+                                      Matcher<? super T> matcher,
+                                      TimeoutConstraint  constraint) throws AssertionError
     {
         assertThat(message, eventually(value), matcher, constraint);
     }
@@ -152,8 +150,8 @@ public class Eventually
      *
      * @throws AssertionError if the assertion fails
      */
-    public static <T> void assertThat(Deferred<T> deferred,
-                                      Matcher<?>  matcher) throws AssertionError
+    public static <T> void assertThat(Deferred<T>         deferred,
+                                      Matcher<? super T>  matcher) throws AssertionError
     {
         assertThat(null, deferred, matcher);
     }
@@ -172,9 +170,9 @@ public class Eventually
      *
      * @throws AssertionError if the assertion fails
      */
-    public static <T> void assertThat(String      message,
-                                      Deferred<T> deferred,
-                                      Matcher<?>  matcher) throws AssertionError
+    public static <T> void assertThat(String             message,
+                                      Deferred<T>        deferred,
+                                      Matcher<? super T> matcher) throws AssertionError
     {
         TimeoutConstraint constraint = new SimpleTimeoutConstraint();
 
@@ -195,9 +193,9 @@ public class Eventually
      *
      * @throws AssertionError if the assertion fails
      */
-    public static <T> void assertThat(Deferred<T>       deferred,
-                                      Matcher<?>        matcher,
-                                      TimeoutConstraint constraint) throws AssertionError
+    public static <T> void assertThat(Deferred<T>        deferred,
+                                      Matcher<? super T> matcher,
+                                      TimeoutConstraint  constraint) throws AssertionError
     {
         assertThat(null, deferred, matcher, constraint);
     }
@@ -217,10 +215,10 @@ public class Eventually
      *
      * @throws AssertionError if the assertion fails
      */
-    public static <T> void assertThat(String            message,
-                                      Deferred<T>       deferred,
-                                      Matcher<?>        matcher,
-                                      TimeoutConstraint constraint) throws AssertionError
+    public static <T> void assertThat(String             message,
+                                      Deferred<T>        deferred,
+                                      Matcher<? super T> matcher,
+                                      TimeoutConstraint  constraint) throws AssertionError
     {
         // a DeferredMatcher does the heavy lifting
         DeferredMatch<T> deferredMatch = new DeferredMatch<T>(deferred, matcher);
@@ -278,9 +276,9 @@ public class Eventually
      *
      * @throws AssertionError  if the assertion fails
      */
-    public static <T> void assertThat(JavaApplication   application,
-                                      RemoteCallable<T> callable,
-                                      Matcher<?>        matcher) throws AssertionError
+    public static <T> void assertThat(JavaApplication    application,
+                                      RemoteCallable<T>  callable,
+                                      Matcher<? super T> matcher) throws AssertionError
     {
         assertThat(new DeferredRemoteExecution<T>(application, callable), matcher);
     }
@@ -300,10 +298,10 @@ public class Eventually
      *
      * @throws AssertionError  if the assertion fails
      */
-    public static <T> void assertThat(JavaApplication   application,
-                                      RemoteCallable<T> callable,
-                                      Matcher<?>        matcher,
-                                      TimeoutConstraint constraint) throws AssertionError
+    public static <T> void assertThat(JavaApplication    application,
+                                      RemoteCallable<T>  callable,
+                                      Matcher<? super T> matcher,
+                                      TimeoutConstraint  constraint) throws AssertionError
     {
         assertThat(new DeferredRemoteExecution<T>(application, callable), matcher, constraint);
     }
@@ -363,10 +361,10 @@ public class Eventually
      * @deprecated use {@link #assertThat(Object, Matcher, TimeoutConstraint)} instead
      */
     @Deprecated
-    public static <T> void assertThat(T          value,
-                                      Matcher<?> matcher,
-                                      long       totalRetryDuration,
-                                      TimeUnit   totalRetryDurationUnits) throws AssertionError
+    public static <T> void assertThat(T                  value,
+                                      Matcher<? super T> matcher,
+                                      long               totalRetryDuration,
+                                      TimeUnit           totalRetryDurationUnits) throws AssertionError
     {
         TimeoutConstraint constraint = new SimpleTimeoutConstraint(0,
                                                                    totalRetryDurationUnits.toMillis(totalRetryDuration),
@@ -396,11 +394,11 @@ public class Eventually
      * @deprecated use {@link #assertThat(String, Object, Matcher, TimeoutConstraint)} instead
      */
     @Deprecated
-    public static <T> void assertThat(String     message,
-                                      T          value,
-                                      Matcher<?> matcher,
-                                      long       totalRetryDuration,
-                                      TimeUnit   totalRetryDurationUnits) throws AssertionError
+    public static <T> void assertThat(String             message,
+                                      T                  value,
+                                      Matcher<? super T> matcher,
+                                      long               totalRetryDuration,
+                                      TimeUnit           totalRetryDurationUnits) throws AssertionError
     {
         TimeoutConstraint constraint = new SimpleTimeoutConstraint(0,
                                                                    totalRetryDurationUnits.toMillis(totalRetryDuration),
@@ -428,10 +426,10 @@ public class Eventually
      * @deprecated use {@link #assertThat(Deferred, Matcher, TimeoutConstraint)} instead
      */
     @Deprecated
-    public static <T> void assertThat(Deferred<T> deferred,
-                                      Matcher<?>  matcher,
-                                      long        totalRetryDuration,
-                                      TimeUnit    totalRetryDurationUnits) throws AssertionError
+    public static <T> void assertThat(Deferred<T>        deferred,
+                                      Matcher<? super T> matcher,
+                                      long               totalRetryDuration,
+                                      TimeUnit           totalRetryDurationUnits) throws AssertionError
     {
         TimeoutConstraint constraint = new SimpleTimeoutConstraint(0,
                                                                    totalRetryDurationUnits.toMillis(totalRetryDuration),
@@ -460,11 +458,11 @@ public class Eventually
      * @deprecated use {@link #assertThat(String, Deferred, Matcher, TimeoutConstraint)} instead
      */
     @Deprecated
-    public static <T> void assertThat(String      message,
-                                      Deferred<T> deferred,
-                                      Matcher<?>  matcher,
-                                      long        totalRetryDuration,
-                                      TimeUnit    totalRetryDurationUnits) throws AssertionError
+    public static <T> void assertThat(String             message,
+                                      Deferred<T>        deferred,
+                                      Matcher<? super T> matcher,
+                                      long               totalRetryDuration,
+                                      TimeUnit           totalRetryDurationUnits) throws AssertionError
     {
         TimeoutConstraint constraint = new SimpleTimeoutConstraint(0,
                                                                    totalRetryDurationUnits.toMillis(totalRetryDuration),
@@ -492,11 +490,11 @@ public class Eventually
      * @deprecated use {@link #assertThat(JavaApplication, RemoteCallable, Matcher, TimeoutConstraint)} instead
      */
     @Deprecated
-    public static <T> void assertThat(JavaApplication   application,
-                                      RemoteCallable<T> callable,
-                                      Matcher<?>        matcher,
-                                      long              totalRetryDuration,
-                                      TimeUnit          totalRetryDurationUnits) throws AssertionError
+    public static <T> void assertThat(JavaApplication    application,
+                                      RemoteCallable<T>  callable,
+                                      Matcher<? super T> matcher,
+                                      long               totalRetryDuration,
+                                      TimeUnit           totalRetryDurationUnits) throws AssertionError
     {
         TimeoutConstraint constraint = new SimpleTimeoutConstraint(0,
                                                                    totalRetryDurationUnits.toMillis(totalRetryDuration),

@@ -26,39 +26,27 @@
 package com.oracle.tools.runtime.coherence;
 
 import com.oracle.tools.junit.AbstractTest;
-
 import com.oracle.tools.predicate.Predicate;
-
 import com.oracle.tools.runtime.ApplicationConsole;
 import com.oracle.tools.runtime.LocalPlatform;
 import com.oracle.tools.runtime.Platform;
-
 import com.oracle.tools.runtime.actions.InteractiveActionExecutor;
 import com.oracle.tools.runtime.actions.PerpetualAction;
-
 import com.oracle.tools.runtime.coherence.actions.RestartCoherenceClusterMemberAction;
-
 import com.oracle.tools.runtime.console.SystemApplicationConsole;
-
 import com.oracle.tools.runtime.java.JavaApplicationBuilder;
-
 import com.oracle.tools.runtime.network.AvailablePortIterator;
 import com.oracle.tools.runtime.network.Constants;
-
 import com.oracle.tools.util.Capture;
-
 import com.tangosol.net.NamedCache;
-
 import org.junit.Assert;
 import org.junit.Test;
 
-import static com.oracle.tools.deferred.DeferredHelper.invoking;
-
-import static com.oracle.tools.deferred.Eventually.assertThat;
-
-import static org.hamcrest.CoreMatchers.is;
-
 import java.util.HashSet;
+
+import static com.oracle.tools.deferred.DeferredHelper.invoking;
+import static com.oracle.tools.deferred.Eventually.assertThat;
+import static org.hamcrest.CoreMatchers.is;
 
 /**
  * Functional Tests for the {@link CoherenceClusterBuilder} class.
@@ -291,7 +279,7 @@ public abstract class AbstractCoherenceClusterBuilderTest extends AbstractTest
             namedCache.put("key", "hello");
 
             assertThat(namedCache.size(), is(1));
-            assertThat(namedCache.get("key"), is("hello"));
+            assertThat((String) namedCache.get("key"), is("hello"));
         }
         catch (Exception e)
         {

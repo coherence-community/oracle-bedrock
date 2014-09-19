@@ -50,7 +50,7 @@ public class DeferredMatch<T> implements Deferred<Boolean>
     /**
      * The {@link Matcher} to use against the {@link Deferred}.
      */
-    private Matcher<?> matcher;
+    private Matcher<? super T> matcher;
 
     /**
      * The last {@link Deferred} value use when attempting the match.
@@ -68,8 +68,8 @@ public class DeferredMatch<T> implements Deferred<Boolean>
      * @param deferred  the {@link Deferred} to match against
      * @param matcher   the {@link Matcher}
      */
-    public DeferredMatch(Deferred<T> deferred,
-                         Matcher<?>  matcher)
+    public DeferredMatch(Deferred<T>        deferred,
+                         Matcher<? super T> matcher)
     {
         this.deferred           = deferred;
         this.matcher            = matcher;
@@ -93,7 +93,7 @@ public class DeferredMatch<T> implements Deferred<Boolean>
      *
      * @return the {@link Matcher}
      */
-    public Matcher<?> getMatcher()
+    public Matcher<? super T> getMatcher()
     {
         return matcher;
     }

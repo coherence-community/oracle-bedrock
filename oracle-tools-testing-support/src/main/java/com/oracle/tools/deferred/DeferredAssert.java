@@ -26,14 +26,12 @@
 package com.oracle.tools.deferred;
 
 import com.oracle.tools.runtime.concurrent.RemoteCallable;
-
 import com.oracle.tools.runtime.java.JavaApplication;
-
 import org.hamcrest.Matcher;
 
-import static com.oracle.tools.deferred.DeferredHelper.ensure;
-
 import java.util.concurrent.TimeUnit;
+
+import static com.oracle.tools.deferred.DeferredHelper.ensure;
 
 /**
  * The {@link DeferredAssert} is a helper class that defines commonly used
@@ -64,8 +62,8 @@ public class DeferredAssert extends Eventually
      *
      * @throws AssertionError if the assertion fails
      */
-    public static <T> void assertThat(Deferred<T> deferred,
-                                      Matcher<?>  matcher) throws AssertionError
+    public static <T> void assertThat(Deferred<T>        deferred,
+                                      Matcher<? super T> matcher) throws AssertionError
     {
         assertThat(null, deferred, matcher);
     }
@@ -84,9 +82,9 @@ public class DeferredAssert extends Eventually
      *
      * @throws AssertionError if the assertion fails
      */
-    public static <T> void assertThat(String      message,
-                                      Deferred<T> deferred,
-                                      Matcher<?>  matcher) throws AssertionError
+    public static <T> void assertThat(String             message,
+                                      Deferred<T>        deferred,
+                                      Matcher<? super T> matcher) throws AssertionError
     {
         assertThat(message,
                    deferred,
@@ -110,10 +108,10 @@ public class DeferredAssert extends Eventually
      *
      * @throws AssertionError if the assertion fails
      */
-    public static <T> void assertThat(Deferred<T> deferred,
-                                      Matcher<?>  matcher,
-                                      long        totalRetryDuration,
-                                      TimeUnit    totalRetryDurationUnits) throws AssertionError
+    public static <T> void assertThat(Deferred<T>        deferred,
+                                      Matcher<? super T> matcher,
+                                      long               totalRetryDuration,
+                                      TimeUnit           totalRetryDurationUnits) throws AssertionError
     {
         assertThat(null, deferred, matcher, totalRetryDuration, totalRetryDurationUnits);
     }
@@ -134,14 +132,14 @@ public class DeferredAssert extends Eventually
      *
      * @throws AssertionError if the assertion fails
      */
-    public static <T> void assertThat(String      message,
-                                      Deferred<T> deferred,
-                                      Matcher<?>  matcher,
-                                      long        totalRetryDuration,
-                                      TimeUnit    totalRetryDurationUnits) throws AssertionError
+    public static <T> void assertThat(String             message,
+                                      Deferred<T>        deferred,
+                                      Matcher<? super T> matcher,
+                                      long               totalRetryDuration,
+                                      TimeUnit           totalRetryDurationUnits) throws AssertionError
     {
         // a DeferredMatcher does the heavy lifting
-        DeferredMatch<T> deferredMatch = new DeferredMatch<T>(deferred, matcher);
+        DeferredMatch<T> deferredMatch = new DeferredMatch<>(deferred, matcher);
 
         try
         {
@@ -195,9 +193,9 @@ public class DeferredAssert extends Eventually
      *
      * @throws AssertionError
      */
-    public static <T> void assertThat(JavaApplication   application,
-                                      RemoteCallable<T> callable,
-                                      Matcher<?>        matcher) throws AssertionError
+    public static <T> void assertThat(JavaApplication    application,
+                                      RemoteCallable<T>  callable,
+                                      Matcher<? super T> matcher) throws AssertionError
     {
         assertThat(new DeferredRemoteExecution<T>(application, callable), matcher);
     }
