@@ -48,12 +48,13 @@ import java.util.concurrent.Callable;
 public interface RemoteExecutor
 {
     /**
-     * Submits the {@link RemoteCallable} to be asynchronously executed remotely.
+     * Submits a {@link RemoteCallable} for asynchronous execution by the
+     * {@link RemoteExecutor}.
      *
-     * @param callable  the {@link Callable} to be executed remotely
+     * @param callable  the {@link RemoteCallable} to be executed
      * @param listener  a {@link CompletionListener} to be notified upon
-     *                  completed execution of the {@link Callable}
-     * @param <T>       the return type of the {@link Callable}
+     *                  completed execution of the {@link RemoteCallable}
+     * @param <T>       the return type of the {@link RemoteCallable}
      *
      * @throws IllegalStateException  if the {@link RemoteExecutor} is closed or
      *                                is unable to accept the submission
@@ -63,9 +64,10 @@ public interface RemoteExecutor
 
 
     /**
-     * Submits the {@link RemoteRunnable} for asynchronous remote execution.
+     * Submits a {@link RemoteRunnable} for asynchronous execution by the
+     * {@link RemoteExecutor}.
      *
-     * @param runnable  the {@link Runnable} to asynchronously execute remotely
+     * @param runnable  the {@link RemoteRunnable} to be executed
      *
      * @throws IllegalStateException  if the {@link RemoteExecutor} is closed or
      *                                is unable to accept the submission

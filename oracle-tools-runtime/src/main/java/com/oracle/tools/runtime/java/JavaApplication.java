@@ -26,20 +26,31 @@
 package com.oracle.tools.runtime.java;
 
 import com.oracle.tools.deferred.Deferred;
+
 import com.oracle.tools.runtime.Application;
+
 import com.oracle.tools.runtime.concurrent.RemoteCallable;
 import com.oracle.tools.runtime.concurrent.RemoteExecutor;
+import com.oracle.tools.runtime.concurrent.RemoteRunnable;
 import com.oracle.tools.runtime.concurrent.callable.RemoteMethodInvocation;
+
+import com.oracle.tools.util.CompletionListener;
+
+import java.io.NotSerializableException;
+
+import java.net.InetSocketAddress;
+
+import java.util.Properties;
+import java.util.Set;
+
+import java.util.concurrent.Callable;
 
 import javax.management.MBeanInfo;
 import javax.management.ObjectInstance;
 import javax.management.ObjectName;
 import javax.management.QueryExp;
+
 import javax.management.remote.JMXConnector;
-import java.io.NotSerializableException;
-import java.net.InetSocketAddress;
-import java.util.Properties;
-import java.util.Set;
 
 /**
  * An {@link Application} specifically representing Java-based applications.
@@ -328,6 +339,7 @@ public interface JavaApplication extends Application, RemoteExecutor
                              RemoteCallable<T>                  instanceProducer,
                              RemoteMethodInvocation.Interceptor interceptor);
 
+
     /**
      * Obtain the socket that the {@link JavaApplication} is listening on for remote
      * debugging.
@@ -337,11 +349,12 @@ public interface JavaApplication extends Application, RemoteExecutor
      */
     public InetSocketAddress getRemoteDebugSocket();
 
+
     /**
-     * Submits a {@link java.util.concurrent.Callable} for remote execution by the
-     * {@link Application} and blocks waiting for the result.
+     * Submits a {@link RemoteCallable} for execution by the
+     * {@link JavaApplication}, waiting for the result to be returned.
      *
-     * @param callable  the {@link java.util.concurrent.Callable} to execute
+     * @param callable  the {@link RemoteCallable} to be executed
      * @param <T>       the type of the result
      */
     public <T> T submit(RemoteCallable<T> callable);
