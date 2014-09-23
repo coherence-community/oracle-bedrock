@@ -336,4 +336,13 @@ public interface JavaApplication extends Application, RemoteExecutor
      *         debugging, or null if remote debugging is not enabled
      */
     public InetSocketAddress getRemoteDebugSocket();
+
+    /**
+     * Submits a {@link java.util.concurrent.Callable} for remote execution by the
+     * {@link Application} and blocks waiting for the result.
+     *
+     * @param callable  the {@link java.util.concurrent.Callable} to execute
+     * @param <T>       the type of the result
+     */
+    public <T> T submit(RemoteCallable<T> callable);
 }

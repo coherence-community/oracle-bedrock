@@ -354,6 +354,10 @@ reverse chronological order.
     SocketBasedRemoteExecutor notify "local" CompletionListeners when they are
     provided for submissions.
 
+*   [ORACLETOOLS-168](https://java.net/jira/browse/ORACLETOOLS-168): Added
+    the method public <T> T submit(RemoteCallable<T> callable) from
+    AbstractJavaApplication to the JavaApplication interface.
+
 <h4>oracle-tools-runtime-remote</h4>
 
 *   [ORACLETOOLS-91](https://java.net/jira/browse/ORACLETOOLS-91): Introduced
