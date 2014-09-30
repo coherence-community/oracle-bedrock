@@ -203,7 +203,16 @@ public abstract class AbstractCoherenceClusterMember<A extends AbstractCoherence
     @Override
     public NamedCache getCache(String cacheName)
     {
-        return new CoherenceNamedCache(this, cacheName);
+        return new CoherenceNamedCache(this, cacheName, Object.class, Object.class);
+    }
+
+
+    @Override
+    public <K, V> NamedCache<K, V> getCache(String   cacheName,
+                                            Class<K> keyClass,
+                                            Class<V> valueClass)
+    {
+        return new CoherenceNamedCache(this, cacheName, keyClass, valueClass);
     }
 
 

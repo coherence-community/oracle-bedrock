@@ -197,7 +197,10 @@ public class RemoteExecutorServer extends AbstractControllableRemoteExecutor
             {
                 predicate = predicate == null ? NetworkHelper.DEFAULT_ADDRESS : predicate;
 
-                return NetworkHelper.getInetAddress(predicate);
+                InetAddress inetAddress = NetworkHelper.getInetAddress(predicate);
+
+                // when the specific inetAddess is not available, use the server socket
+                return inetAddress == null ? serverSocket.getInetAddress() : inetAddress;
             }
             catch (SocketException e)
             {

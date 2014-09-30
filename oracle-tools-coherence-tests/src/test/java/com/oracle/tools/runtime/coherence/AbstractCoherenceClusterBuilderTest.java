@@ -167,8 +167,7 @@ public abstract class AbstractCoherenceClusterBuilderTest extends AbstractTest
 
         CoherenceCacheServerSchema schema =
             new CoherenceCacheServerSchema().setStorageEnabled(true).setWellKnownAddress(localHost)
-                .setClusterName("WKA").setWellKnownAddressPort(wkaPort).setLocalHostAddress(localHost)
-                .setLocalHostPort(wkaPort).setClusterPort(clusterPort);
+                .setClusterName("WKA").setWellKnownAddressPort(wkaPort).setLocalHostAddress(localHost).setClusterPort(clusterPort);
 
         SystemApplicationConsole console            = new SystemApplicationConsole();
         int                      desiredClusterSize = 4;

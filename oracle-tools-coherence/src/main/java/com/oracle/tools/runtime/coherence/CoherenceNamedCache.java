@@ -61,7 +61,7 @@ import java.util.Set;
  *
  * @author Brian Oliver
  */
-class CoherenceNamedCache implements NamedCache
+class CoherenceNamedCache<K, V> implements NamedCache<K, V>
 {
     /**
      * The {@link CoherenceClusterMember} that owns the {@link NamedCache}
@@ -73,6 +73,16 @@ class CoherenceNamedCache implements NamedCache
      * The name of the {@link NamedCache}.
      */
     private String cacheName;
+
+    /**
+     * The type of the keys for the {@link NamedCache}.
+     */
+    private Class<K> keyClass;
+
+    /**
+     * The type of the values for the {@link NamedCache}.
+     */
+    private Class<V> valueClass;
 
     /**
      * The {@link RemoteCallableStaticMethod} to use in the
@@ -90,14 +100,21 @@ class CoherenceNamedCache implements NamedCache
     /**
      * Constructs a {@link CoherenceNamedCache}.
      *
-     * @param member     the {@link CoherenceClusterMember} that owns the {@link NamedCache}
-     * @param cacheName  the name of the {@link NamedCache}
+     * @param member      the {@link CoherenceClusterMember} that owns the {@link NamedCache}
+     * @param cacheName   the name of the {@link NamedCache}
+     * @param keyClass    the type of the keys for the {@link NamedCache}
+     * @param valueClass  the type of the values for the {@link NamedCache}
      */
     public CoherenceNamedCache(CoherenceClusterMember member,
-                               String                 cacheName)
+                               String                 cacheName,
+                               Class<K>               keyClass,
+                               Class<V>               valueClass)
     {
-        this.member    = member;
-        this.cacheName = cacheName;
+        this.member     = member;
+        this.cacheName  = cacheName;
+        this.keyClass   = keyClass;
+        this.valueClass = valueClass;
+
         this.producer = new RemoteCallableStaticMethod<NamedCache>("com.tangosol.net.CacheFactory",
                                                                    "getCache",
                                                                    cacheName);
@@ -225,80 +242,80 @@ class CoherenceNamedCache implements NamedCache
 
 
     @Override
-    public Object put(Object key,
-                      Object value,
-                      long   expiry)
+    public V put(K    key,
+                 V    value,
+                 long expiry)
     {
-        return remotelyInvoke("put", Object.class, key, value, expiry);
+        return remotelyInvoke("put", valueClass, key, value, expiry);
     }
 
 
     @Override
-    public Map getAll(Collection keys)
+    public Map<K, V> getAll(java.util.Collection<? extends K> keys)
     {
         return remotelyInvoke("getAll", Map.class, keys);
     }
 
 
     @Override
-    public boolean lock(Object key,
-                        long   duration)
+    public boolean lock(K    key,
+                        long duration)
     {
         return remotelyInvoke("lock", Boolean.class, key, duration);
     }
 
 
     @Override
-    public boolean lock(Object key)
+    public boolean lock(K key)
     {
         return remotelyInvoke("lock", Boolean.class, key);
     }
 
 
     @Override
-    public boolean unlock(Object key)
+    public boolean unlock(K key)
     {
         return remotelyInvoke("unlock", Boolean.class, key);
     }
 
 
     @Override
-    public Object invoke(Object         key,
-                         EntryProcessor processor)
+    public <R> R invoke(K                       key,
+                        EntryProcessor<K, V, R> processor)
     {
-        return remotelyInvoke("invoke", Object.class, key, processor);
+        return (R) remotelyInvoke("invoke", Object.class, key, processor);
     }
 
 
     @Override
-    public Map invokeAll(Collection     keys,
-                         EntryProcessor processor)
+    public <R> Map<K, R> invokeAll(Collection<? extends K> keys,
+                                   EntryProcessor<K, V, R> processor)
     {
         return remotelyInvoke("invokeAll", Map.class, keys, processor);
     }
 
 
     @Override
-    public Map invokeAll(Filter         filter,
-                         EntryProcessor processor)
+    public <R> Map<K, R> invokeAll(Filter                  filter,
+                                   EntryProcessor<K, V, R> processor)
     {
         return remotelyInvoke("invokeAll", Map.class, filter, processor);
     }
 
 
     @Override
-    public Object aggregate(Collection      collection,
-                            EntryAggregator aggregator)
+    public <R> R aggregate(Collection<? extends K>                  keys,
+                           EntryAggregator<? super K, ? super V, R> aggregator)
     {
-        return remotelyInvoke("aggregate", Object.class, collection, aggregator);
+        return (R) remotelyInvoke("aggregate", Object.class, keys, aggregator);
     }
 
 
     @Override
-    public Object aggregate(Filter          filter,
-                            EntryAggregator aggregator)
+    public <R> R aggregate(Filter                                   filter,
+                           EntryAggregator<? super K, ? super V, R> aggregator)
     {
-        return remotelyInvoke("aggregate", Object.class, filter, aggregator);
+        return (R) remotelyInvoke("aggregate", Object.class, filter, aggregator);
     }
 
 
@@ -351,38 +368,38 @@ class CoherenceNamedCache implements NamedCache
 
 
     @Override
-    public Set keySet(Filter filter)
+    public Set<K> keySet(Filter filter)
     {
         return remotelyInvoke("keySet", Set.class, filter);
     }
 
 
     @Override
-    public Set entrySet(Filter filter)
+    public Set<Map.Entry<K, V>> entrySet(Filter filter)
     {
         return remotelyInvoke("entrySet", Set.class, filter);
     }
 
 
     @Override
-    public Set entrySet(Filter     filter,
-                        Comparator comparator)
+    public Set<Map.Entry<K, V>> entrySet(Filter     filter,
+                                         Comparator comparator)
     {
         return remotelyInvoke("entrySet", Set.class, filter, comparator);
     }
 
 
     @Override
-    public void addIndex(ValueExtractor valueExtractor,
-                         boolean        ordered,
-                         Comparator     comparator)
+    public <E> void addIndex(ValueExtractor<E> valueExtractor,
+                             boolean           ordered,
+                             Comparator<E>     comparator)
     {
         remotelyInvoke("addIndex", valueExtractor, ordered, comparator);
     }
 
 
     @Override
-    public void removeIndex(ValueExtractor valueExtractor)
+    public <E> void removeIndex(ValueExtractor<E> valueExtractor)
     {
         remotelyInvoke("removeIndex", valueExtractor);
     }
@@ -417,29 +434,29 @@ class CoherenceNamedCache implements NamedCache
 
 
     @Override
-    public Object get(Object key)
+    public V get(Object key)
     {
-        return remotelyInvoke("get", Object.class, key);
+        return remotelyInvoke("get", valueClass, key);
     }
 
 
     @Override
-    public Object put(Object key,
-                      Object value)
+    public V put(K key,
+                 V value)
     {
-        return remotelyInvoke("put", Object.class, key, value);
+        return (V) remotelyInvoke("put", valueClass, key, value);
     }
 
 
     @Override
-    public Object remove(Object key)
+    public V remove(Object key)
     {
-        return remotelyInvoke("remove", Object.class, key);
+        return (V) remotelyInvoke("remove", valueClass, key);
     }
 
 
     @Override
-    public void putAll(Map map)
+    public void putAll(Map<? extends K, ? extends V> map)
     {
         remotelyInvoke("putAll", map);
     }
@@ -453,21 +470,21 @@ class CoherenceNamedCache implements NamedCache
 
 
     @Override
-    public Set keySet()
+    public Set<K> keySet()
     {
         return remotelyInvoke("keySet", Set.class);
     }
 
 
     @Override
-    public Collection values()
+    public Collection<V> values()
     {
         return remotelyInvoke("values", Collection.class);
     }
 
 
     @Override
-    public Set<Map.Entry> entrySet()
+    public Set<Map.Entry<K, V>> entrySet()
     {
         return remotelyInvoke("entrySet", Set.class);
     }

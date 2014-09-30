@@ -126,6 +126,31 @@ public interface CoherenceClusterMember extends JavaApplication
 
 
     /**
+     * Obtains a proxy of a strongly-typed {@link NamedCache} available in the
+     * {@link CoherenceClusterMember}.
+     * <p>
+     * WARNING: Some methods on the returned {@link NamedCache} proxy are not
+     * available for remote execution and are thus not supported.  Attempts to
+     * use such methods will thrown {@link UnsupportedOperationException}.
+     * <p>
+     * The unsupported methods are: getCacheService, addMapListener,
+     * removeMapListener, entrySet, values, addIndex and removeIndex.
+     * <p>
+     * Additionally note that method invocations taking unserializable parameters
+     * or returning unserializable values will throw {@link NotSerializableException}s.
+     *
+     * @param cacheName   the name of the {@link NamedCache}
+     * @param keyClass    the type of the keys for the {@link NamedCache}
+     * @param valueClass  the type of the values for the {@link NamedCache}
+     *
+     * @return  a proxy to the {@link NamedCache}
+     */
+    public <K, V> NamedCache<K, V> getCache(String   cacheName,
+                                            Class<K> keyClass,
+                                            Class<V> valueClass);
+
+
+    /**
      * Determines if a specified service is being run by the {@link CoherenceClusterMember}.
      *
      * @param serviceName  the name of the service

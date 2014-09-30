@@ -29,6 +29,8 @@ import com.tangosol.util.InvocableMap;
 
 import com.tangosol.util.processor.AbstractProcessor;
 
+import javax.swing.*;
+
 /**
  * An {@link InvocableMap.EntryProcessor} to return the value of an entry.
  * <p>
@@ -37,7 +39,7 @@ import com.tangosol.util.processor.AbstractProcessor;
  *
  * @author Brian Oliver
  */
-public class GetProcessor extends AbstractProcessor
+public class GetProcessor<K, V> extends AbstractProcessor<K, V, V>
 {
     /**
      * Constructs a {@link GetProcessor}.
@@ -48,7 +50,7 @@ public class GetProcessor extends AbstractProcessor
 
 
     @Override
-    public Object process(InvocableMap.Entry entry)
+    public V process(InvocableMap.Entry<K, V> entry)
     {
         return entry.isPresent() ? entry.getValue() : null;
     }

@@ -26,33 +26,47 @@
 package com.oracle.tools.runtime.coherence;
 
 import com.oracle.tools.junit.AbstractTest;
+
 import com.oracle.tools.matchers.MapMatcher;
+
 import com.oracle.tools.runtime.LocalPlatform;
 import com.oracle.tools.runtime.Platform;
+
 import com.oracle.tools.runtime.coherence.callables.GetClusterName;
 import com.oracle.tools.runtime.coherence.callables.GetClusterSize;
 import com.oracle.tools.runtime.coherence.callables.GetLocalMemberId;
 import com.oracle.tools.runtime.coherence.callables.GetServiceStatus;
+
 import com.oracle.tools.runtime.console.SystemApplicationConsole;
+
 import com.oracle.tools.runtime.network.AvailablePortIterator;
+
 import com.oracle.tools.runtime.options.Diagnostics;
+
 import com.tangosol.net.NamedCache;
+
 import com.tangosol.util.aggregator.LongSum;
+
 import com.tangosol.util.extractor.IdentityExtractor;
+
 import com.tangosol.util.filter.PresentFilter;
+
 import org.junit.Test;
 
-import javax.management.ObjectName;
+import static com.oracle.tools.deferred.DeferredHelper.invoking;
+
+import static com.oracle.tools.deferred.Eventually.assertThat;
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
+
 import java.util.AbstractMap;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import static com.oracle.tools.deferred.DeferredHelper.invoking;
-import static com.oracle.tools.deferred.Eventually.assertThat;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.notNullValue;
+import javax.management.ObjectName;
 
 /**
  * Functional Tests for {@link CoherenceCacheServer}s.
@@ -202,7 +216,7 @@ public abstract class AbstractCoherenceCacheServerTest extends AbstractTest
             assertThat(server, new GetLocalMemberId(), is(1));
             assertThat(server, new GetClusterSize(), is(1));
 
-            NamedCache namedCache = server.getCache("dist-example");
+            NamedCache<String, String> namedCache = server.getCache("dist-example", String.class, String.class);
 
             // ----- use NamedCache.clear -----
             namedCache.clear();
@@ -213,14 +227,14 @@ public abstract class AbstractCoherenceCacheServerTest extends AbstractTest
             namedCache.put("key", "hello");
 
             assertThat(namedCache.size(), is(1));
-            assertThat((String) namedCache.get("key"), is("hello"));
+            assertThat(namedCache.get("key"), is("hello"));
 
             // ----- use NamedCache.invokeAll -----
-            Map map = namedCache.invokeAll(PresentFilter.INSTANCE, new GetProcessor());
+            Map<String, String> map = namedCache.invokeAll(PresentFilter.INSTANCE, new GetProcessor());
 
             assertThat(map, notNullValue());
             assertThat(map.size(), is(1));
-            assertThat((String) map.get("key"), is("hello"));
+            assertThat(map.get("key"), is("hello"));
 
             // ----- use NamedCache.keySet -----
             Set keySet = namedCache.keySet();
@@ -230,7 +244,7 @@ public abstract class AbstractCoherenceCacheServerTest extends AbstractTest
             assertThat(keySet.contains("key"), is(true));
 
             // ----- use NamedCache.entrySet -----
-            Set entrySet = namedCache.entrySet();
+            Set<Map.Entry<String, String>> entrySet = namedCache.entrySet();
 
             assertThat(entrySet, notNullValue());
             assertThat(entrySet.size(), is(1));
@@ -250,7 +264,7 @@ public abstract class AbstractCoherenceCacheServerTest extends AbstractTest
             namedCache.put("key", "hello");
 
             assertThat(namedCache.size(), is(1));
-            assertThat((String) namedCache.get("key"), is("hello"));
+            assertThat(namedCache.get("key"), is("hello"));
 
             // ----- use NamedCache.remove -----
             namedCache.remove("key");
@@ -258,38 +272,40 @@ public abstract class AbstractCoherenceCacheServerTest extends AbstractTest
             assertThat(namedCache.size(), is(0));
 
             // ----- use NamedCache.putAll -----
-            HashMap<String, Integer> putAllMap = new HashMap<>();
-            long                     sum       = 0;
+            NamedCache<String, Integer> otherNamedCache = server.getCache("dist-other", String.class, Integer.class);
+
+            HashMap<String, Integer>    putAllMap       = new HashMap<>();
+            long                        sum             = 0;
 
             for (int i = 1; i < 5; i++)
             {
                 String key = Integer.toString(i);
 
-                putAllMap.put(key, new Integer(i));
+                putAllMap.put(key, i);
 
                 sum += i;
             }
 
-            namedCache.putAll(putAllMap);
+            otherNamedCache.putAll(putAllMap);
 
-            assertThat(namedCache.size(), is(putAllMap.size()));
+            assertThat(otherNamedCache.size(), is(putAllMap.size()));
 
             // ----- use NamedCache.getAll -----
-            Map<String, Integer> getAllResults = namedCache.getAll(putAllMap.keySet());
+            Map<String, Integer> getAllResults = otherNamedCache.getAll(putAllMap.keySet());
 
             assertThat(getAllResults, MapMatcher.sameAs(putAllMap));
 
-            Map<String, Integer> otherGetAllResults = namedCache.getAll(namedCache.keySet());
+            Map<String, Integer> otherGetAllResults = otherNamedCache.getAll(otherNamedCache.keySet());
 
             assertThat(otherGetAllResults, MapMatcher.sameAs(putAllMap));
 
             // ----- use NamedCache.aggregate -----
-            long longSum = (Long) namedCache.aggregate(PresentFilter.INSTANCE, new LongSum(IdentityExtractor.INSTANCE));
+            long longSum = otherNamedCache.aggregate(PresentFilter.INSTANCE, new LongSum(IdentityExtractor.INSTANCE));
 
             assertThat(longSum, is(sum));
 
-            long anotherLongSum = (Long) namedCache.aggregate(putAllMap.keySet(),
-                                                              new LongSum(IdentityExtractor.INSTANCE));
+            long anotherLongSum = otherNamedCache.aggregate(putAllMap.keySet(),
+                                                            new LongSum(IdentityExtractor.INSTANCE));
 
             assertThat(anotherLongSum, is(sum));
         }

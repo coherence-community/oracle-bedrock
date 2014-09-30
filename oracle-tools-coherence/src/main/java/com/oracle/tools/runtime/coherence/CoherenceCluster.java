@@ -98,4 +98,24 @@ public class CoherenceCluster extends AbstractAssembly<CoherenceClusterMember>
 
         return members.hasNext() ? members.next().getCache(cacheName) : null;
     }
+
+
+    /**
+     * Obtains a proxy of the specified {@link NamedCache} available in the
+     * {@link CoherenceCluster}.
+     *
+     * @param cacheName   the name of the {@link NamedCache}
+     * @param keyClass    the type of the keys for the {@link NamedCache}
+     * @param valueClass  the type of the values for the {@link NamedCache}
+     *
+     * @return  a proxy to the {@link NamedCache}
+     */
+    public <K, V> NamedCache<K, V> getCache(String   cacheName,
+                                            Class<K> keyClass,
+                                            Class<V> valueClass)
+    {
+        Iterator<CoherenceClusterMember> members = iterator();
+
+        return members.hasNext() ? members.next().getCache(cacheName, keyClass, valueClass) : null;
+    }
 }

@@ -4,7 +4,7 @@
     <parent>
         <artifactId>oracle-tools</artifactId>
         <groupId>com.oracle.tools</groupId>
-        <version>2.0.0-RC3-SNAPSHOT</version>
+        <version>3.0.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>oracle-tools-runtime-remote</artifactId>
