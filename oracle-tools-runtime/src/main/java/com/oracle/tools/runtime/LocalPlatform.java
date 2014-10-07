@@ -27,6 +27,7 @@ package com.oracle.tools.runtime;
 
 import com.oracle.tools.runtime.java.JavaApplication;
 import com.oracle.tools.runtime.java.LocalJavaApplicationBuilder;
+
 import com.oracle.tools.runtime.network.AvailablePortIterator;
 
 import java.net.InetAddress;
@@ -46,9 +47,10 @@ public class LocalPlatform extends AbstractPlatform
     /**
      * The singleton instance of {@link LocalPlatform}.
      */
-    private static LocalPlatform INSTANCE = new LocalPlatform();
+    private static LocalPlatform  INSTANCE = new LocalPlatform();
 
     private AvailablePortIterator availablePortIterator;
+
 
     /**
      * Construct a new {@link LocalPlatform}.
@@ -60,6 +62,7 @@ public class LocalPlatform extends AbstractPlatform
                                                           30000,
                                                           AvailablePortIterator.MAXIMUM_PORT);
     }
+
 
     @Override
     public InetAddress getPublicInetAddress()
@@ -74,6 +77,7 @@ public class LocalPlatform extends AbstractPlatform
         }
     }
 
+
     /**
      * Obtains the local host address to use for local-only connections
      * on the platform.
@@ -82,15 +86,9 @@ public class LocalPlatform extends AbstractPlatform
      */
     public String getHostName()
     {
-        if (System.getProperties().containsKey("tangosol.coherence.localhost"))
-        {
-            return System.getProperty("tangosol.coherence.localhost");
-        }
-        else
-        {
-            return "127.0.0.1";
-        }
+        return System.getProperty("tangosol.coherence.localhost", "127.0.0.1");
     }
+
 
     /**
      * Obtains the {@link AvailablePortIterator} for the {@link LocalPlatform}.
@@ -102,9 +100,7 @@ public class LocalPlatform extends AbstractPlatform
         return availablePortIterator;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+
     @Override
     @SuppressWarnings("unchecked")
     public <A extends Application, B extends ApplicationBuilder<A>> B getApplicationBuilder(Class<A> applicationClass)
@@ -118,6 +114,7 @@ public class LocalPlatform extends AbstractPlatform
             return (B) new SimpleApplicationBuilder();
         }
     }
+
 
     /**
      * Obtain the singleton instance of the {@link LocalPlatform}.
