@@ -880,7 +880,7 @@ public class DeferredHelper
             }
             else if (resultType.isArray())
             {
-                return Array.newInstance(resultType, 0);
+                return Array.newInstance(resultType.getComponentType(), 0);
             }
             else if (resultType.equals(String.class))
             {

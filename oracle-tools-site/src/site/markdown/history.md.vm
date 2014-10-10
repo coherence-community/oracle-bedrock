@@ -75,6 +75,9 @@ reverse chronological order.
     TemporarilyUnavailableExceptions to replace the deprecated
     InstanceUnavailableException and UnresolvableInstanceExceptions.
 
+*   [ORACLETOOLS-172](https://java.net/jira/browse/ORACLETOOLS-172): Resolved
+    inability to use DeferredHelper.invoking(...) method calls that return arrays.
+
 <h4>oracle-tools-runtime</h4>
 
 *   [ORACLETOOLS-61](https://java.net/jira/browse/ORACLETOOLS-61): Introduced
