@@ -28,13 +28,19 @@ package com.oracle.tools.deferred;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
-
 import static com.oracle.tools.deferred.DeferredHelper.deferred;
 import static com.oracle.tools.deferred.DeferredHelper.eventually;
 import static com.oracle.tools.deferred.DeferredHelper.invoking;
+
+import static org.hamcrest.CoreMatchers.is;
+
+import static org.hamcrest.Matchers.arrayWithSize;
+
+import static org.junit.Assert.assertThat;
+
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Unit tests for the {@link DeferredHelper}.
@@ -50,7 +56,7 @@ public class DeferredHelperTest
      * Ensure that we can create a {@link Deferred} for an {@link AtomicLong}.
      */
     @Test
-    public void thatDeferringAnAtomicLongIsPossible()
+    public void shouldDeferAnAtomicLong()
     {
         AtomicLong     a        = new AtomicLong(1);
 
@@ -64,7 +70,7 @@ public class DeferredHelperTest
      * Ensure that we can create a {@link Deferred} for an {@link AtomicInteger}.
      */
     @Test
-    public void thatDeferringAnAtomicIntegerIsPossible()
+    public void shouldDeferAnAtomicInteger()
     {
         AtomicInteger     a        = new AtomicInteger(1);
 
@@ -78,7 +84,7 @@ public class DeferredHelperTest
      * Ensure that we can create a {@link Deferred} for an {@link AtomicBoolean}.
      */
     @Test
-    public void thatDeferringAnAtomicBooleanIsPossible()
+    public void shouldDeferAnAtomicBoolean()
     {
         AtomicBoolean     a        = new AtomicBoolean(true);
 
@@ -92,13 +98,27 @@ public class DeferredHelperTest
      * Ensure that we can use DeferredAssert with Strings.
      */
     @Test
-    public void thatCanUseDeferredAssertWithString()
+    public void shouldDeferAString()
     {
         StringContainer  container = new StringContainer("Gudday");
 
-        Deferred<String> defString = eventually(invoking(container).getString());
+        Deferred<String> deferred  = eventually(invoking(container).getString());
 
-        Assert.assertEquals("Gudday", defString.get());
+        Assert.assertEquals("Gudday", deferred.get());
+    }
+
+
+    /**
+     * Ensure that we can use DeferredAssert with String arrays.
+     */
+    @Test
+    public void shouldDeferAStringArray()
+    {
+        StringContainer    container = new StringContainer("Gudday");
+
+        Deferred<String[]> deferred  = eventually(invoking(container).getStrings());
+
+        assertThat(deferred.get(), is(arrayWithSize(1)));
     }
 
 
@@ -107,28 +127,43 @@ public class DeferredHelperTest
      */
     public static class StringContainer
     {
-        private String m_String;
+        private String value;
 
 
         /**
          * Constructs an StringContainer.
          *
-         * @param string
+         * @param value  the String value
          */
-        public StringContainer(String string)
+        public StringContainer(String value)
         {
-            m_String = string;
+            this.value = value;
         }
 
 
         /**
-         * Obtain the String
+         * Obtain the String value.
          *
-         * @return
+         * @return  the String value
          */
         public String getString()
         {
-            return m_String;
+            return value;
+        }
+
+
+        /**
+         * Obtains the String value as an array.
+         *
+         * @return  the String value as an array
+         */
+        public String[] getStrings()
+        {
+            String[] result = new String[1];
+
+            result[0] = value;
+
+            return result;
         }
     }
 }

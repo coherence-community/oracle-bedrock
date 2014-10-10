@@ -23,10 +23,6 @@ reverse chronological order.
 
 *   (no changes)
 
-*   [ORACLETOOLS-171](https://java.net/jira/browse/ORACLETOOLS-171): Refactored
-    Constants.getLocalHost() to remove the requirement for unnecessary security
-    permissions.
-
 <h4>oracle-tools-runtime-remote</h4>
 
 *   (no changes)
