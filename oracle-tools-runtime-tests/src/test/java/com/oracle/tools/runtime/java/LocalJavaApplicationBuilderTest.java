@@ -366,6 +366,7 @@ public class LocalJavaApplicationBuilderTest extends AbstractJavaApplicationBuil
                 new LocalJavaApplicationBuilder<SimpleJavaApplication>();
 
             schema.addOption(Orphanable.disabled());
+            schema.setPreferIPv4(true);
 
             ApplicationConsole console = new SystemApplicationConsole();
 
@@ -441,6 +442,7 @@ public class LocalJavaApplicationBuilderTest extends AbstractJavaApplicationBuil
                 new LocalJavaApplicationBuilder<SimpleJavaApplication>();
 
             schema.addOption(Orphanable.disabled());
+            schema.setPreferIPv4(true);
 
             ApplicationConsole console = new SystemApplicationConsole();
 

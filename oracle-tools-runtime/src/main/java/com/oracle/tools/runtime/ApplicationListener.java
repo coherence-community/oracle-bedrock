@@ -1,5 +1,5 @@
 /*
- * File: Assembly.java
+ * File: ApplicationListener.java
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
@@ -25,42 +25,35 @@
 
 package com.oracle.tools.runtime;
 
-import com.oracle.tools.Option;
-
-import java.io.Closeable;
-
 /**
- * Represents a collection of related {@link Application}s at runtime.
- * <p>
- * {@link Assembly}s are created using {@link AssemblyBuilder}s.
- * <p>
- * Copyright (c) 2014. All Rights Reserved. Oracle Corporation.<br>
- * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
+ * A listener for {@link Application} life-cycle events.
  *
  * @author Brian Oliver
  *
  * @param <A>  the type of the {@link Application} in the {@link Assembly}
  */
-public interface Assembly<A extends Application> extends Iterable<A>, Closeable, Option, ApplicationListener<A>
+public interface ApplicationListener<A extends Application>
 {
     /**
-     * Closes the {@link Assembly} including all of the {@link Application}s
-     * that are part of the {@link Assembly}.
-     * <p>
-     * Upon returning it is safe to assume that all previously running
-     * {@link Application}s have been closed.
-     * <p>
-     * If the {@link Assembly} is already closed, calling this method has no effect.
-     * </p>
+     * Called prior to an {@link Application} being closed.
+     *
+     * @param application  the {@link Application} being closed
      */
-    @Override
-    public void close();
+    public void onClosing(A application);
 
 
     /**
-     * Obtains the number of {@link Application} instances in the {@link Assembly}.
+     * Called after an {@link Application} was closed.
      *
-     * @return  the number of {@link Application}s in the {@link Assembly}
+     * @param application  the {@link Application} that was closed
      */
-    public int size();
+    public void onClosed(A application);
+
+
+    /**
+     * Called after an {@link Application} has been realized.
+     *
+     * @param application  the {@link Application} the was realized
+     */
+    public void onRealized(A application);
 }

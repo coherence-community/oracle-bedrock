@@ -25,6 +25,8 @@
 
 package com.oracle.tools.runtime;
 
+import com.oracle.tools.Options;
+
 import com.oracle.tools.options.Timeout;
 
 import java.io.Closeable;
@@ -137,4 +139,15 @@ public interface Application extends Closeable
      * @return a {@link Timeout}
      */
     public Timeout getDefaultTimeout();
+
+
+    /**
+     * Obtains the configured {@link Options} for the {@link Application}.
+     * <p>
+     * <strong>Changes to the {@link Options} may not be recognized
+     * or used by the {@link Application} after it was realized.</strong>
+     *
+     * @return the {@link Options}
+     */
+    public Options getOptions();
 }

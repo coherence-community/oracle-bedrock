@@ -26,27 +26,39 @@
 package com.oracle.tools.runtime.coherence;
 
 import com.oracle.tools.junit.AbstractTest;
+
 import com.oracle.tools.predicate.Predicate;
+
 import com.oracle.tools.runtime.ApplicationConsole;
 import com.oracle.tools.runtime.LocalPlatform;
 import com.oracle.tools.runtime.Platform;
+
 import com.oracle.tools.runtime.actions.InteractiveActionExecutor;
 import com.oracle.tools.runtime.actions.PerpetualAction;
+
 import com.oracle.tools.runtime.coherence.actions.RestartCoherenceClusterMemberAction;
+
 import com.oracle.tools.runtime.console.SystemApplicationConsole;
+
 import com.oracle.tools.runtime.java.JavaApplicationBuilder;
+
 import com.oracle.tools.runtime.network.AvailablePortIterator;
 import com.oracle.tools.runtime.network.Constants;
+
 import com.oracle.tools.util.Capture;
+
 import com.tangosol.net.NamedCache;
+
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.util.HashSet;
-
 import static com.oracle.tools.deferred.DeferredHelper.invoking;
+
 import static com.oracle.tools.deferred.Eventually.assertThat;
+
 import static org.hamcrest.CoreMatchers.is;
+
+import java.util.HashSet;
 
 /**
  * Functional Tests for the {@link CoherenceClusterBuilder} class.
@@ -99,7 +111,7 @@ public abstract class AbstractCoherenceClusterBuilderTest extends AbstractTest
 
 
     /**
-     * Ensure we can build and destroy a {@link com.oracle.tools.runtime.coherence.Cluster}
+     * Ensure we can build and close a {@link com.oracle.tools.runtime.coherence.CoherenceCluster}
      * of storage enabled members with a proxy server.
      */
     @Test
@@ -167,7 +179,8 @@ public abstract class AbstractCoherenceClusterBuilderTest extends AbstractTest
 
         CoherenceCacheServerSchema schema =
             new CoherenceCacheServerSchema().setStorageEnabled(true).setWellKnownAddress(localHost)
-                .setClusterName("WKA").setWellKnownAddressPort(wkaPort).setLocalHostAddress(localHost).setClusterPort(clusterPort);
+                .setClusterName("WKA").setWellKnownAddressPort(wkaPort).setLocalHostAddress(localHost)
+                .setClusterPort(clusterPort);
 
         SystemApplicationConsole console            = new SystemApplicationConsole();
         int                      desiredClusterSize = 4;
@@ -279,6 +292,46 @@ public abstract class AbstractCoherenceClusterBuilderTest extends AbstractTest
 
             assertThat(namedCache.size(), is(1));
             assertThat((String) namedCache.get("key"), is("hello"));
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            Assert.fail();
+        }
+    }
+
+
+    /**
+     * Ensure that the explicitly closing a CoherenceCacheServer removes it from
+     * the CoherenceCluster in which is it defined.
+     */
+    @Test
+    public void shouldRemoveCoherenceClusterMemberFromCoherenceCluster()
+    {
+        final int             CLUSTER_SIZE   = 3;
+
+        AvailablePortIterator availablePorts = LocalPlatform.getInstance().getAvailablePorts();
+        Capture<Integer>      clusterPort    = new Capture<Integer>(availablePorts);
+
+        CoherenceCacheServerSchema schema =
+            new CoherenceCacheServerSchema().useLocalHostMode().setClusterPort(clusterPort).setClusterName("Access");
+
+        CoherenceClusterBuilder builder = new CoherenceClusterBuilder();
+
+        builder.addSchema("DCS", schema, CLUSTER_SIZE, getPlatform());
+
+        try (CoherenceCluster cluster = builder.realize(new SystemApplicationConsole()))
+        {
+            assertThat(invoking(cluster).getClusterSize(), is(CLUSTER_SIZE));
+
+            // acquire a cluster member
+            CoherenceClusterMember member = cluster.get("DCS-1");
+
+            // close it
+            member.close();
+
+            // ensure that it's not in the cluster
+            assertThat(invoking(cluster).getClusterSize(), is(CLUSTER_SIZE - 1));
         }
         catch (Exception e)
         {

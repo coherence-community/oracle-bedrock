@@ -25,6 +25,8 @@
 
 package com.oracle.tools.runtime;
 
+import com.oracle.tools.Options;
+
 import com.oracle.tools.options.Timeout;
 
 import com.oracle.tools.predicate.Predicate;
@@ -352,6 +354,13 @@ public class InfrastructureAssemblyBuilderTest
         public Platform getPlatform()
         {
             return null;
+        }
+
+
+        @Override
+        public Options getOptions()
+        {
+            return new Options();
         }
 
 
