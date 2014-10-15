@@ -233,6 +233,32 @@ public abstract class AbstractAssembly<A extends Application> implements Assembl
 
 
     @Override
+    public void onClosing(A application)
+    {
+        if (!isClosed())
+        {
+            // when we're not in the process of closing the cluster we must remove
+            // the application as it's been closed explicitly
+            applications.remove(application);
+        }
+    }
+
+
+    @Override
+    public void onClosed(A application)
+    {
+        // SKIP: nothing to do when an application is closed
+    }
+
+
+    @Override
+    public void onRealized(A application)
+    {
+        // SKIP: nothing to do when an application is realized
+    }
+
+
+    @Override
     public int size()
     {
         return applications.size();

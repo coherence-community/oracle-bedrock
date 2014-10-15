@@ -102,9 +102,19 @@ public abstract class AbstractAssemblyBuilder<A extends Application, G extends A
         // build a list of applications
         LinkedList<A> applications = new LinkedList<A>();
 
+        // establish the applications for the assembly
         realizeApplicationFromSchema(applications, overridingConsoleBuilder);
 
-        return createAssembly(applications);
+        // establish the assembly based on the applications
+        G assembly = createAssembly(applications);
+
+        // add the assembly as an option to all of the applications
+        for (A application : applications)
+        {
+            application.getOptions().add(assembly);
+        }
+
+        return assembly;
     }
 
 

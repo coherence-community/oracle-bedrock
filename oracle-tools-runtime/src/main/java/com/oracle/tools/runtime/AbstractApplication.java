@@ -25,6 +25,9 @@
 
 package com.oracle.tools.runtime;
 
+import com.oracle.tools.Option;
+import com.oracle.tools.Options;
+
 import com.oracle.tools.options.Timeout;
 
 import com.oracle.tools.runtime.java.container.Container;
@@ -184,8 +187,26 @@ public abstract class AbstractApplication<A extends AbstractApplication<A, P, R>
 
 
     @Override
+    public Options getOptions()
+    {
+        return runtime.getOptions();
+    }
+
+
+    @Override
     public void close()
     {
+        // notify the ApplicationListener-based Options that the application is about to close
+        Option[] options = getOptions().asArray();
+
+        for (Option option : options)
+        {
+            if (option instanceof ApplicationListener)
+            {
+                ((ApplicationListener) option).onClosing(this);
+            }
+        }
+
         // close the process
         runtime.getApplicationProcess().close();
 
@@ -255,6 +276,15 @@ public abstract class AbstractApplication<A extends AbstractApplication<A, P, R>
         catch (RuntimeException e)
         {
             // nothing to do here as we don't care
+        }
+
+        // notify the ApplicationListener-based Options that the application has closed
+        for (Option option : options)
+        {
+            if (option instanceof ApplicationListener)
+            {
+                ((ApplicationListener) option).onClosed(this);
+            }
         }
 
         // raise the starting / realized event for the application
