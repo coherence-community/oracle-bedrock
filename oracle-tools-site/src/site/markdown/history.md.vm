@@ -365,6 +365,10 @@ reverse chronological order.
     Constants.getLocalHost() to remove the requirement for unnecessary security
     permissions.
 
+*   [ORACLETOOLS-173](https://java.net/jira/browse/ORACLETOOLS-173): Ensured
+    that calling Application.close() will appropriately remove the Application
+    from an associated Assembly.
+
 <h4>oracle-tools-runtime-remote</h4>
 
 *   [ORACLETOOLS-91](https://java.net/jira/browse/ORACLETOOLS-91): Introduced
