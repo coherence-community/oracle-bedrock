@@ -39,12 +39,12 @@ public class SimpleApplication
     /**
      * Construct a {@link SimpleApplication}.
      *
-     * @param runtime   the {@link SimpleApplicationRuntime}
-     * @param interceptors  the {@link LifecycleEventInterceptor}s
+     * @param runtime    the {@link SimpleApplicationRuntime}
+     * @param listeners  the {@link ApplicationListener}s
      */
-    public SimpleApplication(SimpleApplicationRuntime                                       runtime,
-                             Iterable<LifecycleEventInterceptor<? super SimpleApplication>> interceptors)
+    public SimpleApplication(SimpleApplicationRuntime                                 runtime,
+                             Iterable<ApplicationListener<? super SimpleApplication>> listeners)
     {
-        super(runtime, interceptors);
+        super(runtime, listeners);
     }
 }

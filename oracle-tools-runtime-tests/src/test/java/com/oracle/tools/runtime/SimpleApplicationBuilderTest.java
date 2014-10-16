@@ -90,14 +90,14 @@ public class SimpleApplicationBuilderTest extends AbstractTest
      * @throws Exception
      */
     @Test
-    public void shouldInvokeLifecycleInterceptor() throws Exception
+    public void shouldInvokeApplicationListeners() throws Exception
     {
         SimpleApplicationSchema schema =
             new SimpleApplicationSchema("java").addOption(ErrorStreamRedirection.enabled());
 
-        LifecycleEventInterceptor<SimpleApplication> interceptor = Mockito.mock(LifecycleEventInterceptor.class);
+        ApplicationListener<SimpleApplication> listener = Mockito.mock(ApplicationListener.class);
 
-        schema.addLifecycleInterceptor(interceptor);
+        schema.addApplicationListener(listener);
 
         schema.addArgument("-help");
 
@@ -107,7 +107,7 @@ public class SimpleApplicationBuilderTest extends AbstractTest
 
         try (SimpleApplication application = builder.realize(schema, "java", console, platform, Diagnostics.enabled()))
         {
-            Mockito.verify(interceptor, Mockito.times(1)).onEvent(Mockito.any(LifecycleEvent.class));
+            Mockito.verify(listener, Mockito.times(1)).onRealized(Mockito.same(application));
 
             String stdout = console.getOutputReader().readLine();
 
@@ -117,7 +117,8 @@ public class SimpleApplicationBuilderTest extends AbstractTest
 
             application.close();
 
-            Mockito.verify(interceptor, Mockito.times(2)).onEvent(Mockito.any(LifecycleEvent.class));
+            Mockito.verify(listener, Mockito.times(1)).onClosing(Mockito.same(application));
+            Mockito.verify(listener, Mockito.times(1)).onClosed(Mockito.same(application));
 
             int exitCode = application.exitValue();
 

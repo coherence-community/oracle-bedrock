@@ -39,9 +39,9 @@ package com.oracle.tools.runtime;
 public interface FluentApplication<A extends FluentApplication<A>> extends Application
 {
     /**
-     * Obtains the {@link LifecycleEventInterceptor}s for the {@link Application}.
+     * Obtains the {@link ApplicationListener}s for the {@link Application}.
      *
-     * @return  the {@link LifecycleEventInterceptor}s
+     * @return  the {@link ApplicationListener}s
      */
-    public Iterable<LifecycleEventInterceptor<? super A>> getLifecycleInterceptors();
+    public Iterable<ApplicationListener<? super A>> getApplicationListeners();
 }

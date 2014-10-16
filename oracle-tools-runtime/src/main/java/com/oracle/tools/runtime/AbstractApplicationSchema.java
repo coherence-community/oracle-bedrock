@@ -66,10 +66,10 @@ public abstract class AbstractApplicationSchema<A extends Application, S extends
     private ArrayList<String> applicationArguments;
 
     /**
-     * The {@link LifecycleEventInterceptor}s for {@link Application}s
+     * The {@link ApplicationListener}s for {@link Application}s
      * realized from the {@link ApplicationSchema}.
      */
-    private LinkedList<LifecycleEventInterceptor<? super A>> lifecycleInterceptors;
+    private LinkedList<ApplicationListener<? super A>> listeners;
 
     /**
      * The default {@link Option}s for use by {@link Application}s.
@@ -85,15 +85,15 @@ public abstract class AbstractApplicationSchema<A extends Application, S extends
      */
     public AbstractApplicationSchema(ApplicationSchema<A> schema)
     {
-        this.executableName        = schema.getExecutableName();
-        this.workingDirectory      = schema.getWorkingDirectory();
-        this.applicationArguments  = new ArrayList<String>(schema.getArguments());
-        this.lifecycleInterceptors = new LinkedList<LifecycleEventInterceptor<? super A>>();
-        this.options               = new Options(schema.getOptions().asArray());
+        this.executableName       = schema.getExecutableName();
+        this.workingDirectory     = schema.getWorkingDirectory();
+        this.applicationArguments = new ArrayList<String>(schema.getArguments());
+        this.listeners            = new LinkedList<ApplicationListener<? super A>>();
+        this.options              = new Options(schema.getOptions().asArray());
 
-        for (LifecycleEventInterceptor<? super A> interceptor : schema.getLifecycleInterceptors())
+        for (ApplicationListener<? super A> interceptor : schema.getApplicationListeners())
         {
-            this.lifecycleInterceptors.add(interceptor);
+            this.listeners.add(interceptor);
         }
     }
 
@@ -106,10 +106,10 @@ public abstract class AbstractApplicationSchema<A extends Application, S extends
      */
     public AbstractApplicationSchema(String executableName)
     {
-        this.executableName        = executableName;
-        this.applicationArguments  = new ArrayList<String>();
-        this.lifecycleInterceptors = new LinkedList<LifecycleEventInterceptor<? super A>>();
-        this.options               = new Options();
+        this.executableName       = executableName;
+        this.applicationArguments = new ArrayList<String>();
+        this.listeners            = new LinkedList<ApplicationListener<? super A>>();
+        this.options              = new Options();
 
         // set default application options
         this.options.add(Timeout.autoDetect());
@@ -229,19 +229,18 @@ public abstract class AbstractApplicationSchema<A extends Application, S extends
 
 
     @Override
-    public Iterable<LifecycleEventInterceptor<? super A>> getLifecycleInterceptors()
+    public S addApplicationListener(ApplicationListener<? super A> listener)
     {
-        return lifecycleInterceptors;
+        listeners.add(listener);
+
+        return (S) this;
     }
 
 
     @Override
-    @SuppressWarnings("unchecked")
-    public S addLifecycleInterceptor(LifecycleEventInterceptor<? super A> interceptor)
+    public Iterable<ApplicationListener<? super A>> getApplicationListeners()
     {
-        lifecycleInterceptors.add(interceptor);
-
-        return (S) this;
+        return listeners;
     }
 
 

@@ -46,15 +46,14 @@ public interface FluentApplicationSchema<A extends Application, S extends Fluent
     extends ApplicationSchema<A>
 {
     /**
-     * Adds an {@link LifecycleEventInterceptor} to the {@link FluentApplicationSchema}
-     * those of which will be executed when certain {@link LifecycleEvent}s
-     * occur on {@link Application}s created with the {@link ApplicationSchema}.
+     * Adds an {@link ApplicationListener} to be notified of life-cycle events
+     * on {@link Application}s produced by the {@link FluentApplicationSchema}.
      *
-     * @param interceptor  the {@link LifecycleEventInterceptor}
+     * @param listener  the {@link ApplicationListener}
      *
      * @return  the {@link FluentApplicationSchema} to permit fluent-style method invocation
      */
-    public S addLifecycleInterceptor(LifecycleEventInterceptor<? super A> interceptor);
+    public S addApplicationListener(ApplicationListener<? super A> listener);
 
 
     /**

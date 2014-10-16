@@ -25,7 +25,7 @@
 
 package com.oracle.tools.runtime.java;
 
-import com.oracle.tools.runtime.LifecycleEventInterceptor;
+import com.oracle.tools.runtime.ApplicationListener;
 
 /**
  * A {@link SimpleJavaApplication} is concrete implementation of a {@link JavaApplication}.
@@ -41,12 +41,12 @@ public class SimpleJavaApplication
     /**
      * Constructs a {@link SimpleJavaApplication}.
      *
-     * @param runtime   the {@link JavaApplicationRuntime}
-     * @param interceptors  the {@link LifecycleEventInterceptor}s
+     * @param runtime    the {@link JavaApplicationRuntime}
+     * @param listeners  the {@link ApplicationListener}s
      */
-    public SimpleJavaApplication(SimpleJavaApplicationRuntime                                       runtime,
-                                 Iterable<LifecycleEventInterceptor<? super SimpleJavaApplication>> interceptors)
+    public SimpleJavaApplication(SimpleJavaApplicationRuntime                                 runtime,
+                                 Iterable<ApplicationListener<? super SimpleJavaApplication>> listeners)
     {
-        super(runtime, interceptors);
+        super(runtime, listeners);
     }
 }

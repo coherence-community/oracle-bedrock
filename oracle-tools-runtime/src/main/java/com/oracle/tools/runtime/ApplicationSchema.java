@@ -81,16 +81,13 @@ public interface ApplicationSchema<A extends Application>
 
 
     /**
-     * Obtains the {@link LifecycleEventInterceptor}s that will be attached to
+     * Obtains the {@link ApplicationListener}s that will be attached to
      * {@link Application}s produced by this {@link ApplicationSchema}.
      * <p>
-     * {@link LifecycleEventInterceptor}s are typically used by {@link Application}s
-     * and {@link ApplicationBuilder}s to raise {@link LifecycleEvent}s pertaining
-     * to the life-cycle of an {@link Application}.
      *
-     * @return  the {@link LifecycleEventInterceptor}s
+     * @return  the {@link ApplicationListener}s
      */
-    public Iterable<LifecycleEventInterceptor<? super A>> getLifecycleInterceptors();
+    public Iterable<ApplicationListener<? super A>> getApplicationListeners();
 
 
     /**

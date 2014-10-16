@@ -369,6 +369,13 @@ reverse chronological order.
     that calling Application.close() will appropriately remove the Application
     from an associated Assembly.
 
+*   [ORACLETOOLS-174](https://java.net/jira/browse/ORACLETOOLS-174): Refactored
+    and replaced LifecycleInterceptors with ApplicationListeners, a much simpler
+    approach to dealing with life-cycle events.
+
+    *BREAKING CHANGE:*  Any use of LifecycleInterceptors will no longer work.
+    Instead applications should be migrated to use ApplicationListeners instead.
+
 <h4>oracle-tools-runtime-remote</h4>
 
 *   [ORACLETOOLS-91](https://java.net/jira/browse/ORACLETOOLS-91): Introduced

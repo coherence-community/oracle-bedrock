@@ -85,10 +85,10 @@ public abstract class AbstractApplication<A extends AbstractApplication<A, P, R>
     private final Thread stdinThread;
 
     /**
-     * The {@link LifecycleEventInterceptor}s that must be executed for
-     * {@link LifecycleEvent}s on the {@link Application}.
+     * The {@link ApplicationListener}s that must be notified based
+     * on lifecycle events occuring on the {@link Application}.
      */
-    private List<LifecycleEventInterceptor<? super A>> interceptors;
+    private List<ApplicationListener<? super A>> listeners;
 
     /**
      * The default {@link Timeout} to use for the {@link Application}.
@@ -99,25 +99,25 @@ public abstract class AbstractApplication<A extends AbstractApplication<A, P, R>
     /**
      * Construct an {@link AbstractApplication}.
      *
-     * @param runtime       the {@link ApplicationRuntime}
-     * @param interceptors  the {@link LifecycleEventInterceptor}s
+     * @param runtime    the {@link ApplicationRuntime}
+     * @param listeners  the {@link ApplicationListener}s
      */
-    public AbstractApplication(R                                              runtime,
-                               Iterable<LifecycleEventInterceptor<? super A>> interceptors)
+    public AbstractApplication(R                                        runtime,
+                               Iterable<ApplicationListener<? super A>> listeners)
     {
         this.runtime = runtime;
 
         // establish the default Timeout for the application
         this.defaultTimeout = runtime.getOptions().get(Timeout.class, Timeout.autoDetect());
 
-        // make a copy of the interceptors
-        this.interceptors = new ArrayList<LifecycleEventInterceptor<? super A>>();
+        // make a copy of the listeners
+        this.listeners = new ArrayList<ApplicationListener<? super A>>();
 
-        if (interceptors != null)
+        if (listeners != null)
         {
-            for (LifecycleEventInterceptor<? super A> interceptor : interceptors)
+            for (ApplicationListener<? super A> listener : listeners)
             {
-                this.interceptors.add(interceptor);
+                this.listeners.add(listener);
             }
         }
 
@@ -207,6 +207,12 @@ public abstract class AbstractApplication<A extends AbstractApplication<A, P, R>
             }
         }
 
+        // notify the ApplicationListeners registered for the application that is about to close
+        for (ApplicationListener listener : listeners)
+        {
+            listener.onClosing(this);
+        }
+
         // close the process
         runtime.getApplicationProcess().close();
 
@@ -287,25 +293,10 @@ public abstract class AbstractApplication<A extends AbstractApplication<A, P, R>
             }
         }
 
-        // raise the starting / realized event for the application
-        @SuppressWarnings("rawtypes") LifecycleEvent event = new LifecycleEvent<Application>()
+        // notify the ApplicationListeners registered for the application that is has closed
+        for (ApplicationListener listener : listeners)
         {
-            @Override
-            public Enum<?> getType()
-            {
-                return Application.EventKind.DESTROYED;
-            }
-
-            @Override
-            public Application getObject()
-            {
-                return AbstractApplication.this;
-            }
-        };
-
-        for (LifecycleEventInterceptor<? super A> interceptor : this.getLifecycleInterceptors())
-        {
-            interceptor.onEvent(event);
+            listener.onClosed(this);
         }
     }
 
@@ -318,9 +309,9 @@ public abstract class AbstractApplication<A extends AbstractApplication<A, P, R>
 
 
     @Override
-    public Iterable<LifecycleEventInterceptor<? super A>> getLifecycleInterceptors()
+    public Iterable<ApplicationListener<? super A>> getApplicationListeners()
     {
-        return interceptors;
+        return listeners;
     }
 
 

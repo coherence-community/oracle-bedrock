@@ -37,7 +37,7 @@ import com.oracle.tools.deferred.jmx.DeferredMBeanProxy;
 
 import com.oracle.tools.runtime.AbstractApplication;
 import com.oracle.tools.runtime.Application;
-import com.oracle.tools.runtime.LifecycleEventInterceptor;
+import com.oracle.tools.runtime.ApplicationListener;
 import com.oracle.tools.runtime.Platform;
 
 import com.oracle.tools.runtime.concurrent.RemoteCallable;
@@ -98,13 +98,13 @@ public abstract class AbstractJavaApplication<A extends AbstractJavaApplication<
     /**
      * Construct a {@link AbstractJavaApplication}.
      *
-     * @param runtime   the {@link JavaApplicationRuntime} for the {@link JavaApplication}
-     * @param interceptors  the {@link LifecycleEventInterceptor}s
+     * @param runtime    the {@link JavaApplicationRuntime} for the {@link JavaApplication}
+     * @param listeners  the {@link ApplicationListener}s
      */
-    public AbstractJavaApplication(R                                              runtime,
-                                   Iterable<LifecycleEventInterceptor<? super A>> interceptors)
+    public AbstractJavaApplication(R                                        runtime,
+                                   Iterable<ApplicationListener<? super A>> listeners)
     {
-        super(runtime, interceptors);
+        super(runtime, listeners);
 
         // ensure that the RMI server doesn't eagerly load JMX classes
         System.setProperty("java.rmi.server.useCodebaseOnly", "true");

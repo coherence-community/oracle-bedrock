@@ -112,7 +112,7 @@ public class SimpleJavaApplicationSchema
                                                                                     systemProperties,
                                                                                     remoteDebuggingPort);
 
-        return new SimpleJavaApplication(environment, this.getLifecycleInterceptors());
+        return new SimpleJavaApplication(environment, this.getApplicationListeners());
     }
 
 
