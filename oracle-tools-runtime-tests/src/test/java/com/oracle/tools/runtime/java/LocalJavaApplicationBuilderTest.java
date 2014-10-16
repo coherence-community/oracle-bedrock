@@ -174,7 +174,6 @@ public class LocalJavaApplicationBuilderTest extends AbstractJavaApplicationBuil
         SimpleJavaApplicationSchema schema   = new SimpleJavaApplicationSchema(SleepingApplication.class.getName());
 
         CapturingApplicationConsole console  = new CapturingApplicationConsole();
-        LinkedList<String>          lines    = console.getCapturedOutputLines();
 
         try (SimpleJavaApplication app = platform.realize("TestApp",
                                                           schema,
@@ -183,7 +182,7 @@ public class LocalJavaApplicationBuilderTest extends AbstractJavaApplicationBuil
         {
             assertCanConnectDebuggerToApplication(app);
 
-            Eventually.assertThat(lines, hasItem(startsWith("Now sleeping")));
+            Eventually.assertThat(invoking(console).getCapturedOutputLines(), hasItem(startsWith("Now sleeping")));
 
             List<String> args     = app.submit(new GetProgramArgs());
             String       debugArg = null;
@@ -226,18 +225,16 @@ public class LocalJavaApplicationBuilderTest extends AbstractJavaApplicationBuil
             new SimpleApplicationSchema("jdb").addArgument("-listen").addArgument(String.valueOf(debuggerPort.get()));
 
         CapturingApplicationConsole jdbConsole = new CapturingApplicationConsole();
-        LinkedList<String>          jdbOutput  = jdbConsole.getCapturedOutputLines();
 
         try (SimpleApplication jdb = platform.realize("JDB", jdbSchema, jdbConsole))
         {
             Eventually.assertThat("JDB did not start properly",
-                                  jdbOutput,
+                                  invoking(jdbConsole).getCapturedOutputLines(),
                                   hasItem(startsWith("Listening at address:")));
 
             SimpleJavaApplicationSchema schema  = new SimpleJavaApplicationSchema(SleepingApplication.class.getName());
 
             CapturingApplicationConsole console = new CapturingApplicationConsole();
-            LinkedList<String>          lines   = console.getCapturedOutputLines();
 
             try (SimpleJavaApplication app = platform.realize("TestApp",
                                                               schema,
@@ -245,9 +242,9 @@ public class LocalJavaApplicationBuilderTest extends AbstractJavaApplicationBuil
                                                               RemoteDebugging.enabled().startSuspended(false)
                                                                   .attachToDebugger(debuggerPort.get())))
             {
-                Eventually.assertThat(lines, hasItem(startsWith("Now sleeping")));
+                Eventually.assertThat(invoking(console).getCapturedOutputLines(), hasItem(startsWith("Now sleeping")));
                 Eventually.assertThat("Application did not connect back to JDB",
-                                      jdbOutput,
+                                      invoking(jdbConsole).getCapturedOutputLines(),
                                       hasItem(containsString("VM Started:")));
             }
         }
@@ -265,11 +262,10 @@ public class LocalJavaApplicationBuilderTest extends AbstractJavaApplicationBuil
                                         + socket.getPort());
 
         CapturingApplicationConsole console = new CapturingApplicationConsole();
-        LinkedList<String>          lines   = console.getCapturedOutputLines();
 
         try (SimpleApplication jdb = LocalPlatform.getInstance().realize("JDB", schema, console))
         {
-            Eventually.assertThat(lines, hasItem(startsWith("VM Started")));
+            Eventually.assertThat(invoking(console).getCapturedOutputLines(), hasItem(startsWith("VM Started")));
 
             console.getInputWriter().println("run");
             console.getInputWriter().println("quit");
@@ -282,11 +278,11 @@ public class LocalJavaApplicationBuilderTest extends AbstractJavaApplicationBuil
         SimpleApplicationSchema     schema  = new SimpleApplicationSchema("jdb").addArgument("-version");
 
         CapturingApplicationConsole console = new CapturingApplicationConsole();
-        LinkedList<String>          lines   = console.getCapturedOutputLines();
 
         try (SimpleApplication jdb = LocalPlatform.getInstance().realize("JDB", schema, console))
         {
-            Eventually.assertThat(lines, hasItem(startsWith("This is jdb version")));
+            Eventually.assertThat(invoking(console).getCapturedOutputLines(),
+                                  hasItem(startsWith("This is jdb version")));
 
             return true;
         }

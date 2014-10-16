@@ -47,7 +47,7 @@ import static org.junit.Assert.assertThat;
 
 import java.io.PrintWriter;
 
-import java.util.LinkedList;
+import java.util.Queue;
 
 /**
  * Tests for {@link CapturingApplicationConsole}.
@@ -78,9 +78,9 @@ public class CapturingApplicationConsoleTest
 
         console.close();
 
-        assertThat(console.m_outThread.isAlive(), is(false));
+        assertThat(console.stdoutThread.isAlive(), is(false));
 
-        LinkedList<String> lines = console.getCapturedOutputLines();
+        Queue<String> lines = console.getCapturedOutputLines();
 
         assertThat(lines.size(), is(5));
         assertThat(lines.poll(), is("Out: 2"));
@@ -110,9 +110,9 @@ public class CapturingApplicationConsoleTest
 
         console.close();
 
-        assertThat(console.m_errThread.isAlive(), is(false));
+        assertThat(console.stderrThread.isAlive(), is(false));
 
-        LinkedList<String> lines = console.getCapturedErrorLines();
+        Queue<String> lines = console.getCapturedErrorLines();
 
         assertThat(lines.size(), is(5));
         assertThat(lines.poll(), is("Err: 2"));
@@ -133,7 +133,7 @@ public class CapturingApplicationConsoleTest
 
         try (SimpleJavaApplication app = LocalPlatform.getInstance().realize("App", schema, console))
         {
-            LinkedList<String> lines = console.getCapturedOutputLines();
+            Queue<String> lines = console.getCapturedOutputLines();
 
             stdIn.println("Foo");
 

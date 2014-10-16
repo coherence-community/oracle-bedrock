@@ -119,7 +119,7 @@ public class PipedApplicationConsole extends AbstractPipedApplicationConsole
      */
     public BufferedReader getOutputReader()
     {
-        return m_outputReader;
+        return stdoutReader;
     }
 
 
@@ -131,7 +131,7 @@ public class PipedApplicationConsole extends AbstractPipedApplicationConsole
      */
     public BufferedReader getErrorReader()
     {
-        return m_errorReader;
+        return stderrReader;
     }
 
 
@@ -143,6 +143,6 @@ public class PipedApplicationConsole extends AbstractPipedApplicationConsole
      */
     public PrintWriter getInputWriter()
     {
-        return m_inputWriter;
+        return stdinWriter;
     }
 }
