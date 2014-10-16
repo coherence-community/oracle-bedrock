@@ -178,4 +178,16 @@ public class EventuallyTest
             Assert.fail("Unexpected Exception:" + e);
         }
     }
+
+
+    /**
+     * Ensure that Eventually.assertThat works with wrappers and primitives.
+     */
+    @Test
+    public void shouldEventuallyAssertUsingWrappersAndPrimitives()
+    {
+        Eventually.assertThat(Long.valueOf(5), is(5L));
+
+        Eventually.assertThat(5L, is(Long.valueOf(5)));
+    }
 }
