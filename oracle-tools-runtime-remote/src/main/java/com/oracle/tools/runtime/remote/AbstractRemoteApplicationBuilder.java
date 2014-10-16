@@ -531,7 +531,7 @@ public abstract class AbstractRemoteApplicationBuilder<A extends Application, E 
 
             // ----- notify all of the lifecycle listeners -----
 
-            raiseApplicationLifecycleEvent(application, Application.EventKind.REALIZED);
+            raiseOnRealizedFor(application);
 
             return application;
         }

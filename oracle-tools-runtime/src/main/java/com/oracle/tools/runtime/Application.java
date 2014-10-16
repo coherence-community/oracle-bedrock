@@ -45,13 +45,6 @@ import java.util.Properties;
 public interface Application extends Closeable
 {
     /**
-     * The {@link Application} {@link EventKind}s.
-     */
-    public static enum EventKind {REALIZED,
-                                  DESTROYED}
-
-
-    /**
      * Obtains the environment variables that were supplied to the
      * {@link Application} when it was realized.
      *

@@ -158,12 +158,12 @@ public class SimpleApplicationBuilder extends AbstractApplicationBuilder<SimpleA
         final T application = (T) new SimpleApplication(environment,
                                                         schema instanceof FluentApplicationSchema
                                                         ? ((FluentApplicationSchema<SimpleApplication, ?>) schema)
-                                                            .getLifecycleInterceptors() : null);
+                                                            .getApplicationListeners() : null);
 
-        // ----- notify all of the lifecycle listeners -----
+        // ----- notify all of the application listeners -----
 
-        // let interceptors know that the application has been realized
-        raiseApplicationLifecycleEvent(application, Application.EventKind.REALIZED);
+        // raise life-cycle events for the application
+        raiseOnRealizedFor(application);
 
         return application;
     }

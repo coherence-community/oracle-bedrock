@@ -74,40 +74,19 @@ public abstract class AbstractApplicationBuilder<A extends Application> implemen
 
 
     /**
-     * Raises a specific type of {@link Application} {@link LifecycleEvent} for
-     * the specified application.
+     * Raises the "onRealized" event for the specified Application.
      *
      * @param application  the application on which the event occurred
-     * @param eventKind    the event type
      */
-    @SuppressWarnings("unchecked")
-    protected void raiseApplicationLifecycleEvent(final A                     application,
-                                                  final Application.EventKind eventKind)
+    protected void raiseOnRealizedFor(A application)
     {
         if (application instanceof FluentApplication)
         {
             FluentApplication<?> fluentApplication = (FluentApplication) application;
 
-            // construct the LifecycleEvent
-            LifecycleEvent event = new LifecycleEvent<A>()
+            for (ApplicationListener listener : fluentApplication.getApplicationListeners())
             {
-                @Override
-                public Application.EventKind getType()
-                {
-                    return eventKind;
-                }
-
-                @Override
-                public A getObject()
-                {
-                    return application;
-                }
-            };
-
-            // raise the event
-            for (LifecycleEventInterceptor interceptor : fluentApplication.getLifecycleInterceptors())
-            {
-                interceptor.onEvent(event);
+                listener.onRealized(fluentApplication);
             }
         }
     }

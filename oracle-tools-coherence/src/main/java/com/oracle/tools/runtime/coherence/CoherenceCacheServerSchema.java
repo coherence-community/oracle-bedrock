@@ -158,7 +158,7 @@ public class CoherenceCacheServerSchema
                                                                                     systemProperties,
                                                                                     remoteDebuggingPort);
 
-        return new CoherenceCacheServer(environment, getLifecycleInterceptors());
+        return new CoherenceCacheServer(environment, getApplicationListeners());
     }
 
 

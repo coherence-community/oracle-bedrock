@@ -40,7 +40,6 @@ import com.oracle.tools.options.Timeout;
 
 import com.oracle.tools.predicate.Predicate;
 
-import com.oracle.tools.runtime.Application;
 import com.oracle.tools.runtime.ApplicationConsole;
 import com.oracle.tools.runtime.ApplicationSchema;
 import com.oracle.tools.runtime.LocalApplicationProcess;
@@ -392,10 +391,9 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication> extends Abst
             }, within(timeout));
         }
 
-        // ----- notify all of the lifecycle listeners -----
+        // ----- notify all of the application listeners -----
 
-        // let interceptors know that the application has been realized
-        raiseApplicationLifecycleEvent(application, Application.EventKind.REALIZED);
+        raiseOnRealizedFor(application);
 
         return application;
     }

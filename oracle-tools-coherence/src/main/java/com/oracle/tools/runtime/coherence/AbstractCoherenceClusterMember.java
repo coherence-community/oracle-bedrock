@@ -25,7 +25,7 @@
 
 package com.oracle.tools.runtime.coherence;
 
-import com.oracle.tools.runtime.LifecycleEventInterceptor;
+import com.oracle.tools.runtime.ApplicationListener;
 
 import com.oracle.tools.runtime.coherence.callables.GetClusterMemberUIDs;
 import com.oracle.tools.runtime.coherence.callables.GetClusterName;
@@ -72,13 +72,13 @@ public abstract class AbstractCoherenceClusterMember<A extends AbstractCoherence
     /**
      * Construct a {@link AbstractCoherenceClusterMember}.
      *
-     * @param runtime   the {@link JavaApplicationRuntime} for the {@link CoherenceClusterMember}
-     * @param interceptors  the {@link LifecycleEventInterceptor}s
+     * @param runtime    the {@link JavaApplicationRuntime} for the {@link CoherenceClusterMember}
+     * @param listeners  the {@link ApplicationListener}s
      */
     public AbstractCoherenceClusterMember(JavaApplicationRuntime<JavaApplicationProcess> runtime,
-                                          Iterable<LifecycleEventInterceptor<? super A>> interceptors)
+                                          Iterable<ApplicationListener<? super A>>       listeners)
     {
-        super(runtime, interceptors);
+        super(runtime, listeners);
     }
 
 

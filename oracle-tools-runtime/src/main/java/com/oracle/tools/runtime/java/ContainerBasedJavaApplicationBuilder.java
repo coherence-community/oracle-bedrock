@@ -221,8 +221,8 @@ public class ContainerBasedJavaApplicationBuilder<A extends JavaApplication> ext
                                                                systemProperties,
                                                                -1);
 
-            // let interceptors know that the application has been realized
-            raiseApplicationLifecycleEvent(application, Application.EventKind.REALIZED);
+            // raise life-cycle events for the application
+            raiseOnRealizedFor(application);
 
             return application;
         }

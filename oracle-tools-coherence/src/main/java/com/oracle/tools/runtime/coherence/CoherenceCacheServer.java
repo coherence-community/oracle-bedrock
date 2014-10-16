@@ -25,7 +25,7 @@
 
 package com.oracle.tools.runtime.coherence;
 
-import com.oracle.tools.runtime.LifecycleEventInterceptor;
+import com.oracle.tools.runtime.ApplicationListener;
 
 import com.oracle.tools.runtime.java.JavaApplicationProcess;
 import com.oracle.tools.runtime.java.JavaApplicationRuntime;
@@ -43,12 +43,12 @@ public class CoherenceCacheServer extends AbstractCoherenceClusterMember<Coheren
     /**
      * Construct a {@link CoherenceCacheServer}.
      *
-     * @param runtime   the {@link JavaApplicationRuntime} for the {@link CoherenceCacheServer}
-     * @param interceptors  the {@link LifecycleEventInterceptor}s
+     * @param runtime    the {@link JavaApplicationRuntime} for the {@link CoherenceCacheServer}
+     * @param listeners  the {@link ApplicationListener}s
      */
-    CoherenceCacheServer(JavaApplicationRuntime<JavaApplicationProcess>                    runtime,
-                         Iterable<LifecycleEventInterceptor<? super CoherenceCacheServer>> interceptors)
+    CoherenceCacheServer(JavaApplicationRuntime<JavaApplicationProcess>              runtime,
+                         Iterable<ApplicationListener<? super CoherenceCacheServer>> listeners)
     {
-        super(runtime, interceptors);
+        super(runtime, listeners);
     }
 }

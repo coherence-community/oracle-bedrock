@@ -111,6 +111,6 @@ public class SimpleRemoteApplicationBuilder
         return (T) new SimpleApplication(runtime,
                                          schema instanceof FluentApplicationSchema
                                          ? ((FluentApplicationSchema<SimpleApplication,
-                                                                     ?>) schema).getLifecycleInterceptors() : null);
+                                                                     ?>) schema).getApplicationListeners() : null);
     }
 }
