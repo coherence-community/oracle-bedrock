@@ -32,8 +32,12 @@ import org.junit.Test;
 
 import static com.oracle.tools.deferred.DeferredHelper.within;
 
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.CoreMatchers.hasItem;
+
 import static org.hamcrest.core.Is.is;
 
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -189,5 +193,26 @@ public class EventuallyTest
         Eventually.assertThat(Long.valueOf(5), is(5L));
 
         Eventually.assertThat(5L, is(Long.valueOf(5)));
+    }
+
+
+    /**
+     * Ensure that Eventually.assertThat works with queues (collections).
+     */
+    @Test
+    public void shouldEventuallyAssertThatQueueContainsElement()
+    {
+        String                        element = "VM Started:";
+
+        ConcurrentLinkedQueue<String> queue   = new ConcurrentLinkedQueue<>();
+
+        queue.add("Listening at address: Hummingbird.local:30003");
+        queue.add("Set uncaught java.lang.Throwable");
+        queue.add("Set deferred uncaught java.lang.Throwable");
+        queue.add("Initializing jdb");
+        queue.add("VM Started: >");
+        queue.add("The application exited, (terminated)");
+
+        Eventually.assertThat(queue, hasItem(containsString("VM Started:")));
     }
 }

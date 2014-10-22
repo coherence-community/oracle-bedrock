@@ -26,13 +26,15 @@
 package com.oracle.tools.deferred;
 
 import com.oracle.tools.runtime.concurrent.RemoteCallable;
-import com.oracle.tools.runtime.java.JavaApplication;
-import org.hamcrest.Matcher;
 
-import java.util.concurrent.TimeUnit;
+import com.oracle.tools.runtime.java.JavaApplication;
+
+import org.hamcrest.Matcher;
 
 import static com.oracle.tools.deferred.DeferredHelper.ensure;
 import static com.oracle.tools.deferred.DeferredHelper.eventually;
+
+import java.util.concurrent.TimeUnit;
 
 /**
  * A helper class that defines commonly used "assertThat" methods for the
@@ -150,8 +152,8 @@ public class Eventually
      *
      * @throws AssertionError if the assertion fails
      */
-    public static <T> void assertThat(Deferred<T>         deferred,
-                                      Matcher<? super T>  matcher) throws AssertionError
+    public static <T> void assertThat(Deferred<T>        deferred,
+                                      Matcher<? super T> matcher) throws AssertionError
     {
         assertThat(null, deferred, matcher);
     }

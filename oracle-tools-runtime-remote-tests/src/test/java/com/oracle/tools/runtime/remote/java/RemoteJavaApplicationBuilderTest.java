@@ -50,6 +50,8 @@ import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.Test;
 
+import static com.oracle.tools.deferred.DeferredHelper.invoking;
+
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.CoreMatchers.is;
@@ -115,7 +117,6 @@ public class RemoteJavaApplicationBuilderTest extends AbstractRemoteApplicationB
             new SimpleJavaApplicationSchema(SleepingApplication.class.getName()).addArgument("300");
 
         CapturingApplicationConsole console  = new CapturingApplicationConsole();
-        LinkedList<String>          lines    = console.getCapturedOutputLines();
 
         RemoteDebugging remoteDebugging      = RemoteDebugging.enabled().startSuspended(false).listenForDebugger();
 
@@ -127,7 +128,7 @@ public class RemoteJavaApplicationBuilderTest extends AbstractRemoteApplicationB
                                                                   remoteDebugging,
                                                                   StrictHostChecking.disabled()))
         {
-            Eventually.assertThat(lines, hasItem(startsWith("Now sleeping")));
+            Eventually.assertThat(invoking(console).getCapturedOutputLines(), hasItem(startsWith("Now sleeping")));
 
             List<String> args     = application.submit(new GetProgramArgs());
 
@@ -163,10 +164,7 @@ public class RemoteJavaApplicationBuilderTest extends AbstractRemoteApplicationB
         SimpleJavaApplicationSchema schema = new SimpleJavaApplicationSchema(SleepingApplication.class.getName());
 
         CapturingApplicationConsole console         = new CapturingApplicationConsole();
-        LinkedList<String>          lines           = console.getCapturedOutputLines();
-
         RemotePlatform              platform        = getRemotePlatform();
-
         RemoteDebugging             remoteDebugging = RemoteDebugging.enabled().startSuspended(true);
 
         try (SimpleJavaApplication application = platform.realize("Java",
@@ -177,7 +175,7 @@ public class RemoteJavaApplicationBuilderTest extends AbstractRemoteApplicationB
         {
             assertCanConnectDebuggerToApplication(application);
 
-            Eventually.assertThat(lines, hasItem(startsWith("Now sleeping")));
+            Eventually.assertThat(invoking(console).getCapturedOutputLines(), hasItem(startsWith("Now sleeping")));
 
             List<String> args     = application.submit(new GetProgramArgs());
             String       debugArg = null;
@@ -215,12 +213,11 @@ public class RemoteJavaApplicationBuilderTest extends AbstractRemoteApplicationB
             new SimpleApplicationSchema("jdb").addArgument("-listen").addArgument(String.valueOf(debugPort.get()));
 
         CapturingApplicationConsole jdbConsole = new CapturingApplicationConsole();
-        LinkedList<String>          jdbOutput  = jdbConsole.getCapturedOutputLines();
 
         try (SimpleApplication jdb = LocalPlatform.getInstance().realize("JDB", jdbSchema, jdbConsole))
         {
             Eventually.assertThat("JDB did not start properly",
-                                  jdbOutput,
+                                  invoking(jdbConsole).getCapturedOutputLines(),
                                   hasItem(startsWith("Listening at address:")));
 
             SimpleJavaApplicationSchema schema = new SimpleJavaApplicationSchema(SleepingApplication.class.getName());
@@ -229,7 +226,6 @@ public class RemoteJavaApplicationBuilderTest extends AbstractRemoteApplicationB
                 RemoteDebugging.enabled().startSuspended(false).attachToDebugger(debugPort.get());
 
             CapturingApplicationConsole console  = new CapturingApplicationConsole();
-            LinkedList<String>          lines    = console.getCapturedOutputLines();
 
             RemotePlatform              platform = getRemotePlatform();
 
@@ -239,9 +235,9 @@ public class RemoteJavaApplicationBuilderTest extends AbstractRemoteApplicationB
                                                                       remoteDebugging,
                                                                       StrictHostChecking.disabled()))
             {
-                Eventually.assertThat(lines, hasItem(startsWith("Now sleeping")));
+                Eventually.assertThat(invoking(console).getCapturedOutputLines(), hasItem(startsWith("Now sleeping")));
                 Eventually.assertThat("Application did not connect back to JDB",
-                                      jdbOutput,
+                                      invoking(jdbConsole).getCapturedOutputLines(),
                                       hasItem(containsString("VM Started:")));
             }
         }
@@ -259,11 +255,10 @@ public class RemoteJavaApplicationBuilderTest extends AbstractRemoteApplicationB
                                         + socket.getPort());
 
         CapturingApplicationConsole console = new CapturingApplicationConsole();
-        LinkedList<String>          lines   = console.getCapturedOutputLines();
 
         try (SimpleApplication jdb = LocalPlatform.getInstance().realize("JDB", schema, console))
         {
-            Eventually.assertThat(lines, hasItem(startsWith("VM Started")));
+            Eventually.assertThat(invoking(console).getCapturedOutputLines(), hasItem(startsWith("VM Started")));
 
             console.getInputWriter().println("run");
             console.getInputWriter().println("quit");
@@ -317,11 +312,11 @@ public class RemoteJavaApplicationBuilderTest extends AbstractRemoteApplicationB
         SimpleApplicationSchema     schema  = new SimpleApplicationSchema("jdb").addArgument("-version");
 
         CapturingApplicationConsole console = new CapturingApplicationConsole();
-        LinkedList<String>          lines   = console.getCapturedOutputLines();
 
         try (SimpleApplication jdb = LocalPlatform.getInstance().realize("JDB", schema, console))
         {
-            Eventually.assertThat(lines, hasItem(startsWith("This is jdb version")));
+            Eventually.assertThat(invoking(console).getCapturedOutputLines(),
+                                  hasItem(startsWith("This is jdb version")));
 
             return true;
         }

@@ -1,5 +1,5 @@
 /*
- * File: PipedApplicationConsole.java
+ * File: AbstractPipedApplicationConsole.java
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
@@ -49,22 +49,42 @@ import java.io.Reader;
  */
 public abstract class AbstractPipedApplicationConsole implements ApplicationConsole
 {
+    /**
+     * The default pipe size.
+     */
     public static final int DEFAULT_PIPE_SIZE = 1024;
 
-    protected BufferedReader m_outputReader;
-    protected PrintWriter    m_outputWriter;
-    protected PipedWriter    m_outputPipedWriter;
-    protected BufferedReader m_errorReader;
-    protected PrintWriter    m_errorWriter;
-    protected PipedWriter    m_errorPipedWriter;
-    protected PipedReader    m_inputReader;
-    protected PrintWriter    m_inputWriter;
-    protected boolean        m_diagnosticMode;
+    /**
+     * Readers and Writers for managing stdout.
+     */
+    protected BufferedReader stdoutReader;
+    protected PrintWriter    stdoutWriter;
+    protected PipedWriter    stdoutPipedWriter;
+
+    /**
+     * Readers and Writers for managing stderr.
+     */
+    protected BufferedReader stderrReader;
+    protected PrintWriter    stderrWriter;
+    protected PipedWriter    stderrPipedWriter;
+
+    /**
+     * Readers and Writers for managing stdin.
+     */
+    protected PipedReader stdinReader;
+    protected PrintWriter stdinWriter;
+
+    /**
+     * Will all stdout and stderr also be output to the underlying
+     * native platform streams.
+     */
+    protected boolean diagnosticMode;
+
 
     /**
      * Constructs an {@link AbstractPipedApplicationConsole}.
      *
-     * @param pipeSize   the size of the pipe's buffers
+     * @param pipeSize         the size of the pipe's buffers
      * @param diagnosticMode   if true, output to this console is formatted
      *                         with application details and line numbers
      *
@@ -73,52 +93,53 @@ public abstract class AbstractPipedApplicationConsole implements ApplicationCons
      *
      * @throws java.io.IOException if an error occurs creating this {@link AbstractPipedApplicationConsole}
      */
-    public AbstractPipedApplicationConsole(int pipeSize, boolean diagnosticMode) throws IOException
+    public AbstractPipedApplicationConsole(int     pipeSize,
+                                           boolean diagnosticMode) throws IOException
     {
         PipedReader pipedOutputReader = new PipedReader(pipeSize);
 
-        m_diagnosticMode    = diagnosticMode;
+        this.diagnosticMode    = diagnosticMode;
 
-        m_outputReader      = new BufferedReader(pipedOutputReader);
-        m_outputPipedWriter = new PipedWriter(pipedOutputReader);
-        m_outputWriter      = new PrintWriter(m_outputPipedWriter);
+        this.stdoutReader      = new BufferedReader(pipedOutputReader);
+        this.stdoutPipedWriter = new PipedWriter(pipedOutputReader);
+        this.stdoutWriter      = new PrintWriter(stdoutPipedWriter);
 
         PipedReader pipedErrorReader = new PipedReader(pipeSize);
 
-        m_errorReader      = new BufferedReader(pipedErrorReader);
-        m_errorPipedWriter = new PipedWriter(pipedErrorReader);
-        m_errorWriter      = new PrintWriter(m_errorPipedWriter);
+        this.stderrReader      = new BufferedReader(pipedErrorReader);
+        this.stderrPipedWriter = new PipedWriter(pipedErrorReader);
+        this.stderrWriter      = new PrintWriter(stderrPipedWriter);
 
-        m_inputReader      = new PipedReader(pipeSize);
-        m_inputWriter      = new PrintWriter(new PipedWriter(m_inputReader));
+        this.stdinReader       = new PipedReader(pipeSize);
+        this.stdinWriter       = new PrintWriter(new PipedWriter(stdinReader));
     }
 
 
     @Override
     public PrintWriter getOutputWriter()
     {
-        return m_outputWriter;
+        return stdoutWriter;
     }
 
 
     @Override
     public PrintWriter getErrorWriter()
     {
-        return m_errorWriter;
+        return stderrWriter;
     }
 
 
     @Override
     public Reader getInputReader()
     {
-        return m_inputReader;
+        return stdinReader;
     }
 
 
     @Override
     public boolean isDiagnosticsEnabled()
     {
-        return m_diagnosticMode;
+        return diagnosticMode;
     }
 
 
@@ -127,7 +148,7 @@ public abstract class AbstractPipedApplicationConsole implements ApplicationCons
     {
         try
         {
-            m_inputReader.close();
+            stdinReader.close();
         }
         catch (IOException e)
         {
@@ -136,7 +157,7 @@ public abstract class AbstractPipedApplicationConsole implements ApplicationCons
 
         try
         {
-            m_outputPipedWriter.close();
+            stdoutPipedWriter.close();
         }
         catch (IOException e)
         {
@@ -145,7 +166,7 @@ public abstract class AbstractPipedApplicationConsole implements ApplicationCons
 
         try
         {
-            m_errorPipedWriter.close();
+            stderrPipedWriter.close();
         }
         catch (IOException e)
         {

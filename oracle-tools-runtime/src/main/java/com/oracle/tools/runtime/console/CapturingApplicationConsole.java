@@ -28,7 +28,11 @@ package com.oracle.tools.runtime.console;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
+
 import java.util.LinkedList;
+import java.util.Queue;
+
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
  * An implementation of an {@link com.oracle.tools.runtime.ApplicationConsole} that
@@ -47,27 +51,27 @@ public class CapturingApplicationConsole extends AbstractPipedApplicationConsole
      * The maximum number of lines of output that will be captured and stored
      * by this {link CapturingApplicationConsole}.
      */
-    private int m_maxLines;
+    private int maximumLines;
 
     /**
      * The lines of output captured from StdOut
      */
-    private LinkedList<String> m_outBuffer;
+    private ConcurrentLinkedQueue<String> stdoutBuffer;
 
     /**
      * The lines of output captured from StdErr
      */
-    private LinkedList<String> m_errBuffer;
+    private ConcurrentLinkedQueue<String> stderrBuffer;
 
     /**
      * The {@link Thread} capturing StdOut lines
      */
-    protected Thread m_outThread;
+    protected Thread stdoutThread;
 
     /**
      * The {@link Thread} capturing StdErr lines
      */
-    protected Thread m_errThread;
+    protected Thread stderrThread;
 
 
     /**
@@ -86,58 +90,58 @@ public class CapturingApplicationConsole extends AbstractPipedApplicationConsole
     /**
      * Constructs {@link CapturingApplicationConsole}.
      *
-     * @param maxLines  the number of lines of output to capture
+     * @param maximumLines  the number of lines of output to capture
      *
      * @throws IOException
      */
-    public CapturingApplicationConsole(int maxLines) throws IOException
+    public CapturingApplicationConsole(int maximumLines) throws IOException
     {
-        this(maxLines, false, DEFAULT_PIPE_SIZE);
+        this(maximumLines, false, DEFAULT_PIPE_SIZE);
     }
 
 
     /**
      * Constructs {@link CapturingApplicationConsole}.
      *
-     * @param maxLines   the number of lines of output to keep
-     * @param plainMode  if true, output to this console is not formatted
-     *                   with application details or line numbers
+     * @param maximumLines    the number of lines of output to keep
+     * @param diagnosticMode  if true, output to this console is not formatted
+     *                        with application details or line numbers
      *
      * @throws IOException
      */
-    public CapturingApplicationConsole(int     maxLines,
-                                       boolean plainMode) throws IOException
+    public CapturingApplicationConsole(int     maximumLines,
+                                       boolean diagnosticMode) throws IOException
     {
-        this(maxLines, plainMode, DEFAULT_PIPE_SIZE);
+        this(maximumLines, diagnosticMode, DEFAULT_PIPE_SIZE);
     }
 
 
     /**
      * Constructs {@link CapturingApplicationConsole}.
      *
-     * @param maxLines   the number of lines of output to keep
-     * @param plainMode  if true, output to this console is not formatted
-     *                   with application details or line numbers
-     * @param pipeSize   the size of the pipe's buffers
+     * @param maximumLines    the number of lines of output to keep
+     * @param diagnosticMode  if true, output to this console is not formatted
+     *                        with application details or line numbers
+     * @param pipeSize        the size of the pipe's buffers
      *
      * @throws IOException
      */
-    public CapturingApplicationConsole(int     maxLines,
-                                       boolean plainMode,
+    public CapturingApplicationConsole(int     maximumLines,
+                                       boolean diagnosticMode,
                                        int     pipeSize) throws IOException
     {
-        super(pipeSize, plainMode);
+        super(pipeSize, diagnosticMode);
 
-        m_maxLines  = maxLines;
+        this.maximumLines = maximumLines;
 
-        m_outBuffer = new LinkedList<String>();
-        m_errBuffer = new LinkedList<String>();
+        this.stdoutBuffer = new ConcurrentLinkedQueue<String>();
+        this.stderrBuffer = new ConcurrentLinkedQueue<String>();
 
-        m_outThread = new Thread(new OutputCaptor(m_outputReader, m_outBuffer));
-        m_errThread = new Thread(new OutputCaptor(m_errorReader, m_errBuffer));
+        this.stdoutThread = new Thread(new OutputCaptor(stdoutReader, stdoutBuffer));
+        this.stderrThread = new Thread(new OutputCaptor(stderrReader, stderrBuffer));
 
-        m_outThread.start();
-        m_errThread.start();
+        this.stdoutThread.start();
+        this.stderrThread.start();
     }
 
 
@@ -145,16 +149,18 @@ public class CapturingApplicationConsole extends AbstractPipedApplicationConsole
     public void close()
     {
         super.close();
+
         try
         {
-            m_outThread.join();
-            m_errThread.join();
+            stdoutThread.join();
+            stderrThread.join();
         }
         catch (InterruptedException e)
         {
             // Ignored
         }
     }
+
 
     /**
      * Obtain a {@link LinkedList} containing the lines captured
@@ -165,9 +171,9 @@ public class CapturingApplicationConsole extends AbstractPipedApplicationConsole
      * @return a {@link LinkedList} containing the lines captured
      *         from the applications StdOut
      */
-    public LinkedList<String> getCapturedOutputLines()
+    public Queue<String> getCapturedOutputLines()
     {
-        return m_outBuffer;
+        return stdoutBuffer;
     }
 
 
@@ -180,9 +186,9 @@ public class CapturingApplicationConsole extends AbstractPipedApplicationConsole
      * @return a {@link LinkedList} containing the lines captured
      *         from the applications StdErr
      */
-    public LinkedList<String> getCapturedErrorLines()
+    public Queue<String> getCapturedErrorLines()
     {
-        return m_errBuffer;
+        return stderrBuffer;
     }
 
 
@@ -194,7 +200,7 @@ public class CapturingApplicationConsole extends AbstractPipedApplicationConsole
      */
     public PrintWriter getInputWriter()
     {
-        return m_inputWriter;
+        return stdinWriter;
     }
 
 
@@ -206,12 +212,13 @@ public class CapturingApplicationConsole extends AbstractPipedApplicationConsole
         /**
          * The {@link BufferedReader} to capture output from
          */
-        BufferedReader     reader;
+        BufferedReader reader;
 
         /**
          * The {@link LinkedList} to store lines of output in
          */
-        LinkedList<String> lines;
+        ConcurrentLinkedQueue<String> lines;
+
 
         /**
          * Create an {@link OutputCaptor}.
@@ -219,8 +226,8 @@ public class CapturingApplicationConsole extends AbstractPipedApplicationConsole
          * @param reader  The {@link BufferedReader} to capture output from
          * @param lines   The {@link LinkedList} to store lines of output in
          */
-        OutputCaptor(BufferedReader              reader,
-                     LinkedList<String> lines)
+        OutputCaptor(BufferedReader                reader,
+                     ConcurrentLinkedQueue<String> lines)
         {
             this.reader = reader;
             this.lines  = lines;
@@ -240,7 +247,7 @@ public class CapturingApplicationConsole extends AbstractPipedApplicationConsole
 
                 while (line != null)
                 {
-                    if (lines.size() >= CapturingApplicationConsole.this.m_maxLines)
+                    if (lines.size() >= CapturingApplicationConsole.this.maximumLines)
                     {
                         lines.poll();
                     }
