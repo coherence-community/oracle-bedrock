@@ -472,6 +472,9 @@ reverse chronological order.
     internal CoherenceNamedCache implementation to respect and correctly
     ensure arguments and returned method invocation results are serializable.
 
+*   [ORACLETOOLS-177](https://java.net/jira/browse/ORACLETOOLS-177): Removed
+    unnecessary ensure(eventually(...)) in the RestartCoherenceClusterMemberAction.
+
 <h4>oracle-tools-coherence-testing-support</h4>
 
 *   (none)
