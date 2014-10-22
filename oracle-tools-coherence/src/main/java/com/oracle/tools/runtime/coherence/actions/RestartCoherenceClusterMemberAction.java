@@ -221,9 +221,6 @@ public class RestartCoherenceClusterMemberAction<A extends CoherenceClusterMembe
                             // ensure that the new member is a member of the cluster
                             ensure(eventually(invoking(cluster).getClusterMemberUIDs()), contains(memberUID));
 
-                            // ensure that the predicate is satisfied (using a deferred)
-                            ensure(new DeferredPredicate<CoherenceClusterMember>(member, closePredicate));
-
                             if (LOGGER.isLoggable(Level.INFO))
                             {
                                 LOGGER.info("Created new cluster member [" + name + " #" + member.getLocalMemberId()
