@@ -399,6 +399,10 @@ reverse chronological order.
     StrictHostChecking option and removed previous setters/getters for
     strict-host-checking across builders.
 
+*   [ORACLETOOLS-178](https://java.net/jira/browse/ORACLETOOLS-178): Resolved
+    issue where wildcards in Java Application classpaths would be expanded
+    into a list of every file name (when using tsch).
+
 <h4>oracle-tools-runtime-virtual</h4>
 
 *   [ORACLETOOLS-115](https://java.net/jira/browse/ORACLETOOLS-115): Introduced
