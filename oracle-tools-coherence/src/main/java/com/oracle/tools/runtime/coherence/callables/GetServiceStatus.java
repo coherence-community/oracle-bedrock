@@ -78,7 +78,7 @@ public class GetServiceStatus implements RemoteCallable<ServiceStatus>
             if (service instanceof SafeDistributedCacheService)
             {
                 SafeDistributedCacheService distributedCacheService = (SafeDistributedCacheService) service;
-                PartitionedService partitionedService = (PartitionedService) distributedCacheService.getCacheService();
+                PartitionedService partitionedService = (PartitionedService) distributedCacheService.getService();
                 int                         backupStrength          = (Integer) partitionedService.getBackupStrength();
 
                 switch (backupStrength)
