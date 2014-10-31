@@ -31,36 +31,27 @@ import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import com.jcraft.jsch.SftpException;
-
 import com.oracle.tools.Option;
 import com.oracle.tools.Options;
-
 import com.oracle.tools.options.Timeout;
-
 import com.oracle.tools.runtime.AbstractApplicationBuilder;
 import com.oracle.tools.runtime.Application;
 import com.oracle.tools.runtime.ApplicationConsole;
 import com.oracle.tools.runtime.ApplicationSchema;
 import com.oracle.tools.runtime.Platform;
 import com.oracle.tools.runtime.PropertiesBuilder;
-
-import com.oracle.tools.runtime.options.EnvironmentVariables;
 import com.oracle.tools.runtime.options.PlatformSeparators;
 import com.oracle.tools.runtime.options.TemporaryDirectory;
-
 import com.oracle.tools.runtime.remote.options.Deployment;
 import com.oracle.tools.runtime.remote.options.StrictHostChecking;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Iterator;
 import java.util.Properties;
-
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -449,7 +440,7 @@ public abstract class AbstractRemoteApplicationBuilder<A extends Application, E 
                             }
                             else
                             {
-                                sftpChannel.cd(asRemotePlatformFileName(destinationFile.getPath(), separators));
+                                sftpChannel.cd(asRemotePlatformFileName(destinationFilePath, separators));
                             }
 
                             destinationFileName = destinationFile.getName();
