@@ -44,7 +44,6 @@ import com.oracle.tools.runtime.ApplicationSchema;
 import com.oracle.tools.runtime.Platform;
 import com.oracle.tools.runtime.PropertiesBuilder;
 
-import com.oracle.tools.runtime.options.EnvironmentVariables;
 import com.oracle.tools.runtime.options.PlatformSeparators;
 import com.oracle.tools.runtime.options.TemporaryDirectory;
 
@@ -53,7 +52,6 @@ import com.oracle.tools.runtime.remote.options.StrictHostChecking;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import java.util.ArrayList;
@@ -449,7 +447,7 @@ public abstract class AbstractRemoteApplicationBuilder<A extends Application, E 
                             }
                             else
                             {
-                                sftpChannel.cd(asRemotePlatformFileName(destinationFile.getPath(), separators));
+                                sftpChannel.cd(asRemotePlatformFileName(destinationFilePath, separators));
                             }
 
                             destinationFileName = destinationFile.getName();
