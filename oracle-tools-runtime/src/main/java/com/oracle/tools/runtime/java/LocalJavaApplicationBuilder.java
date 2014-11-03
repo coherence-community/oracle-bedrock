@@ -202,7 +202,7 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication> extends Abst
         if (javaHome == null)
         {
             // when we don't have a java home we just use the defined executable
-            processBuilder.command(schema.getExecutableName());
+            processBuilder.command(StringHelper.doubleQuoteIfNecessary(schema.getExecutableName()));
         }
         else
         {
@@ -216,7 +216,8 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication> extends Abst
                 javaHomePath = javaHomePath + File.separator;
             }
 
-            processBuilder.command(javaHomePath + "bin" + File.separator + schema.getExecutableName());
+            processBuilder.command(StringHelper.doubleQuoteIfNecessary(javaHomePath + "bin" + File.separator
+                                                                       + schema.getExecutableName()));
         }
 
         // ----- establish the system properties for the java application -----

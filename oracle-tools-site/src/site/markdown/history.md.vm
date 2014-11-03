@@ -382,6 +382,8 @@ reverse chronological order.
     *BREAKING CHANGE:*  The returned type of numerous methods were changed to
     Queue from LinkedList.
 
+*   [ORACLETOOLS-180](https://java.net/jira/browse/ORACLETOOLS-180): Correctly
+    double-quoted ApplicationSchema.getExecutableName() when it contains spaces.
 
 <h4>oracle-tools-runtime-remote</h4>
 

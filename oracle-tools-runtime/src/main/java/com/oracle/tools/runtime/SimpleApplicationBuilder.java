@@ -28,6 +28,8 @@ package com.oracle.tools.runtime;
 import com.oracle.tools.Option;
 import com.oracle.tools.Options;
 
+import com.oracle.tools.lang.StringHelper;
+
 import com.oracle.tools.runtime.options.EnvironmentVariables;
 import com.oracle.tools.runtime.options.ErrorStreamRedirection;
 
@@ -76,7 +78,8 @@ public class SimpleApplicationBuilder extends AbstractApplicationBuilder<SimpleA
 
         // we'll use the native operating system process builder to create
         // and manage the local application process
-        ProcessBuilder processBuilder = new ProcessBuilder(schema.getExecutableName());
+        ProcessBuilder processBuilder =
+            new ProcessBuilder(StringHelper.doubleQuoteIfNecessary(schema.getExecutableName()));
 
         // ----- establish the working directory -----
 
