@@ -206,27 +206,28 @@ public class RemoteJavaApplicationEnvironment<A extends JavaApplication>
         if (javaHome == null)
         {
             // when we don't have a java home we just use the defined executable
-            builder.append(schema.getExecutableName());
+            builder.append(StringHelper.doubleQuoteIfNecessary(schema.getExecutableName()));
         }
         else
         {
-            // determine the PlatformSeparators (assume unix is not defined)
+            // determine the PlatformSeparators (assume unix if not defined)
             PlatformSeparators separators = options.get(PlatformSeparators.class, PlatformSeparators.forUnix());
 
             // when we have a java home, we prefix the executable name with the java.home/bin/
-            String javaHomePath = javaHome.get().trim();
+            String javaHomePath   = javaHome.get().trim();
 
-            builder.append(javaHomePath);
+            String javaExecutable = javaHomePath;
 
             if (!javaHomePath.endsWith(separators.getFileSeparator()))
             {
-                builder.append(separators.getFileSeparator());
+                javaExecutable += separators.getFileSeparator();
             }
 
-            builder.append("bin");
-            builder.append(separators.getFileSeparator());
+            javaExecutable += "bin";
+            javaExecutable += separators.getFileSeparator();
+            javaExecutable += schema.getExecutableName();
 
-            builder.append(schema.getExecutableName());
+            builder.append(StringHelper.doubleQuoteIfNecessary(javaExecutable));
         }
 
         // ----- establish the remote application class path -----
