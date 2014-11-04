@@ -25,10 +25,7 @@ reverse chronological order.
 
 <h4>oracle-tools-runtime-remote</h4>
 
-*   [ORACLETOOLS-179](https://java.net/jira/browse/ORACLETOOLS-179): Fixed a bug
-    where deployment of custom artefacts failed when realizing a remote application
-    using a CustomDeployment option where the destination directory for the artefacts
-    is not the default working directory.
+*   (no changes)
 
 <h4>oracle-tools-runtime-virtual</h4>
 
