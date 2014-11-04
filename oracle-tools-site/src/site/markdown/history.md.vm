@@ -358,7 +358,7 @@ reverse chronological order.
     provided for submissions.
 
 *   [ORACLETOOLS-168](https://java.net/jira/browse/ORACLETOOLS-168): Added
-    the method public <T> T submit(RemoteCallable<T> callable) from
+    the method public &lt;T&gt; T submit(RemoteCallable&lt;T&gt; callable) from
     AbstractJavaApplication to the JavaApplication interface.
 
 *   [ORACLETOOLS-171](https://java.net/jira/browse/ORACLETOOLS-171): Refactored
