@@ -385,6 +385,10 @@ reverse chronological order.
 *   [ORACLETOOLS-180](https://java.net/jira/browse/ORACLETOOLS-180): Correctly
     double-quoted ApplicationSchema.getExecutableName() when it contains spaces.
 
+*   [ORACLETOOLS-182](https://java.net/jira/browse/ORACLETOOLS-182): Resolves
+    an issue where session timeouts are set to zero for remote applications,
+    regardless of what may be configured.
+
 <h4>oracle-tools-runtime-remote</h4>
 
 *   [ORACLETOOLS-91](https://java.net/jira/browse/ORACLETOOLS-91): Introduced

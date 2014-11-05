@@ -27,6 +27,8 @@ package com.oracle.tools.options;
 
 import com.oracle.tools.Option;
 
+import java.sql.Time;
+
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -83,6 +85,19 @@ public class Timeout implements Option
     public TimeUnit getUnits()
     {
         return units;
+    }
+
+
+    /**
+     * Obtains the {@link Timeout} duration in the specified {@link TimeUnit}.
+     *
+     * @param units  the desired {@link TimeUnit}
+     *
+     * @return  the duration measured in the specified {@link TimeUnit}
+     */
+    public long to(TimeUnit units)
+    {
+        return units.convert(getDuration(), getUnits());
     }
 
 
