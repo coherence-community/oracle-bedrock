@@ -329,7 +329,7 @@ public abstract class AbstractRemoteApplicationBuilder<A extends Application, E 
 
             // determine the timeout
             Timeout timeout   = options.get(Timeout.class, Timeout.autoDetect());
-            int     timeoutMS = (int) timeout.getUnits().convert(timeout.getDuration(), TimeUnit.MILLISECONDS);
+            int     timeoutMS = (int) timeout.getUnits().toMillis(timeout.getDuration());
 
             // set the default session timeouts (in milliseconds)
             session.setTimeout(timeoutMS);
@@ -365,7 +365,6 @@ public abstract class AbstractRemoteApplicationBuilder<A extends Application, E 
 
             // determine the DeploymentArtifacts based on those specified by the Deployment option
             ArrayList<DeploymentArtifact> artifactsToDeploy = new ArrayList<DeploymentArtifact>();
-
             Deployment<T, S>              deployment        = options.get(Deployment.class);
 
             if (deployment != null)
