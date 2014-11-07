@@ -279,12 +279,21 @@ public class RemoteJavaApplicationBuilderTest extends AbstractRemoteApplicationB
         SimpleJavaApplicationSchema schema =
             new SimpleJavaApplicationSchema(SleepingApplication.class.getName()).addArgument("30");
 
-        try (SimpleJavaApplication app = LocalPlatform.getInstance().realize("TestApp",
-                                                                             schema,
-                                                                             new SystemApplicationConsole(),
-                                                                             RemoteDebugging.disabled()))
+        CapturingApplicationConsole console  = new CapturingApplicationConsole();
+
+        RemoteDebugging remoteDebugging      = RemoteDebugging.disabled();
+
+        RemotePlatform              platform = getRemotePlatform();
+
+        try (SimpleJavaApplication application = platform.realize("Java",
+                                                                  schema,
+                                                                  console,
+                                                                  remoteDebugging,
+                                                                  StrictHostChecking.disabled()))
         {
-            List<String> args     = app.submit(new GetProgramArgs());
+            Eventually.assertThat(invoking(console).getCapturedOutputLines(), hasItem(startsWith("Now sleeping")));
+
+            List<String> args     = application.submit(new GetProgramArgs());
 
             String       debugArg = null;
 

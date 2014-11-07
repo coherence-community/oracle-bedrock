@@ -120,6 +120,42 @@ public class NetworkHelper
     };
 
     /**
+     * The {@link Predicate} for the Link Local {@link InetAddress}.
+     */
+    public static final Predicate<InetAddress> LINK_LOCAL_ADDRESS = new Predicate<InetAddress>()
+    {
+        @Override
+        public boolean evaluate(InetAddress address)
+        {
+            return address != null && address.isLinkLocalAddress();
+        }
+
+        @Override
+        public String toString()
+        {
+            return "LINK-LOCAL-ADDRESS";
+        }
+    };
+
+    /**
+     * The {@link Predicate} for any local {@link InetAddress}.
+     */
+    public static final Predicate<InetAddress> ANY_LOCAL_ADDRESS = new Predicate<InetAddress>()
+    {
+        @Override
+        public boolean evaluate(InetAddress address)
+        {
+            return address != null && address.isAnyLocalAddress();
+        }
+
+        @Override
+        public String toString()
+        {
+            return "ANY-LOCAL-ADDRESS";
+        }
+    };
+
+    /**
      * The {@link Predicate} for the DEFAULT {@link InetAddress}, based on the
      * defined system properties java.net.preferIPv4Stack and java.net.preferIPv6Addresses.
      */
