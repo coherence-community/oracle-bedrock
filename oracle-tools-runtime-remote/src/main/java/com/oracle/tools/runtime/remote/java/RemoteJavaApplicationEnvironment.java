@@ -54,6 +54,7 @@ import com.oracle.tools.runtime.remote.AbstractRemoteApplicationEnvironment;
 import com.oracle.tools.runtime.remote.java.options.JavaDeployment;
 
 import static com.oracle.tools.predicate.Predicates.allOf;
+import static com.oracle.tools.predicate.Predicates.isNot;
 
 import java.io.IOException;
 
@@ -110,7 +111,8 @@ public class RemoteJavaApplicationEnvironment<A extends JavaApplication>
         // configure a server that the remote process can communicate with
         remoteExecutor = new RemoteExecutorServer();
 
-        remoteExecutor.open();
+        // open the server
+        InetAddress remoteExecutorServerAddress = remoteExecutor.open();
 
         // ----- determine the remote system properties -----
 
@@ -130,13 +132,42 @@ public class RemoteJavaApplicationEnvironment<A extends JavaApplication>
             }
         }
 
-        // add oracle tools specific system properties
-        Predicate<InetAddress> preferred = allOf(NetworkHelper.NON_LOOPBACK_ADDRESS,
+        // attempt to determine a suitable network address for the remote application to connect back to the
+        // remote executor server (the ideal is something non-local and routable)
+        Predicate<InetAddress> preferred = allOf(isNot(NetworkHelper.LOOPBACK_ADDRESS),
+                                                 isNot(NetworkHelper.LINK_LOCAL_ADDRESS),
+                                                 isNot(NetworkHelper.ANY_LOCAL_ADDRESS),
                                                  schema.isIPv4Preferred()
                                                  ? NetworkHelper.IPv4_ADDRESS : NetworkHelper.DEFAULT_ADDRESS);
 
-        remoteSystemProperties.setProperty(Settings.PARENT_ADDRESS,
-                                           remoteExecutor.getInetAddress(preferred).getHostAddress());
+        InetAddress remoteExecutorAddress = remoteExecutor.getInetAddress(preferred);
+
+        if (remoteExecutorAddress == null)
+        {
+            // if the ideal fails, try a local address (non-loop-back)
+            preferred = allOf(isNot(NetworkHelper.LOOPBACK_ADDRESS),
+                              schema.isIPv4Preferred() ? NetworkHelper.IPv4_ADDRESS : NetworkHelper.DEFAULT_ADDRESS);
+
+            remoteExecutorAddress = remoteExecutor.getInetAddress(preferred);
+        }
+
+        if (remoteExecutorAddress == null)
+        {
+            // worse case, try to use loopback
+            preferred = allOf(NetworkHelper.LOOPBACK_ADDRESS,
+                              schema.isIPv4Preferred() ? NetworkHelper.IPv4_ADDRESS : NetworkHelper.DEFAULT_ADDRESS);
+
+            remoteExecutorAddress = remoteExecutor.getInetAddress(preferred);
+        }
+
+        if (remoteExecutorAddress == null)
+        {
+            throw new RuntimeException("Can't determine a suitable address for the Remote Application to connect back to:"
+                                       + remoteExecutorServerAddress);
+        }
+
+        // add oracle tools specific system properties
+        remoteSystemProperties.setProperty(Settings.PARENT_ADDRESS, remoteExecutorAddress.getHostAddress());
         remoteSystemProperties.setProperty(Settings.PARENT_PORT, Integer.toString(remoteExecutor.getPort()));
 
         Orphanable orphanable = options.get(Orphanable.class, Orphanable.disabled());
