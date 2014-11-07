@@ -30,6 +30,7 @@ import com.oracle.tools.Options;
 
 import com.oracle.tools.options.Timeout;
 
+import com.oracle.tools.runtime.console.SystemApplicationConsole;
 import com.oracle.tools.runtime.java.container.Container;
 
 import com.oracle.tools.runtime.options.Diagnostics;
@@ -133,7 +134,7 @@ public abstract class AbstractApplication<A extends AbstractApplication<A, P, R>
                                                        process.getInputStream(),
                                                        console.getOutputWriter(),
                                                        process.getId(),
-                                                       diagnosticsEnabled,
+                                                       diagnosticsEnabled && !(console instanceof SystemApplicationConsole),
                                                        console.isDiagnosticsEnabled()));
         stdoutThread.setDaemon(true);
         stdoutThread.setName(displayName + " StdOut Thread");
@@ -145,7 +146,7 @@ public abstract class AbstractApplication<A extends AbstractApplication<A, P, R>
                                                        process.getErrorStream(),
                                                        console.getErrorWriter(),
                                                        process.getId(),
-                                                       diagnosticsEnabled,
+                                                       diagnosticsEnabled && !(console instanceof SystemApplicationConsole),
                                                        console.isDiagnosticsEnabled()));
         stderrThread.setDaemon(true);
         stderrThread.setName(displayName + " StdErr Thread");

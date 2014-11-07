@@ -389,6 +389,10 @@ reverse chronological order.
     an issue where session timeouts are set to zero for remote applications,
     regardless of what may be configured.
 
+*   [ORACLETOOLS-185](https://java.net/jira/browse/ORACLETOOLS-185): Optimized
+    diagnostics output when using SystemApplicationConsoles to avoid duplicate
+    output occuring.
+
 <h4>oracle-tools-runtime-remote</h4>
 
 *   [ORACLETOOLS-91](https://java.net/jira/browse/ORACLETOOLS-91): Introduced
