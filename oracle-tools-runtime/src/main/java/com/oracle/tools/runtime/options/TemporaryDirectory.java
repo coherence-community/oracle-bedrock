@@ -82,6 +82,13 @@ public class TemporaryDirectory implements Option
     }
 
 
+    @Override
+    public String toString()
+    {
+        return "TemporaryDirectory{" + path + "}";
+    }
+
+
     /**
      * Constructs a {@link TemporaryDirectory} given a specified string.
      *

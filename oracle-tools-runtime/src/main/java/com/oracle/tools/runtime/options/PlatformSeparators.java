@@ -27,6 +27,8 @@ package com.oracle.tools.runtime.options;
 
 import com.oracle.tools.Option;
 
+import com.oracle.tools.lang.StringHelper;
+
 import com.oracle.tools.runtime.Platform;
 
 import java.io.File;

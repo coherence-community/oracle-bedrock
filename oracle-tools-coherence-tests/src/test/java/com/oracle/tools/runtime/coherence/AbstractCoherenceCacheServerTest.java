@@ -26,33 +26,47 @@
 package com.oracle.tools.runtime.coherence;
 
 import com.oracle.tools.junit.AbstractTest;
+
 import com.oracle.tools.matchers.MapMatcher;
+
+import com.oracle.tools.options.Diagnostics;
+
 import com.oracle.tools.runtime.LocalPlatform;
 import com.oracle.tools.runtime.Platform;
+
 import com.oracle.tools.runtime.coherence.callables.GetClusterName;
 import com.oracle.tools.runtime.coherence.callables.GetClusterSize;
 import com.oracle.tools.runtime.coherence.callables.GetLocalMemberId;
 import com.oracle.tools.runtime.coherence.callables.GetServiceStatus;
+
 import com.oracle.tools.runtime.console.SystemApplicationConsole;
+
 import com.oracle.tools.runtime.network.AvailablePortIterator;
-import com.oracle.tools.runtime.options.Diagnostics;
+
 import com.tangosol.net.NamedCache;
+
 import com.tangosol.util.aggregator.LongSum;
+
 import com.tangosol.util.extractor.IdentityExtractor;
+
 import com.tangosol.util.filter.PresentFilter;
+
 import org.junit.Test;
 
-import javax.management.ObjectName;
+import static com.oracle.tools.deferred.DeferredHelper.invoking;
+
+import static com.oracle.tools.deferred.Eventually.assertThat;
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
+
 import java.util.AbstractMap;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import static com.oracle.tools.deferred.DeferredHelper.invoking;
-import static com.oracle.tools.deferred.Eventually.assertThat;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.notNullValue;
+import javax.management.ObjectName;
 
 /**
  * Functional Tests for {@link CoherenceCacheServer}s.

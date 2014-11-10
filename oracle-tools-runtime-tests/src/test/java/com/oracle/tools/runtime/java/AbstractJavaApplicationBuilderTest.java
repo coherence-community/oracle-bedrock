@@ -36,6 +36,8 @@ import com.oracle.tools.junit.AbstractTest;
 
 import com.oracle.tools.lang.StringHelper;
 
+import com.oracle.tools.options.Diagnostics;
+
 import com.oracle.tools.runtime.ApplicationConsole;
 import com.oracle.tools.runtime.DummyApp;
 import com.oracle.tools.runtime.DummyClassPathApp;
@@ -47,8 +49,6 @@ import com.oracle.tools.runtime.concurrent.callable.RemoteCallableStaticMethod;
 
 import com.oracle.tools.runtime.console.PipedApplicationConsole;
 import com.oracle.tools.runtime.console.SystemApplicationConsole;
-
-import com.oracle.tools.runtime.options.Diagnostics;
 
 import com.oracle.tools.util.FutureCompletionListener;
 

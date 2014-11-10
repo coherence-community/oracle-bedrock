@@ -68,6 +68,13 @@ public class ErrorStreamRedirection implements Option
     }
 
 
+    @Override
+    public String toString()
+    {
+        return "ErrorStreamRedirection{" + (enabled ? "enabled" : "disabled") + "}";
+    }
+
+
     /**
      * Constructs a {@link ErrorStreamRedirection} being enabled.
      *

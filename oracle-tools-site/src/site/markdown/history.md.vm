@@ -78,6 +78,14 @@ reverse chronological order.
 *   [ORACLETOOLS-172](https://java.net/jira/browse/ORACLETOOLS-172): Resolved
     inability to use DeferredHelper.invoking(...) method calls that return arrays.
 
+*   [ORACLETOOLS-186](https://java.net/jira/browse/ORACLETOOLS-186): Moved the
+    Diagnostics option from the oracle-tools-runtime module into the
+    oracle-tools-core module.
+
+*   [ORACLETOOLS-187](https://java.net/jira/browse/ORACLETOOLS-187): Ensured
+    that the Options.getClassOfOption(...) methods only return concrete classes
+    or interfaces directly implementing the Option/ComposableOption interfaces.
+
 <h4>oracle-tools-runtime</h4>
 
 *   [ORACLETOOLS-61](https://java.net/jira/browse/ORACLETOOLS-61): Introduced
@@ -392,6 +400,9 @@ reverse chronological order.
 *   [ORACLETOOLS-185](https://java.net/jira/browse/ORACLETOOLS-185): Optimized
     diagnostics output when using SystemApplicationConsoles to avoid duplicate
     output occuring.
+
+*   [ORACLETOOLS-186](https://java.net/jira/browse/ORACLETOOLS-186): Moved the
+    Diagnostics option into the oracle-tools-core module.
 
 <h4>oracle-tools-runtime-remote</h4>
 
