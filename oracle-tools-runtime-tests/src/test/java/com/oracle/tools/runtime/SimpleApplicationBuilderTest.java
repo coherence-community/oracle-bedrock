@@ -27,9 +27,10 @@ package com.oracle.tools.runtime;
 
 import com.oracle.tools.junit.AbstractTest;
 
+import com.oracle.tools.options.Diagnostics;
+
 import com.oracle.tools.runtime.console.PipedApplicationConsole;
 
-import com.oracle.tools.runtime.options.Diagnostics;
 import com.oracle.tools.runtime.options.ErrorStreamRedirection;
 
 import org.junit.Test;

@@ -29,6 +29,8 @@ import com.oracle.tools.junit.AbstractTest;
 
 import com.oracle.tools.matchers.MapMatcher;
 
+import com.oracle.tools.options.Diagnostics;
+
 import com.oracle.tools.runtime.LocalPlatform;
 import com.oracle.tools.runtime.Platform;
 
@@ -40,8 +42,6 @@ import com.oracle.tools.runtime.coherence.callables.GetServiceStatus;
 import com.oracle.tools.runtime.console.SystemApplicationConsole;
 
 import com.oracle.tools.runtime.network.AvailablePortIterator;
-
-import com.oracle.tools.runtime.options.Diagnostics;
 
 import com.tangosol.net.NamedCache;
 

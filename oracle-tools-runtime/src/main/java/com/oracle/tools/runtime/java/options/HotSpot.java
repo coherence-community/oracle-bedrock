@@ -51,7 +51,14 @@ public class HotSpot
         @Override
         public Iterable<String> getOptions()
         {
-            return Collections.singletonList("-" + this.toString().toLowerCase());
+            return Collections.singletonList("-" + this.name().toLowerCase());
+        }
+
+
+        @Override
+        public String toString()
+        {
+            return "HotSpot.Mode{" + this.name().toLowerCase() + "}";
         }
     }
 }

@@ -101,6 +101,13 @@ public class Timeout implements Option
     }
 
 
+    @Override
+    public String toString()
+    {
+        return "Timeout{" + getDuration() + " " + getUnits().name() + "}";
+    }
+
+
     /**
      * Obtains the {@link Timeout} by auto-detecting it from the configuration
      * and environment.

@@ -70,6 +70,13 @@ public class StrictHostChecking implements Option
     }
 
 
+    @Override
+    public String toString()
+    {
+        return "StrictHostChecking{" + (enabled ? "enabled" : "disabled") + "}";
+    }
+
+
     /**
      * Constructs a {@link StrictHostChecking} being enabled.
      *

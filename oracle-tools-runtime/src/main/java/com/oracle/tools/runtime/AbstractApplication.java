@@ -28,12 +28,12 @@ package com.oracle.tools.runtime;
 import com.oracle.tools.Option;
 import com.oracle.tools.Options;
 
+import com.oracle.tools.options.Diagnostics;
 import com.oracle.tools.options.Timeout;
 
 import com.oracle.tools.runtime.console.SystemApplicationConsole;
-import com.oracle.tools.runtime.java.container.Container;
 
-import com.oracle.tools.runtime.options.Diagnostics;
+import com.oracle.tools.runtime.java.container.Container;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
@@ -126,7 +126,8 @@ public abstract class AbstractApplication<A extends AbstractApplication<A, P, R>
         String             displayName = runtime.getApplicationName();
         P                  process     = runtime.getApplicationProcess();
         ApplicationConsole console     = runtime.getApplicationConsole();
-        boolean diagnosticsEnabled = runtime.getOptions().get(Diagnostics.class, Diagnostics.autoDetect()).isEnabled();
+        boolean diagnosticsEnabled     = runtime.getOptions().get(Diagnostics.class,
+                                                                  Diagnostics.disabled()).isEnabled();
 
         // start a thread to redirect standard out to the console
         stdoutThread = new Thread(new OutputRedirector(displayName,
@@ -134,7 +135,8 @@ public abstract class AbstractApplication<A extends AbstractApplication<A, P, R>
                                                        process.getInputStream(),
                                                        console.getOutputWriter(),
                                                        process.getId(),
-                                                       diagnosticsEnabled && !(console instanceof SystemApplicationConsole),
+                                                       diagnosticsEnabled
+                                                       &&!(console instanceof SystemApplicationConsole),
                                                        console.isDiagnosticsEnabled()));
         stdoutThread.setDaemon(true);
         stdoutThread.setName(displayName + " StdOut Thread");
@@ -146,7 +148,8 @@ public abstract class AbstractApplication<A extends AbstractApplication<A, P, R>
                                                        process.getErrorStream(),
                                                        console.getErrorWriter(),
                                                        process.getId(),
-                                                       diagnosticsEnabled && !(console instanceof SystemApplicationConsole),
+                                                       diagnosticsEnabled
+                                                       &&!(console instanceof SystemApplicationConsole),
                                                        console.isDiagnosticsEnabled()));
         stderrThread.setDaemon(true);
         stderrThread.setName(displayName + " StdErr Thread");

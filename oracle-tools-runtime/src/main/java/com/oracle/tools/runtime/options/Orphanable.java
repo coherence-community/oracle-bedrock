@@ -69,6 +69,13 @@ public class Orphanable implements Option
     }
 
 
+    @Override
+    public String toString()
+    {
+        return "Orphanable{" + orphanable + "}";
+    }
+
+
     /**
      * Constructs a {@link Orphanable} being enabled.
      *

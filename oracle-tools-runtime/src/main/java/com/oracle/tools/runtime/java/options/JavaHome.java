@@ -67,6 +67,13 @@ public class JavaHome implements Option
     }
 
 
+    @Override
+    public String toString()
+    {
+        return "JavaHome{" + javaHome + "}";
+    }
+
+
     /**
      * Constructs a {@link JavaHome} given a specified string.
      *

@@ -25,13 +25,13 @@
 
 package com.oracle.tools.runtime.java;
 
+import com.oracle.tools.options.Diagnostics;
+
 import com.oracle.tools.runtime.Platform;
 
 import com.oracle.tools.runtime.console.AbstractPipedApplicationConsole;
 import com.oracle.tools.runtime.console.PipedApplicationConsole;
 import com.oracle.tools.runtime.console.SystemApplicationConsole;
-
-import com.oracle.tools.runtime.options.Diagnostics;
 
 import org.junit.Test;
 
