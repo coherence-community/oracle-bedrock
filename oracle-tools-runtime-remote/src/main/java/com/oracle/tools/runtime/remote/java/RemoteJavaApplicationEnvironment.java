@@ -108,71 +108,14 @@ public class RemoteJavaApplicationEnvironment<A extends JavaApplication>
     {
         super(schema, platform, options);
 
+        // assume no system properties to start with
+        remoteSystemProperties = new Properties();
+
         // configure a server that the remote process can communicate with
         remoteExecutor = new RemoteExecutorServer();
 
         // open the server
-        InetAddress remoteExecutorServerAddress = remoteExecutor.open();
-
-        // ----- determine the remote system properties -----
-
-        Properties properties = schema.getSystemProperties(platform);
-
-        remoteSystemProperties = new Properties();
-
-        for (String propertyName : properties.stringPropertyNames())
-        {
-            String propertyValue = properties.getProperty(propertyName);
-
-            // filter out (don't set) system properties that start with "oracletools"
-            // (we don't want to have "parents" applications effect child applications
-            if (!propertyName.startsWith("oracletools"))
-            {
-                remoteSystemProperties.setProperty(propertyName, propertyValue);
-            }
-        }
-
-        // attempt to determine a suitable network address for the remote application to connect back to the
-        // remote executor server (the ideal is something non-local and routable)
-        Predicate<InetAddress> preferred = allOf(isNot(NetworkHelper.LOOPBACK_ADDRESS),
-                                                 isNot(NetworkHelper.LINK_LOCAL_ADDRESS),
-                                                 isNot(NetworkHelper.ANY_LOCAL_ADDRESS),
-                                                 schema.isIPv4Preferred()
-                                                 ? NetworkHelper.IPv4_ADDRESS : NetworkHelper.DEFAULT_ADDRESS);
-
-        InetAddress remoteExecutorAddress = remoteExecutor.getInetAddress(preferred);
-
-        if (remoteExecutorAddress == null)
-        {
-            // if the ideal fails, try a local address (non-loop-back)
-            preferred = allOf(isNot(NetworkHelper.LOOPBACK_ADDRESS),
-                              schema.isIPv4Preferred() ? NetworkHelper.IPv4_ADDRESS : NetworkHelper.DEFAULT_ADDRESS);
-
-            remoteExecutorAddress = remoteExecutor.getInetAddress(preferred);
-        }
-
-        if (remoteExecutorAddress == null)
-        {
-            // worse case, try to use loopback
-            preferred = allOf(NetworkHelper.LOOPBACK_ADDRESS,
-                              schema.isIPv4Preferred() ? NetworkHelper.IPv4_ADDRESS : NetworkHelper.DEFAULT_ADDRESS);
-
-            remoteExecutorAddress = remoteExecutor.getInetAddress(preferred);
-        }
-
-        if (remoteExecutorAddress == null)
-        {
-            throw new RuntimeException("Can't determine a suitable address for the Remote Application to connect back to:"
-                                       + remoteExecutorServerAddress);
-        }
-
-        // add oracle tools specific system properties
-        remoteSystemProperties.setProperty(Settings.PARENT_ADDRESS, remoteExecutorAddress.getHostAddress());
-        remoteSystemProperties.setProperty(Settings.PARENT_PORT, Integer.toString(remoteExecutor.getPort()));
-
-        Orphanable orphanable = options.get(Orphanable.class, Orphanable.disabled());
-
-        remoteSystemProperties.setProperty(Settings.ORPHANABLE, Boolean.toString(orphanable.isOrphanable()));
+        remoteExecutor.open();
 
         // ----- determine the remote classpath based on the deployment option -----
 
@@ -226,7 +169,7 @@ public class RemoteJavaApplicationEnvironment<A extends JavaApplication>
 
 
     @Override
-    public String getRemoteCommandToExecute()
+    public String getRemoteCommandToExecute(InetAddress localInetAddress)
     {
         StringBuilder builder = new StringBuilder();
 
@@ -307,12 +250,34 @@ public class RemoteJavaApplicationEnvironment<A extends JavaApplication>
 
         // ----- establish the system properties for the java application -----
 
-        // add the system properties to the command
-        Properties properties = getRemoteSystemProperties();
+        Properties properties = schema.getSystemProperties(platform);
 
         for (String propertyName : properties.stringPropertyNames())
         {
             String propertyValue = properties.getProperty(propertyName);
+
+            // filter out (don't set) system properties that start with "oracletools"
+            // (we don't want to have "parents" applications effect child applications
+            if (!propertyName.startsWith("oracletools"))
+            {
+                remoteSystemProperties.setProperty(propertyName, propertyValue);
+            }
+        }
+
+        // add oracle tools specific system properties
+        InetAddress remoteExecutorAddress = localInetAddress;
+
+        remoteSystemProperties.setProperty(Settings.PARENT_ADDRESS, remoteExecutorAddress.getHostAddress());
+        remoteSystemProperties.setProperty(Settings.PARENT_PORT, Integer.toString(remoteExecutor.getPort()));
+
+        Orphanable orphanable = options.get(Orphanable.class, Orphanable.disabled());
+
+        remoteSystemProperties.setProperty(Settings.ORPHANABLE, Boolean.toString(orphanable.isOrphanable()));
+
+        // add the system properties to the command
+        for (String propertyName : remoteSystemProperties.stringPropertyNames())
+        {
+            String propertyValue = remoteSystemProperties.getProperty(propertyName);
 
             builder.append(" ");
             builder.append("-D");

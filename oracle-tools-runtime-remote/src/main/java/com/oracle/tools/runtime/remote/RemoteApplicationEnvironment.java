@@ -29,6 +29,8 @@ import com.oracle.tools.runtime.Application;
 
 import java.io.Closeable;
 
+import java.net.InetAddress;
+
 import java.util.Properties;
 
 /**
@@ -45,11 +47,15 @@ import java.util.Properties;
 public interface RemoteApplicationEnvironment extends Closeable
 {
     /**
-     * Obtains the remote command to execute to launch the {@link Application}.
+     * Obtains the remote command to execute to launch the remote {@link Application}.
+     *
+     * @param localInetAddress  the local {@link InetAddress} that the remote
+     *                          {@link Application} can use to connect back to the platform
+     *                          that realized the {@link Application}
      *
      * @return  the remote command
      */
-    public String getRemoteCommandToExecute();
+    public String getRemoteCommandToExecute(InetAddress localInetAddress);
 
 
     /**

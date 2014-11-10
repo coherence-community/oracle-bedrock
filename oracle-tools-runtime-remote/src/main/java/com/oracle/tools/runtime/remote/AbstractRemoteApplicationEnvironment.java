@@ -30,13 +30,13 @@ import com.oracle.tools.Options;
 import com.oracle.tools.runtime.Application;
 import com.oracle.tools.runtime.ApplicationSchema;
 import com.oracle.tools.runtime.Platform;
-import com.oracle.tools.runtime.PropertiesBuilder;
 
 import com.oracle.tools.runtime.java.JavaApplication;
 
 import com.oracle.tools.runtime.options.EnvironmentVariables;
 
-import java.util.Collections;
+import java.net.InetAddress;
+
 import java.util.Properties;
 
 /**
@@ -87,7 +87,7 @@ public abstract class AbstractRemoteApplicationEnvironment<A extends Application
 
 
     @Override
-    public String getRemoteCommandToExecute()
+    public String getRemoteCommandToExecute(InetAddress localInetAddress)
     {
         return schema.getExecutableName();
     }
