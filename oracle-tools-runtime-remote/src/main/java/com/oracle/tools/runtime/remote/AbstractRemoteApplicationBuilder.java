@@ -305,6 +305,10 @@ public abstract class AbstractRemoteApplicationBuilder<A extends Application, E 
                                                                    Platform           platform,
                                                                    Option...          applicationOptions)
     {
+        // establish a specialized SocketFactory for JSsch
+        JSchSocketFactory socketFactory = new JSchSocketFactory();
+
+        // initially there's no session
         Session session = null;
 
         // obtain the platform specific options from the schema
@@ -323,6 +327,9 @@ public abstract class AbstractRemoteApplicationBuilder<A extends Application, E 
         {
             // create the remote session
             session = jsch.getSession(userName, hostName, port);
+
+            // establish the specialized socket factory for the session
+            session.setSocketFactory(socketFactory);
 
             // the session should not cause the JVM not to exit
             session.setDaemonThread(true);
@@ -491,7 +498,7 @@ public abstract class AbstractRemoteApplicationBuilder<A extends Application, E 
             // ----- establish the application command line to execute -----
 
             // determine the command to execute remotely
-            String command = environment.getRemoteCommandToExecute();
+            String command = environment.getRemoteCommandToExecute(socketFactory.getLastLocalAddress());
 
             // the actual remote command must include changing to the remote directory
             String remoteCommand = String.format("cd %s ; %s", remoteDirectory, command);
