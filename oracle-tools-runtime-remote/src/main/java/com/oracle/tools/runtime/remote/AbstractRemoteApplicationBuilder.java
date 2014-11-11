@@ -35,6 +35,8 @@ import com.jcraft.jsch.SftpException;
 import com.oracle.tools.Option;
 import com.oracle.tools.Options;
 
+import com.oracle.tools.lang.StringHelper;
+
 import com.oracle.tools.options.Timeout;
 
 import com.oracle.tools.runtime.AbstractApplicationBuilder;
@@ -45,6 +47,7 @@ import com.oracle.tools.runtime.Platform;
 import com.oracle.tools.runtime.PropertiesBuilder;
 
 import com.oracle.tools.runtime.options.PlatformSeparators;
+import com.oracle.tools.runtime.options.Shell;
 import com.oracle.tools.runtime.options.TemporaryDirectory;
 
 import com.oracle.tools.runtime.remote.options.Deployment;
@@ -58,8 +61,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Iterator;
 import java.util.Properties;
-
-import java.util.concurrent.TimeUnit;
 
 /**
  * An {@link AbstractRemoteApplicationBuilder} is a base implementation of an {@link RemoteApplicationBuilder}
@@ -320,6 +321,9 @@ public abstract class AbstractRemoteApplicationBuilder<A extends Application, E 
         // define the PlatformSeparators as Unix if they are not already defined
         options.addIfAbsent(PlatformSeparators.forUnix());
 
+        // define the default Platform Shell (assume BASH)
+        options.addIfAbsent(Shell.is(Shell.Type.BASH));
+
         // obtain the builder-specific remote application environment based on the schema
         E environment = getRemoteApplicationEnvironment(applicationSchema, platform, options);
 
@@ -487,12 +491,39 @@ public abstract class AbstractRemoteApplicationBuilder<A extends Application, E 
 
             // ----- establish the remote environment variables -----
 
-            // define the remote environment variables in the remote channel
+            String environmentVariables = "";
+
+            // get the remote environment variables for the remote application
             Properties variables = environment.getRemoteEnvironmentVariables();
+
+            // determine the format to use for setting variables
+            String format;
+
+            Shell  shell = options.get(Shell.class, Shell.isUnknown());
+
+            switch (shell.getType())
+            {
+            case SH :
+            case BASH :
+                format = "export %s=%s ; ";
+                break;
+
+            case CSH :
+            case TSCH :
+                format = "setenv %s %s ; ";
+
+            default :
+
+                // when we don't know, assume something bash-like
+                format = "export %s=%s ; ";
+                break;
+            }
 
             for (String variableName : variables.stringPropertyNames())
             {
-                execChannel.setEnv(variableName, variables.getProperty(variableName));
+                environmentVariables +=
+                    String.format(format, variableName,
+                                  StringHelper.doubleQuoteIfNecessary(variables.getProperty(variableName)));
             }
 
             // ----- establish the application command line to execute -----
@@ -501,7 +532,7 @@ public abstract class AbstractRemoteApplicationBuilder<A extends Application, E 
             String command = environment.getRemoteCommandToExecute(socketFactory.getLastLocalAddress());
 
             // the actual remote command must include changing to the remote directory
-            String remoteCommand = String.format("cd %s ; %s", remoteDirectory, command);
+            String remoteCommand = environmentVariables + String.format("cd %s ; %s", remoteDirectory, command);
 
             execChannel.setCommand(remoteCommand);
 
