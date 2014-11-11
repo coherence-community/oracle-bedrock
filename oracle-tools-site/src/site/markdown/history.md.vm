@@ -433,6 +433,10 @@ reverse chronological order.
     issue where Remote Java Application Builders were providing a non-routable
     address to remote applications.
 
+*   [ORACLETOOLS-189](https://java.net/jira/browse/ORACLETOOLS-189): Resolved
+    ability to set environment variables on some Remote Platforms
+    (works around JSch defect / inability to reliably set environment variables).
+
 <h4>oracle-tools-runtime-virtual</h4>
 
 *   [ORACLETOOLS-115](https://java.net/jira/browse/ORACLETOOLS-115): Introduced

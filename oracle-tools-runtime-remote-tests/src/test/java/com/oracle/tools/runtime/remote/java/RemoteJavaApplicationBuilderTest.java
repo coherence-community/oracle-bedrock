@@ -37,6 +37,7 @@ import com.oracle.tools.runtime.console.SystemApplicationConsole;
 import com.oracle.tools.runtime.java.JavaApplication;
 import com.oracle.tools.runtime.java.SimpleJavaApplication;
 import com.oracle.tools.runtime.java.SimpleJavaApplicationSchema;
+import com.oracle.tools.runtime.java.options.JavaHome;
 import com.oracle.tools.runtime.java.options.RemoteDebugging;
 
 import com.oracle.tools.runtime.remote.AbstractRemoteApplicationBuilderTest;
@@ -89,6 +90,35 @@ public class RemoteJavaApplicationBuilderTest extends AbstractRemoteApplicationB
 
         // sleep only for 3 seconds
         schema.addArgument("3");
+
+        RemotePlatform platform = getRemotePlatform();
+
+        try (SimpleJavaApplication application = platform.realize("Java",
+                schema,
+                new SystemApplicationConsole(),
+                StrictHostChecking.disabled()))
+        {
+            assertThat(application.waitFor(), is(0));
+
+            application.close();
+
+            assertThat(application.exitValue(), is(0));
+        }
+    }
+
+    /**
+     * Ensure that we can launch Java remotely using a Java Home.
+     */
+    @Test
+    public void shouldLaunchJavaApplicationUsingJavaHome() throws Exception
+    {
+        SimpleJavaApplicationSchema schema = new SimpleJavaApplicationSchema(SleepingApplication.class.getName());
+
+        // sleep only for 3 seconds
+        schema.addArgument("3");
+
+        // use the JavaHome of this process
+        schema.setOptions(JavaHome.at(System.getProperty("java.home")));
 
         RemotePlatform platform = getRemotePlatform();
 
