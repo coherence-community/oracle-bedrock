@@ -468,6 +468,21 @@ public class ContainerBasedJavaApplicationBuilder<A extends JavaApplication> ext
 
 
         @Override
+        public void exit(int exitCode)
+        {
+            throw new UnsupportedOperationException("Calls to exit(...) are not supported by ContainerBasedJavaApplications");
+        }
+
+
+        @Override
+        public void halt(int exitCode)
+        {
+            throw new UnsupportedOperationException("Calls to halt(...) are not supported by ContainerBasedJavaApplications");
+
+        }
+
+
+        @Override
         @Deprecated
         public void destroy()
         {

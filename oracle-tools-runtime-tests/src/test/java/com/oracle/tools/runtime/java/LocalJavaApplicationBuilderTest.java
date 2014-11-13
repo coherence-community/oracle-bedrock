@@ -43,6 +43,8 @@ import com.oracle.tools.runtime.SimpleApplicationSchema;
 import com.oracle.tools.runtime.concurrent.RemoteExecutor;
 import com.oracle.tools.runtime.concurrent.RemoteExecutorListener;
 import com.oracle.tools.runtime.concurrent.callable.GetSystemProperty;
+import com.oracle.tools.runtime.concurrent.runnable.RuntimeExit;
+import com.oracle.tools.runtime.concurrent.runnable.RuntimeHalt;
 import com.oracle.tools.runtime.concurrent.runnable.SystemExit;
 import com.oracle.tools.runtime.concurrent.socket.RemoteExecutorServer;
 import com.oracle.tools.runtime.concurrent.socket.SocketBasedRemoteExecutorTests;
@@ -551,6 +553,54 @@ public class LocalJavaApplicationBuilderTest extends AbstractJavaApplicationBuil
                                                                  HeapSize.initial(256, HeapSize.Units.MB),
                                                                  HeapSize.maximum(1, HeapSize.Units.GB)))
         {
+        }
+    }
+
+
+    /**
+     * Ensure that local {@link JavaApplication}s can be terminated using {@link RuntimeExit}.
+     */
+    @Test
+    public void shouldTerminateUsingRuntimeExit()
+    {
+        // define the SleepingApplication
+        SimpleJavaApplicationSchema schema =
+            new SimpleJavaApplicationSchema(SleepingApplication.class.getName()).setPreferIPv4(true);
+
+        // build and start the SleepingApplication
+        LocalPlatform      platform = LocalPlatform.getInstance();
+
+        ApplicationConsole console  = new SystemApplicationConsole();
+
+        try (SimpleJavaApplication application = platform.realize("sleeping", schema, console))
+        {
+            application.exit(42);
+
+            Eventually.assertThat(invoking(application).exitValue(), is(42));
+        }
+    }
+
+
+    /**
+     * Ensure that local {@link JavaApplication}s can be terminated using {@link RuntimeHalt}.
+     */
+    @Test
+    public void shouldTerminateUsingRuntimeHalt()
+    {
+        // define the SleepingApplication
+        SimpleJavaApplicationSchema schema =
+            new SimpleJavaApplicationSchema(SleepingApplication.class.getName()).setPreferIPv4(true);
+
+        // build and start the SleepingApplication
+        LocalPlatform      platform = LocalPlatform.getInstance();
+
+        ApplicationConsole console  = new SystemApplicationConsole();
+
+        try (SimpleJavaApplication application = platform.realize("sleeping", schema, console))
+        {
+            application.halt(42);
+
+            Eventually.assertThat(invoking(application).exitValue(), is(42));
         }
     }
 

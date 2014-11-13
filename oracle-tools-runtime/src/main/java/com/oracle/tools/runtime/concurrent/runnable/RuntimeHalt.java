@@ -1,5 +1,5 @@
 /*
- * File: SystemExit.java
+ * File: RuntimeHalt.java
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
@@ -28,37 +28,38 @@ package com.oracle.tools.runtime.concurrent.runnable;
 import com.oracle.tools.runtime.concurrent.RemoteRunnable;
 
 /**
- * A {@link RemoteRunnable} to perform a {@link System#exit(int)}.
+ * A {@link RemoteRunnable} to perform a {@link Runtime#halt(int)}.
  * <p>
  * Copyright (c) 2014. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Brian Oliver
  */
-public class SystemExit implements RemoteRunnable
+public class RuntimeHalt implements RemoteRunnable
 {
     /**
-     * The desired system exit code (by default 0);
+     * The desired runtime exit code (by default 0);
      */
     private int exitCode;
 
 
     /**
-     * Constructs a {@link SystemExit}
+     * Constructs a {@link RuntimeHalt}
+     *
      * (using the default exit code 0).
      */
-    public SystemExit()
+    public RuntimeHalt()
     {
         this(0);
     }
 
 
     /**
-     * Constructs a {@link SystemExit} for a specific exit code.
+     * Constructs a {@link RuntimeHalt} for a specific exit code.
      *
      * @param exitCode  the desired exit code
      */
-    public SystemExit(int exitCode)
+    public RuntimeHalt(int exitCode)
     {
         this.exitCode = exitCode;
     }
@@ -67,8 +68,8 @@ public class SystemExit implements RemoteRunnable
     @Override
     public void run()
     {
-        System.out.println("Terminating Application using System.exit(" + exitCode + ")");
+        System.out.println("Terminating Application using Runtime.halt(" + exitCode + ")");
 
-        System.exit(exitCode);
+        Runtime.getRuntime().halt(exitCode);
     }
 }

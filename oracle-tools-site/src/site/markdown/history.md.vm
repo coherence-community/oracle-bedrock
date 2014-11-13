@@ -404,6 +404,13 @@ reverse chronological order.
 *   [ORACLETOOLS-186](https://java.net/jira/browse/ORACLETOOLS-186): Moved the
     Diagnostics option into the oracle-tools-core module.
 
+*   [ORACLETOOLS-194](https://java.net/jira/browse/ORACLETOOLS-194): Introduced
+    the ability to call .exit(exitCode) and .halt(exitCode) on JavaApplications
+
+    NOTE: These methods are not supported for ContainerBasedJavaApplications
+    executed inside the VirtualMachinePlatform as that would mean terminating
+    the launching application.
+
 <h4>oracle-tools-runtime-remote</h4>
 
 *   [ORACLETOOLS-91](https://java.net/jira/browse/ORACLETOOLS-91): Introduced
@@ -436,6 +443,10 @@ reverse chronological order.
 *   [ORACLETOOLS-189](https://java.net/jira/browse/ORACLETOOLS-189): Resolved
     ability to set environment variables on some Remote Platforms
     (works around JSch defect / inability to reliably set environment variables).
+
+*   [ORACLETOOLS-195](https://java.net/jira/browse/ORACLETOOLS-195): Resolved
+    issue where RemoteJavaApplicationBuilders did not wait for launched
+    RemoteJavaApplications to "connect back".
 
 <h4>oracle-tools-runtime-virtual</h4>
 

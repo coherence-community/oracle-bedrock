@@ -27,9 +27,14 @@ package com.oracle.tools.runtime.remote.java;
 
 import com.oracle.tools.deferred.Eventually;
 
+import com.oracle.tools.runtime.ApplicationConsole;
 import com.oracle.tools.runtime.LocalPlatform;
+import com.oracle.tools.runtime.Platform;
 import com.oracle.tools.runtime.SimpleApplication;
 import com.oracle.tools.runtime.SimpleApplicationSchema;
+
+import com.oracle.tools.runtime.concurrent.runnable.RuntimeExit;
+import com.oracle.tools.runtime.concurrent.runnable.RuntimeHalt;
 
 import com.oracle.tools.runtime.console.CapturingApplicationConsole;
 import com.oracle.tools.runtime.console.SystemApplicationConsole;
@@ -94,9 +99,9 @@ public class RemoteJavaApplicationBuilderTest extends AbstractRemoteApplicationB
         RemotePlatform platform = getRemotePlatform();
 
         try (SimpleJavaApplication application = platform.realize("Java",
-                schema,
-                new SystemApplicationConsole(),
-                StrictHostChecking.disabled()))
+                                                                  schema,
+                                                                  new SystemApplicationConsole(),
+                                                                  StrictHostChecking.disabled()))
         {
             assertThat(application.waitFor(), is(0));
 
@@ -105,6 +110,7 @@ public class RemoteJavaApplicationBuilderTest extends AbstractRemoteApplicationB
             assertThat(application.exitValue(), is(0));
         }
     }
+
 
     /**
      * Ensure that we can launch Java remotely using a Java Home.
@@ -309,11 +315,11 @@ public class RemoteJavaApplicationBuilderTest extends AbstractRemoteApplicationB
         SimpleJavaApplicationSchema schema =
             new SimpleJavaApplicationSchema(SleepingApplication.class.getName()).addArgument("30");
 
-        CapturingApplicationConsole console  = new CapturingApplicationConsole();
+        CapturingApplicationConsole console         = new CapturingApplicationConsole();
 
-        RemoteDebugging remoteDebugging      = RemoteDebugging.disabled();
+        RemoteDebugging             remoteDebugging = RemoteDebugging.disabled();
 
-        RemotePlatform              platform = getRemotePlatform();
+        RemotePlatform              platform        = getRemotePlatform();
 
         try (SimpleJavaApplication application = platform.realize("Java",
                                                                   schema,
@@ -337,6 +343,70 @@ public class RemoteJavaApplicationBuilderTest extends AbstractRemoteApplicationB
             }
 
             Assert.assertThat(debugArg, is(nullValue()));
+        }
+    }
+
+
+    /**
+     * Ensure that local {@link JavaApplication}s can be terminated using {@link RuntimeExit}.
+     */
+    @Test
+    public void shouldTerminateUsingRuntimeExit() throws Exception
+    {
+        // define the SleepingApplication
+        SimpleJavaApplicationSchema schema =
+            new SimpleJavaApplicationSchema(SleepingApplication.class.getName()).setPreferIPv4(true);
+
+        // sleep only for 3 seconds
+        schema.addArgument("3");
+
+        // build and start the SleepingApplication
+        Platform           platform = getRemotePlatform();
+
+        ApplicationConsole console  = new SystemApplicationConsole();
+
+        try (SimpleJavaApplication application = platform.realize("sleeping",
+                                                                  schema,
+                                                                  console,
+                                                                  StrictHostChecking.disabled()))
+        {
+            application.exit(42);
+
+            int exitStatus = application.waitFor();
+
+            assertThat(exitStatus, is(42));
+        }
+    }
+
+
+    /**
+     * Ensure that local {@link JavaApplication}s can be terminated using {@link RuntimeHalt}.
+     */
+    @Test
+    public void shouldTerminateUsingRuntimeHalt() throws Exception
+    {
+        // define the SleepingApplication
+        SimpleJavaApplicationSchema schema =
+            new SimpleJavaApplicationSchema(SleepingApplication.class.getName()).setPreferIPv4(true);
+
+        // sleep only for 3 seconds
+        schema.addArgument("3");
+
+        // build and start the SleepingApplication
+        Platform           platform = getRemotePlatform();
+
+        ApplicationConsole console  = new SystemApplicationConsole();
+
+        try (SimpleJavaApplication application = platform.realize("sleeping",
+                                                                  schema,
+                                                                  console,
+                                                                  StrictHostChecking.disabled()))
+        {
+            application.halt(42);
+
+            int exitStatus = application.waitFor();
+
+            assertThat(exitStatus, is(42));
         }
     }
 

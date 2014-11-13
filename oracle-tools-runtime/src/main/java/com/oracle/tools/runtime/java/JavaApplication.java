@@ -358,4 +358,21 @@ public interface JavaApplication extends Application, RemoteExecutor
      * @param <T>       the type of the result
      */
     public <T> T submit(RemoteCallable<T> callable);
+
+
+    /**
+     * Terminates the {@link JavaApplication} using a call to {@link Runtime#exit}
+     * (which is semantically the same as {@link System#exit(int)}).
+     *
+     * @param exitCode  the desired exit code
+     */
+    public void exit(int exitCode);
+
+
+    /**
+     * Terminates the {@link JavaApplication} using a call to {@link Runtime#halt}.
+     *
+     * @param exitCode  the desired exit code
+     */
+    public void halt(int exitCode);
 }
