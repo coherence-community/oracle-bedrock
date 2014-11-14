@@ -74,7 +74,7 @@ public interface Application extends Closeable
 
 
     /**
-     * Attempts to gracefully closes and terminate the running {@link Application}.
+     * Attempts to gracefully close and terminate the running {@link Application}.
      * <p>
      * Upon returning it is safe to assume that the {@link Application}
      * is no longer running.   All resources, including input and output streams

@@ -40,4 +40,19 @@ import com.oracle.tools.runtime.concurrent.RemoteExecutor;
  */
 public interface JavaApplicationProcess extends ApplicationProcess, RemoteExecutor
 {
+    /**
+     * Terminates the {@link JavaApplicationProcess} using a call to {@link Runtime#exit}
+     * (which is semantically the same as {@link System#exit(int)}).
+     *
+     * @param exitCode  the desired exit code
+     */
+    public void exit(int exitCode);
+
+
+    /**
+     * Terminates the {@link JavaApplicationProcess} using a call to {@link Runtime#halt}.
+     *
+     * @param exitCode  the desired exit code
+     */
+    public void halt(int exitCode);
 }

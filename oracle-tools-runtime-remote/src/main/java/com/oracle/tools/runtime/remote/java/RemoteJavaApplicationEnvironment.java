@@ -146,12 +146,12 @@ public class RemoteJavaApplicationEnvironment<A extends JavaApplication>
 
 
     /**
-     * Obtains the {@link ControllableRemoteExecutor} that can be used to communicate
+     * Obtains the {@link RemoteExecutorServer} that can be used to communicate
      * with the remote {@link JavaApplication}.
      *
      * @return  the {@link ControllableRemoteExecutor}
      */
-    public ControllableRemoteExecutor getRemoteExecutor()
+    public RemoteExecutorServer getRemoteExecutor()
     {
         return remoteExecutor;
     }

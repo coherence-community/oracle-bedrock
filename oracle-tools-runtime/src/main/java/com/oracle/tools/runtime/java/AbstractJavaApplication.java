@@ -313,6 +313,50 @@ public abstract class AbstractJavaApplication<A extends AbstractJavaApplication<
 
 
     @Override
+    public void exit(int exitCode)
+    {
+        // close the JMXConnector (if we've got one)
+        JMXConnector jmxConnector = cachedJmxConnector.release();
+
+        if (jmxConnector != null)
+        {
+            try
+            {
+                jmxConnector.close();
+            }
+            catch (IOException e)
+            {
+                // nothing to do here as we don't care
+            }
+        }
+
+        runtime.getApplicationProcess().exit(exitCode);
+    }
+
+
+    @Override
+    public void halt(int exitCode)
+    {
+        // close the JMXConnector (if we've got one)
+        JMXConnector jmxConnector = cachedJmxConnector.release();
+
+        if (jmxConnector != null)
+        {
+            try
+            {
+                jmxConnector.close();
+            }
+            catch (IOException e)
+            {
+                // nothing to do here as we don't care
+            }
+        }
+
+        runtime.getApplicationProcess().halt(exitCode);
+    }
+
+
+    @Override
     public InetSocketAddress getRemoteDebugSocket()
     {
         int remoteDebuggingPort = runtime.getRemoteDebuggingPort();

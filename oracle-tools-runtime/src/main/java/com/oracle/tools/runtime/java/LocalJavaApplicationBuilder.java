@@ -51,6 +51,8 @@ import com.oracle.tools.runtime.concurrent.ControllableRemoteExecutor;
 import com.oracle.tools.runtime.concurrent.RemoteCallable;
 import com.oracle.tools.runtime.concurrent.RemoteExecutor;
 import com.oracle.tools.runtime.concurrent.RemoteRunnable;
+import com.oracle.tools.runtime.concurrent.runnable.RuntimeExit;
+import com.oracle.tools.runtime.concurrent.runnable.RuntimeHalt;
 import com.oracle.tools.runtime.concurrent.socket.RemoteExecutorServer;
 
 import com.oracle.tools.runtime.java.options.JavaHome;
@@ -448,6 +450,20 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication> extends Abst
             super.close();
 
             remoteExecutor.close();
+        }
+
+
+        @Override
+        public void exit(int exitCode)
+        {
+            remoteExecutor.submit(new RuntimeExit(exitCode));
+        }
+
+
+        @Override
+        public void halt(int exitCode)
+        {
+            remoteExecutor.submit(new RuntimeHalt(exitCode));
         }
     }
 }
