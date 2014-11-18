@@ -408,6 +408,41 @@ public class DeferredHelper
 
 
     /**
+     * A specialized mechanism for allowing custom {@link Deferred} implementations to be used
+     * within 'eventually' / 'assertThat' calls, where no method chaining is required or used
+     * (unlike {@link #invoking}).
+     *
+     * @param <T>       the type of {@link Object}
+     * @param deferred  the {@link Deferred}
+     *
+     * @return  a dumby value representing the {@link Deferred}
+     */
+    public static <T> T valueOf(Deferred<T> deferred)
+    {
+        // ensure that there are no other pending invoking calls on this thread
+        if (m_deferred.get() == null)
+        {
+            // set the current deferred as a thread local so that
+            // we can "eventually" evaluate and return it.
+            m_deferred.set(deferred);
+
+            // FUTURE: we should raise a soft exception here if the deferred
+            // class is final or perhaps native as we can't proxy them.
+
+            // we return null as the deferred will be retrieved from the ThreadLocal
+            // by the outer 'eventually' call
+            return null;
+        }
+        else
+        {
+            throw new UnsupportedOperationException("An attempt was made to call 'valueOf' after a previous call was made outside an 'eventually'."
+                                                    + "Alternatively two or more calls to 'the' have been made sequentially."
+                                                    + "Calls to 'valueOf' must be made inside an 'eventually' call.");
+        }
+    }
+
+
+    /**
      * Obtains a {@link Deferred} representation of the last call to a
      * dynamic proxy created with either {@link #invoking(Object)} or
      * {@link #invoking(Deferred)}.

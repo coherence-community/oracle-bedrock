@@ -65,6 +65,7 @@ import org.junit.Assume;
 import org.junit.Test;
 
 import static com.oracle.tools.deferred.DeferredHelper.invoking;
+import static com.oracle.tools.deferred.DeferredHelper.valueOf;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.hasItem;
@@ -80,7 +81,6 @@ import java.io.IOException;
 
 import java.net.InetSocketAddress;
 
-import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
 
@@ -134,6 +134,8 @@ public class LocalJavaApplicationBuilderTest extends AbstractJavaApplicationBuil
 
         SimpleJavaApplicationSchema schema   = new SimpleJavaApplicationSchema(SleepingApplication.class.getName());
 
+        schema.setPreferIPv4(true);
+
         try (SimpleJavaApplication app = platform.realize("TestApp",
                                                           schema,
                                                           new SystemApplicationConsole(),
@@ -175,7 +177,9 @@ public class LocalJavaApplicationBuilderTest extends AbstractJavaApplicationBuil
 
         SimpleJavaApplicationSchema schema   = new SimpleJavaApplicationSchema(SleepingApplication.class.getName());
 
-        CapturingApplicationConsole console  = new CapturingApplicationConsole();
+        schema.setPreferIPv4(true);
+
+        CapturingApplicationConsole console = new CapturingApplicationConsole();
 
         try (SimpleJavaApplication app = platform.realize("TestApp",
                                                           schema,
@@ -234,7 +238,9 @@ public class LocalJavaApplicationBuilderTest extends AbstractJavaApplicationBuil
                                   invoking(jdbConsole).getCapturedOutputLines(),
                                   hasItem(startsWith("Listening at address:")));
 
-            SimpleJavaApplicationSchema schema  = new SimpleJavaApplicationSchema(SleepingApplication.class.getName());
+            SimpleJavaApplicationSchema schema = new SimpleJavaApplicationSchema(SleepingApplication.class.getName());
+
+            schema.setPreferIPv4(true);
 
             CapturingApplicationConsole console = new CapturingApplicationConsole();
 
@@ -309,6 +315,8 @@ public class LocalJavaApplicationBuilderTest extends AbstractJavaApplicationBuil
 
         SimpleJavaApplicationSchema schema = new SimpleJavaApplicationSchema(SleepingApplication.class.getName());
 
+        schema.setPreferIPv4(true);
+
         try (SimpleJavaApplication app = LocalPlatform.getInstance().realize("TestApp",
                                                                              schema,
                                                                              new SystemApplicationConsole(),
@@ -377,12 +385,12 @@ public class LocalJavaApplicationBuilderTest extends AbstractJavaApplicationBuil
             parentApplication.close();
 
             // submit the child a request to prove that it's orphaned
-            RemoteExecutor                     child    = listener.getExecutor();
-            DeferredCompletionListener<String> response = new DeferredCompletionListener<String>(String.class);
+            RemoteExecutor                     child            = listener.getExecutor();
+            DeferredCompletionListener<String> deferredResponse = new DeferredCompletionListener<String>(String.class);
 
-            child.submit(new SocketBasedRemoteExecutorTests.PingPong(), response);
+            child.submit(new SocketBasedRemoteExecutorTests.PingPong(), deferredResponse);
 
-            Eventually.assertThat(response, is("PONG"));
+            Eventually.assertThat(valueOf(deferredResponse), is("PONG"));
 
             // shutdown the client (by invoking a System.exit internally)
             child.submit(new SystemExit());
@@ -486,6 +494,7 @@ public class LocalJavaApplicationBuilderTest extends AbstractJavaApplicationBuil
         // set a System-Property for the SleepingApplication (we'll request it back)
         String uuid = UUID.randomUUID().toString();
 
+        schema.setPreferIPv4(true);
         schema.setSystemProperty("uuid", uuid);
 
         // build and start the SleepingApplication
@@ -496,11 +505,11 @@ public class LocalJavaApplicationBuilderTest extends AbstractJavaApplicationBuil
         try (SimpleJavaApplication application = builder.realize(schema, "sleeping", console))
         {
             // request the system property from the SleepingApplication
-            DeferredCompletionListener<String> deferred = new DeferredCompletionListener<String>(String.class);
+            DeferredCompletionListener<String> deferredResponse = new DeferredCompletionListener<String>(String.class);
 
-            application.submit(new GetSystemProperty("uuid"), deferred);
+            application.submit(new GetSystemProperty("uuid"), deferredResponse);
 
-            Eventually.assertThat(deferred, is(uuid));
+            Eventually.assertThat(valueOf(deferredResponse), is(uuid));
         }
     }
 
@@ -514,6 +523,8 @@ public class LocalJavaApplicationBuilderTest extends AbstractJavaApplicationBuil
     {
         // define the SleepingApplication
         SimpleJavaApplicationSchema schema = new SimpleJavaApplicationSchema(SleepingApplication.class.getName());
+
+        schema.setPreferIPv4(true);
 
         // determine the JAVA_HOME based on this process
         String   javaHomePath = System.getProperty("java.home");
@@ -539,6 +550,8 @@ public class LocalJavaApplicationBuilderTest extends AbstractJavaApplicationBuil
     {
         // define the SleepingApplication
         SimpleJavaApplicationSchema schema = new SimpleJavaApplicationSchema(SleepingApplication.class.getName());
+
+        schema.setPreferIPv4(true);
 
         // build and start the SleepingApplication
         LocalJavaApplicationBuilder<JavaApplication> builder = new LocalJavaApplicationBuilder<JavaApplication>();
