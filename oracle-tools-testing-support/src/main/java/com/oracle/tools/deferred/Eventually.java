@@ -33,6 +33,7 @@ import org.hamcrest.Matcher;
 
 import static com.oracle.tools.deferred.DeferredHelper.ensure;
 import static com.oracle.tools.deferred.DeferredHelper.eventually;
+import static com.oracle.tools.deferred.DeferredHelper.valueOf;
 
 import java.util.concurrent.TimeUnit;
 
@@ -55,17 +56,19 @@ public class Eventually
      * Should the value be the result of a call to {@link DeferredHelper#invoking(Deferred)}
      * the result is unwrapped into a {@link Deferred} that is then used for the assert.
      *
-     * @param <T>       the type of value produced by the {@link Deferred}
+     * @param <T>       the type of the value
      *
      * @param value     the value
-     * @param matcher   the {@link Matcher}
+     * @param matcher   the {@link Matcher} for the value
      *
      * @throws AssertionError if the assertion fails
      */
     public static <T> void assertThat(T                  value,
                                       Matcher<? super T> matcher) throws AssertionError
     {
-        assertThat(null, eventually(value), matcher);
+        SimpleTimeoutConstraint constraint = new SimpleTimeoutConstraint();
+
+        assertThat(null, eventually(value), matcher, constraint);
     }
 
 
@@ -76,10 +79,10 @@ public class Eventually
      * Should the value be the result of a call to {@link DeferredHelper#invoking(Deferred)}
      * the result is unwrapped into a {@link Deferred} that is then used for the assert.
      *
-     * @param <T>         the type of value produced by the {@link Deferred}
+     * @param <T>         the type of the value
      *
      * @param value       the value
-     * @param matcher     the {@link Matcher}
+     * @param matcher     the {@link Matcher} for the value
      * @param constraint  the {@link TimeoutConstraint}
      *
      * @throws AssertionError if the assertion fails
@@ -99,11 +102,11 @@ public class Eventually
      * Should the value be the result of a call to {@link DeferredHelper#invoking(Deferred)}
      * the result is unwrapped into a {@link Deferred} that is then used for the assert.
      *
-     * @param <T>       the type of value produced by the {@link Deferred}
+     * @param <T>       the type of the value
      *
      * @param message   the message for the AssertionError (<code>null</code> ok)
      * @param value     the value
-     * @param matcher   the {@link Matcher}
+     * @param matcher   the {@link Matcher} for the value
      *
      * @throws AssertionError if the assertion fails
      */
@@ -111,7 +114,9 @@ public class Eventually
                                       T                  value,
                                       Matcher<? super T> matcher) throws AssertionError
     {
-        assertThat(message, eventually(value), matcher);
+        SimpleTimeoutConstraint constraint = new SimpleTimeoutConstraint();
+
+        assertThat(message, eventually(value), matcher, constraint);
     }
 
 
@@ -122,11 +127,11 @@ public class Eventually
      * Should the value be the result of a call to {@link DeferredHelper#invoking(Deferred)}
      * the result is unwrapped into a {@link Deferred} that is then used for the assert.
      *
-     * @param <T>         the type of value produced by the {@link Deferred}
+     * @param <T>         the type of the value
      *
      * @param message     the message for the AssertionError (<code>null</code> ok)
      * @param value       the value
-     * @param matcher     the {@link Matcher}
+     * @param matcher     the {@link Matcher} for the value
      * @param constraint  the {@link TimeoutConstraint}
      *
      * @throws AssertionError if the assertion fails
@@ -141,78 +146,15 @@ public class Eventually
 
 
     /**
-     * Asserts that a {@link Deferred}, when it becomes available,
-     * will eventually satisfy the specified {@link Matcher}
-     * within the bounds of the default {@link TimeoutConstraint}.
-     *
-     * @param <T>       the type of value produced by the {@link Deferred}
-     *
-     * @param deferred  the {@link Deferred}
-     * @param matcher   the {@link Matcher}
-     *
-     * @throws AssertionError if the assertion fails
-     */
-    public static <T> void assertThat(Deferred<T>        deferred,
-                                      Matcher<? super T> matcher) throws AssertionError
-    {
-        assertThat(null, deferred, matcher);
-    }
-
-
-    /**
-     * Asserts that a {@link Deferred}, when it becomes available,
-     * will eventually satisfy the specified {@link Matcher}
-     * within the bounds of the default {@link TimeoutConstraint}.
-     *
-     * @param <T>       the type of value produced by the {@link Deferred}
-     *
-     * @param message   the message for the AssertionError (<code>null</code> ok)
-     * @param deferred  the {@link Deferred}
-     * @param matcher   the {@link Matcher}
-     *
-     * @throws AssertionError if the assertion fails
-     */
-    public static <T> void assertThat(String             message,
-                                      Deferred<T>        deferred,
-                                      Matcher<? super T> matcher) throws AssertionError
-    {
-        TimeoutConstraint constraint = new SimpleTimeoutConstraint();
-
-        assertThat(message, deferred, matcher, constraint);
-    }
-
-
-    /**
-     * Asserts that a {@link Deferred}, when it becomes available,
+     * Asserts that a {@link Deferred} value, when it becomes available,
      * will eventually satisfy the specified {@link Matcher}
      * within the bounds of the provided {@link TimeoutConstraint}.
      *
-     * @param <T>         the type of value produced by the {@link Deferred}
-     *
-     * @param deferred    the {@link Deferred}
-     * @param matcher     the {@link Matcher}
-     * @param constraint  the {@link TimeoutConstraint}
-     *
-     * @throws AssertionError if the assertion fails
-     */
-    public static <T> void assertThat(Deferred<T>        deferred,
-                                      Matcher<? super T> matcher,
-                                      TimeoutConstraint  constraint) throws AssertionError
-    {
-        assertThat(null, deferred, matcher, constraint);
-    }
-
-
-    /**
-     * Asserts that a {@link Deferred}, when it becomes available,
-     * will eventually satisfy the specified {@link Matcher}
-     * within the bounds of the provided {@link TimeoutConstraint}.
-     *
-     * @param <T>         the type of value produced by the {@link Deferred}
+     * @param <T>         the type of the value
      *
      * @param message     the message for the AssertionError (<code>null</code> ok)
-     * @param deferred    the {@link Deferred}
-     * @param matcher     the {@link Matcher}
+     * @param deferred    the {@link Deferred} value
+     * @param matcher     the {@link Matcher} for the value
      * @param constraint  the {@link TimeoutConstraint}
      *
      * @throws AssertionError if the assertion fails
@@ -270,7 +212,7 @@ public class Eventually
      * {@link JavaApplication} will eventually match the specified matcher
      * within the bounds of the default {@link TimeoutConstraint}.
      *
-     * @param <T>          the type of value produced by the {@link Deferred}
+     * @param <T>          the type of the value
      *
      * @param application  the {@link JavaApplication} to which the {@link RemoteCallable} will be submitted
      * @param callable     the {@link RemoteCallable}
@@ -282,7 +224,7 @@ public class Eventually
                                       RemoteCallable<T>  callable,
                                       Matcher<? super T> matcher) throws AssertionError
     {
-        assertThat(new DeferredRemoteExecution<T>(application, callable), matcher);
+        assertThat(valueOf(new DeferredRemoteExecution<T>(application, callable)), matcher);
     }
 
 
@@ -291,7 +233,7 @@ public class Eventually
      * the {@link JavaApplication} will eventually match the specified matcher
      * within the bounds of the provided {@link TimeoutConstraint}.
      *
-     * @param <T>          the type of value produced by the {@link Deferred}
+     * @param <T>          the type of the value
      *
      * @param application  the {@link JavaApplication} to which the {@link RemoteCallable} will be submitted
      * @param callable     the {@link RemoteCallable}
@@ -305,7 +247,7 @@ public class Eventually
                                       Matcher<? super T> matcher,
                                       TimeoutConstraint  constraint) throws AssertionError
     {
-        assertThat(new DeferredRemoteExecution<T>(application, callable), matcher, constraint);
+        assertThat(valueOf(new DeferredRemoteExecution<T>(application, callable)), matcher, constraint);
     }
 
 
@@ -351,10 +293,10 @@ public class Eventually
      * Should the value be the result of a call to {@link DeferredHelper#invoking(Deferred)}
      * the result is unwrapped into a {@link Deferred} that is then used for the assert.
      *
-     * @param <T>                      the type of value produced by the {@link Deferred}
+     * @param <T>                      the type of the value
      *
      * @param value                    the value
-     * @param matcher                  the {@link Matcher}
+     * @param matcher                  the {@link Matcher} for the value
      * @param totalRetryDuration       the maximum duration for retrying
      * @param totalRetryDurationUnits  the {@link TimeUnit}s for the duration
      *
@@ -383,7 +325,7 @@ public class Eventually
      * Should the value be the result of a call to {@link DeferredHelper#invoking(Deferred)}
      * the result is unwrapped into a {@link Deferred} that is then used for the assert.
      *
-     * @param <T>                      the type of value produced by the {@link Deferred}
+     * @param <T>                      the type of the value
      *
      * @param message                  the message for the AssertionError (<code>null</code> ok)
      * @param value                    the value
@@ -416,7 +358,7 @@ public class Eventually
      * will eventually (after the specified amount of time) satisfy the
      * specified {@link Matcher}.
      *
-     * @param <T>                      the type of value produced by the {@link Deferred}
+     * @param <T>                      the type of the value
      *
      * @param deferred                 the {@link Deferred}
      * @param matcher                  the {@link Matcher}
@@ -425,7 +367,7 @@ public class Eventually
      *
      * @throws AssertionError if the assertion fails
      *
-     * @deprecated use {@link #assertThat(Deferred, Matcher, TimeoutConstraint)} instead
+     * @deprecated use {@link #assertThat(Object, Matcher, TimeoutConstraint)} instead
      */
     @Deprecated
     public static <T> void assertThat(Deferred<T>        deferred,
@@ -447,7 +389,7 @@ public class Eventually
      * will eventually (after the specified amount of time) satisfy the
      * specified {@link Matcher}.
      *
-     * @param <T>                      the type of value produced by the {@link Deferred}
+     * @param <T>                      the type of the value
      *
      * @param message                  the message for the AssertionError (<code>null</code> ok)
      * @param deferred                 the {@link Deferred}
@@ -479,7 +421,7 @@ public class Eventually
      * Asserts that the specified {@link RemoteCallable} submitted to the {@link JavaApplication}
      * will eventually match the specified matcher.
      *
-     * @param <T>                      the type of value produced by the {@link Deferred}
+     * @param <T>                      the type of the value
      *
      * @param application              the {@link JavaApplication} to which the {@link RemoteCallable} will be submitted
      * @param callable                 the {@link RemoteCallable}
@@ -503,7 +445,7 @@ public class Eventually
                                                                    DeferredHelper
                                                                        .getDefaultEnsuredRetryDurationsMSIterable());
 
-        assertThat(new DeferredRemoteExecution<T>(application, callable), matcher, constraint);
+        assertThat(valueOf(new DeferredRemoteExecution<T>(application, callable)), matcher, constraint);
     }
 
     // ------------------------------------------------------------------------

@@ -13,7 +13,7 @@ reverse chronological order.
 
 <h4>Global and Cross-Module Changes</h4>
 
-*   [ORACLETOOLS-XX](https://java.net/jira/browse/ORACLETOOLS-XX): Upgraded to require Java 8.
+*   [ORACLETOOLS-192](https://java.net/jira/browse/ORACLETOOLS-192): Upgraded to require Java 8.
 
 <h4>oracle-tools-core</h4>
 

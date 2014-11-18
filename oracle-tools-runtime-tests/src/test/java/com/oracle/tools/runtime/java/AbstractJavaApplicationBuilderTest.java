@@ -108,6 +108,8 @@ public abstract class AbstractJavaApplicationBuilderTest extends AbstractTest
                                                                                             "arg2").setSystemProperty("test.prop.1", "value.1")
                                                                                                 .setSystemProperty("test.prop.2", "value.2");
 
+        schema.setPreferIPv4(true);
+
         JavaApplicationBuilder<JavaApplication> builder  = newJavaApplicationBuilder();
         Platform                                platform = getPlatform();
 
@@ -150,6 +152,8 @@ public abstract class AbstractJavaApplicationBuilderTest extends AbstractTest
         SimpleJavaApplicationSchema schema =
             new SimpleJavaApplicationSchema(DummyClassPathApp.class.getCanonicalName()).setClassPath(classPath)
                 .addArgument(knownClass.getCanonicalName());
+
+        schema.setPreferIPv4(true);
 
         JavaApplicationBuilder<JavaApplication> builder  = newJavaApplicationBuilder();
         Platform                                platform = getPlatform();
@@ -213,6 +217,8 @@ public abstract class AbstractJavaApplicationBuilderTest extends AbstractTest
         // define and start the SleepingApplication
         SimpleJavaApplicationSchema schema = new SimpleJavaApplicationSchema(TesterApplication.class.getName());
 
+        schema.setPreferIPv4(true);
+
         JavaApplicationBuilder<JavaApplication> builder = newJavaApplicationBuilder();
 
         ApplicationConsole                      console = new SystemApplicationConsole();
@@ -243,6 +249,8 @@ public abstract class AbstractJavaApplicationBuilderTest extends AbstractTest
         // define and start the SleepingApplication
         SimpleJavaApplicationSchema schema = new SimpleJavaApplicationSchema(TesterApplication.class.getName());
 
+        schema.setPreferIPv4(true);
+
         JavaApplicationBuilder<JavaApplication> builder = newJavaApplicationBuilder();
 
         ApplicationConsole                      console = new SystemApplicationConsole();
@@ -269,6 +277,8 @@ public abstract class AbstractJavaApplicationBuilderTest extends AbstractTest
     {
         // define and start the SleepingApplication
         SimpleJavaApplicationSchema schema = new SimpleJavaApplicationSchema(SleepingApplication.class.getName());
+
+        schema.setPreferIPv4(true);
 
         // we'll wait at most 5 seconds in the application
         schema.addArgument("5");
@@ -298,6 +308,7 @@ public abstract class AbstractJavaApplicationBuilderTest extends AbstractTest
         // define and start the SleepingApplication
         SimpleJavaApplicationSchema schema = new SimpleJavaApplicationSchema(SleepingApplication.class.getName());
 
+        schema.setPreferIPv4(true);
         schema.setSystemProperty(propertyName, propertyValue);
 
         JavaApplicationBuilder<JavaApplication> builder = newJavaApplicationBuilder();
