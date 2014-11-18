@@ -472,6 +472,20 @@ reverse chronological order.
     change could introduce compile time errors into existing code that does
     not use the correct types in calls to assert methods.
 
+*   [ORACLETOOLS-192](https://java.net/jira/browse/ORACLETOOLS-192): Resolved
+    type ambiguity issue introduced by Java 8 type-inference incompatibility
+    with Java 5, 6 and 7, by removing all Eventually.assertThat(..., Deferred, ...)
+    methods.   In order to use custom Deferreds directly with Eventually.assertThat
+    you must now wrap them in a DeferredHelper.valueOf(...) call.  For example:
+
+    Eventually.assertThat(deferred, matcher);
+
+    must now be written as:
+
+    Eventually.assertThat(valueOf(deferred), matcher);
+
+    *BREAKING CHANGE:*  Sadly this is a breaking change caused by Java 8.
+
 <h4>oracle-tools-coherence</h4>
 
 *   [ORACLETOOLS-92](https://java.net/jira/browse/ORACLETOOLS-92): Refactored
