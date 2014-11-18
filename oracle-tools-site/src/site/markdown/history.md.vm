@@ -405,11 +405,8 @@ reverse chronological order.
     Diagnostics option into the oracle-tools-core module.
 
 *   [ORACLETOOLS-194](https://java.net/jira/browse/ORACLETOOLS-194): Introduced
-    the ability to call .exit(exitCode) and .halt(exitCode) on JavaApplications
-
-    NOTE: These methods are not supported for ContainerBasedJavaApplications
-    executed inside the VirtualMachinePlatform as that would mean terminating
-    the launching application.
+    Application.close(Option...) and the ApplicationClosingBehavior Option
+    as a means of controlling how Applications are closed.
 
 <h4>oracle-tools-runtime-remote</h4>
 

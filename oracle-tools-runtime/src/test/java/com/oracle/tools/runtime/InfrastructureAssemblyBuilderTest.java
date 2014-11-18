@@ -25,6 +25,7 @@
 
 package com.oracle.tools.runtime;
 
+import com.oracle.tools.Option;
 import com.oracle.tools.Options;
 
 import com.oracle.tools.options.Timeout;
@@ -366,6 +367,12 @@ public class InfrastructureAssemblyBuilderTest
 
         @Override
         public void close()
+        {
+        }
+
+
+        @Override
+        public void close(Option... options)
         {
         }
 

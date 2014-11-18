@@ -28,7 +28,6 @@ package com.oracle.tools.runtime.java;
 import com.oracle.tools.Option;
 import com.oracle.tools.Options;
 
-import com.oracle.tools.runtime.Application;
 import com.oracle.tools.runtime.ApplicationConsole;
 import com.oracle.tools.runtime.ApplicationSchema;
 import com.oracle.tools.runtime.Platform;
@@ -464,21 +463,6 @@ public class ContainerBasedJavaApplicationBuilder<A extends JavaApplication> ext
 
             // notify the container to stop managing the scope
             Container.unmanage(scope);
-        }
-
-
-        @Override
-        public void exit(int exitCode)
-        {
-            throw new UnsupportedOperationException("Calls to exit(...) are not supported by ContainerBasedJavaApplications");
-        }
-
-
-        @Override
-        public void halt(int exitCode)
-        {
-            throw new UnsupportedOperationException("Calls to halt(...) are not supported by ContainerBasedJavaApplications");
-
         }
 
 

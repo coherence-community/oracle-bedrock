@@ -67,12 +67,9 @@ import static org.hamcrest.CoreMatchers.startsWith;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 
-import java.io.IOException;
-
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 
-import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -370,7 +367,7 @@ public class RemoteJavaApplicationBuilderTest extends AbstractRemoteApplicationB
                                                                   console,
                                                                   StrictHostChecking.disabled()))
         {
-            application.exit(42);
+            application.close(RuntimeExit.withExitCode(42));
 
             int exitStatus = application.waitFor();
 
@@ -402,7 +399,7 @@ public class RemoteJavaApplicationBuilderTest extends AbstractRemoteApplicationB
                                                                   console,
                                                                   StrictHostChecking.disabled()))
         {
-            application.halt(42);
+            application.close(RuntimeHalt.withExitCode(42));
 
             int exitStatus = application.waitFor();
 

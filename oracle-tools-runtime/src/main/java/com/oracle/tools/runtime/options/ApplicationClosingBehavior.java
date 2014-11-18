@@ -1,5 +1,5 @@
 /*
- * File: JavaApplicationProcess.java
+ * File: ApplicationClosingBehavior.java
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
@@ -23,21 +23,26 @@
  * "Portions Copyright [year] [name of copyright owner]"
  */
 
-package com.oracle.tools.runtime.java;
+package com.oracle.tools.runtime.options;
 
-import com.oracle.tools.runtime.ApplicationProcess;
+import com.oracle.tools.Option;
 
-import com.oracle.tools.runtime.concurrent.RemoteExecutor;
+import com.oracle.tools.runtime.Application;
 
 /**
- * A {@link ApplicationProcess} specifically for managing Java-based
- * Applications at runtime.
+ * An {@link Option} defining custom closing behavior for an {@link Application}.
  * <p>
- * Copyright (c) 2013. All Rights Reserved. Oracle Corporation.<br>
+ * Copyright (c) 2014. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Brian Oliver
  */
-public interface JavaApplicationProcess extends ApplicationProcess, RemoteExecutor
+public interface ApplicationClosingBehavior<A extends Application> extends Option
 {
+    /**
+     * Called prior to the {@link Application} being closed.
+     *
+     * @param application  the {@link }
+     */
+    public void onBeforeClosing(A application);
 }
