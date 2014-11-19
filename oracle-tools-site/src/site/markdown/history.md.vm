@@ -86,6 +86,10 @@ reverse chronological order.
     that the Options.getClassOfOption(...) methods only return concrete classes
     or interfaces directly implementing the Option/ComposableOption interfaces.
 
+*   [ORACLETOOLS-199](https://java.net/jira/browse/ORACLETOOLS-199): Resolved
+    issue where attempting to call invoking(...) on a final class/instance
+    would cause misleading exceptions to be thrown.
+
 <h4>oracle-tools-runtime</h4>
 
 *   [ORACLETOOLS-61](https://java.net/jira/browse/ORACLETOOLS-61): Introduced
