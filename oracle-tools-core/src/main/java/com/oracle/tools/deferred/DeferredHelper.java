@@ -387,22 +387,25 @@ public class DeferredHelper
         // ensure that there are no other pending invoking calls on this thread
         if (m_deferred.get() == null)
         {
-            // set the current deferred as a thread local so that
-            // we can "eventually" evaluate and return it.
-            m_deferred.set(deferred);
+            // attempt to create a proxy of the specified object class that will record
+            // methods calls on the object and represent them as a deferred on a thread local
 
             // FUTURE: we should raise a soft exception here if the deferred
             // class is final or perhaps native as we can't proxy them.
 
-            // create a proxy of the specified object class that will record
-            // methods calls on the object and represent them as a deferred on a thread local
-            return ReflectionHelper.createProxyOf(deferred.getDeferredClass(), new DeferredMethodInteceptor());
+            T proxy = ReflectionHelper.createProxyOf(deferred.getDeferredClass(), new DeferredMethodInteceptor());
+
+            // set the current deferred as a thread local so that
+            // we can "eventually" evaluate and return it.
+            m_deferred.set(deferred);
+
+            return proxy;
         }
         else
         {
-            throw new UnsupportedOperationException("An attempt was made to call 'invoking' after a previous call was made outside an 'eventually'."
-                                                    + "Alternatively two or more calls to 'invoking' have been made sequentially."
-                                                    + "Calls to 'invoking' must be made inside an 'eventually' call.");
+            throw new UnsupportedOperationException("An attempt was made to call 'invoking' without being wrapped inside an 'eventually' call. "
+                                                    + "Alternatively two or more calls to 'invoking' have been made sequentially. "
+                                                    + "Calls to 'invoking' must be contained inside an 'eventually' call.");
         }
     }
 
@@ -435,9 +438,9 @@ public class DeferredHelper
         }
         else
         {
-            throw new UnsupportedOperationException("An attempt was made to call 'valueOf' after a previous call was made outside an 'eventually'."
-                                                    + "Alternatively two or more calls to 'the' have been made sequentially."
-                                                    + "Calls to 'valueOf' must be made inside an 'eventually' call.");
+            throw new UnsupportedOperationException("An attempt was made to call 'valueOf' without being wrapped inside of an 'eventually' call. "
+                                                    + "Alternatively two or more calls to 'valueOf' have been made sequentially. "
+                                                    + "Calls to 'valueOf' must be contained inside an 'eventually' call.");
         }
     }
 
