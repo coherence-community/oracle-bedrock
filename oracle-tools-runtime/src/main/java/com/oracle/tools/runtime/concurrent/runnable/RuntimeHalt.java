@@ -27,6 +27,10 @@ package com.oracle.tools.runtime.concurrent.runnable;
 
 import com.oracle.tools.runtime.concurrent.RemoteRunnable;
 
+import com.oracle.tools.runtime.java.JavaApplication;
+
+import com.oracle.tools.runtime.options.ApplicationClosingBehavior;
+
 /**
  * A {@link RemoteRunnable} to perform a {@link Runtime#halt(int)}.
  * <p>
@@ -35,7 +39,7 @@ import com.oracle.tools.runtime.concurrent.RemoteRunnable;
  *
  * @author Brian Oliver
  */
-public class RuntimeHalt implements RemoteRunnable
+public class RuntimeHalt implements RemoteRunnable, ApplicationClosingBehavior<JavaApplication>
 {
     /**
      * The desired runtime exit code (by default 0);
@@ -59,7 +63,7 @@ public class RuntimeHalt implements RemoteRunnable
      *
      * @param exitCode  the desired exit code
      */
-    public RuntimeHalt(int exitCode)
+    private RuntimeHalt(int exitCode)
     {
         this.exitCode = exitCode;
     }
@@ -71,5 +75,36 @@ public class RuntimeHalt implements RemoteRunnable
         System.out.println("Terminating Application using Runtime.halt(" + exitCode + ")");
 
         Runtime.getRuntime().halt(exitCode);
+    }
+
+
+    @Override
+    public void onBeforeClosing(JavaApplication application)
+    {
+        try
+        {
+            // submit the System.exit request to the application
+            application.submit(this);
+
+            // now wait for it to terminate
+            application.waitFor();
+        }
+        catch (IllegalStateException e)
+        {
+            // we ignore exceptions that occurred as we are attempting to close the application
+        }
+    }
+
+
+    /**
+     * Constructs a {@link RuntimeHalt} with a specified exit code.
+     *
+     * @param exitCode  the exit code to use
+     *
+     * @return a {@link RuntimeHalt}
+     */
+    public static RuntimeHalt withExitCode(int exitCode)
+    {
+        return new RuntimeHalt(exitCode);
     }
 }

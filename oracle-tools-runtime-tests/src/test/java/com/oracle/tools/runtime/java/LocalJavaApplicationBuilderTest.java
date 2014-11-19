@@ -587,7 +587,7 @@ public class LocalJavaApplicationBuilderTest extends AbstractJavaApplicationBuil
 
         try (SimpleJavaApplication application = platform.realize("sleeping", schema, console))
         {
-            application.exit(42);
+            application.close(SystemExit.withExitCode(42));
 
             Eventually.assertThat(invoking(application).exitValue(), is(42));
         }
@@ -611,7 +611,7 @@ public class LocalJavaApplicationBuilderTest extends AbstractJavaApplicationBuil
 
         try (SimpleJavaApplication application = platform.realize("sleeping", schema, console))
         {
-            application.halt(42);
+            application.close(RuntimeHalt.withExitCode(42));
 
             Eventually.assertThat(invoking(application).exitValue(), is(42));
         }

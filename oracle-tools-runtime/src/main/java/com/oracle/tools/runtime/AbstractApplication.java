@@ -35,6 +35,8 @@ import com.oracle.tools.runtime.console.SystemApplicationConsole;
 
 import com.oracle.tools.runtime.java.container.Container;
 
+import com.oracle.tools.runtime.options.ApplicationClosingBehavior;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -200,10 +202,22 @@ public abstract class AbstractApplication<A extends AbstractApplication<A, P, R>
     @Override
     public void close()
     {
-        // notify the ApplicationListener-based Options that the application is about to close
-        Option[] options = getOptions().asArray();
+        // delegate the close() to close(Option...)
+        close(new Option[]
+        {
+        });
+    }
 
-        for (Option option : options)
+
+    @Override
+    public void close(Option... options)
+    {
+        // ------ notify ApplicationListeners (about closing) ------
+
+        // notify the ApplicationListener-based Options that the application is about to close
+        Option[] applicationOptions = getOptions().asArray();
+
+        for (Option option : applicationOptions)
         {
             if (option instanceof ApplicationListener)
             {
@@ -217,8 +231,38 @@ public abstract class AbstractApplication<A extends AbstractApplication<A, P, R>
             listener.onClosing(this);
         }
 
+        // ------ perform any necessary ApplicationClosingBehaviors ------
+
+        // determine the default closing behavior (defined for the application options)
+        ApplicationClosingBehavior defaultClosingBehavior = getOptions().get(ApplicationClosingBehavior.class);
+
+        // determine the custom closing behavior for the application
+        Options closingOptions = new Options(options);
+
+        // determine the required closing behavior
+        ApplicationClosingBehavior closingBehavior = closingOptions.get(ApplicationClosingBehavior.class,
+                                                                        defaultClosingBehavior);
+
+        if (closingBehavior != null)
+        {
+            try
+            {
+                closingBehavior.onBeforeClosing(this);
+            }
+            catch (Exception e)
+            {
+                // we ignore any issues that occurred due to closing behaviors
+
+                // TODO: if diagnostics are enabled we should output the exception
+            }
+        }
+
+        // ------ close the process ------
+
         // close the process
         runtime.getApplicationProcess().close();
+
+        // ------ clean up ------
 
         // terminate the thread that is writing to the process standard in
         try
@@ -288,8 +332,10 @@ public abstract class AbstractApplication<A extends AbstractApplication<A, P, R>
             // nothing to do here as we don't care
         }
 
+        // ------ notify ApplicationListeners (about being closed) ------
+
         // notify the ApplicationListener-based Options that the application has closed
-        for (Option option : options)
+        for (Option option : applicationOptions)
         {
             if (option instanceof ApplicationListener)
             {

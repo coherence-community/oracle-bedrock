@@ -240,20 +240,6 @@ public class RemoteJavaApplicationBuilder<A extends JavaApplication>
 
 
         @Override
-        public void exit(int exitCode)
-        {
-            remoteExecutor.submit(new RuntimeExit(exitCode));
-        }
-
-
-        @Override
-        public void halt(int exitCode)
-        {
-            remoteExecutor.submit(new RuntimeHalt(exitCode));
-        }
-
-
-        @Override
         public int exitValue()
         {
             return process.exitValue();
