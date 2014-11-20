@@ -19,6 +19,14 @@ reverse chronological order.
 
 *   (no changes)
 
+*   [ORACLETOOLS-202](https://java.net/jira/browse/ORACLETOOLS-201): Resolved
+    issue where the Ensured class would continuously attempt to retry (calling
+    .get() on the underlying Deferred) when null was encountered.   This is
+    incorrect behavior according to the contract defined by the Deferred class.
+
+    *BREAKING CHANGE:* This may be a breaking change for some custom Deferred
+    implementations in Oracle Tools 1.x
+
 <h4>oracle-tools-runtime</h4>
 
 *   (no changes)

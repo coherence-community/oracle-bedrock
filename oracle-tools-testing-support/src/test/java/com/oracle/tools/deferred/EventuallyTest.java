@@ -30,13 +30,12 @@ import com.oracle.tools.util.StopWatch;
 import org.junit.Assert;
 import org.junit.Test;
 
-import static com.oracle.tools.deferred.DeferredHelper.deferred;
-import static com.oracle.tools.deferred.DeferredHelper.invoking;
 import static com.oracle.tools.deferred.DeferredHelper.valueOf;
 import static com.oracle.tools.deferred.DeferredHelper.within;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.hasItem;
+import static org.hamcrest.CoreMatchers.nullValue;
 
 import static org.hamcrest.core.Is.is;
 
@@ -55,7 +54,6 @@ import java.util.concurrent.atomic.AtomicLong;
  *
  * @author Brian Oliver
  */
-
 public class EventuallyTest
 {
     /**
@@ -161,6 +159,30 @@ public class EventuallyTest
         {
             Assert.fail("Unexpected Exception:" + e);
         }
+    }
+
+
+    /**
+     * Ensure that a {@link Eventually#assertThat(Object, org.hamcrest.Matcher)}
+     * returns immediately if the {@link Deferred} resolves to <code>null</code>.
+     */
+    @Test
+    public void shouldReturnImmediatelyWhenEncounteringNull()
+    {
+        StopWatch stopWatch = new StopWatch();
+
+        stopWatch.start();
+        Eventually.assertThat(valueOf(new DeferredNull<String>(String.class)
+        {
+        } ), is(nullValue()));
+
+        stopWatch.stop();
+
+        Assert.assertTrue(String
+            .format("Failed to return immediately when encountering a null.  Instead waited for Waited %s seconds",
+                    stopWatch.getElapsedTimeIn(TimeUnit.SECONDS)),
+                          stopWatch.getElapsedTimeIn(TimeUnit.SECONDS)
+                          < DeferredHelper.ORACLETOOLS_DEFERRED_RETRY_TIMEOUT_SECS);
     }
 
 
