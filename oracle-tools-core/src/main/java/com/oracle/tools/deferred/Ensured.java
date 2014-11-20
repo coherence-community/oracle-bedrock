@@ -31,18 +31,18 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * A specialized {@link Deferred} implementation that attempts to guarantee a
- * non-<code>null</code> object reference will be returned when a call to
- * {@link Ensured#get()} is made.  ie: "ensuring that an object is available".
+ * an object reference will be returned when a call to {@link Ensured#get()} is
+ * made.  ie: "ensuring that an object is available".
  * <p>
- * An {@link Ensured} will repetitively attempt to acquire a
- * non-<code>null</code> object reference from an associated {@link Deferred},
- * giving only after the conditions defined by a {@link TimeoutConstraint} is
- * met or an unexpected exception occurs.
+ * An {@link Ensured} will repetitively attempt to acquire a object reference,
+ * including <code>null</code> from an underlying {@link Deferred},
+ * giving up only after the conditions defined by a {@link TimeoutConstraint} is
+ * met, an unexpected exception or {@link PermanentlyUnavailableException} occurs.
  * <p>
- * If a non-<code>null</code> object reference can not be acquired with in the
- * specified constraints, an {@link UnresolvableInstanceException} will be thrown.
+ * If an object reference or <code>null</code> can not be acquired with in the
+ * specified constraints, an {@link PermanentlyUnavailableException} will be thrown.
  * <p>
- * If the underlying {@link Deferred} throws an {@link UnresolvableInstanceException},
+ * If the underlying {@link Deferred} throws an {@link PermanentlyUnavailableException},
  * while attempting to acquire the object reference, the said exception will be
  * immediately rethrown.
  * <p>
@@ -189,14 +189,7 @@ public class Ensured<T> implements Deferred<T>
                 acquisitionDurationMS    = stopped - started;
                 remainingRetryDurationMS -= acquisitionDurationMS < 0 ? 0 : acquisitionDurationMS;
 
-                if (object == null)
-                {
-                    throw new TemporarilyUnavailableException(this);
-                }
-                else
-                {
-                    return object;
-                }
+                return object;
             }
             catch (PermanentlyUnavailableException e)
             {
