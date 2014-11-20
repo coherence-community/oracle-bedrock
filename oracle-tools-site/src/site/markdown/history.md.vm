@@ -86,9 +86,19 @@ reverse chronological order.
     that the Options.getClassOfOption(...) methods only return concrete classes
     or interfaces directly implementing the Option/ComposableOption interfaces.
 
+*   [ORACLETOOLS-198](https://java.net/jira/browse/ORACLETOOLS-198): Introduced
+    the ability to specify the proxy type when using invoking(..., Class).
+    This allows final class instances to be specified for invoking, but a proxy
+    of interfaces or super classes to be created.
+
 *   [ORACLETOOLS-199](https://java.net/jira/browse/ORACLETOOLS-199): Resolved
     issue where attempting to call invoking(...) on a final class/instance
     would cause misleading exceptions to be thrown.
+
+*   [ORACLETOOLS-201](https://java.net/jira/browse/ORACLETOOLS-201): Allowed
+    Atomic types to be used with DeferredHelper.valueOf(...) thus making
+    Eventually.assertThat(...) calls simpler.  eg: there's no reason to use
+    valueOf(deferred(atomic)), now you can just use valueOf(atomic).
 
 <h4>oracle-tools-runtime</h4>
 

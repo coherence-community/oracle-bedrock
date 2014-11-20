@@ -30,12 +30,18 @@ import com.oracle.tools.util.StopWatch;
 import org.junit.Assert;
 import org.junit.Test;
 
+import static com.oracle.tools.deferred.DeferredHelper.deferred;
+import static com.oracle.tools.deferred.DeferredHelper.invoking;
 import static com.oracle.tools.deferred.DeferredHelper.valueOf;
 import static com.oracle.tools.deferred.DeferredHelper.within;
 
 import static org.hamcrest.core.Is.is;
 
 import java.util.concurrent.TimeUnit;
+
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Unit tests for {@link Eventually}.
@@ -190,5 +196,28 @@ public class EventuallyTest
         Eventually.assertThat(Long.valueOf(5), is(5L));
 
         Eventually.assertThat(5L, is(Long.valueOf(5)));
+    }
+
+
+    /**
+     * Ensure that Eventually.assertThat works with atomics.
+     */
+    @Test
+    public void shouldEventuallyAssertThatUsingAtomics()
+    {
+        // use an atomic long
+        AtomicLong atomicLong = new AtomicLong(42);
+
+        Eventually.assertThat(valueOf(atomicLong), is(42L));
+
+        // use an atomic integer
+        AtomicInteger atomicInteger = new AtomicInteger(42);
+
+        Eventually.assertThat(valueOf(atomicInteger), is(42));
+
+        // use an atomic boolean
+        AtomicBoolean atomicBoolean = new AtomicBoolean(true);
+
+        Eventually.assertThat(valueOf(atomicBoolean), is(true));
     }
 }

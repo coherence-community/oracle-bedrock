@@ -355,7 +355,8 @@ public class DeferredHelper
      * <p>
      * The results of interactions on the returned proxy are always non-sense
      * and/or other dynamic proxies.  To determine the actual result (as
-     * a {@link Deferred}), one must call {@link #eventually(Object)}.
+     * a {@link Deferred}), applications must wrap the result in a
+     * call to {@link #eventually(Object)}.
      *
      * @param <T>     the type of {@link Object}
      * @param object  the {@link Object} to proxy
@@ -365,6 +366,32 @@ public class DeferredHelper
     public static <T> T invoking(T object)
     {
         return invoking(new Existing<T>(object));
+    }
+
+
+    /**
+     * Creates a dynamic proxy of the {@link Object} represented by a
+     * specific {@link Class}.  The returned proxy will record
+     * interactions (method calls) against the proxy of the {@link Class}
+     * for the purposes of representing the calls as {@link Deferred}s.
+     * <p>
+     * The results of interactions on the returned proxy are always non-sense
+     * and/or other dynamic proxies.  To determine the actual result (as
+     * a {@link Deferred}), applications must wrap the result in a call
+     * to {@link #eventually(Object)}.
+     *
+     * @param <T>            the specific type to proxy
+     * @param <O>            the type of the {@link Object} (a sub-type of T)
+     * @param object         the {@link Object} to proxy
+     * @param specificClass  the specific {@link Class} to proxy
+     *
+     * @return a recording dynamic proxy of the {@link Object} represented
+     *         as the specified {@link Class}
+     */
+    public static <T, O extends T> T invoking(O        object,
+                                              Class<T> specificClass)
+    {
+        return invoking(new Existing<T>(object, specificClass));
     }
 
 
@@ -442,6 +469,54 @@ public class DeferredHelper
                                                     + "Alternatively two or more calls to 'valueOf' have been made sequentially. "
                                                     + "Calls to 'valueOf' must be contained inside an 'eventually' call.");
         }
+    }
+
+
+    /**
+     * A helper method to allow {@link AtomicInteger}s to be used directly with 'eventually' calls.
+     * <p>
+     * For Example:
+     * <code>Eventually.assertThat(valueOf(atomicInteger), is(42));</code>
+     *
+     * @param atomic  the {@link AtomicInteger}
+     *
+     * @return  a dumby {@link Integer} value
+     */
+    public static Integer valueOf(AtomicInteger atomic)
+    {
+        return valueOf(deferred(atomic));
+    }
+
+
+    /**
+     * A helper method to allow {@link AtomicLong}s to be used directly with 'eventually' calls.
+     * <p>
+     * For Example:
+     * <code>Eventually.assertThat(valueOf(atomicLong), is(42L));</code>
+     *
+     * @param atomic  the {@link AtomicLong}
+     *
+     * @return  a dumby {@link Long} value
+     */
+    public static Long valueOf(AtomicLong atomic)
+    {
+        return valueOf(deferred(atomic));
+    }
+
+
+    /**
+     * A helper method to allow {@link AtomicBoolean}s to be used directly with 'eventually' calls.
+     * <p>
+     * For Example:
+     * <code>Eventually.assertThat(valueOf(atomicBoolean), is(true));</code>
+     *
+     * @param atomic  the {@link AtomicLong}
+     *
+     * @return  a dumby {@link Boolean} value
+     */
+    public static Boolean valueOf(AtomicBoolean atomic)
+    {
+        return valueOf(deferred(atomic));
     }
 
 
