@@ -42,15 +42,35 @@ public class Existing<T> implements Deferred<T>
      */
     private T object;
 
+    /**
+     * The type of the {@link Deferred}.
+     */
+    private Class<T> deferredClass;
+
 
     /**
-     * Construct a {@link Existing} given a specified object.
+     * Construct an {@link Existing} given a specified object.
      *
      * @param object  the {@link Object} (can't be <code>null</code>)
      */
     public Existing(T object)
     {
-        this.object = object;
+        this.object        = object;
+        this.deferredClass = (Class<T>) object.getClass();
+    }
+
+
+    /**
+     * Constructs an {@link Existing} given the specified object and class.
+     *
+     * @param object         the {@link Object} (can't be <code>null</code>)
+     * @param deferredClass  the {@link Class} of the {@link Deferred}
+     */
+    public Existing(T        object,
+                    Class<T> deferredClass)
+    {
+        this.object        = object;
+        this.deferredClass = deferredClass;
     }
 
 
@@ -64,7 +84,7 @@ public class Existing<T> implements Deferred<T>
     @Override
     public Class<T> getDeferredClass()
     {
-        return (Class<T>) object.getClass();
+        return deferredClass;
     }
 
 

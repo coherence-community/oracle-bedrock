@@ -25,6 +25,8 @@
 
 package com.oracle.tools.deferred;
 
+import org.hamcrest.Matchers;
+
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -91,6 +93,22 @@ public class DeferredHelperTest
         Deferred<Boolean> deferred = deferred(a);
 
         Assert.assertEquals(Boolean.TRUE, deferred.get());
+    }
+
+
+    /**
+     * Ensure that we can create a {@link Deferred} of a specific type
+     * when specified.
+     */
+    @Test
+    public void shouldCreateDeferredOfSpecificType()
+    {
+        Integer          integer        = new Integer(42);
+
+        Deferred<Number> deferredNumber = eventually(invoking(integer, Number.class));
+
+        Assert.assertThat(deferredNumber.getDeferredClass(), Matchers.instanceOf(Number.class.getClass()));
+        Assert.assertThat(deferredNumber.get().intValue(), Matchers.is(42));
     }
 
 
