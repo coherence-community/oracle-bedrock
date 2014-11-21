@@ -324,4 +324,32 @@ public abstract class AbstractJavaApplicationBuilderTest extends AbstractTest
             assertThat(System.getProperty(propertyName), is(nullValue()));
         }
     }
+
+
+    /**
+     * Ensure that we can create applications that can have {@link RemoteCallable}s
+     * represented as lambda submitted to them and executed.
+     */
+    @Test
+    public void shouldExecuteLambda() throws InterruptedException
+    {
+        // define and start the SleepingApplication
+        SimpleJavaApplicationSchema schema = new SimpleJavaApplicationSchema(SleepingApplication.class.getName());
+
+        // set a System-Property for the SleepingApplication (we'll request it back)
+        String uuid = UUID.randomUUID().toString();
+
+        schema.setSystemProperty("uuid", uuid);
+
+        schema.setPreferIPv4(true);
+
+        JavaApplicationBuilder<JavaApplication> builder = newJavaApplicationBuilder();
+
+        ApplicationConsole console = new SystemApplicationConsole();
+
+        try (SimpleJavaApplication application = builder.realize(schema, "sleeping", console))
+        {
+            Eventually.assertThat(application, () -> System.getProperty("uuid"), is(uuid));
+        }
+    }
 }

@@ -38,6 +38,7 @@ import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.CoreMatchers.nullValue;
 
 import static org.hamcrest.core.Is.is;
+import static org.hamcrest.number.OrderingComparison.greaterThan;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
@@ -266,5 +267,15 @@ public class EventuallyTest
         AtomicBoolean atomicBoolean = new AtomicBoolean(true);
 
         Eventually.assertThat(valueOf(atomicBoolean), is(true));
+    }
+
+
+    /**
+     * Ensure that the Eventually.assertThat works with lambda expressions
+     */
+    @Test
+    public void shouldEventuallyAssertUsingLambda()
+    {
+        Eventually.assertThat(valueOf(() -> 42), greaterThan(41));
     }
 }

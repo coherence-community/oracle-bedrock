@@ -27,6 +27,7 @@ package com.oracle.tools.deferred;
 
 import org.hamcrest.Matchers;
 
+import org.hamcrest.core.Is;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -34,12 +35,14 @@ import static com.oracle.tools.deferred.DeferredHelper.deferred;
 import static com.oracle.tools.deferred.DeferredHelper.eventually;
 import static com.oracle.tools.deferred.DeferredHelper.invoking;
 
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 
 import static org.hamcrest.Matchers.arrayWithSize;
 
 import static org.junit.Assert.assertThat;
 
+import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -93,6 +96,20 @@ public class DeferredHelperTest
         Deferred<Boolean> deferred = deferred(a);
 
         Assert.assertEquals(Boolean.TRUE, deferred.get());
+    }
+
+
+    /**
+     * Ensure that we can create a {@link Deferred} representation of a lambda
+     * expression using a {@link Callable}.
+     */
+    @Test
+    public void shouldDeferALambdaUsingACallable()
+    {
+        Deferred<String> deferred = new DeferredCallable<>(() -> "Gudday", String.class);
+
+        assertThat(deferred.getDeferredClass(), equalTo(String.class));
+        assertThat(deferred.get(), is("Gudday"));
     }
 
 

@@ -47,6 +47,7 @@ import java.lang.reflect.Method;
 
 import java.util.Iterator;
 
+import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -153,6 +154,23 @@ public class DeferredHelper
     public static Deferred<Boolean> deferred(AtomicBoolean atomic)
     {
         return new DeferredAtomicBoolean(atomic);
+    }
+
+
+    /**
+     * Obtains a {@link Deferred} representation of a {@link Callable}.
+     *
+     * @param <T>                 the type of return value
+     *
+     * @param callable            the {@link Callable} to be deferred
+     * @param callableReturnType  the {@link Class} of the return type
+     *
+     * @return a {@link Deferred} for the {@link Callable}
+     */
+    public static <T> Deferred<T> deferred(Callable<T> callable,
+                                           Class<T>    callableReturnType)
+    {
+        return new DeferredCallable<T>(callable, callableReturnType);
     }
 
 
@@ -438,14 +456,14 @@ public class DeferredHelper
 
 
     /**
-     * A specialized mechanism for allowing custom {@link Deferred} implementations to be used
+     * A specialized mechanism to allow custom {@link Deferred} implementations to be used
      * within 'eventually' / 'assertThat' calls, where no method chaining is required or used
      * (unlike {@link #invoking}).
      *
      * @param <T>       the type of {@link Object}
      * @param deferred  the {@link Deferred}
      *
-     * @return  a dumby value representing the {@link Deferred}
+     * @return  a dummy value representing the {@link Deferred}
      */
     public static <T> T valueOf(Deferred<T> deferred)
     {
@@ -473,6 +491,26 @@ public class DeferredHelper
 
 
     /**
+     * A helper method to allow strongly-typed {@link Callable}s to be used with 'eventually' calls,
+     * especially useful for strongly-typed lambda expressions.
+     * <p>
+     * For Example:
+     * <code>Eventually.assertThat(valueOf(() -> 42, Integer.class), is(42));</code>
+     *
+     * @param <T>         the specific type of the callable
+     * @param callable    the {@link Callable} to evaluate
+     * @param returnType  the {@link Class} representing the type of value returned by the {@link Callable}
+     *
+     * @return  a dummy {@link Class} value
+     */
+    public static <T> T valueOf(Callable<T> callable,
+                                Class<T>    returnType)
+    {
+        return valueOf(deferred(callable, returnType));
+    }
+
+
+    /**
      * A helper method to allow {@link AtomicInteger}s to be used directly with 'eventually' calls.
      * <p>
      * For Example:
@@ -480,7 +518,7 @@ public class DeferredHelper
      *
      * @param atomic  the {@link AtomicInteger}
      *
-     * @return  a dumby {@link Integer} value
+     * @return  a dummy {@link Integer} value
      */
     public static Integer valueOf(AtomicInteger atomic)
     {
@@ -496,7 +534,7 @@ public class DeferredHelper
      *
      * @param atomic  the {@link AtomicLong}
      *
-     * @return  a dumby {@link Long} value
+     * @return  a dummy {@link Long} value
      */
     public static Long valueOf(AtomicLong atomic)
     {
@@ -512,11 +550,29 @@ public class DeferredHelper
      *
      * @param atomic  the {@link AtomicLong}
      *
-     * @return  a dumby {@link Boolean} value
+     * @return  a dummy {@link Boolean} value
      */
     public static Boolean valueOf(AtomicBoolean atomic)
     {
         return valueOf(deferred(atomic));
+    }
+
+
+    /**
+     * A helper method to allow type-less (erased) {@link Callable}s to be used directly with
+     * 'eventually' calls, especially useful for lambda expressions.
+     * <p>
+     * For Example:
+     * <code>Eventually.assertThat(valueOf(() -> 42), is(42));</code>
+     *
+     * @param <T>         the specific type of the callable
+     * @param callable    the {@link Callable} to evaluate
+     *
+     * @return  a dummy {@link Class} value
+     */
+    public static <T> T valueOf(Callable<T> callable)
+    {
+        return valueOf(deferred(callable, (Class<T>) Object.class));
     }
 
 
