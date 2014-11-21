@@ -64,6 +64,7 @@ import com.oracle.tools.util.Capture;
 import org.junit.Assume;
 import org.junit.Test;
 
+import static com.oracle.tools.deferred.DeferredHelper.delayedBy;
 import static com.oracle.tools.deferred.DeferredHelper.invoking;
 import static com.oracle.tools.deferred.DeferredHelper.valueOf;
 
@@ -84,6 +85,7 @@ import java.net.InetSocketAddress;
 import java.util.List;
 import java.util.UUID;
 
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -155,7 +157,6 @@ public class LocalJavaApplicationBuilderTest extends AbstractJavaApplicationBuil
 
             assertThat(debugArg, is(notNullValue()));
             assertThat(debugArg, startsWith("-agentlib:jdwp=transport=dt_socket,"));
-            assertThat(debugArg, containsString(String.format(",address=%s", platform.getHostName())));
             assertThat(debugArg, containsString(",suspend=n"));
             assertThat(debugArg, containsString(",server=y"));
         }
@@ -204,7 +205,6 @@ public class LocalJavaApplicationBuilderTest extends AbstractJavaApplicationBuil
 
             assertThat(debugArg, is(notNullValue()));
             assertThat(debugArg, startsWith("-agentlib:jdwp=transport=dt_socket,"));
-            assertThat(debugArg, containsString(String.format(",address=%s", platform.getHostName())));
             assertThat(debugArg, containsString(",suspend=y"));
             assertThat(debugArg, containsString(",server=y"));
         }
@@ -240,6 +240,9 @@ public class LocalJavaApplicationBuilderTest extends AbstractJavaApplicationBuil
 
             SimpleJavaApplicationSchema schema = new SimpleJavaApplicationSchema(SleepingApplication.class.getName());
 
+            // sleep for at least 60 seconds to allow for the JDB to connect
+            schema.addArgument("60");
+
             schema.setPreferIPv4(true);
 
             CapturingApplicationConsole console = new CapturingApplicationConsole();
@@ -251,9 +254,12 @@ public class LocalJavaApplicationBuilderTest extends AbstractJavaApplicationBuil
                                                                   .attachToDebugger(debuggerPort.get())))
             {
                 Eventually.assertThat(invoking(console).getCapturedOutputLines(), hasItem(startsWith("Now sleeping")));
+
+                // assert that the application connects back to the debugger
+                // (this can take sometime as JDB initializes itself)
                 Eventually.assertThat("Application did not connect back to JDB",
                                       invoking(jdbConsole).getCapturedOutputLines(),
-                                      hasItem(containsString("VM Started:")));
+                                      hasItem(containsString("VM Started:")), delayedBy(10, TimeUnit.SECONDS));
             }
         }
     }
@@ -277,6 +283,8 @@ public class LocalJavaApplicationBuilderTest extends AbstractJavaApplicationBuil
 
             console.getInputWriter().println("run");
             console.getInputWriter().println("quit");
+
+            jdb.waitFor();
         }
     }
 
@@ -291,6 +299,10 @@ public class LocalJavaApplicationBuilderTest extends AbstractJavaApplicationBuil
         {
             Eventually.assertThat(invoking(console).getCapturedOutputLines(),
                                   hasItem(startsWith("This is jdb version")));
+
+            console.getInputWriter().println("quit");
+
+            jdb.waitFor();
 
             return true;
         }

@@ -297,10 +297,9 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication> extends Abst
             boolean isDebugServer = remoteDebugging.getBehavior() == RemoteDebugging.Behavior.LISTEN_FOR_DEBUGGER;
 
             // construct the Java option
-            String option = String.format("-agentlib:jdwp=transport=dt_socket,server=%s,suspend=%s,address=%s:%d",
+            String option = String.format("-agentlib:jdwp=transport=dt_socket,server=%s,suspend=%s,address=%d",
                                           (isDebugServer ? "y" : "n"),
                                           (remoteDebugging.isStartSuspended() ? "y" : "n"),
-                                          LocalPlatform.getInstance().getHostName(),
                                           debugPort);
 
             processBuilder.command().add(option);
