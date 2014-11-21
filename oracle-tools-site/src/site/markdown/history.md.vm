@@ -95,12 +95,19 @@ reverse chronological order.
     issue where attempting to call invoking(...) on a final class/instance
     would cause misleading exceptions to be thrown.
 
+*   [ORACLETOOLS-200](https://java.net/jira/browse/ORACLETOOLS-200): Introduced
+    DeferredCallables, DeferredHelper.deferred(Callable) and
+    DeferredHelper.valueOf(Callable) to allow simple application of Java 8
+    lambdas.
+
+    eg: Eventually.assertThat(valueOf(() -> 42), is(42));
+
 *   [ORACLETOOLS-201](https://java.net/jira/browse/ORACLETOOLS-201): Allowed
     Atomic types to be used with DeferredHelper.valueOf(...) thus making
     Eventually.assertThat(...) calls simpler.  eg: there's no reason to use
     valueOf(deferred(atomic)), now you can just use valueOf(atomic).
 
-*   [ORACLETOOLS-202](https://java.net/jira/browse/ORACLETOOLS-201): Resolved
+*   [ORACLETOOLS-202](https://java.net/jira/browse/ORACLETOOLS-202): Resolved
     issue where the Ensured class would continuously attempt to retry (calling
     .get() on the underlying Deferred) when null was encountered.   This is
     incorrect behavior according to the contract defined by the Deferred class.

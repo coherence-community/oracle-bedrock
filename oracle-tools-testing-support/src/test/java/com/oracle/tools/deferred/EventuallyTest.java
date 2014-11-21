@@ -30,8 +30,6 @@ import com.oracle.tools.util.StopWatch;
 import org.junit.Assert;
 import org.junit.Test;
 
-import static com.oracle.tools.deferred.DeferredHelper.deferred;
-import static com.oracle.tools.deferred.DeferredHelper.invoking;
 import static com.oracle.tools.deferred.DeferredHelper.valueOf;
 import static com.oracle.tools.deferred.DeferredHelper.within;
 
