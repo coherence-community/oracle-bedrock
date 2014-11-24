@@ -442,6 +442,10 @@ reverse chronological order.
     test failures.  Remote Java Debugging should not specify a port for
     local host sessions.
 
+*   [ORACLETOOLS-204](https://java.net/jira/browse/ORACLETOOLS-204): Resolved
+    race-condition where by Remote Executor Service may acquire a port that is
+    about to be allocated to a System Property.
+
 *   [ORACLETOOLS-207](https://java.net/jira/browse/ORACLETOOLS-207): Introduced
     Assembly.close(Option...) as a means of controlling how assemblies are closed.
 
