@@ -94,17 +94,6 @@ public interface FluentCoherenceClusterSchema<S extends FluentCoherenceClusterSc
 
 
     /**
-     * Sets if storage should be enabled for distributed caching services of Oracle Coherence applications based on
-     * this {@link FluentCoherenceClusterSchema}.
-     *
-     * @param isStorageEnabled
-     *
-     * @return  the {@link FluentCoherenceClusterSchema}
-     */
-    public S setStorageEnabled(boolean isStorageEnabled);
-
-
-    /**
      * Sets the Well-Known-Address (WKA) for Oracle Coherence applications based on this {@link FluentCoherenceClusterSchema}.
      *
      * @param address  The address (as a {@link String}).

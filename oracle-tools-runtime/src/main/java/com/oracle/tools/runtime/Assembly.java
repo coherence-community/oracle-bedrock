@@ -27,6 +27,8 @@ package com.oracle.tools.runtime;
 
 import com.oracle.tools.Option;
 
+import com.oracle.tools.runtime.options.ApplicationClosingBehavior;
+
 import java.io.Closeable;
 
 /**
@@ -55,6 +57,21 @@ public interface Assembly<A extends Application> extends Iterable<A>, Closeable,
      */
     @Override
     public void close();
+
+
+    /**
+     * Closes the {@link Assembly} including all of the {@link Application}s
+     * that are part of the {@link Assembly}.
+     * <p>
+     * Upon returning it is safe to assume that all previously running
+     * {@link Application}s have been closed.
+     * <p>
+     *
+     * @param options  the {@link Option}s indicating how to close the {@link Application}s
+     *
+     * @see ApplicationClosingBehavior
+     */
+    public void close(Option... options);
 
 
     /**

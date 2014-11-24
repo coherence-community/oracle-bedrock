@@ -116,6 +116,7 @@ public interface CoherenceClusterMemberSchema<A extends CoherenceClusterMember> 
      */
     public String getMachineName();
 
+
     /**
      * Obtains if remote JMX monitoring is enabled for Oracle Coherence applications based on this
      * {@link CoherenceClusterMemberSchema}.
@@ -132,4 +133,13 @@ public interface CoherenceClusterMemberSchema<A extends CoherenceClusterMember> 
      * @return  if TCMP is enabled
      */
     public boolean isTCMPEnabled();
+
+
+    /**
+     * Obtains the storage should be enabled for distributed caching services of Oracle Coherence applications based on
+     * this {@link CoherenceClusterMemberSchema}.
+     *
+     * @return  if storage is to be enabled
+     */
+    public boolean isStorageEnabled();
 }

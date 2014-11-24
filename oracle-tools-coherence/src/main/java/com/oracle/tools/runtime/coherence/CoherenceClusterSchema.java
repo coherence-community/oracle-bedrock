@@ -99,15 +99,6 @@ public interface CoherenceClusterSchema extends CoherenceSchema
 
 
     /**
-     * Obtains the storage should be enabled for distributed caching services of Oracle Coherence applications based on
-     * this {@link CoherenceClusterSchema}.
-     *
-     * @return  if storage is to be enabled
-     */
-    public boolean isStorageEnabled();
-
-
-    /**
      * Obtains the Well-Known-Address (WKA) for Oracle Coherence applications based on this {@link CoherenceClusterSchema}.
      *
      * @return  the well-known-address (or null if not set)
