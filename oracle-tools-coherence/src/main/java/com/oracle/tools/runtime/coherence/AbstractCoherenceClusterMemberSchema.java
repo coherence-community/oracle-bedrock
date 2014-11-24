@@ -329,7 +329,7 @@ public abstract class AbstractCoherenceClusterMemberSchema<A extends CoherenceCl
 
 
     @Override
-    public String getOperationalOverrideURI(String operationalOverrideURI)
+    public String getOperationalOverrideURI()
     {
         return getSystemProperty(PROPERTY_OPERATIONAL_OVERRIDE, String.class, null);
     }
@@ -343,7 +343,7 @@ public abstract class AbstractCoherenceClusterMemberSchema<A extends CoherenceCl
 
 
     @Override
-    public String getPofConfigURI(String pofConfigURI)
+    public String getPofConfigURI()
     {
         return getSystemProperty(PROPERTY_POF_CONFIG, String.class, null);
     }

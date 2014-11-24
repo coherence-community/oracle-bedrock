@@ -25,6 +25,8 @@
 
 package com.oracle.tools.runtime;
 
+import com.oracle.tools.Option;
+
 import com.oracle.tools.predicate.Predicate;
 
 import java.util.Iterator;
@@ -209,6 +211,16 @@ public abstract class AbstractAssembly<A extends Application> implements Assembl
     @Override
     public void close()
     {
+        this.close(new Option[]
+        {
+        });
+
+    }
+
+
+    @Override
+    public void close(Option... options)
+    {
         if (isClosed.compareAndSet(false, true))
         {
             for (A application : applications)
@@ -217,7 +229,7 @@ public abstract class AbstractAssembly<A extends Application> implements Assembl
                 {
                     try
                     {
-                        application.close();
+                        application.close(options);
                     }
                     catch (Exception e)
                     {

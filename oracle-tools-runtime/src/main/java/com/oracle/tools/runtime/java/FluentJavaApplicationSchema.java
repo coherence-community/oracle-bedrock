@@ -48,6 +48,33 @@ public interface FluentJavaApplicationSchema<A extends JavaApplication, S extend
      * for the desired application.
      *
      * @param className  the fully-qualified class name of the "main" class
+     *
+     * @return the {@link FluentJavaApplicationSchema} to permit fluent-style method calls
      */
     public S setApplicationClassName(String className);
+
+
+    /**
+     * Sets the specified system property.
+     *
+     * @param name   the name of the system property
+     * @param value  the value for the system property
+     *
+     * @return the {@link FluentJavaApplicationSchema} to permit fluent-style method calls
+     */
+    public S setSystemProperty(String name,
+                               Object value);
+
+
+    /**
+     * Optionally sets the specified system property.
+     *
+     * @param name   the name of the system property
+     * @param value  the value for the system property
+     *
+     * @return the {@link FluentJavaApplicationSchema} to permit fluent-style method calls
+     */
+    @SuppressWarnings("unchecked")
+    public S setSystemPropertyIfAbsent(String name,
+                                       Object value);
 }
