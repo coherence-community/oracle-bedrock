@@ -220,6 +220,35 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication> extends Abst
                                                                        + schema.getExecutableName()));
         }
 
+        // ----- establish Oracle Tools specific system properties -----
+
+        // configure a server channel to communicate with the native process
+        final RemoteExecutorServer server = new RemoteExecutorServer();
+
+        try
+        {
+            server.open();
+        }
+        catch (IOException e)
+        {
+            throw new RuntimeException("Failed to create remote execution server for the application", e);
+        }
+
+        // add Oracle Tools specific System Properties
+        Predicate<InetAddress> preferred = schema.isIPv4Preferred() ? allOf(NetworkHelper.IPv4_ADDRESS,
+                NetworkHelper
+                        .NON_LOOPBACK_ADDRESS) : NetworkHelper
+                .DEFAULT_ADDRESS;
+
+        processBuilder.command().add("-D" + Settings.PARENT_ADDRESS + "="
+                + server.getInetAddress(preferred).getHostAddress());
+        processBuilder.command().add("-D" + Settings.PARENT_PORT + "=" + server.getPort());
+
+        // add Orphanable configuration
+        Orphanable orphanable = options.get(Orphanable.class, Orphanable.disabled());
+
+        processBuilder.command().add("-D" + Settings.ORPHANABLE + "=" + orphanable.isOrphanable());
+
         // ----- establish the system properties for the java application -----
 
         // define the system properties based on those defined by the schema
@@ -238,35 +267,6 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication> extends Abst
                                                 ? "" : "=" + StringHelper.doubleQuoteIfNecessary(propertyValue)));
             }
         }
-
-        // ----- establish Oracle Tools specific system properties -----
-
-        // configure a server channel to communicate with the native process
-        final RemoteExecutorServer server = new RemoteExecutorServer();
-
-        try
-        {
-            server.open();
-        }
-        catch (IOException e)
-        {
-            throw new RuntimeException("Failed to create remote execution server for the application", e);
-        }
-
-        // add Oracle Tools specific System Properties
-        Predicate<InetAddress> preferred = schema.isIPv4Preferred() ? allOf(NetworkHelper.IPv4_ADDRESS,
-                                                                            NetworkHelper
-                                                                                .NON_LOOPBACK_ADDRESS) : NetworkHelper
-                                                                                    .DEFAULT_ADDRESS;
-
-        processBuilder.command().add("-D" + Settings.PARENT_ADDRESS + "="
-                                     + server.getInetAddress(preferred).getHostAddress());
-        processBuilder.command().add("-D" + Settings.PARENT_PORT + "=" + server.getPort());
-
-        // add Orphanable configuration
-        Orphanable orphanable = options.get(Orphanable.class, Orphanable.disabled());
-
-        processBuilder.command().add("-D" + Settings.ORPHANABLE + "=" + orphanable.isOrphanable());
 
         // ----- establish Java Virtual Machine options -----
 
