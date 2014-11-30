@@ -15,11 +15,6 @@
         Functional and Integration tests for the Remote Runtime Management module.
     </description>
 
-    <properties>
-        <!-- override the following to skip remote tests -->
-        <skip-remote-tests>false</skip-remote-tests>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>com.oracle.tools</groupId>
@@ -88,9 +83,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <configuration>
-                    <skipTests>${skip-remote-tests}</skipTests>
-                </configuration>
             </plugin>
         </plugins>
     </build>
