@@ -1047,6 +1047,10 @@ public class DeferredHelper
             {
                 return new AtomicLong(0);
             }
+            else if (resultType.isEnum())
+            {
+                return null;
+            }
             else if (resultType.isArray())
             {
                 return Array.newInstance(resultType.getComponentType(), 0);

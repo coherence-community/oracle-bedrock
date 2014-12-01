@@ -34,6 +34,7 @@ import org.junit.Test;
 import static com.oracle.tools.deferred.DeferredHelper.deferred;
 import static com.oracle.tools.deferred.DeferredHelper.eventually;
 import static com.oracle.tools.deferred.DeferredHelper.invoking;
+import static com.oracle.tools.deferred.DeferredHelper.valueOf;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
@@ -57,6 +58,13 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public class DeferredHelperTest
 {
+    /**
+     * A simple enum for testing.
+     */
+    public static enum Status {ON,
+                               OFF}
+
+
     /**
      * Ensure that we can create a {@link Deferred} for an {@link AtomicLong}.
      */
@@ -130,7 +138,7 @@ public class DeferredHelperTest
 
 
     /**
-     * Ensure that we can use DeferredAssert with Strings.
+     * Ensure that we can create a {@link Deferred} representing a {@link String}.
      */
     @Test
     public void shouldDeferAString()
@@ -144,7 +152,7 @@ public class DeferredHelperTest
 
 
     /**
-     * Ensure that we can use DeferredAssert with String arrays.
+     * Ensure that we can create a {@link Deferred} representing an array of {@link String}s.
      */
     @Test
     public void shouldDeferAStringArray()
@@ -154,6 +162,32 @@ public class DeferredHelperTest
         Deferred<String[]> deferred  = eventually(invoking(container).getStrings());
 
         assertThat(deferred.get(), is(arrayWithSize(1)));
+    }
+
+
+    /**
+     * Ensure that we can create a {@link Deferred} representing a {@link Enum}.
+     */
+    @Test
+    public void shouldDeferAnEnum()
+    {
+        Status           s        = Status.ON;
+        Deferred<Status> deferred = eventually(invoking(this).getStatus(s));
+
+        assertThat(deferred.get(), Matchers.is(Status.ON));
+    }
+
+
+    /**
+     * A simple method to return a {@link Status}
+     *
+     * @param status  the {@link Status} to return
+     *
+     * @return a {@link Status}
+     */
+    public Status getStatus(Status status)
+    {
+        return status;
     }
 
 
