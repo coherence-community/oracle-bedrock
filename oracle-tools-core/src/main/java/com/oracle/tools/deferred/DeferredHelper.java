@@ -577,6 +577,23 @@ public class DeferredHelper
 
 
     /**
+     * A helper method to allow Java enums to be used directly with 'eventually' calls.
+     * <p>
+     * For Example:
+     * <code>Eventually.assertThat(valueOf(enum), is(x));</code>
+     *
+     * @param <T>          the type of the enum
+     * @param enumeration  the enum
+     *
+     * @return  a dummy enum value
+     */
+    public static <T extends Enum> T valueOf(T enumeration)
+    {
+        return valueOf(new Existing<T>(enumeration));
+    }
+
+
+    /**
      * Obtains a {@link Deferred} representation of the last call to a
      * dynamic proxy created with either {@link #invoking(Object)} or
      * {@link #invoking(Deferred)}.
@@ -1046,6 +1063,10 @@ public class DeferredHelper
             else if (resultType.equals(AtomicLong.class))
             {
                 return new AtomicLong(0);
+            }
+            else if (resultType.isEnum())
+            {
+                return null;
             }
             else if (resultType.isArray())
             {
