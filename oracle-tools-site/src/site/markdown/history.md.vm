@@ -124,6 +124,15 @@ reverse chronological order.
     the concept of Platform, together with LocalPlatform and RemotePlatform
     implementations.
 
+*   [ORACLETOOLS-69](https://java.net/jira/browse/ORACLETOOLS-69): Removed
+    PropertiesBuilder "default" property support (includes "default" system
+    properties support from JavaApplicationSchema).
+
+    *BREAKING CHANGE:*  While this is a breaking API change, it's highly
+    unlikely that this will effect anyone as it wasn't used internally.
+    Applications using this method are safe to use regular properties
+    instead.
+
 *   [ORACLETOOLS-79](https://java.net/jira/browse/ORACLETOOLS-79): Completed
     implementation of stdin redirection so that an ApplicationConsole can
     be used to interact with an Application stdin.

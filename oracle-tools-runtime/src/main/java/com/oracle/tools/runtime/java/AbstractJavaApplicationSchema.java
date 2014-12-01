@@ -260,24 +260,6 @@ public abstract class AbstractJavaApplicationSchema<A extends JavaApplication,
 
 
     /**
-     * Sets a default value for specified system property (to be used if it's not defined)
-     *
-     * @param name  The name of the system property
-     * @param value The value for the system property
-     * @return the {@link JavaApplicationSchema}
-     */
-    @Deprecated
-    @SuppressWarnings("unchecked")
-    public S setDefaultSystemProperty(String name,
-                                      Object value)
-    {
-        systemPropertiesBuilder.setDefaultProperty(name, value);
-
-        return (S) this;
-    }
-
-
-    /**
      * Adds the properties defined by the {@link PropertiesBuilder} to this {@link JavaApplicationSchema}.
      *
      * @param systemProperties The system {@link PropertiesBuilder}
