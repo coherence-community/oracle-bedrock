@@ -154,15 +154,8 @@ public class DeferredHelperTest
     @Test
     public void shouldDeferAnEnum()
     {
-        Status s = Status.ON;
-
-        // ensure that we can use an enum that was "recorded" with invoking/eventually
+        Status           s        = Status.ON;
         Deferred<Status> deferred = eventually(invoking(this).getStatus(s));
-
-        assertThat(deferred.get(), Matchers.is(Status.ON));
-
-        // ensure that we can use an enum that is a "valueOf"
-        deferred = eventually(valueOf(s));
 
         assertThat(deferred.get(), Matchers.is(Status.ON));
     }
