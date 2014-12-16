@@ -300,12 +300,13 @@ public abstract class AbstractCoherenceCacheServerTest extends AbstractTest
             assertThat(otherGetAllResults, MapMatcher.sameAs(putAllMap));
 
             // ----- use NamedCache.aggregate -----
-            long longSum = otherNamedCache.aggregate(PresentFilter.INSTANCE, new LongSum(IdentityExtractor.INSTANCE));
+            long longSum = (Long) otherNamedCache.aggregate(PresentFilter.INSTANCE,
+                                                            new LongSum(IdentityExtractor.INSTANCE));
 
             assertThat(longSum, is(sum));
 
-            long anotherLongSum = otherNamedCache.aggregate(putAllMap.keySet(),
-                                                            new LongSum(IdentityExtractor.INSTANCE));
+            long anotherLongSum = (Long) otherNamedCache.aggregate(putAllMap.keySet(),
+                                                                   new LongSum(IdentityExtractor.INSTANCE));
 
             assertThat(anotherLongSum, is(sum));
         }

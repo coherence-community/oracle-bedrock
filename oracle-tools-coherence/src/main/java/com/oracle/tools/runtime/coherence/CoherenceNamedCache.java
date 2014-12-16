@@ -258,22 +258,22 @@ class CoherenceNamedCache<K, V> implements NamedCache<K, V>
 
 
     @Override
-    public boolean lock(K    key,
-                        long duration)
+    public boolean lock(Object key,
+                        long   duration)
     {
         return remotelyInvoke("lock", Boolean.class, key, duration);
     }
 
 
     @Override
-    public boolean lock(K key)
+    public boolean lock(Object key)
     {
         return remotelyInvoke("lock", Boolean.class, key);
     }
 
 
     @Override
-    public boolean unlock(K key)
+    public boolean unlock(Object key)
     {
         return remotelyInvoke("unlock", Boolean.class, key);
     }
@@ -296,7 +296,7 @@ class CoherenceNamedCache<K, V> implements NamedCache<K, V>
 
 
     @Override
-    public <R> Map<K, R> invokeAll(Filter                  filter,
+    public <R> Map<K, R> invokeAll(Filter<?>               filter,
                                    EntryProcessor<K, V, R> processor)
     {
         return remotelyInvoke("invokeAll", Map.class, filter, processor);
@@ -312,7 +312,7 @@ class CoherenceNamedCache<K, V> implements NamedCache<K, V>
 
 
     @Override
-    public <R> R aggregate(Filter                                   filter,
+    public <R> R aggregate(Filter<?>                                filter,
                            EntryAggregator<? super K, ? super V, R> aggregator)
     {
         return (R) remotelyInvoke("aggregate", Object.class, filter, aggregator);
@@ -390,16 +390,16 @@ class CoherenceNamedCache<K, V> implements NamedCache<K, V>
 
 
     @Override
-    public <E> void addIndex(ValueExtractor<E> valueExtractor,
-                             boolean           ordered,
-                             Comparator<E>     comparator)
+    public <T, E> void addIndex(com.tangosol.util.ValueExtractor<? super T, ? extends E> valueExtractor,
+                                boolean                                                  ordered,
+                                java.util.Comparator<? super E>                          comparator)
     {
         remotelyInvoke("addIndex", valueExtractor, ordered, comparator);
     }
 
 
     @Override
-    public <E> void removeIndex(ValueExtractor<E> valueExtractor)
+    public <T, E> void removeIndex(com.tangosol.util.ValueExtractor<? super T, ? extends E> valueExtractor)
     {
         remotelyInvoke("removeIndex", valueExtractor);
     }

@@ -15,9 +15,6 @@ reverse chronological order.
 
 *   [ORACLETOOLS-192](https://java.net/jira/browse/ORACLETOOLS-192): Upgraded to require Java 8.
 
-*   [ORACLETOOLS-213](https://java.net/jira/browse/ORACLETOOLS-213): Introduced
-    Object.equals() and Object.hashCode() methods for all Option implementations.
-
 <h4>oracle-tools-core</h4>
 
 *   (no changes)
