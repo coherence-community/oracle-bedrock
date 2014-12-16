@@ -30,6 +30,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+
 import java.net.URL;
 
 /**
@@ -130,7 +131,8 @@ public class VagrantFilePlatformSchema extends AbstractVagrantPlatformSchema<Vag
      * @param name         the name to assign to the {@link VagrantPlatform}
      * @param vagrantFile  the {@link java.io.File} to write the Vagrant configuration to
      */
-    protected VagrantPlatform realize(String name, File vagrantFile) throws IOException
+    protected VagrantPlatform realize(String name,
+                                      File   vagrantFile) throws IOException
     {
         if (vagrantFileURL != null)
         {
@@ -167,6 +169,6 @@ public class VagrantFilePlatformSchema extends AbstractVagrantPlatformSchema<Vag
             }
         }
 
-        return instantiatePlatform(name, getCloseAction(), vagrantFile.getParentFile(), getPublicHostName());
+        return instantiatePlatform(name, vagrantFile.getParentFile(), getPublicHostName(), getCloseAction());
     }
 }

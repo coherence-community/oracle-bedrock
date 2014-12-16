@@ -155,21 +155,29 @@ public class ContainerBasedJavaApplicationBuilder<A extends JavaApplication> ext
                                                                    Platform           platform,
                                                                    Option...          applicationOptions)
     {
-        // obtain the platform specific options from the schema
-        Options options = applicationSchema.getPlatformSpecificOptions(platform);
+        // TODO: this should be a safe cast but we should also check to make sure
+        JavaApplicationSchema<T> schema = (JavaApplicationSchema) applicationSchema;
+
+        // ---- establish the Options for the Application -----
+
+        // add the platform options
+        Options options = new Options(platform == null ? null : platform.getOptions().asArray());
+
+        // add the schema options
+        options.addAll(applicationSchema.getOptions().asArray());
+
+        // add the schema options (based on the platform)
+        options.addAll(applicationSchema.getPlatformSpecificOptions(platform).asArray());
 
         // add the custom application options
         options.addAll(applicationOptions);
-
-        // TODO: this should be a safe cast but we should also check to make sure
-        JavaApplicationSchema<T> schema = (JavaApplicationSchema) applicationSchema;
 
         try
         {
             // establish the System Properties for the ContainerBasedJavaApplication
             Properties systemProperties = schema.getSystemProperties(platform);
 
-            // santity check the schema and realized properties
+            // sanity check the schema and realized properties
             sanityCheck(schema, systemProperties);
 
             // establish the ContainerClassLoader for the application

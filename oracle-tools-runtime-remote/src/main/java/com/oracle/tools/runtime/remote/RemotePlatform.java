@@ -25,6 +25,8 @@
 
 package com.oracle.tools.runtime.remote;
 
+import com.oracle.tools.Option;
+
 import com.oracle.tools.runtime.AbstractPlatform;
 import com.oracle.tools.runtime.Application;
 import com.oracle.tools.runtime.ApplicationBuilder;
@@ -79,12 +81,14 @@ public class RemotePlatform extends AbstractPlatform
      * @param address         the remote address
      * @param userName        the user name on the remote host
      * @param authentication  the {@link Authentication} for connecting to the host
+     * @param options         the {@link Option}s for the {@link RemotePlatform}
      */
     public RemotePlatform(InetAddress    address,
                           String         userName,
-                          Authentication authentication)
+                          Authentication authentication,
+                          Option...      options)
     {
-        this(address.toString(), address, RemoteApplicationBuilder.DEFAULT_PORT, userName, authentication);
+        this(address.toString(), address, RemoteApplicationBuilder.DEFAULT_PORT, userName, authentication, options);
     }
 
 
@@ -96,13 +100,15 @@ public class RemotePlatform extends AbstractPlatform
      * @param address         the remote address
      * @param userName        the user name on the remote host
      * @param authentication  the {@link Authentication} for connecting to the host
+     * @param options         the {@link Option}s for the {@link RemotePlatform}
      */
     public RemotePlatform(String         name,
                           InetAddress    address,
                           String         userName,
-                          Authentication authentication)
+                          Authentication authentication,
+                          Option...      options)
     {
-        this(name, address, RemoteApplicationBuilder.DEFAULT_PORT, userName, authentication);
+        this(name, address, RemoteApplicationBuilder.DEFAULT_PORT, userName, authentication, options);
     }
 
 
@@ -114,14 +120,16 @@ public class RemotePlatform extends AbstractPlatform
      * @param port            the remote port (for ssh)
      * @param userName        the user name on the remote host
      * @param authentication  the {@link Authentication} for connecting to the host
+     * @param options         the {@link Option}s for the {@link RemotePlatform}
      */
     public RemotePlatform(String         name,
                           InetAddress    address,
                           int            port,
                           String         userName,
-                          Authentication authentication)
+                          Authentication authentication,
+                          Option...      options)
     {
-        super(name);
+        super(name, options);
 
         this.privateAddress = address;
         this.publicAddress  = address;

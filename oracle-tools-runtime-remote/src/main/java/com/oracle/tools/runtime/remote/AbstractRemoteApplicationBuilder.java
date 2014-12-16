@@ -312,17 +312,29 @@ public abstract class AbstractRemoteApplicationBuilder<A extends Application, E 
         // initially there's no session
         Session session = null;
 
-        // obtain the platform specific options from the schema
-        Options options = applicationSchema.getPlatformSpecificOptions(platform);
+        // ---- establish the Options for the Application -----
+
+        // add the platform options
+        Options options = new Options(platform == null ? null : platform.getOptions().asArray());
+
+        // add the schema options
+        options.addAll(applicationSchema.getOptions().asArray());
+
+        // add the schema options (based on the platform)
+        options.addAll(applicationSchema.getPlatformSpecificOptions(platform).asArray());
 
         // add the custom application options
         options.addAll(applicationOptions);
+
+        // ---- establish the default Options ----
 
         // define the PlatformSeparators as Unix if they are not already defined
         options.addIfAbsent(PlatformSeparators.forUnix());
 
         // define the default Platform Shell (assume BASH)
         options.addIfAbsent(Shell.is(Shell.Type.BASH));
+
+        // ---- establish the environment for the application ----
 
         // obtain the builder-specific remote application environment based on the schema
         E environment = getRemoteApplicationEnvironment(applicationSchema, platform, options);

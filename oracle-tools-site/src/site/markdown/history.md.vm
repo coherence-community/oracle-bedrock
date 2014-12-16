@@ -464,6 +464,9 @@ reverse chronological order.
 *   [ORACLETOOLS-207](https://java.net/jira/browse/ORACLETOOLS-207): Introduced
     Assembly.close(Option...) as a means of controlling how assemblies are closed.
 
+*   [ORACLETOOLS-214](https://java.net/jira/browse/ORACLETOOLS-214): Introduced
+    Option support into Platform implementations.
+
 <h4>oracle-tools-runtime-remote</h4>
 
 *   [ORACLETOOLS-91](https://java.net/jira/browse/ORACLETOOLS-91): Introduced
@@ -501,11 +504,18 @@ reverse chronological order.
     issue where RemoteJavaApplicationBuilders did not wait for launched
     RemoteJavaApplications to "connect back".
 
+*   [ORACLETOOLS-214](https://java.net/jira/browse/ORACLETOOLS-214): Introduced
+    Option support into RemotePlatform implementations.
+
 <h4>oracle-tools-runtime-virtual</h4>
 
 *   [ORACLETOOLS-115](https://java.net/jira/browse/ORACLETOOLS-115): Introduced
     support for Virtual Machines and specifically support for configuring
     controlling virtual machines using Vagrant.
+
+*   [ORACLETOOLS-214](https://java.net/jira/browse/ORACLETOOLS-214): Introduced
+    Option support into VirtualPlatform implementations, includes refactoring
+    CloseAction as an Option.
 
 <h4>oracle-tools-testing-support</h4>
 

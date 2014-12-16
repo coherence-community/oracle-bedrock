@@ -26,24 +26,29 @@
 package com.oracle.tools.runtime.virtual.vagrant;
 
 import com.oracle.tools.runtime.virtual.CloseAction;
+
 import org.junit.ClassRule;
 import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
 
-import java.io.File;
-import java.io.IOException;
+import org.junit.rules.TemporaryFolder;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.sameInstance;
+
 import static org.junit.Assert.assertThat;
+
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
+
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import java.io.File;
+import java.io.IOException;
 
 /**
  * Copyright (c) 2014. All Rights Reserved. Oracle Corporation.<br>
@@ -53,8 +58,8 @@ import static org.mockito.Mockito.when;
  */
 public class AbstractVagrantPlatformSchemaTest
 {
-    /** 
-     *Field description 
+    /**
+     * Field description
      */
     @ClassRule
     public static TemporaryFolder temporaryFolder = new TemporaryFolder();
@@ -122,7 +127,7 @@ public class AbstractVagrantPlatformSchemaTest
         File                          dir      = temporaryFolder.newFolder();
         AbstractVagrantPlatformSchema stub     = new AbstractVagrantPlatformSchemaStub("Test", true, dir);
         AbstractVagrantPlatformSchema schema   = spy(stub);
-        VagrantPlatform platform = mock(VagrantPlatform.class);
+        VagrantPlatform               platform = mock(VagrantPlatform.class);
 
         when(schema.realize(anyString(), any(File.class))).thenReturn(platform);
 
@@ -131,8 +136,10 @@ public class AbstractVagrantPlatformSchemaTest
         assertThat(result, is(sameInstance(platform)));
 
         File expected = new File(new File(dir, "Foo"), "VagrantFile");
+
         verify(schema).realize(eq("Foo"), eq(expected));
     }
+
 
     /**
      *
@@ -142,14 +149,15 @@ public class AbstractVagrantPlatformSchemaTest
     {
         File                          file     = temporaryFolder.newFile();
         AbstractVagrantPlatformSchema schema   = new AbstractVagrantPlatformSchemaStub("Test", true, null);
-        VagrantPlatform               platform = schema.instantiatePlatform("Foo",CloseAction.None, file, "Bar");
+        VagrantPlatform               platform = schema.instantiatePlatform("Foo", file, "Bar", CloseAction.None);
 
         assertThat(platform, is(notNullValue()));
         assertThat(platform.getName(), is("Foo"));
-        assertThat(platform.getCloseAction(), is(CloseAction.None));
+        assertThat(platform.getOptions().get(CloseAction.class), is(CloseAction.None));
         assertThat(platform.getVagrantFile(), is(file));
         assertThat(platform.getPublicHostName(), is("Bar"));
     }
+
 
     private static class AbstractVagrantPlatformSchemaStub extends AbstractVagrantPlatformSchema
     {

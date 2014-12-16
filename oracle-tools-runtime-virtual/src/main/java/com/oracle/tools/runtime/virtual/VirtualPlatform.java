@@ -1,5 +1,5 @@
 /*
- * File: VirtualMachinePlatform.java
+ * File: VirtualPlatform.java
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
@@ -25,11 +25,14 @@
 
 package com.oracle.tools.runtime.virtual;
 
+import com.oracle.tools.Option;
+
 import com.oracle.tools.runtime.remote.Authentication;
 import com.oracle.tools.runtime.remote.RemotePlatform;
 
 import java.io.Closeable;
 import java.io.IOException;
+
 import java.net.InetAddress;
 
 /**
@@ -43,10 +46,6 @@ import java.net.InetAddress;
  */
 public abstract class VirtualPlatform extends RemotePlatform implements Closeable
 {
-    /** The action to perform when this {@link } is closed */
-    private CloseAction closeAction;
-
-
     /**
      * Construct a new {@link VirtualPlatform}.
      *
@@ -57,24 +56,23 @@ public abstract class VirtualPlatform extends RemotePlatform implements Closeabl
      *                        this {@link VirtualPlatform}
      * @param userName        the user name on the remote host
      * @param authentication  the {@link Authentication} for connecting to the host
-     * @param closeAction     the action to perform when this {@link VirtualPlatform}
-     *                        is closed
+     * @param options         the {@link Option}s for the {@link VirtualPlatform}
      */
-    public VirtualPlatform(String name,
-                           InetAddress address,
-                           int port,
-                           String userName,
+    public VirtualPlatform(String         name,
+                           InetAddress    address,
+                           int            port,
+                           String         userName,
                            Authentication authentication,
-                           CloseAction closeAction)
+                           Option...      options)
     {
-        super(name, address, port, userName, authentication);
-        this.closeAction = closeAction != null ? closeAction : CloseAction.Shutdown;
+        super(name, address, port, userName, authentication, options);
     }
 
 
     /**
-     * Close this VirtualPlatform by performing the
-     * action specified by the {@link #closeAction} field.
+     * Closes the {@link VirtualPlatform} by performing the
+     * any necessary {@link CloseAction} that has been specified
+     * as a {@link VirtualPlatform} {@link Option}.
      *
      * @throws IOException
      *
@@ -82,17 +80,4 @@ public abstract class VirtualPlatform extends RemotePlatform implements Closeabl
      */
     @Override
     public abstract void close() throws IOException;
-
-
-    /**
-     * Obtain the {@link CloseAction} to perform when this {@link VirtualPlatform}
-     * is closed.
-     *
-     * @return the {@link CloseAction} to perform when this {@link VirtualPlatform}
-     *         is closed
-     */
-    public CloseAction getCloseAction()
-    {
-        return closeAction;
-    }
 }

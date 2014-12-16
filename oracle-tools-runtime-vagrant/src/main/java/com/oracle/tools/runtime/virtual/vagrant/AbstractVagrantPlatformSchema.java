@@ -25,6 +25,8 @@
 
 package com.oracle.tools.runtime.virtual.vagrant;
 
+import com.oracle.tools.Option;
+
 import com.oracle.tools.runtime.virtual.CloseAction;
 import com.oracle.tools.runtime.virtual.VirtualPlatformSchema;
 
@@ -45,6 +47,7 @@ public abstract class AbstractVagrantPlatformSchema<S extends AbstractVagrantPla
 {
     /** The Vagrant working directory; the directory containing the vagrantFile */
     private final File workingDirectory;
+
 
     /**
      * Construct a new AbstractVagrantPlatformSchema.
@@ -73,6 +76,7 @@ public abstract class AbstractVagrantPlatformSchema<S extends AbstractVagrantPla
     protected File ensureWorkingDirectory(String name)
     {
         File dir = new File(workingDirectory, name);
+
         if (!dir.exists())
         {
             if (!dir.mkdirs())
@@ -117,25 +121,25 @@ public abstract class AbstractVagrantPlatformSchema<S extends AbstractVagrantPla
      * @param name         the name to assign to the {@link VagrantPlatform}
      * @param vagrantFile  the {@link java.io.File} to write the Vagrant configuration to
      */
-    protected abstract VagrantPlatform realize(String name, File vagrantFile) throws IOException;
+    protected abstract VagrantPlatform realize(String name,
+                                               File   vagrantFile) throws IOException;
 
 
     /**
      * Instantiate a new {@link VagrantPlatform} instance.
      *
      * @param name            the name for the {@link VagrantPlatform}
-     * @param closeAction     the close action for the {@link VagrantPlatform}
      * @param workingDir      the working directory for the {@link VagrantPlatform}
      * @param publicHostName  the public hostname for the {@link VagrantPlatform}
+     * @param options         the {@link Option}s for the {@link VagrantPlatform}
      *
      * @return a new {@link VagrantPlatform}
      */
-    protected VagrantPlatform instantiatePlatform(String name, CloseAction closeAction,
-                                                  File workingDir, String publicHostName)
+    protected VagrantPlatform instantiatePlatform(String    name,
+                                                  File      workingDir,
+                                                  String    publicHostName,
+                                                  Option... options)
     {
-        return new VagrantPlatform(name,
-                                   closeAction,
-                                   workingDir,
-                                   publicHostName);
+        return new VagrantPlatform(name, workingDir, publicHostName, options);
     }
 }

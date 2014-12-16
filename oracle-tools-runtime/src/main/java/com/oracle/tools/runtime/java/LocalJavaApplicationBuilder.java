@@ -112,14 +112,22 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication> extends Abst
                                                                    Platform           platform,
                                                                    Option...          applicationOptions)
     {
-        // obtain the platform specific options from the schema
-        Options options = applicationSchema.getPlatformSpecificOptions(platform);
+        // TODO: this should be a safe cast but we should also check to make sure
+        JavaApplicationSchema<T> schema = (JavaApplicationSchema) applicationSchema;
+
+        // ---- establish the Options for the Application -----
+
+        // add the platform options
+        Options options = new Options(platform == null ? null : platform.getOptions().asArray());
+
+        // add the schema options
+        options.addAll(applicationSchema.getOptions().asArray());
+
+        // add the schema options (based on the platform)
+        options.addAll(applicationSchema.getPlatformSpecificOptions(platform).asArray());
 
         // add the custom application options
         options.addAll(applicationOptions);
-
-        // TODO: this should be a safe cast but we should also check to make sure
-        JavaApplicationSchema<T> schema = (JavaApplicationSchema) applicationSchema;
 
         // ---- establish the underlying ProcessBuilder -----
 
@@ -236,12 +244,22 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication> extends Abst
 
         // add Oracle Tools specific System Properties
         Predicate<InetAddress> preferred = schema.isIPv4Preferred() ? allOf(NetworkHelper.IPv4_ADDRESS,
-                NetworkHelper
-                        .NON_LOOPBACK_ADDRESS) : NetworkHelper
-                .DEFAULT_ADDRESS;
+                                                                            NetworkHelper
+                                                                                .NON_LOOPBACK_ADDRESS) : NetworkHelper
+                                                                                    .DEFAULT_ADDRESS;
 
-        processBuilder.command().add("-D" + Settings.PARENT_ADDRESS + "="
-                + server.getInetAddress(preferred).getHostAddress());
+        InetAddress inetAddress = server.getInetAddress(preferred);
+
+        if (inetAddress == null)
+        {
+            preferred = schema.isIPv4Preferred()
+                        ? allOf(NetworkHelper.IPv4_ADDRESS, NetworkHelper.LOOPBACK_ADDRESS)
+                        : allOf(NetworkHelper.DEFAULT_ADDRESS, NetworkHelper.LOOPBACK_ADDRESS);
+
+            inetAddress = server.getInetAddress(preferred);
+        }
+
+        processBuilder.command().add("-D" + Settings.PARENT_ADDRESS + "=" + inetAddress.getHostAddress());
         processBuilder.command().add("-D" + Settings.PARENT_PORT + "=" + server.getPort());
 
         // add Orphanable configuration
