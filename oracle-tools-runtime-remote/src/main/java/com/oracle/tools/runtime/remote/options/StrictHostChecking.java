@@ -77,6 +77,37 @@ public class StrictHostChecking implements Option
     }
 
 
+    @Override
+    public boolean equals(Object other)
+    {
+        if (this == other)
+        {
+            return true;
+        }
+
+        if (!(other instanceof StrictHostChecking))
+        {
+            return false;
+        }
+
+        StrictHostChecking that = (StrictHostChecking) other;
+
+        if (enabled != that.enabled)
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+
+    @Override
+    public int hashCode()
+    {
+        return (enabled ? 1 : 0);
+    }
+
+
     /**
      * Constructs a {@link StrictHostChecking} being enabled.
      *

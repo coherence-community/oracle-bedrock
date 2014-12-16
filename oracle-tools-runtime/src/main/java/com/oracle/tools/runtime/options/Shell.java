@@ -100,6 +100,37 @@ public class Shell implements Option
     }
 
 
+    @Override
+    public boolean equals(Object other)
+    {
+        if (this == other)
+        {
+            return true;
+        }
+
+        if (!(other instanceof Shell))
+        {
+            return false;
+        }
+
+        Shell shell = (Shell) other;
+
+        if (type != shell.type)
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+
+    @Override
+    public int hashCode()
+    {
+        return type.hashCode();
+    }
+
+
     /**
      * Creates a {@link Shell} of the specified {@link Type}.
      *

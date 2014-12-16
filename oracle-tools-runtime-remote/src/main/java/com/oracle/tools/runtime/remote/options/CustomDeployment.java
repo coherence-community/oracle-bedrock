@@ -74,6 +74,37 @@ public class CustomDeployment implements Deployment
     }
 
 
+    @Override
+    public boolean equals(Object other)
+    {
+        if (this == other)
+        {
+            return true;
+        }
+
+        if (!(other instanceof CustomDeployment))
+        {
+            return false;
+        }
+
+        CustomDeployment that = (CustomDeployment) other;
+
+        if (!artifactsToDeploy.equals(that.artifactsToDeploy))
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+
+    @Override
+    public int hashCode()
+    {
+        return artifactsToDeploy.hashCode();
+    }
+
+
     /**
      * Creates an empty {@link CustomDeployment}.
      *

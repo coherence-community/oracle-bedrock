@@ -108,6 +108,46 @@ public class Timeout implements Option
     }
 
 
+    @Override
+    public boolean equals(Object other)
+    {
+        if (this == other)
+        {
+            return true;
+        }
+
+        if (!(other instanceof Timeout))
+        {
+            return false;
+        }
+
+        Timeout timeout = (Timeout) other;
+
+        if (duration != timeout.duration)
+        {
+            return false;
+        }
+
+        if (units != timeout.units)
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+
+    @Override
+    public int hashCode()
+    {
+        int result = (int) (duration ^ (duration >>> 32));
+
+        result = 31 * result + units.hashCode();
+
+        return result;
+    }
+
+
     /**
      * Obtains the {@link Timeout} by auto-detecting it from the configuration
      * and environment.
