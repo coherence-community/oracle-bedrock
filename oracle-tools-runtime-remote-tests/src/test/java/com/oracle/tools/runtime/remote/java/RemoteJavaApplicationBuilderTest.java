@@ -95,10 +95,7 @@ public class RemoteJavaApplicationBuilderTest extends AbstractRemoteApplicationB
 
         RemotePlatform platform = getRemotePlatform();
 
-        try (SimpleJavaApplication application = platform.realize("Java",
-                                                                  schema,
-                                                                  new SystemApplicationConsole(),
-                                                                  StrictHostChecking.disabled()))
+        try (SimpleJavaApplication application = platform.realize("Java", schema, new SystemApplicationConsole()))
         {
             assertThat(application.waitFor(), is(0));
 
@@ -125,10 +122,7 @@ public class RemoteJavaApplicationBuilderTest extends AbstractRemoteApplicationB
 
         RemotePlatform platform = getRemotePlatform();
 
-        try (SimpleJavaApplication application = platform.realize("Java",
-                                                                  schema,
-                                                                  new SystemApplicationConsole(),
-                                                                  StrictHostChecking.disabled()))
+        try (SimpleJavaApplication application = platform.realize("Java", schema, new SystemApplicationConsole()))
         {
             assertThat(application.waitFor(), is(0));
 
@@ -155,11 +149,7 @@ public class RemoteJavaApplicationBuilderTest extends AbstractRemoteApplicationB
 
         RemotePlatform              platform = getRemotePlatform();
 
-        try (SimpleJavaApplication application = platform.realize("Java",
-                                                                  schema,
-                                                                  console,
-                                                                  remoteDebugging,
-                                                                  StrictHostChecking.disabled()))
+        try (SimpleJavaApplication application = platform.realize("Java", schema, console, remoteDebugging))
         {
             Eventually.assertThat(invoking(console).getCapturedOutputLines(), hasItem(startsWith("Now sleeping")));
 
@@ -200,11 +190,7 @@ public class RemoteJavaApplicationBuilderTest extends AbstractRemoteApplicationB
         RemotePlatform              platform        = getRemotePlatform();
         RemoteDebugging             remoteDebugging = RemoteDebugging.enabled().startSuspended(true);
 
-        try (SimpleJavaApplication application = platform.realize("Java",
-                                                                  schema,
-                                                                  console,
-                                                                  remoteDebugging,
-                                                                  StrictHostChecking.disabled()))
+        try (SimpleJavaApplication application = platform.realize("Java", schema, console, remoteDebugging))
         {
             assertCanConnectDebuggerToApplication(application);
 
@@ -262,11 +248,7 @@ public class RemoteJavaApplicationBuilderTest extends AbstractRemoteApplicationB
 
             RemotePlatform              platform = getRemotePlatform();
 
-            try (SimpleJavaApplication application = platform.realize("Java",
-                                                                      schema,
-                                                                      console,
-                                                                      remoteDebugging,
-                                                                      StrictHostChecking.disabled()))
+            try (SimpleJavaApplication application = platform.realize("Java", schema, console, remoteDebugging))
             {
                 Eventually.assertThat(invoking(console).getCapturedOutputLines(), hasItem(startsWith("Now sleeping")));
                 Eventually.assertThat("Application did not connect back to JDB",
@@ -318,11 +300,7 @@ public class RemoteJavaApplicationBuilderTest extends AbstractRemoteApplicationB
 
         RemotePlatform              platform        = getRemotePlatform();
 
-        try (SimpleJavaApplication application = platform.realize("Java",
-                                                                  schema,
-                                                                  console,
-                                                                  remoteDebugging,
-                                                                  StrictHostChecking.disabled()))
+        try (SimpleJavaApplication application = platform.realize("Java", schema, console, remoteDebugging))
         {
             Eventually.assertThat(invoking(console).getCapturedOutputLines(), hasItem(startsWith("Now sleeping")));
 
@@ -362,10 +340,7 @@ public class RemoteJavaApplicationBuilderTest extends AbstractRemoteApplicationB
 
         ApplicationConsole console  = new SystemApplicationConsole();
 
-        try (SimpleJavaApplication application = platform.realize("sleeping",
-                                                                  schema,
-                                                                  console,
-                                                                  StrictHostChecking.disabled()))
+        try (SimpleJavaApplication application = platform.realize("sleeping", schema, console))
         {
             application.close(RuntimeExit.withExitCode(42));
 
@@ -394,10 +369,7 @@ public class RemoteJavaApplicationBuilderTest extends AbstractRemoteApplicationB
 
         ApplicationConsole console  = new SystemApplicationConsole();
 
-        try (SimpleJavaApplication application = platform.realize("sleeping",
-                                                                  schema,
-                                                                  console,
-                                                                  StrictHostChecking.disabled()))
+        try (SimpleJavaApplication application = platform.realize("sleeping", schema, console))
         {
             application.close(RuntimeHalt.withExitCode(42));
 
@@ -440,6 +412,7 @@ public class RemoteJavaApplicationBuilderTest extends AbstractRemoteApplicationB
         return new RemotePlatform("Remote",
                                   InetAddress.getByName(getRemoteHostName()),
                                   getRemoteUserName(),
-                                  getRemoteAuthentication());
+                                  getRemoteAuthentication(),
+                                  StrictHostChecking.disabled());
     }
 }

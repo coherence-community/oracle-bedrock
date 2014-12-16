@@ -26,6 +26,7 @@
 package com.oracle.tools.runtime;
 
 import com.oracle.tools.Option;
+import com.oracle.tools.Options;
 
 import java.net.InetAddress;
 
@@ -44,15 +45,23 @@ public abstract class AbstractPlatform implements Platform
      */
     private String name;
 
+    /**
+     * The {@link Options} for the {@link Platform}.
+     */
+    private Options options;
+
 
     /**
      * Construct an {@link AbstractPlatform} with the specified name.
      *
-     * @param name  the name of this {@link Platform}
+     * @param name     the name of this {@link Platform}
+     * @param options  the {@link Option}s for the {@link Platform}
      */
-    public AbstractPlatform(String name)
+    public AbstractPlatform(String    name,
+                            Option... options)
     {
-        this.name = name;
+        this.name    = name;
+        this.options = new Options(options);
     }
 
 
@@ -60,6 +69,13 @@ public abstract class AbstractPlatform implements Platform
     public String getName()
     {
         return name;
+    }
+
+
+    @Override
+    public Options getOptions()
+    {
+        return options;
     }
 
 

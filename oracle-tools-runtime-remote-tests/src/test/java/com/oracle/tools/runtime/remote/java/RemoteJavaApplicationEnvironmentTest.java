@@ -26,25 +26,19 @@
 package com.oracle.tools.runtime.remote.java;
 
 import com.oracle.tools.Options;
-
 import com.oracle.tools.runtime.LocalPlatform;
-
 import com.oracle.tools.runtime.java.SimpleJavaApplicationSchema;
 import com.oracle.tools.runtime.java.options.RemoteDebugging;
-
 import com.oracle.tools.runtime.remote.RemotePlatform;
 import com.oracle.tools.runtime.remote.java.applications.SleepingApplication;
-
 import org.junit.Test;
+
+import java.net.InetAddress;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.not;
-
 import static org.junit.Assert.assertThat;
-
 import static org.mockito.Mockito.mock;
-
-import java.net.InetAddress;
 
 /**
  * @author jk 2014.07.04

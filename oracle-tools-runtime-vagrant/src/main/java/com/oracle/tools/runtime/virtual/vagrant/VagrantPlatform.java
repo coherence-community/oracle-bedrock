@@ -88,17 +88,17 @@ public class VagrantPlatform extends VirtualPlatform
     /**
      * Construct a new {@link VagrantPlatform}.
      *
-     * @param name           the name of this {@link VagrantPlatform}
-     * @param closeAction    the action to perform when this {@link VagrantPlatform}
-     *                       is closed
-     * @param vagrantFile    the location of this {@link VagrantPlatform}'s VagrantFile
+     * @param name            the name of this {@link VagrantPlatform}
+     * @param vagrantFile     the location of this {@link VagrantPlatform}'s VagrantFile
+     * @param publicHostName  the host name of the public interface of the {@link VagrantPlatform}
+     * @param options         the {@link Option}s for the {@link VirtualPlatform}
      */
-    public VagrantPlatform(String      name,
-                           CloseAction closeAction,
-                           File        vagrantFile,
-                           String      publicHostName)
+    public VagrantPlatform(String    name,
+                           File      vagrantFile,
+                           String    publicHostName,
+                           Option... options)
     {
-        super(name, null, 0, null, null, closeAction);
+        super(name, null, 0, null, null, options);
 
         this.vagrantFile        = vagrantFile;
         this.applicationBuilder = new SimpleApplicationBuilder();
@@ -151,20 +151,12 @@ public class VagrantPlatform extends VirtualPlatform
     }
 
 
-    /**
-     * Close this VirtualPlatform by performing the
-     * action specified by the {@link #closeAction} field.
-     *
-     * @throws IOException
-     *
-     * @see java.io.Closeable
-     */
     @Override
     public void close() throws IOException
     {
         SimpleApplicationSchema schema = instantiateSchema();
 
-        CloseAction             action = getCloseAction();
+        CloseAction             action = getOptions().get(CloseAction.class, CloseAction.Shutdown);
 
         switch (action)
         {
