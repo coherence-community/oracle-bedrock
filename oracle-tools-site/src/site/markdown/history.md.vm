@@ -37,6 +37,9 @@ reverse chronological order.
     MOCKITO Dependency:    Version 1.9.0 -> 1.9.5
     OBJENESIS Dependency:  Version 1.2 -> 2.1
 
+*   [ORACLETOOLS-213](https://java.net/jira/browse/ORACLETOOLS-213): Introduced
+    Object.equals() and Object.hashCode() methods for all Option implementations.
+
 <h4>oracle-tools-core</h4>
 
 *   [ORACLETOOLS-87](https://java.net/jira/browse/ORACLETOOLS-87): Increased

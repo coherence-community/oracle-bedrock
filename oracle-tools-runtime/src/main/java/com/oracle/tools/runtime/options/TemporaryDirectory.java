@@ -89,6 +89,37 @@ public class TemporaryDirectory implements Option
     }
 
 
+    @Override
+    public boolean equals(Object other)
+    {
+        if (this == other)
+        {
+            return true;
+        }
+
+        if (!(other instanceof TemporaryDirectory))
+        {
+            return false;
+        }
+
+        TemporaryDirectory that = (TemporaryDirectory) other;
+
+        if (!path.equals(that.path))
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+
+    @Override
+    public int hashCode()
+    {
+        return path.hashCode();
+    }
+
+
     /**
      * Constructs a {@link TemporaryDirectory} given a specified string.
      *

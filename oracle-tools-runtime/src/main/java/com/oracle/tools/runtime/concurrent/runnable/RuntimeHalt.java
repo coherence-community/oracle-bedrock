@@ -96,6 +96,37 @@ public class RuntimeHalt implements RemoteRunnable, ApplicationClosingBehavior<J
     }
 
 
+    @Override
+    public boolean equals(Object other)
+    {
+        if (this == other)
+        {
+            return true;
+        }
+
+        if (!(other instanceof RuntimeHalt))
+        {
+            return false;
+        }
+
+        RuntimeHalt that = (RuntimeHalt) other;
+
+        if (exitCode != that.exitCode)
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+
+    @Override
+    public int hashCode()
+    {
+        return exitCode;
+    }
+
+
     /**
      * Constructs a {@link RuntimeHalt} with a specified exit code.
      *

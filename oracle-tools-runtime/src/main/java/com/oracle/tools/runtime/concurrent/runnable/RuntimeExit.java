@@ -96,6 +96,37 @@ public class RuntimeExit implements RemoteRunnable, ApplicationClosingBehavior<J
     }
 
 
+    @Override
+    public boolean equals(Object other)
+    {
+        if (this == other)
+        {
+            return true;
+        }
+
+        if (!(other instanceof RuntimeExit))
+        {
+            return false;
+        }
+
+        RuntimeExit that = (RuntimeExit) other;
+
+        if (exitCode != that.exitCode)
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+
+    @Override
+    public int hashCode()
+    {
+        return exitCode;
+    }
+
+
     /**
      * Constructs a {@link RuntimeExit} with a specified exit code.
      *

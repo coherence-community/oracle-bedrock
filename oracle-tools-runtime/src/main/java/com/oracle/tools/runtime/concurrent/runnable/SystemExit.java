@@ -95,6 +95,37 @@ public class SystemExit implements RemoteRunnable, ApplicationClosingBehavior<Ja
     }
 
 
+    @Override
+    public boolean equals(Object other)
+    {
+        if (this == other)
+        {
+            return true;
+        }
+
+        if (!(other instanceof SystemExit))
+        {
+            return false;
+        }
+
+        SystemExit that = (SystemExit) other;
+
+        if (exitCode != that.exitCode)
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+
+    @Override
+    public int hashCode()
+    {
+        return exitCode;
+    }
+
+
     /**
      * Constructs a {@link SystemExit} with a specified exit code.
      *

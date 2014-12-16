@@ -121,6 +121,52 @@ public class PlatformSeparators implements Option
     }
 
 
+    @Override
+    public boolean equals(Object other)
+    {
+        if (this == other)
+        {
+            return true;
+        }
+
+        if (!(other instanceof PlatformSeparators))
+        {
+            return false;
+        }
+
+        PlatformSeparators that = (PlatformSeparators) other;
+
+        if (!fileSeparator.equals(that.fileSeparator))
+        {
+            return false;
+        }
+
+        if (!lineSeparator.equals(that.lineSeparator))
+        {
+            return false;
+        }
+
+        if (!pathSeparator.equals(that.pathSeparator))
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+
+    @Override
+    public int hashCode()
+    {
+        int result = fileSeparator.hashCode();
+
+        result = 31 * result + pathSeparator.hashCode();
+        result = 31 * result + lineSeparator.hashCode();
+
+        return result;
+    }
+
+
     /**
      * Auto-detect the {@link PlatformSeparators} based on the platform the calling
      * thread is executing in.

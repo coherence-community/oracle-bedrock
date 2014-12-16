@@ -229,6 +229,58 @@ public class RemoteDebugging implements Option
     }
 
 
+    @Override
+    public boolean equals(Object other)
+    {
+        if (this == other)
+        {
+            return true;
+        }
+
+        if (!(other instanceof RemoteDebugging))
+        {
+            return false;
+        }
+
+        RemoteDebugging that = (RemoteDebugging) other;
+
+        if (enabled != that.enabled)
+        {
+            return false;
+        }
+
+        if (remoteDebuggerPort != that.remoteDebuggerPort)
+        {
+            return false;
+        }
+
+        if (startSuspended != that.startSuspended)
+        {
+            return false;
+        }
+
+        if (behavior != that.behavior)
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+
+    @Override
+    public int hashCode()
+    {
+        int result = (enabled ? 1 : 0);
+
+        result = 31 * result + (startSuspended ? 1 : 0);
+        result = 31 * result + behavior.hashCode();
+        result = 31 * result + remoteDebuggerPort;
+
+        return result;
+    }
+
+
     /**
      * Obtains a default {@link RemoteDebugging} {@link Option}, with debugging enabled.
      *

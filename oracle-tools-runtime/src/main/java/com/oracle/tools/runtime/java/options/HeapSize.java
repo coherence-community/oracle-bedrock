@@ -231,4 +231,56 @@ public class HeapSize implements ComposableOption<HeapSize>, JvmOption
 
         return result;
     }
+
+
+    @Override
+    public boolean equals(Object other)
+    {
+        if (this == other)
+        {
+            return true;
+        }
+
+        if (!(other instanceof HeapSize))
+        {
+            return false;
+        }
+
+        HeapSize heapSize = (HeapSize) other;
+
+        if (initial != heapSize.initial)
+        {
+            return false;
+        }
+
+        if (maximum != heapSize.maximum)
+        {
+            return false;
+        }
+
+        if (initialUnits != heapSize.initialUnits)
+        {
+            return false;
+        }
+
+        if (maximumUnits != heapSize.maximumUnits)
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+
+    @Override
+    public int hashCode()
+    {
+        int result = initial;
+
+        result = 31 * result + (initialUnits != null ? initialUnits.hashCode() : 0);
+        result = 31 * result + maximum;
+        result = 31 * result + (maximumUnits != null ? maximumUnits.hashCode() : 0);
+
+        return result;
+    }
 }

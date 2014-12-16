@@ -74,6 +74,37 @@ public class JavaHome implements Option
     }
 
 
+    @Override
+    public boolean equals(Object other)
+    {
+        if (this == other)
+        {
+            return true;
+        }
+
+        if (!(other instanceof JavaHome))
+        {
+            return false;
+        }
+
+        JavaHome javaHome1 = (JavaHome) other;
+
+        if (!javaHome.equals(javaHome1.javaHome))
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+
+    @Override
+    public int hashCode()
+    {
+        return javaHome.hashCode();
+    }
+
+
     /**
      * Constructs a {@link JavaHome} given a specified string.
      *
