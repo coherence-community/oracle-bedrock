@@ -46,8 +46,7 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.Reader;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.LinkedHashSet;
 import java.util.Properties;
 
 /**
@@ -91,7 +90,7 @@ public abstract class AbstractApplication<A extends AbstractApplication<A, P, R>
      * The {@link ApplicationListener}s that must be notified based
      * on lifecycle events occuring on the {@link Application}.
      */
-    private List<ApplicationListener<? super A>> listeners;
+    private LinkedHashSet<ApplicationListener<? super A>> listeners;
 
     /**
      * The default {@link Timeout} to use for the {@link Application}.
@@ -114,7 +113,7 @@ public abstract class AbstractApplication<A extends AbstractApplication<A, P, R>
         this.defaultTimeout = runtime.getOptions().get(Timeout.class, Timeout.autoDetect());
 
         // make a copy of the listeners
-        this.listeners = new ArrayList<ApplicationListener<? super A>>();
+        this.listeners = new LinkedHashSet<>();
 
         if (listeners != null)
         {
@@ -362,6 +361,20 @@ public abstract class AbstractApplication<A extends AbstractApplication<A, P, R>
     public Iterable<ApplicationListener<? super A>> getApplicationListeners()
     {
         return listeners;
+    }
+
+
+    @Override
+    public void addApplicationListener(ApplicationListener listener)
+    {
+        listeners.add(listener);
+    }
+
+
+    @Override
+    public void removeApplicationListener(ApplicationListener listener)
+    {
+        listeners.remove(listener);
     }
 
 

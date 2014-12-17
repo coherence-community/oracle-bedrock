@@ -467,6 +467,9 @@ reverse chronological order.
 *   [ORACLETOOLS-214](https://java.net/jira/browse/ORACLETOOLS-214): Introduced
     Option support into Platform implementations.
 
+*   [ORACLETOOLS-215](https://java.net/jira/browse/ORACLETOOLS-215): Removed
+    the requirement for the Assembly interface to extend Option and ApplicationListener.
+
 <h4>oracle-tools-runtime-remote</h4>
 
 *   [ORACLETOOLS-91](https://java.net/jira/browse/ORACLETOOLS-91): Introduced

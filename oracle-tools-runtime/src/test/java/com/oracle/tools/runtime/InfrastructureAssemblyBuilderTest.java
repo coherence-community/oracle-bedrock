@@ -52,8 +52,6 @@ import static org.mockito.Mockito.when;
 
 import java.util.Properties;
 
-import java.util.concurrent.TimeUnit;
-
 /**
  * Tests for the {@link InfrastructureAssemblyBuilder} class.
  * <p>
@@ -402,6 +400,18 @@ public class InfrastructureAssemblyBuilderTest
         public Timeout getDefaultTimeout()
         {
             return Timeout.autoDetect();
+        }
+
+
+        @Override
+        public void addApplicationListener(ApplicationListener listener)
+        {
+        }
+
+
+        @Override
+        public void removeApplicationListener(ApplicationListener listener)
+        {
         }
     }
 }

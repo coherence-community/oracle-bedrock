@@ -43,7 +43,7 @@ import java.io.Closeable;
  *
  * @param <A>  the type of the {@link Application} in the {@link Assembly}
  */
-public interface Assembly<A extends Application> extends Iterable<A>, Closeable, Option, ApplicationListener<A>
+public interface Assembly<A extends Application> extends Iterable<A>, Closeable
 {
     /**
      * Closes the {@link Assembly} including all of the {@link Application}s
