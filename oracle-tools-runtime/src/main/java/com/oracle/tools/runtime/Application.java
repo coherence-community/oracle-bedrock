@@ -164,4 +164,20 @@ public interface Application extends Closeable
      * @return the {@link Options}
      */
     public Options getOptions();
+
+
+    /**
+     * Adds an {@link ApplicationListener} to the {@link Application}.
+     *
+     * @param listener  the {@link ApplicationListener}
+     */
+    public void addApplicationListener(ApplicationListener listener);
+
+
+    /**
+     * Removes an {@link ApplicationListener} from the {@link Application}.
+     *
+     * @param listener  the {@link ApplicationListener}
+     */
+    public void removeApplicationListener(ApplicationListener listener);
 }
