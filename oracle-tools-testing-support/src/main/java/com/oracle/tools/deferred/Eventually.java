@@ -29,6 +29,8 @@ import com.oracle.tools.runtime.concurrent.RemoteCallable;
 
 import com.oracle.tools.runtime.java.JavaApplication;
 
+import com.oracle.tools.util.Duration;
+
 import org.hamcrest.Matcher;
 
 import static com.oracle.tools.deferred.DeferredHelper.ensure;
@@ -310,10 +312,13 @@ public class Eventually
                                       long               totalRetryDuration,
                                       TimeUnit           totalRetryDurationUnits) throws AssertionError
     {
-        TimeoutConstraint constraint = new SimpleTimeoutConstraint(0,
-                                                                   totalRetryDurationUnits.toMillis(totalRetryDuration),
+        TimeoutConstraint constraint = new SimpleTimeoutConstraint(Duration.ZERO,
                                                                    DeferredHelper
-                                                                       .getDefaultEnsuredRetryDurationsMSIterable());
+                                                                       .getDefaultEnsuredMaximumPollingDuration(),
+                                                                   Duration.of(totalRetryDuration,
+                                                                               totalRetryDurationUnits),
+                                                                   DeferredHelper
+                                                                       .getDefaultEnsuredRetryDurationsIterable());
 
         assertThat(null, eventually(value), matcher, constraint);
     }
@@ -344,10 +349,13 @@ public class Eventually
                                       long               totalRetryDuration,
                                       TimeUnit           totalRetryDurationUnits) throws AssertionError
     {
-        TimeoutConstraint constraint = new SimpleTimeoutConstraint(0,
-                                                                   totalRetryDurationUnits.toMillis(totalRetryDuration),
+        TimeoutConstraint constraint = new SimpleTimeoutConstraint(Duration.ZERO,
                                                                    DeferredHelper
-                                                                       .getDefaultEnsuredRetryDurationsMSIterable());
+                                                                       .getDefaultEnsuredMaximumPollingDuration(),
+                                                                   Duration.of(totalRetryDuration,
+                                                                               totalRetryDurationUnits),
+                                                                   DeferredHelper
+                                                                       .getDefaultEnsuredRetryDurationsIterable());
 
         assertThat(message, eventually(value), matcher, constraint);
     }
@@ -375,10 +383,13 @@ public class Eventually
                                       long               totalRetryDuration,
                                       TimeUnit           totalRetryDurationUnits) throws AssertionError
     {
-        TimeoutConstraint constraint = new SimpleTimeoutConstraint(0,
-                                                                   totalRetryDurationUnits.toMillis(totalRetryDuration),
+        TimeoutConstraint constraint = new SimpleTimeoutConstraint(Duration.ZERO,
                                                                    DeferredHelper
-                                                                       .getDefaultEnsuredRetryDurationsMSIterable());
+                                                                       .getDefaultEnsuredMaximumPollingDuration(),
+                                                                   Duration.of(totalRetryDuration,
+                                                                               totalRetryDurationUnits),
+                                                                   DeferredHelper
+                                                                       .getDefaultEnsuredRetryDurationsIterable());
 
         assertThat(null, deferred, matcher, constraint);
     }
@@ -408,10 +419,13 @@ public class Eventually
                                       long               totalRetryDuration,
                                       TimeUnit           totalRetryDurationUnits) throws AssertionError
     {
-        TimeoutConstraint constraint = new SimpleTimeoutConstraint(0,
-                                                                   totalRetryDurationUnits.toMillis(totalRetryDuration),
+        TimeoutConstraint constraint = new SimpleTimeoutConstraint(Duration.ZERO,
                                                                    DeferredHelper
-                                                                       .getDefaultEnsuredRetryDurationsMSIterable());
+                                                                       .getDefaultEnsuredMaximumPollingDuration(),
+                                                                   Duration.of(totalRetryDuration,
+                                                                               totalRetryDurationUnits),
+                                                                   DeferredHelper
+                                                                       .getDefaultEnsuredRetryDurationsIterable());
 
         assertThat(message, deferred, matcher, constraint);
     }
@@ -440,10 +454,13 @@ public class Eventually
                                       long               totalRetryDuration,
                                       TimeUnit           totalRetryDurationUnits) throws AssertionError
     {
-        TimeoutConstraint constraint = new SimpleTimeoutConstraint(0,
-                                                                   totalRetryDurationUnits.toMillis(totalRetryDuration),
+        TimeoutConstraint constraint = new SimpleTimeoutConstraint(Duration.ZERO,
                                                                    DeferredHelper
-                                                                       .getDefaultEnsuredRetryDurationsMSIterable());
+                                                                       .getDefaultEnsuredMaximumPollingDuration(),
+                                                                   Duration.of(totalRetryDuration,
+                                                                               totalRetryDurationUnits),
+                                                                   DeferredHelper
+                                                                       .getDefaultEnsuredRetryDurationsIterable());
 
         assertThat(valueOf(new DeferredRemoteExecution<T>(application, callable)), matcher, constraint);
     }

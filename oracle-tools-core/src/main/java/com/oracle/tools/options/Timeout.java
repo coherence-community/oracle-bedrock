@@ -27,7 +27,7 @@ package com.oracle.tools.options;
 
 import com.oracle.tools.Option;
 
-import java.sql.Time;
+import com.oracle.tools.util.Duration;
 
 import java.util.concurrent.TimeUnit;
 
@@ -42,54 +42,35 @@ import java.util.concurrent.TimeUnit;
 public class Timeout implements Option
 {
     /**
-     * The duration of the {@link Timeout} in {@link #units}.
+     * The {@link Duration} of the {@link Timeout}.
      */
-    private long duration;
-
-    /**
-     * The {@link TimeUnit} of the {@link Timeout}.
-     */
-    private TimeUnit units;
+    private Duration duration;
 
 
     /**
      * Privately constructs a {@link Timeout} {@link Option}.
      *
-     * @param duration  the duration for the {@link Timeout}
-     * @param units     the {@link TimeUnit}s for the duration of the {@link Timeout}
+     * @param duration  the {@link Duration} for the {@link Timeout}
      */
-    private Timeout(long     duration,
-                    TimeUnit units)
+    private Timeout(Duration duration)
     {
         this.duration = duration;
-        this.units    = units;
     }
 
 
     /**
-     * Obtains the duration of the {@link Timeout}.
+     * Obtains the {@link Duration} of the {@link Timeout}.
      *
-     * @return  the duration of the {@link Timeout}
+     * @return  the {@link Duration} of the {@link Timeout}
      */
-    public long getDuration()
+    public Duration getDuration()
     {
         return duration;
     }
 
 
     /**
-     * Obtains the units of the duration for the {@link Timeout}.
-     *
-     * @return  the {@link TimeUnit}s for the {@link Timeout}
-     */
-    public TimeUnit getUnits()
-    {
-        return units;
-    }
-
-
-    /**
-     * Obtains the {@link Timeout} duration in the specified {@link TimeUnit}.
+     * Obtains the {@link Timeout} {@link Duration} in the specified {@link TimeUnit}.
      *
      * @param units  the desired {@link TimeUnit}
      *
@@ -97,14 +78,7 @@ public class Timeout implements Option
      */
     public long to(TimeUnit units)
     {
-        return units.convert(getDuration(), getUnits());
-    }
-
-
-    @Override
-    public String toString()
-    {
-        return "Timeout{" + getDuration() + " " + getUnits().name() + "}";
+        return duration.to(units);
     }
 
 
@@ -123,12 +97,7 @@ public class Timeout implements Option
 
         Timeout timeout = (Timeout) other;
 
-        if (duration != timeout.duration)
-        {
-            return false;
-        }
-
-        if (units != timeout.units)
+        if (!duration.equals(timeout.duration))
         {
             return false;
         }
@@ -140,11 +109,14 @@ public class Timeout implements Option
     @Override
     public int hashCode()
     {
-        int result = (int) (duration ^ (duration >>> 32));
+        return duration.hashCode();
+    }
 
-        result = 31 * result + units.hashCode();
 
-        return result;
+    @Override
+    public String toString()
+    {
+        return "Timeout{" + getDuration() + "}";
     }
 
 
@@ -156,7 +128,7 @@ public class Timeout implements Option
      */
     public static Timeout autoDetect()
     {
-        return new Timeout(1, TimeUnit.MINUTES);
+        return new Timeout(Duration.of(1, TimeUnit.MINUTES));
     }
 
 
@@ -171,6 +143,21 @@ public class Timeout implements Option
     public static Timeout after(long     duration,
                                 TimeUnit units)
     {
-        return new Timeout(duration, units);
+        return new Timeout(Duration.of(duration, units));
+    }
+
+
+    /**
+     * Obtains a {@link Timeout} for a specified time represented as a {@link String}
+     * formatted as (0-9)+['ms'|'s'|'m'|'h'].  If no units are specified, the unit
+     * of 'ms' is assumed.
+     *
+     * @param duration  the timeout string
+     *
+     * @return  a {@link Timeout}
+     */
+    public static Timeout after(String duration)
+    {
+        return new Timeout(Duration.of(duration));
     }
 }

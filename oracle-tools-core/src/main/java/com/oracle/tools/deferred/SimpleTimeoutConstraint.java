@@ -25,32 +25,44 @@
 
 package com.oracle.tools.deferred;
 
+import com.oracle.tools.util.Duration;
+
 import java.util.Iterator;
 
 import java.util.concurrent.TimeUnit;
 
 /**
- * Created by brianoliver on 7/27/14.
+ * A simple implementation of a {@link TimeoutConstraint}.
+ * <p>
+ * Copyright (c) 2014. All Rights Reserved. Oracle Corporation.<br>
+ * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
+ *
+ * @author Brian Oliver
  */
 public class SimpleTimeoutConstraint implements TimeoutConstraint
 {
     /**
-     * The initial number of milliseconds to wait before attempting
+     * The initial {@link Duration} to wait before attempting
      * to acquire an object reference.
      */
-    private long initialDelayMilliseconds;
+    private Duration initialDelay;
 
     /**
-     * The maximum number of milliseconds to wait before giving up on
+     * The maximum {@link Duration} to wait between attempts
+     * to acquire an object reference.
+     */
+    private Duration maximumPollingDelay;
+
+    /**
+     * The maximum {@link Duration} to wait before giving up on
      * acquiring an object reference.
      */
-    private long maximumRetryMilliseconds;
+    private Duration maximumRetryDuration;
 
     /**
-     * An {@link Iterable} providing an {@link Iterator} of retry durations
-     * in milliseconds.
+     * An {@link Iterable} providing an {@link Iterator} of retry {@link Duration}s.
      */
-    private Iterable<Long> retryDelayMillisecondsIterable;
+    private Iterable<Duration> retryDurations;
 
 
     /**
@@ -59,49 +71,61 @@ public class SimpleTimeoutConstraint implements TimeoutConstraint
      */
     public SimpleTimeoutConstraint()
     {
-        this.initialDelayMilliseconds       = 0;
-        this.maximumRetryMilliseconds       = DeferredHelper.getDefaultEnsuredTimeoutMS();
-        this.retryDelayMillisecondsIterable = DeferredHelper.getDefaultEnsuredRetryDurationsMSIterable();
+        this.initialDelay         = Duration.of(0, TimeUnit.MILLISECONDS);
+        this.maximumPollingDelay  = DeferredHelper.getDefaultEnsuredMaximumPollingDuration();
+        this.maximumRetryDuration = DeferredHelper.getDefaultEnsuredMaximumRetryDuration();
+        this.retryDurations       = DeferredHelper.getDefaultEnsuredRetryDurationsIterable();
     }
 
 
     /**
      * Constructs a {@link SimpleTimeoutConstraint}.
      *
-     * @param initialDelayMilliseconds        the initial number of milliseconds to wait
-     *                                        before attempting to acquire an object reference
-     * @param maximumRetryMilliseconds        the maximum number of milliseconds to wait
-     *                                        for an object reference to become available
-     * @param retryDelayMillisecondsIterable  an {@link Iterable} of retry milliseconds
+     * @param initialDelay          the initial {@link Duration} to wait
+     *                              before attempting to acquire an object reference
+     * @param maximumPollingDelay   the maximum {@link Duration} to wait
+     *                              between attempts to acquire an object reference
+     * @param maximumRetryDuration  the maximum {@link Duration} to wait
+     *                              for an object reference to become available
+     * @param retryDurations        an {@link Iterable} of retry {@link Duration}s
      */
-    public SimpleTimeoutConstraint(long           initialDelayMilliseconds,
-                                   long           maximumRetryMilliseconds,
-                                   Iterable<Long> retryDelayMillisecondsIterable)
+    public SimpleTimeoutConstraint(Duration           initialDelay,
+                                   Duration           maximumPollingDelay,
+                                   Duration           maximumRetryDuration,
+                                   Iterable<Duration> retryDurations)
     {
-        this.initialDelayMilliseconds       = initialDelayMilliseconds;
-        this.maximumRetryMilliseconds       = maximumRetryMilliseconds;
-        this.retryDelayMillisecondsIterable = retryDelayMillisecondsIterable;
+        this.initialDelay         = initialDelay;
+        this.maximumPollingDelay  = maximumPollingDelay;
+        this.maximumRetryDuration = maximumRetryDuration;
+        this.retryDurations       = retryDurations;
     }
 
 
     @Override
-    public long getInitialDelayMilliseconds()
+    public Duration getInitialDelay()
     {
-        return initialDelayMilliseconds;
+        return initialDelay;
     }
 
 
     @Override
-    public long getMaximumRetryMilliseconds()
+    public Duration getMaximumRetryDuration()
     {
-        return maximumRetryMilliseconds;
+        return maximumRetryDuration;
     }
 
 
     @Override
-    public Iterable<Long> getRetryDelayMillisecondsIterable()
+    public Duration getMaximumPollingDelay()
     {
-        return retryDelayMillisecondsIterable;
+        return maximumPollingDelay;
+    }
+
+
+    @Override
+    public Iterable<Duration> getRetryDelayDurations()
+    {
+        return retryDurations;
     }
 
 
@@ -116,7 +140,7 @@ public class SimpleTimeoutConstraint implements TimeoutConstraint
     public SimpleTimeoutConstraint within(long     duration,
                                           TimeUnit units)
     {
-        this.maximumRetryMilliseconds = units.toMillis(duration);
+        this.maximumRetryDuration = Duration.of(duration, units);
 
         return this;
     }
@@ -133,7 +157,7 @@ public class SimpleTimeoutConstraint implements TimeoutConstraint
     public SimpleTimeoutConstraint delayedBy(long     duration,
                                              TimeUnit units)
     {
-        this.initialDelayMilliseconds = units.toMillis(duration);
+        this.initialDelay = Duration.of(duration, units);
 
         return this;
     }

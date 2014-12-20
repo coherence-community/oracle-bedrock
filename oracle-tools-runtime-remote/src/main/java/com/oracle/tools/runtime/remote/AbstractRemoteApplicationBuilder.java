@@ -62,6 +62,8 @@ import java.util.Calendar;
 import java.util.Iterator;
 import java.util.Properties;
 
+import java.util.concurrent.TimeUnit;
+
 /**
  * An {@link AbstractRemoteApplicationBuilder} is a base implementation of an {@link RemoteApplicationBuilder}
  * (over SSH).
@@ -352,7 +354,7 @@ public abstract class AbstractRemoteApplicationBuilder<A extends Application, E 
 
             // determine the timeout
             Timeout timeout   = options.get(Timeout.class, Timeout.autoDetect());
-            int     timeoutMS = (int) timeout.getUnits().toMillis(timeout.getDuration());
+            int     timeoutMS = (int) timeout.getDuration().to(TimeUnit.MILLISECONDS);
 
             // set the default session timeouts (in milliseconds)
             session.setTimeout(timeoutMS);
