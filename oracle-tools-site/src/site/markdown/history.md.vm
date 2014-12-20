@@ -121,6 +121,11 @@ reverse chronological order.
 *   [ORACLETOOLS-209](https://java.net/jira/browse/ORACLETOOLS-209): Allowed
     java.lang.Enums to be used as part of invoking(...) calls.
 
+*   [ORACLETOOLS-211](https://java.net/jira/browse/ORACLETOOLS-211): Introduced
+    upper-bound for ensured (deferred) polling times.  Introduced Duration
+    class to represent Durations.  Refactored Timeout to use Durations.  Refactored
+    internal implementations to use Durations where appropriate.
+
 <h4>oracle-tools-runtime</h4>
 
 *   [ORACLETOOLS-61](https://java.net/jira/browse/ORACLETOOLS-61): Introduced

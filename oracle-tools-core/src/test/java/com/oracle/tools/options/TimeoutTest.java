@@ -25,6 +25,8 @@
 
 package com.oracle.tools.options;
 
+import com.oracle.tools.util.Duration;
+
 import org.junit.Test;
 
 import static org.hamcrest.core.Is.is;
@@ -49,10 +51,34 @@ public class TimeoutTest
     @Test
     public void shouldConvertTimeouts()
     {
-        Timeout timeout   = Timeout.autoDetect();
-        long    timeoutMS = timeout.getUnits().toMillis(timeout.getDuration());
+        Timeout  timeout  = Timeout.autoDetect();
+        Duration duration = timeout.getDuration();
 
-        assertThat(timeoutMS, is(60000L));
-        assertThat(timeout.to(TimeUnit.MILLISECONDS), is(60000L));
+        assertThat(duration.to(TimeUnit.MILLISECONDS), is(60000L));
+    }
+
+
+    /**
+     * Ensure that we can create {@link Timeout}s from {@link String}s.
+     */
+    @Test
+    public void shouldCreateTimeoutsFromStrings()
+    {
+        Timeout timeout;
+
+        timeout = Timeout.after("42");
+        assertThat(timeout.to(TimeUnit.MILLISECONDS), is(42L));
+
+        timeout = Timeout.after("42ms");
+        assertThat(timeout.to(TimeUnit.MILLISECONDS), is(42L));
+
+        timeout = Timeout.after("42s");
+        assertThat(timeout.to(TimeUnit.SECONDS), is(42L));
+
+        timeout = Timeout.after("42m");
+        assertThat(timeout.to(TimeUnit.MINUTES), is(42L));
+
+        timeout = Timeout.after("42h");
+        assertThat(timeout.to(TimeUnit.HOURS), is(42L));
     }
 }

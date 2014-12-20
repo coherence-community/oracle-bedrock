@@ -33,8 +33,10 @@ import com.oracle.tools.options.Timeout;
 
 import com.oracle.tools.predicate.Predicate;
 
+import com.oracle.tools.util.Duration;
 import com.oracle.tools.util.ExponentialIterator;
 import com.oracle.tools.util.FibonacciIterator;
+import com.oracle.tools.util.MappingIterator;
 import com.oracle.tools.util.PerpetualIterator;
 import com.oracle.tools.util.RandomIterator;
 import com.oracle.tools.util.ReflectionHelper;
@@ -66,7 +68,7 @@ import java.util.concurrent.atomic.AtomicLong;
 public class DeferredHelper
 {
     /**
-     * The retry strategy that will be used for {@link Ensured}s.
+     * The system property defining the retry strategy that will be used for {@link Ensured}s.
      * <p/>
      * Legal Values are:
      * <ol>
@@ -77,7 +79,7 @@ public class DeferredHelper
      *                               an exponential sequence (a rate of 50%)</li>
      *     <li>random.fibonacci    = polling based on randomized values taken in
      *                               order from the fibonacci sequence</li>
-     *     <li>randomo.exponential = polling based on randomized values taken in
+     *     <li>random.exponential  = polling based on randomized values taken in
      *                               order from an exponential sequence
      *                               (a rate of 50%)</li>
      * </ol>
@@ -87,20 +89,50 @@ public class DeferredHelper
     public static final String ORACLETOOLS_DEFERRED_RETRY_STRATEGY = "oracletools.deferred.retry.strategy";
 
     /**
-     * The maximum retry (timeout) that will be used for {@link Ensured}s.
+     * The system property defining the total maximum time (retry timeout) that
+     * can be used attempting to ensure a {@link Deferred}.
      * <p/>
      * By default values are measured in milliseconds, however when
-     * time units are specified after the amounts eg:
+     * time units are specified after the amount eg:
      * (ms = milliseconds, m = minutes, s = seconds, h = hours),
      * conversions are automatically made to milliseconds.
      */
     public static final String ORACLETOOLS_DEFERRED_RETRY_TIMEOUT = "oracletools.deferred.retry.timeout";
 
     /**
-     * The default maximum retry timeout to use (in seconds) when a timeout
-     * is not configured or specified.
+     * The default total maximum time (retry timeout) that can be used attempting to ensure
+     * a {@link Deferred} when a timeout is not configured or specified.
      */
     public static final long ORACLETOOLS_DEFERRED_RETRY_TIMEOUT_SECS = 60;
+
+    /**
+     * The total maximum {@link Duration} that can be used attempting to
+     * ensure a {@link Deferred}.
+     */
+    private static final Duration ENSURED_MAXIMUM_RETRY_DURATION;
+
+    /**
+     * The system property defining the maximum time permitted to wait between
+     * attempts to ensure a {@link Deferred}.
+     * <p/>
+     * By default values are measured in milliseconds, however when
+     * time units are specified after the amount eg:
+     * (ms = milliseconds, m = minutes, s = seconds, h = hours),
+     * conversions are automatically made to milliseconds.
+     */
+    public static final String ORACLETOOLS_DEFERRED_MAXIMUM_POLLING_TIME = "oracletools.deferred.maximum.polling.time";
+
+    /**
+     * The default maximum time (in milliseconds) permitted to wait between attempts
+     * to ensure a {@link Deferred}.
+     */
+    public static final long ORACLETOOLS_DEFERRED_MAXIMUM_POLLING_TIME_MS = 1000;
+
+    /**
+     * The maximum {@link Duration} permitted to wait between attempts
+     * to ensure a {@link Deferred}.
+     */
+    private static final Duration ENSURED_MAXIMUM_POLLING_DURATION;
 
     /**
      * A {@link ThreadLocal} to capture the most recent {@link Deferred}
@@ -109,13 +141,13 @@ public class DeferredHelper
      * See {@link #invoking(Deferred)} and {@link #eventually(Object)}
      * for more information.
      */
-    private static final ThreadLocal<Deferred<?>> m_deferred = new ThreadLocal<Deferred<?>>();
+    private static final ThreadLocal<Deferred<?>> DEFERRED = new ThreadLocal<Deferred<?>>();
 
     /**
      * An {@link Iterable} that produces {@link Iterator}s to use for retry
-     * durations (measured in milliseconds).
+     * {@link Duration}.
      */
-    private static final Iterable<Long> ensuredRetryDurationsMSIterable;
+    private static final Iterable<Duration> ENSURED_RETRY_DURATIONS;
 
 
     /**
@@ -175,79 +207,74 @@ public class DeferredHelper
 
 
     /**
-     * Obtains the default configured retry durations {@link Iterator}
-     * (each value measured in milliseconds) that can be used with
-     * {@link Ensured}s.
-     *
-     * @return a new instance of the default configured retry durations
-     *         {@link Iterator}
-     */
-    public static Iterator<Long> getDefaultEnsuredRetryDurationsMS()
-    {
-        return ensuredRetryDurationsMSIterable.iterator();
-    }
-
-
-    /**
-     * Obtains the default configured retry durations {@link Iterable}
+     * Obtains the default configured retry {@link Duration}s {@link Iterator}
      * that can be used with {@link Ensured}s.
      *
-     * @return an {@link Iterable}
+     * @return a new instance of the default configured retry {@link Duration}
+     *         {@link Iterator}
      */
-    public static Iterable<Long> getDefaultEnsuredRetryDurationsMSIterable()
+    public static Iterator<Duration> getDefaultEnsuredRetryDurations()
     {
-        return ensuredRetryDurationsMSIterable;
+        return ENSURED_RETRY_DURATIONS.iterator();
     }
 
 
     /**
-     * Obtains the default timeout/maximum wait duration (in milliseconds)
+     * Obtains the default configured retry {@link Duration} {@link Iterable}
+     * that can be used with {@link Ensured}s.
+     *
+     * @return an {@link Iterable} of {@link Duration}s
+     */
+    public static Iterable<Duration> getDefaultEnsuredRetryDurationsIterable()
+    {
+        return ENSURED_RETRY_DURATIONS;
+    }
+
+
+    /**
+     * Obtains the timeout/maximum wait {@link Duration}
+     * for {@link Ensured}s.
+     *
+     * @return the {@link Duration}
+     */
+    public static Duration getDefaultEnsuredMaximumRetryDuration()
+    {
+        return ENSURED_MAXIMUM_RETRY_DURATION;
+    }
+
+
+    /**
+     * Obtains the timeout/maximum wait duration (in milliseconds)
      * for {@link Ensured}s.
      *
      * @return the default timeout (in milliseconds)
      */
     public static long getDefaultEnsuredTimeoutMS()
     {
-        String timeOut = System.getProperty(ORACLETOOLS_DEFERRED_RETRY_TIMEOUT);
+        String duration = System.getProperty(ORACLETOOLS_DEFERRED_RETRY_TIMEOUT);
 
-        if (timeOut == null)
+        if (duration == null)
         {
             return TimeUnit.SECONDS.toMillis(ORACLETOOLS_DEFERRED_RETRY_TIMEOUT_SECS);
         }
         else
         {
-            timeOut = timeOut.trim().toLowerCase();
+            Timeout timeout = Timeout.after(duration);
 
-            TimeUnit timeUnit;
-
-            if (timeOut.endsWith("ms"))
-            {
-                timeUnit = TimeUnit.MILLISECONDS;
-                timeOut  = timeOut.substring(timeOut.length() - 2).trim();
-            }
-            else if (timeOut.endsWith("s"))
-            {
-                timeUnit = TimeUnit.SECONDS;
-                timeOut  = timeOut.substring(timeOut.length() - 1).trim();
-            }
-            else if (timeOut.endsWith("m"))
-            {
-                timeUnit = TimeUnit.MINUTES;
-                timeOut  = timeOut.substring(timeOut.length() - 1).trim();
-            }
-            else if (timeOut.endsWith("h"))
-            {
-                timeUnit = TimeUnit.HOURS;
-                timeOut  = timeOut.substring(timeOut.length() - 1).trim();
-            }
-            else
-            {
-                // assume milliseconds when there's no timeout unit
-                timeUnit = TimeUnit.MILLISECONDS;
-            }
-
-            return timeUnit.toMillis(Long.valueOf(timeOut));
+            return timeout.to(TimeUnit.MILLISECONDS);
         }
+    }
+
+
+    /**
+     * Obtains the maximum polling {@link Duration} that will be waited
+     * between attempts to ensure a {@link Deferred}.
+     *
+     * @return the polling time
+     */
+    public static Duration getDefaultEnsuredMaximumPollingDuration()
+    {
+        return ENSURED_MAXIMUM_POLLING_DURATION;
     }
 
 
@@ -430,7 +457,7 @@ public class DeferredHelper
     public static <T> T invoking(Deferred<T> deferred)
     {
         // ensure that there are no other pending invoking calls on this thread
-        if (m_deferred.get() == null)
+        if (DEFERRED.get() == null)
         {
             // attempt to create a proxy of the specified object class that will record
             // methods calls on the object and represent them as a deferred on a thread local
@@ -442,7 +469,7 @@ public class DeferredHelper
 
             // set the current deferred as a thread local so that
             // we can "eventually" evaluate and return it.
-            m_deferred.set(deferred);
+            DEFERRED.set(deferred);
 
             return proxy;
         }
@@ -468,11 +495,11 @@ public class DeferredHelper
     public static <T> T valueOf(Deferred<T> deferred)
     {
         // ensure that there are no other pending invoking calls on this thread
-        if (m_deferred.get() == null)
+        if (DEFERRED.get() == null)
         {
             // set the current deferred as a thread local so that
             // we can "eventually" evaluate and return it.
-            m_deferred.set(deferred);
+            DEFERRED.set(deferred);
 
             // FUTURE: we should raise a soft exception here if the deferred
             // class is final or perhaps native as we can't proxy them.
@@ -590,7 +617,7 @@ public class DeferredHelper
     public static <T> Deferred<T> eventually(T t)
     {
         // get the last deferred value from invoking
-        Deferred<T> deferred = (Deferred<T>) m_deferred.get();
+        Deferred<T> deferred = (Deferred<T>) DEFERRED.get();
 
         if (deferred == null)
         {
@@ -599,7 +626,7 @@ public class DeferredHelper
         else
         {
             // clear the last invoking call
-            m_deferred.set(null);
+            DEFERRED.set(null);
         }
 
         return ensured(deferred);
@@ -621,7 +648,7 @@ public class DeferredHelper
     public static <T> Deferred<T> eventually(Deferred<T> t)
     {
         // get the last deferred value from invoking
-        Deferred<T> deferred = (Deferred<T>) m_deferred.get();
+        Deferred<T> deferred = (Deferred<T>) DEFERRED.get();
 
         if (deferred == null)
         {
@@ -630,7 +657,7 @@ public class DeferredHelper
         else
         {
             // clear the last invoking call
-            m_deferred.set(null);
+            DEFERRED.set(null);
         }
 
         return ensured(deferred);
@@ -652,7 +679,7 @@ public class DeferredHelper
                                              TimeoutConstraint constraint)
     {
         // get the last deferred value from invoking
-        Deferred<T> deferred = (Deferred<T>) m_deferred.get();
+        Deferred<T> deferred = (Deferred<T>) DEFERRED.get();
 
         if (deferred == null)
         {
@@ -661,7 +688,7 @@ public class DeferredHelper
         else
         {
             // clear the last invoking call
-            m_deferred.set(null);
+            DEFERRED.set(null);
         }
 
         return ensured(deferred, constraint);
@@ -684,7 +711,7 @@ public class DeferredHelper
                                              TimeoutConstraint constraint)
     {
         // get the last deferred value from invoking
-        Deferred<T> deferred = (Deferred<T>) m_deferred.get();
+        Deferred<T> deferred = (Deferred<T>) DEFERRED.get();
 
         if (deferred == null)
         {
@@ -693,7 +720,7 @@ public class DeferredHelper
         else
         {
             // clear the last invoking call
-            m_deferred.set(null);
+            DEFERRED.set(null);
         }
 
         return ensured(deferred, constraint);
@@ -712,7 +739,10 @@ public class DeferredHelper
     public static SimpleTimeoutConstraint within(long     duration,
                                                  TimeUnit units)
     {
-        return new SimpleTimeoutConstraint(0, units.toMillis(duration), ensuredRetryDurationsMSIterable);
+        return new SimpleTimeoutConstraint(Duration.ZERO,
+                                           ENSURED_MAXIMUM_POLLING_DURATION,
+                                           Duration.of(duration, units),
+                                           ENSURED_RETRY_DURATIONS);
     }
 
 
@@ -726,9 +756,10 @@ public class DeferredHelper
      */
     public static SimpleTimeoutConstraint within(Timeout timeout)
     {
-        return new SimpleTimeoutConstraint(0,
-                                           timeout.getUnits().toMillis(timeout.getDuration()),
-                                           ensuredRetryDurationsMSIterable);
+        return new SimpleTimeoutConstraint(Duration.ZERO,
+                                           ENSURED_MAXIMUM_POLLING_DURATION,
+                                           timeout.getDuration(),
+                                           ENSURED_RETRY_DURATIONS);
     }
 
 
@@ -744,9 +775,10 @@ public class DeferredHelper
     public static SimpleTimeoutConstraint delayedBy(long     duration,
                                                     TimeUnit units)
     {
-        return new SimpleTimeoutConstraint(units.toMillis(duration),
-                                           getDefaultEnsuredTimeoutMS(),
-                                           ensuredRetryDurationsMSIterable);
+        return new SimpleTimeoutConstraint(Duration.of(duration, units),
+                                           ENSURED_MAXIMUM_POLLING_DURATION,
+                                           ENSURED_MAXIMUM_RETRY_DURATION,
+                                           ENSURED_RETRY_DURATIONS);
     }
 
 
@@ -773,9 +805,10 @@ public class DeferredHelper
         long maximumRetryDurationMS = maximumRetryDurationUnits.toMillis(maximumRetryDuration);
 
         return deferred instanceof Ensured ? deferred : new Ensured<T>(deferred,
-                                                                       new SimpleTimeoutConstraint(0,
-                                                                                                   maximumRetryDurationMS,
-                                                                                                   ensuredRetryDurationsMSIterable));
+                                                                       new SimpleTimeoutConstraint(Duration.ZERO,
+                                                                                                   ENSURED_MAXIMUM_POLLING_DURATION,
+                                                                                                   ENSURED_MAXIMUM_RETRY_DURATION,
+                                                                                                   ENSURED_RETRY_DURATIONS));
     }
 
 
@@ -799,12 +832,12 @@ public class DeferredHelper
                                           long        totalRetryDuration,
                                           TimeUnit    totalRetryDurationUnits)
     {
-        Iterator<Long> retryDurationsMS =
-            new PerpetualIterator<Long>(retryDelayDurationUnits.toMillis(retryDelayDuration < 0
-                                                                         ? 0 : retryDelayDuration));
+        Iterator<Duration> retryDurations =
+            new PerpetualIterator<Duration>(Duration.of(retryDelayDuration < 0 ? 0 : retryDelayDuration,
+                                                        retryDelayDurationUnits));
 
         return deferred instanceof Ensured ? deferred : new Ensured<T>(deferred,
-                                                                       retryDurationsMS,
+                                                                       retryDurations,
                                                                        totalRetryDurationUnits
                                                                            .toMillis(totalRetryDuration));
     }
@@ -824,9 +857,11 @@ public class DeferredHelper
     public static <T> Deferred<T> ensured(Deferred<T> deferred,
                                           long        totalRetryDurationMS)
     {
-        TimeoutConstraint constraint = new SimpleTimeoutConstraint(0,
-                                                                   totalRetryDurationMS,
-                                                                   ensuredRetryDurationsMSIterable);
+        TimeoutConstraint constraint = new SimpleTimeoutConstraint(Duration.ZERO,
+                                                                   ENSURED_MAXIMUM_POLLING_DURATION,
+                                                                   Duration.of(totalRetryDurationMS,
+                                                                               TimeUnit.MILLISECONDS),
+                                                                   ENSURED_RETRY_DURATIONS);
 
         return deferred instanceof Ensured ? (Ensured<T>) deferred : new Ensured<T>(deferred, constraint);
     }
@@ -851,9 +886,11 @@ public class DeferredHelper
                                long        totalRetryDuration,
                                TimeUnit    totalRetryDurationUnits)
     {
-        TimeoutConstraint constraint = new SimpleTimeoutConstraint(0,
-                                                                   totalRetryDurationUnits.toMillis(totalRetryDuration),
-                                                                   ensuredRetryDurationsMSIterable);
+        TimeoutConstraint constraint = new SimpleTimeoutConstraint(Duration.ZERO,
+                                                                   ENSURED_MAXIMUM_POLLING_DURATION,
+                                                                   Duration.of(totalRetryDuration,
+                                                                               totalRetryDurationUnits),
+                                                                   ENSURED_RETRY_DURATIONS);
 
         return ensured(deferred, constraint).get();
     }
@@ -907,9 +944,11 @@ public class DeferredHelper
     public static <T> T ensure(Deferred<T> deferred,
                                long        totalRetryDurationMS)
     {
-        TimeoutConstraint constraint = new SimpleTimeoutConstraint(0,
-                                                                   totalRetryDurationMS,
-                                                                   ensuredRetryDurationsMSIterable);
+        TimeoutConstraint constraint = new SimpleTimeoutConstraint(Duration.ZERO,
+                                                                   ENSURED_MAXIMUM_POLLING_DURATION,
+                                                                   Duration.of(totalRetryDurationMS,
+                                                                               TimeUnit.MILLISECONDS),
+                                                                   ENSURED_RETRY_DURATIONS);
 
         return ensured(deferred, constraint).get();
     }
@@ -936,9 +975,11 @@ public class DeferredHelper
                                              long        totalRetryDuration,
                                              TimeUnit    totalRetryDurationUnits)
     {
-        TimeoutConstraint constraint = new SimpleTimeoutConstraint(0,
-                                                                   totalRetryDurationUnits.toMillis(totalRetryDuration),
-                                                                   ensuredRetryDurationsMSIterable);
+        TimeoutConstraint constraint = new SimpleTimeoutConstraint(Duration.ZERO,
+                                                                   ENSURED_MAXIMUM_POLLING_DURATION,
+                                                                   Duration.of(totalRetryDuration,
+                                                                               totalRetryDurationUnits),
+                                                                   ENSURED_RETRY_DURATIONS);
 
         return eventually(t, constraint);
     }
@@ -963,9 +1004,11 @@ public class DeferredHelper
                                              long     totalRetryDuration,
                                              TimeUnit totalRetryDurationUnits)
     {
-        TimeoutConstraint constraint = new SimpleTimeoutConstraint(0,
-                                                                   totalRetryDurationUnits.toMillis(totalRetryDuration),
-                                                                   ensuredRetryDurationsMSIterable);
+        TimeoutConstraint constraint = new SimpleTimeoutConstraint(Duration.ZERO,
+                                                                   ENSURED_MAXIMUM_POLLING_DURATION,
+                                                                   Duration.of(totalRetryDuration,
+                                                                               totalRetryDurationUnits),
+                                                                   ENSURED_RETRY_DURATIONS);
 
         return eventually(t, constraint);
     }
@@ -992,11 +1035,11 @@ public class DeferredHelper
                                 MethodProxy methodProxy) throws Throwable
         {
             // get the underlying deferred object on which this invocation really occurred
-            Deferred<?> deferred = DeferredHelper.m_deferred.get();
+            Deferred<?> deferred = DeferredHelper.DEFERRED.get();
 
             // replace the underlying deferred with a deferred method invocation
             // representing the result of this invocation
-            DeferredHelper.m_deferred.set(new DeferredInvoke(deferred, method, args));
+            DeferredHelper.DEFERRED.set(new DeferredInvoke(deferred, method, args));
 
             // determine a suitable return value based on the method return type.
             // this value will actually be ignored as this method call is being
@@ -1072,72 +1115,95 @@ public class DeferredHelper
     static
     {
         // ----------------
-        // establish the ensured retry durations iterable
-        String strategy = System.getProperty(ORACLETOOLS_DEFERRED_RETRY_STRATEGY);
+        // establish the ensured maximum retry duration
+        String maximumRetryDuration = System.getProperty(ORACLETOOLS_DEFERRED_RETRY_TIMEOUT,
+                                                         Long.toString(ORACLETOOLS_DEFERRED_RETRY_TIMEOUT_SECS) + "s");
 
-        if (strategy == null)
-        {
-            strategy = "random.fibonacci";
-        }
+        ENSURED_MAXIMUM_RETRY_DURATION = Duration.of(maximumRetryDuration);
+
+        // ----------------
+        // establish the ensured maximum polling time
+        String maximumPollingDuration = System.getProperty(ORACLETOOLS_DEFERRED_MAXIMUM_POLLING_TIME,
+                                                           Long.toString(ORACLETOOLS_DEFERRED_MAXIMUM_POLLING_TIME_MS));
+
+        ENSURED_MAXIMUM_POLLING_DURATION = Duration.of(maximumPollingDuration);
+
+        // ----------------
+        // establish the ensured retry durations iterable
+        String strategy = System.getProperty(ORACLETOOLS_DEFERRED_RETRY_STRATEGY, "random.fibonacci");
 
         strategy = strategy.trim().toLowerCase();
 
+        // the mapping function from Longs (milliseconds) to Durations
+        final MappingIterator.Function<Long, Duration> MILLISECONDS_TO_DURATION = new MappingIterator.Function<Long,
+                                                                                      Duration>()
+        {
+            @Override
+            public Duration map(Long milliseconds)
+            {
+                return Duration.of(milliseconds, TimeUnit.MILLISECONDS);
+            }
+        };
+
         if (strategy.equals("random.fibonacci"))
         {
-            ensuredRetryDurationsMSIterable = new Iterable<Long>()
+            ENSURED_RETRY_DURATIONS = new Iterable<Duration>()
             {
                 @Override
-                public Iterator<Long> iterator()
+                public Iterator<Duration> iterator()
                 {
-                    return new RandomIterator(new FibonacciIterator());
+                    return new MappingIterator<Long, Duration>(new RandomIterator(new FibonacciIterator()),
+                                                               MILLISECONDS_TO_DURATION);
                 }
             };
         }
         else if (strategy.equals("random.exponential"))
         {
-            ensuredRetryDurationsMSIterable = new Iterable<Long>()
+            ENSURED_RETRY_DURATIONS = new Iterable<Duration>()
             {
                 @Override
-                public Iterator<Long> iterator()
+                public Iterator<Duration> iterator()
                 {
-                    return new RandomIterator(new ExponentialIterator(0, 50));
+                    return new MappingIterator<Long, Duration>(new RandomIterator(new ExponentialIterator(0,
+                                                                                                          50)),
+                                                               MILLISECONDS_TO_DURATION);
                 }
             };
         }
         else if (strategy.equals("fibonacci"))
         {
-            ensuredRetryDurationsMSIterable = new Iterable<Long>()
+            ENSURED_RETRY_DURATIONS = new Iterable<Duration>()
             {
                 @Override
-                public Iterator<Long> iterator()
+                public Iterator<Duration> iterator()
                 {
-                    return new FibonacciIterator();
+                    return new MappingIterator<Long, Duration>(new FibonacciIterator(), MILLISECONDS_TO_DURATION);
                 }
             };
         }
         else if (strategy.equals("exponential"))
         {
-            ensuredRetryDurationsMSIterable = new Iterable<Long>()
+            ENSURED_RETRY_DURATIONS = new Iterable<Duration>()
             {
                 @Override
-                public Iterator<Long> iterator()
+                public Iterator<Duration> iterator()
                 {
-                    return new ExponentialIterator(0, 50);
+                    return new MappingIterator<Long, Duration>(new ExponentialIterator(0,
+                                                                                       50), MILLISECONDS_TO_DURATION);
                 }
             };
         }
         else
         {
             // default to perpetual polling
-            ensuredRetryDurationsMSIterable = new Iterable<Long>()
+            ENSURED_RETRY_DURATIONS = new Iterable<Duration>()
             {
                 @Override
-                public Iterator<Long> iterator()
+                public Iterator<Duration> iterator()
                 {
-                    return new PerpetualIterator<Long>(250L);
+                    return new PerpetualIterator<Duration>(Duration.of(250, TimeUnit.MILLISECONDS));
                 }
             };
         }
-
     }
 }

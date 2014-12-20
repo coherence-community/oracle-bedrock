@@ -25,6 +25,8 @@
 
 package com.oracle.tools.deferred;
 
+import com.oracle.tools.util.Duration;
+
 import java.util.Iterator;
 
 /**
@@ -47,25 +49,35 @@ public interface TimeoutConstraint
      *
      * @return  the minimum milliseconds to wait
      */
-    public long getInitialDelayMilliseconds();
+    public Duration getInitialDelay();
 
 
     /**
-     * Obtains the maximum number of milliseconds to wait before
+     * Obtains the maximum number of milliseconds to wait between attempts
+     * to acquire an {@link Object} from a {@link Deferred}.
+     *
+     * @return  the maximum milliseconds to wait between attempts to
+     *          acquire an {@link Object} from a {@link Deferred}.
+     */
+    public Duration getMaximumPollingDelay();
+
+
+    /**
+     * Obtains the total maximum number of milliseconds to wait before
      * giving up on attempting to acquire an {@link Object} from a
-     * {@link Deferred}, including the {@link #getInitialDelayMilliseconds()})
+     * {@link Deferred}, including the {@link #getInitialDelay()})
      *
      * @return  the maximum milliseconds to retry
      */
-    public long getMaximumRetryMilliseconds();
+    public Duration getMaximumRetryDuration();
 
 
     /**
      * Obtains an {@link Iterable} that can be used to produce an
-     * {@link Iterator} consisting of suitable milliseconds to delay
+     * {@link Iterator} consisting of suitable {@link Duration}s to delay
      * between attempts to acquire an {@link Object} from a {@link Deferred}.
      *
-     * @return  an {@link Iterator} of milliseconds to delay
+     * @return  an {@link Iterator} of {@link Duration}s
      */
-    public Iterable<Long> getRetryDelayMillisecondsIterable();
+    public Iterable<Duration> getRetryDelayDurations();
 }

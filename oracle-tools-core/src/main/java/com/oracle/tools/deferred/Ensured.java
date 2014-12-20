@@ -25,6 +25,8 @@
 
 package com.oracle.tools.deferred;
 
+import com.oracle.tools.util.Duration;
+
 import java.util.Iterator;
 
 import java.util.concurrent.TimeUnit;
@@ -62,10 +64,28 @@ public class Ensured<T> implements Deferred<T>
     /**
      * The {@link Deferred} being adapted.
      */
-    private Deferred<T>    deferred;
-    private long           initialDelayDurationMS;
-    private long           maximumRetryDurationMS;
-    private Iterator<Long> retryDurationsMSIterator;
+    private Deferred<T> deferred;
+
+    /**
+     * The initial delay before starting to ensure the {@link Deferred}.
+     */
+    private long initialDelayDurationMS;
+
+    /**
+     * The maximum polling time between attempts to acquire the {@link Deferred}.
+     */
+    private long maximumPollingDurationMS;
+
+    /**
+     * The total maximum retry duration before giving up on the {@link Deferred}.
+     */
+    private long maximumRetryDurationMS;
+
+    /**
+     * An {@link Iterator} provide retry/waiting delays {@link Duration}s to be used
+     * between attempts to acquire the {@link Deferred}.
+     */
+    private Iterator<Duration> retryDurations;
 
 
     /**
@@ -95,15 +115,19 @@ public class Ensured<T> implements Deferred<T>
 
         if (constraint == null)
         {
-            this.initialDelayDurationMS   = 0;
-            this.maximumRetryDurationMS   = DeferredHelper.getDefaultEnsuredTimeoutMS();
-            this.retryDurationsMSIterator = DeferredHelper.getDefaultEnsuredRetryDurationsMSIterable().iterator();
+            this.initialDelayDurationMS = 0;
+            this.maximumPollingDurationMS =
+                DeferredHelper.getDefaultEnsuredMaximumPollingDuration().to(TimeUnit.MILLISECONDS);
+            this.maximumRetryDurationMS =
+                DeferredHelper.getDefaultEnsuredMaximumRetryDuration().to(TimeUnit.MILLISECONDS);
+            this.retryDurations = DeferredHelper.getDefaultEnsuredRetryDurationsIterable().iterator();
         }
         else
         {
-            this.initialDelayDurationMS   = constraint.getInitialDelayMilliseconds();
-            this.maximumRetryDurationMS   = constraint.getMaximumRetryMilliseconds();
-            this.retryDurationsMSIterator = constraint.getRetryDelayMillisecondsIterable().iterator();
+            this.initialDelayDurationMS   = constraint.getInitialDelay().to(TimeUnit.MILLISECONDS);
+            this.maximumPollingDurationMS = constraint.getMaximumPollingDelay().to(TimeUnit.MILLISECONDS);
+            this.maximumRetryDurationMS   = constraint.getMaximumRetryDuration().to(TimeUnit.MILLISECONDS);
+            this.retryDurations           = constraint.getRetryDelayDurations().iterator();
         }
     }
 
@@ -112,7 +136,7 @@ public class Ensured<T> implements Deferred<T>
      * Construct an {@link Ensured} adapting the specified {@link Deferred}.
      *
      * @param deferred                  the {@link Deferred} to ensure
-     * @param retryDurationsMSIterator  an {@link Iterator} providing individual retry
+     * @param retryDurations  an {@link Iterator} providing individual retry
      *                                  durations (in milliseconds) for each time the
      *                                  {@link Ensured} needs to wait
      * @param maximumRetryDurationMS    the maximum duration (in milliseconds) to wait
@@ -121,17 +145,19 @@ public class Ensured<T> implements Deferred<T>
      * @deprecated  Use {@link #Ensured(Deferred, TimeoutConstraint)} instead
      */
     @Deprecated
-    public Ensured(Deferred<T>    deferred,
-                   Iterator<Long> retryDurationsMSIterator,
-                   long           maximumRetryDurationMS)
+    public Ensured(Deferred<T>        deferred,
+                   Iterator<Duration> retryDurations,
+                   long               maximumRetryDurationMS)
     {
         // when we're ensuring an ensured, use the adapted deferred
         // (this is to ensure that we don't attempt to ensure another ensured)
-        this.deferred                 = deferred instanceof Ensured ? ((Ensured<T>) deferred).getDeferred() : deferred;
+        this.deferred               = deferred instanceof Ensured ? ((Ensured<T>) deferred).getDeferred() : deferred;
 
-        this.initialDelayDurationMS   = 0;
-        this.maximumRetryDurationMS   = maximumRetryDurationMS;
-        this.retryDurationsMSIterator = retryDurationsMSIterator;
+        this.initialDelayDurationMS = 0;
+        this.maximumPollingDurationMS =
+            DeferredHelper.getDefaultEnsuredMaximumPollingDuration().to(TimeUnit.MILLISECONDS);
+        this.maximumRetryDurationMS = maximumRetryDurationMS;
+        this.retryDurations         = retryDurations;
     }
 
 
@@ -215,37 +241,50 @@ public class Ensured<T> implements Deferred<T>
             if (maximumRetryDurationMS < 0 || remainingRetryDurationMS > 0)
             {
                 // we can only retry while we have retry durations
-                if (retryDurationsMSIterator.hasNext())
+                if (retryDurations.hasNext())
                 {
                     try
                     {
-                        long durationMS = retryDurationsMSIterator.next();
+                        Duration duration   = retryDurations.next();
+                        long     durationMS = duration.to(TimeUnit.MILLISECONDS);
 
+                        // ensure we don't wait longer than the maximum polling duration
+                        if (durationMS > maximumPollingDurationMS)
+                        {
+                            durationMS = maximumPollingDurationMS;
+                        }
+
+                        // ensure we don't wait longer that the remaining duration
                         if (remainingRetryDurationMS - durationMS < 0)
                         {
                             durationMS = remainingRetryDurationMS;
                         }
 
+                        // only wait if we have a duration
                         if (durationMS > 0)
                         {
                             TimeUnit.MILLISECONDS.sleep(durationMS);
                         }
 
+                        // reduce the remaining time
                         remainingRetryDurationMS -= durationMS;
                     }
                     catch (InterruptedException e)
                     {
+                        // if we're interrupted, we give up immediately
                         throw new PermanentlyUnavailableException(deferred, e);
                     }
                 }
                 else
                 {
+                    // if we run out of retry times, we give up immediately
                     throw new PermanentlyUnavailableException(deferred);
                 }
             }
         }
         while (maximumRetryDurationMS < 0 || remainingRetryDurationMS > 0);
 
+        // we give up if we've timed-out
         throw new PermanentlyUnavailableException(deferred);
     }
 
