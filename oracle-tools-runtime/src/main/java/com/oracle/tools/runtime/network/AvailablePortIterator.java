@@ -26,23 +26,25 @@
 package com.oracle.tools.runtime.network;
 
 import java.io.IOException;
+
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.UnknownHostException;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Queue;
+
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
- * An {@link AvailablePortIterator} is an {@link Iterator} implementation that
- * lazily performs a port scanning on a specified address to determine what
- * {@link ServerSocket} ports are available.
+ * An {@link Iterator} implementation that lazily performs a port scanning on a
+ * specified address to determine what {@link ServerSocket} ports are available.
  * <p>
- * Copyright (c) 2011. All Rights Reserved. Oracle Corporation.<br>
+ * Copyright (c) 2015. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Brian Oliver
@@ -73,17 +75,17 @@ public class AvailablePortIterator implements Iterator<Integer>, Iterable<Intege
     /**
      * The {@link InetAddress} on which the port scanning is occurring.
      */
-    private InetAddress m_inetAddress;
+    private InetAddress inetAddress;
 
     /**
      * The start of the port range in which scanning will occur.
      */
-    private int m_portRangeStart;
+    private int portRangeStart;
 
     /**
      * The end of the port range in which scanning will occur.
      */
-    private int m_portRangeEnd;
+    private int portRangeEnd;
 
     /**
      * A {@link Queue} of available {@link ServerSocket} and {@link DatagramSocket}s.
@@ -91,63 +93,59 @@ public class AvailablePortIterator implements Iterator<Integer>, Iterable<Intege
      * Connections to these remain open until they are requested using
      * {@link #next()}.
      */
-    private Queue<ServerSocket> m_availableSockets;
+    private Queue<ServerSocket> availableSockets;
 
     /**
      * The last port checked for availability
      */
-    private int m_lastCheckedPort;
+    private int lastCheckedPort;
 
 
     /**
      * Constructs an {@link AvailablePortIterator}.
      * <p>
-     * Defaults to using the loop back address and full port range.
+     * Defaults to using the wildcard address and full port range.
      *
      * @throws UnknownHostException  when the loop back address can not be determined
      */
-    public AvailablePortIterator() throws UnknownHostException
+    public AvailablePortIterator()
     {
-        this(InetAddress.getByName(Constants.getLocalHost()), MINIMUM_PORT, MAXIMUM_PORT);
+        this(new InetSocketAddress(0).getAddress(), MINIMUM_PORT, MAXIMUM_PORT);
     }
 
 
     /**
      * Constructs an {@link AvailablePortIterator}
      * <p>
-     * Defaults to using the loop back address and starting port.
+     * Defaults to using the wildcard address and a starting port.
      *
      * @param portRangeStart  the port at which to start scanning (inclusive)
-     *
-     * @throws UnknownHostException  when the loop back address can not be determined
      */
-    public AvailablePortIterator(int portRangeStart) throws UnknownHostException
+    public AvailablePortIterator(int portRangeStart)
     {
-        this(InetAddress.getByName(Constants.getLocalHost()), portRangeStart, MAXIMUM_PORT);
+        this(new InetSocketAddress(0).getAddress(), portRangeStart, MAXIMUM_PORT);
     }
 
 
     /**
      * Constructs an {@link AvailablePortIterator}.
      * <p>
-     * Defaults to using the loop back address but the specified port range.
+     * Defaults to using the wildcard address with the specified port range.
      *
      * @param portRangeStart  the port at which to start scanning (inclusive)
      * @param portRangeEnd    the port at which to destroy scanning (inclusive)
-     *
-     * @throws UnknownHostException  when the loop back address can not be determined
      */
     public AvailablePortIterator(int portRangeStart,
-                                 int portRangeEnd) throws UnknownHostException
+                                 int portRangeEnd)
     {
-        this(InetAddress.getByName(Constants.getLocalHost()), portRangeStart, portRangeEnd);
+        this(new InetSocketAddress(0).getAddress(), portRangeStart, portRangeEnd);
     }
 
 
     /**
      * Constructs an {@link AvailablePortIterator}.
      *
-     * @param inetAddress     the {@link InetAddress} on which to scan ports (typically loopback or localhost)
+     * @param inetAddress     the {@link InetAddress} on which to scan ports
      * @param portRangeStart  the port at which to start scanning (inclusive)
      * @param portRangeEnd    the port at which to destroy scanning (inclusive)
      */
@@ -155,11 +153,11 @@ public class AvailablePortIterator implements Iterator<Integer>, Iterable<Intege
                                  int         portRangeStart,
                                  int         portRangeEnd)
     {
-        m_inetAddress      = inetAddress;
-        m_portRangeStart   = portRangeStart;
-        m_portRangeEnd     = portRangeEnd;
-        m_availableSockets = new ConcurrentLinkedQueue<ServerSocket>();
-        m_lastCheckedPort  = portRangeStart - 1;
+        this.inetAddress      = inetAddress;
+        this.portRangeStart   = portRangeStart;
+        this.portRangeEnd     = portRangeEnd;
+        this.availableSockets = new ConcurrentLinkedQueue<ServerSocket>();
+        this.lastCheckedPort  = portRangeStart - 1;
 
         acquireAvailablePorts(LOW_PORT_THRESHOLD, IDEAL_AVAILABLE_PORTS);
     }
@@ -181,13 +179,14 @@ public class AvailablePortIterator implements Iterator<Integer>, Iterable<Intege
 
 
     /**
-     * Obtains the {@link InetAddress} on which port scanning is occurring.
+     * Obtains the {@link InetAddress} on which port scanning is occurring, which
+     * may be the wildcard address (0.0.0.0 or ::)
      *
      * @return an {@link InetAddress}
      */
     public InetAddress getInetAddress()
     {
-        return m_inetAddress;
+        return inetAddress;
     }
 
 
@@ -204,7 +203,7 @@ public class AvailablePortIterator implements Iterator<Integer>, Iterable<Intege
      */
     private boolean isPortAvailable(int port)
     {
-        if (port < m_portRangeStart || port > m_portRangeEnd)
+        if (port < portRangeStart || port > portRangeEnd)
         {
             return false;
         }
@@ -217,9 +216,9 @@ public class AvailablePortIterator implements Iterator<Integer>, Iterable<Intege
             {
                 serverSocket = new ServerSocket();
                 serverSocket.setReuseAddress(false);
-                serverSocket.bind(new InetSocketAddress(m_inetAddress, port));
+                serverSocket.bind(new InetSocketAddress(inetAddress, port));
 
-                m_availableSockets.add(serverSocket);
+                availableSockets.add(serverSocket);
 
                 return true;
             }
@@ -258,21 +257,18 @@ public class AvailablePortIterator implements Iterator<Integer>, Iterable<Intege
                                                    int idealQueueSize)
     {
         // we want at least the minimum specified number of sockets in the queue
-        int count = m_availableSockets.size() < minimumThreshold
-                    ? m_availableSockets.size() + idealQueueSize : m_availableSockets.size();
+        int count = availableSockets.size() < minimumThreshold
+                    ? availableSockets.size() + idealQueueSize : availableSockets.size();
 
-        while (m_availableSockets.size() < count && m_lastCheckedPort < m_portRangeEnd)
+        while (availableSockets.size() < count && lastCheckedPort < portRangeEnd)
         {
-            isPortAvailable(++m_lastCheckedPort);
+            isPortAvailable(++lastCheckedPort);
         }
 
-        return m_availableSockets.size();
+        return availableSockets.size();
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Iterator<Integer> iterator()
     {
@@ -280,9 +276,6 @@ public class AvailablePortIterator implements Iterator<Integer>, Iterable<Intege
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public boolean hasNext()
     {
@@ -290,9 +283,6 @@ public class AvailablePortIterator implements Iterator<Integer>, Iterable<Intege
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Integer next()
     {
@@ -315,7 +305,7 @@ public class AvailablePortIterator implements Iterator<Integer>, Iterable<Intege
                     else
                     {
                         // grab the open socket
-                        socket = m_availableSockets.remove();
+                        socket = availableSockets.remove();
                     }
                 }
 
@@ -346,9 +336,6 @@ public class AvailablePortIterator implements Iterator<Integer>, Iterable<Intege
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void remove()
     {
@@ -356,13 +343,10 @@ public class AvailablePortIterator implements Iterator<Integer>, Iterable<Intege
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String toString()
     {
-        ArrayList<ServerSocket> list    = new ArrayList<ServerSocket>(m_availableSockets);
+        ArrayList<ServerSocket> list    = new ArrayList<ServerSocket>(availableSockets);
 
         StringBuilder           builder = new StringBuilder("");
 
@@ -376,6 +360,6 @@ public class AvailablePortIterator implements Iterator<Integer>, Iterable<Intege
             builder.append(socket.getLocalPort());
         }
 
-        return "AvailablePortIterator{" + builder.toString() + "}";
+        return "AvailablePortIterator{" + inetAddress + ":" + builder.toString() + "}";
     }
 }

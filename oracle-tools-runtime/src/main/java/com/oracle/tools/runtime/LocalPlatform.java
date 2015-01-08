@@ -58,9 +58,7 @@ public class LocalPlatform extends AbstractPlatform
     private LocalPlatform()
     {
         super("Local");
-        availablePortIterator = new AvailablePortIterator(getPrivateInetAddress(),
-                                                          30000,
-                                                          AvailablePortIterator.MAXIMUM_PORT);
+        availablePortIterator = new AvailablePortIterator(30000, AvailablePortIterator.MAXIMUM_PORT);
     }
 
 

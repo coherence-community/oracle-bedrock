@@ -29,7 +29,6 @@ import com.oracle.tools.Options;
 
 import com.oracle.tools.runtime.ApplicationConsole;
 import com.oracle.tools.runtime.Platform;
-import com.oracle.tools.runtime.PlatformAware;
 
 import com.oracle.tools.runtime.java.options.RemoteDebugging;
 
@@ -41,14 +40,9 @@ import static org.hamcrest.CoreMatchers.is;
 
 import static org.junit.Assert.assertThat;
 
-import static org.mockito.Matchers.same;
-
 import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-
-import java.rmi.Remote;
 
 import java.util.Properties;
 
@@ -97,30 +91,6 @@ public class AbstractJavaApplicationSchemaTest
 
         assertThat(remoteDebugging.isEnabled(), is(true));
         verify(jvm, atLeastOnce()).shouldEnableRemoteDebugging();
-    }
-
-
-    @Test
-    @SuppressWarnings("unchecked")
-    public void shouldUsePlatformAwarePropertyValue() throws Exception
-    {
-        AbstractJavaApplicationSchema schema = new AbstractJavaApplicationSchemaStub(SimpleJavaApplication.class,
-                                                                                     "TestExe",
-                                                                                     "TestApp",
-                                                                                     "classpath");
-
-        Platform      platform = mock(Platform.class);
-        PlatformAware property = mock(PlatformAware.class);
-
-        when(property.toString()).thenReturn("my-property-value");
-
-        schema.setSystemProperty("my.property", property);
-
-        Properties properties = schema.getSystemProperties(platform);
-
-        assertThat(properties.getProperty("my.property"), is("my-property-value"));
-
-        verify(property).setPlatform(same(platform));
     }
 
 
