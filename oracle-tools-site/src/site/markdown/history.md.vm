@@ -475,6 +475,9 @@ reverse chronological order.
 *   [ORACLETOOLS-215](https://java.net/jira/browse/ORACLETOOLS-215): Removed
     the requirement for the Assembly interface to extend Option and ApplicationListener.
 
+*   [ORACLETOOLS-217](https://java.net/jira/browse/ORACLETOOLS-217): AvailablePortIterator
+    should bind to the wildcard address by default, not localhost.
+
 *   [ORACLETOOLS-218](https://java.net/jira/browse/ORACLETOOLS-218): Removed
     the PlatformAware interface together with all internal implementations.
 

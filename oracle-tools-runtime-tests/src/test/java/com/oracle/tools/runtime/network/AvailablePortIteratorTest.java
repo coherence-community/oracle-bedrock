@@ -26,16 +26,20 @@
 package com.oracle.tools.runtime.network;
 
 import com.oracle.tools.deferred.Eventually;
+
 import org.hamcrest.MatcherAssert;
+
 import org.junit.Test;
 
-import java.net.UnknownHostException;
-import java.util.ArrayList;
-
 import static com.oracle.tools.deferred.DeferredHelper.invoking;
+
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
+
+import java.net.UnknownHostException;
+
+import java.util.ArrayList;
 
 /**
  * Unit tests for the {@link AvailablePortIterator}.
@@ -53,7 +57,7 @@ public class AvailablePortIteratorTest
      * @throws UnknownHostException
      */
     @Test
-    public void shouldFindAvailablePort() throws UnknownHostException
+    public void shouldFindAvailablePort()
     {
         AvailablePortIterator iterator = new AvailablePortIterator(40000, 40100);
 
@@ -68,7 +72,7 @@ public class AvailablePortIteratorTest
      * @throws UnknownHostException
      */
     @Test
-    public void shouldFindDifferentAvailablePorts() throws UnknownHostException
+    public void shouldFindDifferentAvailablePorts()
     {
         AvailablePortIterator availablePortIterator1 = new AvailablePortIterator(40000, 40100);
         AvailablePortIterator availablePortIterator2 = new AvailablePortIterator(40000, 40100);
