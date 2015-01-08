@@ -466,11 +466,6 @@ public class PropertiesBuilder
             {
                 Object value = getProperty(name);
 
-                if (value instanceof PlatformAware)
-                {
-                    ((PlatformAware) value).setPlatform(platform);
-                }
-
                 if (value != null)
                 {
                     if (value instanceof Iterator<?>)

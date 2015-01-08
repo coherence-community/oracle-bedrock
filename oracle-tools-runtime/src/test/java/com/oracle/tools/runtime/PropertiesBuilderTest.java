@@ -425,27 +425,4 @@ public class PropertiesBuilderTest
         assertThat(properties.getProperty("Key-1"), is("Value-1-Default"));
         assertThat(properties.getProperty("Key-2"), is("One"));
     }
-
-
-    /**
-     * Ensure property values that are {@link PlatformAware} work correctly
-     */
-    @Test
-    public void shouldPassPlatformToPlatformAwareProperties() throws Exception
-    {
-        Platform          platform = mock(Platform.class);
-        PlatformAware     property = mock(PlatformAware.class);
-
-        PropertiesBuilder builder  = new PropertiesBuilder();
-
-        when(property.toString()).thenReturn("my-property-value");
-
-        builder.setProperty("my.property", property);
-
-        Properties properties = builder.realize(null, platform);
-
-        assertThat(properties.getProperty("my.property"), is("my-property-value"));
-
-        verify(property).setPlatform(same(platform));
-    }
 }
