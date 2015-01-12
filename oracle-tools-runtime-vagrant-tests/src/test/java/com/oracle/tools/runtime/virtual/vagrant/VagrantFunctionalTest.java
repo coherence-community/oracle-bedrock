@@ -175,12 +175,12 @@ public class VagrantFunctionalTest
 
         try
         {
-            schema.setLocalHostAddress(platform1.getPublicInetAddress().getHostName());
+            schema.setLocalHostAddress(platform1.getAddress().getHostAddress());
 
             app1 = platform1.realize("Data-1@VM-1", schema, new SystemApplicationConsole());
             app2 = platform1.realize("Data-2@VM-1", schema, new SystemApplicationConsole());
 
-            schema.setLocalHostAddress(platform2.getPublicInetAddress().getHostName());
+            schema.setLocalHostAddress(platform2.getAddress().getHostAddress());
 
             app3 = platform2.realize("Data-1@VM-2", schema, new SystemApplicationConsole());
             app4 = platform2.realize("Data-2@VM-2", schema, new SystemApplicationConsole());
@@ -272,7 +272,7 @@ public class VagrantFunctionalTest
 
             assertThat(platform, is(notNullValue()));
 
-            InetAddress address = platform.getPublicInetAddress();
+            InetAddress address = platform.getAddress();
 
             assertThat(address.getAddress(), is(InetAddress.getByName("192.168.56.210").getAddress()));
             assertThat(address.isReachable(20000), is(true));

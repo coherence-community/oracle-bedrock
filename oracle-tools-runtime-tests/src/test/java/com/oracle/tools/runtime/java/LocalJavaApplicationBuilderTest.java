@@ -86,6 +86,7 @@ import java.util.List;
 import java.util.UUID;
 
 import java.util.concurrent.TimeUnit;
+
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -259,7 +260,8 @@ public class LocalJavaApplicationBuilderTest extends AbstractJavaApplicationBuil
                 // (this can take sometime as JDB initializes itself)
                 Eventually.assertThat("Application did not connect back to JDB",
                                       invoking(jdbConsole).getCapturedOutputLines(),
-                                      hasItem(containsString("VM Started:")), delayedBy(10, TimeUnit.SECONDS));
+                                      hasItem(containsString("VM Started:")),
+                                      delayedBy(10, TimeUnit.SECONDS));
             }
         }
     }
@@ -272,8 +274,8 @@ public class LocalJavaApplicationBuilderTest extends AbstractJavaApplicationBuil
         assertThat(socket, is(notNullValue()));
 
         SimpleApplicationSchema schema =
-            new SimpleApplicationSchema("jdb").addArgument("-attach").addArgument(socket.getHostName() + ":"
-                                        + socket.getPort());
+            new SimpleApplicationSchema("jdb").addArgument("-attach").addArgument(socket.getAddress().getHostAddress()
+                                        + ":" + socket.getPort());
 
         CapturingApplicationConsole console = new CapturingApplicationConsole();
 

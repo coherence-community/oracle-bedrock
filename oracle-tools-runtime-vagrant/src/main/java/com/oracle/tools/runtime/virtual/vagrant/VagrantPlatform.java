@@ -32,7 +32,6 @@ import com.oracle.tools.runtime.Application;
 import com.oracle.tools.runtime.ApplicationBuilder;
 import com.oracle.tools.runtime.ApplicationConsole;
 import com.oracle.tools.runtime.ApplicationSchema;
-import com.oracle.tools.runtime.LocalPlatform;
 import com.oracle.tools.runtime.SimpleApplication;
 import com.oracle.tools.runtime.SimpleApplicationBuilder;
 import com.oracle.tools.runtime.SimpleApplicationSchema;
@@ -193,13 +192,19 @@ public class VagrantPlatform extends VirtualPlatform
         SimpleApplicationSchema schemaUp = instantiateSchema().addArgument("up");
 
         execute(schemaUp);
-        detecteSSH();
+        detectSSH();
 
         try
         {
             if (publicHostName != null &&!publicHostName.isEmpty())
             {
-                setPublicAddress(InetAddress.getByName(publicHostName));
+                this.address = InetAddress.getByName(publicHostName);
+            }
+            else
+            {
+                // TODO: is this correct?  Should we assume the loopback address?
+                // perhaps it's possible to ask the RemoteApplication it's address?
+                this.address = InetAddress.getLoopbackAddress();
             }
         }
         catch (UnknownHostException e)
@@ -213,7 +218,7 @@ public class VagrantPlatform extends VirtualPlatform
      * Detect the SSH settings for the NAT port forwarding that Vagrant
      * has configured on the VM and set them into this {@link VagrantPlatform}.
      */
-    protected void detecteSSH()
+    protected void detectSSH()
     {
         SimpleApplicationSchema  schema  = instantiateSchema().addArgument("ssh-config");
         SimpleApplicationBuilder builder = new SimpleApplicationBuilder();
@@ -256,7 +261,10 @@ public class VagrantPlatform extends VirtualPlatform
                 }
             }
 
-            this.privateAddress = LocalPlatform.getInstance().getPrivateInetAddress();
+            // Important:  At this point all we know is that we can connect to the local loopback
+            // NAT'd address so we can SSH into the Vagrant Box.   We don't know what the
+            // address of the Vagrant Box is.  It may not even have an address we can access.
+            this.address        = InetAddress.getLoopbackAddress();
             this.port           = Integer.parseInt(sshProperties.getProperty("Port"));
             this.userName       = sshProperties.getProperty("User");
             this.authentication = SecureKeys.fromPrivateKeyFile(sshProperties.getProperty("IdentityFile"));

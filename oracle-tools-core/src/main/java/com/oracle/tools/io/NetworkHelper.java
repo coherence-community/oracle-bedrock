@@ -34,6 +34,7 @@ import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
+import java.net.UnknownHostException;
 
 import java.util.Enumeration;
 
@@ -212,5 +213,73 @@ public class NetworkHelper
         }
 
         return null;
+    }
+
+
+    /**
+     * Obtains an {@link InetAddress} that is feasibly a reachable, non-loopback, site-local network address of the
+     * localhost, especially in cases where a localhost is multi-homed with numerous virtual network adapters, including
+     * loop-back.
+     * <p/>
+     * This method will consult all of the network interfaces defined by the localhost to determine the
+     * {@link InetAddress} that is feasibly a locally reachable network address.  When a localhost has numerous network
+     * interfaces, this method will return the first available and active site-local {@link InetAddress}, like 192.168.x.x
+     * or 10.10.x.x.  Should one not be available, this method will attempt to return the first non-loop-back address.
+     * Should both of these approaches fail, the {@link InetAddress#getLocalHost()} will returned and failing that
+     * not being available {@link InetAddress#getLoopbackAddress()} will be returned.
+     */
+    public static InetAddress getFeasibleLocalHost()
+    {
+        try
+        {
+            InetAddress potentialInetAddress = null;
+
+            // consider each of the NetworkInterfaces
+            for (Enumeration<NetworkInterface> networkInterfaces = NetworkInterface.getNetworkInterfaces();
+                networkInterfaces.hasMoreElements(); )
+            {
+                NetworkInterface networkInterface = networkInterfaces.nextElement();
+
+                // consider each of the InetAddresses defined by the NetworkInterface
+                for (Enumeration<InetAddress> inetAddresses = networkInterface.getInetAddresses();
+                    inetAddresses.hasMoreElements(); )
+                {
+                    InetAddress inetAddress = inetAddresses.nextElement();
+
+                    if (!inetAddress.isLoopbackAddress())
+                    {
+                        if (inetAddress.isSiteLocalAddress())
+                        {
+                            // found a non-loopback site-local address!
+                            return inetAddress;
+                        }
+                        else if (potentialInetAddress == null)
+                        {
+                            // discovered a non-loopback but site-local address (remember it just in case!)
+                            potentialInetAddress = inetAddress;
+                        }
+                    }
+                }
+            }
+
+            if (potentialInetAddress == null)
+            {
+                // we didn't discover a site-local or other non-loopback address, so we'll ask Java for the localhost
+                potentialInetAddress = InetAddress.getLocalHost();
+            }
+
+            if (potentialInetAddress == null)
+            {
+                // the localhost is undefined as well, so let's fall-back to loop-back
+                potentialInetAddress = InetAddress.getLoopbackAddress();
+            }
+
+            return potentialInetAddress;
+        }
+        catch (Exception e)
+        {
+            // TODO: log once that the address can't be discovered (we're probably without a network)
+            return InetAddress.getLoopbackAddress();
+        }
     }
 }

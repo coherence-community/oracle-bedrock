@@ -25,6 +25,8 @@
 
 package com.oracle.tools.runtime;
 
+import com.oracle.tools.io.NetworkHelper;
+
 import com.oracle.tools.runtime.java.JavaApplication;
 import com.oracle.tools.runtime.java.LocalJavaApplicationBuilder;
 
@@ -51,6 +53,11 @@ public class LocalPlatform extends AbstractPlatform
 
     private AvailablePortIterator availablePortIterator;
 
+    /**
+     * The {@link InetAddress} of the {@link Platform}.
+     */
+    private InetAddress address;
+
 
     /**
      * Construct a new {@link LocalPlatform}.
@@ -58,33 +65,39 @@ public class LocalPlatform extends AbstractPlatform
     private LocalPlatform()
     {
         super("Local");
-        availablePortIterator = new AvailablePortIterator(30000, AvailablePortIterator.MAXIMUM_PORT);
+
+        // ----- establish InetAddress of the LocalPlatform -----
+
+        // attempt to use the system property that may have been defined
+        // (in the future we may use a PlatformAddress Option to achieve this)
+        String addressSystemProperty = System.getProperty("oracletools.runtime.address");
+
+        if (addressSystemProperty == null)
+        {
+            this.address = NetworkHelper.getFeasibleLocalHost();
+        }
+        else
+        {
+            try
+            {
+                this.address = InetAddress.getByName(addressSystemProperty);
+            }
+            catch (UnknownHostException e)
+            {
+                // TODO: log that the specified address can't be resolved, defaulting to the feasible localhost
+                this.address = NetworkHelper.getFeasibleLocalHost();
+            }
+        }
+
+        // ----- establish an AvailablePortIterator for the LocalPlatform ------
+        this.availablePortIterator = new AvailablePortIterator(30000, AvailablePortIterator.MAXIMUM_PORT);
     }
 
 
     @Override
-    public InetAddress getPublicInetAddress()
+    public InetAddress getAddress()
     {
-        try
-        {
-            return InetAddress.getByName(getHostName());
-        }
-        catch (UnknownHostException e)
-        {
-            throw new RuntimeException("Unable to obtain an InetAddress for the LocalPlatform", e);
-        }
-    }
-
-
-    /**
-     * Obtains the local host address to use for local-only connections
-     * on the platform.
-     *
-     * @return the local host string for the platform
-     */
-    public String getHostName()
-    {
-        return System.getProperty("tangosol.coherence.localhost", "127.0.0.1");
+        return address;
     }
 
 

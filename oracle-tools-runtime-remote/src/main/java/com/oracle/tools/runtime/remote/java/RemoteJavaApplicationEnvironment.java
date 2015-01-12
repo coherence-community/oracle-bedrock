@@ -27,11 +27,7 @@ package com.oracle.tools.runtime.remote.java;
 
 import com.oracle.tools.Options;
 
-import com.oracle.tools.io.NetworkHelper;
-
 import com.oracle.tools.lang.StringHelper;
-
-import com.oracle.tools.predicate.Predicate;
 
 import com.oracle.tools.runtime.LocalPlatform;
 import com.oracle.tools.runtime.Platform;
@@ -52,9 +48,6 @@ import com.oracle.tools.runtime.options.PlatformSeparators;
 
 import com.oracle.tools.runtime.remote.AbstractRemoteApplicationEnvironment;
 import com.oracle.tools.runtime.remote.java.options.JavaDeployment;
-
-import static com.oracle.tools.predicate.Predicates.allOf;
-import static com.oracle.tools.predicate.Predicates.isNot;
 
 import java.io.IOException;
 
@@ -238,7 +231,7 @@ public class RemoteJavaApplicationEnvironment<A extends JavaApplication>
 
             String debugAddress = isDebugServer
                                   ? String.valueOf(remoteDebugPort)
-                                  : LocalPlatform.getInstance().getHostName() + ":" + remoteDebugPort;
+                                  : LocalPlatform.getInstance().getAddress().getHostAddress() + ":" + remoteDebugPort;
 
             String debugOption = String.format(" -agentlib:jdwp=transport=dt_socket,server=%s,suspend=%s,address=%s",
                                                (isDebugServer ? "y" : "n"),

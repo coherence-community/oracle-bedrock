@@ -135,7 +135,7 @@ public class AbstractVagrantPlatformSchemaTest
 
         assertThat(result, is(sameInstance(platform)));
 
-        File expected = new File(new File(dir, "Foo"), "VagrantFile");
+        File expected = new File(new File(dir, "Foo"), "Vagrantfile");
 
         verify(schema).realize(eq("Foo"), eq(expected));
     }

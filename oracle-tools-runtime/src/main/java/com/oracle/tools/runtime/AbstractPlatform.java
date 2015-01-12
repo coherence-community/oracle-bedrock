@@ -80,13 +80,6 @@ public abstract class AbstractPlatform implements Platform
 
 
     @Override
-    public InetAddress getPrivateInetAddress()
-    {
-        return getPublicInetAddress();
-    }
-
-
-    @Override
     public <A extends Application, S extends ApplicationSchema<A>> A realize(String             applicationName,
                                                                              S                  applicationSchema,
                                                                              ApplicationConsole console,
