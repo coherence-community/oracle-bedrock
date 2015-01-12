@@ -25,6 +25,8 @@
 
 package com.oracle.tools.runtime;
 
+import com.oracle.tools.Option;
+
 import com.oracle.tools.predicate.Predicate;
 
 import java.util.Iterator;
@@ -45,7 +47,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  *
  * @param <A>  the type of {@link Application} that belongs to the {@link Assembly}.
  */
-public abstract class AbstractAssembly<A extends Application> implements Assembly<A>
+public abstract class AbstractAssembly<A extends Application> implements Assembly<A>, ApplicationListener<A>
 {
     /**
      * The {@link Application}s that belong to the {@link Assembly}.
@@ -67,6 +69,12 @@ public abstract class AbstractAssembly<A extends Application> implements Assembl
     {
         this.applications = new CopyOnWriteArraySet<A>(applications);
         this.isClosed     = new AtomicBoolean(false);
+
+        // ensure the assembly is notified of application lifecycle changes
+        for (A application : this.applications)
+        {
+            application.addApplicationListener(this);
+        }
     }
 
 
@@ -169,6 +177,10 @@ public abstract class AbstractAssembly<A extends Application> implements Assembl
         }
         else
         {
+            // ensure the assembly is notified of application lifecycle changes
+            application.addApplicationListener(this);
+
+            // add the application to the assembly
             applications.add(application);
         }
 
@@ -189,11 +201,15 @@ public abstract class AbstractAssembly<A extends Application> implements Assembl
     {
         if (isClosed())
         {
-            throw new IllegalStateException("Can't add [" + application + "] as the " + this.getClass().getName()
+            throw new IllegalStateException("Can't remove [" + application + "] as the " + this.getClass().getName()
                                             + " is closed");
         }
         else
         {
+            // ensure the assembly is no longer notified of application lifecycle changes
+            application.removeApplicationListener(this);
+
+            // remove the application from the assembly
             return applications.remove(application);
         }
     }
@@ -209,15 +225,29 @@ public abstract class AbstractAssembly<A extends Application> implements Assembl
     @Override
     public void close()
     {
+        this.close(new Option[]
+        {
+        });
+
+    }
+
+
+    @Override
+    public void close(Option... options)
+    {
         if (isClosed.compareAndSet(false, true))
         {
             for (A application : applications)
             {
                 if (application != null)
                 {
+                    // ensure the assembly is no longer notified of application
+                    // lifecycle changes
+                    application.removeApplicationListener(this);
+
                     try
                     {
-                        application.close();
+                        application.close(options);
                     }
                     catch (Exception e)
                     {

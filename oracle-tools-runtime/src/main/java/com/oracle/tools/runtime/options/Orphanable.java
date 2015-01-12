@@ -69,6 +69,44 @@ public class Orphanable implements Option
     }
 
 
+    @Override
+    public String toString()
+    {
+        return "Orphanable{" + orphanable + "}";
+    }
+
+
+    @Override
+    public boolean equals(Object other)
+    {
+        if (this == other)
+        {
+            return true;
+        }
+
+        if (!(other instanceof Orphanable))
+        {
+            return false;
+        }
+
+        Orphanable that = (Orphanable) other;
+
+        if (orphanable != that.orphanable)
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+
+    @Override
+    public int hashCode()
+    {
+        return (orphanable ? 1 : 0);
+    }
+
+
     /**
      * Constructs a {@link Orphanable} being enabled.
      *

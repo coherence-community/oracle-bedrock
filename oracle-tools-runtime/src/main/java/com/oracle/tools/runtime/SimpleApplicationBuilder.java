@@ -28,6 +28,8 @@ package com.oracle.tools.runtime;
 import com.oracle.tools.Option;
 import com.oracle.tools.Options;
 
+import com.oracle.tools.lang.StringHelper;
+
 import com.oracle.tools.runtime.options.EnvironmentVariables;
 import com.oracle.tools.runtime.options.ErrorStreamRedirection;
 
@@ -64,19 +66,28 @@ public class SimpleApplicationBuilder extends AbstractApplicationBuilder<SimpleA
                                                                                    Platform           platform,
                                                                                    Option...          applicationOptions)
     {
-        // obtain the platform specific options from the schema
-        Options options = applicationSchema.getPlatformSpecificOptions(platform);
+        ApplicationSchema<T> schema = applicationSchema;
+
+        // ---- establish the Options for the Application -----
+
+        // add the platform options
+        Options options = new Options(platform == null ? null : platform.getOptions().asArray());
+
+        // add the schema options
+        options.addAll(applicationSchema.getOptions().asArray());
+
+        // add the schema options (based on the platform)
+        options.addAll(applicationSchema.getPlatformSpecificOptions(platform).asArray());
 
         // add the custom application options
         options.addAll(applicationOptions);
-
-        ApplicationSchema<T> schema = applicationSchema;
 
         // ---- establish the underlying ProcessBuilder -----
 
         // we'll use the native operating system process builder to create
         // and manage the local application process
-        ProcessBuilder processBuilder = new ProcessBuilder(schema.getExecutableName());
+        ProcessBuilder processBuilder =
+            new ProcessBuilder(StringHelper.doubleQuoteIfNecessary(schema.getExecutableName()));
 
         // ----- establish the working directory -----
 

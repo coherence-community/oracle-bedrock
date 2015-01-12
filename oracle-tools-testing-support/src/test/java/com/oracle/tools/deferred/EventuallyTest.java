@@ -30,11 +30,18 @@ import com.oracle.tools.util.StopWatch;
 import org.junit.Assert;
 import org.junit.Test;
 
+import static com.oracle.tools.deferred.DeferredHelper.valueOf;
 import static com.oracle.tools.deferred.DeferredHelper.within;
+
+import static org.hamcrest.CoreMatchers.nullValue;
 
 import static org.hamcrest.core.Is.is;
 
 import java.util.concurrent.TimeUnit;
+
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Unit tests for {@link Eventually}.
@@ -44,11 +51,10 @@ import java.util.concurrent.TimeUnit;
  *
  * @author Brian Oliver
  */
-
 public class EventuallyTest
 {
     /**
-     * Ensure that a {@link Eventually#assertThat(Deferred, org.hamcrest.Matcher)}
+     * Ensure that a {@link Eventually#assertThat(Object, org.hamcrest.Matcher)}
      * waits at least the default amount of time before throwing an exception when
      * a {@link Deferred} is {@link NotAvailable}.
      */
@@ -60,7 +66,7 @@ public class EventuallyTest
         try
         {
             stopWatch.start();
-            Eventually.assertThat(new NotAvailable<String>(String.class), is("hello world"));
+            Eventually.assertThat(valueOf(new NotAvailable<String>(String.class)), is("hello world"));
         }
         catch (AssertionError e)
         {
@@ -84,7 +90,7 @@ public class EventuallyTest
 
 
     /**
-     * Ensure that a {@link Eventually#assertThat(Deferred, org.hamcrest.Matcher)}
+     * Ensure that a {@link Eventually#assertThat(Object, org.hamcrest.Matcher)}
      * waits at least the specified time before throwing an exception when
      * the {@link Deferred} returns <code>null</code>.
      */
@@ -97,7 +103,7 @@ public class EventuallyTest
         try
         {
             stopWatch.start();
-            Eventually.assertThat(new NotAvailable<String>(String.class),
+            Eventually.assertThat(valueOf(new NotAvailable<String>(String.class)),
                                   is("hello world"),
                                   within(retryDurationSECS, TimeUnit.SECONDS));
         }
@@ -121,7 +127,7 @@ public class EventuallyTest
 
 
     /**
-     * Ensure that a {@link Eventually#assertThat(Deferred, org.hamcrest.Matcher)}
+     * Ensure that a {@link Eventually#assertThat(Object, org.hamcrest.Matcher)}
      * fails fast when the {@link Deferred} throws an {@link PermanentlyUnavailableException}.
      */
     @Test
@@ -132,7 +138,7 @@ public class EventuallyTest
         try
         {
             stopWatch.start();
-            Eventually.assertThat(new NeverAvailable<String>(String.class), is("hello world"));
+            Eventually.assertThat(valueOf(new NeverAvailable<String>(String.class)), is("hello world"));
         }
         catch (AssertionError e)
         {
@@ -154,7 +160,31 @@ public class EventuallyTest
 
 
     /**
-     * Ensure that the exception thrown by {@link Eventually#assertThat(Deferred, org.hamcrest.Matcher)}
+     * Ensure that a {@link Eventually#assertThat(Object, org.hamcrest.Matcher)}
+     * returns immediately if the {@link Deferred} resolves to <code>null</code>.
+     */
+    @Test
+    public void shouldReturnImmediatelyWhenEncounteringNull()
+    {
+        StopWatch stopWatch = new StopWatch();
+
+        stopWatch.start();
+        Eventually.assertThat(valueOf(new DeferredNull<String>(String.class)
+        {
+        } ), is(nullValue()));
+
+        stopWatch.stop();
+
+        Assert.assertTrue(String
+            .format("Failed to return immediately when encountering a null.  Instead waited for Waited %s seconds",
+                    stopWatch.getElapsedTimeIn(TimeUnit.SECONDS)),
+                          stopWatch.getElapsedTimeIn(TimeUnit.SECONDS)
+                          < DeferredHelper.ORACLETOOLS_DEFERRED_RETRY_TIMEOUT_SECS);
+    }
+
+
+    /**
+     * Ensure that the exception thrown by {@link Eventually#assertThat(Object, org.hamcrest.Matcher)}
      * contains the last used value with the matcher.
      */
     @Test
@@ -164,7 +194,7 @@ public class EventuallyTest
 
         try
         {
-            Eventually.assertThat(deferred, is("Gudday"), within(1, TimeUnit.SECONDS));
+            Eventually.assertThat(valueOf(deferred), is("Gudday"), within(1, TimeUnit.SECONDS));
         }
         catch (AssertionError e)
         {
@@ -189,5 +219,28 @@ public class EventuallyTest
         Eventually.assertThat(Long.valueOf(5), is(5L));
 
         Eventually.assertThat(5L, is(Long.valueOf(5)));
+    }
+
+
+    /**
+     * Ensure that Eventually.assertThat works with atomics.
+     */
+    @Test
+    public void shouldEventuallyAssertThatUsingAtomics()
+    {
+        // use an atomic long
+        AtomicLong atomicLong = new AtomicLong(42);
+
+        Eventually.assertThat(valueOf(atomicLong), is(42L));
+
+        // use an atomic integer
+        AtomicInteger atomicInteger = new AtomicInteger(42);
+
+        Eventually.assertThat(valueOf(atomicInteger), is(42));
+
+        // use an atomic boolean
+        AtomicBoolean atomicBoolean = new AtomicBoolean(true);
+
+        Eventually.assertThat(valueOf(atomicBoolean), is(true));
     }
 }

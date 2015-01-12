@@ -25,9 +25,12 @@
 
 package com.oracle.tools.runtime;
 
+import com.oracle.tools.Option;
 import com.oracle.tools.Options;
 
 import com.oracle.tools.options.Timeout;
+
+import com.oracle.tools.runtime.options.ApplicationClosingBehavior;
 
 import java.io.Closeable;
 
@@ -74,7 +77,7 @@ public interface Application extends Closeable
 
 
     /**
-     * Attempts to gracefully closes and terminate the running {@link Application}.
+     * Attempts to close and terminate the running {@link Application}.
      * <p>
      * Upon returning it is safe to assume that the {@link Application}
      * is no longer running.   All resources, including input and output streams
@@ -84,6 +87,24 @@ public interface Application extends Closeable
      */
     @Override
     public void close();
+
+
+    /**
+     * Attempts to close and terminate the running {@link Application} using the
+     * specified {@link Option}s.  When no {@link Option}s are specified
+     * a regular {@link #close} is performed.
+     * <p>
+     * Upon returning it is safe to assume that the {@link Application}
+     * is no longer running.   All resources, including input and output streams
+     * used by the {@link Application} are no longer available to be used.
+     * <p>
+     * To determine the exit value of the terminated application use {@link #exitValue()}.
+     *
+     * @param options  the {@link Option}s indicating how to close the application.
+     *
+     * @see ApplicationClosingBehavior
+     */
+    public void close(Option... options);
 
 
     /**
@@ -143,4 +164,20 @@ public interface Application extends Closeable
      * @return the {@link Options}
      */
     public Options getOptions();
+
+
+    /**
+     * Adds an {@link ApplicationListener} to the {@link Application}.
+     *
+     * @param listener  the {@link ApplicationListener}
+     */
+    public void addApplicationListener(ApplicationListener listener);
+
+
+    /**
+     * Removes an {@link ApplicationListener} from the {@link Application}.
+     *
+     * @param listener  the {@link ApplicationListener}
+     */
+    public void removeApplicationListener(ApplicationListener listener);
 }

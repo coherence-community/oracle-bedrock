@@ -70,28 +70,28 @@ The following [Apache Maven][MAVEN] modules are defined by Oracle Tools.
 
 Defines the core interfaces, classes and resources for the Oracle Tools.
 
-<img src="images/external-link.png" alt="External Link" height="10" width="10" align="top"/> **Download from [maven.java.net](https://maven.java.net):** [oracle-tools-core-${project.version}.jar](https://maven.java.net/service/local/artifact/maven/redirect?r=${repository}&g=com.oracle.tools&a=oracle-tools-core&v=${project.version}&e=jar)
+<img src="images/external-link.png" alt="External Link" height="10" width="10" align="top"/> **Download from [maven.java.net](https://maven.java.net):** [oracle-tools-core-${project.version}.jar](https://maven.java.net/service/local/artifact/maven/redirect?r=${repository}&amp;g=com.oracle.tools&amp;a=oracle-tools-core&amp;v=${project.version}&amp;e=jar)
 
 [**The Runtime Module:**](runtime/index.html)
 
 Defines the interfaces, classes and resources for creating, managing, monitoring
 and controlling application processes, in particular, Java processes.
 
-<img src="images/external-link.png" alt="External Link" height="10" width="10" align="top"/> **Download from [maven.java.net](https://maven.java.net):** [oracle-tools-runtime-${project.version}.jar](https://maven.java.net/service/local/artifact/maven/redirect?r=${repository}&g=com.oracle.tools&a=oracle-tools-runtime&v=${project.version}&e=jar)
+<img src="images/external-link.png" alt="External Link" height="10" width="10" align="top"/> **Download from [maven.java.net](https://maven.java.net):** [oracle-tools-runtime-${project.version}.jar](https://maven.java.net/service/local/artifact/maven/redirect?r=${repository}&amp;g=com.oracle.tools&amp;a=oracle-tools-runtime&amp;v=${project.version}&amp;e=jar)
 
 [**The Testing Support Module:**](testing-support/index.html)
 
 Defines extensions to [JUnit](http://junit.org/) for the purposes of testing
 processes and deferred results.
 
-<img src="images/external-link.png" alt="External Link" height="10" width="10" align="top"/> **Download from [maven.java.net](https://maven.java.net):** [oracle-tools-testing-support-${project.version}.jar](https://maven.java.net/service/local/artifact/maven/redirect?r=${repository}&g=com.oracle.tools&a=oracle-tools-testing-support&v=${project.version}&e=jar)
+<img src="images/external-link.png" alt="External Link" height="10" width="10" align="top"/> **Download from [maven.java.net](https://maven.java.net):** [oracle-tools-testing-support-${project.version}.jar](https://maven.java.net/service/local/artifact/maven/redirect?r=${repository}&amp;g=com.oracle.tools&amp;a=oracle-tools-testing-support&amp;v=${project.version}&amp;e=jar)
 
 [**The Coherence Module:**](coherence/index.html)
 
 (Optional) Defines extensions to Runtime Module for the purposes of managing Oracle
 Coherence-based applications.   (Requires Oracle Coherence)
 
-<img src="images/external-link.png" alt="External Link" height="10" width="10" align="top"/> **Download from [maven.java.net](https://maven.java.net):** [oracle-tools-coherence-${project.version}.jar](https://maven.java.net/service/local/artifact/maven/redirect?r=${repository}&g=com.oracle.tools&a=oracle-tools-coherence&v=${project.version}&e=jar)
+<img src="images/external-link.png" alt="External Link" height="10" width="10" align="top"/> **Download from [maven.java.net](https://maven.java.net):** [oracle-tools-coherence-${project.version}.jar](https://maven.java.net/service/local/artifact/maven/redirect?r=${repository}&amp;g=com.oracle.tools&amp;a=oracle-tools-coherence&amp;v=${project.version}&amp;e=jar)
 
 <h4>Contributions</h4>
 

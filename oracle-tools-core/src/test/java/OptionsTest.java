@@ -129,8 +129,6 @@ public class OptionsTest
         Class   optionClass = Options.getClassOfOption(option);
 
         assertThat(optionClass.equals(Timeout.class), is(true));
-
-        Enhanced enhanced = new Enhanced();
     }
 
 
@@ -170,6 +168,20 @@ public class OptionsTest
 
 
     /**
+     * Ensure that an abstract class of {@link Option} is not returned
+     * as a concrete type of {@link Option}.
+     */
+
+    @Test
+    public void shouldNotDetermineAbstractOptionClass()
+    {
+        Class optionClass = Options.getClassOfOption(AbstractEnhanced.class);
+
+        assertThat(optionClass, is(nullValue()));
+    }
+
+
+    /**
      * An {@link EnhancedOption}.
      */
     public static interface EnhancedOption extends Option
@@ -178,9 +190,17 @@ public class OptionsTest
 
 
     /**
+     * An abstract {@link EnhancedOption}.
+     */
+    public abstract class AbstractEnhanced implements EnhancedOption
+    {
+    }
+
+
+    /**
      * A simple {@link EnhancedOption}.
      */
-    public class Enhanced implements EnhancedOption
+    public class Enhanced extends AbstractEnhanced
     {
     }
 

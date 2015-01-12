@@ -112,14 +112,22 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication> extends Abst
                                                                    Platform           platform,
                                                                    Option...          applicationOptions)
     {
-        // obtain the platform specific options from the schema
-        Options options = applicationSchema.getPlatformSpecificOptions(platform);
+        // TODO: this should be a safe cast but we should also check to make sure
+        JavaApplicationSchema<T> schema = (JavaApplicationSchema) applicationSchema;
+
+        // ---- establish the Options for the Application -----
+
+        // add the platform options
+        Options options = new Options(platform == null ? null : platform.getOptions().asArray());
+
+        // add the schema options
+        options.addAll(applicationSchema.getOptions().asArray());
+
+        // add the schema options (based on the platform)
+        options.addAll(applicationSchema.getPlatformSpecificOptions(platform).asArray());
 
         // add the custom application options
         options.addAll(applicationOptions);
-
-        // TODO: this should be a safe cast but we should also check to make sure
-        JavaApplicationSchema<T> schema = (JavaApplicationSchema) applicationSchema;
 
         // ---- establish the underlying ProcessBuilder -----
 
@@ -202,7 +210,7 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication> extends Abst
         if (javaHome == null)
         {
             // when we don't have a java home we just use the defined executable
-            processBuilder.command(schema.getExecutableName());
+            processBuilder.command(StringHelper.doubleQuoteIfNecessary(schema.getExecutableName()));
         }
         else
         {
@@ -216,26 +224,8 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication> extends Abst
                 javaHomePath = javaHomePath + File.separator;
             }
 
-            processBuilder.command(javaHomePath + "bin" + File.separator + schema.getExecutableName());
-        }
-
-        // ----- establish the system properties for the java application -----
-
-        // define the system properties based on those defined by the schema
-        Properties systemProperties = schema.getSystemProperties(platform);
-
-        for (String propertyName : systemProperties.stringPropertyNames())
-        {
-            String propertyValue = systemProperties.getProperty(propertyName);
-
-            // filter out (don't set) system properties that start with "oracletools"
-            // (we don't want to have "parents" applications effect child applications
-            if (!propertyName.startsWith("oracletools"))
-            {
-                processBuilder.command().add("-D" + propertyName
-                                             + (propertyValue.isEmpty()
-                                                ? "" : "=" + StringHelper.doubleQuoteIfNecessary(propertyValue)));
-            }
+            processBuilder.command(StringHelper.doubleQuoteIfNecessary(javaHomePath + "bin" + File.separator
+                                                                       + schema.getExecutableName()));
         }
 
         // ----- establish Oracle Tools specific system properties -----
@@ -258,14 +248,43 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication> extends Abst
                                                                                 .NON_LOOPBACK_ADDRESS) : NetworkHelper
                                                                                     .DEFAULT_ADDRESS;
 
-        processBuilder.command().add("-D" + Settings.PARENT_ADDRESS + "="
-                                     + server.getInetAddress(preferred).getHostAddress());
+        InetAddress inetAddress = server.getInetAddress(preferred);
+
+        if (inetAddress == null)
+        {
+            preferred = schema.isIPv4Preferred()
+                        ? allOf(NetworkHelper.IPv4_ADDRESS, NetworkHelper.LOOPBACK_ADDRESS)
+                        : allOf(NetworkHelper.DEFAULT_ADDRESS, NetworkHelper.LOOPBACK_ADDRESS);
+
+            inetAddress = server.getInetAddress(preferred);
+        }
+
+        processBuilder.command().add("-D" + Settings.PARENT_ADDRESS + "=" + inetAddress.getHostAddress());
         processBuilder.command().add("-D" + Settings.PARENT_PORT + "=" + server.getPort());
 
         // add Orphanable configuration
         Orphanable orphanable = options.get(Orphanable.class, Orphanable.disabled());
 
         processBuilder.command().add("-D" + Settings.ORPHANABLE + "=" + orphanable.isOrphanable());
+
+        // ----- establish the system properties for the java application -----
+
+        // define the system properties based on those defined by the schema
+        Properties systemProperties = schema.getSystemProperties(platform);
+
+        for (String propertyName : systemProperties.stringPropertyNames())
+        {
+            String propertyValue = systemProperties.getProperty(propertyName);
+
+            // filter out (don't set) system properties that start with "oracletools"
+            // (we don't want to have "parents" applications effect child applications
+            if (!propertyName.startsWith("oracletools"))
+            {
+                processBuilder.command().add("-D" + propertyName
+                                             + (propertyValue.isEmpty()
+                                                ? "" : "=" + StringHelper.doubleQuoteIfNecessary(propertyValue)));
+            }
+        }
 
         // ----- establish Java Virtual Machine options -----
 
@@ -296,10 +315,9 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication> extends Abst
             boolean isDebugServer = remoteDebugging.getBehavior() == RemoteDebugging.Behavior.LISTEN_FOR_DEBUGGER;
 
             // construct the Java option
-            String option = String.format("-agentlib:jdwp=transport=dt_socket,server=%s,suspend=%s,address=%s:%d",
+            String option = String.format("-agentlib:jdwp=transport=dt_socket,server=%s,suspend=%s,address=%d",
                                           (isDebugServer ? "y" : "n"),
                                           (remoteDebugging.isStartSuspended() ? "y" : "n"),
-                                          LocalPlatform.getInstance().getHostName(),
                                           debugPort);
 
             processBuilder.command().add(option);

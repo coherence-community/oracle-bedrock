@@ -37,6 +37,9 @@ reverse chronological order.
     MOCKITO Dependency:    Version 1.9.0 -> 1.9.5
     OBJENESIS Dependency:  Version 1.2 -> 2.1
 
+*   [ORACLETOOLS-213](https://java.net/jira/browse/ORACLETOOLS-213): Introduced
+    Object.equals() and Object.hashCode() methods for all Option implementations.
+
 <h4>oracle-tools-core</h4>
 
 *   [ORACLETOOLS-87](https://java.net/jira/browse/ORACLETOOLS-87): Increased
@@ -78,11 +81,65 @@ reverse chronological order.
 *   [ORACLETOOLS-172](https://java.net/jira/browse/ORACLETOOLS-172): Resolved
     inability to use DeferredHelper.invoking(...) method calls that return arrays.
 
+*   [ORACLETOOLS-186](https://java.net/jira/browse/ORACLETOOLS-186): Moved the
+    Diagnostics option from the oracle-tools-runtime module into the
+    oracle-tools-core module.
+
+*   [ORACLETOOLS-187](https://java.net/jira/browse/ORACLETOOLS-187): Ensured
+    that the Options.getClassOfOption(...) methods only return concrete classes
+    or interfaces directly implementing the Option/ComposableOption interfaces.
+
+*   [ORACLETOOLS-198](https://java.net/jira/browse/ORACLETOOLS-198): Introduced
+    the ability to specify the proxy type when using invoking(..., Class).
+    This allows final class instances to be specified for invoking, but a proxy
+    of interfaces or super classes to be created.
+
+*   [ORACLETOOLS-199](https://java.net/jira/browse/ORACLETOOLS-199): Resolved
+    issue where attempting to call invoking(...) on a final class/instance
+    would cause misleading exceptions to be thrown.
+
+*   [ORACLETOOLS-200](https://java.net/jira/browse/ORACLETOOLS-200): Introduced
+    DeferredCallables, DeferredHelper.deferred(Callable) and
+    DeferredHelper.valueOf(Callable) to allow simple application of Java 8
+    lambdas.
+
+    eg: Eventually.assertThat(valueOf(() -> 42), is(42));
+
+*   [ORACLETOOLS-201](https://java.net/jira/browse/ORACLETOOLS-201): Allowed
+    Atomic types to be used with DeferredHelper.valueOf(...) thus making
+    Eventually.assertThat(...) calls simpler.  eg: there's no reason to use
+    valueOf(deferred(atomic)), now you can just use valueOf(atomic).
+
+*   [ORACLETOOLS-202](https://java.net/jira/browse/ORACLETOOLS-202): Resolved
+    issue where the Ensured class would continuously attempt to retry (calling
+    .get() on the underlying Deferred) when null was encountered.   This is
+    incorrect behavior according to the contract defined by the Deferred class.
+
+    *BREAKING CHANGE:* This may be a breaking change for some custom Deferred
+    implementations in Oracle Tools 1.x
+
+*   [ORACLETOOLS-209](https://java.net/jira/browse/ORACLETOOLS-209): Allowed
+    java.lang.Enums to be used as part of invoking(...) calls.
+
+*   [ORACLETOOLS-211](https://java.net/jira/browse/ORACLETOOLS-211): Introduced
+    upper-bound for ensured (deferred) polling times.  Introduced Duration
+    class to represent Durations.  Refactored Timeout to use Durations.  Refactored
+    internal implementations to use Durations where appropriate.
+
 <h4>oracle-tools-runtime</h4>
 
 *   [ORACLETOOLS-61](https://java.net/jira/browse/ORACLETOOLS-61): Introduced
     the concept of Platform, together with LocalPlatform and RemotePlatform
     implementations.
+
+*   [ORACLETOOLS-69](https://java.net/jira/browse/ORACLETOOLS-69): Removed
+    PropertiesBuilder "default" property support (includes "default" system
+    properties support from JavaApplicationSchema).
+
+    *BREAKING CHANGE:*  While this is a breaking API change, it's highly
+    unlikely that this will effect anyone as it wasn't used internally.
+    Applications using this method are safe to use regular properties
+    instead.
 
 *   [ORACLETOOLS-79](https://java.net/jira/browse/ORACLETOOLS-79): Completed
     implementation of stdin redirection so that an ApplicationConsole can
@@ -358,7 +415,7 @@ reverse chronological order.
     provided for submissions.
 
 *   [ORACLETOOLS-168](https://java.net/jira/browse/ORACLETOOLS-168): Added
-    the method public <T> T submit(RemoteCallable<T> callable) from
+    the method public &lt;T&gt; T submit(RemoteCallable&lt;T&gt; callable) from
     AbstractJavaApplication to the JavaApplication interface.
 
 *   [ORACLETOOLS-171](https://java.net/jira/browse/ORACLETOOLS-171): Refactored
@@ -382,6 +439,47 @@ reverse chronological order.
     *BREAKING CHANGE:*  The returned type of numerous methods were changed to
     Queue from LinkedList.
 
+*   [ORACLETOOLS-180](https://java.net/jira/browse/ORACLETOOLS-180): Correctly
+    double-quoted ApplicationSchema.getExecutableName() when it contains spaces.
+
+*   [ORACLETOOLS-182](https://java.net/jira/browse/ORACLETOOLS-182): Resolves
+    an issue where session timeouts are set to zero for remote applications,
+    regardless of what may be configured.
+
+*   [ORACLETOOLS-185](https://java.net/jira/browse/ORACLETOOLS-185): Optimized
+    diagnostics output when using SystemApplicationConsoles to avoid duplicate
+    output occuring.
+
+*   [ORACLETOOLS-186](https://java.net/jira/browse/ORACLETOOLS-186): Moved the
+    Diagnostics option into the oracle-tools-core module.
+
+*   [ORACLETOOLS-194](https://java.net/jira/browse/ORACLETOOLS-194): Introduced
+    Application.close(Option...) and the ApplicationClosingBehavior Option
+    as a means of controlling how Applications are closed.
+
+*   [ORACLETOOLS-203](https://java.net/jira/browse/ORACLETOOLS-203): Resolved
+    intermittent LocalJavaApplicationBuilder connect-back-to-java-debugger
+    test failures.  Remote Java Debugging should not specify a port for
+    local host sessions.
+
+*   [ORACLETOOLS-204](https://java.net/jira/browse/ORACLETOOLS-204): Resolved
+    race-condition where by Remote Executor Service may acquire a port that is
+    about to be allocated to a System Property.
+
+*   [ORACLETOOLS-207](https://java.net/jira/browse/ORACLETOOLS-207): Introduced
+    Assembly.close(Option...) as a means of controlling how assemblies are closed.
+
+*   [ORACLETOOLS-214](https://java.net/jira/browse/ORACLETOOLS-214): Introduced
+    Option support into Platform implementations.
+
+*   [ORACLETOOLS-215](https://java.net/jira/browse/ORACLETOOLS-215): Removed
+    the requirement for the Assembly interface to extend Option and ApplicationListener.
+
+*   [ORACLETOOLS-217](https://java.net/jira/browse/ORACLETOOLS-217): AvailablePortIterator
+    should bind to the wildcard address by default, not localhost.
+
+*   [ORACLETOOLS-218](https://java.net/jira/browse/ORACLETOOLS-218): Removed
+    the PlatformAware interface together with all internal implementations.
 
 <h4>oracle-tools-runtime-remote</h4>
 
@@ -403,6 +501,26 @@ reverse chronological order.
     issue where wildcards in Java Application classpaths would be expanded
     into a list of every file name (when using tsch).
 
+*   [ORACLETOOLS-179](https://java.net/jira/browse/ORACLETOOLS-179): Resolved
+    issue where deployment of custom artifacts failed when using a
+    CustomDeployment option where the destination directory for
+    the artifacts is not the default working directory.
+
+*   [ORACLETOOLS-183](https://java.net/jira/browse/ORACLETOOLS-183): Resolved
+    issue where Remote Java Application Builders were providing a non-routable
+    address to remote applications.
+
+*   [ORACLETOOLS-189](https://java.net/jira/browse/ORACLETOOLS-189): Resolved
+    ability to set environment variables on some Remote Platforms
+    (works around JSch defect / inability to reliably set environment variables).
+
+*   [ORACLETOOLS-195](https://java.net/jira/browse/ORACLETOOLS-195): Resolved
+    issue where RemoteJavaApplicationBuilders did not wait for launched
+    RemoteJavaApplications to "connect back".
+
+*   [ORACLETOOLS-214](https://java.net/jira/browse/ORACLETOOLS-214): Introduced
+    Option support into RemotePlatform implementations.
+
 <h4>oracle-tools-runtime-virtual</h4>
 
 *   [ORACLETOOLS-222](https://java.net/jira/browse/ORACLETOOLS-222): Fixed bug
@@ -413,7 +531,11 @@ reverse chronological order.
 
 *   [ORACLETOOLS-115](https://java.net/jira/browse/ORACLETOOLS-115): Introduced
     support for Virtual Machines and specifically support for configuring
-    conrolling virtual machines using Vagrant.
+    controlling virtual machines using Vagrant.
+
+*   [ORACLETOOLS-214](https://java.net/jira/browse/ORACLETOOLS-214): Introduced
+    Option support into VirtualPlatform implementations, includes refactoring
+    CloseAction as an Option.
 
 <h4>oracle-tools-testing-support</h4>
 
@@ -432,6 +554,20 @@ reverse chronological order.
     the correct compile time checking will now be done for assertions. This
     change could introduce compile time errors into existing code that does
     not use the correct types in calls to assert methods.
+
+*   [ORACLETOOLS-192](https://java.net/jira/browse/ORACLETOOLS-192): Resolved
+    type ambiguity issue introduced by Java 8 type-inference incompatibility
+    with Java 5, 6 and 7, by removing all Eventually.assertThat(..., Deferred, ...)
+    methods.   In order to use custom Deferreds directly with Eventually.assertThat
+    you must now wrap them in a DeferredHelper.valueOf(...) call.  For example:
+
+    Eventually.assertThat(deferred, matcher);
+
+    must now be written as:
+
+    Eventually.assertThat(valueOf(deferred), matcher);
+
+    *BREAKING CHANGE:*  Sadly this is a breaking change caused by Java 8.
 
 <h4>oracle-tools-coherence</h4>
 
@@ -484,6 +620,14 @@ reverse chronological order.
 
 *   [ORACLETOOLS-177](https://java.net/jira/browse/ORACLETOOLS-177): Removed
     unnecessary ensure(eventually(...)) in the RestartCoherenceClusterMemberAction.
+
+*   [ORACLETOOLS-205](https://java.net/jira/browse/ORACLETOOLS-205): Corrected
+    location of CoherenceClusterSchema.getOperationalConfigURI() and
+    CoherenceClusterSchema.getPofConfigURI() methods.
+
+*   [ORACLETOOLS-206](https://java.net/jira/browse/ORACLETOOLS-206): Moved
+    CoherenceClusterSchema.isStorageEnabled() method to the
+    CoherenceClusterMemberSchema interface.
 
 <h4>oracle-tools-coherence-testing-support</h4>
 

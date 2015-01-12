@@ -54,6 +54,7 @@ import com.oracle.tools.runtime.remote.AbstractRemoteApplicationEnvironment;
 import com.oracle.tools.runtime.remote.java.options.JavaDeployment;
 
 import static com.oracle.tools.predicate.Predicates.allOf;
+import static com.oracle.tools.predicate.Predicates.isNot;
 
 import java.io.IOException;
 
@@ -107,41 +108,14 @@ public class RemoteJavaApplicationEnvironment<A extends JavaApplication>
     {
         super(schema, platform, options);
 
+        // assume no system properties to start with
+        remoteSystemProperties = new Properties();
+
         // configure a server that the remote process can communicate with
         remoteExecutor = new RemoteExecutorServer();
 
+        // open the server
         remoteExecutor.open();
-
-        // ----- determine the remote system properties -----
-
-        Properties properties = schema.getSystemProperties(platform);
-
-        remoteSystemProperties = new Properties();
-
-        for (String propertyName : properties.stringPropertyNames())
-        {
-            String propertyValue = properties.getProperty(propertyName);
-
-            // filter out (don't set) system properties that start with "oracletools"
-            // (we don't want to have "parents" applications effect child applications
-            if (!propertyName.startsWith("oracletools"))
-            {
-                remoteSystemProperties.setProperty(propertyName, propertyValue);
-            }
-        }
-
-        // add oracle tools specific system properties
-        Predicate<InetAddress> preferred = allOf(NetworkHelper.NON_LOOPBACK_ADDRESS,
-                                                 schema.isIPv4Preferred()
-                                                 ? NetworkHelper.IPv4_ADDRESS : NetworkHelper.DEFAULT_ADDRESS);
-
-        remoteSystemProperties.setProperty(Settings.PARENT_ADDRESS,
-                                           remoteExecutor.getInetAddress(preferred).getHostAddress());
-        remoteSystemProperties.setProperty(Settings.PARENT_PORT, Integer.toString(remoteExecutor.getPort()));
-
-        Orphanable orphanable = options.get(Orphanable.class, Orphanable.disabled());
-
-        remoteSystemProperties.setProperty(Settings.ORPHANABLE, Boolean.toString(orphanable.isOrphanable()));
 
         // ----- determine the remote classpath based on the deployment option -----
 
@@ -172,12 +146,12 @@ public class RemoteJavaApplicationEnvironment<A extends JavaApplication>
 
 
     /**
-     * Obtains the {@link ControllableRemoteExecutor} that can be used to communicate
+     * Obtains the {@link RemoteExecutorServer} that can be used to communicate
      * with the remote {@link JavaApplication}.
      *
      * @return  the {@link ControllableRemoteExecutor}
      */
-    public ControllableRemoteExecutor getRemoteExecutor()
+    public RemoteExecutorServer getRemoteExecutor()
     {
         return remoteExecutor;
     }
@@ -195,7 +169,7 @@ public class RemoteJavaApplicationEnvironment<A extends JavaApplication>
 
 
     @Override
-    public String getRemoteCommandToExecute()
+    public String getRemoteCommandToExecute(InetAddress localInetAddress)
     {
         StringBuilder builder = new StringBuilder();
 
@@ -206,27 +180,28 @@ public class RemoteJavaApplicationEnvironment<A extends JavaApplication>
         if (javaHome == null)
         {
             // when we don't have a java home we just use the defined executable
-            builder.append(schema.getExecutableName());
+            builder.append(StringHelper.doubleQuoteIfNecessary(schema.getExecutableName()));
         }
         else
         {
-            // determine the PlatformSeparators (assume unix is not defined)
+            // determine the PlatformSeparators (assume unix if not defined)
             PlatformSeparators separators = options.get(PlatformSeparators.class, PlatformSeparators.forUnix());
 
             // when we have a java home, we prefix the executable name with the java.home/bin/
-            String javaHomePath = javaHome.get().trim();
+            String javaHomePath   = javaHome.get().trim();
 
-            builder.append(javaHomePath);
+            String javaExecutable = javaHomePath;
 
             if (!javaHomePath.endsWith(separators.getFileSeparator()))
             {
-                builder.append(separators.getFileSeparator());
+                javaExecutable += separators.getFileSeparator();
             }
 
-            builder.append("bin");
-            builder.append(separators.getFileSeparator());
+            javaExecutable += "bin";
+            javaExecutable += separators.getFileSeparator();
+            javaExecutable += schema.getExecutableName();
 
-            builder.append(schema.getExecutableName());
+            builder.append(StringHelper.doubleQuoteIfNecessary(javaExecutable));
         }
 
         // ----- establish the remote application class path -----
@@ -275,12 +250,34 @@ public class RemoteJavaApplicationEnvironment<A extends JavaApplication>
 
         // ----- establish the system properties for the java application -----
 
-        // add the system properties to the command
-        Properties properties = getRemoteSystemProperties();
+        Properties properties = schema.getSystemProperties(platform);
 
         for (String propertyName : properties.stringPropertyNames())
         {
             String propertyValue = properties.getProperty(propertyName);
+
+            // filter out (don't set) system properties that start with "oracletools"
+            // (we don't want to have "parents" applications effect child applications
+            if (!propertyName.startsWith("oracletools"))
+            {
+                remoteSystemProperties.setProperty(propertyName, propertyValue);
+            }
+        }
+
+        // add oracle tools specific system properties
+        InetAddress remoteExecutorAddress = localInetAddress;
+
+        remoteSystemProperties.setProperty(Settings.PARENT_ADDRESS, remoteExecutorAddress.getHostAddress());
+        remoteSystemProperties.setProperty(Settings.PARENT_PORT, Integer.toString(remoteExecutor.getPort()));
+
+        Orphanable orphanable = options.get(Orphanable.class, Orphanable.disabled());
+
+        remoteSystemProperties.setProperty(Settings.ORPHANABLE, Boolean.toString(orphanable.isOrphanable()));
+
+        // add the system properties to the command
+        for (String propertyName : remoteSystemProperties.stringPropertyNames())
+        {
+            String propertyValue = remoteSystemProperties.getProperty(propertyName);
 
             builder.append(" ");
             builder.append("-D");

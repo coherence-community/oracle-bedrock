@@ -27,6 +27,12 @@ package com.oracle.tools.runtime.remote.java;
 
 import com.oracle.tools.Options;
 
+import com.oracle.tools.deferred.AbstractDeferred;
+import com.oracle.tools.deferred.PermanentlyUnavailableException;
+import com.oracle.tools.deferred.TemporarilyUnavailableException;
+
+import com.oracle.tools.options.Timeout;
+
 import com.oracle.tools.runtime.ApplicationConsole;
 import com.oracle.tools.runtime.ApplicationSchema;
 import com.oracle.tools.runtime.Platform;
@@ -35,18 +41,25 @@ import com.oracle.tools.runtime.concurrent.ControllableRemoteExecutor;
 import com.oracle.tools.runtime.concurrent.RemoteCallable;
 import com.oracle.tools.runtime.concurrent.RemoteExecutor;
 import com.oracle.tools.runtime.concurrent.RemoteRunnable;
+import com.oracle.tools.runtime.concurrent.runnable.RuntimeExit;
+import com.oracle.tools.runtime.concurrent.runnable.RuntimeHalt;
+import com.oracle.tools.runtime.concurrent.socket.RemoteExecutorServer;
 
 import com.oracle.tools.runtime.java.ClassPath;
 import com.oracle.tools.runtime.java.JavaApplication;
 import com.oracle.tools.runtime.java.JavaApplicationBuilder;
 import com.oracle.tools.runtime.java.JavaApplicationProcess;
 import com.oracle.tools.runtime.java.JavaApplicationSchema;
+import com.oracle.tools.runtime.java.options.RemoteDebugging;
 
 import com.oracle.tools.runtime.remote.AbstractRemoteApplicationBuilder;
 import com.oracle.tools.runtime.remote.Authentication;
 import com.oracle.tools.runtime.remote.RemoteApplicationProcess;
 
 import com.oracle.tools.util.CompletionListener;
+
+import static com.oracle.tools.deferred.DeferredHelper.ensure;
+import static com.oracle.tools.deferred.DeferredHelper.within;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -134,6 +147,33 @@ public class RemoteJavaApplicationBuilder<A extends JavaApplication>
         RemoteJavaApplicationProcess remoteJavaProcess = new RemoteJavaApplicationProcess(process,
                                                                                           environment
                                                                                               .getRemoteExecutor());
+
+        // ensure that the launcher process connects back to the server to
+        // know that the application has started
+        RemoteDebugging remoteDebugging = options.get(RemoteDebugging.class, RemoteDebugging.autoDetect());
+
+        if (!(remoteDebugging.isEnabled() && remoteDebugging.isStartSuspended()))
+        {
+            Timeout                    timeout = options.get(Timeout.class, Timeout.autoDetect());
+
+            final RemoteExecutorServer server  = environment.getRemoteExecutor();
+
+            ensure(new AbstractDeferred<Boolean>()
+            {
+                @Override
+                public Boolean get() throws TemporarilyUnavailableException, PermanentlyUnavailableException
+                {
+                    if (!server.getRemoteExecutors().iterator().hasNext())
+                    {
+                        throw new TemporarilyUnavailableException(this);
+                    }
+                    else
+                    {
+                        return true;
+                    }
+                }
+            }, within(timeout));
+        }
 
         return javaSchema.createJavaApplication(remoteJavaProcess,
                                                 applicationName,

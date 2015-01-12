@@ -25,9 +25,12 @@
 
 package com.oracle.tools;
 
+import java.lang.reflect.Modifier;
+
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
+import java.util.Stack;
 
 import java.util.logging.Logger;
 
@@ -126,7 +129,7 @@ public class Options
         {
             Option previousOption = options.put(classOfOption, option);
 
-            if (previousOption != null)
+            if (previousOption != null &&!previousOption.equals(option))
             {
                 LOGGER.warning("The option [" + option + "] will replace the previously defined option ["
                                + previousOption + "]");
@@ -322,13 +325,41 @@ public class Options
     }
 
 
+    @Override
+    public String toString()
+    {
+        StringBuilder builder = new StringBuilder();
+
+        builder.append("Options{");
+
+        boolean first = true;
+
+        for (Option option : options.values())
+        {
+            if (first)
+            {
+                first = false;
+            }
+            else
+            {
+                builder.append(", ");
+            }
+
+            builder.append(option);
+        }
+
+        builder.append("}");
+
+        return builder.toString();
+    }
+
+
     /**
-     * Obtains the class of the {@link Option} that directly extends / implements the
-     * {@link Option} interface.
+     * Obtains the concrete type that directly implements / extends the specified {@link Option}.
      *
      * @param option  the {@link Option}
      *
-     * @return  the {@link Class} that directly implements the {@link Option} interface
+     * @return  the concrete {@link Class} that directly extends / implements the {@link Option} interface
      *          or <code>null</code> if the {@link Option} is <code>null</code>
      */
     public static Class<Option> getClassOfOption(Option option)
@@ -338,34 +369,61 @@ public class Options
 
 
     /**
-     * Obtains the class that directly extends / implements the {@link Option} interface.
+     * Obtains the concrete type that directly implements / extends the {@link Option} interface,
+     * implemented by the specified class.
      *
      * @param aClass  the class that somehow implements the {@link Option} interface
      *
-     * @return  the {@link Class} that directly implements the {@link Option} interface
+     * @return  the concrete {@link Class} that directly extends / implements the {@link Option} interface
      *          or <code>null</code> if the specified {@link Class} doesn't implement {@link Option}
      */
     public static Class<Option> getClassOfOption(Class<?> aClass)
     {
+        // the hierarchy of classes we've visited
+        // (so that we can traverse it later to find non-abstract classes)
+        Stack<Class<?>> hierarchy = new Stack<>();
+
         while (aClass != null)
         {
+            // remember the current class
+            hierarchy.push(aClass);
+
             for (Class<?> interfaceClass : aClass.getInterfaces())
             {
                 if (Option.class.equals(interfaceClass) || ComposableOption.class.equals(interfaceClass))
                 {
-                    // when the Option/ComposableOption is directly implemented,
-                    // we return the class itself that's implementing it.
+                    // when the Option/ComposableOption is directly implemented by a class,
+                    // we return the first non-abstract class in the hierarchy.
+                    while (aClass != null && Modifier.isAbstract(aClass.getModifiers()) &&!aClass.isInterface())
+                    {
+                        aClass = hierarchy.isEmpty() ? null : hierarchy.pop();
+                    }
+
                     return (Class<Option>) aClass;
                 }
                 else if (Option.class.isAssignableFrom(interfaceClass))
                 {
-                    // when the Option is a super class of an interface,
-                    // we return the interface that's directly extending it.
+                    // ensure that we have a concrete class in our hierarchy
+                    while (aClass != null && Modifier.isAbstract(aClass.getModifiers()) &&!aClass.isInterface())
+                    {
+                        aClass = hierarchy.isEmpty() ? null : hierarchy.pop();
+                    }
 
-                    // TODO: we should search to find the directly-most interface
-                    // that is extending Option (that is not a ComposableOption),
-                    // and not just assume that the interfaceClass is directly implementing it
-                    return (Class<Option>) interfaceClass;
+                    if (aClass == null)
+                    {
+                        // when the hierarchy is entirely abstract, we can't determine a concrete Option type
+                        return null;
+                    }
+                    else
+                    {
+                        // when the Option is a super class of an interface,
+                        // we return the interface that's directly extending it.
+
+                        // TODO: we should search to find the interface that is directly
+                        // extending Option (that is not a ComposableOption),
+                        // and not just assume that the interfaceClass is directly implementing it
+                        return (Class<Option>) interfaceClass;
+                    }
                 }
             }
 

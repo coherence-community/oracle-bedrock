@@ -25,6 +25,7 @@
 
 package com.oracle.tools.runtime;
 
+import com.oracle.tools.Option;
 import com.oracle.tools.Options;
 
 import com.oracle.tools.options.Timeout;
@@ -50,8 +51,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.Properties;
-
-import java.util.concurrent.TimeUnit;
 
 /**
  * Tests for the {@link InfrastructureAssemblyBuilder} class.
@@ -371,6 +370,12 @@ public class InfrastructureAssemblyBuilderTest
 
 
         @Override
+        public void close(Option... options)
+        {
+        }
+
+
+        @Override
         public int waitFor()
         {
             return 0;
@@ -395,6 +400,18 @@ public class InfrastructureAssemblyBuilderTest
         public Timeout getDefaultTimeout()
         {
             return Timeout.autoDetect();
+        }
+
+
+        @Override
+        public void addApplicationListener(ApplicationListener listener)
+        {
+        }
+
+
+        @Override
+        public void removeApplicationListener(ApplicationListener listener)
+        {
         }
     }
 }

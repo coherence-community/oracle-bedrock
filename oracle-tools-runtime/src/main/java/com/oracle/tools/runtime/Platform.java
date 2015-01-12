@@ -26,6 +26,7 @@
 package com.oracle.tools.runtime;
 
 import com.oracle.tools.Option;
+import com.oracle.tools.Options;
 
 import java.net.InetAddress;
 
@@ -70,14 +71,28 @@ public interface Platform
 
 
     /**
+     * Obtains the {@link Options} configured for the {@link Platform}.
+     * <p>
+     * <strong>Changes to the {@link Options} may not be recognized
+     * or used by the {@link Platform} after it was created.</strong>
+     *
+     * @return the {@link Options}
+     *
+     * @see #realize(String, ApplicationSchema, ApplicationConsole, Option...)
+     */
+    public Options getOptions();
+
+
+    /**
      * Realizes an instance of an {@link Application}.
      *
      * @param applicationName    the name of the application
      * @param applicationSchema  the {@link ApplicationSchema} to use for realizing the {@link Application}
      * @param console            the {@link ApplicationConsole} that will be used for I/O by the
      *                           realized {@link Application}. This may be <code>null</code> if not required
-     * @param options            the {@link Platform} specific {@link Option}s to be used when realizing the
-     *                           {@link Application}
+     * @param options            the custom {@link Option}s to be used when realizing the {@link Application},
+     *                           overriding those defined by the {@link ApplicationSchema} and the
+     *                           {@link Platform} itself.
      *
      * @return an {@link Application} representing the realized application
      *

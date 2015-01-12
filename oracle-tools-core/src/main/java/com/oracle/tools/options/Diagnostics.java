@@ -23,14 +23,12 @@
  * "Portions Copyright [year] [name of copyright owner]"
  */
 
-package com.oracle.tools.runtime.options;
+package com.oracle.tools.options;
 
 import com.oracle.tools.Option;
 
-import com.oracle.tools.runtime.Settings;
-
 /**
- * An {@link Option} to define the level of Oracle Tools runtime diagnostics.
+ * An {@link Option} to define enabled Oracle Tools diagnostics.
  * <p>
  * Copyright (c) 2014. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
@@ -46,11 +44,11 @@ public class Diagnostics implements Option
 
 
     /**
-     * Privately construct a {@link Diagnostics}
+     * Construct a {@link Diagnostics}
      *
      * @param enabled  is diagnostics enabled
      */
-    private Diagnostics(boolean enabled)
+    protected Diagnostics(boolean enabled)
     {
         this.enabled = enabled;
     }
@@ -64,6 +62,44 @@ public class Diagnostics implements Option
     public boolean isEnabled()
     {
         return enabled;
+    }
+
+
+    @Override
+    public String toString()
+    {
+        return "Diagnostics{" + (enabled ? "enabled" : "disabled") + "}";
+    }
+
+
+    @Override
+    public boolean equals(Object other)
+    {
+        if (this == other)
+        {
+            return true;
+        }
+
+        if (!(other instanceof Diagnostics))
+        {
+            return false;
+        }
+
+        Diagnostics that = (Diagnostics) other;
+
+        if (enabled != that.enabled)
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+
+    @Override
+    public int hashCode()
+    {
+        return (enabled ? 1 : 0);
     }
 
 
@@ -99,16 +135,5 @@ public class Diagnostics implements Option
     public static Diagnostics enabled(boolean enabled)
     {
         return new Diagnostics(enabled);
-    }
-
-
-    /**
-     * Constructs a {@link Diagnostics} based on auto-detected configuration.
-     *
-     * @return  a {@link Diagnostics}
-     */
-    public static Diagnostics autoDetect()
-    {
-        return new Diagnostics(Settings.isDiagnosticsEnabled(false));
     }
 }

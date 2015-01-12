@@ -27,6 +27,8 @@ package com.oracle.tools.runtime.options;
 
 import com.oracle.tools.Option;
 
+import com.oracle.tools.lang.StringHelper;
+
 import com.oracle.tools.runtime.Platform;
 
 import java.io.File;
@@ -116,6 +118,52 @@ public class PlatformSeparators implements Option
     public String getLineSeparator()
     {
         return lineSeparator;
+    }
+
+
+    @Override
+    public boolean equals(Object other)
+    {
+        if (this == other)
+        {
+            return true;
+        }
+
+        if (!(other instanceof PlatformSeparators))
+        {
+            return false;
+        }
+
+        PlatformSeparators that = (PlatformSeparators) other;
+
+        if (!fileSeparator.equals(that.fileSeparator))
+        {
+            return false;
+        }
+
+        if (!lineSeparator.equals(that.lineSeparator))
+        {
+            return false;
+        }
+
+        if (!pathSeparator.equals(that.pathSeparator))
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+
+    @Override
+    public int hashCode()
+    {
+        int result = fileSeparator.hashCode();
+
+        result = 31 * result + pathSeparator.hashCode();
+        result = 31 * result + lineSeparator.hashCode();
+
+        return result;
     }
 
 

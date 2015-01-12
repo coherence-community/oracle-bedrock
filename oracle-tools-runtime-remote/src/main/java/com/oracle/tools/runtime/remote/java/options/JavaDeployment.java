@@ -233,6 +233,52 @@ public class JavaDeployment implements Deployment<JavaApplication, JavaApplicati
     }
 
 
+    @Override
+    public boolean equals(Object other)
+    {
+        if (this == other)
+        {
+            return true;
+        }
+
+        if (!(other instanceof JavaDeployment))
+        {
+            return false;
+        }
+
+        JavaDeployment that = (JavaDeployment) other;
+
+        if (autoDeployEnabled != that.autoDeployEnabled)
+        {
+            return false;
+        }
+
+        if (!excludeFileNames.equals(that.excludeFileNames))
+        {
+            return false;
+        }
+
+        if (!includePaths.equals(that.includePaths))
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+
+    @Override
+    public int hashCode()
+    {
+        int result = (autoDeployEnabled ? 1 : 0);
+
+        result = 31 * result + includePaths.hashCode();
+        result = 31 * result + excludeFileNames.hashCode();
+
+        return result;
+    }
+
+
     /**
      * Constructs a {@link JavaDeployment} configured for auto-deployment.
      *

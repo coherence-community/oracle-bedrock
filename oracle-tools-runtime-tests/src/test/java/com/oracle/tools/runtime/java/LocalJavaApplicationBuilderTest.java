@@ -43,6 +43,8 @@ import com.oracle.tools.runtime.SimpleApplicationSchema;
 import com.oracle.tools.runtime.concurrent.RemoteExecutor;
 import com.oracle.tools.runtime.concurrent.RemoteExecutorListener;
 import com.oracle.tools.runtime.concurrent.callable.GetSystemProperty;
+import com.oracle.tools.runtime.concurrent.runnable.RuntimeExit;
+import com.oracle.tools.runtime.concurrent.runnable.RuntimeHalt;
 import com.oracle.tools.runtime.concurrent.runnable.SystemExit;
 import com.oracle.tools.runtime.concurrent.socket.RemoteExecutorServer;
 import com.oracle.tools.runtime.concurrent.socket.SocketBasedRemoteExecutorTests;
@@ -62,7 +64,9 @@ import com.oracle.tools.util.Capture;
 import org.junit.Assume;
 import org.junit.Test;
 
+import static com.oracle.tools.deferred.DeferredHelper.delayedBy;
 import static com.oracle.tools.deferred.DeferredHelper.invoking;
+import static com.oracle.tools.deferred.DeferredHelper.valueOf;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.hasItem;
@@ -78,10 +82,10 @@ import java.io.IOException;
 
 import java.net.InetSocketAddress;
 
-import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
 
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -132,6 +136,8 @@ public class LocalJavaApplicationBuilderTest extends AbstractJavaApplicationBuil
 
         SimpleJavaApplicationSchema schema   = new SimpleJavaApplicationSchema(SleepingApplication.class.getName());
 
+        schema.setPreferIPv4(true);
+
         try (SimpleJavaApplication app = platform.realize("TestApp",
                                                           schema,
                                                           new SystemApplicationConsole(),
@@ -151,7 +157,6 @@ public class LocalJavaApplicationBuilderTest extends AbstractJavaApplicationBuil
 
             assertThat(debugArg, is(notNullValue()));
             assertThat(debugArg, startsWith("-agentlib:jdwp=transport=dt_socket,"));
-            assertThat(debugArg, containsString(String.format(",address=%s", platform.getHostName())));
             assertThat(debugArg, containsString(",suspend=n"));
             assertThat(debugArg, containsString(",server=y"));
         }
@@ -173,7 +178,9 @@ public class LocalJavaApplicationBuilderTest extends AbstractJavaApplicationBuil
 
         SimpleJavaApplicationSchema schema   = new SimpleJavaApplicationSchema(SleepingApplication.class.getName());
 
-        CapturingApplicationConsole console  = new CapturingApplicationConsole();
+        schema.setPreferIPv4(true);
+
+        CapturingApplicationConsole console = new CapturingApplicationConsole();
 
         try (SimpleJavaApplication app = platform.realize("TestApp",
                                                           schema,
@@ -198,7 +205,6 @@ public class LocalJavaApplicationBuilderTest extends AbstractJavaApplicationBuil
 
             assertThat(debugArg, is(notNullValue()));
             assertThat(debugArg, startsWith("-agentlib:jdwp=transport=dt_socket,"));
-            assertThat(debugArg, containsString(String.format(",address=%s", platform.getHostName())));
             assertThat(debugArg, containsString(",suspend=y"));
             assertThat(debugArg, containsString(",server=y"));
         }
@@ -232,7 +238,12 @@ public class LocalJavaApplicationBuilderTest extends AbstractJavaApplicationBuil
                                   invoking(jdbConsole).getCapturedOutputLines(),
                                   hasItem(startsWith("Listening at address:")));
 
-            SimpleJavaApplicationSchema schema  = new SimpleJavaApplicationSchema(SleepingApplication.class.getName());
+            SimpleJavaApplicationSchema schema = new SimpleJavaApplicationSchema(SleepingApplication.class.getName());
+
+            // sleep for at least 60 seconds to allow for the JDB to connect
+            schema.addArgument("60");
+
+            schema.setPreferIPv4(true);
 
             CapturingApplicationConsole console = new CapturingApplicationConsole();
 
@@ -243,9 +254,12 @@ public class LocalJavaApplicationBuilderTest extends AbstractJavaApplicationBuil
                                                                   .attachToDebugger(debuggerPort.get())))
             {
                 Eventually.assertThat(invoking(console).getCapturedOutputLines(), hasItem(startsWith("Now sleeping")));
+
+                // assert that the application connects back to the debugger
+                // (this can take sometime as JDB initializes itself)
                 Eventually.assertThat("Application did not connect back to JDB",
                                       invoking(jdbConsole).getCapturedOutputLines(),
-                                      hasItem(containsString("VM Started:")));
+                                      hasItem(containsString("VM Started:")), delayedBy(10, TimeUnit.SECONDS));
             }
         }
     }
@@ -269,6 +283,8 @@ public class LocalJavaApplicationBuilderTest extends AbstractJavaApplicationBuil
 
             console.getInputWriter().println("run");
             console.getInputWriter().println("quit");
+
+            jdb.waitFor();
         }
     }
 
@@ -283,6 +299,10 @@ public class LocalJavaApplicationBuilderTest extends AbstractJavaApplicationBuil
         {
             Eventually.assertThat(invoking(console).getCapturedOutputLines(),
                                   hasItem(startsWith("This is jdb version")));
+
+            console.getInputWriter().println("quit");
+
+            jdb.waitFor();
 
             return true;
         }
@@ -306,6 +326,8 @@ public class LocalJavaApplicationBuilderTest extends AbstractJavaApplicationBuil
         Assume.assumeThat(JavaVirtualMachine.getInstance().shouldEnableRemoteDebugging(), is(false));
 
         SimpleJavaApplicationSchema schema = new SimpleJavaApplicationSchema(SleepingApplication.class.getName());
+
+        schema.setPreferIPv4(true);
 
         try (SimpleJavaApplication app = LocalPlatform.getInstance().realize("TestApp",
                                                                              schema,
@@ -375,12 +397,12 @@ public class LocalJavaApplicationBuilderTest extends AbstractJavaApplicationBuil
             parentApplication.close();
 
             // submit the child a request to prove that it's orphaned
-            RemoteExecutor                     child    = listener.getExecutor();
-            DeferredCompletionListener<String> response = new DeferredCompletionListener<String>(String.class);
+            RemoteExecutor                     child            = listener.getExecutor();
+            DeferredCompletionListener<String> deferredResponse = new DeferredCompletionListener<String>(String.class);
 
-            child.submit(new SocketBasedRemoteExecutorTests.PingPong(), response);
+            child.submit(new SocketBasedRemoteExecutorTests.PingPong(), deferredResponse);
 
-            Eventually.assertThat(response, is("PONG"));
+            Eventually.assertThat(valueOf(deferredResponse), is("PONG"));
 
             // shutdown the client (by invoking a System.exit internally)
             child.submit(new SystemExit());
@@ -484,6 +506,7 @@ public class LocalJavaApplicationBuilderTest extends AbstractJavaApplicationBuil
         // set a System-Property for the SleepingApplication (we'll request it back)
         String uuid = UUID.randomUUID().toString();
 
+        schema.setPreferIPv4(true);
         schema.setSystemProperty("uuid", uuid);
 
         // build and start the SleepingApplication
@@ -494,11 +517,11 @@ public class LocalJavaApplicationBuilderTest extends AbstractJavaApplicationBuil
         try (SimpleJavaApplication application = builder.realize(schema, "sleeping", console))
         {
             // request the system property from the SleepingApplication
-            DeferredCompletionListener<String> deferred = new DeferredCompletionListener<String>(String.class);
+            DeferredCompletionListener<String> deferredResponse = new DeferredCompletionListener<String>(String.class);
 
-            application.submit(new GetSystemProperty("uuid"), deferred);
+            application.submit(new GetSystemProperty("uuid"), deferredResponse);
 
-            Eventually.assertThat(deferred, is(uuid));
+            Eventually.assertThat(valueOf(deferredResponse), is(uuid));
         }
     }
 
@@ -512,6 +535,8 @@ public class LocalJavaApplicationBuilderTest extends AbstractJavaApplicationBuil
     {
         // define the SleepingApplication
         SimpleJavaApplicationSchema schema = new SimpleJavaApplicationSchema(SleepingApplication.class.getName());
+
+        schema.setPreferIPv4(true);
 
         // determine the JAVA_HOME based on this process
         String   javaHomePath = System.getProperty("java.home");
@@ -538,6 +563,8 @@ public class LocalJavaApplicationBuilderTest extends AbstractJavaApplicationBuil
         // define the SleepingApplication
         SimpleJavaApplicationSchema schema = new SimpleJavaApplicationSchema(SleepingApplication.class.getName());
 
+        schema.setPreferIPv4(true);
+
         // build and start the SleepingApplication
         LocalJavaApplicationBuilder<JavaApplication> builder = new LocalJavaApplicationBuilder<JavaApplication>();
 
@@ -551,6 +578,54 @@ public class LocalJavaApplicationBuilderTest extends AbstractJavaApplicationBuil
                                                                  HeapSize.initial(256, HeapSize.Units.MB),
                                                                  HeapSize.maximum(1, HeapSize.Units.GB)))
         {
+        }
+    }
+
+
+    /**
+     * Ensure that local {@link JavaApplication}s can be terminated using {@link RuntimeExit}.
+     */
+    @Test
+    public void shouldTerminateUsingRuntimeExit()
+    {
+        // define the SleepingApplication
+        SimpleJavaApplicationSchema schema =
+            new SimpleJavaApplicationSchema(SleepingApplication.class.getName()).setPreferIPv4(true);
+
+        // build and start the SleepingApplication
+        LocalPlatform      platform = LocalPlatform.getInstance();
+
+        ApplicationConsole console  = new SystemApplicationConsole();
+
+        try (SimpleJavaApplication application = platform.realize("sleeping", schema, console))
+        {
+            application.close(SystemExit.withExitCode(42));
+
+            Eventually.assertThat(invoking(application).exitValue(), is(42));
+        }
+    }
+
+
+    /**
+     * Ensure that local {@link JavaApplication}s can be terminated using {@link RuntimeHalt}.
+     */
+    @Test
+    public void shouldTerminateUsingRuntimeHalt()
+    {
+        // define the SleepingApplication
+        SimpleJavaApplicationSchema schema =
+            new SimpleJavaApplicationSchema(SleepingApplication.class.getName()).setPreferIPv4(true);
+
+        // build and start the SleepingApplication
+        LocalPlatform      platform = LocalPlatform.getInstance();
+
+        ApplicationConsole console  = new SystemApplicationConsole();
+
+        try (SimpleJavaApplication application = platform.realize("sleeping", schema, console))
+        {
+            application.close(RuntimeHalt.withExitCode(42));
+
+            Eventually.assertThat(invoking(application).exitValue(), is(42));
         }
     }
 

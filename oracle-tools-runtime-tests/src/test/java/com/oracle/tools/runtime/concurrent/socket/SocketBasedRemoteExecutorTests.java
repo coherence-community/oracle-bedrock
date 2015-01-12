@@ -32,10 +32,10 @@ import com.oracle.tools.deferred.listener.DeferredCompletionListener;
 import com.oracle.tools.runtime.concurrent.RemoteCallable;
 import com.oracle.tools.runtime.concurrent.RemoteRunnable;
 
-import com.oracle.tools.runtime.java.container.Container;
-
 import org.junit.Assert;
 import org.junit.Test;
+
+import static com.oracle.tools.deferred.DeferredHelper.valueOf;
 
 import static org.hamcrest.CoreMatchers.is;
 
@@ -74,13 +74,13 @@ public class SocketBasedRemoteExecutorTests
 
             client.submit(new PingPong(), serverResponse);
 
-            Eventually.assertThat(serverResponse, is("PONG"));
+            Eventually.assertThat(valueOf(serverResponse), is("PONG"));
 
             DeferredCompletionListener<String> clientResponse = new DeferredCompletionListener<String>(String.class);
 
             server.submit(new PingPong(), clientResponse);
 
-            Eventually.assertThat(clientResponse, is("PONG"));
+            Eventually.assertThat(valueOf(clientResponse), is("PONG"));
         }
         catch (IOException e)
         {

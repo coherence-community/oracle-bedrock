@@ -67,17 +67,17 @@ public class SimpleRemoteApplicationBuilderTest extends AbstractRemoteApplicatio
 
         RemotePlatform platform = new RemotePlatform(InetAddress.getByName(getRemoteHostName()),
                                                      getRemoteUserName(),
-                                                     getRemoteAuthentication());
+                                                     getRemoteAuthentication(),
+                                                     StrictHostChecking.disabled());
 
         URL  testFileURL = Thread.currentThread().getContextClassLoader().getResource("test.txt");
         File testFile    = new File(testFileURL.getFile());
 
-        try (SimpleApplication application = platform.realize("Java",
+        try (SimpleApplication application = platform.realize("ls",
                                                               schema,
                                                               new SystemApplicationConsole(),
                                                               CustomDeployment
-                                                                  .including(new DeploymentArtifact(testFile)),
-                                                              StrictHostChecking.disabled()))
+                                                                  .including(new DeploymentArtifact(testFile))))
         {
             assertThat(application.waitFor(), is(0));
 

@@ -35,6 +35,8 @@ import com.jcraft.jsch.SftpException;
 import com.oracle.tools.Option;
 import com.oracle.tools.Options;
 
+import com.oracle.tools.lang.StringHelper;
+
 import com.oracle.tools.options.Timeout;
 
 import com.oracle.tools.runtime.AbstractApplicationBuilder;
@@ -44,8 +46,8 @@ import com.oracle.tools.runtime.ApplicationSchema;
 import com.oracle.tools.runtime.Platform;
 import com.oracle.tools.runtime.PropertiesBuilder;
 
-import com.oracle.tools.runtime.options.EnvironmentVariables;
 import com.oracle.tools.runtime.options.PlatformSeparators;
+import com.oracle.tools.runtime.options.Shell;
 import com.oracle.tools.runtime.options.TemporaryDirectory;
 
 import com.oracle.tools.runtime.remote.options.Deployment;
@@ -53,7 +55,6 @@ import com.oracle.tools.runtime.remote.options.StrictHostChecking;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import java.util.ArrayList;
@@ -307,16 +308,35 @@ public abstract class AbstractRemoteApplicationBuilder<A extends Application, E 
                                                                    Platform           platform,
                                                                    Option...          applicationOptions)
     {
+        // establish a specialized SocketFactory for JSsch
+        JSchSocketFactory socketFactory = new JSchSocketFactory();
+
+        // initially there's no session
         Session session = null;
 
-        // obtain the platform specific options from the schema
-        Options options = applicationSchema.getPlatformSpecificOptions(platform);
+        // ---- establish the Options for the Application -----
+
+        // add the platform options
+        Options options = new Options(platform == null ? null : platform.getOptions().asArray());
+
+        // add the schema options
+        options.addAll(applicationSchema.getOptions().asArray());
+
+        // add the schema options (based on the platform)
+        options.addAll(applicationSchema.getPlatformSpecificOptions(platform).asArray());
 
         // add the custom application options
         options.addAll(applicationOptions);
 
+        // ---- establish the default Options ----
+
         // define the PlatformSeparators as Unix if they are not already defined
         options.addIfAbsent(PlatformSeparators.forUnix());
+
+        // define the default Platform Shell (assume BASH)
+        options.addIfAbsent(Shell.is(Shell.Type.BASH));
+
+        // ---- establish the environment for the application ----
 
         // obtain the builder-specific remote application environment based on the schema
         E environment = getRemoteApplicationEnvironment(applicationSchema, platform, options);
@@ -326,12 +346,15 @@ public abstract class AbstractRemoteApplicationBuilder<A extends Application, E 
             // create the remote session
             session = jsch.getSession(userName, hostName, port);
 
+            // establish the specialized socket factory for the session
+            session.setSocketFactory(socketFactory);
+
             // the session should not cause the JVM not to exit
             session.setDaemonThread(true);
 
             // determine the timeout
             Timeout timeout   = options.get(Timeout.class, Timeout.autoDetect());
-            int     timeoutMS = (int) timeout.getUnits().convert(timeout.getDuration(), TimeUnit.MILLISECONDS);
+            int     timeoutMS = (int) timeout.getDuration().to(TimeUnit.MILLISECONDS);
 
             // set the default session timeouts (in milliseconds)
             session.setTimeout(timeoutMS);
@@ -367,7 +390,6 @@ public abstract class AbstractRemoteApplicationBuilder<A extends Application, E 
 
             // determine the DeploymentArtifacts based on those specified by the Deployment option
             ArrayList<DeploymentArtifact> artifactsToDeploy = new ArrayList<DeploymentArtifact>();
-
             Deployment<T, S>              deployment        = options.get(Deployment.class);
 
             if (deployment != null)
@@ -449,7 +471,7 @@ public abstract class AbstractRemoteApplicationBuilder<A extends Application, E 
                             }
                             else
                             {
-                                sftpChannel.cd(asRemotePlatformFileName(destinationFile.getPath(), separators));
+                                sftpChannel.cd(asRemotePlatformFileName(destinationFilePath, separators));
                             }
 
                             destinationFileName = destinationFile.getName();
@@ -483,21 +505,48 @@ public abstract class AbstractRemoteApplicationBuilder<A extends Application, E 
 
             // ----- establish the remote environment variables -----
 
-            // define the remote environment variables in the remote channel
+            String environmentVariables = "";
+
+            // get the remote environment variables for the remote application
             Properties variables = environment.getRemoteEnvironmentVariables();
+
+            // determine the format to use for setting variables
+            String format;
+
+            Shell  shell = options.get(Shell.class, Shell.isUnknown());
+
+            switch (shell.getType())
+            {
+            case SH :
+            case BASH :
+                format = "export %s=%s ; ";
+                break;
+
+            case CSH :
+            case TSCH :
+                format = "setenv %s %s ; ";
+
+            default :
+
+                // when we don't know, assume something bash-like
+                format = "export %s=%s ; ";
+                break;
+            }
 
             for (String variableName : variables.stringPropertyNames())
             {
-                execChannel.setEnv(variableName, variables.getProperty(variableName));
+                environmentVariables +=
+                    String.format(format, variableName,
+                                  StringHelper.doubleQuoteIfNecessary(variables.getProperty(variableName)));
             }
 
             // ----- establish the application command line to execute -----
 
             // determine the command to execute remotely
-            String command = environment.getRemoteCommandToExecute();
+            String command = environment.getRemoteCommandToExecute(socketFactory.getLastLocalAddress());
 
             // the actual remote command must include changing to the remote directory
-            String remoteCommand = String.format("cd %s ; %s", remoteDirectory, command);
+            String remoteCommand = environmentVariables + String.format("cd %s ; %s", remoteDirectory, command);
 
             execChannel.setCommand(remoteCommand);
 

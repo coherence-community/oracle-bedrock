@@ -33,7 +33,6 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.PrintStream;
-import java.io.Serializable;
 
 /**
  * Helpers to aid in the serialization and deserialization of Objects.
@@ -59,12 +58,23 @@ public class Serialization
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         ObjectOutputStream    objectOutputStream    = new ObjectOutputStream(byteArrayOutputStream);
 
-        if (object instanceof Serializable || object == null)
+        // assume the object isn't serializable
+        boolean isSerializable = false;
+
+        try
         {
             objectOutputStream.writeBoolean(true);
             objectOutputStream.writeObject(object);
+            isSerializable = true;
         }
-        else
+        catch (IOException e)
+        {
+            // reconstruct the stream as the object wasn't serializable
+            byteArrayOutputStream = new ByteArrayOutputStream();
+            objectOutputStream    = new ObjectOutputStream(byteArrayOutputStream);
+        }
+
+        if (!isSerializable)
         {
             objectOutputStream.writeBoolean(false);
             objectOutputStream.writeObject(object.getClass().getName());

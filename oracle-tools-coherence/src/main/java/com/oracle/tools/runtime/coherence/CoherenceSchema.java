@@ -96,7 +96,7 @@ public interface CoherenceSchema
      *
      * @return  the Operational Override URI (or null if not set)
      */
-    public String getOperationalOverrideURI(String operationalOverrideURI);
+    public String getOperationalOverrideURI();
 
 
     /**
@@ -104,7 +104,7 @@ public interface CoherenceSchema
      *
      * @return  the POF Configuration URI (or null if not set)
      */
-    public String getPofConfigURI(String pofConfigURI);
+    public String getPofConfigURI();
 
 
     /**

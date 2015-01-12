@@ -27,6 +27,16 @@ package com.oracle.tools.runtime;
 
 import org.junit.Test;
 
+import static org.hamcrest.CoreMatchers.is;
+
+import static org.junit.Assert.assertThat;
+
+import static org.mockito.Matchers.same;
+
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -34,13 +44,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.same;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 /**
  * Unit Tests for {@link PropertiesBuilder}s.
@@ -421,103 +424,5 @@ public class PropertiesBuilderTest
 
         assertThat(properties.getProperty("Key-1"), is("Value-1-Default"));
         assertThat(properties.getProperty("Key-2"), is("One"));
-    }
-
-
-    /**
-     * Ensure a default property value is used when one is not set.
-     */
-    @Test
-    @Deprecated
-    public void shouldUseDefaultIfPropertyNotSet()
-    {
-        PropertiesBuilder builder = new PropertiesBuilder();
-
-        builder.setDefaultProperty("Key-1", "Value-1-Default");
-
-        Properties properties = builder.realize();
-
-        assertThat(properties.getProperty("Key-1"), is("Value-1-Default"));
-    }
-
-
-    /**
-     * Ensure a set property overrides a default property.
-     */
-    @Test
-    @Deprecated
-    public void shouldNotUseDefaultIfPropertySet()
-    {
-        PropertiesBuilder builder = new PropertiesBuilder();
-
-        builder.setDefaultProperty("Key-1", "Value-1-Default");
-        builder.setProperty("Key-1", "Value-1");
-
-        Properties properties = builder.realize();
-
-        assertThat(properties.getProperty("Key-1"), is("Value-1"));
-    }
-
-
-    /**
-     * Ensure a default property is used if a property is unset.
-     */
-    @Test
-    @Deprecated
-    public void shouldUseDefaultIfPropertySetThenUnset()
-    {
-        PropertiesBuilder builder = new PropertiesBuilder();
-
-        builder.setDefaultProperty("Key-1", "Value-1-Default");
-        builder.setProperty("Key-1", "Value-1");
-        builder.setProperty("Key-1", null);
-
-        Properties properties = builder.realize();
-
-        assertThat(properties.getProperty("Key-1"), is("Value-1-Default"));
-    }
-
-
-    /**
-     * Ensure property values are chosen from an iterator when realized.
-     */
-    @Test
-    @Deprecated
-    public void shouldUseDefaultIteratorProperty()
-    {
-        List<String>      values  = Arrays.asList("one", "two");
-
-        PropertiesBuilder builder = new PropertiesBuilder();
-
-        builder.setDefaultProperty("Key-1", values.iterator());
-
-        Properties properties1 = builder.realize();
-        Properties properties2 = builder.realize();
-
-        assertThat(properties1.getProperty("Key-1"), is("one"));
-        assertThat(properties2.getProperty("Key-1"), is("two"));
-    }
-
-
-    /**
-     * Ensure property values that are {@link PlatformAware} work correctly
-     */
-    @Test
-    public void shouldPassPlatformToPlatformAwareProperties() throws Exception
-    {
-        Platform          platform = mock(Platform.class);
-        PlatformAware     property = mock(PlatformAware.class);
-
-        PropertiesBuilder builder  = new PropertiesBuilder();
-
-        when(property.toString()).thenReturn("my-property-value");
-
-        builder.setProperty("my.property", property);
-
-        Properties properties = builder.realize(null, platform);
-
-        assertThat(properties.getProperty("my.property"), is("my-property-value"));
-
-        verify(property).setPlatform(same(platform));
     }
 }

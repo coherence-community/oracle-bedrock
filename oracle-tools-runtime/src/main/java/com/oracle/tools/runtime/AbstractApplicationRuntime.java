@@ -30,8 +30,6 @@ import com.oracle.tools.Options;
 
 import com.oracle.tools.runtime.console.SystemApplicationConsole;
 
-import com.oracle.tools.runtime.options.Diagnostics;
-
 import java.util.Properties;
 
 /**

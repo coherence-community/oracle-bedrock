@@ -128,6 +128,17 @@ public interface FluentCoherenceClusterMemberSchema<A extends CoherenceClusterMe
 
 
     /**
+     * Sets if storage should be enabled for distributed caching services of Oracle Coherence applications based on
+     * this {@link FluentCoherenceClusterSchema}.
+     *
+     * @param isStorageEnabled
+     *
+     * @return  the {@link FluentCoherenceClusterSchema}
+     */
+    public S setStorageEnabled(boolean isStorageEnabled);
+
+
+    /**
      * Configures the {@link FluentCoherenceClusterMemberSchema} so that when a Oracle Coherence application
      * is realized it will be running in local-host only mode, meaning that other cluster members
      * must be on the same host.

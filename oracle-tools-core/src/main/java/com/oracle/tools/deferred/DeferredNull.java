@@ -1,5 +1,5 @@
 /*
- * File: PlatformAware.java
+ * File: DeferredNull.java
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
@@ -23,20 +23,46 @@
  * "Portions Copyright [year] [name of copyright owner]"
  */
 
-package com.oracle.tools.runtime;
+package com.oracle.tools.deferred;
 
 /**
- * This interface represent a class that is aware of
- * a specific {@link Platform}.
+ * A strongly-typed {@link Deferred} implementation that always returns <code>null</code>.
+ * <p>
+ * Copyright (c) 2014. All Rights Reserved. Oracle Corporation.<br>
+ * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
- * @author Jonathan Knight
+ * @author Brian Oliver
  */
-public interface PlatformAware
+public class DeferredNull<T> implements Deferred<T>
 {
     /**
-     * Set the {@link Platform} that this class will use.
-     *
-     * @param platform  the {@link Platform} to use
+     * The type of the {@link Deferred} (even though the value is null).
      */
-    void setPlatform(Platform platform);
+    private Class<T> deferredClass;
+
+
+    /**
+     * Constructs ...
+     *
+     *
+     * @param deferredClass
+     */
+    public DeferredNull(Class<T> deferredClass)
+    {
+        this.deferredClass = deferredClass;
+    }
+
+
+    @Override
+    public T get() throws TemporarilyUnavailableException, PermanentlyUnavailableException
+    {
+        return null;
+    }
+
+
+    @Override
+    public Class<T> getDeferredClass()
+    {
+        return deferredClass;
+    }
 }

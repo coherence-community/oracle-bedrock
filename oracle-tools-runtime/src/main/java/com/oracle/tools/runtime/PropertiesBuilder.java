@@ -26,7 +26,9 @@
 package com.oracle.tools.runtime;
 
 import java.io.IOException;
+
 import java.net.URL;
+
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -105,9 +107,6 @@ public class PropertiesBuilder
     /**
      * Constructs a {@link PropertiesBuilder} with properties based on a
      * {@link Map} of name-value pairs.
-     * <p>
-     * Note: The provided properties are added as default values to the
-     * {@link PropertiesBuilder}.
      *
      * @param properties  the {@link Map} of properties to use as the basis for
      *                    the {@link PropertiesBuilder}
@@ -118,7 +117,7 @@ public class PropertiesBuilder
 
         for (String name : properties.keySet())
         {
-            this.properties.put(name, new Property(name, null, properties.get(name)));
+            this.properties.put(name, new Property(name, properties.get(name)));
         }
     }
 
@@ -126,9 +125,6 @@ public class PropertiesBuilder
     /**
      * Constructs a {@link PropertiesBuilder} based on a standard
      * {@link Properties} representation.
-     * <p>
-     * Note: The provided properties are added as default values to the
-     * {@link PropertiesBuilder}.
      *
      * @param properties  the {@link Properties} to use as the basis for the
      *                    {@link PropertiesBuilder}
@@ -139,7 +135,7 @@ public class PropertiesBuilder
 
         for (String key : properties.stringPropertyNames())
         {
-            this.properties.put(key, new Property(key, null, properties.getProperty(key)));
+            this.properties.put(key, new Property(key, properties.getProperty(key)));
         }
     }
 
@@ -196,7 +192,7 @@ public class PropertiesBuilder
         }
         else
         {
-            properties.put(name, new Property(name, iterator, null));
+            properties.put(name, new Property(name, iterator));
         }
 
         return this;
@@ -232,36 +228,6 @@ public class PropertiesBuilder
 
 
     /**
-     * Sets the specified named default property to use an {@link Iterator} to
-     * provide successive property values when the {@link PropertiesBuilder} is realized.
-     *
-     * @param name              the name of the property
-     * @param defaultIterator   the default {@link Iterator} that will provide
-     *                          successive property values for the property when
-     *                          the {@link PropertiesBuilder} is realized
-     *
-     * @return  the {@link PropertiesBuilder} to which the property was added so
-     *          that further chained method calls, like to other
-     *          <code>setProperty(...)</code> methods on this class may be used
-     */
-    @Deprecated
-    public PropertiesBuilder setDefaultProperty(String      name,
-                                                Iterator<?> defaultIterator)
-    {
-        if (containsProperty(name))
-        {
-            properties.get(name).setDefaultValue(defaultIterator);
-        }
-        else
-        {
-            properties.put(name, new Property(name, null, defaultIterator));
-        }
-
-        return this;
-    }
-
-
-    /**
      * Sets the specified named property to have the specified value.
      *
      * @param name   the name of the property
@@ -280,7 +246,7 @@ public class PropertiesBuilder
         }
         else
         {
-            properties.put(name, new Property(name, value, null));
+            properties.put(name, new Property(name, value));
         }
 
         return this;
@@ -308,33 +274,6 @@ public class PropertiesBuilder
         {
             return setProperty(name, value);
         }
-    }
-
-
-    /**
-     * Sets the specified named default property to have the specified value.
-     *
-     * @param name          the name of the property
-     * @param defaultValue  the default value of the property
-     *
-     * @return  the {@link PropertiesBuilder} to which the property was added so
-     *          that further chained method calls, like to other
-     *          <code>setProperty(...)</code> methods on this class may be used
-     */
-    @Deprecated
-    public PropertiesBuilder setDefaultProperty(String name,
-                                                Object defaultValue)
-    {
-        if (containsProperty(name))
-        {
-            properties.get(name).setDefaultValue(defaultValue);
-        }
-        else
-        {
-            properties.put(name, new Property(name, null, defaultValue));
-        }
-
-        return this;
     }
 
 
@@ -393,9 +332,8 @@ public class PropertiesBuilder
 
     /**
      * Obtains the current value of the specified property.  If the property has
-     * a value specified, that value will be used.  If not the default value of
-     * the property will be used.  If the property is not known, <code>null</code>
-     * will be returned.
+     * a value specified, that value will be used.  If the property is unknown,
+     * <code>null</code> will be returned.
      *
      * @param name  the name of the property
      *
@@ -407,7 +345,7 @@ public class PropertiesBuilder
         {
             Property property = properties.get(name);
 
-            return property.hasValue() ? property.getValue() : property.getDefaultValue();
+            return property.getValue();
         }
         else
         {
@@ -417,8 +355,7 @@ public class PropertiesBuilder
 
 
     /**
-     * Removes the specified named property from the {@link PropertiesBuilder},
-     * including its value and default value.
+     * Removes the specified named property from the {@link PropertiesBuilder}.
      * <p>
      * If the specified property is not contained by the {@link PropertiesBuilder},
      * nothing happens.
@@ -435,8 +372,7 @@ public class PropertiesBuilder
      * Removes the specified named property value from {@link PropertiesBuilder}.
      * <p>
      * If the specified property is not contained by the {@link PropertiesBuilder},
-     * nothing happens.  If the specified property is defined, only the value
-     * is removed.  Its default value will remain defined.
+     * nothing happens.
      *
      * @param name The name of the property value to remove.
      */
@@ -495,6 +431,7 @@ public class PropertiesBuilder
         return realize(overrides, null);
     }
 
+
     /**
      * Creates a new {@link Properties} instance containing name, value pairs
      * defined by the {@link PropertiesBuilder}.
@@ -512,7 +449,8 @@ public class PropertiesBuilder
      *
      * @return a new {@link Properties} instance as defined by the {@link PropertiesBuilder}
      */
-    public Properties realize(PropertiesBuilder overrides, Platform platform)
+    public Properties realize(PropertiesBuilder overrides,
+                              Platform          platform)
     {
         Properties properties = new Properties();
 
@@ -527,11 +465,6 @@ public class PropertiesBuilder
             if (!properties.containsKey(name))
             {
                 Object value = getProperty(name);
-
-                if (value instanceof PlatformAware)
-                {
-                    ((PlatformAware) value).setPlatform(platform);
-                }
 
                 if (value != null)
                 {
@@ -644,8 +577,7 @@ public class PropertiesBuilder
 
 
     /**
-     * A {@link Property} represents the defined value (with possible a default)
-     * for a specified named property.
+     * A {@link Property} represents the defined value for a specified named property.
      */
     private static class Property
     {
@@ -659,13 +591,6 @@ public class PropertiesBuilder
          */
         private Object value;
 
-        /**
-         * The default value of the {@link Property}
-         * (used when value is null).
-         */
-        @Deprecated
-        private Object defaultValue;
-
 
         /**
          * Constructs a {@link Property} based on another {@link Property}.
@@ -675,9 +600,8 @@ public class PropertiesBuilder
          */
         public Property(Property property)
         {
-            this.name         = property.getName();
-            this.value        = property.getValue();
-            this.defaultValue = property.getDefaultValue();
+            this.name  = property.getName();
+            this.value = property.getValue();
         }
 
 
@@ -686,15 +610,12 @@ public class PropertiesBuilder
          *
          * @param name          the name of the {@link Property}
          * @param value         the value of the {@link Property}
-         * @param defaultValue  the default value of the {@link Property}
          */
         public Property(String name,
-                        Object value,
-                        Object defaultValue)
+                        Object value)
         {
-            this.name         = name;
-            this.value        = value;
-            this.defaultValue = defaultValue;
+            this.name  = name;
+            this.value = value;
         }
 
 
@@ -744,36 +665,12 @@ public class PropertiesBuilder
 
 
         /**
-         * Obtain the default value of a {@link Property}.
-         *
-         * @return  the default value of a {@link Property}
-         */
-        @Deprecated
-        public Object getDefaultValue()
-        {
-            return defaultValue;
-        }
-
-
-        /**
-         * Sets the default value of a {@link Property}
-         *
-         * @param defaultValue  the default value of the {@link Property}
-         */
-        @Deprecated
-        public void setDefaultValue(Object defaultValue)
-        {
-            this.defaultValue = defaultValue;
-        }
-
-
-        /**
          * {@inheritDoc}
          */
         @Override
         public String toString()
         {
-            return String.format("{name=%s, value=%s, defaultValue=%s}", name, value, defaultValue);
+            return String.format("{name=%s, value=%s}", name, value);
         }
     }
 }

@@ -27,9 +27,14 @@ package com.oracle.tools.runtime.remote.java;
 
 import com.oracle.tools.deferred.Eventually;
 
+import com.oracle.tools.runtime.ApplicationConsole;
 import com.oracle.tools.runtime.LocalPlatform;
+import com.oracle.tools.runtime.Platform;
 import com.oracle.tools.runtime.SimpleApplication;
 import com.oracle.tools.runtime.SimpleApplicationSchema;
+
+import com.oracle.tools.runtime.concurrent.runnable.RuntimeExit;
+import com.oracle.tools.runtime.concurrent.runnable.RuntimeHalt;
 
 import com.oracle.tools.runtime.console.CapturingApplicationConsole;
 import com.oracle.tools.runtime.console.SystemApplicationConsole;
@@ -37,6 +42,7 @@ import com.oracle.tools.runtime.console.SystemApplicationConsole;
 import com.oracle.tools.runtime.java.JavaApplication;
 import com.oracle.tools.runtime.java.SimpleJavaApplication;
 import com.oracle.tools.runtime.java.SimpleJavaApplicationSchema;
+import com.oracle.tools.runtime.java.options.JavaHome;
 import com.oracle.tools.runtime.java.options.RemoteDebugging;
 
 import com.oracle.tools.runtime.remote.AbstractRemoteApplicationBuilderTest;
@@ -61,12 +67,9 @@ import static org.hamcrest.CoreMatchers.startsWith;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 
-import java.io.IOException;
-
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 
-import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -92,10 +95,34 @@ public class RemoteJavaApplicationBuilderTest extends AbstractRemoteApplicationB
 
         RemotePlatform platform = getRemotePlatform();
 
-        try (SimpleJavaApplication application = platform.realize("Java",
-                                                                  schema,
-                                                                  new SystemApplicationConsole(),
-                                                                  StrictHostChecking.disabled()))
+        try (SimpleJavaApplication application = platform.realize("Java", schema, new SystemApplicationConsole()))
+        {
+            assertThat(application.waitFor(), is(0));
+
+            application.close();
+
+            assertThat(application.exitValue(), is(0));
+        }
+    }
+
+
+    /**
+     * Ensure that we can launch Java remotely using a Java Home.
+     */
+    @Test
+    public void shouldLaunchJavaApplicationUsingJavaHome() throws Exception
+    {
+        SimpleJavaApplicationSchema schema = new SimpleJavaApplicationSchema(SleepingApplication.class.getName());
+
+        // sleep only for 3 seconds
+        schema.addArgument("3");
+
+        // use the JavaHome of this process
+        schema.setOptions(JavaHome.at(System.getProperty("java.home")));
+
+        RemotePlatform platform = getRemotePlatform();
+
+        try (SimpleJavaApplication application = platform.realize("Java", schema, new SystemApplicationConsole()))
         {
             assertThat(application.waitFor(), is(0));
 
@@ -122,11 +149,7 @@ public class RemoteJavaApplicationBuilderTest extends AbstractRemoteApplicationB
 
         RemotePlatform              platform = getRemotePlatform();
 
-        try (SimpleJavaApplication application = platform.realize("Java",
-                                                                  schema,
-                                                                  console,
-                                                                  remoteDebugging,
-                                                                  StrictHostChecking.disabled()))
+        try (SimpleJavaApplication application = platform.realize("Java", schema, console, remoteDebugging))
         {
             Eventually.assertThat(invoking(console).getCapturedOutputLines(), hasItem(startsWith("Now sleeping")));
 
@@ -167,11 +190,7 @@ public class RemoteJavaApplicationBuilderTest extends AbstractRemoteApplicationB
         RemotePlatform              platform        = getRemotePlatform();
         RemoteDebugging             remoteDebugging = RemoteDebugging.enabled().startSuspended(true);
 
-        try (SimpleJavaApplication application = platform.realize("Java",
-                                                                  schema,
-                                                                  console,
-                                                                  remoteDebugging,
-                                                                  StrictHostChecking.disabled()))
+        try (SimpleJavaApplication application = platform.realize("Java", schema, console, remoteDebugging))
         {
             assertCanConnectDebuggerToApplication(application);
 
@@ -229,11 +248,7 @@ public class RemoteJavaApplicationBuilderTest extends AbstractRemoteApplicationB
 
             RemotePlatform              platform = getRemotePlatform();
 
-            try (SimpleJavaApplication application = platform.realize("Java",
-                                                                      schema,
-                                                                      console,
-                                                                      remoteDebugging,
-                                                                      StrictHostChecking.disabled()))
+            try (SimpleJavaApplication application = platform.realize("Java", schema, console, remoteDebugging))
             {
                 Eventually.assertThat(invoking(console).getCapturedOutputLines(), hasItem(startsWith("Now sleeping")));
                 Eventually.assertThat("Application did not connect back to JDB",
@@ -279,12 +294,17 @@ public class RemoteJavaApplicationBuilderTest extends AbstractRemoteApplicationB
         SimpleJavaApplicationSchema schema =
             new SimpleJavaApplicationSchema(SleepingApplication.class.getName()).addArgument("30");
 
-        try (SimpleJavaApplication app = LocalPlatform.getInstance().realize("TestApp",
-                                                                             schema,
-                                                                             new SystemApplicationConsole(),
-                                                                             RemoteDebugging.disabled()))
+        CapturingApplicationConsole console         = new CapturingApplicationConsole();
+
+        RemoteDebugging             remoteDebugging = RemoteDebugging.disabled();
+
+        RemotePlatform              platform        = getRemotePlatform();
+
+        try (SimpleJavaApplication application = platform.realize("Java", schema, console, remoteDebugging))
         {
-            List<String> args     = app.submit(new GetProgramArgs());
+            Eventually.assertThat(invoking(console).getCapturedOutputLines(), hasItem(startsWith("Now sleeping")));
+
+            List<String> args     = application.submit(new GetProgramArgs());
 
             String       debugArg = null;
 
@@ -298,6 +318,64 @@ public class RemoteJavaApplicationBuilderTest extends AbstractRemoteApplicationB
             }
 
             Assert.assertThat(debugArg, is(nullValue()));
+        }
+    }
+
+
+    /**
+     * Ensure that local {@link JavaApplication}s can be terminated using {@link RuntimeExit}.
+     */
+    @Test
+    public void shouldTerminateUsingRuntimeExit() throws Exception
+    {
+        // define the SleepingApplication
+        SimpleJavaApplicationSchema schema =
+            new SimpleJavaApplicationSchema(SleepingApplication.class.getName()).setPreferIPv4(true);
+
+        // sleep only for 3 seconds
+        schema.addArgument("3");
+
+        // build and start the SleepingApplication
+        Platform           platform = getRemotePlatform();
+
+        ApplicationConsole console  = new SystemApplicationConsole();
+
+        try (SimpleJavaApplication application = platform.realize("sleeping", schema, console))
+        {
+            application.close(RuntimeExit.withExitCode(42));
+
+            int exitStatus = application.waitFor();
+
+            assertThat(exitStatus, is(42));
+        }
+    }
+
+
+    /**
+     * Ensure that local {@link JavaApplication}s can be terminated using {@link RuntimeHalt}.
+     */
+    @Test
+    public void shouldTerminateUsingRuntimeHalt() throws Exception
+    {
+        // define the SleepingApplication
+        SimpleJavaApplicationSchema schema =
+            new SimpleJavaApplicationSchema(SleepingApplication.class.getName()).setPreferIPv4(true);
+
+        // sleep only for 3 seconds
+        schema.addArgument("3");
+
+        // build and start the SleepingApplication
+        Platform           platform = getRemotePlatform();
+
+        ApplicationConsole console  = new SystemApplicationConsole();
+
+        try (SimpleJavaApplication application = platform.realize("sleeping", schema, console))
+        {
+            application.close(RuntimeHalt.withExitCode(42));
+
+            int exitStatus = application.waitFor();
+
+            assertThat(exitStatus, is(42));
         }
     }
 
@@ -334,6 +412,7 @@ public class RemoteJavaApplicationBuilderTest extends AbstractRemoteApplicationB
         return new RemotePlatform("Remote",
                                   InetAddress.getByName(getRemoteHostName()),
                                   getRemoteUserName(),
-                                  getRemoteAuthentication());
+                                  getRemoteAuthentication(),
+                                  StrictHostChecking.disabled());
     }
 }

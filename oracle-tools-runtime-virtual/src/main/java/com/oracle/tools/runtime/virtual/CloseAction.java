@@ -25,6 +25,8 @@
 
 package com.oracle.tools.runtime.virtual;
 
+import com.oracle.tools.Option;
+
 /**
  * An enum of different options for closing a Virtual Machine.
  * <p>
@@ -33,7 +35,7 @@ package com.oracle.tools.runtime.virtual;
  *
  * @author Jonathan Knight
  */
-public enum CloseAction
+public enum CloseAction implements Option
 {
     /** When close is called on the {@link VirtualPlatform} do nothing */
     None,

@@ -25,6 +25,9 @@
 
 package com.oracle.tools.runtime.java;
 
+import com.oracle.tools.Option;
+import com.oracle.tools.Options;
+
 import com.oracle.tools.deferred.Cached;
 import com.oracle.tools.deferred.Deferred;
 import com.oracle.tools.deferred.NeverAvailable;
@@ -45,6 +48,8 @@ import com.oracle.tools.runtime.concurrent.RemoteRunnable;
 import com.oracle.tools.runtime.concurrent.callable.RemoteMethodInvocation;
 
 import com.oracle.tools.runtime.network.Constants;
+
+import com.oracle.tools.runtime.options.ApplicationClosingBehavior;
 
 import com.oracle.tools.util.CompletionListener;
 import com.oracle.tools.util.FutureCompletionListener;
@@ -291,7 +296,7 @@ public abstract class AbstractJavaApplication<A extends AbstractJavaApplication<
 
 
     @Override
-    public void close()
+    public void close(Option... options)
     {
         // close the JMXConnector (if we've got one)
         JMXConnector jmxConnector = cachedJmxConnector.release();
@@ -308,7 +313,7 @@ public abstract class AbstractJavaApplication<A extends AbstractJavaApplication<
             }
         }
 
-        super.close();
+        super.close(options);
     }
 
 

@@ -209,14 +209,7 @@ public abstract class AbstractJavaApplicationSchema<A extends JavaApplication,
     }
 
 
-    /**
-     * Sets the specified system property.
-     *
-     * @param name  The name of the system property
-     * @param value The value for the system property
-     * @return the {@link JavaApplicationSchema}
-     */
-    @SuppressWarnings("unchecked")
+    @Override
     public S setSystemProperty(String name,
                                Object value)
     {
@@ -256,37 +249,11 @@ public abstract class AbstractJavaApplicationSchema<A extends JavaApplication,
     }
 
 
-    /**
-     * Optionally sets the specified system property.
-     *
-     * @param name   the name of the system property
-     * @param value  the value for the system property
-     *
-     * @return the {@link JavaApplicationSchema}
-     */
-    @SuppressWarnings("unchecked")
+    @Override
     public S setSystemPropertyIfAbsent(String name,
                                        Object value)
     {
         systemPropertiesBuilder.setPropertyIfAbsent(name, value);
-
-        return (S) this;
-    }
-
-
-    /**
-     * Sets a default value for specified system property (to be used if it's not defined)
-     *
-     * @param name  The name of the system property
-     * @param value The value for the system property
-     * @return the {@link JavaApplicationSchema}
-     */
-    @Deprecated
-    @SuppressWarnings("unchecked")
-    public S setDefaultSystemProperty(String name,
-                                      Object value)
-    {
-        systemPropertiesBuilder.setDefaultProperty(name, value);
 
         return (S) this;
     }

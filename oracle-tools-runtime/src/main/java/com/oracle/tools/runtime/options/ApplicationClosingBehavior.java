@@ -1,5 +1,5 @@
 /*
- * File: PlatformPublicHostNameProperty.java
+ * File: ApplicationClosingBehavior.java
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
@@ -23,37 +23,26 @@
  * "Portions Copyright [year] [name of copyright owner]"
  */
 
-package com.oracle.tools.runtime.java;
+package com.oracle.tools.runtime.options;
 
-import com.oracle.tools.runtime.LocalPlatform;
-import com.oracle.tools.runtime.Platform;
-import com.oracle.tools.runtime.PlatformAware;
+import com.oracle.tools.Option;
+
+import com.oracle.tools.runtime.Application;
 
 /**
- * Instances of this class can be used to provide the
- * public host name of a {@link Platform} as a system
- * property in a {@link com.oracle.tools.runtime.PropertiesBuilder}.
+ * An {@link Option} defining custom closing behavior for an {@link Application}.
+ * <p>
+ * Copyright (c) 2014. All Rights Reserved. Oracle Corporation.<br>
+ * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
- * @author Jonathan Knight
+ * @author Brian Oliver
  */
-public class PlatformPublicHostNameProperty implements PlatformAware
+public interface ApplicationClosingBehavior<A extends Application> extends Option
 {
-    /** The current {@link com.oracle.tools.runtime.Platform} */
-    private Platform platform;
-
-
-    @Override
-    public void setPlatform(Platform platform)
-    {
-        this.platform = platform;
-    }
-
-
-    @Override
-    public String toString()
-    {
-        return platform != null
-               ? platform.getPublicInetAddress().getHostName()
-               : LocalPlatform.getInstance().getHostName();
-    }
+    /**
+     * Called prior to the {@link Application} being closed.
+     *
+     * @param application  the {@link }
+     */
+    public void onBeforeClosing(A application);
 }

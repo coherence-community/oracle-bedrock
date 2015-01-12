@@ -27,6 +27,10 @@ package com.oracle.tools.runtime.concurrent.runnable;
 
 import com.oracle.tools.runtime.concurrent.RemoteRunnable;
 
+import com.oracle.tools.runtime.java.JavaApplication;
+
+import com.oracle.tools.runtime.options.ApplicationClosingBehavior;
+
 /**
  * A {@link RemoteRunnable} to perform a {@link System#exit(int)}.
  * <p>
@@ -35,7 +39,7 @@ import com.oracle.tools.runtime.concurrent.RemoteRunnable;
  *
  * @author Brian Oliver
  */
-public class SystemExit implements RemoteRunnable
+public class SystemExit implements RemoteRunnable, ApplicationClosingBehavior<JavaApplication>
 {
     /**
      * The desired system exit code (by default 0);
@@ -58,7 +62,7 @@ public class SystemExit implements RemoteRunnable
      *
      * @param exitCode  the desired exit code
      */
-    public SystemExit(int exitCode)
+    private SystemExit(int exitCode)
     {
         this.exitCode = exitCode;
     }
@@ -67,8 +71,70 @@ public class SystemExit implements RemoteRunnable
     @Override
     public void run()
     {
-        System.out.println("Terminating Application (due to SystemExit) [exitcode=" + exitCode + "]");
+        System.out.println("Terminating Application using System.exit(" + exitCode + ")");
 
         System.exit(exitCode);
+    }
+
+
+    @Override
+    public void onBeforeClosing(JavaApplication application)
+    {
+        try
+        {
+            // submit the System.exit request to the application
+            application.submit(this);
+
+            // now wait for it to terminate
+            application.waitFor();
+        }
+        catch (IllegalStateException e)
+        {
+            // we ignore exceptions that occurred as we are attempting to close the application
+        }
+    }
+
+
+    @Override
+    public boolean equals(Object other)
+    {
+        if (this == other)
+        {
+            return true;
+        }
+
+        if (!(other instanceof SystemExit))
+        {
+            return false;
+        }
+
+        SystemExit that = (SystemExit) other;
+
+        if (exitCode != that.exitCode)
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+
+    @Override
+    public int hashCode()
+    {
+        return exitCode;
+    }
+
+
+    /**
+     * Constructs a {@link SystemExit} with a specified exit code.
+     *
+     * @param exitCode  the exit code to use
+     *
+     * @return a {@link SystemExit}
+     */
+    public static SystemExit withExitCode(int exitCode)
+    {
+        return new SystemExit(exitCode);
     }
 }

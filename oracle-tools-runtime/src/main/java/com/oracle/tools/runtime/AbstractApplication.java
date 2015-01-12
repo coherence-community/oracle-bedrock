@@ -28,11 +28,14 @@ package com.oracle.tools.runtime;
 import com.oracle.tools.Option;
 import com.oracle.tools.Options;
 
+import com.oracle.tools.options.Diagnostics;
 import com.oracle.tools.options.Timeout;
+
+import com.oracle.tools.runtime.console.SystemApplicationConsole;
 
 import com.oracle.tools.runtime.java.container.Container;
 
-import com.oracle.tools.runtime.options.Diagnostics;
+import com.oracle.tools.runtime.options.ApplicationClosingBehavior;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
@@ -43,8 +46,7 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.Reader;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.LinkedHashSet;
 import java.util.Properties;
 
 /**
@@ -88,7 +90,7 @@ public abstract class AbstractApplication<A extends AbstractApplication<A, P, R>
      * The {@link ApplicationListener}s that must be notified based
      * on lifecycle events occuring on the {@link Application}.
      */
-    private List<ApplicationListener<? super A>> listeners;
+    private LinkedHashSet<ApplicationListener<? super A>> listeners;
 
     /**
      * The default {@link Timeout} to use for the {@link Application}.
@@ -111,7 +113,7 @@ public abstract class AbstractApplication<A extends AbstractApplication<A, P, R>
         this.defaultTimeout = runtime.getOptions().get(Timeout.class, Timeout.autoDetect());
 
         // make a copy of the listeners
-        this.listeners = new ArrayList<ApplicationListener<? super A>>();
+        this.listeners = new LinkedHashSet<>();
 
         if (listeners != null)
         {
@@ -125,7 +127,8 @@ public abstract class AbstractApplication<A extends AbstractApplication<A, P, R>
         String             displayName = runtime.getApplicationName();
         P                  process     = runtime.getApplicationProcess();
         ApplicationConsole console     = runtime.getApplicationConsole();
-        boolean diagnosticsEnabled = runtime.getOptions().get(Diagnostics.class, Diagnostics.autoDetect()).isEnabled();
+        boolean diagnosticsEnabled     = runtime.getOptions().get(Diagnostics.class,
+                                                                  Diagnostics.disabled()).isEnabled();
 
         // start a thread to redirect standard out to the console
         stdoutThread = new Thread(new OutputRedirector(displayName,
@@ -133,7 +136,8 @@ public abstract class AbstractApplication<A extends AbstractApplication<A, P, R>
                                                        process.getInputStream(),
                                                        console.getOutputWriter(),
                                                        process.getId(),
-                                                       diagnosticsEnabled,
+                                                       diagnosticsEnabled
+                                                       &&!(console instanceof SystemApplicationConsole),
                                                        console.isDiagnosticsEnabled()));
         stdoutThread.setDaemon(true);
         stdoutThread.setName(displayName + " StdOut Thread");
@@ -145,7 +149,8 @@ public abstract class AbstractApplication<A extends AbstractApplication<A, P, R>
                                                        process.getErrorStream(),
                                                        console.getErrorWriter(),
                                                        process.getId(),
-                                                       diagnosticsEnabled,
+                                                       diagnosticsEnabled
+                                                       &&!(console instanceof SystemApplicationConsole),
                                                        console.isDiagnosticsEnabled()));
         stderrThread.setDaemon(true);
         stderrThread.setName(displayName + " StdErr Thread");
@@ -196,10 +201,22 @@ public abstract class AbstractApplication<A extends AbstractApplication<A, P, R>
     @Override
     public void close()
     {
-        // notify the ApplicationListener-based Options that the application is about to close
-        Option[] options = getOptions().asArray();
+        // delegate the close() to close(Option...)
+        close(new Option[]
+        {
+        });
+    }
 
-        for (Option option : options)
+
+    @Override
+    public void close(Option... options)
+    {
+        // ------ notify ApplicationListeners (about closing) ------
+
+        // notify the ApplicationListener-based Options that the application is about to close
+        Option[] applicationOptions = getOptions().asArray();
+
+        for (Option option : applicationOptions)
         {
             if (option instanceof ApplicationListener)
             {
@@ -213,8 +230,38 @@ public abstract class AbstractApplication<A extends AbstractApplication<A, P, R>
             listener.onClosing(this);
         }
 
+        // ------ perform any necessary ApplicationClosingBehaviors ------
+
+        // determine the default closing behavior (defined for the application options)
+        ApplicationClosingBehavior defaultClosingBehavior = getOptions().get(ApplicationClosingBehavior.class);
+
+        // determine the custom closing behavior for the application
+        Options closingOptions = new Options(options);
+
+        // determine the required closing behavior
+        ApplicationClosingBehavior closingBehavior = closingOptions.get(ApplicationClosingBehavior.class,
+                                                                        defaultClosingBehavior);
+
+        if (closingBehavior != null)
+        {
+            try
+            {
+                closingBehavior.onBeforeClosing(this);
+            }
+            catch (Exception e)
+            {
+                // we ignore any issues that occurred due to closing behaviors
+
+                // TODO: if diagnostics are enabled we should output the exception
+            }
+        }
+
+        // ------ close the process ------
+
         // close the process
         runtime.getApplicationProcess().close();
+
+        // ------ clean up ------
 
         // terminate the thread that is writing to the process standard in
         try
@@ -284,8 +331,10 @@ public abstract class AbstractApplication<A extends AbstractApplication<A, P, R>
             // nothing to do here as we don't care
         }
 
+        // ------ notify ApplicationListeners (about being closed) ------
+
         // notify the ApplicationListener-based Options that the application has closed
-        for (Option option : options)
+        for (Option option : applicationOptions)
         {
             if (option instanceof ApplicationListener)
             {
@@ -312,6 +361,20 @@ public abstract class AbstractApplication<A extends AbstractApplication<A, P, R>
     public Iterable<ApplicationListener<? super A>> getApplicationListeners()
     {
         return listeners;
+    }
+
+
+    @Override
+    public void addApplicationListener(ApplicationListener listener)
+    {
+        listeners.add(listener);
+    }
+
+
+    @Override
+    public void removeApplicationListener(ApplicationListener listener)
+    {
+        listeners.remove(listener);
     }
 
 

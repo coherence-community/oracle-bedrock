@@ -30,8 +30,6 @@ import com.oracle.tools.Option;
 import com.oracle.tools.runtime.console.NullApplicationConsole;
 import com.oracle.tools.runtime.console.SingletonApplicationConsoleBuilder;
 
-import com.oracle.tools.util.Quadruple;
-
 import java.io.IOException;
 
 import java.util.LinkedHashMap;
@@ -107,12 +105,6 @@ public abstract class AbstractAssemblyBuilder<A extends Application, G extends A
 
         // establish the assembly based on the applications
         G assembly = createAssembly(applications);
-
-        // add the assembly as an option to all of the applications
-        for (A application : applications)
-        {
-            application.getOptions().add(assembly);
-        }
 
         return assembly;
     }
