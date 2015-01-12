@@ -29,6 +29,12 @@ reverse chronological order.
 
 <h4>oracle-tools-runtime-virtual</h4>
 
+*   [ORACLETOOLS-222](https://java.net/jira/browse/ORACLETOOLS-222): Fixed bug
+    where the Vagrant configuration file was created with a file name that did
+    not work on case sensetive file systems such as Linux.
+
+<h4>oracle-tools-runtime-virtual</h4>
+
 *   (no changes)
 
 <h4>oracle-tools-testing-support</h4>
