@@ -521,7 +521,7 @@ reverse chronological order.
 *   [ORACLETOOLS-214](https://java.net/jira/browse/ORACLETOOLS-214): Introduced
     Option support into RemotePlatform implementations.
 
-<h4>oracle-tools-runtime-virtual</h4>
+<h4>oracle-tools-runtime-vagrant</h4>
 
 *   [ORACLETOOLS-222](https://java.net/jira/browse/ORACLETOOLS-222): Fixed bug
     where the Vagrant configuration file was created with a file name that did
