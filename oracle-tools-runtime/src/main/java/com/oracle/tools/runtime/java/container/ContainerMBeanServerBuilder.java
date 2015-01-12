@@ -26,6 +26,7 @@
 package com.oracle.tools.runtime.java.container;
 
 import com.oracle.tools.runtime.LocalPlatform;
+
 import com.oracle.tools.runtime.network.AvailablePortIterator;
 
 import static com.oracle.tools.runtime.java.JavaApplication.JAVA_HOME;
@@ -304,7 +305,7 @@ public class ContainerMBeanServerBuilder extends MBeanServerBuilder
             }
             else
             {
-                hostName = LocalPlatform.getInstance().getPublicInetAddress().getHostAddress();
+                hostName = LocalPlatform.getInstance().getAddress().getHostAddress();
             }
 
             int port;

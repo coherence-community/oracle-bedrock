@@ -49,14 +49,9 @@ import java.net.InetAddress;
 public class RemotePlatform extends AbstractPlatform
 {
     /**
-     * The private {@link InetAddress}.
+     * The {@link InetAddress} of the {@link RemotePlatform}.
      */
-    protected InetAddress privateAddress;
-
-    /**
-     * The public {@link InetAddress}.
-     */
-    protected InetAddress publicAddress;
+    protected InetAddress address;
 
     /**
      * The port of the remote host to connect for the SSH-based session.
@@ -131,8 +126,7 @@ public class RemotePlatform extends AbstractPlatform
     {
         super(name, options);
 
-        this.privateAddress = address;
-        this.publicAddress  = address;
+        this.address        = address;
         this.port           = port;
         this.userName       = userName;
         this.authentication = authentication;
@@ -140,24 +134,17 @@ public class RemotePlatform extends AbstractPlatform
 
 
     @Override
-    public InetAddress getPrivateInetAddress()
+    public InetAddress getAddress()
     {
-        return privateAddress;
-    }
-
-
-    @Override
-    public InetAddress getPublicInetAddress()
-    {
-        return publicAddress;
+        return address;
     }
 
 
     /**
-     * Obtain the port to use with the private {@link InetAddress}
+     * Obtain the port to use with the {@link InetAddress}
      * to use to SSH to the remote host.
      *
-     * @return the port to use with the private {@link InetAddress}
+     * @return the port to use with the {@link InetAddress}
      *         to use to SSH to the remote host.
      */
     public int getPort()
@@ -188,12 +175,6 @@ public class RemotePlatform extends AbstractPlatform
     }
 
 
-    public void setPublicAddress(InetAddress publicAddress)
-    {
-        this.publicAddress = publicAddress;
-    }
-
-
     @Override
     @SuppressWarnings("unchecked")
     public <A extends Application, B extends ApplicationBuilder<A>> B getApplicationBuilder(Class<A> applicationClass)
@@ -202,11 +183,11 @@ public class RemotePlatform extends AbstractPlatform
 
         if (JavaApplication.class.isAssignableFrom(applicationClass))
         {
-            builder = new RemoteJavaApplicationBuilder(privateAddress.getHostName(), port, userName, authentication);
+            builder = new RemoteJavaApplicationBuilder(address.getHostAddress(), port, userName, authentication);
         }
         else
         {
-            builder = new SimpleRemoteApplicationBuilder(privateAddress.getHostName(), port, userName, authentication);
+            builder = new SimpleRemoteApplicationBuilder(address.getHostAddress(), port, userName, authentication);
         }
 
         return (B) builder;

@@ -61,11 +61,11 @@ import java.util.List;
 public class JavaVirtualMachineTest
 {
     @Test
-    public void shouldReturnHostName() throws Exception
+    public void shouldReturnLocalPlatformAddress() throws Exception
     {
         Platform platform = JavaVirtualMachine.getInstance();
 
-        assertThat(platform.getPrivateInetAddress(), is(LocalPlatform.getInstance().getPrivateInetAddress()));
+        assertThat(platform.getAddress(), is(LocalPlatform.getInstance().getAddress()));
     }
 
 

@@ -319,7 +319,8 @@ public abstract class AbstractJavaApplicationSchema<A extends JavaApplication,
             setSystemPropertyIfAbsent(SUN_MANAGEMENT_JMXREMOTE_PORT, 9000);
             setSystemPropertyIfAbsent(SUN_MANAGEMENT_JMXREMOTE_AUTHENTICATE, false);
             setSystemPropertyIfAbsent(SUN_MANAGEMENT_JMXREMOTE_SSL, false);
-            setSystemPropertyIfAbsent(JAVA_RMI_SERVER_HOSTNAME, LocalPlatform.getInstance().getHostName());
+            setSystemPropertyIfAbsent(JAVA_RMI_SERVER_HOSTNAME,
+                                      LocalPlatform.getInstance().getAddress().getHostAddress());
         }
         else
         {

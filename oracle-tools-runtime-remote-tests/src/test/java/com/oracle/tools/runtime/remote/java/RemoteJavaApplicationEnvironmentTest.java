@@ -88,7 +88,7 @@ public class RemoteJavaApplicationEnvironmentTest
         String                           command         = env.getRemoteCommandToExecute(InetAddress.getLocalHost());
 
         String debugCommand = String.format("-agentlib:jdwp=transport=dt_socket,server=n,suspend=n,address=%s:%d",
-                                            LocalPlatform.getInstance().getHostName(),
+                                            LocalPlatform.getInstance().getAddress().getHostAddress(),
                                             debuggerPort);
 
         assertThat(command, containsString(debugCommand));

@@ -71,7 +71,9 @@ import static com.oracle.tools.predicate.Predicates.allOf;
 import java.io.File;
 import java.io.IOException;
 
+import java.net.Inet4Address;
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 
 import java.util.Properties;
 
@@ -235,6 +237,7 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication> extends Abst
 
         try
         {
+            // NOTE: this listens on the wildcard address on an ephemeral port
             server.open();
         }
         catch (IOException e)
@@ -243,23 +246,33 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication> extends Abst
         }
 
         // add Oracle Tools specific System Properties
-        Predicate<InetAddress> preferred = schema.isIPv4Preferred() ? allOf(NetworkHelper.IPv4_ADDRESS,
-                                                                            NetworkHelper
-                                                                                .NON_LOOPBACK_ADDRESS) : NetworkHelper
-                                                                                    .DEFAULT_ADDRESS;
 
-        InetAddress inetAddress = server.getInetAddress(preferred);
+        // NOTE: the Oracle Tools parent address for locally created applications is always "loopback" as
+        // i). they are always running locally,
+        // ii). they only need to connect locally, and
+        // iii). the "loopback" interface should work regardless of the network we're on.
+        InetAddress parentAddress;
 
-        if (inetAddress == null)
+        if (schema.isIPv4Preferred())
         {
-            preferred = schema.isIPv4Preferred()
-                        ? allOf(NetworkHelper.IPv4_ADDRESS, NetworkHelper.LOOPBACK_ADDRESS)
-                        : allOf(NetworkHelper.DEFAULT_ADDRESS, NetworkHelper.LOOPBACK_ADDRESS);
-
-            inetAddress = server.getInetAddress(preferred);
+            // we have to provide the schema with an IPv4 address!
+            try
+            {
+                parentAddress = InetAddress.getByName("127.0.0.1");
+            }
+            catch (UnknownHostException e)
+            {
+                // TODO: log that we couldn't determine the loopback address!
+                parentAddress = InetAddress.getLoopbackAddress();
+            }
+        }
+        else
+        {
+            // when the schema doesn't care, we can default to what this platform chooses
+            parentAddress = InetAddress.getLoopbackAddress();
         }
 
-        processBuilder.command().add("-D" + Settings.PARENT_ADDRESS + "=" + inetAddress.getHostAddress());
+        processBuilder.command().add("-D" + Settings.PARENT_ADDRESS + "=" + parentAddress.getHostAddress());
         processBuilder.command().add("-D" + Settings.PARENT_PORT + "=" + server.getPort());
 
         // add Orphanable configuration

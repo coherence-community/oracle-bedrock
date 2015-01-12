@@ -25,15 +25,20 @@
 
 package com.oracle.tools.runtime;
 
+import com.oracle.tools.io.NetworkHelper;
+
 import com.oracle.tools.runtime.java.JavaApplication;
 import com.oracle.tools.runtime.java.JavaApplicationBuilder;
+
 import org.junit.Test;
 
-import java.net.InetAddress;
-
 import static org.hamcrest.CoreMatchers.is;
+
 import static org.hamcrest.MatcherAssert.assertThat;
+
 import static org.hamcrest.core.IsInstanceOf.instanceOf;
+
+import java.net.InetAddress;
 
 /**
  * Unit tests for {@link LocalPlatform}s.
@@ -47,12 +52,13 @@ import static org.hamcrest.core.IsInstanceOf.instanceOf;
 public class LocalPlatformTest
 {
     @Test
-    public void shouldReturnHostName() throws Exception
+    public void shouldReturnFeasibleLocalHost() throws Exception
     {
-        String hostName = LocalPlatform.getInstance().getHostName();
+        InetAddress address = LocalPlatform.getInstance().getAddress();
 
-        assertThat(LocalPlatform.getInstance().getPrivateInetAddress(), is(InetAddress.getByName(hostName)));
+        assertThat(address, is(NetworkHelper.getFeasibleLocalHost()));
     }
+
 
     @Test
     public void shouldReturnJavaApplicationBuilder()

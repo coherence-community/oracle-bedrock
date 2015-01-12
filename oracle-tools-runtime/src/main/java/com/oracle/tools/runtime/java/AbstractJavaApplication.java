@@ -26,7 +26,6 @@
 package com.oracle.tools.runtime.java;
 
 import com.oracle.tools.Option;
-import com.oracle.tools.Options;
 
 import com.oracle.tools.deferred.Cached;
 import com.oracle.tools.deferred.Deferred;
@@ -46,10 +45,6 @@ import com.oracle.tools.runtime.Platform;
 import com.oracle.tools.runtime.concurrent.RemoteCallable;
 import com.oracle.tools.runtime.concurrent.RemoteRunnable;
 import com.oracle.tools.runtime.concurrent.callable.RemoteMethodInvocation;
-
-import com.oracle.tools.runtime.network.Constants;
-
-import com.oracle.tools.runtime.options.ApplicationClosingBehavior;
 
 import com.oracle.tools.util.CompletionListener;
 import com.oracle.tools.util.FutureCompletionListener;
@@ -204,7 +199,7 @@ public abstract class AbstractJavaApplication<A extends AbstractJavaApplication<
     {
         String hostname = getSystemProperties().getProperty(JAVA_RMI_SERVER_HOSTNAME);
 
-        return hostname == null ? Constants.getLocalHost() : hostname;
+        return hostname == null ? getPlatform().getAddress().getHostAddress() : hostname;
     }
 
 
@@ -334,7 +329,7 @@ public abstract class AbstractJavaApplication<A extends AbstractJavaApplication<
             return null;
         }
 
-        InetAddress address = platform.getPublicInetAddress();
+        InetAddress address = platform.getAddress();
 
         return new InetSocketAddress(address, remoteDebuggingPort);
     }

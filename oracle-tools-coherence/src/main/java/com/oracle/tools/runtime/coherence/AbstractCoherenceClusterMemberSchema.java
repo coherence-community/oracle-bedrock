@@ -25,7 +25,6 @@
 
 package com.oracle.tools.runtime.coherence;
 
-import com.oracle.tools.runtime.LocalPlatform;
 import com.oracle.tools.runtime.Platform;
 
 import com.oracle.tools.runtime.concurrent.RemoteCallable;
@@ -138,12 +137,12 @@ public abstract class AbstractCoherenceClusterMemberSchema<A extends CoherenceCl
             // information to that as defined by the remote platform (when it's not defined)
             if (!properties.containsKey(CoherenceCacheServerSchema.PROPERTY_LOCALHOST_ADDRESS))
             {
-                InetAddress inetAddress = platform.getPublicInetAddress();
+                InetAddress inetAddress = platform.getAddress();
 
                 if (inetAddress != null)
                 {
                     properties.setProperty(CoherenceClusterMemberSchema.PROPERTY_LOCALHOST_ADDRESS,
-                                           inetAddress.getHostName());
+                                           inetAddress.getHostAddress());
                 }
             }
 
@@ -456,7 +455,8 @@ public abstract class AbstractCoherenceClusterMemberSchema<A extends CoherenceCl
     @SuppressWarnings("unchecked")
     public S useLocalHostMode()
     {
-        setLocalHostAddress(LocalPlatform.getInstance().getHostName());
+        // TODO: this needs to be changed to use the local host of the platform, not the LocalPlatform
+        setLocalHostAddress(InetAddress.getLoopbackAddress().getHostAddress());
         setMulticastTTL(0);
 
         return (S) this;

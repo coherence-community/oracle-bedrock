@@ -27,19 +27,23 @@ package com.oracle.tools.runtime;
 
 import com.oracle.tools.runtime.java.SimpleJavaApplication;
 import com.oracle.tools.runtime.java.SimpleJavaApplicationSchema;
-import org.junit.Test;
 
-import java.net.InetAddress;
+import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.CoreMatchers.sameInstance;
+
 import static org.junit.Assert.assertThat;
+
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.same;
+
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
+
+import java.net.InetAddress;
 
 /**
  * @author jk 2014.06.27
@@ -50,71 +54,88 @@ public class AbstractPlatformTest
     public void shouldHaveCorrectName() throws Exception
     {
         AbstractPlatform platform = new AbstractPlatformStub("Test");
+
         assertThat(platform.getName(), is("Test"));
     }
 
+
     @Test
-    public void shouldHaveCorrectPrivateInetAddress() throws Exception
+    public void shouldHaveCorrectAddress() throws Exception
     {
         AbstractPlatform stub     = new AbstractPlatformStub("Test");
         AbstractPlatform platform = spy(stub);
         InetAddress      address  = mock(InetAddress.class);
 
-        when(platform.getPublicInetAddress()).thenReturn(address);
+        when(platform.getAddress()).thenReturn(address);
 
-        assertThat(platform.getPrivateInetAddress(), is(sameInstance(address)));
+        assertThat(platform.getAddress(), is(sameInstance(address)));
     }
+
 
     @Test
     @SuppressWarnings("unchecked")
     public void shouldRealizeApplicationWithCorrectBuilder() throws Exception
     {
-        ApplicationBuilder          builder = mock(ApplicationBuilder.class);
-        ApplicationConsole          console = mock(ApplicationConsole.class);
-        SimpleJavaApplicationSchema schema  = new SimpleJavaApplicationSchema("Dummy");
-        SimpleJavaApplication       app     = mock(SimpleJavaApplication.class);
+        ApplicationBuilder          builder  = mock(ApplicationBuilder.class);
+        ApplicationConsole          console  = mock(ApplicationConsole.class);
+        SimpleJavaApplicationSchema schema   = new SimpleJavaApplicationSchema("Dummy");
+        SimpleJavaApplication       app      = mock(SimpleJavaApplication.class);
 
-        AbstractPlatform stub     = new AbstractPlatformStub("Test");
-        AbstractPlatform platform = spy(stub);
+        AbstractPlatform            stub     = new AbstractPlatformStub("Test");
+        AbstractPlatform            platform = spy(stub);
 
         when(platform.getApplicationBuilder(SimpleJavaApplication.class)).thenReturn(builder);
         when(builder.realize(same(schema), eq("TestApp"), same(console), same(platform))).thenReturn(app);
 
         SimpleJavaApplication result = platform.realize("TestApp", schema, console);
+
         assertThat(result, is(sameInstance(app)));
     }
+
 
     @Test
     public void shouldNotRealizeApplicationIfBuilderIsNull() throws Exception
     {
-        ApplicationConsole          console = mock(ApplicationConsole.class);
-        SimpleJavaApplicationSchema schema  = new SimpleJavaApplicationSchema("Dummy");
+        ApplicationConsole          console  = mock(ApplicationConsole.class);
+        SimpleJavaApplicationSchema schema   = new SimpleJavaApplicationSchema("Dummy");
 
-        AbstractPlatform stub     = new AbstractPlatformStub("Test");
-        AbstractPlatform platform = spy(stub);
+        AbstractPlatform            stub     = new AbstractPlatformStub("Test");
+        AbstractPlatform            platform = spy(stub);
 
         when(platform.getApplicationBuilder(SimpleJavaApplication.class)).thenReturn(null);
 
         SimpleJavaApplication result = platform.realize("TestApp", schema, console);
+
         assertThat(result, is(nullValue()));
     }
 
 
+    /**
+     * An abstract {@link Platform} stub.
+     */
     public static class AbstractPlatformStub extends AbstractPlatform
     {
+        /**
+         * Constructs an {@link AbstractPlatformStub}.
+         *
+         * @param name  the name of the {@link Platform}
+         */
         public AbstractPlatformStub(String name)
         {
             super(name);
         }
 
+
         @Override
-        public InetAddress getPublicInetAddress()
+        public InetAddress getAddress()
         {
             return null;
         }
 
+
         @Override
-        public <A extends Application, B extends ApplicationBuilder<A>> B getApplicationBuilder(Class<A> applicationClass)
+        public <A extends Application,
+                B extends ApplicationBuilder<A>> B getApplicationBuilder(Class<A> applicationClass)
         {
             return null;
         }

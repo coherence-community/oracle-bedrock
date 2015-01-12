@@ -25,16 +25,18 @@
 
 package com.oracle.tools.runtime.java;
 
+import com.oracle.tools.io.NetworkHelper;
+
 import com.oracle.tools.runtime.AbstractPlatform;
 import com.oracle.tools.runtime.Application;
 import com.oracle.tools.runtime.ApplicationBuilder;
-import com.oracle.tools.runtime.LocalPlatform;
 import com.oracle.tools.runtime.Platform;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
 
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 
 /**
  * An implementation of a {@link Platform} for running, deploying and
@@ -54,6 +56,11 @@ public class JavaVirtualMachine extends AbstractPlatform
 
     private boolean                   isAutoDebugEnabled = true;
 
+    /**
+     * The {@link InetAddress} of the {@link Platform}.
+     */
+    private InetAddress address;
+
 
     /**
      * Construct a new {@link JavaVirtualMachine}.
@@ -63,13 +70,36 @@ public class JavaVirtualMachine extends AbstractPlatform
     private JavaVirtualMachine()
     {
         super("JVM");
+
+        // ----- establish InetAddress of the LocalPlatform -----
+
+        // attempt to use the system property that may have been defined
+        // (in the future we may use a PlatformAddress Option to achieve this)
+        String addressSystemProperty = System.getProperty("oracletools.runtime.address");
+
+        if (addressSystemProperty == null)
+        {
+            this.address = NetworkHelper.getFeasibleLocalHost();
+        }
+        else
+        {
+            try
+            {
+                this.address = InetAddress.getByName(addressSystemProperty);
+            }
+            catch (UnknownHostException e)
+            {
+                // TODO: log that the specified address can't be resolved, defaulting to the feasible localhost
+                this.address = NetworkHelper.getFeasibleLocalHost();
+            }
+        }
     }
 
 
     @Override
-    public InetAddress getPublicInetAddress()
+    public InetAddress getAddress()
     {
-        return LocalPlatform.getInstance().getPrivateInetAddress();
+        return address;
     }
 
 

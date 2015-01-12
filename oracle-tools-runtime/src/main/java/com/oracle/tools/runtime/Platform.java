@@ -51,23 +51,25 @@ public interface Platform
 
 
     /**
-     * Obtain the private InetAddress for this {@link Platform}, this is
-     * the address that will be used internally by Oracle Tools to
-     * open connections to this {@link Platform}.
+     * Obtains the {@link InetAddress} that could <strong>feasibly</strong>
+     * be used by {@link Application}s running on other {@link Platform}s to
+     * connect to {@link Application}s running on this {@link Platform}.
+     * <p/>
+     * There is no guarantee that the {@link InetAddress} returned by this
+     * method is actually reachable by other {@link Platform}s.
+     * <p/>
+     * In some cases it may not be possible to determine an {@link InetAddress}
+     * of the {@link Platform}, in which case the {@link InetAddress#getLoopbackAddress()}
+     * will be returned.  When this happens the {@link Platform} is considered
+     * isolated to a single host; it may only be contacted by other {@link Platform}s
+     * running on the same host.
+     * <p/>
+     * Should a specific {@link InetAddress} be returned, applications
+     * can define the "oracletools.runtime.address" system-property.
      *
-     * @return the private InetAddress for this {@link Platform}.
+     * @return the {@link InetAddress} of the {@link Platform}
      */
-    public InetAddress getPrivateInetAddress();
-
-
-    /**
-     * Obtain the public InetAddress for this {@link Platform}, this is
-     * the address that is visible to the outside world should be used
-     * to open connections to this {@link Platform}.
-     *
-     * @return the public InetAddress for this {@link Platform}.
-     */
-    public InetAddress getPublicInetAddress();
+    public InetAddress getAddress();
 
 
     /**

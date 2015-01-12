@@ -481,6 +481,37 @@ reverse chronological order.
 *   [ORACLETOOLS-218](https://java.net/jira/browse/ORACLETOOLS-218): Removed
     the PlatformAware interface together with all internal implementations.
 
+*   [ORACLETOOLS-220](https://java.net/jira/browse/ORACLETOOLS-220): Ensured
+    JMX is configued to listen on wildcard addresses.  Connections to JMX
+    for Java Applications can reasonably be made on any locally routable network
+    address on the Platform on which the said applications are running.
+
+*   [ORACLETOOLS-221](https://java.net/jira/browse/ORACLETOOLS-221): Ensured
+    Remote Debuging for Java Applications is configued to listen on wildcard
+    addresses.  Debugging connections to Java Applications can reasonably be
+    made on any locally routable network address on the Platform on which the
+    said applications are running.
+
+*   [ORACLETOOLS-223](https://java.net/jira/browse/ORACLETOOLS-223): Refactored
+    Platform Networking implementation, in particular how addresses are discovered
+    and chosen for Oracle Tools.
+
+    *BREAKING CHANGE:*  This change removes several public methods that
+    can cause application using Oracle Tools to choose invalid network adapters
+    and addresses on multi-homed networks.
+
+    The following methods have been removed:
+
+    Platform.getPublicInetAddress(), Platform.getPrivateInetAddress(),
+    LocalPlatform.getHostName().
+
+    The following method was added:
+
+    Platform.getAddress()
+
+    All locally-based Application Builders now default to using loopback for
+    starting and managing local applications.
+
 <h4>oracle-tools-runtime-remote</h4>
 
 *   [ORACLETOOLS-91](https://java.net/jira/browse/ORACLETOOLS-91): Introduced
