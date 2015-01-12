@@ -98,7 +98,7 @@ public abstract class AbstractVagrantPlatformSchema<S extends AbstractVagrantPla
 
         try
         {
-            File vagrantFile = new File(workingDir, "VagrantFile");
+            File vagrantFile = new File(workingDir, "Vagrantfile");
 
             return realize(name, vagrantFile);
         }
