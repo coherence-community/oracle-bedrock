@@ -42,6 +42,7 @@ import java.io.Serializable;
 
 import java.lang.reflect.Constructor;
 
+import java.net.InetAddress;
 import java.net.Socket;
 
 import java.util.HashMap;
@@ -173,6 +174,28 @@ public class SocketBasedRemoteExecutor extends AbstractControllableRemoteExecuto
     {
         return executorId;
 
+    }
+
+
+    /**
+     * Obtains the {@link InetAddress} of the {@link Socket}.
+     *
+     * @return  the {@link InetAddress} of the {@link Socket}
+     */
+    public InetAddress getInetAddress()
+    {
+        return socket.getInetAddress();
+    }
+
+
+    /**
+     * Obtains the {@link InetAddress} port number for the {@link Socket}.
+     *
+     * @return  the {@link InetAddress} port number
+     */
+    public int getPort()
+    {
+        return socket.getPort();
     }
 
 

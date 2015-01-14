@@ -130,6 +130,11 @@ public interface JavaApplication extends Application, RemoteExecutor
      */
     public static final String JAVA_NET_PREFER_IPV4_STACK = "java.net.preferIPv4Stack";
 
+    /**
+     * The java.net.preferIP64Stack JVM property
+     */
+    public static final String JAVA_NET_PREFER_IPV6_STACK = "java.net.preferIPv6Stack";
+
 
     /**
      * Obtains the system {@link Properties} that were supplied to the
