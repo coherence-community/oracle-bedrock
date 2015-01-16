@@ -21,7 +21,11 @@ reverse chronological order.
 
 <h4>oracle-tools-runtime</h4>
 
-*   (no changes)
+*   [ORACLETOOLS-225](https://java.net/jira/browse/ORACLETOOLS-224): Fixed a
+    bug where ClassPath.toString() may use path separators that did not match
+    the target environment. Introduced a ClassPath.toString(Option... opts)
+    method that allows a PathSeparator option to be passed to the toString
+    method.
 
 <h4>oracle-tools-runtime-remote</h4>
 

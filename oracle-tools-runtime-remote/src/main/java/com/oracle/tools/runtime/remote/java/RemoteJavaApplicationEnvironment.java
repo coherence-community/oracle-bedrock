@@ -200,7 +200,7 @@ public class RemoteJavaApplicationEnvironment<A extends JavaApplication>
         // ----- establish the remote application class path -----
 
         // set the remote classpath (it must be quoted to prevent wildcard expansion)
-        builder.append(" -cp \"" + remoteClassPath.toString() + "\"");
+        builder.append(" -cp \"" + remoteClassPath.toString(options.asArray()) + "\"");
 
         // ----- establish Java Virtual Machine options -----
 

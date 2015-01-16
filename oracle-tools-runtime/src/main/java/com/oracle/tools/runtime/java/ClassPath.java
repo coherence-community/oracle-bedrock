@@ -25,7 +25,10 @@
 
 package com.oracle.tools.runtime.java;
 
+import com.oracle.tools.Option;
+import com.oracle.tools.Options;
 import com.oracle.tools.lang.StringHelper;
+import com.oracle.tools.runtime.options.PlatformSeparators;
 
 import java.io.File;
 import java.io.IOException;
@@ -64,26 +67,12 @@ public class ClassPath implements Iterable<String>
     private final ArrayList<String> paths;
 
     /**
-     * The {@link File#separator} to use when converting the {@link ClassPath} to a {@link String}.
-     */
-    private String fileSeparator;
-
-    /**
-     * The {@link File#pathSeparator} to use when converting the {@link ClassPath} to a {@link String}.
-     */
-    private String pathSeparator;
-
-
-    /**
      * Constructs an empty {@link ClassPath} using the system default
      * {@link File#separator} and {@link File#pathSeparator}s.
      */
     public ClassPath()
     {
-        paths         = new ArrayList<String>();
-
-        fileSeparator = File.separator;
-        pathSeparator = File.pathSeparator;
+        paths = new ArrayList<String>();
     }
 
 
@@ -95,10 +84,7 @@ public class ClassPath implements Iterable<String>
      */
     public ClassPath(ClassPath... classPaths)
     {
-        paths         = new ArrayList<String>();
-
-        fileSeparator = File.separator;
-        pathSeparator = File.pathSeparator;
+        paths = new ArrayList<String>();
 
         if (classPaths != null && classPaths.length > 0)
         {
@@ -122,10 +108,7 @@ public class ClassPath implements Iterable<String>
      */
     public ClassPath(Iterable<ClassPath> classPaths)
     {
-        paths         = new ArrayList<String>();
-
-        fileSeparator = File.separator;
-        pathSeparator = File.pathSeparator;
+        paths = new ArrayList<String>();
 
         if (classPaths != null)
         {
@@ -149,10 +132,7 @@ public class ClassPath implements Iterable<String>
      */
     public ClassPath(String... classPaths)
     {
-        paths         = new ArrayList<String>();
-
-        fileSeparator = File.separator;
-        pathSeparator = File.pathSeparator;
+        paths = new ArrayList<String>();
 
         if (classPaths != null)
         {
@@ -167,7 +147,7 @@ public class ClassPath implements Iterable<String>
                 if (!classPath.isEmpty())
                 {
                     // separate the individual paths from the class path
-                    String[] paths = classPath.split(pathSeparator);
+                    String[] paths = classPath.split(File.pathSeparator);
 
                     for (String path : paths)
                     {
@@ -315,7 +295,22 @@ public class ClassPath implements Iterable<String>
     @Override
     public String toString()
     {
-        StringBuilder builder = new StringBuilder();
+        return toString(PlatformSeparators.autoDetect());
+    }
+
+    /**
+     * Obtains a String representation of the {@link ClassPath} that is suitable
+     * for using as a Java class-path property (using the specified
+     * file and path separators).
+     *
+     * @return the Java class-path
+     */
+    public String toString(Option... options)
+    {
+        StringBuilder      builder       = new StringBuilder();
+        Options            opts          = new Options(options);
+        PlatformSeparators separators    = opts.get(PlatformSeparators.class, PlatformSeparators.autoDetect());
+        String             pathSeparator = separators.getPathSeparator();
 
         for (String path : paths)
         {
@@ -329,7 +324,6 @@ public class ClassPath implements Iterable<String>
 
         return builder.toString();
     }
-
 
     @Override
     public boolean equals(Object other)
