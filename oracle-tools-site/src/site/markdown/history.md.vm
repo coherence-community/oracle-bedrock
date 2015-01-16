@@ -25,7 +25,8 @@ reverse chronological order.
 
 <h4>oracle-tools-runtime-remote</h4>
 
-*   (no changes)
+*   [ORACLETOOLS-224](https://java.net/jira/browse/ORACLETOOLS-224): Introduced
+    Cygwin PlatformSeparator options.
 
 <h4>oracle-tools-runtime-vagrant</h4>
 

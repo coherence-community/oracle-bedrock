@@ -199,4 +199,14 @@ public class PlatformSeparators implements Option
     {
         return new PlatformSeparators("/", ":", "\n");
     }
+
+    /**
+     * Obtains suitable {@link PlatformSeparators} for typical Cygwin-based platforms.
+     *
+     * @return  the {@link PlatformSeparators} for Cygwin
+     */
+    public static PlatformSeparators forCygwin()
+    {
+        return new PlatformSeparators("/", ":", "\n");
+    }
 }
