@@ -512,6 +512,9 @@ reverse chronological order.
     All locally-based Application Builders now default to using loopback for
     starting and managing local applications.
 
+*   [ORACLETOOLS-224](https://java.net/jira/browse/ORACLETOOLS-224): Introduced
+    Cygwin PlatformSeparator options.
+
 *   [ORACLETOOLS-226](https://java.net/jira/browse/ORACLETOOLS-226): Introduced
     the ability to perform LocalPlatform diagnostics, simply by executing the
     LocalPlatform class (main method).
