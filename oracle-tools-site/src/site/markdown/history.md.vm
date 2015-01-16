@@ -515,6 +515,9 @@ reverse chronological order.
 *   [ORACLETOOLS-224](https://java.net/jira/browse/ORACLETOOLS-224): Introduced
     Cygwin PlatformSeparator options.
 
+*   [ORACLETOOLS-225](https://java.net/jira/browse/ORACLETOOLS-225): Refactored
+    ClassPath.toString(...) to use PlatformSeparators when generating a classpath.
+
 *   [ORACLETOOLS-226](https://java.net/jira/browse/ORACLETOOLS-226): Introduced
     the ability to perform LocalPlatform diagnostics, simply by executing the
     LocalPlatform class (main method).
