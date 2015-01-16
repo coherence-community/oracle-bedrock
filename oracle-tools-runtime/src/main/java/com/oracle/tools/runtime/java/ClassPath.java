@@ -310,6 +310,7 @@ public class ClassPath implements Iterable<String>
         StringBuilder      builder       = new StringBuilder();
         Options            opts          = new Options(options);
         PlatformSeparators separators    = opts.get(PlatformSeparators.class, PlatformSeparators.autoDetect());
+        ClassPathModifier  modifier      = opts.get(ClassPathModifier.class, ClassPathModifier.none());
         String             pathSeparator = separators.getPathSeparator();
 
         for (String path : paths)
@@ -322,7 +323,7 @@ public class ClassPath implements Iterable<String>
             builder.append(path);
         }
 
-        return builder.toString();
+        return modifier.modify(builder.toString());
     }
 
     @Override

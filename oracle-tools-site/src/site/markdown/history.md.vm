@@ -27,6 +27,12 @@ reverse chronological order.
     method that allows a PathSeparator option to be passed to the toString
     method.
 
+*   [ORACLETOOLS-227](https://java.net/jira/browse/ORACLETOOLS-224): Introduced
+    a ClassPathModifier option that can be used to modify the string returned
+    by the ClassPath.toString(Options... opts) method. This is to support some
+    platforms that have requirements for more complex class path strings than
+    just a concatenation of folders and jar files, for example Cygwin.
+
 <h4>oracle-tools-runtime-remote</h4>
 
 *   [ORACLETOOLS-224](https://java.net/jira/browse/ORACLETOOLS-224): Introduced

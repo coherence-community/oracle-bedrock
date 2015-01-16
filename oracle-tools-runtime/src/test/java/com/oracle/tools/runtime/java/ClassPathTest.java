@@ -27,10 +27,16 @@ package com.oracle.tools.runtime.java;
 
 import com.oracle.tools.io.FileHelper;
 
+import com.oracle.tools.runtime.options.PlatformSeparators;
 import org.junit.Assert;
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.io.File;
 
@@ -54,9 +60,9 @@ public class ClassPathTest
     {
         ClassPath classPath = new ClassPath();
 
-        Assert.assertThat(classPath.toString(), is(""));
+        assertThat(classPath.toString(), is(""));
         Assert.assertTrue(classPath.isEmpty());
-        Assert.assertThat(classPath.size(), is(0));
+        assertThat(classPath.size(), is(0));
     }
 
 
@@ -68,13 +74,13 @@ public class ClassPathTest
     {
         ClassPath classPath = new ClassPath((String) null);
 
-        Assert.assertThat(classPath.toString(), is(""));
+        assertThat(classPath.toString(), is(""));
         Assert.assertTrue(classPath.isEmpty());
 
         classPath = new ClassPath(new ClassPath());
-        Assert.assertThat(classPath.toString(), is(""));
+        assertThat(classPath.toString(), is(""));
         Assert.assertTrue(classPath.isEmpty());
-        Assert.assertThat(classPath.size(), is(0));
+        assertThat(classPath.size(), is(0));
     }
 
 
@@ -90,7 +96,7 @@ public class ClassPathTest
 
         Assert.assertEquals(classPath, copyClassPath);
         Assert.assertNotSame(classPath, copyClassPath);
-        Assert.assertThat(classPath.size(), is(1));
+        assertThat(classPath.size(), is(1));
     }
 
 
@@ -103,10 +109,10 @@ public class ClassPathTest
         String    path      = ".";
         ClassPath classPath = new ClassPath(path);
 
-        Assert.assertThat(classPath.toString(), is(path + File.separator));
+        assertThat(classPath.toString(), is(path + File.separator));
         Assert.assertTrue(classPath.contains(path));
         Assert.assertFalse(classPath.isEmpty());
-        Assert.assertThat(classPath.size(), is(1));
+        assertThat(classPath.size(), is(1));
     }
 
 
@@ -119,10 +125,10 @@ public class ClassPathTest
         String    path      = "*";
         ClassPath classPath = new ClassPath(path);
 
-        Assert.assertThat(classPath.toString(), is(path));
+        assertThat(classPath.toString(), is(path));
         Assert.assertTrue(classPath.contains(path));
         Assert.assertFalse(classPath.isEmpty());
-        Assert.assertThat(classPath.size(), is(1));
+        assertThat(classPath.size(), is(1));
     }
 
 
@@ -135,10 +141,10 @@ public class ClassPathTest
         String    path      = File.separator;
         ClassPath classPath = new ClassPath(path);
 
-        Assert.assertThat(classPath.toString(), is(path));
+        assertThat(classPath.toString(), is(path));
         Assert.assertTrue(classPath.contains(path));
         Assert.assertFalse(classPath.isEmpty());
-        Assert.assertThat(classPath.size(), is(1));
+        assertThat(classPath.size(), is(1));
     }
 
 
@@ -151,10 +157,10 @@ public class ClassPathTest
         String    path      = "simple.jar";
         ClassPath classPath = new ClassPath(path);
 
-        Assert.assertThat(classPath.toString(), is(path));
+        assertThat(classPath.toString(), is(path));
         Assert.assertTrue(classPath.contains(path));
         Assert.assertFalse(classPath.isEmpty());
-        Assert.assertThat(classPath.size(), is(1));
+        assertThat(classPath.size(), is(1));
     }
 
 
@@ -167,11 +173,11 @@ public class ClassPathTest
         String    path      = "one.jar" + File.pathSeparator + "two.jar";
         ClassPath classPath = new ClassPath(path);
 
-        Assert.assertThat(classPath.toString(), is(path));
+        assertThat(classPath.toString(), is(path));
         Assert.assertTrue(classPath.contains("one.jar"));
         Assert.assertTrue(classPath.contains("two.jar"));
         Assert.assertFalse(classPath.isEmpty());
-        Assert.assertThat(classPath.size(), is(2));
+        assertThat(classPath.size(), is(2));
     }
 
 
@@ -184,10 +190,10 @@ public class ClassPathTest
         String    path      = File.separator + "one" + File.separator + "two";
         ClassPath classPath = new ClassPath(path);
 
-        Assert.assertThat(classPath.toString(), is(path + File.separator));
+        assertThat(classPath.toString(), is(path + File.separator));
         Assert.assertTrue(classPath.contains(path));
         Assert.assertFalse(classPath.isEmpty());
-        Assert.assertThat(classPath.size(), is(1));
+        assertThat(classPath.size(), is(1));
     }
 
 
@@ -201,12 +207,12 @@ public class ClassPathTest
         String    path2     = "three" + File.separator + "four";
         ClassPath classPath = new ClassPath(path1 + File.pathSeparator + path2);
 
-        Assert.assertThat(classPath.toString(),
-                          is(path1 + File.separator + File.pathSeparator + path2 + File.separator));
+        assertThat(classPath.toString(),
+                   is(path1 + File.separator + File.pathSeparator + path2 + File.separator));
         Assert.assertTrue(classPath.contains(path1));
         Assert.assertTrue(classPath.contains(path2));
         Assert.assertFalse(classPath.isEmpty());
-        Assert.assertThat(classPath.size(), is(2));
+        assertThat(classPath.size(), is(2));
     }
 
 
@@ -220,10 +226,10 @@ public class ClassPathTest
         String    path      = "simple.jar";
         ClassPath classPath = new ClassPath(path + File.pathSeparator);
 
-        Assert.assertThat(classPath.toString(), is(path));
+        assertThat(classPath.toString(), is(path));
         Assert.assertTrue(classPath.contains(path));
         Assert.assertFalse(classPath.isEmpty());
-        Assert.assertThat(classPath.size(), is(1));
+        assertThat(classPath.size(), is(1));
     }
 
 
@@ -237,10 +243,10 @@ public class ClassPathTest
         String    path      = File.separator + "one" + File.separator + "two";
         ClassPath classPath = new ClassPath(path + File.pathSeparator);
 
-        Assert.assertThat(classPath.toString(), is(path + File.separator));
+        assertThat(classPath.toString(), is(path + File.separator));
         Assert.assertTrue(classPath.contains(path));
         Assert.assertFalse(classPath.isEmpty());
-        Assert.assertThat(classPath.size(), is(1));
+        assertThat(classPath.size(), is(1));
     }
 
 
@@ -280,4 +286,41 @@ public class ClassPathTest
             }
         }
     }
+
+    @Test
+    public void shouldUseSpecifiedSeparator() throws Exception
+    {
+        PlatformSeparators separators = mock(PlatformSeparators.class);
+        ClassPath          path       = new ClassPath("foo.jar", "bar.jar");
+
+        when(separators.getPathSeparator()).thenReturn("$");
+
+        assertThat(path.toString(separators), is("foo.jar" + separators.getPathSeparator() + "bar.jar"));
+    }
+
+    @Test
+    public void shouldUseDefaultSeparators() throws Exception
+    {
+        PlatformSeparators separators = PlatformSeparators.autoDetect();
+        ClassPath          path = new ClassPath("foo.jar", "bar.jar");
+
+        assertThat(path.toString(separators), is("foo.jar" + separators.getPathSeparator() + "bar.jar"));
+    }
+
+    @Test
+    public void shouldApplyModifier() throws Exception
+    {
+        ClassPathModifier  modifier   = mock(ClassPathModifier.class, "Mod");
+        PlatformSeparators separators = mock(PlatformSeparators.class, "Sep");
+        ClassPath          path       = new ClassPath("foo.jar", "bar.jar");
+
+        when(separators.getPathSeparator()).thenReturn("$");
+        when(modifier.modify(anyString())).thenReturn("modified-path");
+
+        String pathString = path.toString(separators, modifier);
+
+        assertThat(pathString, is("modified-path"));
+        verify(modifier).modify("foo.jar$bar.jar");
+    }
+
 }
