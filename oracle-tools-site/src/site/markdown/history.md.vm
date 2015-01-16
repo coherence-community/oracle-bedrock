@@ -522,6 +522,10 @@ reverse chronological order.
     the ability to perform LocalPlatform diagnostics, simply by executing the
     LocalPlatform class (main method).
 
+*   [ORACLETOOLS-227](https://java.net/jira/browse/ORACLETOOLS-227): Introduced
+    ClassPathModifier Option to allow ClassPath modification by platforms
+    (like cygwin).
+
 <h4>oracle-tools-runtime-remote</h4>
 
 *   [ORACLETOOLS-91](https://java.net/jira/browse/ORACLETOOLS-91): Introduced
