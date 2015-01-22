@@ -25,6 +25,8 @@
 
 package com.oracle.tools.runtime.coherence;
 
+import com.oracle.tools.deferred.Eventually;
+
 import com.oracle.tools.junit.AbstractTest;
 
 import com.oracle.tools.matchers.MapMatcher;
@@ -34,6 +36,7 @@ import com.oracle.tools.options.Diagnostics;
 import com.oracle.tools.runtime.LocalPlatform;
 import com.oracle.tools.runtime.Platform;
 
+import com.oracle.tools.runtime.coherence.callables.GetAutoStartServiceNames;
 import com.oracle.tools.runtime.coherence.callables.GetClusterName;
 import com.oracle.tools.runtime.coherence.callables.GetClusterSize;
 import com.oracle.tools.runtime.coherence.callables.GetLocalMemberId;
@@ -57,6 +60,7 @@ import static com.oracle.tools.deferred.DeferredHelper.invoking;
 
 import static com.oracle.tools.deferred.Eventually.assertThat;
 
+import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 
@@ -167,6 +171,39 @@ public abstract class AbstractCoherenceCacheServerTest extends AbstractTest
             assertThat(server, new GetLocalMemberId(), is(1));
             assertThat(server, new GetClusterSize(), is(1));
             assertThat(server, new GetServiceStatus("DistributedCache"), is(ServiceStatus.ENDANGERED));
+        }
+    }
+
+
+    /**
+     * Ensure that we can get all of the auto-start service names of a Coherence Cluster Member.
+     */
+    @Test
+    public void shouldEnsureAutoStartServicesAreStarted()
+    {
+        AvailablePortIterator availablePorts = LocalPlatform.getInstance().getAvailablePorts();
+
+        CoherenceCacheServerSchema schema =
+            new CoherenceCacheServerSchema().setClusterPort(availablePorts).useLocalHostMode();
+
+        Platform platform = getPlatform();
+
+        try (CoherenceCacheServer server = platform.realize("TEST",
+                                                            schema,
+                                                            new SystemApplicationConsole(),
+                                                            Diagnostics.enabled()))
+        {
+            assertThat(server, new GetLocalMemberId(), is(1));
+            assertThat(server, new GetClusterSize(), is(1));
+
+            Set<String> serviceNames = server.submit(new GetAutoStartServiceNames());
+
+            assertThat(serviceNames, hasItem("DistributedCache"));
+
+            for (String serviceName : serviceNames)
+            {
+                Eventually.assertThat(invoking(server).isServiceRunning(serviceName), is(true));
+            }
         }
     }
 
