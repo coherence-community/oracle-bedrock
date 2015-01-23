@@ -184,7 +184,8 @@ public abstract class AbstractCoherenceCacheServerTest extends AbstractTest
         AvailablePortIterator availablePorts = LocalPlatform.getInstance().getAvailablePorts();
 
         CoherenceCacheServerSchema schema =
-            new CoherenceCacheServerSchema().setClusterPort(availablePorts).useLocalHostMode();
+            new CoherenceCacheServerSchema().setClusterPort(availablePorts).useLocalHostMode()
+                .setCacheConfigURI("test-autostart-services-cache-config.xml");
 
         Platform platform = getPlatform();
 
@@ -197,8 +198,6 @@ public abstract class AbstractCoherenceCacheServerTest extends AbstractTest
             assertThat(server, new GetClusterSize(), is(1));
 
             Set<String> serviceNames = server.submit(new GetAutoStartServiceNames());
-
-            assertThat(serviceNames, hasItem("DistributedCache"));
 
             for (String serviceName : serviceNames)
             {

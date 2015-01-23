@@ -29,8 +29,7 @@ import com.oracle.tools.runtime.concurrent.RemoteCallable;
 
 import com.tangosol.coherence.config.CacheConfig;
 
-import com.tangosol.coherence.config.builder.ServiceBuilder;
-
+import com.tangosol.coherence.config.scheme.AbstractCompositeScheme;
 import com.tangosol.coherence.config.scheme.ServiceScheme;
 
 import com.tangosol.net.CacheFactory;
@@ -69,10 +68,21 @@ public class GetAutoStartServiceNames implements RemoteCallable<Set<String>>
 
                 for (ServiceScheme serviceScheme : cacheConfig.getServiceSchemeRegistry())
                 {
-                    if (serviceScheme.isAutoStart() && serviceScheme instanceof ServiceBuilder
-                        && ((ServiceBuilder) serviceScheme).isRunningClusterNeeded())
+                    if (serviceScheme.isAutoStart())
                     {
-                        serviceNames.add(serviceScheme.getServiceName());
+                        if (serviceScheme instanceof AbstractCompositeScheme)
+                        {
+                            serviceScheme = ((AbstractCompositeScheme) serviceScheme).getBackScheme();
+
+                            if (isAutoStartable(serviceScheme))
+                            {
+                                serviceNames.add(serviceScheme.getServiceName());
+                            }
+                        }
+                        else
+                        {
+                            serviceNames.add(serviceScheme.getServiceName());
+                        }
                     }
                 }
 
@@ -83,5 +93,19 @@ public class GetAutoStartServiceNames implements RemoteCallable<Set<String>>
         {
             throw new RuntimeException("The ConfigurableCacheFactory is not an ExtensibleConfigurableCacheFactory");
         }
+    }
+
+
+    /**
+     * Determine if the specified {@link ServiceScheme} is auto-startable
+     * (typically if it requires a cluster to operate).
+     *
+     * @param scheme  the {@link ServiceScheme}
+     *
+     * @return if the service scheme is auto-startable
+     */
+    public boolean isAutoStartable(ServiceScheme scheme)
+    {
+        return scheme.getServiceBuilder().isRunningClusterNeeded();
     }
 }
