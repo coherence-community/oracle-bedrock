@@ -566,7 +566,7 @@ reverse chronological order.
 *   [ORACLETOOLS-214](https://java.net/jira/browse/ORACLETOOLS-214): Introduced
     Option support into RemotePlatform implementations.
 
-*   [ORACLETOOLS-221](https://java.net/jira/browse/ORACLETOOLS-221): Improved the
+*   [ORACLETOOLS-231](https://java.net/jira/browse/ORACLETOOLS-231): Improved the
     remote debug attach option to allow a the host name as well as the port to be
     specified for the remote debugger that the application shoul dconnect to.
 
