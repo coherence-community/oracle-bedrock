@@ -226,10 +226,13 @@ public class RemoteJavaApplicationBuilderTest extends AbstractRemoteApplicationB
         // Make sure we can run the JDB debugger otherwise we cannot run this test
         Assume.assumeThat(hasJDB(), is(true));
 
-        Capture<Integer> debugPort = new Capture<Integer>(LocalPlatform.getInstance().getAvailablePorts());
+        InetAddress      debugAddress = LocalPlatform.getInstance().getAddress();
+        Capture<Integer> debugPort    = new Capture<>(LocalPlatform.getInstance().getAvailablePorts());
 
         SimpleApplicationSchema jdbSchema =
-            new SimpleApplicationSchema("jdb").addArgument("-listen").addArgument(String.valueOf(debugPort.get()));
+            new SimpleApplicationSchema("jdb").addArgument("-connect")
+                    .addArgument(String.format("com.sun.jdi.SocketListen:port=%d",
+                                               debugPort.get()));
 
         CapturingApplicationConsole jdbConsole = new CapturingApplicationConsole();
 
@@ -242,7 +245,7 @@ public class RemoteJavaApplicationBuilderTest extends AbstractRemoteApplicationB
             SimpleJavaApplicationSchema schema = new SimpleJavaApplicationSchema(SleepingApplication.class.getName());
 
             RemoteDebugging remoteDebugging =
-                RemoteDebugging.enabled().startSuspended(false).attachToDebugger(debugPort.get());
+                RemoteDebugging.enabled().startSuspended(false).attachToDebugger(debugAddress, debugPort.get());
 
             CapturingApplicationConsole console  = new CapturingApplicationConsole();
 

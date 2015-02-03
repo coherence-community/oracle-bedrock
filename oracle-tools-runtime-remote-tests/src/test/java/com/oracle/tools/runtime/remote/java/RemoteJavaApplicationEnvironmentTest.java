@@ -39,6 +39,7 @@ import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.not;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * @author jk 2014.07.04
@@ -57,7 +58,10 @@ public class RemoteJavaApplicationEnvironmentTest
         Options                          options         = new Options(remoteDebugging);
 
         RemotePlatform                   platform        = mock(RemotePlatform.class);
-        SimpleJavaApplicationSchema      schema = new SimpleJavaApplicationSchema(SleepingApplication.class.getName());
+        SimpleJavaApplicationSchema      schema          = new SimpleJavaApplicationSchema(SleepingApplication.class.getName());
+        InetAddress                      address         = InetAddress.getLoopbackAddress();
+
+        when(platform.getAddress()).thenReturn(address);
 
         RemoteJavaApplicationEnvironment env = new RemoteJavaApplicationEnvironment(schema, platform, options);
 
@@ -81,19 +85,44 @@ public class RemoteJavaApplicationEnvironmentTest
         Options                          options         = new Options(remoteDebugging);
 
         RemotePlatform                   platform        = mock(RemotePlatform.class);
-        SimpleJavaApplicationSchema      schema = new SimpleJavaApplicationSchema(SleepingApplication.class.getName());
+        SimpleJavaApplicationSchema      schema          = new SimpleJavaApplicationSchema(SleepingApplication.class.getName());
 
         RemoteJavaApplicationEnvironment env = new RemoteJavaApplicationEnvironment(schema, platform, options);
 
         String                           command         = env.getRemoteCommandToExecute(InetAddress.getLocalHost());
 
         String debugCommand = String.format("-agentlib:jdwp=transport=dt_socket,server=n,suspend=n,address=%s:%d",
-                                            LocalPlatform.getInstance().getAddress().getHostAddress(),
+                                            LocalPlatform.getInstance().getAddress().getHostName(),
                                             debuggerPort);
 
         assertThat(command, containsString(debugCommand));
     }
 
+    /**
+     * Should add the remote debug options if enabled on the schema
+     */
+    @Test
+    @SuppressWarnings("unchecked")
+    public void shouldAddDebugOptionWithModeAsAttachToDebuggerWithSpecifiedAddress() throws Exception
+    {
+        InetAddress                      address         = InetAddress.getLocalHost();
+        int                              debuggerPort    = 5005;
+        RemoteDebugging                  remoteDebugging = RemoteDebugging.enabled().attachToDebugger(address, debuggerPort);
+        Options                          options         = new Options(remoteDebugging);
+
+        RemotePlatform                   platform        = mock(RemotePlatform.class);
+        SimpleJavaApplicationSchema      schema          = new SimpleJavaApplicationSchema(SleepingApplication.class.getName());
+
+        RemoteJavaApplicationEnvironment env             = new RemoteJavaApplicationEnvironment(schema, platform, options);
+
+        String                           command         = env.getRemoteCommandToExecute(InetAddress.getLocalHost());
+
+        String debugCommand = String.format("-agentlib:jdwp=transport=dt_socket,server=n,suspend=n,address=%s:%d",
+                                            address.getHostName(),
+                                            debuggerPort);
+
+        assertThat(command, containsString(debugCommand));
+    }
 
     /**
      * Should add the remote debug options if enabled on the schema
@@ -106,7 +135,10 @@ public class RemoteJavaApplicationEnvironmentTest
         Options                          options         = new Options(remoteDebugging);
 
         RemotePlatform                   platform        = mock(RemotePlatform.class);
-        SimpleJavaApplicationSchema      schema = new SimpleJavaApplicationSchema(SleepingApplication.class.getName());
+        SimpleJavaApplicationSchema      schema          = new SimpleJavaApplicationSchema(SleepingApplication.class.getName());
+        InetAddress                      address         = InetAddress.getLoopbackAddress();
+
+        when(platform.getAddress()).thenReturn(address);
 
         RemoteJavaApplicationEnvironment env = new RemoteJavaApplicationEnvironment(schema, platform, options);
 
@@ -129,7 +161,10 @@ public class RemoteJavaApplicationEnvironmentTest
         Options                          options         = new Options(remoteDebugging);
 
         RemotePlatform                   platform        = mock(RemotePlatform.class);
-        SimpleJavaApplicationSchema      schema = new SimpleJavaApplicationSchema(SleepingApplication.class.getName());
+        SimpleJavaApplicationSchema      schema          = new SimpleJavaApplicationSchema(SleepingApplication.class.getName());
+        InetAddress                      address         = InetAddress.getLoopbackAddress();
+
+        when(platform.getAddress()).thenReturn(address);
 
         RemoteJavaApplicationEnvironment env = new RemoteJavaApplicationEnvironment(schema, platform, options);
 
