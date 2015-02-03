@@ -35,9 +35,7 @@ import com.oracle.tools.runtime.java.JavaVirtualMachine;
 
 import com.oracle.tools.runtime.network.AvailablePortIterator;
 
-import com.oracle.tools.util.Capture;
-
-import java.net.UnknownHostException;
+import java.net.InetAddress;
 
 /**
  * An {@link Option} to define the {@link Platform} specific remote debugging configuration
@@ -92,6 +90,12 @@ public class RemoteDebugging implements Option
     private AvailablePortIterator remoteDebuggingPorts;
 
     /**
+     * The address a {@link JavaApplication} should connect to when
+     * using the {@link Behavior#ATTACH_TO_DEBUGGER}.
+     */
+    private InetAddress remoteDebuggerAddress;
+
+    /**
      * The port a {@link JavaApplication} should connect to when
      * using the {@link Behavior#ATTACH_TO_DEBUGGER}, -1 when not in use.
      */
@@ -111,11 +115,12 @@ public class RemoteDebugging implements Option
                             Behavior              behavior,
                             AvailablePortIterator remoteDebuggingPorts)
     {
-        this.enabled              = enabled;
-        this.startSuspended       = startSuspended;
-        this.behavior             = behavior;
-        this.remoteDebuggingPorts = remoteDebuggingPorts;
-        this.remoteDebuggerPort   = -1;
+        this.enabled               = enabled;
+        this.startSuspended        = startSuspended;
+        this.behavior              = behavior;
+        this.remoteDebuggingPorts  = remoteDebuggingPorts;
+        this.remoteDebuggerPort    = -1;
+        this.remoteDebuggerAddress = LocalPlatform.getInstance().getAddress();
     }
 
 
@@ -170,6 +175,20 @@ public class RemoteDebugging implements Option
 
 
     /**
+     * Obtain the address that {@link JavaApplication}s using this {@link RemoteDebugging} {@link Option}
+     * will use to connect back to a remote debugger if started with remote debug enabled and the
+     * remote debugging {@link Behavior} is {@link Behavior#ATTACH_TO_DEBUGGER}.
+     *
+     * @return the address that {@link JavaApplication}s will use to attach to a remote debugger.
+     *         The same value will be returned each time this method is called, or null if not configured
+     */
+    public InetAddress getAttachAddress()
+    {
+        return remoteDebuggerAddress;
+    }
+
+
+    /**
      * Obtain the port that {@link JavaApplication}s using this {@link RemoteDebugging} {@link Option}
      * will use to connect back to a remote debugger if started with remote debug enabled and the
      * remote debugging {@link Behavior} is {@link Behavior#ATTACH_TO_DEBUGGER}.
@@ -182,7 +201,6 @@ public class RemoteDebugging implements Option
         return remoteDebuggerPort;
     }
 
-
     /**
      * Set the {@link Behavior} of the {@link RemoteDebugging} {@link Option}
      * to attach to the debugger.
@@ -191,8 +209,21 @@ public class RemoteDebugging implements Option
      */
     public RemoteDebugging attachToDebugger(int remoteDebuggerPort)
     {
-        this.behavior           = Behavior.ATTACH_TO_DEBUGGER;
-        this.remoteDebuggerPort = remoteDebuggerPort;
+        return attachToDebugger(LocalPlatform.getInstance().getAddress(), remoteDebuggerPort);
+    }
+
+
+    /**
+     * Set the {@link Behavior} of the {@link RemoteDebugging} {@link Option}
+     * to attach to the debugger.
+     *
+     * @return the {@link RemoteDebugging} {@link Option} to allow fluent-method calls
+     */
+    public RemoteDebugging attachToDebugger(InetAddress address, int remoteDebuggerPort)
+    {
+        this.behavior              = Behavior.ATTACH_TO_DEBUGGER;
+        this.remoteDebuggerAddress = address;
+        this.remoteDebuggerPort    = remoteDebuggerPort;
 
         return this;
     }

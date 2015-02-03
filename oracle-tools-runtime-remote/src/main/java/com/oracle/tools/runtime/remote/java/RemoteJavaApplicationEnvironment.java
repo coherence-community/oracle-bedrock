@@ -83,6 +83,11 @@ public class RemoteJavaApplicationEnvironment<A extends JavaApplication>
     private ClassPath remoteClassPath;
 
     /**
+     * The remote debugging address assigned to the remote {@link JavaApplication}.
+     */
+    private InetAddress remoteDebugAddress;
+
+    /**
      * The remote debugging port assigned to the remote {@link JavaApplication}.
      */
     private int remoteDebugPort;
@@ -222,16 +227,15 @@ public class RemoteJavaApplicationEnvironment<A extends JavaApplication>
             boolean isDebugServer = remoteDebugging.getBehavior() == RemoteDebugging.Behavior.LISTEN_FOR_DEBUGGER;
             boolean suspend       = remoteDebugging.isStartSuspended();
 
-            remoteDebugPort = isDebugServer ? remoteDebugging.getListenPort() : remoteDebugging.getAttachPort();
+            remoteDebugAddress = isDebugServer ? platform.getAddress() : remoteDebugging.getAttachAddress();
+            remoteDebugPort    = isDebugServer ? remoteDebugging.getListenPort() : remoteDebugging.getAttachPort();
 
             if (remoteDebugPort <= 0)
             {
                 remoteDebugPort = LocalPlatform.getInstance().getAvailablePorts().next();
             }
 
-            String debugAddress = isDebugServer
-                                  ? String.valueOf(remoteDebugPort)
-                                  : LocalPlatform.getInstance().getAddress().getHostAddress() + ":" + remoteDebugPort;
+            String debugAddress = remoteDebugAddress.getHostName() + ":" + remoteDebugPort;
 
             String debugOption = String.format(" -agentlib:jdwp=transport=dt_socket,server=%s,suspend=%s,address=%s",
                                                (isDebugServer ? "y" : "n"),
@@ -320,6 +324,10 @@ public class RemoteJavaApplicationEnvironment<A extends JavaApplication>
         return properties;
     }
 
+    public InetAddress getRemoteDebugAddress()
+    {
+        return remoteDebugAddress;
+    }
 
     public int getRemoteDebugPort()
     {
