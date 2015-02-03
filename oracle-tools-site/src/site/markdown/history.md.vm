@@ -38,6 +38,10 @@ reverse chronological order.
 *   [ORACLETOOLS-224](https://java.net/jira/browse/ORACLETOOLS-224): Introduced
     Cygwin PlatformSeparator options.
 
+*   [ORACLETOOLS-231](https://java.net/jira/browse/ORACLETOOLS-231): Improved the
+    remote debug attach option to allow a the host name as well as the port to be
+    specified for the remote debugger that the application shoul dconnect to.
+
 <h4>oracle-tools-runtime-vagrant</h4>
 
 *   [ORACLETOOLS-222](https://java.net/jira/browse/ORACLETOOLS-222): Fixed bug
