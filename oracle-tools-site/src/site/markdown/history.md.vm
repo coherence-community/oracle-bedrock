@@ -61,6 +61,10 @@ reverse chronological order.
 *   [ORACLETOOLS-170](https://java.net/jira/browse/ORACLETOOLS-170): Upgraded to require
     the next generation of Coherence.
 
+*   [ORACLETOOLS-229](https://java.net/jira/browse/ORACLETOOLS-229): Introduced the
+    GetAutoStartServiceNames RemoteCallable to allow applications to determine the
+    names of the configured auto-start services.
+
 <h4>oracle-tools-coherence-testing-support</h4>
 
 *   (no changes)
