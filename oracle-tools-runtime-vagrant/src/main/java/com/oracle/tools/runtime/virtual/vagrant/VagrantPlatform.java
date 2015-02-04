@@ -51,8 +51,8 @@ import java.io.File;
 import java.io.IOException;
 
 import java.net.InetAddress;
-import java.net.UnknownHostException;
 
+import java.net.UnknownHostException;
 import java.util.Properties;
 
 /**
@@ -90,11 +90,14 @@ public class VagrantPlatform extends VirtualPlatform
      * @param name            the name of this {@link VagrantPlatform}
      * @param vagrantFile     the location of this {@link VagrantPlatform}'s VagrantFile
      * @param publicHostName  the host name of the public interface of the {@link VagrantPlatform}
+     * @param port            the remote port that will be used to SSH into
+     *                        this {@link VirtualPlatform}
      * @param options         the {@link Option}s for the {@link VirtualPlatform}
      */
     public VagrantPlatform(String    name,
                            File      vagrantFile,
                            String    publicHostName,
+                           int       port,
                            Option... options)
     {
         super(name, null, 0, null, null, options);
@@ -102,6 +105,7 @@ public class VagrantPlatform extends VirtualPlatform
         this.vagrantFile        = vagrantFile;
         this.applicationBuilder = new SimpleApplicationBuilder();
         this.publicHostName     = publicHostName;
+        this.port               = port;
     }
 
 
@@ -192,19 +196,28 @@ public class VagrantPlatform extends VirtualPlatform
         SimpleApplicationSchema schemaUp = instantiateSchema().addArgument("up");
 
         execute(schemaUp);
-        detectSSH();
+
+        Properties sshProperties = detectSSH();
 
         try
         {
-            if (publicHostName != null &&!publicHostName.isEmpty())
+            // If no public host name has been specified then use the
+            // settings configured by Vagrant
+            if (publicHostName == null || publicHostName.isEmpty())
             {
-                this.address = InetAddress.getByName(publicHostName);
+                // Important:  At this point all we know is that we can connect to the local loopback
+                // NAT'd address so we can SSH into the Vagrant Box.   We don't know what the
+                // address of the Vagrant Box is.  It may not even have an address we can access.
+                this.address        = InetAddress.getLoopbackAddress();
+                this.port           = Integer.parseInt(sshProperties.getProperty("Port"));
+                this.userName       = sshProperties.getProperty("User");
+                this.authentication = SecureKeys.fromPrivateKeyFile(sshProperties.getProperty("IdentityFile"));
             }
             else
             {
-                // TODO: is this correct?  Should we assume the loopback address?
-                // perhaps it's possible to ask the RemoteApplication it's address?
-                this.address = InetAddress.getLoopbackAddress();
+                this.address        = InetAddress.getByName(publicHostName);
+                this.userName       = sshProperties.getProperty("User");
+                this.authentication = SecureKeys.fromPrivateKeyFile(sshProperties.getProperty("IdentityFile"));
             }
         }
         catch (UnknownHostException e)
@@ -217,8 +230,10 @@ public class VagrantPlatform extends VirtualPlatform
     /**
      * Detect the SSH settings for the NAT port forwarding that Vagrant
      * has configured on the VM and set them into this {@link VagrantPlatform}.
+     *
+     * @return the SSH properties configured by Vagrant
      */
-    protected void detectSSH()
+    protected Properties detectSSH()
     {
         SimpleApplicationSchema  schema  = instantiateSchema().addArgument("ssh-config");
         SimpleApplicationBuilder builder = new SimpleApplicationBuilder();
@@ -261,13 +276,7 @@ public class VagrantPlatform extends VirtualPlatform
                 }
             }
 
-            // Important:  At this point all we know is that we can connect to the local loopback
-            // NAT'd address so we can SSH into the Vagrant Box.   We don't know what the
-            // address of the Vagrant Box is.  It may not even have an address we can access.
-            this.address        = InetAddress.getLoopbackAddress();
-            this.port           = Integer.parseInt(sshProperties.getProperty("Port"));
-            this.userName       = sshProperties.getProperty("User");
-            this.authentication = SecureKeys.fromPrivateKeyFile(sshProperties.getProperty("IdentityFile"));
+            return sshProperties;
         }
         catch (Exception e)
         {

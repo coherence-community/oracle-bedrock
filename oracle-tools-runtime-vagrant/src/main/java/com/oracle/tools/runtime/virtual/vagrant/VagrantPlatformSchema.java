@@ -223,7 +223,8 @@ public class VagrantPlatformSchema extends AbstractVagrantPlatformSchema<Vagrant
             writer.println("end");
             writer.flush();
 
-            return instantiatePlatform(name, vagrantFile.getParentFile(), publicHostName, getCloseAction());
+            return instantiatePlatform(name, vagrantFile.getParentFile(), publicHostName,
+                                       getRemotePort(), getCloseAction());
         }
         finally
         {

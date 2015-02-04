@@ -149,7 +149,7 @@ public class AbstractVagrantPlatformSchemaTest
     {
         File                          file     = temporaryFolder.newFile();
         AbstractVagrantPlatformSchema schema   = new AbstractVagrantPlatformSchemaStub("Test", true, null);
-        VagrantPlatform               platform = schema.instantiatePlatform("Foo", file, "Bar", CloseAction.None);
+        VagrantPlatform               platform = schema.instantiatePlatform("Foo", file, "Bar", 22, CloseAction.None);
 
         assertThat(platform, is(notNullValue()));
         assertThat(platform.getName(), is("Foo"));
