@@ -576,6 +576,9 @@ reverse chronological order.
     where the Vagrant configuration file was created with a file name that did
     not work on case sensetive file systems such as Linux.
 
+*   [ORACLETOOLS-232](https://java.net/jira/browse/ORACLETOOLS-232): Fixed bug
+    where a VagrantPlatform may use the wrong port for SSH connections.
+
 <h4>oracle-tools-runtime-virtual</h4>
 
 *   [ORACLETOOLS-115](https://java.net/jira/browse/ORACLETOOLS-115): Introduced
