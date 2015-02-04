@@ -44,6 +44,7 @@ import com.oracle.tools.runtime.console.SystemApplicationConsole;
 
 import com.oracle.tools.runtime.java.SimpleJavaApplicationSchema;
 
+import com.oracle.tools.runtime.java.options.JavaHome;
 import com.oracle.tools.runtime.remote.Authentication;
 import com.oracle.tools.runtime.remote.RemotePlatform;
 
@@ -137,7 +138,8 @@ public class VagrantFunctionalTest
         InfrastructureAssemblyBuilder<Platform, Application, Assembly<Application>> assemblyBuilder =
             new InfrastructureAssemblyBuilder<Platform, Application, Assembly<Application>>();
 
-        ApplicationSchema appSchema = new SimpleJavaApplicationSchema(DoStuff.class.getCanonicalName());
+        ApplicationSchema appSchema = new SimpleJavaApplicationSchema(DoStuff.class.getCanonicalName())
+                                        .addOption(JavaHome.at("/usr/java/latest"));
 
         assemblyBuilder.addApplication("Test", appSchema, 1);
 
@@ -163,7 +165,8 @@ public class VagrantFunctionalTest
     public void shouldRunCluster() throws Exception
     {
         CoherenceCacheServerSchema schema =
-            new CoherenceCacheServerSchema().setCacheConfigURI("coherence-cache-config.xml");
+            new CoherenceCacheServerSchema().setCacheConfigURI("coherence-cache-config.xml")
+                .addOption(JavaHome.at("/usr/java/latest"));
 
         Platform             platform1 = infrastructure.getPlatform("VM-1");
         Platform             platform2 = infrastructure.getPlatform("VM-2");
@@ -349,7 +352,8 @@ public class VagrantFunctionalTest
                                                                 int                      memberCount)
     {
         CoherenceCacheServerSchema schema =
-            new CoherenceCacheServerSchema().setCacheConfigURI("coherence-cache-config.xml");
+            new CoherenceCacheServerSchema().setCacheConfigURI("coherence-cache-config.xml")
+                .addOption(JavaHome.at("/usr/java/latest"));
 
         InfrastructureAssemblyBuilder<Platform, CoherenceCacheServer, SimpleAssembly<CoherenceCacheServer>> builder =
             new InfrastructureAssemblyBuilder<Platform, CoherenceCacheServer, SimpleAssembly<CoherenceCacheServer>>();

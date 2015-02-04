@@ -40,7 +40,7 @@ import com.oracle.tools.runtime.PlatformSchema;
 public class VagrantPlatformBuilder<P extends VagrantPlatform> implements PlatformBuilder<P>
 {
     /** The singleton instance of the {@link VagrantPlatformBuilder} */
-    public static final VagrantPlatformBuilder INSTANCE = new VagrantPlatformBuilder();
+    public static final VagrantPlatformBuilder<VagrantPlatform> INSTANCE = new VagrantPlatformBuilder<>();
 
 
     /**
