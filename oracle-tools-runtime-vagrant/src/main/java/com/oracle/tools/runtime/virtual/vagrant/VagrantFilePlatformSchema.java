@@ -169,6 +169,7 @@ public class VagrantFilePlatformSchema extends AbstractVagrantPlatformSchema<Vag
             }
         }
 
-        return instantiatePlatform(name, vagrantFile.getParentFile(), getPublicHostName(), getCloseAction());
+        return instantiatePlatform(name, vagrantFile.getParentFile(), getPublicHostName(),
+                                   getRemotePort(), getCloseAction());
     }
 }

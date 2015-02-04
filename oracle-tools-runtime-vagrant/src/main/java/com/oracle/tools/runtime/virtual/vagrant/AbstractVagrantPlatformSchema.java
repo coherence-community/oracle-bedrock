@@ -48,6 +48,8 @@ public abstract class AbstractVagrantPlatformSchema<S extends AbstractVagrantPla
     /** The Vagrant working directory; the directory containing the vagrantFile */
     private final File workingDirectory;
 
+    /** The port to use on the VM for SSH connections */
+    private int remotePort = 22;
 
     /**
      * Construct a new AbstractVagrantPlatformSchema.
@@ -66,6 +68,29 @@ public abstract class AbstractVagrantPlatformSchema<S extends AbstractVagrantPla
         setCloseAction(CloseAction.PowerButton);
     }
 
+
+    /**
+     * Set the remote port to use to SSH into the VM.
+     *
+     * @param remotePort  the remote port to use to SSH into the VM
+     */
+    @SuppressWarnings("unchecked")
+    public S setRemotePort(int remotePort)
+    {
+        this.remotePort = remotePort;
+
+        return (S) this;
+    }
+
+    /**
+     * Obtain the remote port to use to SSH into the VM.
+     *
+     * @return the remote port to use to SSH into the VM
+     */
+    public int getRemotePort()
+    {
+        return remotePort;
+    }
 
     /**
      * Ensure that the directory that will contain the
@@ -131,6 +156,7 @@ public abstract class AbstractVagrantPlatformSchema<S extends AbstractVagrantPla
      * @param name            the name for the {@link VagrantPlatform}
      * @param workingDir      the working directory for the {@link VagrantPlatform}
      * @param publicHostName  the public hostname for the {@link VagrantPlatform}
+     * @param port            the port to use to connect to the {@link VagrantPlatform}
      * @param options         the {@link Option}s for the {@link VagrantPlatform}
      *
      * @return a new {@link VagrantPlatform}
@@ -138,8 +164,9 @@ public abstract class AbstractVagrantPlatformSchema<S extends AbstractVagrantPla
     protected VagrantPlatform instantiatePlatform(String    name,
                                                   File      workingDir,
                                                   String    publicHostName,
+                                                  int       port,
                                                   Option... options)
     {
-        return new VagrantPlatform(name, workingDir, publicHostName, options);
+        return new VagrantPlatform(name, workingDir, publicHostName, port, options);
     }
 }
