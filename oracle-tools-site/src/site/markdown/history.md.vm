@@ -526,6 +526,10 @@ reverse chronological order.
     ClassPathModifier Option to allow ClassPath modification by platforms
     (like cygwin).
 
+*   [ORACLETOOLS-233](https://java.net/jira/browse/ORACLETOOLS-233): Refactored
+    ClassPath generation for Local Java Applications to use -cp instead of
+    the CLASSPATH environment variable.
+
 <h4>oracle-tools-runtime-remote</h4>
 
 *   [ORACLETOOLS-91](https://java.net/jira/browse/ORACLETOOLS-91): Introduced

@@ -61,6 +61,7 @@ import com.oracle.tools.runtime.options.EnvironmentVariables;
 import com.oracle.tools.runtime.options.ErrorStreamRedirection;
 import com.oracle.tools.runtime.options.Orphanable;
 
+import com.oracle.tools.runtime.options.PlatformSeparators;
 import com.oracle.tools.util.CompletionListener;
 
 import static com.oracle.tools.deferred.DeferredHelper.ensure;
@@ -190,22 +191,8 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication> extends Abst
 
         if (javaHome != null)
         {
-            processBuilder.environment().put("JAVA_HOME", javaHome.get());
+            processBuilder.environment().put("JAVA_HOME", StringHelper.doubleQuoteIfNecessary(javaHome.get()));
         }
-
-        // set the class path (it's an environment variable)
-        ClassPath classPath;
-
-        try
-        {
-            classPath = new ClassPath(schema.getClassPath(), ClassPath.ofClass(JavaApplicationLauncher.class));
-        }
-        catch (IOException e)
-        {
-            throw new RuntimeException("Failed to locate required classes for the class path", e);
-        }
-
-        processBuilder.environment().put("CLASSPATH", classPath.toString());
 
         // ----- establish the command to start java -----
 
@@ -229,6 +216,23 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication> extends Abst
             processBuilder.command(StringHelper.doubleQuoteIfNecessary(javaHomePath + "bin" + File.separator
                                                                        + schema.getExecutableName()));
         }
+
+        // ----- establish the class path -----
+
+        // set the class path
+        ClassPath classPath;
+
+        try
+        {
+            classPath = new ClassPath(schema.getClassPath(), ClassPath.ofClass(JavaApplicationLauncher.class));
+        }
+        catch (IOException e)
+        {
+            throw new RuntimeException("Failed to locate required classes for the class path", e);
+        }
+
+        processBuilder.command().add("-cp");
+        processBuilder.command().add(classPath.toString(options.asArray()));
 
         // ----- establish Oracle Tools specific system properties -----
 

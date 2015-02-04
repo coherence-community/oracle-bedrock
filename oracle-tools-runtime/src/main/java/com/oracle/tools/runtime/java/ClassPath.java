@@ -27,7 +27,9 @@ package com.oracle.tools.runtime.java;
 
 import com.oracle.tools.Option;
 import com.oracle.tools.Options;
+
 import com.oracle.tools.lang.StringHelper;
+
 import com.oracle.tools.runtime.options.PlatformSeparators;
 
 import java.io.File;
@@ -65,6 +67,7 @@ public class ClassPath implements Iterable<String>
      * The paths that make up the {@link ClassPath}.
      */
     private final ArrayList<String> paths;
+
 
     /**
      * Constructs an empty {@link ClassPath} using the system default
@@ -275,9 +278,6 @@ public class ClassPath implements Iterable<String>
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Iterator<String> iterator()
     {
@@ -297,6 +297,7 @@ public class ClassPath implements Iterable<String>
     {
         return toString(PlatformSeparators.autoDetect());
     }
+
 
     /**
      * Obtains a String representation of the {@link ClassPath} that is suitable
@@ -320,11 +321,12 @@ public class ClassPath implements Iterable<String>
                 builder.append(pathSeparator);
             }
 
-            builder.append(path);
+            builder.append(StringHelper.doubleQuoteIfNecessary(path));
         }
 
         return modifier.modify(builder.toString());
     }
+
 
     @Override
     public boolean equals(Object other)
