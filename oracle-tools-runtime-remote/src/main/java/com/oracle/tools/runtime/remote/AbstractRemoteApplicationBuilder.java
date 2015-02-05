@@ -40,8 +40,8 @@ import com.oracle.tools.runtime.options.Shell;
 import com.oracle.tools.runtime.options.TemporaryDirectory;
 
 import com.oracle.tools.runtime.remote.options.Deployment;
-import com.oracle.tools.runtime.remote.options.DeploymentMethod;
-import com.oracle.tools.runtime.remote.ssh.SftpDeploymentMethod;
+import com.oracle.tools.runtime.remote.options.Deployer;
+import com.oracle.tools.runtime.remote.ssh.SftpDeployer;
 
 import java.io.File;
 
@@ -297,9 +297,9 @@ public abstract class AbstractRemoteApplicationBuilder<A extends Application, E 
             remoteDirectory = separators.asRemotePlatformFileName(remoteDirectoryFile.toString());
         }
 
-        DeploymentMethod deploymentMethod = options.get(DeploymentMethod.class, new SftpDeploymentMethod());
+        Deployer deployer = options.get(Deployer.class, new SftpDeployer());
 
-        deploymentMethod.deploy(artifactsToDeploy, remoteDirectory, platform, options.asArray());
+        deployer.deploy(artifactsToDeploy, remoteDirectory, platform, options.asArray());
 
         // Obtain the RemoteShell that will be used to realize the process
         RemoteShellType          shellType   = options.get(RemoteShellType.class, RemoteShellType.sshShell());

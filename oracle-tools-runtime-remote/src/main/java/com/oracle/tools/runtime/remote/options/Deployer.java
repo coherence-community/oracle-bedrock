@@ -1,5 +1,5 @@
 /*
- * File: DeploymentMethod.java
+ * File: Deployer.java
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
@@ -35,7 +35,7 @@ import com.oracle.tools.runtime.remote.DeploymentArtifact;
 import java.util.List;
 
 /**
- * A {@link DeploymentMethod} is able to deploy
+ * A {@link Deployer} is able to deploy
  * a collection of {@link DeploymentArtifact}s using
  * a specific file transfer method.
  * <p>
@@ -44,7 +44,7 @@ import java.util.List;
  *
  * @author Jonathan Knight
  */
-public interface DeploymentMethod extends Option
+public interface Deployer extends Option
 {
     /**
      * Deploy the list of {@link DeploymentArtifact}s to the specified {@link Platform}.

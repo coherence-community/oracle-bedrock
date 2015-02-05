@@ -1,5 +1,5 @@
 /*
- * File: SftpDeploymentMethod.java
+ * File: SftpDeployer.java
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
@@ -41,7 +41,7 @@ import com.oracle.tools.runtime.remote.Authentication;
 import com.oracle.tools.runtime.remote.DeploymentArtifact;
 import com.oracle.tools.runtime.remote.RemotePlatform;
 
-import com.oracle.tools.runtime.remote.options.DeploymentMethod;
+import com.oracle.tools.runtime.remote.options.Deployer;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -50,7 +50,7 @@ import java.io.IOException;
 import java.util.List;
 
 /**
- * An implementation of a {@link DeploymentMethod} that uses SFTP to
+ * An implementation of a {@link com.oracle.tools.runtime.remote.options.Deployer} that uses SFTP to
  * transfer {@link DeploymentArtifact}s to a platform.
  * <p>
  * Copyright (c) 2015. All Rights Reserved. Oracle Corporation.<br>
@@ -58,7 +58,7 @@ import java.util.List;
  *
  * @author Jonathan Knight
  */
-public class SftpDeploymentMethod implements DeploymentMethod
+public class SftpDeployer implements Deployer
 {
     /**
      * The {@link JSchSessionFactory} to use to obtain JSch {@link Session}s.
@@ -66,18 +66,18 @@ public class SftpDeploymentMethod implements DeploymentMethod
     private JSchSessionFactory sessionFactory;
 
     /**
-     * Create a {@link SftpDeploymentMethod}.
+     * Create a {@link SftpDeployer}.
      */
-    public SftpDeploymentMethod()
+    public SftpDeployer()
     {
         this(new JSchSessionFactory());
     }
 
     /**
-     * Create a {@link SftpDeploymentMethod} that will use the
+     * Create a {@link SftpDeployer} that will use the
      * specified {@link JSchSessionFactory}.
      */
-    public SftpDeploymentMethod(JSchSessionFactory sessionFactory)
+    public SftpDeployer(JSchSessionFactory sessionFactory)
     {
         this.sessionFactory = sessionFactory;
     }

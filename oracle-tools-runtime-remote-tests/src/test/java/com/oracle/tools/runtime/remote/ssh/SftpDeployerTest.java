@@ -1,5 +1,5 @@
 /*
- * File: SftpDeploymentMethodTest.java
+ * File: SftpDeployerTest.java
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
@@ -27,11 +27,10 @@ package com.oracle.tools.runtime.remote.ssh;
 
 import com.oracle.tools.Options;
 
-import com.oracle.tools.runtime.LocalPlatform;
 import com.oracle.tools.runtime.Platform;
 import com.oracle.tools.runtime.remote.AbstractRemoteTest;
 import com.oracle.tools.runtime.remote.DeploymentArtifact;
-import com.oracle.tools.runtime.remote.options.DeploymentMethod;
+import com.oracle.tools.runtime.remote.options.Deployer;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -45,14 +44,14 @@ import static org.hamcrest.CoreMatchers.sameInstance;
 import static org.junit.Assert.assertThat;
 
 /**
- * Tests for the {@link SftpDeploymentMethod} class.
+ * Tests for the {@link SftpDeployer} class.
  * <p>
  * Copyright (c) 2015. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Jonathan Knight
  */
-public class SftpDeploymentMethodTest extends AbstractRemoteTest
+public class SftpDeployerTest extends AbstractRemoteTest
 {
     @ClassRule
     public static TemporaryFolder temporaryFolder = new TemporaryFolder();
@@ -60,9 +59,9 @@ public class SftpDeploymentMethodTest extends AbstractRemoteTest
     @Test
     public void shouldFindAsDeploymentMethodInOptions() throws Exception
     {
-        DeploymentMethod sftp    = new SftpDeploymentMethod();
+        Deployer sftp    = new SftpDeployer();
         Options          options = new Options(sftp);
-        DeploymentMethod result  = options.get(DeploymentMethod.class);
+        Deployer result  = options.get(Deployer.class);
 
         assertThat(result, is(sameInstance(sftp)));
     }
@@ -79,7 +78,7 @@ public class SftpDeploymentMethodTest extends AbstractRemoteTest
         artifacts.add(new DeploymentArtifact(source));
         artifacts.add(new DeploymentArtifact(source, new File(root, "temp.txt")));
 
-        SftpDeploymentMethod sftp = new SftpDeploymentMethod();
+        SftpDeployer sftp = new SftpDeployer();
 
         sftp.deploy(artifacts, defaultDir.getCanonicalPath(), platform);
 
