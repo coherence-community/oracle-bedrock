@@ -121,6 +121,66 @@ public class PlatformSeparators implements Option
     }
 
 
+    /**
+     * Creates a remote-platform specific filename, given a fileName
+     * represented in a format for this platform.
+     *
+     * @param fileName  the file name to convert
+     *
+     * @return the file as it would be represented by the remote platform
+     */
+    public String asRemotePlatformFileName(String fileName)
+    {
+        return fileName == null ? null : fileName.replace(File.separator, getFileSeparator());
+    }
+
+
+    /**
+     * Creates a sanitized and lower-case version of a file name by replacing
+     * consecutive non-numerical, non-alphabetical, non ".", non "-" and non "~"
+     * characters of a string with "-".
+     *
+     * @param fileName  the un-sanitized file name
+     *
+     * @return  the sanitized file name
+     */
+    public String asSanitizedFileName(String fileName)
+    {
+        if (fileName == null)
+        {
+            return null;
+        }
+        else
+        {
+            StringBuilder builder = new StringBuilder(fileName.length());
+            String        valid   = "1234567890abcdefghijklmnopqrstuvwxyz.~" + File.separatorChar + getFileSeparator();
+            char          last    = '\0';
+
+            fileName = fileName.toLowerCase();
+
+            for (char c : fileName.toCharArray())
+            {
+                if (valid.indexOf(c) < 0)
+                {
+                    last = '-';
+                }
+                else
+                {
+                    if (last == '-' && builder.length() > 0)
+                    {
+                        builder.append(last);
+                    }
+
+                    last = c;
+                    builder.append(c);
+                }
+            }
+
+            return builder.toString().toLowerCase();
+        }
+    }
+
+
     @Override
     public boolean equals(Object other)
     {

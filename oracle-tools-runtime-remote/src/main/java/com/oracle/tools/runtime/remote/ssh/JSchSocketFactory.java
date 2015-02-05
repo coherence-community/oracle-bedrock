@@ -23,7 +23,7 @@
  * "Portions Copyright [year] [name of copyright owner]"
  */
 
-package com.oracle.tools.runtime.remote;
+package com.oracle.tools.runtime.remote.ssh;
 
 import com.jcraft.jsch.SocketFactory;
 
@@ -33,7 +33,6 @@ import java.io.OutputStream;
 
 import java.net.InetAddress;
 import java.net.Socket;
-import java.net.UnknownHostException;
 
 /**
  * A {@link SocketFactory} that keeps track of the local {@link InetAddress} of the
@@ -53,8 +52,7 @@ public class JSchSocketFactory implements SocketFactory
 
 
     @Override
-    public Socket createSocket(String host,
-                               int    port) throws IOException, UnknownHostException
+    public Socket createSocket(String host, int port) throws IOException
     {
         Socket socket = new Socket(host, port);
 

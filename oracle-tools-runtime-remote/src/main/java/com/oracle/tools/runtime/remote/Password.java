@@ -28,6 +28,8 @@ package com.oracle.tools.runtime.remote;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.Session;
 
+import com.oracle.tools.runtime.remote.ssh.JSchBasedAuthentication;
+
 /**
  * A password-based {@link Authentication}.
  * <p>

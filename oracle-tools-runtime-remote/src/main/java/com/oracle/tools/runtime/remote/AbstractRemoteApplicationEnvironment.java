@@ -36,7 +36,7 @@ import com.oracle.tools.runtime.java.JavaApplication;
 import com.oracle.tools.runtime.options.EnvironmentVariables;
 
 import java.net.InetAddress;
-
+import java.util.List;
 import java.util.Properties;
 
 /**
@@ -87,9 +87,15 @@ public abstract class AbstractRemoteApplicationEnvironment<A extends Application
 
 
     @Override
-    public String getRemoteCommandToExecute(InetAddress localInetAddress)
+    public String getRemoteCommandToExecute()
     {
         return schema.getExecutableName();
+    }
+
+    @Override
+    public List<String> getRemoteCommandArguments(InetAddress remoteExecutorAddress)
+    {
+        return schema.getArguments();
     }
 
 

@@ -59,10 +59,10 @@ public interface Deployment<A extends Application, S extends ApplicationSchema<A
      *
      * @return  a {@link List} of {@link DeploymentArtifact}s
      *
-     * @throws FileNotFoundException  when a {@link DeploymentArtifact} not be found
+     * @throws FileNotFoundException  when a {@link DeploymentArtifact} cannot be found
      * @throws IOException            when a {@link DeploymentArtifact} fail to be created/accessed
      */
     public List<DeploymentArtifact> getDeploymentArtifacts(S        schema,
                                                            Platform platform,
-                                                           Options  options) throws FileNotFoundException, IOException;
+                                                           Options  options) throws IOException;
 }

@@ -30,8 +30,6 @@ import com.oracle.tools.runtime.SimpleApplicationSchema;
 
 import com.oracle.tools.runtime.console.SystemApplicationConsole;
 
-import com.oracle.tools.runtime.options.EnvironmentVariables;
-
 import com.oracle.tools.runtime.remote.options.CustomDeployment;
 import com.oracle.tools.runtime.remote.options.StrictHostChecking;
 
@@ -55,20 +53,17 @@ import java.net.URL;
  *
  * @author Brian Oliver
  */
-public class SimpleRemoteApplicationBuilderTest extends AbstractRemoteApplicationBuilderTest
+public class SimpleRemoteApplicationBuilderTest extends AbstractRemoteTest
 {
     /**
      * Ensure that we can launch deploy a test file.
      */
     @Test
-    public void shouldLaunchSimpleApplicationRemotely() throws IOException, InterruptedException
+    public void shouldLaunchSimpleApplicationRemotely() throws Exception
     {
         SimpleApplicationSchema schema = new SimpleApplicationSchema("ls -la");
 
-        RemotePlatform platform = new RemotePlatform(InetAddress.getByName(getRemoteHostName()),
-                                                     getRemoteUserName(),
-                                                     getRemoteAuthentication(),
-                                                     StrictHostChecking.disabled());
+        RemotePlatform platform = getRemotePlatform();
 
         URL  testFileURL = Thread.currentThread().getContextClassLoader().getResource("test.txt");
         File testFile    = new File(testFileURL.getFile());

@@ -23,14 +23,15 @@
  * "Portions Copyright [year] [name of copyright owner]"
  */
 
-package com.oracle.tools.runtime.remote;
+package com.oracle.tools.runtime.remote.ssh;
 
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.Session;
+import com.oracle.tools.runtime.remote.Authentication;
 
 /**
- * A specialized {@link Authentication} that defines {@link JSch} specific callbacks for
- * {@link Authentication}s.
+ * A specialized {@link com.oracle.tools.runtime.remote.Authentication} that defines {@link JSch} specific callbacks for
+ * {@link com.oracle.tools.runtime.remote.Authentication}s.
  * <p>
  * Copyright (c) 2014. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
