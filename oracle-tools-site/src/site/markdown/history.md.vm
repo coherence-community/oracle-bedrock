@@ -574,6 +574,10 @@ reverse chronological order.
     remote debug attach option to allow a the host name as well as the port to be
     specified for the remote debugger that the application shoul dconnect to.
 
+*   [ORACLETOOLS-237](https://java.net/jira/browse/ORACLETOOLS-237): Refactored
+    remote runtime to allow other remote shells to be added as alternatives to
+    SSH.
+
 <h4>oracle-tools-runtime-vagrant</h4>
 
 *   [ORACLETOOLS-222](https://java.net/jira/browse/ORACLETOOLS-222): Fixed bug
