@@ -30,6 +30,8 @@ import com.oracle.tools.runtime.Application;
 import com.oracle.tools.runtime.ApplicationSchema;
 import com.oracle.tools.runtime.Platform;
 
+import java.io.File;
+
 /**
  * A {@link RemoteShell} is a wrapper around various types
  * of shell running on a remote platform.
@@ -65,4 +67,11 @@ public interface RemoteShell<A extends Application,S extends ApplicationSchema<A
                                      E         environment,
                                      String    workingDirectory,
                                      Options   options);
+
+    /**
+     * Ensure that the specified directory exists on the remote platform.
+     *
+     * @param directoryName the directory to create
+     */
+    void makeDirectories(String directoryName, Options options);
 }

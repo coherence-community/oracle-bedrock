@@ -78,10 +78,8 @@ public class CapturingApplicationConsole extends AbstractPipedApplicationConsole
      * Constructs {@link CapturingApplicationConsole}.
      * </p>
      * This constructor will set the maximum number of lines to capture to {@link Integer#MAX_VALUE}.
-     *
-     * @throws java.io.IOException
      */
-    public CapturingApplicationConsole() throws IOException
+    public CapturingApplicationConsole()
     {
         this(Integer.MAX_VALUE, false, DEFAULT_PIPE_SIZE);
     }
@@ -91,10 +89,8 @@ public class CapturingApplicationConsole extends AbstractPipedApplicationConsole
      * Constructs {@link CapturingApplicationConsole}.
      *
      * @param maximumLines  the number of lines of output to capture
-     *
-     * @throws IOException
      */
-    public CapturingApplicationConsole(int maximumLines) throws IOException
+    public CapturingApplicationConsole(int maximumLines)
     {
         this(maximumLines, false, DEFAULT_PIPE_SIZE);
     }
@@ -106,11 +102,8 @@ public class CapturingApplicationConsole extends AbstractPipedApplicationConsole
      * @param maximumLines    the number of lines of output to keep
      * @param diagnosticMode  if true, output to this console is not formatted
      *                        with application details or line numbers
-     *
-     * @throws IOException
      */
-    public CapturingApplicationConsole(int     maximumLines,
-                                       boolean diagnosticMode) throws IOException
+    public CapturingApplicationConsole(int maximumLines, boolean diagnosticMode)
     {
         this(maximumLines, diagnosticMode, DEFAULT_PIPE_SIZE);
     }
@@ -123,19 +116,17 @@ public class CapturingApplicationConsole extends AbstractPipedApplicationConsole
      * @param diagnosticMode  if true, output to this console is not formatted
      *                        with application details or line numbers
      * @param pipeSize        the size of the pipe's buffers
-     *
-     * @throws IOException
      */
     public CapturingApplicationConsole(int     maximumLines,
                                        boolean diagnosticMode,
-                                       int     pipeSize) throws IOException
+                                       int     pipeSize)
     {
         super(pipeSize, diagnosticMode);
 
         this.maximumLines = maximumLines;
 
-        this.stdoutBuffer = new ConcurrentLinkedQueue<String>();
-        this.stderrBuffer = new ConcurrentLinkedQueue<String>();
+        this.stdoutBuffer = new ConcurrentLinkedQueue<>();
+        this.stderrBuffer = new ConcurrentLinkedQueue<>();
 
         this.stdoutThread = new Thread(new OutputCaptor(stdoutReader, stdoutBuffer));
         this.stderrThread = new Thread(new OutputCaptor(stderrReader, stderrBuffer));

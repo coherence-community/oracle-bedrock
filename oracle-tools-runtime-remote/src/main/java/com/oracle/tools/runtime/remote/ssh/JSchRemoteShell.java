@@ -26,6 +26,7 @@
 package com.oracle.tools.runtime.remote.ssh;
 
 import com.jcraft.jsch.ChannelExec;
+import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
@@ -45,6 +46,7 @@ import com.oracle.tools.runtime.remote.Authentication;
 import com.oracle.tools.runtime.remote.RemoteApplicationEnvironment;
 import com.oracle.tools.runtime.remote.RemoteApplicationProcess;
 
+import java.io.File;
 import java.util.List;
 import java.util.Properties;
 
@@ -180,8 +182,7 @@ public class JSchRemoteShell<A extends Application, S extends ApplicationSchema<
             }
 
             // the actual remote command must include changing to the remote directory
-            String remoteCommand = environmentVariables + String.format("mkdir -p %s ; cd %s ; %s",
-                                                                        workingDirectory,
+            String remoteCommand = environmentVariables + String.format("cd %s ; %s",
                                                                         workingDirectory,
                                                                         command);
 
@@ -209,6 +210,43 @@ public class JSchRemoteShell<A extends Application, S extends ApplicationSchema<
             environment.close();
 
             throw new RuntimeException("Failed to create remote application", e);
+        }
+    }
+
+    @Override
+    public void makeDirectories(String directoryName, Options options)
+    {
+        Session session = null;
+
+        try
+        {
+            // establish a specialized SocketFactory for JSch
+            JSchSocketFactory socketFactory = new JSchSocketFactory();
+
+            // create the remote session
+            session = sessionFactory.createSession(getHostName(), getPort(), getUserName(),
+                                                           getAuthentication(), socketFactory, options);
+
+            ChannelExec execChannel = (ChannelExec) session.openChannel("exec");
+
+            execChannel.setCommand("mkdir -p " + directoryName);
+
+            RemoteApplicationProcess process = new JschRemoteApplicationProcess(session, execChannel);
+
+            execChannel.connect(session.getTimeout());
+
+            process.waitFor();
+        }
+        catch (Exception e)
+        {
+            throw new RuntimeException("Error creating remote directories " + directoryName, e);
+        }
+        finally
+        {
+            if (session != null)
+            {
+                session.disconnect();
+            }
         }
     }
 }

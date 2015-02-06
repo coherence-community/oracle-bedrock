@@ -297,16 +297,20 @@ public abstract class AbstractRemoteApplicationBuilder<A extends Application, E 
             remoteDirectory = separators.asRemotePlatformFileName(remoteDirectoryFile.toString());
         }
 
-        Deployer deployer = options.get(Deployer.class, new SftpDeployer());
-
-        deployer.deploy(artifactsToDeploy, remoteDirectory, platform, options.asArray());
-
         // Obtain the RemoteShell that will be used to realize the process
         RemoteShellType          shellType   = options.get(RemoteShellType.class, RemoteShellType.sshShell());
         RemoteShell<T,S,E>       shell       = shellType.createShell(userName, authentication, hostName, port);
 
+        // create the working directory
+        shell.makeDirectories(remoteDirectory, options);
+
+        // Deploy any artifacts required
+        Deployer deployer = options.get(Deployer.class, new SftpDeployer());
+
+        deployer.deploy(artifactsToDeploy, remoteDirectory, platform, options.asArray());
+
         // Realize the remote process
-        RemoteApplicationProcess process     = shell.realize(applicationSchema, applicationName, platform,
+        RemoteApplicationProcess process = shell.realize(applicationSchema, applicationName, platform,
                                                              environment, remoteDirectory, options);
 
         // create the Application based on the RemoteApplicationProcess

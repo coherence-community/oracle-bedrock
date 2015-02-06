@@ -128,7 +128,16 @@ public class SftpDeployer implements Deployer
                     sftpChannel = (ChannelSftp) session.openChannel("sftp");
                     sftpChannel.connect(session.getTimeout());
 
-                    sftpChannel.mkdir(remoteDirectory);
+                    try
+                    {
+                        // Obtain the status of the remote directory
+                        sftpChannel.lstat(remoteDirectory);
+                    }
+                    catch (SftpException _ignored)
+                    {
+                        // the remote directory does not exist so attempt to create it
+                        sftpChannel.mkdir(remoteDirectory);
+                    }
 
                     // copy deployment artifacts into the remote server
                     for (DeploymentArtifact artifactToDeploy : artifactsToDeploy)
