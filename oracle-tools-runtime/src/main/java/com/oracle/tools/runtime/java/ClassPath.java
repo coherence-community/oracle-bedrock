@@ -303,6 +303,9 @@ public class ClassPath implements Iterable<String>
      * Obtains a String representation of the {@link ClassPath} that is suitable
      * for using as a Java class-path property (using the specified
      * file and path separators).
+     * <p>
+     * Note:  The returned String may contain spaces in which case the caller should
+     * appropriate double-quote the String for their appropriate Platform.
      *
      * @return the Java class-path
      */
@@ -321,9 +324,13 @@ public class ClassPath implements Iterable<String>
                 builder.append(pathSeparator);
             }
 
-            builder.append(StringHelper.doubleQuoteIfNecessary(path));
+            // NOTE: DON'T BE TEMPTED TO DOUBLE QUOTE THESE PATH STRINGS!
+            // (on certain platforms they may be double quoted again!)
+            builder.append(path);
         }
 
+        // NOTE: DON'T BE TEMPTED TO DOUBLE QUOTE THESE PATH STRINGS!
+        // (on certain platforms they may be double quoted again!)
         return modifier.modify(builder.toString());
     }
 
