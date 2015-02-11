@@ -62,6 +62,7 @@ import com.oracle.tools.runtime.options.Orphanable;
 import com.oracle.tools.util.Capture;
 
 import org.junit.Assume;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static com.oracle.tools.deferred.DeferredHelper.delayedBy;
@@ -217,6 +218,7 @@ public class LocalJavaApplicationBuilderTest extends AbstractJavaApplicationBuil
      * {@link com.oracle.tools.runtime.java.options.RemoteDebugging.Behavior#ATTACH_TO_DEBUGGER}
      * and assert the process connects back to the debugger
      */
+    @Ignore("This test can cause JVMs to crash on various platforms.  Disabled for now until there is a fix.")
     @Test
     public void shouldEnableRemoteDebugAndConnectBackToDebugger() throws Exception
     {
@@ -229,7 +231,9 @@ public class LocalJavaApplicationBuilderTest extends AbstractJavaApplicationBuil
         Capture<Integer> debuggerPort = new Capture<Integer>(platform.getAvailablePorts());
 
         SimpleApplicationSchema jdbSchema =
-            new SimpleApplicationSchema("jdb").addArgument("-listen").addArgument(String.valueOf(debuggerPort.get()));
+            new SimpleApplicationSchema("jdb").addArgument("-connect")
+                .addArgument("com.sun.jdi.SocketListen:localAddress=" + platform.getAddress().getHostAddress()
+                        + ",port=" + debuggerPort.get());
 
         CapturingApplicationConsole jdbConsole = new CapturingApplicationConsole();
 
@@ -274,8 +278,8 @@ public class LocalJavaApplicationBuilderTest extends AbstractJavaApplicationBuil
         assertThat(socket, is(notNullValue()));
 
         SimpleApplicationSchema schema =
-            new SimpleApplicationSchema("jdb").addArgument("-attach").addArgument(socket.getAddress().getHostAddress()
-                                        + ":" + socket.getPort());
+            new SimpleApplicationSchema("jdb").addArgument("-connect").addArgument("com.sun.jdi.SocketAttach:hostname="
+                                        + socket.getAddress().getHostAddress() + ",port=" + socket.getPort());
 
         CapturingApplicationConsole console = new CapturingApplicationConsole();
 
