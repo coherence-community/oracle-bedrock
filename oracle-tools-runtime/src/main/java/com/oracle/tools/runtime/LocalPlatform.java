@@ -122,6 +122,20 @@ public class LocalPlatform extends AbstractPlatform
 
 
     /**
+     * Obtains the loopback {@link InetAddress} for the {@link LocalPlatform}.
+     * <p>
+     * The InetAddress returned will represent the IPv4 loopback address, 127.0.0.1, or the IPv6 loopback address, ::1.
+     * The IPv4 loopback address returned is only one of many in the form 127.*.*.
+     *
+     * @return the loopback {@link InetAddress}
+     */
+    public InetAddress getLoopbackAddress()
+    {
+        return InetAddress.getLoopbackAddress();
+    }
+
+
+    /**
      * Obtains the {@link AvailablePortIterator} for the {@link LocalPlatform}.
      *
      * @return the {@link AvailablePortIterator}
