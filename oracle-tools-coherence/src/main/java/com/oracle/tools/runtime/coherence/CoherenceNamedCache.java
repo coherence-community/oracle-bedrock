@@ -35,8 +35,11 @@ import com.tangosol.net.CacheService;
 import com.tangosol.net.NamedCache;
 
 import com.tangosol.util.Filter;
+import com.tangosol.util.InvocableMap;
 import com.tangosol.util.MapListener;
 import com.tangosol.util.ValueExtractor;
+
+import com.tangosol.util.function.Remote;
 
 import java.io.Serializable;
 
@@ -296,7 +299,7 @@ class CoherenceNamedCache<K, V> implements NamedCache<K, V>
 
 
     @Override
-    public <R> Map<K, R> invokeAll(Filter<?>               filter,
+    public <R> Map<K, R> invokeAll(Filter                  filter,
                                    EntryProcessor<K, V, R> processor)
     {
         return remotelyInvoke("invokeAll", Map.class, filter, processor);
@@ -312,7 +315,7 @@ class CoherenceNamedCache<K, V> implements NamedCache<K, V>
 
 
     @Override
-    public <R> R aggregate(Filter<?>                                filter,
+    public <R> R aggregate(Filter                                   filter,
                            EntryAggregator<? super K, ? super V, R> aggregator)
     {
         return (R) remotelyInvoke("aggregate", Object.class, filter, aggregator);
