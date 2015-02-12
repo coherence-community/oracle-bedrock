@@ -534,6 +534,9 @@ reverse chronological order.
     LocalPlatform.getLoopbackAddress() method to obtain the loopback address
     of the LocalPlatform.
 
+*   [ORACLETOOLS-243](https://java.net/jira/browse/ORACLETOOLS-243): Enhanced
+    AvailablePortIterator to ensure both TCP and UDP sockets are available.
+
 <h4>oracle-tools-runtime-remote</h4>
 
 *   [ORACLETOOLS-91](https://java.net/jira/browse/ORACLETOOLS-91): Introduced

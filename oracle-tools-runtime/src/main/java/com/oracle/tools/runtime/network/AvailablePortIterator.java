@@ -41,8 +41,9 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
- * An {@link Iterator} implementation that lazily performs a port scanning on a
- * specified address to determine what {@link ServerSocket} ports are available.
+ * An {@link Iterator} implementation that lazily performs port scanning on a
+ * specified address to determine what {@link ServerSocket} and {@link DatagramSocket}
+ * ports are available.
  * <p>
  * Copyright (c) 2015. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
@@ -88,12 +89,20 @@ public class AvailablePortIterator implements Iterator<Integer>, Iterable<Intege
     private int portRangeEnd;
 
     /**
-     * A {@link Queue} of available {@link ServerSocket} and {@link DatagramSocket}s.
+     * A {@link Queue} of available {@link ServerSocket}s.
      * <p>
-     * Connections to these remain open until they are requested using
+     * Connections to these sockets will remain open until they are requested using
      * {@link #next()}.
      */
-    private Queue<ServerSocket> availableSockets;
+    private Queue<ServerSocket> serverSockets;
+
+    /**
+     * A {@link Queue} of available {@link DatagramSocket}s
+     * <p>
+     * Connections to these sockets will remain open until they are requested using
+     * {@link #next()}.
+     */
+    private Queue<DatagramSocket> datagramSockets;
 
     /**
      * The last port checked for availability
@@ -153,11 +162,12 @@ public class AvailablePortIterator implements Iterator<Integer>, Iterable<Intege
                                  int         portRangeStart,
                                  int         portRangeEnd)
     {
-        this.inetAddress      = inetAddress;
-        this.portRangeStart   = portRangeStart;
-        this.portRangeEnd     = portRangeEnd;
-        this.availableSockets = new ConcurrentLinkedQueue<ServerSocket>();
-        this.lastCheckedPort  = portRangeStart - 1;
+        this.inetAddress     = inetAddress;
+        this.portRangeStart  = portRangeStart;
+        this.portRangeEnd    = portRangeEnd;
+        this.serverSockets   = new ConcurrentLinkedQueue<ServerSocket>();
+        this.datagramSockets = new ConcurrentLinkedQueue<DatagramSocket>();
+        this.lastCheckedPort = portRangeStart - 1;
 
         acquireAvailablePorts(LOW_PORT_THRESHOLD, IDEAL_AVAILABLE_PORTS);
     }
@@ -191,10 +201,10 @@ public class AvailablePortIterator implements Iterator<Integer>, Iterable<Intege
 
 
     /**
-     * Attempts to determine if the specified {@link ServerSocket} port is
-     * available. If it is, a connection is made and kept ut from being taken
-     * by other processes (or iterators).  When an available port is requested
-     * (via a call to {@link #next()}) the socket is closed and returned.
+     * Attempts to determine if the specified {@link ServerSocket} and
+     * {@link DatagramSocket} port is available. If it is, a connection is made and
+     * kept from being taken by other processes (or iterators).  When an available port is
+     * requested (via a call to {@link #next()}) the sockets are closed and returned.
      *
      * @param port  the port to test
      *
@@ -209,7 +219,7 @@ public class AvailablePortIterator implements Iterator<Integer>, Iterable<Intege
         }
         else
         {
-            // attempt to connect to both a server and datagram socket (we want both to be free)
+            // attempt to bind to a ServerSocket on the specified port
             ServerSocket serverSocket = null;
 
             try
@@ -217,10 +227,6 @@ public class AvailablePortIterator implements Iterator<Integer>, Iterable<Intege
                 serverSocket = new ServerSocket();
                 serverSocket.setReuseAddress(false);
                 serverSocket.bind(new InetSocketAddress(inetAddress, port));
-
-                availableSockets.add(serverSocket);
-
-                return true;
             }
             catch (IOException ioException)
             {
@@ -234,6 +240,41 @@ public class AvailablePortIterator implements Iterator<Integer>, Iterable<Intege
                     {
                         // deliberately empty as failing here will have no effect on scanning for ports
                     }
+                }
+
+                // give up on this port as the ServerSocket isn't available
+                return false;
+            }
+
+            // now attempt to bind to a DatagramSocket on the same port
+            DatagramSocket datagramSocket = null;
+
+            try
+            {
+                datagramSocket = new DatagramSocket(port, inetAddress);
+
+                // success!  remember both the sockets for later retrieval
+                datagramSockets.add(datagramSocket);
+                serverSockets.add(serverSocket);
+
+                return true;
+
+            }
+            catch (IOException ioException)
+            {
+                try
+                {
+                    // any failure to bind to the DatagramSocket means we have to relinquish the corresponding ServerSocket
+                    serverSocket.close();
+
+                    if (datagramSocket != null)
+                    {
+                        datagramSocket.close();
+                    }
+                }
+                catch (IOException e)
+                {
+                    // deliberately empty as failing here will have no effect on scanning for ports
                 }
 
                 return false;
@@ -257,15 +298,15 @@ public class AvailablePortIterator implements Iterator<Integer>, Iterable<Intege
                                                    int idealQueueSize)
     {
         // we want at least the minimum specified number of sockets in the queue
-        int count = availableSockets.size() < minimumThreshold
-                    ? availableSockets.size() + idealQueueSize : availableSockets.size();
+        int count = serverSockets.size() < minimumThreshold
+                    ? serverSockets.size() + idealQueueSize : serverSockets.size();
 
-        while (availableSockets.size() < count && lastCheckedPort < portRangeEnd)
+        while (serverSockets.size() < count && lastCheckedPort < portRangeEnd)
         {
             isPortAvailable(++lastCheckedPort);
         }
 
-        return availableSockets.size();
+        return serverSockets.size();
     }
 
 
@@ -293,7 +334,8 @@ public class AvailablePortIterator implements Iterator<Integer>, Iterable<Intege
 
             do
             {
-                ServerSocket socket;
+                ServerSocket   serverSocket;
+                DatagramSocket datagramSocket;
 
                 synchronized (this)
                 {
@@ -304,20 +346,33 @@ public class AvailablePortIterator implements Iterator<Integer>, Iterable<Intege
                     }
                     else
                     {
-                        // grab the open socket
-                        socket = availableSockets.remove();
+                        // grab an open ServerSocket
+                        serverSocket = serverSockets.remove();
+
+                        // grab the corresponding DatagramSocket
+                        datagramSocket = datagramSockets.remove();
                     }
                 }
 
                 // determine the port from the server socket
-                port = socket.getLocalPort();
+                port = serverSocket.getLocalPort();
 
                 // attempt to close the ports (as we're returning them)
                 reacquire = false;
 
                 try
                 {
-                    socket.close();
+                    serverSocket.close();
+                }
+                catch (Exception e)
+                {
+                    // any failure to close means we should try another port
+                    reacquire = true;
+                }
+
+                try
+                {
+                    datagramSocket.close();
                 }
                 catch (Exception e)
                 {
@@ -346,7 +401,7 @@ public class AvailablePortIterator implements Iterator<Integer>, Iterable<Intege
     @Override
     public String toString()
     {
-        ArrayList<ServerSocket> list    = new ArrayList<ServerSocket>(availableSockets);
+        ArrayList<ServerSocket> list    = new ArrayList<ServerSocket>(serverSockets);
 
         StringBuilder           builder = new StringBuilder("");
 
