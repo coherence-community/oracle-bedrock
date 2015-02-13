@@ -36,7 +36,12 @@ import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Enumeration;
+import java.util.List;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 /**
  * Common Network utilities.
@@ -233,13 +238,14 @@ public class NetworkHelper
         try
         {
             InetAddress potentialInetAddress = null;
+            List<NetworkInterface> interfaces = Collections.list(NetworkInterface.getNetworkInterfaces());
+
+            // Sort the interfaces by ID
+            Collections.sort(interfaces, new NetworkInterfaceComparator());
 
             // consider each of the NetworkInterfaces
-            for (Enumeration<NetworkInterface> networkInterfaces = NetworkInterface.getNetworkInterfaces();
-                networkInterfaces.hasMoreElements(); )
+            for ( NetworkInterface networkInterface : interfaces)
             {
-                NetworkInterface networkInterface = networkInterfaces.nextElement();
-
                 // consider each of the InetAddresses defined by the NetworkInterface
                 for (Enumeration<InetAddress> inetAddresses = networkInterface.getInetAddresses();
                     inetAddresses.hasMoreElements(); )
@@ -280,6 +286,20 @@ public class NetworkHelper
         {
             // TODO: log once that the address can't be discovered (we're probably without a network)
             return InetAddress.getLoopbackAddress();
+        }
+    }
+
+
+    /**
+     * A {@link Comparator} that can sort {@link NetworkInterface}s
+     * by their ID.
+     */
+    private static class NetworkInterfaceComparator implements Comparator<NetworkInterface>
+    {
+        @Override
+        public int compare(NetworkInterface if1, NetworkInterface if2)
+        {
+            return if1.getIndex() - if2.getIndex();
         }
     }
 }
