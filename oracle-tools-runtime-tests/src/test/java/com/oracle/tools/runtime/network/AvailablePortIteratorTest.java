@@ -42,7 +42,7 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 
 /**
- * Unit tests for the {@link AvailablePortIterator}.
+ * Functional tests for the {@link AvailablePortIterator}.
  * <p>
  * Copyright (c) 2011. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
