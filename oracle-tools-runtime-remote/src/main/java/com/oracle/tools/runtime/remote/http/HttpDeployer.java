@@ -49,16 +49,18 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URL;
-import java.net.URLEncoder;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
+
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 
 /**
  * A base class for {@link Deployer}s that use HTTP
@@ -125,6 +127,17 @@ public abstract class HttpDeployer implements Deployer
     }
 
 
+    /**
+     * A static helper method to return an {@link HttpDeployer}
+     * that will use PowerShell Invoke-WebRequest to retrieve
+     * artifacts.
+     */
+    public static HttpDeployer powerShell()
+    {
+        return new PowerShellHttpDeployer();
+    }
+
+
     @Override
     public void deploy(List<DeploymentArtifact> artifactsToDeploy,
                        String                   remoteDirectory,
@@ -142,32 +155,31 @@ public abstract class HttpDeployer implements Deployer
         options.addAll(deploymentOptions);
 
         Map<String, DeploymentArtifact> artifactMap = new LinkedHashMap<>();
-        String                          encoding    = System.getProperty("file.encoding", "UTF-8");
+        ExecutorService                 executor    = createExecutor();
         HttpServer                      server      = null;
 
         try
         {
             for (DeploymentArtifact artifact : artifactsToDeploy)
             {
-                URI    artifactURI = artifact.getSourceFile().toURI();
-                String path        = "/" + URLEncoder.encode(artifactURI.getPath(), encoding);
-
-                artifactMap.put(path, artifact);
+                artifactMap.put("/" + UUID.randomUUID().toString(), artifact);
             }
 
-            server = createServer(artifactMap);
+            server = createServer(executor, artifactMap);
 
             deployAllArtifacts(artifactMap, remoteDirectory, platform, server.getAddress(), options);
-        }
-        catch (IOException e)
-        {
-            throw new RuntimeException("Unable to create HTTP server", e);
         }
         finally
         {
             if (server != null)
             {
                 server.stop(0);
+
+            }
+
+            if (executor != null)
+            {
+                executor.shutdownNow();
             }
         }
     }
@@ -197,7 +209,7 @@ public abstract class HttpDeployer implements Deployer
         try
         {
             PlatformSeparators separators = options.get(PlatformSeparators.class, PlatformSeparators.autoDetect());
-            String             hostName   = httpServerAddress.getHostName();
+            String             hostName   = httpServerAddress.getAddress().getHostAddress();
             int                port       = httpServerAddress.getPort();
 
             for (Map.Entry<String, DeploymentArtifact> entry : artifacts.entrySet())
@@ -240,6 +252,22 @@ public abstract class HttpDeployer implements Deployer
 
 
     /**
+     * Create the {@link Executor} that will be used by the {@link HttpServer}
+     * that this deployer runs.
+     * If a specific implementation of {@link HttpDeployer} will perform
+     * parallel HTTP requests then it should use an {@link Executor} to provide
+     * multiple threads to the {@link HttpServer}. If the deployer only deploys
+     * artifacts one at a time then it can return null from this method.
+     *
+     * @return an {@link Executor} to use for parallel deployments or null
+     *         if performing single threaded deployments.
+     */
+    protected ExecutorService createExecutor()
+    {
+        return null;
+    }
+
+    /**
      * Deploy the specified artifact.
      *
      * @param sourceURL       the HTTP URL to download the artifact from
@@ -255,11 +283,13 @@ public abstract class HttpDeployer implements Deployer
      * Start the HTTP server that will be used to serve the artifacts
      * to be deployed.
      *
+     * @param executor  the {@link Executor} to pass to the {@link HttpServer}
      * @param artifacts a {@link Map} of {@link DeploymentArtifact}s to deploy
      *                  keyed by the URL path for each artifact
      *
      */
-    protected HttpServer createServer(Map<String, DeploymentArtifact> artifacts)
+    protected HttpServer createServer(ExecutorService                 executor,
+                                      Map<String, DeploymentArtifact> artifacts)
     {
         try
         {
@@ -269,7 +299,7 @@ public abstract class HttpDeployer implements Deployer
             HttpServer    server   = HttpServer.create(new InetSocketAddress(address, port), 0);
 
             server.createContext("/", new ArtifactsHandler(artifacts));
-            server.setExecutor(null);
+            server.setExecutor(executor);
             server.start();
 
             return server;

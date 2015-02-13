@@ -56,4 +56,25 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+              <groupId>org.jvnet.jaxb2.maven2</groupId>
+              <artifactId>maven-jaxb2-plugin</artifactId>
+              <executions>
+                <execution>
+                  <goals>
+                    <goal>generate</goal>
+                  </goals>
+                  <configuration>
+                    <schemaDirectory>src/main/resources/xsd</schemaDirectory>
+                    <bindingDirectory>src/main/resources</bindingDirectory>
+                    <generateDirectory>${project.build.directory}/generated-sources</generateDirectory>
+                  </configuration>
+                </execution>
+              </executions>
+            </plugin>
+        </plugins>
+    </build>
 </project>

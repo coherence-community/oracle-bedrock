@@ -132,8 +132,8 @@ public class CurlHttpDeployerTest extends AbstractHttpDeployerTest
     {
         Platform                       platform    = mock(Platform.class);
         int                            port        = 1234;
-        InetSocketAddress              address     = new InetSocketAddress(InetAddress.getLocalHost(), port);
-        String                         hostName    = address.getHostName();
+        String                         hostName    = InetAddress.getLocalHost().getHostAddress();
+        InetSocketAddress              address     = new InetSocketAddress(hostName, port);
         Options                        options     = new Options();
         SimpleApplication              application = mock(SimpleApplication.class, "1");
 
@@ -172,8 +172,8 @@ public class CurlHttpDeployerTest extends AbstractHttpDeployerTest
         String                         destination = "/foo";
         Platform                       platform    = mock(Platform.class);
         int                            port        = 1234;
-        InetSocketAddress              address     = new InetSocketAddress(InetAddress.getLocalHost(), port);
-        String                         hostName    = address.getHostName();
+        String                         hostName    = InetAddress.getLocalHost().getHostAddress();
+        InetSocketAddress              address     = new InetSocketAddress(hostName, port);
         Options                        options     = new Options();
         SimpleApplication              application = mock(SimpleApplication.class, "1");
 

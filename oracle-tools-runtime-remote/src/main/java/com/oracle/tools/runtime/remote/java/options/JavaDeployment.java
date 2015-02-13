@@ -78,6 +78,8 @@ public class JavaDeployment implements Deployment<JavaApplication, JavaApplicati
     private HashSet<String> excludeFileNames;
 
 
+    private boolean excludeJDK;
+
     /**
      * Privately constructs a {@link JavaDeployment}.
      *
@@ -87,6 +89,7 @@ public class JavaDeployment implements Deployment<JavaApplication, JavaApplicati
     {
         this.autoDeployEnabled = autoDeployEnabled;
         this.includePaths      = new HashSet<>();
+        this.excludeJDK        = true;
 
         // by default there are some files we never want to deploy
         // (as these are part of the Java platform)
@@ -162,6 +165,13 @@ public class JavaDeployment implements Deployment<JavaApplication, JavaApplicati
                                                            Options                                options) throws FileNotFoundException, IOException
     {
         ArrayList<DeploymentArtifact> deploymentArtifacts = new ArrayList<DeploymentArtifact>();
+        File                          javaHomeFile        = new File(System.getProperty("java.home"));
+        String                        javaHome            = javaHomeFile.getCanonicalPath();
+
+        if (javaHomeFile.getName().equals("jre"))
+        {
+            javaHome = javaHomeFile.getParentFile().getCanonicalPath();
+        }
 
         if (autoDeployEnabled)
         {
@@ -172,6 +182,11 @@ public class JavaDeployment implements Deployment<JavaApplication, JavaApplicati
             {
                 // we ignore leading and trailing spaces
                 path = path.trim();
+
+                if (this.excludeJDK && path.startsWith(javaHome))
+                {
+                    continue;
+                }
 
                 if (path.endsWith("*"))
                 {

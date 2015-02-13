@@ -582,6 +582,10 @@ reverse chronological order.
     option to specify HTTP download using curl or wget as an alternative to
     SFTP as a method of deploying remote artifacts.
 
+*   [ORACLETOOLS-239](https://java.net/jira/browse/ORACLETOOLS-239): Added
+    Windows Remote Management (WinRM) as an alternative to SSH for controlling
+    remote processes on a platform running a Windows O/S.
+
 <h4>oracle-tools-runtime-vagrant</h4>
 
 *   [ORACLETOOLS-222](https://java.net/jira/browse/ORACLETOOLS-222): Fixed bug

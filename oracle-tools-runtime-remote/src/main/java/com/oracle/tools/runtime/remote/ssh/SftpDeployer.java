@@ -86,6 +86,11 @@ public class SftpDeployer implements Deployer
     public void deploy(List<DeploymentArtifact> artifactsToDeploy, String remoteDirectory, Platform platform,
                        Option... deploymentOptions)
     {
+        if (artifactsToDeploy == null || artifactsToDeploy.isEmpty())
+        {
+            return;
+        }
+
         if (!(platform instanceof RemotePlatform))
         {
             throw new IllegalArgumentException("The platform parameter must be an instance of RemotePlatform");
