@@ -694,7 +694,10 @@ reverse chronological order.
 
 <h4>oracle-tools-coherence-testing-support</h4>
 
-*   (none)
+*   [ORACLETOOLS-244](https://java.net/jira/browse/ORACLETOOLS-244): Introduced
+    the Coherence Cluster Orchestration JUnit Rule.   This will automatically
+    create a Coherence Cluster consisting of two storage enabled servers
+    and one proxy enabled storage disabled member.
 
 <h4>oracle-tools-site</h4>
 
