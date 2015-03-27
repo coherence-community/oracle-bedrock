@@ -314,7 +314,7 @@ public class NetworkHelper
                 public int compare(NetworkInterface networkInterface1,
                                    NetworkInterface networkInterface2)
                 {
-                    return networkInterface2.getIndex() - networkInterface1.getIndex();
+                    return networkInterface1.getIndex() - networkInterface2.getIndex();
                 }
             });
         }
