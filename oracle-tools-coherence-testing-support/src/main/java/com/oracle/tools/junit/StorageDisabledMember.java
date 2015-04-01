@@ -53,6 +53,14 @@ public class StorageDisabledMember implements SessionBuilder
         CoherenceCacheServerSchema schema =
             new CoherenceCacheServerSchema(serverSchema).setRoleName("client").setStorageEnabled(false);
 
+        // obtain the cache configuration to use for the storage-disabled member
+        String cacheConfigURI = serverSchema.getCacheConfigURI();
+
+        if (cacheConfigURI == null || cacheConfigURI.trim().isEmpty())
+        {
+            cacheConfigURI = "coherence-cache-config.xml";
+        }
+
         // set the current system properties with those of the schema
         Properties properties = schema.getSystemProperties(platform);
 
@@ -61,6 +69,20 @@ public class StorageDisabledMember implements SessionBuilder
             System.setProperty(propertyName, properties.getProperty(propertyName));
         }
 
-        return new ScopedCacheFactoryBuilder().getConfigurableCacheFactory(getClass().getClassLoader());
+        return new ScopedCacheFactoryBuilder().getConfigurableCacheFactory(cacheConfigURI, getClass().getClassLoader());
+    }
+
+
+    @Override
+    public boolean equals(Object other)
+    {
+        return other instanceof StorageDisabledMember;
+    }
+
+
+    @Override
+    public int hashCode()
+    {
+        return StorageDisabledMember.class.hashCode();
     }
 }
