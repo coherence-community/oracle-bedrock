@@ -36,6 +36,7 @@ import java.net.DatagramSocket;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.NetworkInterface;
 import java.net.ServerSocket;
 import java.net.SocketException;
@@ -395,5 +396,16 @@ public class NetworkHelper
             // TODO: log once that the address can't be discovered (we're probably without a network)
             return InetAddress.getLoopbackAddress();
         }
+    }
+
+
+    /**
+     * Obtains the wildcard address of the host.
+     *
+     * @return  the {@link InetAddress} representing the wildcard address
+     */
+    public static InetAddress getWildcardAddress()
+    {
+        return new InetSocketAddress(0).getAddress();
     }
 }

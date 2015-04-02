@@ -25,6 +25,8 @@
 
 package com.oracle.tools.runtime.network;
 
+import com.oracle.tools.io.NetworkHelper;
+
 import java.io.IOException;
 
 import java.net.DatagramSocket;
@@ -34,15 +36,20 @@ import java.net.ServerSocket;
 import java.net.UnknownHostException;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Queue;
+import java.util.Set;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
  * An {@link Iterator} implementation that lazily performs port scanning on a
- * specified address to determine what {@link ServerSocket} and {@link DatagramSocket}
+ * set of {@link InetAddress}es to determine what {@link ServerSocket} and {@link DatagramSocket}
  * ports are available.
  * <p>
  * Copyright (c) 2015. All Rights Reserved. Oracle Corporation.<br>
@@ -74,9 +81,9 @@ public class AvailablePortIterator implements Iterator<Integer>, Iterable<Intege
     private final static int IDEAL_AVAILABLE_PORTS = 10;
 
     /**
-     * The {@link InetAddress} on which the port scanning is occurring.
+     * The {@link InetAddress}es on which the port scanning is occurring.
      */
-    private InetAddress inetAddress;
+    private Set<InetAddress> inetAddresses;
 
     /**
      * The start of the port range in which scanning will occur.
@@ -89,23 +96,23 @@ public class AvailablePortIterator implements Iterator<Integer>, Iterable<Intege
     private int portRangeEnd;
 
     /**
-     * A {@link Queue} of available {@link ServerSocket}s.
+     * A {@link Queue} of available {@link ServerSocket}s per {@link InetAddress}.
      * <p>
      * Connections to these sockets will remain open until they are requested using
      * {@link #next()}.
      */
-    private Queue<ServerSocket> serverSockets;
+    private Queue<Map<InetAddress, ServerSocket>> serverSockets;
 
     /**
-     * A {@link Queue} of available {@link DatagramSocket}s
+     * A {@link Queue} of available {@link DatagramSocket}s per {@link InetAddress}.
      * <p>
      * Connections to these sockets will remain open until they are requested using
      * {@link #next()}.
      */
-    private Queue<DatagramSocket> datagramSockets;
+    private Queue<Map<InetAddress, DatagramSocket>> datagramSockets;
 
     /**
-     * The last port checked for availability
+     * The last port checked for availability.
      */
     private int lastCheckedPort;
 
@@ -114,12 +121,10 @@ public class AvailablePortIterator implements Iterator<Integer>, Iterable<Intege
      * Constructs an {@link AvailablePortIterator}.
      * <p>
      * Defaults to using the wildcard address and full port range.
-     *
-     * @throws UnknownHostException  when the loop back address can not be determined
      */
     public AvailablePortIterator()
     {
-        this(new InetSocketAddress(0).getAddress(), MINIMUM_PORT, MAXIMUM_PORT);
+        this(MINIMUM_PORT, MAXIMUM_PORT, NetworkHelper.getWildcardAddress());
     }
 
 
@@ -132,7 +137,7 @@ public class AvailablePortIterator implements Iterator<Integer>, Iterable<Intege
      */
     public AvailablePortIterator(int portRangeStart)
     {
-        this(new InetSocketAddress(0).getAddress(), portRangeStart, MAXIMUM_PORT);
+        this(portRangeStart, MAXIMUM_PORT, NetworkHelper.getWildcardAddress());
     }
 
 
@@ -147,7 +152,7 @@ public class AvailablePortIterator implements Iterator<Integer>, Iterable<Intege
     public AvailablePortIterator(int portRangeStart,
                                  int portRangeEnd)
     {
-        this(new InetSocketAddress(0).getAddress(), portRangeStart, portRangeEnd);
+        this(portRangeStart, portRangeEnd, NetworkHelper.getWildcardAddress());
     }
 
 
@@ -157,16 +162,61 @@ public class AvailablePortIterator implements Iterator<Integer>, Iterable<Intege
      * @param inetAddress     the {@link InetAddress} on which to scan ports
      * @param portRangeStart  the port at which to start scanning (inclusive)
      * @param portRangeEnd    the port at which to destroy scanning (inclusive)
+     *
+     * @deprecated use {@link #AvailablePortIterator(int, int, InetAddress...)} instead
      */
+    @Deprecated
     public AvailablePortIterator(InetAddress inetAddress,
                                  int         portRangeStart,
                                  int         portRangeEnd)
     {
-        this.inetAddress     = inetAddress;
+        this(portRangeStart, portRangeEnd, inetAddress);
+    }
+
+
+    /**
+     * Constructs an {@link AvailablePortIterator} for an array of {@link InetAddress}es
+     * over a range of ports.
+     *
+     * @param portRangeStart  the port at which to start scanning (inclusive)
+     * @param portRangeEnd    the port at which to destroy scanning (inclusive)
+     * @param inetAddresses   the {@link InetAddress}es to protect
+     */
+    public AvailablePortIterator(int            portRangeStart,
+                                 int            portRangeEnd,
+                                 InetAddress... inetAddresses)
+    {
+        this(portRangeStart, portRangeEnd, Arrays.asList(inetAddresses));
+    }
+
+
+    /**
+     * Constructs an {@link AvailablePortIterator} for an {@link Iterable} of {@link InetAddress}es
+     * over a range of ports.
+     *
+     * @param portRangeStart  the port at which to start scanning (inclusive)
+     * @param portRangeEnd    the port at which to destroy scanning (inclusive)
+     * @param inetAddresses   the {@link InetAddress}es to protect
+     */
+    public AvailablePortIterator(int                   portRangeStart,
+                                 int                   portRangeEnd,
+                                 Iterable<InetAddress> inetAddresses)
+    {
+        // copy the InetAddresses into our set (maintaining the order)
+        this.inetAddresses = new LinkedHashSet<>();
+
+        if (inetAddresses != null)
+        {
+            for (InetAddress inetAddress : inetAddresses)
+            {
+                this.inetAddresses.add(inetAddress);
+            }
+        }
+
         this.portRangeStart  = portRangeStart;
         this.portRangeEnd    = portRangeEnd;
-        this.serverSockets   = new ConcurrentLinkedQueue<ServerSocket>();
-        this.datagramSockets = new ConcurrentLinkedQueue<DatagramSocket>();
+        this.serverSockets   = new ConcurrentLinkedQueue<>();
+        this.datagramSockets = new ConcurrentLinkedQueue<>();
         this.lastCheckedPort = portRangeStart - 1;
 
         acquireAvailablePorts(LOW_PORT_THRESHOLD, IDEAL_AVAILABLE_PORTS);
@@ -176,7 +226,7 @@ public class AvailablePortIterator implements Iterator<Integer>, Iterable<Intege
     /**
      * Constructs an {@link AvailablePortIterator}.
      *
-     * @param host            the host name or IP address on which to scan (as a String)
+     * @param host            the host name on which to scan (as a String)
      * @param portRangeStart  the port at which to start scanning (inclusive)
      * @param portRangeEnd    the port at which to destroy scanning (inclusive)
      */
@@ -184,32 +234,23 @@ public class AvailablePortIterator implements Iterator<Integer>, Iterable<Intege
                                  int    portRangeStart,
                                  int    portRangeEnd) throws UnknownHostException
     {
-        this(InetAddress.getByName(host), portRangeStart, portRangeEnd);
+        this(portRangeStart, portRangeEnd, InetAddress.getByName(host));
     }
 
 
     /**
-     * Obtains the {@link InetAddress} on which port scanning is occurring, which
-     * may be the wildcard address (0.0.0.0 or ::)
-     *
-     * @return an {@link InetAddress}
-     */
-    public InetAddress getInetAddress()
-    {
-        return inetAddress;
-    }
-
-
-    /**
-     * Attempts to determine if the specified {@link ServerSocket} and
-     * {@link DatagramSocket} port is available. If it is, a connection is made and
-     * kept from being taken by other processes (or iterators).  When an available port is
-     * requested (via a call to {@link #next()}) the sockets are closed and returned.
+     * Attempts to determine if a {@link ServerSocket} and {@link DatagramSocket} port is
+     * available for each of the {@link InetAddress}es protected by the {@link AvailablePortIterator}.
+     * <p>
+     * When they are, a connection is made to each and kept from being "taken" by other processes
+     * (or iterators).  When an available port is then requested (via a call to {@link #next()}) the
+     * sockets are closed and returned.
      *
      * @param port  the port to test
      *
      * @return <code>true</code> if the specified port was determined to be
-     *         available and thus is now reserved for returning via {@link #next()}.
+     *         available and thus is now reserved on all {@link InetAddress}es
+     *         for returning via {@link #next()}.
      */
     private boolean isPortAvailable(int port)
     {
@@ -219,18 +260,84 @@ public class AvailablePortIterator implements Iterator<Integer>, Iterable<Intege
         }
         else
         {
-            // attempt to bind to a ServerSocket on the specified port
-            ServerSocket serverSocket = null;
+            HashMap<InetAddress, ServerSocket>   serverSocketMap   = new HashMap<>();
+            HashMap<InetAddress, DatagramSocket> datagramSocketMap = new HashMap<>();
 
-            try
+            // attempt to acquire the port for all InetAddresses
+            for (InetAddress inetAddress : inetAddresses)
             {
-                serverSocket = new ServerSocket();
-                serverSocket.setReuseAddress(false);
-                serverSocket.bind(new InetSocketAddress(inetAddress, port));
+                // attempt to bind to a ServerSocket on the specified port
+                ServerSocket serverSocket = null;
+
+                try
+                {
+                    serverSocket = new ServerSocket();
+                    serverSocket.bind(new InetSocketAddress(inetAddress, port));
+                }
+                catch (IOException ioException)
+                {
+                    if (serverSocket != null)
+                    {
+                        try
+                        {
+                            serverSocket.close();
+                        }
+                        catch (IOException e)
+                        {
+                            // deliberately empty as failing here will have no effect on scanning for ports
+                        }
+                    }
+
+                    // give up on this port as the ServerSocket isn't available
+                    break;
+                }
+
+                // now attempt to bind to a DatagramSocket on the same port
+                DatagramSocket datagramSocket = null;
+
+                try
+                {
+                    datagramSocket = new DatagramSocket(port, inetAddress);
+
+                    // success!  remember both the sockets for later retrieval
+                    datagramSocketMap.put(inetAddress, datagramSocket);
+                    serverSocketMap.put(inetAddress, serverSocket);
+                }
+                catch (IOException ioException)
+                {
+                    try
+                    {
+                        // any failure to bind to the DatagramSocket means we have to relinquish the corresponding ServerSocket
+                        serverSocket.close();
+
+                        if (datagramSocket != null)
+                        {
+                            datagramSocket.close();
+                        }
+                    }
+                    catch (IOException e)
+                    {
+                        // deliberately empty as failing here will have no effect on scanning for ports
+                    }
+
+                    // give up on this port as the DatagramSocket isn't available
+                    break;
+                }
             }
-            catch (IOException ioException)
+
+            // did we find that the port was available on all of the InetAddresses?
+            if (serverSocketMap.size() == inetAddresses.size())
             {
-                if (serverSocket != null)
+                // we acquired the port on all InetAddress so remember the sockets
+                serverSockets.add(serverSocketMap);
+                datagramSockets.add(datagramSocketMap);
+
+                return true;
+            }
+            else
+            {
+                // we failed to acquire the port on all InetAddress, so free up those we did find!
+                for (ServerSocket serverSocket : serverSocketMap.values())
                 {
                     try
                     {
@@ -242,39 +349,16 @@ public class AvailablePortIterator implements Iterator<Integer>, Iterable<Intege
                     }
                 }
 
-                // give up on this port as the ServerSocket isn't available
-                return false;
-            }
-
-            // now attempt to bind to a DatagramSocket on the same port
-            DatagramSocket datagramSocket = null;
-
-            try
-            {
-                datagramSocket = new DatagramSocket(port, inetAddress);
-
-                // success!  remember both the sockets for later retrieval
-                datagramSockets.add(datagramSocket);
-                serverSockets.add(serverSocket);
-
-                return true;
-
-            }
-            catch (IOException ioException)
-            {
-                try
+                for (DatagramSocket datagramSocket : datagramSocketMap.values())
                 {
-                    // any failure to bind to the DatagramSocket means we have to relinquish the corresponding ServerSocket
-                    serverSocket.close();
-
-                    if (datagramSocket != null)
+                    try
                     {
                         datagramSocket.close();
                     }
-                }
-                catch (IOException e)
-                {
-                    // deliberately empty as failing here will have no effect on scanning for ports
+                    catch (Exception e)
+                    {
+                        // deliberately empty as failing here will have no effect on scanning for ports
+                    }
                 }
 
                 return false;
@@ -334,8 +418,8 @@ public class AvailablePortIterator implements Iterator<Integer>, Iterable<Intege
 
             do
             {
-                ServerSocket   serverSocket;
-                DatagramSocket datagramSocket;
+                Map<InetAddress, ServerSocket>   serverSocketMap;
+                Map<InetAddress, DatagramSocket> datagramSocketMap;
 
                 synchronized (this)
                 {
@@ -346,38 +430,44 @@ public class AvailablePortIterator implements Iterator<Integer>, Iterable<Intege
                     }
                     else
                     {
-                        // grab an open ServerSocket
-                        serverSocket = serverSockets.remove();
+                        // grab the open ServerSockets
+                        serverSocketMap = serverSockets.remove();
 
-                        // grab the corresponding DatagramSocket
-                        datagramSocket = datagramSockets.remove();
+                        // grab the corresponding open DatagramSockets
+                        datagramSocketMap = datagramSockets.remove();
                     }
                 }
 
-                // determine the port from the server socket
-                port = serverSocket.getLocalPort();
+                // determine the port from one of the server sockets
+                port = serverSocketMap.values().iterator().next().getLocalPort();
 
                 // attempt to close the ports (as we're returning them)
                 reacquire = false;
 
-                try
+                for (ServerSocket serverSocket : serverSocketMap.values())
                 {
-                    serverSocket.close();
-                }
-                catch (Exception e)
-                {
-                    // any failure to close means we should try another port
-                    reacquire = true;
+                    try
+                    {
+                        serverSocket.close();
+                    }
+                    catch (IOException e)
+                    {
+                        // any failure to close means we should try another port
+                        reacquire = true;
+                    }
                 }
 
-                try
+                for (DatagramSocket datagramSocket : datagramSocketMap.values())
                 {
-                    datagramSocket.close();
-                }
-                catch (Exception e)
-                {
-                    // any failure to close means we should try another port
-                    reacquire = true;
+                    try
+                    {
+                        datagramSocket.close();
+                    }
+                    catch (Exception e)
+                    {
+                        // any failure to close means we should try another port
+                        reacquire = true;
+                    }
                 }
             }
             while (reacquire);
@@ -401,20 +491,20 @@ public class AvailablePortIterator implements Iterator<Integer>, Iterable<Intege
     @Override
     public String toString()
     {
-        ArrayList<ServerSocket> list    = new ArrayList<ServerSocket>(serverSockets);
+        ArrayList<Map<InetAddress, ServerSocket>> list    = new ArrayList<>(serverSockets);
 
-        StringBuilder           builder = new StringBuilder("");
+        StringBuilder                             builder = new StringBuilder("");
 
-        for (ServerSocket socket : list)
+        for (Map<InetAddress, ServerSocket> sockets : list)
         {
             if (builder.length() > 0)
             {
                 builder.append(", ");
             }
 
-            builder.append(socket.getLocalPort());
+            builder.append(sockets.values().iterator().next().getLocalPort());
         }
 
-        return "AvailablePortIterator{" + inetAddress + ":" + builder.toString() + "}";
+        return "AvailablePortIterator{" + inetAddresses + ": " + builder.toString() + "}";
     }
 }
