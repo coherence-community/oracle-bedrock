@@ -63,4 +63,18 @@ public class StorageDisabledMember implements SessionBuilder
 
         return new ScopedCacheFactoryBuilder().getConfigurableCacheFactory(getClass().getClassLoader());
     }
+
+
+    @Override
+    public boolean equals(Object other)
+    {
+        return other instanceof StorageDisabledMember;
+    }
+
+
+    @Override
+    public int hashCode()
+    {
+        return StorageDisabledMember.class.hashCode();
+    }
 }

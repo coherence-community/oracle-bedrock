@@ -40,6 +40,7 @@ import com.oracle.tools.runtime.coherence.CoherenceCluster;
 import com.oracle.tools.runtime.coherence.CoherenceClusterBuilder;
 import com.oracle.tools.runtime.coherence.CoherenceClusterMember;
 import com.oracle.tools.runtime.coherence.FluentCoherenceClusterSchema;
+import com.oracle.tools.runtime.coherence.callables.GetAutoStartServiceNames;
 
 import com.oracle.tools.runtime.console.SystemApplicationConsole;
 
@@ -51,7 +52,6 @@ import com.oracle.tools.runtime.options.ApplicationClosingBehavior;
 import com.oracle.tools.util.Capture;
 
 import com.tangosol.net.CacheFactory;
-import com.tangosol.net.CacheFactoryBuilder;
 import com.tangosol.net.ConfigurableCacheFactory;
 
 import org.junit.rules.ExternalResource;
@@ -64,7 +64,12 @@ import static com.oracle.tools.deferred.DeferredHelper.invoking;
 
 import static org.hamcrest.core.Is.is;
 
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
+
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * A JUnit {@link ExternalResource} to represent and orchestrate configuring,
@@ -120,10 +125,10 @@ public class CoherenceClusterOrchestration extends ExternalResource
     private CoherenceCluster cluster;
 
     /**
-     * The {@link ConfigurableCacheFactory} session that has be optionally
+     * The {@link ConfigurableCacheFactory} sessions that have been
      * created against the orchestrated {@link CoherenceCluster}.
      */
-    private ConfigurableCacheFactory session;
+    private HashMap<SessionBuilder, ConfigurableCacheFactory> sessions;
 
     // the Coherence Cluster Port
     private Capture<Integer> clusterPort;
@@ -143,7 +148,7 @@ public class CoherenceClusterOrchestration extends ExternalResource
         // establish a Cluster port
         this.clusterPort = new Capture<>(platform.getAvailablePorts());
 
-        // establish the Extend port
+        // establish the Extend port (is the same as the cluster port)
         this.extendPort = new Capture<>(platform.getAvailablePorts());
 
         // establish a common server schema on which to base storage enabled and proxy members
@@ -174,6 +179,9 @@ public class CoherenceClusterOrchestration extends ExternalResource
         // by default the creation and closing options aren't set
         this.clusterCreationOptions = new Options();
         this.clusterClosingOptions  = new Options();
+
+        // by default we have no sessions
+        this.sessions = new HashMap<>();
     }
 
 
@@ -237,8 +245,20 @@ public class CoherenceClusterOrchestration extends ExternalResource
         // ensure that the cluster has been orchestrated correctly
         Eventually.assertThat(invoking(cluster).getClusterSize(), is(preferredClusterSize));
 
-        // ensure that the proxy service has started
-        Eventually.assertThat(invoking(cluster.get("proxy-1")).isServiceRunning("TcpProxyService"), is(true));
+        // ensure that all services marked as autostart on the proxy have started
+        CoherenceClusterMember proxyServer     = cluster.get("proxy-1");
+
+        Set<String>            setServiceNames = proxyServer.submit(new GetAutoStartServiceNames());
+
+        for (String sServiceName : setServiceNames)
+        {
+            Eventually.assertThat(invoking(proxyServer).isServiceRunning(sServiceName), is(true));
+        }
+
+        // let's ensure that we don't have a local cluster member
+        CacheFactory.setCacheFactoryBuilder(null);
+
+        CacheFactory.shutdown();
 
         // let the super-class perform it's initialization
         super.before();
@@ -248,13 +268,20 @@ public class CoherenceClusterOrchestration extends ExternalResource
     @Override
     protected void after()
     {
-        // clean up the session (if one was created)
-        if (session != null)
+        // clean up the sessions
+        synchronized (sessions)
         {
-            session.dispose();
+            for (ConfigurableCacheFactory session : sessions.values())
+            {
+                session.dispose();
 
-            CacheFactory.shutdown();
+                CacheFactory.getCacheFactoryBuilder().release(session);
+            }
         }
+
+        CacheFactory.shutdown();
+
+        CacheFactory.setCacheFactoryBuilder(null);
 
         // close the cluster
         cluster.close(clusterClosingOptions.asArray());
@@ -559,16 +586,21 @@ public class CoherenceClusterOrchestration extends ExternalResource
      * <p>
      * Only a single session may be created by a {@link CoherenceClusterOrchestration}
      * against an orchestrated {@link CoherenceCluster}.
+     * <p>
+     * Attempts to request a session multiple times with the same {@link SessionBuilder}
+     * will return the same session.
      *
      * @param builder  the builder for the specific type of session
      *
      * @return  a {@link ConfigurableCacheFactory} representing the Coherence Session.
      *
-     * @throws IllegalStateException  when an attempt to create multiple sessions for a
-     *                                {@link CoherenceClusterOrchestration} is made
+     * @throws IllegalStateException  when an attempt to request sessions for
+     *                                different {@link SessionBuilder}s is made
      */
     public synchronized ConfigurableCacheFactory getSessionFor(SessionBuilder builder)
     {
+        ConfigurableCacheFactory session = sessions.get(builder);
+
         if (session == null)
         {
             CoherenceCacheServerSchema sessionSchema = new CoherenceCacheServerSchema(commonServerSchema);
@@ -578,12 +610,9 @@ public class CoherenceClusterOrchestration extends ExternalResource
 
             session = builder.realize(platform, this, sessionSchema);
 
-            return session;
+            sessions.put(builder, session);
         }
-        else
-        {
-            throw new IllegalStateException("An attempt was made to create an additional Session (ConfigurableCacheFactory)\n"
-                + "against an orchestrated Coherence Cluster.  Only a single session is permitted per orchestration.");
-        }
+
+        return session;
     }
 }

@@ -26,16 +26,24 @@
 package com.oracle.tools.junit;
 
 import com.oracle.tools.deferred.Eventually;
+
 import com.oracle.tools.runtime.coherence.CoherenceCluster;
+
 import com.tangosol.net.ConfigurableCacheFactory;
 import com.tangosol.net.NamedCache;
+
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 
 import static com.oracle.tools.deferred.DeferredHelper.invoking;
+
 import static com.oracle.tools.junit.SessionBuilders.extendClient;
 import static com.oracle.tools.junit.SessionBuilders.storageDisabledMember;
+
+import static org.hamcrest.CoreMatchers.not;
+
 import static org.hamcrest.core.Is.is;
 
 /**
@@ -106,13 +114,23 @@ public class DefaultCoherenceClusterOrchestrationTest
 
 
     /**
-     * Ensure that an {@link CoherenceClusterOrchestration} won't create multiple sessions.
+     * Ensure that an {@link CoherenceClusterOrchestration} will return the same Session when using
+     * the same {@link SessionBuilder}.
      */
-    @Test(expected = IllegalStateException.class)
-    public void shouldNotCreateMultipleSessions()
+    @Test
+    @Ignore
+    public void shouldReturnSameSessionForSameSessionBuilder()
     {
-        orchestration.getSessionFor(storageDisabledMember());
+        ConfigurableCacheFactory cacheFactory1 = orchestration.getSessionFor(storageDisabledMember());
 
-        orchestration.getSessionFor(storageDisabledMember());
+        ConfigurableCacheFactory cacheFactory2 = orchestration.getSessionFor(storageDisabledMember());
+
+        ConfigurableCacheFactory cacheFactory3 = orchestration.getSessionFor(extendClient("proxy-cache-config.xml"));
+
+        ConfigurableCacheFactory cacheFactory4 = orchestration.getSessionFor(extendClient("proxy-cache-config.xml"));
+
+        Assert.assertThat(cacheFactory1, is(cacheFactory2));
+        Assert.assertThat(cacheFactory3, is(cacheFactory4));
+        Assert.assertThat(cacheFactory1, is(not(cacheFactory3)));
     }
 }

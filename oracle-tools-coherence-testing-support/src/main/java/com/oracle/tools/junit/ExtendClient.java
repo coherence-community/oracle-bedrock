@@ -26,7 +26,9 @@
 package com.oracle.tools.junit;
 
 import com.oracle.tools.runtime.LocalPlatform;
+
 import com.oracle.tools.runtime.coherence.CoherenceCacheServerSchema;
+
 import com.tangosol.net.ConfigurableCacheFactory;
 import com.tangosol.net.ScopedCacheFactoryBuilder;
 
@@ -79,5 +81,32 @@ public class ExtendClient implements SessionBuilder
         }
 
         return new ScopedCacheFactoryBuilder().getConfigurableCacheFactory(cacheConfigURI, getClass().getClassLoader());
+    }
+
+
+    @Override
+    public boolean equals(Object other)
+    {
+        if (this == other)
+        {
+            return true;
+        }
+
+        if (!(other instanceof ExtendClient))
+        {
+            return false;
+        }
+
+        ExtendClient that = (ExtendClient) other;
+
+        return cacheConfigURI.equals(that.cacheConfigURI);
+
+    }
+
+
+    @Override
+    public int hashCode()
+    {
+        return cacheConfigURI.hashCode();
     }
 }
