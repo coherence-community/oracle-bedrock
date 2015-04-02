@@ -25,21 +25,18 @@
 
 package com.oracle.tools.runtime.network;
 
-import com.oracle.tools.deferred.Eventually;
-
+import com.oracle.tools.io.NetworkHelper;
 import org.hamcrest.MatcherAssert;
-
+import org.junit.Assert;
 import org.junit.Test;
 
-import static com.oracle.tools.deferred.DeferredHelper.invoking;
+import java.net.InetAddress;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
-
-import java.net.UnknownHostException;
-
-import java.util.ArrayList;
 
 /**
  * Functional tests for the {@link AvailablePortIterator}.
@@ -53,29 +50,41 @@ public class AvailablePortIteratorTest
 {
     /**
      * Ensure that at least one port is available.
-     *
-     * @throws UnknownHostException
      */
     @Test
     public void shouldFindAvailablePort()
     {
-        AvailablePortIterator iterator = new AvailablePortIterator(40000, 40100);
+        AvailablePortIterator iterator = new AvailablePortIterator(30000, 30030);
 
-        Eventually.assertThat(invoking(iterator).hasNext(), is(true));
+        Assert.assertThat(iterator.hasNext(), is(true));
+    }
+
+
+    /**
+     * Ensure that at least one port is available on bindable addresses
+     */
+    @Test
+    public void shouldFindAvailablePortOnBindableAddresses()
+    {
+        // acquire the list of bindable addresses
+        List<InetAddress> addresses = NetworkHelper.getInetAddresses(NetworkHelper.BINDABLE_ADDRESS);
+
+        // establish an available port iterator over those addresses
+        AvailablePortIterator iterator = new AvailablePortIterator(30000, 30030, addresses);
+
+        Assert.assertThat(iterator.hasNext(), is(true));
     }
 
 
     /**
      * Ensure that two {@link AvailablePortIterator}s don't find the
      * same ports.
-     *
-     * @throws UnknownHostException
      */
     @Test
     public void shouldFindDifferentAvailablePorts()
     {
-        AvailablePortIterator availablePortIterator1 = new AvailablePortIterator(40000, 40100);
-        AvailablePortIterator availablePortIterator2 = new AvailablePortIterator(40000, 40100);
+        AvailablePortIterator availablePortIterator1 = new AvailablePortIterator(30000, 30100);
+        AvailablePortIterator availablePortIterator2 = new AvailablePortIterator(30000, 30100);
 
         ArrayList<Integer>    availablePorts1        = new ArrayList<Integer>();
 
