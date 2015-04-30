@@ -29,6 +29,8 @@ import com.oracle.tools.runtime.LocalPlatform;
 
 import com.oracle.tools.runtime.coherence.CoherenceCacheServerSchema;
 
+import com.oracle.tools.util.SystemProperties;
+
 import com.tangosol.net.ConfigurableCacheFactory;
 import com.tangosol.net.ScopedCacheFactoryBuilder;
 
@@ -72,7 +74,10 @@ public class ExtendClient implements SessionBuilder
                 .setTCMPEnabled(false).setSystemProperty("tangosol.coherence.extend.enabled",
                                                          true).setCacheConfigURI(cacheConfigURI);
 
-        // set the current system properties with those of the schema
+        // take a snapshot of the system properties as we're about to mess with them
+        Properties systemProperties = SystemProperties.createSnapshot();
+
+        // modify the current system properties to include/override those in the schema
         Properties properties = schema.getSystemProperties(platform);
 
         for (String propertyName : properties.stringPropertyNames())
@@ -80,7 +85,15 @@ public class ExtendClient implements SessionBuilder
             System.setProperty(propertyName, properties.getProperty(propertyName));
         }
 
-        return new ScopedCacheFactoryBuilder().getConfigurableCacheFactory(cacheConfigURI, getClass().getClassLoader());
+        // create the session
+        ConfigurableCacheFactory session = new ScopedCacheFactoryBuilder().getConfigurableCacheFactory(cacheConfigURI,
+                                                                                                       getClass()
+                                                                                                           .getClassLoader());
+
+        // replace the system properties
+        SystemProperties.replaceWith(systemProperties);
+
+        return session;
     }
 
 

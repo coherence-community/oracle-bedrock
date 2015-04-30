@@ -29,6 +29,9 @@ import com.oracle.tools.runtime.LocalPlatform;
 
 import com.oracle.tools.runtime.coherence.CoherenceCacheServerSchema;
 
+import com.oracle.tools.util.SystemProperties;
+
+import com.tangosol.net.CacheFactory;
 import com.tangosol.net.ConfigurableCacheFactory;
 import com.tangosol.net.ScopedCacheFactoryBuilder;
 
@@ -53,7 +56,18 @@ public class StorageDisabledMember implements SessionBuilder
         CoherenceCacheServerSchema schema =
             new CoherenceCacheServerSchema(serverSchema).setRoleName("client").setStorageEnabled(false);
 
-        // set the current system properties with those of the schema
+        // obtain the cache configuration to use for the storage-disabled member
+        String cacheConfigURI = serverSchema.getCacheConfigURI();
+
+        if (cacheConfigURI == null || cacheConfigURI.trim().isEmpty())
+        {
+            cacheConfigURI = "coherence-cache-config.xml";
+        }
+
+        // take a snapshot of the system properties as we're about to mess with them
+        Properties systemProperties = SystemProperties.createSnapshot();
+
+        // modify the current system properties to include/override those in the schema
         Properties properties = schema.getSystemProperties(platform);
 
         for (String propertyName : properties.stringPropertyNames())
@@ -61,7 +75,18 @@ public class StorageDisabledMember implements SessionBuilder
             System.setProperty(propertyName, properties.getProperty(propertyName));
         }
 
-        return new ScopedCacheFactoryBuilder().getConfigurableCacheFactory(getClass().getClassLoader());
+        // create the session
+        ConfigurableCacheFactory session = new ScopedCacheFactoryBuilder().getConfigurableCacheFactory(cacheConfigURI,
+                                                                                                       getClass()
+                                                                                                           .getClassLoader());
+
+        // as this is a cluster member we have to join the cluster
+        CacheFactory.ensureCluster();
+
+        // replace the system properties
+        SystemProperties.replaceWith(systemProperties);
+
+        return session;
     }
 
 

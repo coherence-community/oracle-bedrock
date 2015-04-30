@@ -33,6 +33,7 @@ import com.tangosol.net.ConfigurableCacheFactory;
 import com.tangosol.net.NamedCache;
 
 import org.junit.Assert;
+import org.junit.ClassRule;
 import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
@@ -118,7 +119,6 @@ public class DefaultCoherenceClusterOrchestrationTest
      * the same {@link SessionBuilder}.
      */
     @Test
-    @Ignore
     public void shouldReturnSameSessionForSameSessionBuilder()
     {
         ConfigurableCacheFactory cacheFactory1 = orchestration.getSessionFor(storageDisabledMember());
