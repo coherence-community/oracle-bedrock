@@ -639,6 +639,10 @@ reverse chronological order.
 
     *BREAKING CHANGE:*  Sadly this is a breaking change caused by Java 8.
 
+*   [ORACLETOOLS-249](https://java.net/jira/browse/ORACLETOOLS-249): Introduced
+    the SystemPropertyIsolation JUnit Rule to ensure any system properties modified
+    by tests are reverted (returned to normal) upon completion of a test.
+
 <h4>oracle-tools-coherence</h4>
 
 *   [ORACLETOOLS-92](https://java.net/jira/browse/ORACLETOOLS-92): Refactored

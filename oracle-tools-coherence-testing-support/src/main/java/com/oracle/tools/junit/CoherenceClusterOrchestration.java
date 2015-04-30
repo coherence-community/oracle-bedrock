@@ -277,6 +277,8 @@ public class CoherenceClusterOrchestration extends ExternalResource
             }
         }
 
+        CacheFactory.shutdown();
+
         // close the cluster
         cluster.close(clusterClosingOptions.asArray());
 
