@@ -33,6 +33,9 @@ import com.oracle.tools.lang.StringHelper;
 import com.oracle.tools.runtime.options.PlatformSeparators;
 import com.oracle.tools.runtime.options.PlatformSeparators;
 
+import com.oracle.tools.table.Table;
+import com.oracle.tools.table.Tabular;
+
 import java.io.File;
 import java.io.IOException;
 
@@ -55,7 +58,7 @@ import java.util.Iterator;
  *
  * @author Brian Oliver
  */
-public class ClassPath implements Iterable<String>
+public class ClassPath implements Iterable<String>, Tabular
 {
     /**
      * The known of Java Archives Types, typically used in class-paths and
@@ -333,6 +336,22 @@ public class ClassPath implements Iterable<String>
         // NOTE: DON'T BE TEMPTED TO DOUBLE QUOTE THESE PATH STRINGS!
         // (on certain platforms they may be double quoted again!)
         return modifier.modify(builder.toString());
+    }
+
+
+    @Override
+    public Table getTable()
+    {
+        Table table = new Table();
+
+        for (String path : paths)
+        {
+            File file = new File(path);
+
+            table.addRow(file.getName(), "(" + file.getPath() + ")");
+        }
+
+        return table;
     }
 
 
