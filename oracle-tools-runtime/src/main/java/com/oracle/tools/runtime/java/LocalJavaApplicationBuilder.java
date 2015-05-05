@@ -366,7 +366,11 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication> extends Abst
             {
                 processBuilder.command().add(option);
 
-                jvmOptions.append(" ");
+                if (jvmOptions.length() > 0)
+                {
+                    jvmOptions.append(" ");
+                }
+
                 jvmOptions.append(option);
             }
         }
