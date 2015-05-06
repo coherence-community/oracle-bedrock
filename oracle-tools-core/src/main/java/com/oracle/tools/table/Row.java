@@ -25,6 +25,7 @@
 
 package com.oracle.tools.table;
 
+import com.oracle.tools.Option;
 import com.oracle.tools.Options;
 
 import java.util.ArrayList;
@@ -148,5 +149,14 @@ public class Row implements Iterable<Cell>
     public Iterator<Cell> iterator()
     {
         return cells.iterator();
+    }
+
+
+    /**
+     * An {@link Option} to define how {@link Row}s can be compared and thus sorted
+     * in a {@link Table}.
+     */
+    public interface Comparator extends Option, java.util.Comparator<Row>
+    {
     }
 }
