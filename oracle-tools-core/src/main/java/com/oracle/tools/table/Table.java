@@ -77,17 +77,17 @@ public class Table implements Iterable<Row>
 
 
     /**
-     * Obtains a {@link Row} {@link Comparator} that uses the specific
+     * Obtains a {@link Row} {@link Row.Comparator} that uses the specific
      * {@link Cell} for comparison (uses natural ordering of the {@link Cell}
      * content to order the {@link Row}).
      *
      * @param column  the index of the {@link Cell} in the {@link Row} to compare {@link Row}s
      *
-     * @return  the {@link Row} {@link Comparator}
+     * @return  the {@link Row} {@link Row.Comparator}
      */
-    public static Comparator orderByColumn(final int column)
+    public static Row.Comparator orderByColumn(final int column)
     {
-        return new Comparator()
+        return new Row.Comparator()
         {
             @Override
             public int compare(Row row1,
@@ -210,8 +210,6 @@ public class Table implements Iterable<Row>
         // determine the Cell Separator
         Cell.Separator cellSeparator = options.get(Cell.Separator.class, Cell.Separator.standard());
 
-        StringBuilder  builder       = new StringBuilder();
-
         // -----------------------------------
         // determine the maximum widths of the cells each row in the table
         ArrayList<Integer> cellWidths = new ArrayList<>();
@@ -261,10 +259,10 @@ public class Table implements Iterable<Row>
         }
 
         // -----------------------------------
-        // sort the rows (when a Comparator has been provided)
-        Comparator comparator  = options.get(Comparator.class);
+        // sort the rows (when a Row.Comparator has been provided)
+        Row.Comparator comparator  = options.get(Row.Comparator.class);
 
-        Row[]      orderedRows = new Row[rows.size()];
+        Row[]          orderedRows = new Row[rows.size()];
 
         rows.toArray(orderedRows);
 
@@ -274,7 +272,9 @@ public class Table implements Iterable<Row>
         }
 
         // -----------------------------------
-        // output all of the cells in each row
+        // generate the table
+        StringBuilder builder = new StringBuilder();
+
         for (int rowIndex = 0; rowIndex < orderedRows.length; rowIndex++)
         {
             // grab the next row
@@ -357,14 +357,5 @@ public class Table implements Iterable<Row>
         }
 
         return builder.toString();
-    }
-
-
-    /**
-     * An {@link Option} to define how {@link Row}s can be compared and thus sorted
-     * in a {@link Table}.
-     */
-    public interface Comparator extends Option, java.util.Comparator<Row>
-    {
     }
 }

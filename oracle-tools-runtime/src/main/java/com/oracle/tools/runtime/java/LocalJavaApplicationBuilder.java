@@ -453,7 +453,11 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication> extends Abst
 
         if (LOGGER.isLoggable(Level.INFO))
         {
-            LOGGER.log(Level.INFO, "Oracle Tools Diagnostics: Starting Application...\n" + diagnosticsTable.toString());
+            LOGGER.log(Level.INFO,
+                       "Oracle Tools Diagnostics: Starting Application...\n"
+                       + "------------------------------------------------------------------------\n"
+                       + diagnosticsTable.toString() + "\n"
+                       + "------------------------------------------------------------------------\n");
         }
 
         // create and start the native process
