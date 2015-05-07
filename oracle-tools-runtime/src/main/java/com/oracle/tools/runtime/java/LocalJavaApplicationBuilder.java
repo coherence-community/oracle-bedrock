@@ -424,7 +424,7 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication> extends Abst
 
         diagnosticsTable.addRow("Application Launcher", applicationLauncherClassName);
         diagnosticsTable.addRow("Application Class", applicationClassName);
-        diagnosticsTable.addRow("Application Name", applicationName);
+        diagnosticsTable.addRow("Application", applicationName);
 
         // add the arguments to the command for the process
         String arguments = "";
@@ -438,7 +438,7 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication> extends Abst
 
         if (arguments.length() > 0)
         {
-            diagnosticsTable.addRow("Application Class Arguments", arguments);
+            diagnosticsTable.addRow("Application Arguments", arguments);
         }
 
         // should the standard error be redirected to the standard out?
