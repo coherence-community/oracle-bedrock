@@ -92,7 +92,7 @@ public class TableTest
         table.addRow("Hello", "World");
         table.addRow("Gudday", "Mate");
 
-        Assert.assertThat(table.toString(), is("Hello  : World\nGudday : Mate "));
+        Assert.assertThat(table.toString(), is("Hello  : World\nGudday : Mate"));
     }
 
 
@@ -124,7 +124,7 @@ public class TableTest
         table.addRow("Gudday");
         table.addRow("Mate");
 
-        Assert.assertThat(table.toString(), is("Hello \nWorld \nGudday\nMate  "));
+        Assert.assertThat(table.toString(), is("Hello\nWorld\nGudday\nMate"));
     }
 
 
