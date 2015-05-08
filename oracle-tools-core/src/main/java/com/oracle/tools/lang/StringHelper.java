@@ -131,4 +131,31 @@ public final class StringHelper
 
         return sb.toString();
     }
+
+
+    /**
+     * Trims the trailing whitespace from the specified {@link String}.
+     *
+     * @param string  the {@link String} from which to trim trailing spaces
+     *
+     * @return  the specified {@link String} without trailing whitespace
+     */
+    public static String trimTrailingWhiteSpace(String string)
+    {
+        if (string == null || string.isEmpty())
+        {
+            return string;
+        }
+        else
+        {
+            StringBuilder builder = new StringBuilder(string);
+
+            while (builder.length() > 0 && Character.isWhitespace(builder.charAt(builder.length() - 1)))
+            {
+                builder.deleteCharAt(builder.length() - 1);
+            }
+
+            return builder.toString();
+        }
+    }
 }

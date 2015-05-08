@@ -345,9 +345,11 @@ public class ClassPath implements Iterable<String>, Tabular
 
         for (String path : paths)
         {
-            File file = new File(path);
+            File   file   = new File(path);
 
-            table.addRow(file.getName(), "(" + file.getPath() + ")");
+            String parent = file.getParent();
+
+            table.addRow(file.getName(), parent == null ? "" : "(" + parent + ")");
         }
 
         return table;

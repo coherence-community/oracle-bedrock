@@ -28,6 +28,8 @@ package com.oracle.tools.table;
 import com.oracle.tools.Option;
 import com.oracle.tools.Options;
 
+import static com.oracle.tools.lang.StringHelper.trimTrailingWhiteSpace;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -293,7 +295,9 @@ public class Table implements Iterable<Row>
             {
                 rowHeight = 0;
 
-                for (int cellIndex = 0; cellIndex < row.width(); cellIndex++)
+                int rowWidth = row.width();
+
+                for (int cellIndex = 0; cellIndex < rowWidth; cellIndex++)
                 {
                     Cell cell = row.getCell(cellIndex);
 
@@ -311,6 +315,8 @@ public class Table implements Iterable<Row>
 
                     rowHeight = cellHeight > rowHeight ? cellHeight : rowHeight;
 
+                    String justifiedContent;
+
                     if (cell.isEmpty() || line >= cellHeight)
                     {
                         // output a cell separator?
@@ -322,10 +328,7 @@ public class Table implements Iterable<Row>
                         }
 
                         // justify the cell content
-                        String justifiedContent = justification.format("", cellWidths.get(cellIndex));
-
-                        // output the justified cell content
-                        builder.append(justifiedContent);
+                        justifiedContent = justification.format("", cellWidths.get(cellIndex));
                     }
                     else
                     {
@@ -338,12 +341,20 @@ public class Table implements Iterable<Row>
                         }
 
                         // justify the cell content
-                        String content          = cell.getLine(line);
-                        String justifiedContent = justification.format(content, cellWidths.get(cellIndex));
+                        String content = cell.getLine(line);
 
-                        // output the justified cell content
-                        builder.append(justifiedContent);
+                        justifiedContent = justification.format(content, cellWidths.get(cellIndex));
+
                     }
+
+                    // ensure the last column doesn't have any unnecessary white space
+                    if (cellIndex == rowWidth - 1)
+                    {
+                        justifiedContent = trimTrailingWhiteSpace(justifiedContent);
+                    }
+
+                    // output the justified cell content
+                    builder.append(justifiedContent);
                 }
 
                 line++;
