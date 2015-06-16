@@ -1,5 +1,5 @@
 /*
- * File: Strings.java
+ * File: StringHelper.java
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
@@ -105,5 +105,57 @@ public final class StringHelper
     {
         return string != null && string.contains(" ") &&!string.startsWith("\"") &&!string.endsWith("\"")
                ? "\"" + string + "\"" : string;
+    }
+
+
+    /**
+     * Generates a {@link String} that is repeated the specified number of times.
+     *
+     * @param string  the {@link String} to repeat
+     * @param count   the number of times to repeat the specified {@link String} in
+     *                the generated {@link String}
+     *
+     * @return a {@link String} containing the specified {@link String} repeated the
+     *         specified number of times
+     */
+    public static String repeat(String string,
+                                int    count)
+    {
+        int           len = count * string.length();
+        StringBuilder sb  = new StringBuilder(len);
+
+        for (int i = 0; i < count; i++)
+        {
+            sb.append(string);
+        }
+
+        return sb.toString();
+    }
+
+
+    /**
+     * Trims the trailing whitespace from the specified {@link String}.
+     *
+     * @param string  the {@link String} from which to trim trailing spaces
+     *
+     * @return  the specified {@link String} without trailing whitespace
+     */
+    public static String trimTrailingWhiteSpace(String string)
+    {
+        if (string == null || string.isEmpty())
+        {
+            return string;
+        }
+        else
+        {
+            StringBuilder builder = new StringBuilder(string);
+
+            while (builder.length() > 0 && Character.isWhitespace(builder.charAt(builder.length() - 1)))
+            {
+                builder.deleteCharAt(builder.length() - 1);
+            }
+
+            return builder.toString();
+        }
     }
 }

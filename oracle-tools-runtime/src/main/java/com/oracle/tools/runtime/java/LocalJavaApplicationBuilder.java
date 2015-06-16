@@ -32,13 +32,9 @@ import com.oracle.tools.deferred.AbstractDeferred;
 import com.oracle.tools.deferred.PermanentlyUnavailableException;
 import com.oracle.tools.deferred.TemporarilyUnavailableException;
 
-import com.oracle.tools.io.NetworkHelper;
-
 import com.oracle.tools.lang.StringHelper;
 
 import com.oracle.tools.options.Timeout;
-
-import com.oracle.tools.predicate.Predicate;
 
 import com.oracle.tools.runtime.ApplicationConsole;
 import com.oracle.tools.runtime.ApplicationSchema;
@@ -61,21 +57,22 @@ import com.oracle.tools.runtime.options.EnvironmentVariables;
 import com.oracle.tools.runtime.options.ErrorStreamRedirection;
 import com.oracle.tools.runtime.options.Orphanable;
 
-import com.oracle.tools.runtime.options.PlatformSeparators;
+import com.oracle.tools.table.Cell;
+import com.oracle.tools.table.Table;
+import com.oracle.tools.table.Tabularize;
+
 import com.oracle.tools.util.CompletionListener;
 
 import static com.oracle.tools.deferred.DeferredHelper.ensure;
 import static com.oracle.tools.deferred.DeferredHelper.within;
 
-import static com.oracle.tools.predicate.Predicates.allOf;
-
 import java.io.File;
 import java.io.IOException;
 
-import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
+import java.util.Map;
 import java.util.Properties;
 
 import java.util.logging.Level;
@@ -118,6 +115,16 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication> extends Abst
         // TODO: this should be a safe cast but we should also check to make sure
         JavaApplicationSchema<T> schema = (JavaApplicationSchema) applicationSchema;
 
+        // establish the diagnostics output table
+        Table diagnosticsTable = new Table();
+
+        diagnosticsTable.getOptions().add(Table.orderByColumn(0));
+
+        if (platform != null)
+        {
+            diagnosticsTable.addRow("Target Platform", platform.getName());
+        }
+
         // ---- establish the Options for the Application -----
 
         // add the platform options
@@ -145,7 +152,9 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication> extends Abst
 
         if (directory != null)
         {
-            processBuilder.directory(schema.getWorkingDirectory());
+            processBuilder.directory(directory);
+
+            diagnosticsTable.addRow("Working Directory", directory.toString());
         }
 
         // ----- establish environment variables -----
@@ -157,14 +166,23 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication> extends Abst
         {
         case Custom :
             processBuilder.environment().clear();
+
+            diagnosticsTable.addRow("Environment Variables", "(cleared)");
             break;
 
         case ThisApplication :
+
+            Map<String, String> map = System.getenv();
+
             processBuilder.environment().clear();
-            processBuilder.environment().putAll(System.getenv());
+            processBuilder.environment().putAll(map);
+
+            diagnosticsTable.addRow("Environment Variables", "(based on parent process)");
             break;
 
         case TargetPlatform :
+
+            diagnosticsTable.addRow("Environment Variables", "(based on platform defaults)");
             break;
         }
 
@@ -174,6 +192,13 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication> extends Abst
         for (String variableName : variables.stringPropertyNames())
         {
             processBuilder.environment().put(variableName, variables.getProperty(variableName));
+        }
+
+        if (variables.size() > 0)
+        {
+            Table table = Tabularize.tabularize(variables);
+
+            diagnosticsTable.addRow("", table.toString());
         }
 
         // ----- establish java specific environment variables -----
@@ -196,10 +221,12 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication> extends Abst
 
         // ----- establish the command to start java -----
 
+        String executable;
+
         if (javaHome == null)
         {
             // when we don't have a java home we just use the defined executable
-            processBuilder.command(StringHelper.doubleQuoteIfNecessary(schema.getExecutableName()));
+            executable = StringHelper.doubleQuoteIfNecessary(schema.getExecutableName());
         }
         else
         {
@@ -208,14 +235,21 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication> extends Abst
 
             javaHomePath = javaHomePath.trim();
 
+            diagnosticsTable.addRow("Java Home", javaHomePath);
+
             if (!javaHomePath.endsWith(File.separator))
             {
                 javaHomePath = javaHomePath + File.separator;
             }
 
-            processBuilder.command(StringHelper.doubleQuoteIfNecessary(javaHomePath + "bin" + File.separator
-                                                                       + schema.getExecutableName()));
+            executable = StringHelper.doubleQuoteIfNecessary(javaHomePath + "bin" + File.separator
+                                                             + schema.getExecutableName());
+
         }
+
+        processBuilder.command(executable);
+
+        diagnosticsTable.addRow("Java Executable", executable);
 
         // ----- establish the class path -----
 
@@ -233,6 +267,11 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication> extends Abst
 
         processBuilder.command().add("-cp");
         processBuilder.command().add(classPath.toString(options.asArray()));
+
+        Table classPathTable = classPath.getTable();
+
+        classPathTable.getOptions().add(Cell.Separator.of(""));
+        diagnosticsTable.addRow("Class Path", classPathTable.toString());
 
         // ----- establish Oracle Tools specific system properties -----
 
@@ -276,6 +315,14 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication> extends Abst
             parentAddress = InetAddress.getLoopbackAddress();
         }
 
+        Table systemPropertiesTable = new Table();
+
+        systemPropertiesTable.getOptions().add(Table.orderByColumn(0));
+        systemPropertiesTable.getOptions().add(Cell.Separator.of(""));
+
+        systemPropertiesTable.addRow(Settings.PARENT_ADDRESS, parentAddress.getHostAddress());
+        systemPropertiesTable.addRow(Settings.PARENT_PORT, Integer.toString(server.getPort()));
+
         processBuilder.command().add("-D" + Settings.PARENT_ADDRESS + "=" + parentAddress.getHostAddress());
         processBuilder.command().add("-D" + Settings.PARENT_PORT + "=" + server.getPort());
 
@@ -283,6 +330,8 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication> extends Abst
         Orphanable orphanable = options.get(Orphanable.class, Orphanable.disabled());
 
         processBuilder.command().add("-D" + Settings.ORPHANABLE + "=" + orphanable.isOrphanable());
+
+        systemPropertiesTable.addRow(Settings.ORPHANABLE, Boolean.toString(orphanable.isOrphanable()));
 
         // ----- establish the system properties for the java application -----
 
@@ -300,17 +349,35 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication> extends Abst
                 processBuilder.command().add("-D" + propertyName
                                              + (propertyValue.isEmpty()
                                                 ? "" : "=" + StringHelper.doubleQuoteIfNecessary(propertyValue)));
+
+                systemPropertiesTable.addRow(propertyName, propertyValue);
             }
         }
 
+        diagnosticsTable.addRow("System Properties", systemPropertiesTable.toString());
+
         // ----- establish Java Virtual Machine options -----
+
+        StringBuilder jvmOptions = new StringBuilder();
 
         for (JvmOption jvmOption : options.getAll(JvmOption.class))
         {
             for (String option : jvmOption.getOptions())
             {
                 processBuilder.command().add(option);
+
+                if (jvmOptions.length() > 0)
+                {
+                    jvmOptions.append(" ");
+                }
+
+                jvmOptions.append(option);
             }
+        }
+
+        if (jvmOptions.length() > 0)
+        {
+            diagnosticsTable.addRow("Java Options", jvmOptions.toString());
         }
 
         // ----- establish remote debugging JVM options -----
@@ -338,21 +405,40 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication> extends Abst
                                           debugPort);
 
             processBuilder.command().add(option);
+
+            diagnosticsTable.addRow("Remote Debugging Options", option);
         }
 
         // ----- establish the application command line to execute -----
 
         // use the launcher to launch the application
         // (we don't start the application directly itself)
-        processBuilder.command().add("com.oracle.tools.runtime.java.JavaApplicationLauncher");
+        String applicationLauncherClassName = "com.oracle.tools.runtime.java.JavaApplicationLauncher";
+
+        processBuilder.command().add(applicationLauncherClassName);
 
         // set the Java application class name we need to launch
-        processBuilder.command().add(schema.getApplicationClassName());
+        String applicationClassName = schema.getApplicationClassName();
+
+        processBuilder.command().add(applicationClassName);
+
+        diagnosticsTable.addRow("Application Launcher", applicationLauncherClassName);
+        diagnosticsTable.addRow("Application Class", applicationClassName);
+        diagnosticsTable.addRow("Application", applicationName);
 
         // add the arguments to the command for the process
+        String arguments = "";
+
         for (String argument : schema.getArguments())
         {
             processBuilder.command().add(argument);
+
+            arguments += argument + " ";
+        }
+
+        if (arguments.length() > 0)
+        {
+            diagnosticsTable.addRow("Application Arguments", arguments);
         }
 
         // should the standard error be redirected to the standard out?
@@ -361,19 +447,17 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication> extends Abst
 
         processBuilder.redirectErrorStream(redirection.isEnabled());
 
+        diagnosticsTable.addRow("Standard Error Device", redirection.isEnabled() ? "stdout" : "stderr");
+
         // ----- start the local process -----
 
         if (LOGGER.isLoggable(Level.INFO))
         {
-            StringBuilder commandBuilder = new StringBuilder();
-
-            for (String command : processBuilder.command())
-            {
-                commandBuilder.append(command);
-                commandBuilder.append(" ");
-            }
-
-            LOGGER.log(Level.INFO, "Starting Local Process: " + commandBuilder.toString());
+            LOGGER.log(Level.INFO,
+                       "Oracle Tools Diagnostics: Starting Application...\n"
+                       + "------------------------------------------------------------------------\n"
+                       + diagnosticsTable.toString() + "\n"
+                       + "------------------------------------------------------------------------\n");
         }
 
         // create and start the native process

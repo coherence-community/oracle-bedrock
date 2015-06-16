@@ -51,6 +51,7 @@ import java.net.UnknownHostException;
 
 import java.util.Enumeration;
 
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -109,8 +110,11 @@ public class LocalPlatform extends AbstractPlatform
             }
         }
 
-        // ----- establish an AvailablePortIterator for the LocalPlatform ------
-        this.availablePortIterator = new AvailablePortIterator(30000, AvailablePortIterator.MAXIMUM_PORT);
+        // ----- establish an AvailablePortIterator for the LocalPlatform against all bindable addresses ------
+
+        List<InetAddress> bindableAddresses = NetworkHelper.getInetAddresses(NetworkHelper.BINDABLE_ADDRESS);
+
+        this.availablePortIterator = new AvailablePortIterator(30000, AvailablePortIterator.MAXIMUM_PORT, bindableAddresses);
     }
 
 

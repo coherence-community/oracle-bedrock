@@ -26,22 +26,27 @@
 package com.oracle.tools.io;
 
 import com.oracle.tools.predicate.Predicate;
+import com.oracle.tools.predicate.Predicates;
 
 import static com.oracle.tools.predicate.Predicates.always;
 
+import java.io.IOException;
+
+import java.net.DatagramSocket;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.NetworkInterface;
+import java.net.ServerSocket;
 import java.net.SocketException;
-import java.net.UnknownHostException;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Enumeration;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.SortedSet;
-import java.util.TreeSet;
 
 /**
  * Common Network utilities.
@@ -189,6 +194,32 @@ public class NetworkHelper
         }
     };
 
+    /**
+     * The {@link Predicate} to test if it is possible to bind to an {@link InetAddress}.
+     */
+    public static final Predicate<InetAddress> BINDABLE_ADDRESS = new Predicate<InetAddress>()
+    {
+        @Override
+        public boolean evaluate(InetAddress address)
+        {
+            try (ServerSocket serverSocket = new ServerSocket(0, 1, address);
+                DatagramSocket datagramSocket = new DatagramSocket(0, address))
+            {
+                return true;
+            }
+            catch (IOException e)
+            {
+                return false;
+            }
+        }
+
+        @Override
+        public String toString()
+        {
+            return "BINDABLE_ADDRESS";
+        }
+    };
+
 
     /**
      * Acquires the first {@link InetAddress} (of the machine on which this code is executing)
@@ -200,13 +231,9 @@ public class NetworkHelper
      */
     public static InetAddress getInetAddress(Predicate<InetAddress> predicate) throws SocketException
     {
-        Enumeration interfaces = NetworkInterface.getNetworkInterfaces();
-
-        while (interfaces.hasMoreElements())
+        for (NetworkInterface networkInterface : getNetworkInterfaces(Predicates.<NetworkInterface>always()))
         {
-            NetworkInterface i = (NetworkInterface) interfaces.nextElement();
-
-            for (Enumeration addresses = i.getInetAddresses(); addresses.hasMoreElements(); )
+            for (Enumeration addresses = networkInterface.getInetAddresses(); addresses.hasMoreElements(); )
             {
                 InetAddress address = (InetAddress) addresses.nextElement();
 
@@ -222,7 +249,87 @@ public class NetworkHelper
 
 
     /**
-     * Obtains an {@link InetAddress} that is feasibly a reachable, non-loopback, site-local network address of the
+     * Obtains the list of {@link InetAddress}es (of the machine on which this code is executing)
+     * that matches the specified {@link Predicate}.
+     *
+     * @return a {@link List} of {@link InetAddress} matching the {@link Predicate} or an empty
+     *         list if no matching {@link InetAddress} can be found
+     */
+    public static List<InetAddress> getInetAddresses(Predicate<InetAddress> predicate)
+    {
+        LinkedList<InetAddress> addressList = new LinkedList<>();
+
+        for (NetworkInterface networkInterface : getNetworkInterfaces(Predicates.<NetworkInterface>always()))
+        {
+            for (Enumeration addresses = networkInterface.getInetAddresses(); addresses.hasMoreElements(); )
+            {
+                InetAddress address = (InetAddress) addresses.nextElement();
+
+                try
+                {
+                    if (predicate.evaluate(address))
+                    {
+                        addressList.add(address);
+                    }
+                }
+                catch (Exception e)
+                {
+                    // ignore the address if an exception occurred
+                }
+            }
+        }
+
+        return addressList;
+    }
+
+
+    /**
+     * Obtains the list of {@link NetworkInterface}s (of the machine on which this code is executing),
+     * ordered by {@link NetworkInterface#getIndex()}, that satisfy the specified {@link Predicate}.
+     *
+     * @return  a list of {@link NetworkInterface}s
+     */
+    public static List<NetworkInterface> getNetworkInterfaces(Predicate<NetworkInterface> predicate)
+    {
+        ArrayList<NetworkInterface> networkInterfaces = new ArrayList<>();
+
+        try
+        {
+            // create the list of filtered network interfaces
+            Enumeration<NetworkInterface> enumeration = NetworkInterface.getNetworkInterfaces();
+
+            while (enumeration.hasMoreElements())
+            {
+                NetworkInterface networkInterface = enumeration.nextElement();
+
+                if (predicate.evaluate(networkInterface))
+                {
+                    networkInterfaces.add(networkInterface);
+                }
+            }
+
+            // sort the network interfaces by index
+            Collections.sort(networkInterfaces, new Comparator<NetworkInterface>()
+            {
+                @Override
+                public int compare(NetworkInterface networkInterface1,
+                                   NetworkInterface networkInterface2)
+                {
+                    return networkInterface1.getIndex() - networkInterface2.getIndex();
+                }
+            });
+        }
+        catch (SocketException e)
+        {
+            // nothing to do when we've had an exception
+        }
+
+        return networkInterfaces;
+    }
+
+
+    /**
+     * Obtains an {@link InetAddress} that is feasibly a reachable, bindable, non-loopback, site-local network address of the
      * localhost, especially in cases where a localhost is multi-homed with numerous virtual network adapters, including
      * loop-back.
      * <p/>
@@ -238,13 +345,9 @@ public class NetworkHelper
         try
         {
             InetAddress potentialInetAddress = null;
-            List<NetworkInterface> interfaces = Collections.list(NetworkInterface.getNetworkInterfaces());
-
-            // Sort the interfaces by ID
-            Collections.sort(interfaces, new NetworkInterfaceComparator());
 
             // consider each of the NetworkInterfaces
-            for ( NetworkInterface networkInterface : interfaces)
+            for (NetworkInterface networkInterface : getNetworkInterfaces(Predicates.<NetworkInterface>always()))
             {
                 // consider each of the InetAddresses defined by the NetworkInterface
                 for (Enumeration<InetAddress> inetAddresses = networkInterface.getInetAddresses();
@@ -252,17 +355,23 @@ public class NetworkHelper
                 {
                     InetAddress inetAddress = inetAddresses.nextElement();
 
-                    if (!inetAddress.isLoopbackAddress())
+                    // ensure that we can bind to the address
+                    if (BINDABLE_ADDRESS.evaluate(inetAddress))
                     {
-                        if (inetAddress.isSiteLocalAddress())
+                        // prefer non-loopback addresses
+                        if (!inetAddress.isLoopbackAddress())
                         {
-                            // found a non-loopback site-local address!
-                            return inetAddress;
-                        }
-                        else if (potentialInetAddress == null)
-                        {
-                            // discovered a non-loopback but site-local address (remember it just in case!)
-                            potentialInetAddress = inetAddress;
+                            // prefer site-local addresses
+                            if (inetAddress.isSiteLocalAddress())
+                            {
+                                // found a non-loopback site-local address!
+                                return inetAddress;
+                            }
+                            else if (potentialInetAddress == null)
+                            {
+                                // discovered a non-loopback but it's not site-local address (remember it just in case!)
+                                potentialInetAddress = inetAddress;
+                            }
                         }
                     }
                 }
@@ -291,15 +400,12 @@ public class NetworkHelper
 
 
     /**
-     * A {@link Comparator} that can sort {@link NetworkInterface}s
-     * by their ID.
+     * Obtains the wildcard address of the host.
+     *
+     * @return  the {@link InetAddress} representing the wildcard address
      */
-    private static class NetworkInterfaceComparator implements Comparator<NetworkInterface>
+    public static InetAddress getWildcardAddress()
     {
-        @Override
-        public int compare(NetworkInterface if1, NetworkInterface if2)
-        {
-            return if1.getIndex() - if2.getIndex();
-        }
+        return new InetSocketAddress(0).getAddress();
     }
 }

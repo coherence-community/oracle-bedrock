@@ -537,6 +537,17 @@ reverse chronological order.
 *   [ORACLETOOLS-243](https://java.net/jira/browse/ORACLETOOLS-243): Enhanced
     AvailablePortIterator to ensure both TCP and UDP sockets are available.
 
+*   [ORACLETOOLS-245](https://java.net/jira/browse/ORACLETOOLS-245): Enhanced
+    AvailablePortIterator to protect a set of InetAddresses (when required).
+
+*   [ORACLETOOLS-248](https://java.net/jira/browse/ORACLETOOLS-248): Enhanced
+    AvailablePortIterator to protect bindable addresses (instead of wildcard)
+    to prevent to possibility of port "hijacking" on some platforms (OSX / Solaris).
+
+*   [ORACLETOOLS-250](https://java.net/jira/browse/ORACLETOOLS-250): Enhanced
+    LocalJavaApplicationBuilder logging to improve readability of application
+    startup information.
+
 <h4>oracle-tools-runtime-remote</h4>
 
 *   [ORACLETOOLS-91](https://java.net/jira/browse/ORACLETOOLS-91): Introduced
@@ -644,6 +655,10 @@ reverse chronological order.
 
     *BREAKING CHANGE:*  Sadly this is a breaking change caused by Java 8.
 
+*   [ORACLETOOLS-249](https://java.net/jira/browse/ORACLETOOLS-249): Introduced
+    the SystemPropertyIsolation JUnit Rule to ensure any system properties modified
+    by tests are reverted (returned to normal) upon completion of a test.
+
 <h4>oracle-tools-coherence</h4>
 
 *   [ORACLETOOLS-92](https://java.net/jira/browse/ORACLETOOLS-92): Refactored
@@ -706,7 +721,10 @@ reverse chronological order.
 
 <h4>oracle-tools-coherence-testing-support</h4>
 
-*   (none)
+*   [ORACLETOOLS-244](https://java.net/jira/browse/ORACLETOOLS-244): Introduced
+    the Coherence Cluster Orchestration JUnit Rule.   This will automatically
+    create a Coherence Cluster consisting of two storage enabled servers
+    and one proxy enabled storage disabled member.
 
 <h4>oracle-tools-site</h4>
 
