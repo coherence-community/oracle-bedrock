@@ -28,6 +28,7 @@ package com.oracle.tools.runtime.remote.http;
 import com.oracle.tools.Option;
 import com.oracle.tools.Options;
 
+import com.oracle.tools.io.NetworkHelper;
 import com.oracle.tools.runtime.LocalPlatform;
 import com.oracle.tools.runtime.Platform;
 
@@ -74,20 +75,69 @@ import java.util.concurrent.ExecutorService;
 public abstract class HttpDeployer implements Deployer
 {
     /**
-     * Create a new {@link HttpDeployer}.
+     * The {@link Options} controlling this {@link HttpDeployer}.
      */
-    public HttpDeployer()
+    private Options options;
+
+    /**
+     * Create a new {@link HttpDeployer}.
+     *
+     * @param options the {@link Options} controlling
+     *                this {@link HttpDeployer}
+     */
+    public HttpDeployer(Option... options)
     {
+        this.options = new Options(options);
     }
 
+    /**
+     * Set the size of the byte buffer that will be used to
+     * send the response of a HTTP request.
+     *
+     * @param size the size of the buffer in bytes
+     *
+     * @return this {@link HttpDeployer} to allow a fluent method style
+     */
+    public HttpDeployer withBufferSize(int size)
+    {
+        options.replace(new BufferSize(size));
+
+        return this;
+    }
+
+    /**
+     * Set the size of the byte buffer that will be used to
+     * send the response of a HTTP request.
+     *
+     * @param size the size of the buffer in kilo-bytes
+     *
+     * @return this {@link HttpDeployer} to allow a fluent method style
+     */
+    public HttpDeployer withBufferSizeInKB(int size)
+    {
+        return withBufferSize(size * 1024);
+    }
+
+    /**
+     * Set the size of the byte buffer that will be used to
+     * send the response of a HTTP request.
+     *
+     * @param size the size of the buffer in mega-bytes
+     *
+     * @return this {@link HttpDeployer} to allow a fluent method style
+     */
+    public HttpDeployer withBufferSizeInMB(int size)
+    {
+        return withBufferSize(size * 1024 * 1024);
+    }
 
     /**
      * A static helper method to return an {@link HttpDeployer}
      * that will use wget to retrieve artifacts.
      */
-    public static HttpDeployer wget()
+    public static HttpDeployer wget(Option... options)
     {
-        return new WGetHttpDeployer();
+        return new WGetHttpDeployer(options);
     }
 
 
@@ -97,20 +147,23 @@ public abstract class HttpDeployer implements Deployer
      *
      * @param wgetLocation the location of the wget executable
      *                     (for example "/usr/local/bin/wget")
+     * @param options the {@link Option}s controlling the deployer
      */
-    public static HttpDeployer wgetAt(String wgetLocation)
+    public static HttpDeployer wgetAt(String wgetLocation, Option... options)
     {
-        return new WGetHttpDeployer(wgetLocation);
+        return new WGetHttpDeployer(wgetLocation, options);
     }
 
 
     /**
      * A static helper method to return an {@link HttpDeployer}
      * that will use wget to retrieve artifacts.
+     *
+     * @param options the {@link Option}s controlling the deployer
      */
-    public static HttpDeployer curl()
+    public static HttpDeployer curl(Option... options)
     {
-        return new CurlHttpDeployer();
+        return new CurlHttpDeployer(options);
     }
 
 
@@ -120,10 +173,11 @@ public abstract class HttpDeployer implements Deployer
      *
      * @param curlLocation the location of the curl executable
      *                     (for example "/usr/local/bin/curl")
+     * @param options the {@link Option}s controlling the deployer
      */
-    public static HttpDeployer curlAt(String curlLocation)
+    public static HttpDeployer curlAt(String curlLocation, Option... options)
     {
-        return new CurlHttpDeployer(curlLocation);
+        return new CurlHttpDeployer(curlLocation, options);
     }
 
 
@@ -131,10 +185,12 @@ public abstract class HttpDeployer implements Deployer
      * A static helper method to return an {@link HttpDeployer}
      * that will use PowerShell Invoke-WebRequest to retrieve
      * artifacts.
+     *
+     * @param options the {@link Option}s controlling the deployer
      */
-    public static HttpDeployer powerShell()
+    public static HttpDeployer powerShell(Option... options)
     {
-        return new PowerShellHttpDeployer();
+        return new PowerShellHttpDeployer(options);
     }
 
 
@@ -294,11 +350,11 @@ public abstract class HttpDeployer implements Deployer
         try
         {
             LocalPlatform platform = LocalPlatform.getInstance();
-            InetAddress   address  = InetAddress.getLocalHost();
+            InetAddress   address  = NetworkHelper.getFeasibleLocalHost();
             int           port     = platform.getAvailablePorts().next();
             HttpServer    server   = HttpServer.create(new InetSocketAddress(address, port), 0);
 
-            server.createContext("/", new ArtifactsHandler(artifacts));
+            server.createContext("/", new ArtifactsHandler(artifacts, options.asArray()));
             server.setExecutor(executor);
             server.start();
 
@@ -323,16 +379,22 @@ public abstract class HttpDeployer implements Deployer
          */
         private final Map<String, DeploymentArtifact> artifacts;
 
+        /**
+         * The options controlling this {@link ArtifactsHandler}.
+         */
+        private final Options options;
 
         /**
          * Create a {@link ArtifactsHandler} to serve the specified
          * {@link List} of {@link DeploymentArtifact}s.
          *
          * @param artifacts the {@link DeploymentArtifact}s to serve
+         * @param options   the {@link Option}s controlling the {@link ArtifactsHandler}
          */
-        public ArtifactsHandler(Map<String, DeploymentArtifact> artifacts)
+        public ArtifactsHandler(Map<String, DeploymentArtifact> artifacts, Option... options)
         {
             this.artifacts = artifacts;
+            this.options   = new Options(options);
         }
 
 
@@ -357,14 +419,17 @@ public abstract class HttpDeployer implements Deployer
             httpExchange.getResponseHeaders().set("Content-type", "application/octet-stream");
             httpExchange.sendResponseHeaders(200, 0);
 
-            byte[] buff = new byte[100000];
+            BufferSize bufferSize  = options.get(BufferSize.class, new BufferSize(1000000));
+            int        bufferBytes = bufferSize.getBufferSize();
+
+            byte[] buff = new byte[bufferBytes];
 
             try (InputStream data = sourceURI.toURL().openStream();
                 OutputStream os = httpExchange.getResponseBody())
             {
                 while (true)
                 {
-                    int read = data.read(buff, 0, 100000);
+                    int read = data.read(buff, 0, bufferBytes);
 
                     if (read <= 0)
                     {
@@ -375,5 +440,20 @@ public abstract class HttpDeployer implements Deployer
                 }
             }
         }
+    }
+
+    public static class BufferSize implements Option
+    {
+        public BufferSize(int bufferSize)
+        {
+            this.bufferSize = bufferSize;
+        }
+
+        public int getBufferSize()
+        {
+            return bufferSize;
+        }
+
+        private int bufferSize;
     }
 }

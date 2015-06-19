@@ -25,6 +25,7 @@
 
 package com.oracle.tools.runtime.remote.http;
 
+import com.oracle.tools.Option;
 import com.oracle.tools.lang.StringHelper;
 
 import com.oracle.tools.runtime.Platform;
@@ -32,8 +33,11 @@ import com.oracle.tools.runtime.SimpleApplication;
 import com.oracle.tools.runtime.SimpleApplicationSchema;
 
 import com.oracle.tools.runtime.console.CapturingApplicationConsole;
+import com.oracle.tools.runtime.remote.winrm.WindowsShellOptions;
 
+import java.io.File;
 import java.net.URL;
+import java.util.concurrent.TimeUnit;
 
 /**
  * An implementation of {@link PowerShellHttpDeployer} that runs
@@ -49,9 +53,12 @@ public class PowerShellHttpDeployer extends HttpDeployer
 {
     /**
      * Create a {@link PowerShellHttpDeployer}.
+     *
+     * @param options the {@link Option}s controlling the deployer
      */
-    public PowerShellHttpDeployer()
+    public PowerShellHttpDeployer(Option... options)
     {
+        super(options);
     }
 
 
@@ -60,6 +67,9 @@ public class PowerShellHttpDeployer extends HttpDeployer
                                   final String   targetFileName,
                                   final Platform platform)
     {
+        int    index        = targetFileName.lastIndexOf('\\');
+        String parentFolder = index > 0 ? targetFileName.substring(0, index) : "C:\\";
+
         SimpleApplicationSchema schema =
             new SimpleApplicationSchema("powershell")
                     .addArgument("-Command")
@@ -67,33 +77,36 @@ public class PowerShellHttpDeployer extends HttpDeployer
                     .addArgument("-Uri")
                     .addArgument(sourceURL.toExternalForm())
                     .addArgument("-OutFile")
-                    .addArgument(StringHelper.doubleQuoteIfNecessary(targetFileName));
+                    .addArgument(StringHelper.doubleQuoteIfNecessary(targetFileName))
+                    .setWorkingDirectory(new File(parentFolder));
 
-        CapturingApplicationConsole console     = new CapturingApplicationConsole();
-        SimpleApplication           application = platform.realize("Deploy", schema, console);
-        int                         exitCode    = application.waitFor();
+        CapturingApplicationConsole console = new CapturingApplicationConsole();
 
-        if (exitCode != 0)
+        try (SimpleApplication application = platform.realize("Deploy", schema, console))
         {
-            StringBuilder message = new StringBuilder("Error deploying ")
-                    .append(targetFileName)
-                    .append(" - PowerShell returned ")
-                    .append(application.exitValue())
-                    .append("\n")
-                    .append("Invoke-WebRequest output:");
+            int exitCode = application.waitFor();
 
-            for (String line : console.getCapturedOutputLines())
+            if (exitCode != 0)
             {
-                message.append('\n').append(line);
-            }
+                StringBuilder message = new StringBuilder("Error deploying ")
+                        .append(targetFileName)
+                        .append(" - PowerShell returned ")
+                        .append(application.exitValue())
+                        .append("\n")
+                        .append("Invoke-WebRequest output:");
 
-            for (String line : console.getCapturedErrorLines())
-            {
-                message.append('\n').append(line);
-            }
+                for (String line : console.getCapturedOutputLines())
+                {
+                    message.append('\n').append(line);
+                }
 
-            throw new RuntimeException(message.toString());
+                for (String line : console.getCapturedErrorLines())
+                {
+                    message.append('\n').append(line);
+                }
+
+                throw new RuntimeException(message.toString());
+            }
         }
-
     }
 }

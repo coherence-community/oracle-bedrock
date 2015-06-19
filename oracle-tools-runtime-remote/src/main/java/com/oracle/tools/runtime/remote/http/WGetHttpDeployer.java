@@ -25,6 +25,7 @@
 
 package com.oracle.tools.runtime.remote.http;
 
+import com.oracle.tools.Option;
 import com.oracle.tools.runtime.Platform;
 import com.oracle.tools.runtime.SimpleApplication;
 import com.oracle.tools.runtime.SimpleApplicationSchema;
@@ -61,8 +62,10 @@ public class WGetHttpDeployer extends HttpDeployer
 
     /**
      * Create a {@link WGetHttpDeployer}.
+     *
+     * @param options the {@link Option}s controlling the deployer
      */
-    public WGetHttpDeployer()
+    public WGetHttpDeployer(Option... options)
     {
         this(DEFAULT_WGET);
     }
@@ -72,9 +75,11 @@ public class WGetHttpDeployer extends HttpDeployer
      * Create a {@link WGetHttpDeployer}.
      *
      * @param wgetCommand the location of the wget command
+     * @param options     the {@link Option}s controlling the deployer
      */
-    public WGetHttpDeployer(String wgetCommand)
+    public WGetHttpDeployer(String wgetCommand, Option... options)
     {
+        super(options);
         this.wgetCommand = wgetCommand;
     }
 

@@ -25,6 +25,7 @@
 
 package com.oracle.tools.runtime.remote.http;
 
+import com.oracle.tools.Option;
 import com.oracle.tools.lang.StringHelper;
 
 import com.oracle.tools.runtime.Platform;
@@ -60,8 +61,10 @@ public class CurlHttpDeployer extends HttpDeployer
 
     /**
      * Create a {@link CurlHttpDeployer}.
+     *
+     * @param options the {@link Option}s controlling the deployer
      */
-    public CurlHttpDeployer()
+    public CurlHttpDeployer(Option... options)
     {
         this(DEFAULT_CURL);
     }
@@ -71,9 +74,11 @@ public class CurlHttpDeployer extends HttpDeployer
      * Create a {@link CurlHttpDeployer}.
      *
      * @param curlCommand the location of the curl executable
+     * @param options     the {@link Option}s controlling the deployer
      */
-    public CurlHttpDeployer(String curlCommand)
+    public CurlHttpDeployer(String curlCommand, Option... options)
     {
+        super(options);
         this.curlCommand = curlCommand;
     }
 

@@ -112,10 +112,8 @@ public class WindowsRemoteShell<A extends Application, S extends ApplicationSche
     @Override
     public void makeDirectories(String  directoryName, Options options)
     {
-        try
+        try (WindowsSession session = createSession())
         {
-            WindowsSession session = createSession();
-
             session.connect();
 
             try (WindowsRemoteApplicationProcess process = new WindowsRemoteApplicationProcess(session))
@@ -124,7 +122,7 @@ public class WindowsRemoteShell<A extends Application, S extends ApplicationSche
 
                 int rc = process.waitFor();
 
-                if (rc != 0)
+                if (rc != 0 && rc != 1)
                 {
                     throw new RuntimeException("Error creating directory " + directoryName + " - mkdir returned " + rc);
                 }

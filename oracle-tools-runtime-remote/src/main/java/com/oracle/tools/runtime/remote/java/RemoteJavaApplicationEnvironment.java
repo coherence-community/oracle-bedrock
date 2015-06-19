@@ -37,6 +37,7 @@ import com.oracle.tools.runtime.concurrent.ControllableRemoteExecutor;
 import com.oracle.tools.runtime.concurrent.socket.RemoteExecutorServer;
 
 import com.oracle.tools.runtime.java.ClassPath;
+import com.oracle.tools.runtime.java.ClassPathModifier;
 import com.oracle.tools.runtime.java.JavaApplication;
 import com.oracle.tools.runtime.java.JavaApplicationSchema;
 import com.oracle.tools.runtime.java.options.JavaHome;
@@ -131,10 +132,15 @@ public class RemoteJavaApplicationEnvironment<A extends JavaApplication>
 
         if (deployment.isAutoDeployEnabled())
         {
+            // determine the PlatformSeparators (assume unix if not defined)
+            PlatformSeparators separators = options.get(PlatformSeparators.class, PlatformSeparators.forUnix());
+
             // when an automatic deployment is specified,
             // we use our modified class-path
             // (which is where all of the deployed jars will be located)
-            remoteClassPath = new ClassPath(".", "./*");
+            String thisDir = ".";
+            String thisDirAllJars = thisDir + separators.getFileSeparator() + "*";
+            remoteClassPath = new ClassPath(thisDir, thisDirAllJars);
         }
         else
         {
@@ -216,7 +222,11 @@ public class RemoteJavaApplicationEnvironment<A extends JavaApplication>
 
         // set the remote classpath (it must be quoted to prevent wildcard expansion)
         arguments.add("-cp");
-        arguments.add("\"" + remoteClassPath.toString(options.asArray()) + "\"");
+
+        ClassPathModifier modifier  = options.get(ClassPathModifier.class, ClassPathModifier.none());
+        String            classPath = modifier.applyQuotes(remoteClassPath.toString(options.asArray()));
+
+        arguments.add(classPath);
 
         // ----- establish Java Virtual Machine options -----
 
