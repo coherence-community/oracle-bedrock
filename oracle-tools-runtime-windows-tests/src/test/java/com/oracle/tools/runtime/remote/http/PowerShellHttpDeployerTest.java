@@ -40,6 +40,7 @@ import com.oracle.tools.runtime.remote.options.Deployer;
 
 import com.oracle.tools.runtime.remote.winrm.AbstractWindowsTest;
 
+import org.hamcrest.CoreMatchers;
 import org.junit.Assume;
 
 import org.junit.Test;
@@ -78,7 +79,7 @@ import java.util.*;
  *
  * @author Jonathan Knight
  */
-public class PowerShellHttpDeployerTest extends AbstractHttpDeployerTest
+public class PowerShellHttpDeployerTest extends AbstractWindowsHttpDeployerTest
 {
     @Test
     public void shouldFindInOptions() throws Exception
@@ -214,7 +215,7 @@ public class PowerShellHttpDeployerTest extends AbstractHttpDeployerTest
                           AbstractWindowsTest.getPowershellVersion(LocalPlatform.getInstance()),
                           is(greaterThanOrEqualTo(3.0)));
 
-        File                     tempDir           = temporaryFolder.newFolder();
+        File                     tempDir           = AbstractWindowsHttpDeployerTest.temporaryFolder.newFolder();
         List<DeploymentArtifact> artifactsToDeploy = createArtifactList(2);
 
         PowerShellHttpDeployer   deploymentMethod  = new PowerShellHttpDeployer();
@@ -241,7 +242,7 @@ public class PowerShellHttpDeployerTest extends AbstractHttpDeployerTest
             File source   = itSource.next();
             File deployed = itDeployed.next();
 
-            assertThat(getMD5(deployed), is(getMD5(source)));
+            assertThat(getMD5(deployed), CoreMatchers.is(getMD5(source)));
         }
     }
 }

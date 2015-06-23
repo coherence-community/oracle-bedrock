@@ -181,19 +181,6 @@ public abstract class HttpDeployer implements Deployer
     }
 
 
-    /**
-     * A static helper method to return an {@link HttpDeployer}
-     * that will use PowerShell Invoke-WebRequest to retrieve
-     * artifacts.
-     *
-     * @param options the {@link Option}s controlling the deployer
-     */
-    public static HttpDeployer powerShell(Option... options)
-    {
-        return new PowerShellHttpDeployer(options);
-    }
-
-
     @Override
     public void deploy(List<DeploymentArtifact> artifactsToDeploy,
                        String                   remoteDirectory,

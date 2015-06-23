@@ -7,13 +7,13 @@
         <version>2.0.0-RC7-SNAPSHOT</version>
     </parent>
 
-    <artifactId>oracle-tools-runtime-remote</artifactId>
+    <artifactId>oracle-tools-runtime-windows</artifactId>
 
-    <name>Oracle Tools for Remote Runtime Management</name>
+    <name>Oracle Tools for Remote Windows Management</name>
 
     <description>
         Interfaces, classes and resources to construct, inspect and securely
-        manage remote runtime processes (using SSH).
+        manage remote runtime processes on Windows using WinRM.
     </description>
 
     <dependencies>
@@ -30,9 +30,9 @@
         </dependency>
 
         <dependency>
-            <groupId>com.jcraft</groupId>
-            <artifactId>jsch</artifactId>
-            <version>${jsch.version}</version>
+            <groupId>com.oracle.tools</groupId>
+            <artifactId>oracle-tools-runtime-remote</artifactId>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>
@@ -56,4 +56,25 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+              <groupId>org.jvnet.jaxb2.maven2</groupId>
+              <artifactId>maven-jaxb2-plugin</artifactId>
+              <executions>
+                <execution>
+                  <goals>
+                    <goal>generate</goal>
+                  </goals>
+                  <configuration>
+                    <schemaDirectory>src/main/resources/xsd</schemaDirectory>
+                    <bindingDirectory>src/main/resources</bindingDirectory>
+                    <generateDirectory>${project.build.directory}/generated-sources</generateDirectory>
+                  </configuration>
+                </execution>
+              </executions>
+            </plugin>
+        </plugins>
+    </build>
 </project>

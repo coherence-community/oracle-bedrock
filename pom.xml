@@ -67,6 +67,9 @@
         <module>oracle-tools-runtime-virtual</module>
         <module>oracle-tools-runtime-virtual-tests</module>
 
+        <module>oracle-tools-runtime-windows</module>
+        <module>oracle-tools-runtime-windows-tests</module>
+
         <module>oracle-tools-coherence</module>
         <module>oracle-tools-coherence-tests</module>
         <module>oracle-tools-coherence-testing-support</module>
