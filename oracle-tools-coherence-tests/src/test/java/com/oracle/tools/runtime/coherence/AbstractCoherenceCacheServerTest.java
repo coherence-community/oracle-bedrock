@@ -170,7 +170,7 @@ public abstract class AbstractCoherenceCacheServerTest extends AbstractTest
         {
             assertThat(server, new GetLocalMemberId(), is(1));
             assertThat(server, new GetClusterSize(), is(1));
-            assertThat(server, new GetServiceStatus("DistributedCache"), is(ServiceStatus.ENDANGERED));
+            assertThat(server, new GetServiceStatus("PartitionedCache"), is(ServiceStatus.ENDANGERED));
         }
     }
 

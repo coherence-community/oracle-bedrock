@@ -32,6 +32,8 @@ import com.oracle.tools.runtime.Application;
 import com.oracle.tools.runtime.ApplicationBuilder;
 import com.oracle.tools.runtime.ApplicationConsole;
 import com.oracle.tools.runtime.ApplicationSchema;
+import com.oracle.tools.runtime.LocalPlatform;
+import com.oracle.tools.runtime.Platform;
 import com.oracle.tools.runtime.SimpleApplication;
 import com.oracle.tools.runtime.SimpleApplicationBuilder;
 import com.oracle.tools.runtime.SimpleApplicationSchema;
@@ -40,6 +42,7 @@ import com.oracle.tools.runtime.console.PipedApplicationConsole;
 import com.oracle.tools.runtime.console.SystemApplicationConsole;
 
 import com.oracle.tools.runtime.remote.AbstractRemoteApplicationBuilder;
+import com.oracle.tools.runtime.remote.RemotePlatform;
 import com.oracle.tools.runtime.remote.SecureKeys;
 import com.oracle.tools.runtime.remote.options.StrictHostChecking;
 
@@ -51,8 +54,8 @@ import java.io.File;
 import java.io.IOException;
 
 import java.net.InetAddress;
-
 import java.net.UnknownHostException;
+
 import java.util.Properties;
 
 /**
@@ -75,13 +78,8 @@ public class VagrantPlatform extends VirtualPlatform
     /**
      * The location of this {@link VagrantPlatform}'s VagrantFile.
      */
-    private File vagrantFile;
-
-    /**
-     * The {@link ApplicationBuilder} to use to run Vagrant commands
-     */
-    private ApplicationBuilder<SimpleApplication> applicationBuilder;
-    private String                                publicHostName;
+    private File   vagrantFile;
+    private String publicHostName;
 
 
     /**
@@ -102,10 +100,9 @@ public class VagrantPlatform extends VirtualPlatform
     {
         super(name, null, 0, null, null, options);
 
-        this.vagrantFile        = vagrantFile;
-        this.applicationBuilder = new SimpleApplicationBuilder();
-        this.publicHostName     = publicHostName;
-        this.port               = port;
+        this.vagrantFile    = vagrantFile;
+        this.publicHostName = publicHostName;
+        this.port           = port;
     }
 
 
@@ -235,11 +232,12 @@ public class VagrantPlatform extends VirtualPlatform
      */
     protected Properties detectSSH()
     {
-        SimpleApplicationSchema  schema  = instantiateSchema().addArgument("ssh-config");
-        SimpleApplicationBuilder builder = new SimpleApplicationBuilder();
+        SimpleApplicationSchema schema   = instantiateSchema().addArgument("ssh-config");
+
+        LocalPlatform           platform = LocalPlatform.getInstance();
 
         try (PipedApplicationConsole console = new PipedApplicationConsole();
-            Application application = builder.realize(schema, "Vagrant", console);)
+            Application application = platform.realize("Vagrant", schema, console))
         {
             application.waitFor();
             application.close();
@@ -303,11 +301,10 @@ public class VagrantPlatform extends VirtualPlatform
 
     @SuppressWarnings("unchecked")
     @Override
-    public <A extends Application, B extends ApplicationBuilder<A>> B getApplicationBuilder(Class<A> applicationClass)
+    public <A extends Application,
+            B extends ApplicationBuilder<A, RemotePlatform>> B getApplicationBuilder(Class<A> applicationClass)
     {
-        AbstractRemoteApplicationBuilder builder = super.getApplicationBuilder(applicationClass);
-
-        return (B) builder;
+        return super.getApplicationBuilder(applicationClass);
     }
 
 
@@ -318,12 +315,11 @@ public class VagrantPlatform extends VirtualPlatform
      */
     protected void execute(SimpleApplicationSchema schema)
     {
-        try
-        {
-            Application application = applicationBuilder.realize(schema, "Vagrant", new SystemApplicationConsole());
+        LocalPlatform platform = LocalPlatform.getInstance();
 
+        try (Application application = platform.realize("Vagrant", schema, new SystemApplicationConsole()))
+        {
             application.waitFor();
-            application.close();
         }
         catch (Exception e)
         {

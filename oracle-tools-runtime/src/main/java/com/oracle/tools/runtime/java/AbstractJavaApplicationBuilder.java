@@ -26,6 +26,7 @@
 package com.oracle.tools.runtime.java;
 
 import com.oracle.tools.runtime.AbstractApplicationBuilder;
+import com.oracle.tools.runtime.Platform;
 
 /**
  * An {@link AbstractJavaApplicationBuilder} is the base implementation for {@link JavaApplicationBuilder}s.
@@ -35,14 +36,17 @@ import com.oracle.tools.runtime.AbstractApplicationBuilder;
  *
  * @author Brian Oliver
  */
-public abstract class AbstractJavaApplicationBuilder<A extends JavaApplication>
-    extends AbstractApplicationBuilder<A> implements JavaApplicationBuilder<A>
+public abstract class AbstractJavaApplicationBuilder<A extends JavaApplication, P extends Platform>
+    extends AbstractApplicationBuilder<A, P> implements JavaApplicationBuilder<A, P>
 {
     /**
-     * Constructs a {@link AbstractJavaApplicationBuilder}.
+     * Constructs a {@link AbstractJavaApplicationBuilder} for the specified
+     * {@link Platform}
+     *
+     * @param platform  the {@link Platform}
      */
-    public AbstractJavaApplicationBuilder()
+    public AbstractJavaApplicationBuilder(P platform)
     {
-        super();
+        super(platform);
     }
 }

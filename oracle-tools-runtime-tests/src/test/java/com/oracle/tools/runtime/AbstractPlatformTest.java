@@ -73,27 +73,6 @@ public class AbstractPlatformTest
 
 
     @Test
-    @SuppressWarnings("unchecked")
-    public void shouldRealizeApplicationWithCorrectBuilder() throws Exception
-    {
-        ApplicationBuilder          builder  = mock(ApplicationBuilder.class);
-        ApplicationConsole          console  = mock(ApplicationConsole.class);
-        SimpleJavaApplicationSchema schema   = new SimpleJavaApplicationSchema("Dummy");
-        SimpleJavaApplication       app      = mock(SimpleJavaApplication.class);
-
-        AbstractPlatform            stub     = new AbstractPlatformStub("Test");
-        AbstractPlatform            platform = spy(stub);
-
-        when(platform.getApplicationBuilder(SimpleJavaApplication.class)).thenReturn(builder);
-        when(builder.realize(same(schema), eq("TestApp"), same(console), same(platform))).thenReturn(app);
-
-        SimpleJavaApplication result = platform.realize("TestApp", schema, console);
-
-        assertThat(result, is(sameInstance(app)));
-    }
-
-
-    @Test
     public void shouldNotRealizeApplicationIfBuilderIsNull() throws Exception
     {
         ApplicationConsole          console  = mock(ApplicationConsole.class);
@@ -104,7 +83,7 @@ public class AbstractPlatformTest
 
         when(platform.getApplicationBuilder(SimpleJavaApplication.class)).thenReturn(null);
 
-        SimpleJavaApplication result = platform.realize("TestApp", schema, console);
+        Application result = platform.realize("TestApp", schema, console);
 
         assertThat(result, is(nullValue()));
     }
@@ -113,7 +92,7 @@ public class AbstractPlatformTest
     /**
      * An abstract {@link Platform} stub.
      */
-    public static class AbstractPlatformStub extends AbstractPlatform
+    public static class AbstractPlatformStub<P extends Platform> extends AbstractPlatform<P>
     {
         /**
          * Constructs an {@link AbstractPlatformStub}.
@@ -135,7 +114,7 @@ public class AbstractPlatformTest
 
         @Override
         public <A extends Application,
-                B extends ApplicationBuilder<A>> B getApplicationBuilder(Class<A> applicationClass)
+                B extends ApplicationBuilder<A, P>> B getApplicationBuilder(Class<A> applicationClass)
         {
             return null;
         }

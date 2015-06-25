@@ -155,9 +155,12 @@ public class Options
      */
     public Options addAll(Option... options)
     {
-        for (Option option : options)
+        if (options != null)
         {
-            add(option);
+            for (Option option : options)
+            {
+                add(option);
+            }
         }
 
         return this;

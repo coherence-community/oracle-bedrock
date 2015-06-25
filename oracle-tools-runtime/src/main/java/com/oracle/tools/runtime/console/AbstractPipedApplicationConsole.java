@@ -91,27 +91,34 @@ public abstract class AbstractPipedApplicationConsole implements ApplicationCons
      * @see java.io.PipedReader
      * @see java.io.PipedWriter
      *
-     * @throws java.io.IOException if an error occurs creating this {@link AbstractPipedApplicationConsole}
+     * @throws RuntimeException if an error occurs creating this {@link AbstractPipedApplicationConsole}
      */
     public AbstractPipedApplicationConsole(int     pipeSize,
-                                           boolean diagnosticMode) throws IOException
+                                           boolean diagnosticMode)
     {
-        PipedReader pipedOutputReader = new PipedReader(pipeSize);
+        try
+        {
+            PipedReader pipedOutputReader = new PipedReader(pipeSize);
 
-        this.diagnosticMode    = diagnosticMode;
+            this.diagnosticMode    = diagnosticMode;
 
-        this.stdoutReader      = new BufferedReader(pipedOutputReader);
-        this.stdoutPipedWriter = new PipedWriter(pipedOutputReader);
-        this.stdoutWriter      = new PrintWriter(stdoutPipedWriter);
+            this.stdoutReader      = new BufferedReader(pipedOutputReader);
+            this.stdoutPipedWriter = new PipedWriter(pipedOutputReader);
+            this.stdoutWriter      = new PrintWriter(stdoutPipedWriter);
 
-        PipedReader pipedErrorReader = new PipedReader(pipeSize);
+            PipedReader pipedErrorReader = new PipedReader(pipeSize);
 
-        this.stderrReader      = new BufferedReader(pipedErrorReader);
-        this.stderrPipedWriter = new PipedWriter(pipedErrorReader);
-        this.stderrWriter      = new PrintWriter(stderrPipedWriter);
+            this.stderrReader      = new BufferedReader(pipedErrorReader);
+            this.stderrPipedWriter = new PipedWriter(pipedErrorReader);
+            this.stderrWriter      = new PrintWriter(stderrPipedWriter);
 
-        this.stdinReader       = new PipedReader(pipeSize);
-        this.stdinWriter       = new PrintWriter(new PipedWriter(stdinReader));
+            this.stdinReader       = new PipedReader(pipeSize);
+            this.stdinWriter       = new PrintWriter(new PipedWriter(stdinReader));
+        }
+        catch (IOException e)
+        {
+            throw new RuntimeException("Error creating console streams", e);
+        }
     }
 
 

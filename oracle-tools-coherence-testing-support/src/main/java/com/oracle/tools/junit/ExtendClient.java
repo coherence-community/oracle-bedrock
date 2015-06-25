@@ -71,8 +71,9 @@ public class ExtendClient implements SessionBuilder
         // build a schema for a local storage-disabled member
         CoherenceCacheServerSchema schema =
             new CoherenceCacheServerSchema(serverSchema).setRoleName("extend-client").setStorageEnabled(false)
-                .setTCMPEnabled(false).setSystemProperty("tangosol.coherence.extend.enabled",
-                                                         true).setCacheConfigURI(cacheConfigURI);
+                .setTCMPEnabled(false).setSystemProperty("coherence.profile",
+                                                         "thin").setSystemProperty("coherence.client", "remote")
+                                                             .setCacheConfigURI(cacheConfigURI);
 
         // take a snapshot of the system properties as we're about to mess with them
         Properties systemProperties = SystemProperties.createSnapshot();

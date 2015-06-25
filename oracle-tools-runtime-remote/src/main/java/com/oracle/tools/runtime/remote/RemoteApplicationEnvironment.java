@@ -31,6 +31,7 @@ import java.io.Closeable;
 
 import java.net.InetAddress;
 
+import java.util.List;
 import java.util.Properties;
 
 /**
@@ -47,16 +48,23 @@ import java.util.Properties;
 public interface RemoteApplicationEnvironment extends Closeable
 {
     /**
-     * Obtains the remote command to execute to launch the remote {@link Application}.
-     *
-     * @param localInetAddress  the local {@link InetAddress} that the remote
-     *                          {@link Application} can use to connect back to the platform
-     *                          that realized the {@link Application}
+     * Obtains the remote command to execute to launch
+     * the remote {@link Application}.
      *
      * @return  the remote command
      */
-    public String getRemoteCommandToExecute(InetAddress localInetAddress);
+    public String getRemoteCommandToExecute();
 
+    /**
+     * Obtain the command line arguments to use when executing the command.
+     *
+     * @param remoteExecutorAddress the {@link InetAddress} that the Oracle Tools
+     *                              {@link com.oracle.tools.runtime.concurrent.RemoteExecutor}
+     *                              is listening on
+     *
+     * @return  the command line arguments to use when executing the command
+     */
+    public List<String> getRemoteCommandArguments(InetAddress remoteExecutorAddress);
 
     /**
      * Obtains the environment variables to use for the remote {@link Application}.

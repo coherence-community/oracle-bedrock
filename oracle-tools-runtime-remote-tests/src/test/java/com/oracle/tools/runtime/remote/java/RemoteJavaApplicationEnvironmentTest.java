@@ -34,15 +34,17 @@ import com.oracle.tools.runtime.remote.java.applications.SleepingApplication;
 import org.junit.Test;
 
 import java.net.InetAddress;
+import java.util.List;
 
 import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.CoreMatchers.not;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
- * @author jk 2014.07.04
+ * @author Jonathan Knight
  */
 public class RemoteJavaApplicationEnvironmentTest
 {
@@ -65,11 +67,11 @@ public class RemoteJavaApplicationEnvironmentTest
 
         RemoteJavaApplicationEnvironment env = new RemoteJavaApplicationEnvironment(schema, platform, options);
 
-        String                           command         = env.getRemoteCommandToExecute(InetAddress.getLocalHost());
+        List<String>                     arguments      = env.getRemoteCommandArguments(InetAddress.getLocalHost());
 
         String                           debugCommand    = "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n";
 
-        assertThat(command, containsString(debugCommand));
+        assertThat(arguments, hasItem(containsString(debugCommand)));
     }
 
 
@@ -89,13 +91,13 @@ public class RemoteJavaApplicationEnvironmentTest
 
         RemoteJavaApplicationEnvironment env = new RemoteJavaApplicationEnvironment(schema, platform, options);
 
-        String                           command         = env.getRemoteCommandToExecute(InetAddress.getLocalHost());
+        List<String>                     arguments      = env.getRemoteCommandArguments(InetAddress.getLocalHost());
 
         String debugCommand = String.format("-agentlib:jdwp=transport=dt_socket,server=n,suspend=n,address=%s:%d",
                                             LocalPlatform.getInstance().getAddress().getHostName(),
                                             debuggerPort);
 
-        assertThat(command, containsString(debugCommand));
+        assertThat(arguments, hasItem(containsString(debugCommand)));
     }
 
     /**
@@ -115,13 +117,13 @@ public class RemoteJavaApplicationEnvironmentTest
 
         RemoteJavaApplicationEnvironment env             = new RemoteJavaApplicationEnvironment(schema, platform, options);
 
-        String                           command         = env.getRemoteCommandToExecute(InetAddress.getLocalHost());
+        List<String>                     arguments      = env.getRemoteCommandArguments(InetAddress.getLocalHost());
 
         String debugCommand = String.format("-agentlib:jdwp=transport=dt_socket,server=n,suspend=n,address=%s:%d",
                                             address.getHostName(),
                                             debuggerPort);
 
-        assertThat(command, containsString(debugCommand));
+        assertThat(arguments, hasItem(containsString(debugCommand)));
     }
 
     /**
@@ -142,11 +144,11 @@ public class RemoteJavaApplicationEnvironmentTest
 
         RemoteJavaApplicationEnvironment env = new RemoteJavaApplicationEnvironment(schema, platform, options);
 
-        String                           command         = env.getRemoteCommandToExecute(InetAddress.getLocalHost());
+        List<String>                     arguments      = env.getRemoteCommandArguments(InetAddress.getLocalHost());
 
         String                           debugCommand    = "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n";
 
-        assertThat(command, containsString(debugCommand));
+        assertThat(arguments, hasItem(containsString(debugCommand)));
     }
 
 
@@ -168,11 +170,11 @@ public class RemoteJavaApplicationEnvironmentTest
 
         RemoteJavaApplicationEnvironment env = new RemoteJavaApplicationEnvironment(schema, platform, options);
 
-        String                           command         = env.getRemoteCommandToExecute(InetAddress.getLocalHost());
+        List<String>                     arguments      = env.getRemoteCommandArguments(InetAddress.getLocalHost());
 
         String                           debugCommand    = "-agentlib:jdwp=transport=dt_socket,server=y,suspend=y";
 
-        assertThat(command, containsString(debugCommand));
+        assertThat(arguments, hasItem(containsString(debugCommand)));
     }
 
 
@@ -191,8 +193,8 @@ public class RemoteJavaApplicationEnvironmentTest
 
         RemoteJavaApplicationEnvironment env = new RemoteJavaApplicationEnvironment(schema, platform, options);
 
-        String                           command         = env.getRemoteCommandToExecute(InetAddress.getLocalHost());
+        List<String>                     arguments      = env.getRemoteCommandArguments(InetAddress.getLocalHost());
 
-        assertThat(command, not(containsString("-agentlib:jdwp")));
+        assertThat(arguments, not(hasItem(containsString("-agentlib:jdwp"))));
     }
 }

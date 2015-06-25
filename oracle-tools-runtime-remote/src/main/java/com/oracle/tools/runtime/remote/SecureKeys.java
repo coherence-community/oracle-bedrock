@@ -29,6 +29,8 @@ import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 
+import com.oracle.tools.runtime.remote.ssh.JSchBasedAuthentication;
+
 /**
  * A secure public-private key-based {@link Authentication}.
  * <p>

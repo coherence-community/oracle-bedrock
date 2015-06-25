@@ -1,0 +1,80 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <artifactId>oracle-tools</artifactId>
+        <groupId>com.oracle.tools</groupId>
+        <version>3.0.0-RC8-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>oracle-tools-runtime-windows</artifactId>
+
+    <name>Oracle Tools for Remote Windows Management</name>
+
+    <description>
+        Interfaces, classes and resources to construct, inspect and securely
+        manage remote runtime processes on Windows using WinRM.
+    </description>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.oracle.tools</groupId>
+            <artifactId>oracle-tools-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.oracle.tools</groupId>
+            <artifactId>oracle-tools-runtime</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.oracle.tools</groupId>
+            <artifactId>oracle-tools-runtime-remote</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>hamcrest-library</artifactId>
+            <version>${hamcrest.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>${mockito.version}</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+              <groupId>org.jvnet.jaxb2.maven2</groupId>
+              <artifactId>maven-jaxb2-plugin</artifactId>
+              <executions>
+                <execution>
+                  <goals>
+                    <goal>generate</goal>
+                  </goals>
+                  <configuration>
+                    <schemaDirectory>src/main/resources/xsd</schemaDirectory>
+                    <bindingDirectory>src/main/resources</bindingDirectory>
+                    <generateDirectory>${project.build.directory}/generated-sources</generateDirectory>
+                  </configuration>
+                </execution>
+              </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>

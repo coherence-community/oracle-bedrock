@@ -40,7 +40,7 @@ import com.oracle.tools.runtime.ApplicationSchema;
  *
  * @param <A>  the type of the {@link Application}s the {@link RemoteApplicationBuilder} will realize
  */
-public interface RemoteApplicationBuilder<A extends Application> extends ApplicationBuilder<A>
+public interface RemoteApplicationBuilder<A extends Application> extends ApplicationBuilder<A, RemotePlatform>
 {
     /**
      * The default port for secure connection to a remote server (over SSH)

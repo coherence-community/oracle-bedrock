@@ -1,5 +1,5 @@
 /*
- * File: JSchBasedAuthentication.java
+ * File: RemoteTerminals.java
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
@@ -25,34 +25,36 @@
 
 package com.oracle.tools.runtime.remote;
 
-import com.jcraft.jsch.JSch;
-import com.jcraft.jsch.Session;
+import com.oracle.tools.runtime.Application;
+import com.oracle.tools.runtime.ApplicationSchema;
+
+import com.oracle.tools.runtime.remote.ssh.JSchRemoteTerminal;
 
 /**
- * A specialized {@link Authentication} that defines {@link JSch} specific callbacks for
- * {@link Authentication}s.
+ * Helper methods to construct various builders for {@link RemoteTerminal}s.
  * <p>
- * Copyright (c) 2014. All Rights Reserved. Oracle Corporation.<br>
+ * Copyright (c) 2015. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Brian Oliver
  */
-public interface JSchBasedAuthentication extends Authentication
+public class RemoteTerminals
 {
     /**
-     * Configures the {@link JSch} framework for the type
-     * of {@link Authentication}, prior to creating a {@link Session}.
+     * Obtain a {@link RemoteTerminalBuilder} that will create {@link JSchRemoteTerminal}s (for SSH).
      *
-     * @param jsch  the {@link JSch} framework to configure
+     * @return a {@link RemoteTerminalBuilder} for SSH
      */
-    public void configureFramework(JSch jsch);
-
-
-    /**
-     * Configures the {@link JSch} {@link Session} for the type
-     * of {@link Authentication}, prior to creating a connection.
-     *
-     * @param session  the {@link Session} to configure
-     */
-    public void configureSession(Session session);
+    public static RemoteTerminalBuilder ssh()
+    {
+        return new RemoteTerminalBuilder()
+        {
+            @Override
+            public <A extends Application, S extends ApplicationSchema<A>,
+                    E extends RemoteApplicationEnvironment> RemoteTerminal<A, S, E> realize(RemotePlatform platform)
+            {
+                return new JSchRemoteTerminal<>(platform);
+            }
+        };
+    }
 }

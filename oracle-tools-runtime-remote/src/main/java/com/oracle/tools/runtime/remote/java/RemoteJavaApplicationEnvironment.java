@@ -37,6 +37,7 @@ import com.oracle.tools.runtime.concurrent.ControllableRemoteExecutor;
 import com.oracle.tools.runtime.concurrent.socket.RemoteExecutorServer;
 
 import com.oracle.tools.runtime.java.ClassPath;
+import com.oracle.tools.runtime.java.ClassPathModifier;
 import com.oracle.tools.runtime.java.JavaApplication;
 import com.oracle.tools.runtime.java.JavaApplicationSchema;
 import com.oracle.tools.runtime.java.options.JavaHome;
@@ -53,6 +54,8 @@ import java.io.IOException;
 
 import java.net.InetAddress;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
 /**
@@ -129,10 +132,15 @@ public class RemoteJavaApplicationEnvironment<A extends JavaApplication>
 
         if (deployment.isAutoDeployEnabled())
         {
+            // determine the PlatformSeparators (assume unix if not defined)
+            PlatformSeparators separators = options.get(PlatformSeparators.class, PlatformSeparators.forUnix());
+
             // when an automatic deployment is specified,
             // we use our modified class-path
             // (which is where all of the deployed jars will be located)
-            remoteClassPath = new ClassPath(".", "./*");
+            String thisDir = ".";
+            String thisDirAllJars = thisDir + separators.getFileSeparator() + "*";
+            remoteClassPath = new ClassPath(thisDir, thisDirAllJars);
         }
         else
         {
@@ -167,9 +175,9 @@ public class RemoteJavaApplicationEnvironment<A extends JavaApplication>
 
 
     @Override
-    public String getRemoteCommandToExecute(InetAddress localInetAddress)
+    public String getRemoteCommandToExecute()
     {
-        StringBuilder builder = new StringBuilder();
+        StringBuilder commandBuilder = new StringBuilder();
 
         // ----- establish the command to start java -----
 
@@ -178,7 +186,7 @@ public class RemoteJavaApplicationEnvironment<A extends JavaApplication>
         if (javaHome == null)
         {
             // when we don't have a java home we just use the defined executable
-            builder.append(StringHelper.doubleQuoteIfNecessary(schema.getExecutableName()));
+            commandBuilder.append(StringHelper.doubleQuoteIfNecessary(schema.getExecutableName()));
         }
         else
         {
@@ -199,13 +207,26 @@ public class RemoteJavaApplicationEnvironment<A extends JavaApplication>
             javaExecutable += separators.getFileSeparator();
             javaExecutable += schema.getExecutableName();
 
-            builder.append(StringHelper.doubleQuoteIfNecessary(javaExecutable));
+            commandBuilder.append(StringHelper.doubleQuoteIfNecessary(javaExecutable));
         }
+
+        return commandBuilder.toString();
+    }
+
+    @Override
+    public List<String> getRemoteCommandArguments(InetAddress remoteExecutorAddress)
+    {
+        List<String> arguments = new ArrayList<>();
 
         // ----- establish the remote application class path -----
 
         // set the remote classpath (it must be quoted to prevent wildcard expansion)
-        builder.append(" -cp \"" + remoteClassPath.toString(options.asArray()) + "\"");
+        arguments.add("-cp");
+
+        ClassPathModifier modifier  = options.get(ClassPathModifier.class, ClassPathModifier.none());
+        String            classPath = modifier.applyQuotes(remoteClassPath.toString(options.asArray()));
+
+        arguments.add(classPath);
 
         // ----- establish Java Virtual Machine options -----
 
@@ -213,8 +234,7 @@ public class RemoteJavaApplicationEnvironment<A extends JavaApplication>
         {
             for (String option : jvmOption.getOptions())
             {
-                builder.append(" ");
-                builder.append(option);
+                arguments.add(option);
             }
         }
 
@@ -242,7 +262,7 @@ public class RemoteJavaApplicationEnvironment<A extends JavaApplication>
                                                (suspend ? "y" : "n"),
                                                debugAddress);
 
-            builder.append(debugOption);
+            arguments.add(debugOption);
         }
 
         // ----- establish the system properties for the java application -----
@@ -261,9 +281,7 @@ public class RemoteJavaApplicationEnvironment<A extends JavaApplication>
             }
         }
 
-        // add oracle tools specific system properties
-        InetAddress remoteExecutorAddress = localInetAddress;
-
+        // add Oracle Tools specific system properties
         remoteSystemProperties.setProperty(Settings.PARENT_ADDRESS, remoteExecutorAddress.getHostAddress());
         remoteSystemProperties.setProperty(Settings.PARENT_PORT, Integer.toString(remoteExecutor.getPort()));
 
@@ -275,35 +293,34 @@ public class RemoteJavaApplicationEnvironment<A extends JavaApplication>
         for (String propertyName : remoteSystemProperties.stringPropertyNames())
         {
             String propertyValue = remoteSystemProperties.getProperty(propertyName);
+            StringBuilder propBuilder   = new StringBuilder();
 
-            builder.append(" ");
-            builder.append("-D");
-            builder.append(propertyName);
+            propBuilder.append("-D");
+            propBuilder.append(propertyName);
 
             if (!propertyValue.isEmpty())
             {
-                builder.append("=");
-                builder.append(StringHelper.doubleQuoteIfNecessary(propertyValue));
+                propBuilder.append("=");
+                propBuilder.append(StringHelper.doubleQuoteIfNecessary(propertyValue));
             }
+
+            arguments.add(propBuilder.toString());
         }
 
         // we use the launcher to launch the application
         // (we don't start the application directly itself)
-        builder.append(" ");
-        builder.append("com.oracle.tools.runtime.java.JavaApplicationLauncher");
+        arguments.add("com.oracle.tools.runtime.java.JavaApplicationLauncher");
 
         // set the java application class name we need to launch
-        builder.append(" ");
-        builder.append(schema.getApplicationClassName());
+        arguments.add(schema.getApplicationClassName());
 
         // add the arguments to the command
         for (String argument : schema.getArguments())
         {
-            builder.append(" ");
-            builder.append(argument);
+            arguments.add(argument);
         }
 
-        return builder.toString();
+        return arguments;
     }
 
 

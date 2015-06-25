@@ -97,4 +97,11 @@ public class DeploymentArtifact
     {
         return destinationFile;
     }
+
+
+    @Override
+    public String toString()
+    {
+        return "DeploymentArtifact [" + destinationFile + " -> " + sourceFile + ']';
+    }
 }

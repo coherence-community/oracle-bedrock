@@ -27,6 +27,16 @@ package com.oracle.tools.runtime.remote;
 
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.Session;
+import com.oracle.tools.Option;
+import com.oracle.tools.Options;
+import com.oracle.tools.options.HttpProxy;
+import com.oracle.tools.runtime.remote.http.HttpAuthenticationType;
+import com.oracle.tools.runtime.remote.http.HttpBasedAuthentication;
+import com.oracle.tools.runtime.remote.ssh.JSchBasedAuthentication;
+
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
 
 /**
  * A password-based {@link Authentication}.
@@ -41,7 +51,7 @@ import com.jcraft.jsch.Session;
  *
  * @see SecureKeys
  */
-public class Password implements Authentication, JSchBasedAuthentication
+public class Password implements Authentication, JSchBasedAuthentication, HttpBasedAuthentication
 {
     /**
      * The password or the user on the remote system.
@@ -74,4 +84,31 @@ public class Password implements Authentication, JSchBasedAuthentication
         // set the password for the session
         session.setPassword(password);
     }
+
+    @Override
+    public HttpURLConnection openConnection(URL url, String userName, Options options) throws IOException
+        {
+            HttpAuthenticationType authType   = options.get(HttpAuthenticationType.class, HttpAuthenticationType.Basic);
+            HttpProxy              proxy      = options.get(HttpProxy.class, HttpProxy.none());
+            HttpURLConnection      connection;
+
+        switch(authType)
+        {
+            case Basic:
+                String userPassword = userName + ":" + password;
+                String encoding     = new sun.misc.BASE64Encoder().encode(userPassword.getBytes());
+
+                connection = proxy.openConnection(url);
+
+                connection.setRequestProperty("Authorization", "Basic " + encoding);
+                break;
+            case NTLM:
+            case Kerberos:
+            default:
+                throw new IllegalArgumentException("Unsupported HTTP authentication type " + authType);
+        }
+
+        return connection;
+    }
+
 }

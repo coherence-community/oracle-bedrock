@@ -26,11 +26,9 @@
 package com.oracle.tools.runtime.remote;
 
 import com.oracle.tools.Options;
-
 import com.oracle.tools.runtime.ApplicationConsole;
 import com.oracle.tools.runtime.ApplicationSchema;
 import com.oracle.tools.runtime.FluentApplicationSchema;
-import com.oracle.tools.runtime.Platform;
 import com.oracle.tools.runtime.SimpleApplication;
 import com.oracle.tools.runtime.SimpleApplicationRuntime;
 import com.oracle.tools.runtime.SimpleApplicationSchema;
@@ -48,41 +46,20 @@ public class SimpleRemoteApplicationBuilder
                                              SimpleRemoteApplicationBuilder>
 {
     /**
-     * Constructs a {@link SimpleRemoteApplicationBuilder} (using the default port).
+     * Constructs a {@link SimpleRemoteApplicationBuilder} for the specified
+     * {@link RemotePlatform}.
      *
-     * @param hostName        the remote host name
-     * @param userName        the user name on the remote host
-     * @param authentication  the {@link Authentication} for connecting to the host
+     * @param platform  the {@link RemotePlatform}
      */
-    public SimpleRemoteApplicationBuilder(String         hostName,
-                                          String         userName,
-                                          Authentication authentication)
+    public SimpleRemoteApplicationBuilder(RemotePlatform platform)
     {
-        this(hostName, DEFAULT_PORT, userName, authentication);
-    }
-
-
-    /**
-     * Constructs a {@link SimpleRemoteApplicationBuilder}.
-     *
-     * @param hostName        the remote host name
-     * @param port            the remote port
-     * @param userName        the user name on the remote host
-     * @param authentication  the {@link Authentication} for connecting to the host
-     */
-    public SimpleRemoteApplicationBuilder(String         hostName,
-                                          int            port,
-                                          String         userName,
-                                          Authentication authentication)
-    {
-        super(hostName, port, userName, authentication);
+        super(platform);
     }
 
 
     @Override
     protected <T extends SimpleApplication,
         S extends ApplicationSchema<T>> SimpleRemoteApplicationEnvironment getRemoteApplicationEnvironment(S applicationSchema,
-        Platform                                                                                             platform,
         Options                                                                                              options)
     {
         SimpleApplicationSchema schema = (SimpleApplicationSchema) applicationSchema;
@@ -93,8 +70,7 @@ public class SimpleRemoteApplicationBuilder
 
     @Override
     @SuppressWarnings("unchecked")
-    protected <T extends SimpleApplication, S extends ApplicationSchema<T>> T createApplication(Platform                           platform,
-                                                                                                Options                            options,
+    protected <T extends SimpleApplication, S extends ApplicationSchema<T>> T createApplication(Options                            options,
                                                                                                 S                                  schema,
                                                                                                 SimpleRemoteApplicationEnvironment environment,
                                                                                                 String                             applicationName,

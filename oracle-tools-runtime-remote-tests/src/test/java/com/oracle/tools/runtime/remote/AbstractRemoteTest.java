@@ -1,5 +1,5 @@
 /*
- * File: AbstractRemoteApplicationBuilderTest.java
+ * File: AbstractRemoteTest.java
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
@@ -25,17 +25,21 @@
 
 package com.oracle.tools.runtime.remote;
 
-import com.oracle.tools.runtime.remote.java.RemoteJavaApplicationBuilder;
+import com.oracle.tools.runtime.remote.options.StrictHostChecking;
+
+import java.io.File;
+import java.net.InetAddress;
 
 /**
- * Abstract functional test class for {@link RemoteJavaApplicationBuilder}s.
+ * Abstract base class for functional test that require a remote connection
+ * to the current local host.
  * <p>
  * Copyright (c) 2014. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Brian Oliver
  */
-public abstract class AbstractRemoteApplicationBuilderTest
+public abstract class AbstractRemoteTest
 {
     /**
      * Obtains the remote server host name that the tests will run against.
@@ -74,7 +78,50 @@ public abstract class AbstractRemoteApplicationBuilderTest
      */
     public Authentication getRemoteAuthentication()
     {
-        return SecureKeys.fromPrivateKeyFile(System.getProperty("oracletools.remote.privatekey.file",
-                                                                "~/.ssh/127.0.0.1_dsa"));
+        return SecureKeys.fromPrivateKeyFile(getKeyFileName());
     }
+
+    /**
+     * Obtain the name of the private key file to use to authenticate the remote session.
+     *
+     * @return the name of the private key file to use to authenticate the remote session
+     */
+    public String getKeyFileName()
+    {
+        String userHome        = System.getProperty("user.home");
+        String defaultFileName = userHome + File.separator + ".ssh" + File.separator + "127.0.0.1_dsa";
+
+        return System.getProperty("oracletools.remote.privatekey.file", defaultFileName);
+    }
+
+    /**
+     * Determine whether the private key file required by the tests exists.
+     *
+     * @return true if the private key file exists otherwise false
+     */
+    public boolean privateKeyFileExists()
+    {
+        File keyFile = new File(getKeyFileName());
+
+        return keyFile.exists() && keyFile.isFile();
+    }
+
+    /**
+     * Obtain a {@link RemotePlatform} connecting to the
+     * current local platform.
+     *
+     * @return a {@link RemotePlatform} connecting to the
+     *         current local platform
+     *
+     * @throws Exception if there is an error creating the {@link RemotePlatform}
+     */
+    public RemotePlatform getRemotePlatform() throws Exception
+    {
+        return new RemotePlatform("Remote",
+                                  InetAddress.getByName(getRemoteHostName()),
+                                  getRemoteUserName(),
+                                  getRemoteAuthentication(),
+                                  StrictHostChecking.disabled());
+    }
+
 }

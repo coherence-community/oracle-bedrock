@@ -101,7 +101,7 @@ public class DefaultCoherenceClusterOrchestrationTest
     @Test
     public void shouldCreateExtendClientSession()
     {
-        ConfigurableCacheFactory session = orchestration.getSessionFor(extendClient("proxy-cache-config.xml"));
+        ConfigurableCacheFactory session = orchestration.getSessionFor(extendClient("coherence-cache-config.xml"));
 
         NamedCache               cache   = session.ensureCache("dist-example", null);
 
@@ -125,9 +125,9 @@ public class DefaultCoherenceClusterOrchestrationTest
 
         ConfigurableCacheFactory cacheFactory2 = orchestration.getSessionFor(storageDisabledMember());
 
-        ConfigurableCacheFactory cacheFactory3 = orchestration.getSessionFor(extendClient("proxy-cache-config.xml"));
+        ConfigurableCacheFactory cacheFactory3 = orchestration.getSessionFor(extendClient("coherence-cache-config.xml"));
 
-        ConfigurableCacheFactory cacheFactory4 = orchestration.getSessionFor(extendClient("proxy-cache-config.xml"));
+        ConfigurableCacheFactory cacheFactory4 = orchestration.getSessionFor(extendClient("coherence-cache-config.xml"));
 
         Assert.assertThat(cacheFactory1, is(cacheFactory2));
         Assert.assertThat(cacheFactory3, is(cacheFactory4));

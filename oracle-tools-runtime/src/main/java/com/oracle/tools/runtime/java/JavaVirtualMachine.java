@@ -47,14 +47,17 @@ import java.net.UnknownHostException;
  *
  * @author Jonathan Knight
  */
-public class JavaVirtualMachine extends AbstractPlatform
+public class JavaVirtualMachine extends AbstractPlatform<JavaVirtualMachine>
 {
     /**
      * The singleton instance of {@link JavaVirtualMachine}.
      */
-    private static JavaVirtualMachine INSTANCE           = new JavaVirtualMachine();
+    private static JavaVirtualMachine INSTANCE = new JavaVirtualMachine();
 
-    private boolean                   isAutoDebugEnabled = true;
+    /**
+     * A flag indicating if auto-debugging should be enabled.
+     */
+    private boolean isAutoDebugEnabled = true;
 
     /**
      * The {@link InetAddress} of the {@link Platform}.
@@ -105,11 +108,12 @@ public class JavaVirtualMachine extends AbstractPlatform
 
     @Override
     @SuppressWarnings("unchecked")
-    public <A extends Application, B extends ApplicationBuilder<A>> B getApplicationBuilder(Class<A> applicationClass)
+    public <A extends Application,
+            B extends ApplicationBuilder<A, JavaVirtualMachine>> B getApplicationBuilder(Class<A> applicationClass)
     {
         if (JavaApplication.class.isAssignableFrom(applicationClass))
         {
-            return (B) new ContainerBasedJavaApplicationBuilder();
+            return (B) new ContainerBasedJavaApplicationBuilder(this);
         }
 
         return null;
@@ -120,9 +124,9 @@ public class JavaVirtualMachine extends AbstractPlatform
      * Determine whether the current JVM is running with a debugger attached.
      * Typically this will be when running in debug mode inside a Java IDE.
      * If an exception is thrown while trying to determine if a debugger is
-     * attached then this method will return false.
-     *
-     * @return true if running in debug mode, otherwise false
+     *     attached then this method will return false.
+     *    
+     *     @return true if running in debug mode, otherwise false
      */
     public boolean isRunningWithDebugger()
     {

@@ -9,7 +9,7 @@
 
     <groupId>com.oracle.tools</groupId>
     <artifactId>oracle-tools</artifactId>
-    <version>3.0.0-RC7-SNAPSHOT</version>
+    <version>3.0.0-RC8-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>Oracle Tools</name>
@@ -73,6 +73,9 @@
 
         <module>oracle-tools-runtime-vagrant</module>
         <module>oracle-tools-runtime-vagrant-tests</module>
+
+        <module>oracle-tools-runtime-windows</module>
+        <module>oracle-tools-runtime-windows-tests</module>
 
         <module>oracle-tools-site</module>
 

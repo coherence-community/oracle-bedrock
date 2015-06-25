@@ -46,7 +46,7 @@ import java.net.InetAddress;
  *
  * @author Jonathan Knight
  */
-public class RemotePlatform extends AbstractPlatform
+public class RemotePlatform extends AbstractPlatform<RemotePlatform>
 {
     /**
      * The {@link InetAddress} of the {@link RemotePlatform}.
@@ -177,17 +177,18 @@ public class RemotePlatform extends AbstractPlatform
 
     @Override
     @SuppressWarnings("unchecked")
-    public <A extends Application, B extends ApplicationBuilder<A>> B getApplicationBuilder(Class<A> applicationClass)
+    public <A extends Application,
+            B extends ApplicationBuilder<A, RemotePlatform>> B getApplicationBuilder(Class<A> applicationClass)
     {
         AbstractRemoteApplicationBuilder builder;
 
         if (JavaApplication.class.isAssignableFrom(applicationClass))
         {
-            builder = new RemoteJavaApplicationBuilder(address.getHostAddress(), port, userName, authentication);
+            builder = new RemoteJavaApplicationBuilder(this);
         }
         else
         {
-            builder = new SimpleRemoteApplicationBuilder(address.getHostAddress(), port, userName, authentication);
+            builder = new SimpleRemoteApplicationBuilder(this);
         }
 
         return (B) builder;

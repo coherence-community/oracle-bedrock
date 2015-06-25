@@ -45,7 +45,7 @@ import com.oracle.tools.runtime.java.SimpleJavaApplicationSchema;
 import com.oracle.tools.runtime.java.options.JavaHome;
 import com.oracle.tools.runtime.java.options.RemoteDebugging;
 
-import com.oracle.tools.runtime.remote.AbstractRemoteApplicationBuilderTest;
+import com.oracle.tools.runtime.remote.AbstractRemoteTest;
 import com.oracle.tools.runtime.remote.RemotePlatform;
 import com.oracle.tools.runtime.remote.java.applications.SleepingApplication;
 import com.oracle.tools.runtime.remote.options.StrictHostChecking;
@@ -80,7 +80,7 @@ import java.util.List;
  *
  * @author Brian Oliver
  */
-public class RemoteJavaApplicationBuilderTest extends AbstractRemoteApplicationBuilderTest
+public class RemoteJavaApplicationBuilderTest extends AbstractRemoteTest
 {
     /**
      * Ensure that we can launch Java remotely.
@@ -407,15 +407,5 @@ public class RemoteJavaApplicationBuilderTest extends AbstractRemoteApplicationB
         }
 
         return true;
-    }
-
-
-    protected RemotePlatform getRemotePlatform() throws Exception
-    {
-        return new RemotePlatform("Remote",
-                                  InetAddress.getByName(getRemoteHostName()),
-                                  getRemoteUserName(),
-                                  getRemoteAuthentication(),
-                                  StrictHostChecking.disabled());
     }
 }

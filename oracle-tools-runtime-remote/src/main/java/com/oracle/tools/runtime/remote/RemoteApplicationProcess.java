@@ -25,18 +25,12 @@
 
 package com.oracle.tools.runtime.remote;
 
-import com.jcraft.jsch.ChannelExec;
-import com.jcraft.jsch.Session;
-
 import com.oracle.tools.runtime.Application;
 import com.oracle.tools.runtime.ApplicationProcess;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-
 /**
- * Represents an {@link ApplicationProcess} that is securely executing or executed remotely.
+ * An {@link ApplicationProcess} that is executing or executed on
+ * a {@link RemotePlatform}.
  * <p>
  * Typically application developers would not use this interface directly as
  * the {@link Application} interface provides both higher-level concepts and
@@ -47,152 +41,6 @@ import java.io.OutputStream;
  *
  * @author Brian Oliver
  */
-public class RemoteApplicationProcess implements ApplicationProcess
+public interface RemoteApplicationProcess extends ApplicationProcess
 {
-    /**
-     * The {@link Session} for the remote application.
-     */
-    protected Session session;
-
-    /**
-     * The {@link ChannelExec} for the remote application.
-     */
-    protected ChannelExec channel;
-
-    /**
-     * The {@link InputStream} from which to read stdout from the remote application.
-     */
-    private InputStream inputStream;
-
-    /**
-     * The {@link OutputStream} from which to write to the stdin of the remote application.
-     */
-    private OutputStream outputStream;
-
-    /**
-     * The {@link InputStream} from which to read stderr from the remote application.
-     */
-    private InputStream errorStream;
-
-    /**
-     * The exit status of the remote application (null means we don't yet know)
-     */
-    private Integer exitStatus;
-
-
-    /**
-     * Constructs an {@link RemoteApplicationProcess}
-     *
-     * @param session  the {@link Session} for the remote application
-     * @param channel  the {@link ChannelExec} for the remote application
-     *
-     * @throws IOException  when the {@link RemoteApplicationProcess} can't establish
-     *                      the necessary input/output streams
-     */
-    public RemoteApplicationProcess(Session     session,
-                                    ChannelExec channel) throws IOException
-    {
-        this.session = session;
-        this.channel = channel;
-
-        // establish the input/output streams for the Channel
-        this.inputStream  = channel.getInputStream();
-        this.outputStream = channel.getOutputStream();
-        this.errorStream  = channel.getErrStream();
-
-        // initially we don't know the exit status
-        this.exitStatus = null;
-    }
-
-
-    @Override
-    public long getId()
-    {
-        return channel.getId();
-    }
-
-
-    @Override
-    @Deprecated
-    public void destroy()
-    {
-        close();
-    }
-
-
-    @Override
-    public void close()
-    {
-        // prior to closing, attempt to get the exit status (if we can)
-        if (exitStatus == null &&!channel.isClosed())
-        {
-            exitStatus = channel.getExitStatus();
-        }
-
-        channel.disconnect();
-        session.disconnect();
-    }
-
-
-    @Override
-    public int waitFor()
-    {
-        if (exitStatus == null)
-        {
-            if (channel == null || session == null)
-            {
-                throw new RuntimeException("The remote application has terminated.  No exit status is available");
-            }
-            else
-            {
-                int status = channel.getExitStatus();
-
-                while (status == -1)
-                {
-                    try
-                    {
-                        Thread.sleep(500);
-
-                        status = channel.getExitStatus();
-                    }
-                    catch (InterruptedException e)
-                    {
-                        throw new RuntimeException("Interrupted while waiting for application to terminate", e);
-                    }
-                }
-
-                exitStatus = status;
-            }
-        }
-
-        return exitStatus;
-    }
-
-
-    @Override
-    public OutputStream getOutputStream()
-    {
-        return outputStream;
-    }
-
-
-    @Override
-    public InputStream getInputStream()
-    {
-        return inputStream;
-    }
-
-
-    @Override
-    public InputStream getErrorStream()
-    {
-        return errorStream;
-    }
-
-
-    @Override
-    public int exitValue()
-    {
-        return exitStatus == null ? -1 : exitStatus;
-    }
 }
