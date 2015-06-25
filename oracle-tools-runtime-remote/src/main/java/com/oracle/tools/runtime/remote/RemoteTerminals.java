@@ -1,5 +1,5 @@
 /*
- * File: AbstractJavaApplicationBuilder.java
+ * File: RemoteTerminals.java
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
@@ -23,30 +23,38 @@
  * "Portions Copyright [year] [name of copyright owner]"
  */
 
-package com.oracle.tools.runtime.java;
+package com.oracle.tools.runtime.remote;
 
-import com.oracle.tools.runtime.AbstractApplicationBuilder;
-import com.oracle.tools.runtime.Platform;
+import com.oracle.tools.runtime.Application;
+import com.oracle.tools.runtime.ApplicationSchema;
+
+import com.oracle.tools.runtime.remote.ssh.JSchRemoteTerminal;
 
 /**
- * An {@link AbstractJavaApplicationBuilder} is the base implementation for {@link JavaApplicationBuilder}s.
+ * Helper methods to construct various builders for {@link RemoteTerminal}s.
  * <p>
- * Copyright (c) 2011. All Rights Reserved. Oracle Corporation.<br>
+ * Copyright (c) 2015. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Brian Oliver
  */
-public abstract class AbstractJavaApplicationBuilder<A extends JavaApplication, P extends Platform>
-    extends AbstractApplicationBuilder<A, P> implements JavaApplicationBuilder<A, P>
+public class RemoteTerminals
 {
     /**
-     * Constructs a {@link AbstractJavaApplicationBuilder} for the specified
-     * {@link Platform}
+     * Obtain a {@link RemoteTerminalBuilder} that will create {@link JSchRemoteTerminal}s (for SSH).
      *
-     * @param platform  the {@link Platform}
+     * @return a {@link RemoteTerminalBuilder} for SSH
      */
-    public AbstractJavaApplicationBuilder(P platform)
+    public static RemoteTerminalBuilder ssh()
     {
-        super(platform);
+        return new RemoteTerminalBuilder()
+        {
+            @Override
+            public <A extends Application, S extends ApplicationSchema<A>,
+                    E extends RemoteApplicationEnvironment> RemoteTerminal<A, S, E> realize(RemotePlatform platform)
+            {
+                return new JSchRemoteTerminal<>(platform);
+            }
+        };
     }
 }

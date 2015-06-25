@@ -71,10 +71,7 @@ public class RemotePlatformTest
         ApplicationBuilder builder  = platform.getApplicationBuilder(JavaApplication.class);
 
         assertThat(builder, instanceOf(RemoteJavaApplicationBuilder.class));
-        assertThat(((RemoteJavaApplicationBuilder) builder).hostName, is(address.getHostAddress()));
-        assertThat(((RemoteJavaApplicationBuilder) builder).port, is(1234));
-        assertThat(((RemoteJavaApplicationBuilder) builder).userName, is("jk"));
-        assertThat(((RemoteJavaApplicationBuilder) builder).authentication, is(sameInstance(auth)));
+        assertThat((RemotePlatform) builder.getPlatform(), is(sameInstance(platform)));
     }
 
 
@@ -88,9 +85,6 @@ public class RemotePlatformTest
         ApplicationBuilder builder  = platform.getApplicationBuilder(SimpleApplication.class);
 
         assertThat(builder, instanceOf(SimpleRemoteApplicationBuilder.class));
-        assertThat(((SimpleRemoteApplicationBuilder) builder).hostName, is(address.getHostAddress()));
-        assertThat(((SimpleRemoteApplicationBuilder) builder).port, is(1234));
-        assertThat(((SimpleRemoteApplicationBuilder) builder).userName, is("jk"));
-        assertThat(((SimpleRemoteApplicationBuilder) builder).authentication, is(sameInstance(auth)));
+        assertThat((RemotePlatform) builder.getPlatform(), is(sameInstance(platform)));
     }
 }

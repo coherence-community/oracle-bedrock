@@ -88,7 +88,8 @@ import java.util.logging.Logger;
  *
  * @author Brian Oliver
  */
-public class LocalJavaApplicationBuilder<A extends JavaApplication> extends AbstractJavaApplicationBuilder<A>
+public class LocalJavaApplicationBuilder<A extends JavaApplication>
+    extends AbstractJavaApplicationBuilder<A, LocalPlatform>
 {
     /**
      * The {@link Logger} for this class.
@@ -97,11 +98,14 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication> extends Abst
 
 
     /**
-     * Constructs a {@link LocalJavaApplicationBuilder}.
+     * Constructs a {@link LocalJavaApplicationBuilder} for the specified
+     * {@link LocalPlatform}.
+     *
+     * @param platform  the {@link LocalPlatform}
      */
-    public LocalJavaApplicationBuilder()
+    public LocalJavaApplicationBuilder(LocalPlatform platform)
     {
-        super();
+        super(platform);
     }
 
 
@@ -109,7 +113,6 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication> extends Abst
     public <T extends A, S extends ApplicationSchema<T>> T realize(S                  applicationSchema,
                                                                    String             applicationName,
                                                                    ApplicationConsole console,
-                                                                   Platform           platform,
                                                                    Option...          applicationOptions)
     {
         // TODO: this should be a safe cast but we should also check to make sure

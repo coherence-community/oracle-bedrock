@@ -30,14 +30,15 @@ import com.microsoft.wsman.shell.ReceiveResponse;
 import com.microsoft.wsman.shell.StreamType;
 
 import com.oracle.tools.deferred.Eventually;
+
 import org.junit.Test;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 
 import static com.oracle.tools.deferred.DeferredHelper.invoking;
+
 import static org.hamcrest.CoreMatchers.is;
 
 import static org.hamcrest.Matchers.greaterThan;
+
 import static org.junit.Assert.assertThat;
 
 import static org.mockito.Mockito.mock;
@@ -46,6 +47,7 @@ import static org.mockito.Mockito.when;
 import java.io.ByteArrayOutputStream;
 
 import java.math.BigInteger;
+
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -58,9 +60,6 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class OutputStreamConnectorTest
 {
-    /**
-     *
-     */
     @Test
     public void shouldPollForOutputAndPipeToStreams() throws Exception
     {
@@ -106,9 +105,6 @@ public class OutputStreamConnectorTest
     }
 
 
-    /**
-     *
-     */
     @Test
     public void shouldPollForOutputWhenEmptyOutputReturned() throws Exception
     {
@@ -138,9 +134,6 @@ public class OutputStreamConnectorTest
     }
 
 
-    /**
-     *
-     */
     @Test
     public void shouldPollForOutputWhenNoOutputReturned() throws Exception
     {
@@ -163,9 +156,6 @@ public class OutputStreamConnectorTest
     }
 
 
-    /**
-     *
-     */
     @Test
     public void shouldHandleCommandStateWithNoExitCode() throws Exception
     {
@@ -188,9 +178,6 @@ public class OutputStreamConnectorTest
     }
 
 
-    /**
-     *
-     */
     @Test
     public void shouldHandleCommandStateWithExitCodeSet() throws Exception
     {
@@ -214,9 +201,6 @@ public class OutputStreamConnectorTest
     }
 
 
-    /**
-     *
-     */
     @Test
     public void shouldReturnExitCodeFromWaitFor() throws Exception
     {
@@ -238,9 +222,7 @@ public class OutputStreamConnectorTest
         assertThat(connector.waitFor(), is(2));
     }
 
-    /**
-     *
-     */
+
     @Test
     public void shouldWaitForCompletion() throws Exception
     {
@@ -258,7 +240,7 @@ public class OutputStreamConnectorTest
         final OutputStreamConnector connector = new OutputStreamConnector(session, stdOut, stdErr);
         final AtomicInteger         exitCode  = new AtomicInteger();
 
-        Thread t = new Thread()
+        Thread                      t         = new Thread()
         {
             @Override
             public void run()
@@ -276,9 +258,7 @@ public class OutputStreamConnectorTest
         assertThat(exitCode.get(), is(99));
     }
 
-    /**
-     *
-     */
+
     @Test
     public void shouldCloseConnector() throws Exception
     {
@@ -309,5 +289,4 @@ public class OutputStreamConnectorTest
 
         assertThat(connector.getExitCode(), is(0));
     }
-
 }

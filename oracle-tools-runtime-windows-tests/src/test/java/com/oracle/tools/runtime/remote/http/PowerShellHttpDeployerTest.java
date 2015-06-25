@@ -35,14 +35,12 @@ import com.oracle.tools.runtime.SimpleApplication;
 import com.oracle.tools.runtime.SimpleApplicationSchema;
 
 import com.oracle.tools.runtime.remote.*;
-
 import com.oracle.tools.runtime.remote.options.Deployer;
-
 import com.oracle.tools.runtime.remote.winrm.AbstractWindowsTest;
 
 import org.hamcrest.CoreMatchers;
-import org.junit.Assume;
 
+import org.junit.Assume;
 import org.junit.Test;
 
 import org.mockito.ArgumentCaptor;
@@ -51,6 +49,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.sameInstance;
 
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+
 import static org.junit.Assert.assertThat;
 
 import static org.mockito.Matchers.any;

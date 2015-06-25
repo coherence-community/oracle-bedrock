@@ -1,5 +1,5 @@
 /*
- * File: RemoteApplicationProcess.java
+ * File: WindowsTerminals.java
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
@@ -26,21 +26,38 @@
 package com.oracle.tools.runtime.remote;
 
 import com.oracle.tools.runtime.Application;
-import com.oracle.tools.runtime.ApplicationProcess;
+import com.oracle.tools.runtime.ApplicationSchema;
+
+import com.oracle.tools.runtime.remote.winrm.WindowsRemoteTerminal;
 
 /**
- * An {@link ApplicationProcess} that is executing or executed on
- * a {@link RemotePlatform}.
+ * Helper methods to construct various builders for Windows-based
+ * {@link RemoteTerminal}s.
  * <p>
- * Typically application developers would not use this interface directly as
- * the {@link Application} interface provides both higher-level concepts and
- * increased functionality over that of which is defined here.
- * <p>
- * Copyright (c) 2014. All Rights Reserved. Oracle Corporation.<br>
+ * Copyright (c) 2015. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
- * @author Brian Oliver
+ * @author Jonathan Knight
  */
-public interface RemoteApplicationProcess extends ApplicationProcess
+public class WindowsTerminals
 {
+    /**
+     * Create a {@link RemoteTerminalBuilder} that creates {@link WindowsRemoteTerminal} instances
+     * running Windows cmd.exe.
+     *
+     * @return a {@link RemoteTerminalBuilder} that creates {@link WindowsRemoteTerminal} instances
+     *         running cmd.exe
+     */
+    public static RemoteTerminalBuilder cmd()
+    {
+        return new RemoteTerminalBuilder()
+        {
+            @Override
+            public <A extends Application, S extends ApplicationSchema<A>,
+                    E extends RemoteApplicationEnvironment> RemoteTerminal<A, S, E> realize(RemotePlatform platform)
+            {
+                return new WindowsRemoteTerminal<>(platform);
+            }
+        };
+    }
 }

@@ -31,14 +31,16 @@ import com.oracle.tools.Options;
 import java.net.InetAddress;
 
 /**
- * A base class for implementations of {@link Platform}.
+ * An abstract implementation of a {@link Platform}.
  * <p>
  * Copyright (c) 2014. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Jonathan Knight
+ *
+ * @param <P>  the type of {@link Platform} used by {@link ApplicationBuilder}s
  */
-public abstract class AbstractPlatform implements Platform
+public abstract class AbstractPlatform<P extends Platform> implements Platform
 {
     /**
      * The name of this {@link Platform}.
@@ -85,14 +87,14 @@ public abstract class AbstractPlatform implements Platform
                                                                              ApplicationConsole console,
                                                                              Option...          options)
     {
-        ApplicationBuilder<A> builder = getApplicationBuilder(applicationSchema.getApplicationClass());
+        ApplicationBuilder<A, P> builder = getApplicationBuilder(applicationSchema.getApplicationClass());
 
         if (builder == null)
         {
             return null;
         }
 
-        return builder.realize(applicationSchema, applicationName, console, this, options);
+        return builder.realize(applicationSchema, applicationName, console, options);
     }
 
 
@@ -108,5 +110,5 @@ public abstract class AbstractPlatform implements Platform
      *          the specified {@link Application} {@link Class}
      */
     public abstract <A extends Application,
-                     B extends ApplicationBuilder<A>> B getApplicationBuilder(Class<A> applicationClass);
+                     B extends ApplicationBuilder<A, P>> B getApplicationBuilder(Class<A> applicationClass);
 }

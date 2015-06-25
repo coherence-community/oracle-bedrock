@@ -82,7 +82,8 @@ import java.util.logging.Logger;
  * @author Brian Oliver
  * @author Jonathan Knight
  */
-public class ContainerBasedJavaApplicationBuilder<A extends JavaApplication> extends AbstractJavaApplicationBuilder<A>
+public class ContainerBasedJavaApplicationBuilder<A extends JavaApplication>
+    extends AbstractJavaApplicationBuilder<A, JavaVirtualMachine>
 {
     /**
      * The {@link Logger} for this class.
@@ -91,11 +92,14 @@ public class ContainerBasedJavaApplicationBuilder<A extends JavaApplication> ext
 
 
     /**
-     * Constructs a {@link ContainerBasedJavaApplicationBuilder}.
+     * Constructs a {@link ContainerBasedJavaApplicationBuilder} for the
+     * specified {@link JavaVirtualMachine} platform.
+     *
+     * @param platform the {@link JavaVirtualMachine} platform
      */
-    public ContainerBasedJavaApplicationBuilder()
+    public ContainerBasedJavaApplicationBuilder(JavaVirtualMachine platform)
     {
-        super();
+        super(platform);
     }
 
 
@@ -152,7 +156,6 @@ public class ContainerBasedJavaApplicationBuilder<A extends JavaApplication> ext
     public <T extends A, S extends ApplicationSchema<T>> T realize(S                  applicationSchema,
                                                                    String             applicationName,
                                                                    ApplicationConsole console,
-                                                                   Platform           platform,
                                                                    Option...          applicationOptions)
     {
         // TODO: this should be a safe cast but we should also check to make sure

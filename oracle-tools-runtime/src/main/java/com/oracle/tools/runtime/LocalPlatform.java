@@ -50,8 +50,8 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 
 import java.util.Enumeration;
-
 import java.util.List;
+
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -65,13 +65,16 @@ import java.util.concurrent.TimeoutException;
  * @author Jonathan Knight
  * @author Brian Oliver
  */
-public class LocalPlatform extends AbstractPlatform
+public class LocalPlatform extends AbstractPlatform<LocalPlatform>
 {
     /**
      * The singleton instance of {@link LocalPlatform}.
      */
-    private static LocalPlatform  INSTANCE = new LocalPlatform();
+    private static LocalPlatform INSTANCE = new LocalPlatform();
 
+    /**
+     * An {@link AvailablePortIterator} for the {@link LocalPlatform}.
+     */
     private AvailablePortIterator availablePortIterator;
 
     /**
@@ -114,7 +117,9 @@ public class LocalPlatform extends AbstractPlatform
 
         List<InetAddress> bindableAddresses = NetworkHelper.getInetAddresses(NetworkHelper.BINDABLE_ADDRESS);
 
-        this.availablePortIterator = new AvailablePortIterator(30000, AvailablePortIterator.MAXIMUM_PORT, bindableAddresses);
+        this.availablePortIterator = new AvailablePortIterator(30000,
+                                                               AvailablePortIterator.MAXIMUM_PORT,
+                                                               bindableAddresses);
     }
 
 
@@ -152,15 +157,16 @@ public class LocalPlatform extends AbstractPlatform
 
     @Override
     @SuppressWarnings("unchecked")
-    public <A extends Application, B extends ApplicationBuilder<A>> B getApplicationBuilder(Class<A> applicationClass)
+    public <A extends Application,
+            B extends ApplicationBuilder<A, LocalPlatform>> B getApplicationBuilder(Class<A> applicationClass)
     {
         if (JavaApplication.class.isAssignableFrom(applicationClass))
         {
-            return (B) new LocalJavaApplicationBuilder();
+            return (B) new LocalJavaApplicationBuilder(this);
         }
         else
         {
-            return (B) new SimpleApplicationBuilder();
+            return (B) new SimpleApplicationBuilder(this);
         }
     }
 

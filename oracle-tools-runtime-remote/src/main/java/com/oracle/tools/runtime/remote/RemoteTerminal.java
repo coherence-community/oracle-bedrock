@@ -1,9 +1,9 @@
 /*
- * File: RemoteShell.java
+ * File: RemoteTerminal.java
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * The contents of this file are subject to the terms and conditions of
+ * The contents of this file are subject to the terms and conditions of 
  * the Common Development and Distribution License 1.0 (the "License").
  *
  * You may not use this file except in compliance with the License.
@@ -26,52 +26,50 @@
 package com.oracle.tools.runtime.remote;
 
 import com.oracle.tools.Options;
+
 import com.oracle.tools.runtime.Application;
 import com.oracle.tools.runtime.ApplicationSchema;
 import com.oracle.tools.runtime.Platform;
 
-import java.io.File;
-
 /**
- * A {@link RemoteShell} is a wrapper around various types
- * of shell running on a remote platform.
+ * An internal mechanism for interacting with a {@link RemotePlatform}, including
+ * realizing {@link RemoteApplicationProcess}es and creating remote directories.
  * <p>
  * Copyright (c) 2015. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Jonathan Knight
  */
-public interface RemoteShell<A extends Application,S extends ApplicationSchema<A>,
-        E extends RemoteApplicationEnvironment>
+public interface RemoteTerminal<A extends Application, S extends ApplicationSchema<A>,
+                                E extends RemoteApplicationEnvironment>
 {
     /**
-     * Realizes an instance of an {@link Application}.
+     * Realizes an {@link RemoteApplicationProcess}.
      *
      * @param applicationSchema  the {@link ApplicationSchema} to use for realizing
      *                           the {@link RemoteApplicationProcess}
      * @param applicationName    the name of the application
-     * @param platform           an optional {@link Platform} on which the {@link RemoteApplicationProcess}
-     *                           will be realized
      * @param environment        the {@link RemoteApplicationEnvironment} for the application
-     * @param workingDirectory the working directory for the process
+     * @param workingDirectory   the working directory for the process
      * @param options            the {@link Options} to use when realizing the {@link RemoteApplicationProcess}
      *
      * @return an {@link RemoteApplicationProcess} representing the application realized by
-     *         the {@link RemoteShell}
+     *         the {@link RemoteTerminal}
      *
      * @throws RuntimeException when a problem occurs while starting the application
      */
-    RemoteApplicationProcess realize(S         applicationSchema,
-                                     String    applicationName,
-                                     Platform  platform,
-                                     E         environment,
-                                     String    workingDirectory,
-                                     Options   options);
+    RemoteApplicationProcess realize(S        applicationSchema,
+                                     String   applicationName,
+                                     E        environment,
+                                     String   workingDirectory,
+                                     Options  options);
+
 
     /**
-     * Ensure that the specified directory exists on the remote platform.
+     * Ensure that the specified directory exists on the {@link RemotePlatform}.
      *
      * @param directoryName the directory to create
      */
-    void makeDirectories(String directoryName, Options options);
+    void makeDirectories(String  directoryName,
+                         Options options);
 }

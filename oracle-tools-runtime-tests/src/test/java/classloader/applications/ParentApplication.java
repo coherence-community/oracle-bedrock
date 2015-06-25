@@ -26,8 +26,8 @@
 package classloader.applications;
 
 import com.oracle.tools.runtime.ApplicationConsole;
+import com.oracle.tools.runtime.LocalPlatform;
 import com.oracle.tools.runtime.console.SystemApplicationConsole;
-import com.oracle.tools.runtime.java.LocalJavaApplicationBuilder;
 import com.oracle.tools.runtime.java.SimpleJavaApplication;
 import com.oracle.tools.runtime.java.SimpleJavaApplicationSchema;
 import com.oracle.tools.runtime.options.Orphanable;
@@ -62,14 +62,11 @@ public class ParentApplication
         schema.setSystemProperty("server.address", System.getProperty("server.address"));
         schema.setSystemProperty("server.port", System.getProperty("server.port"));
 
-        LocalJavaApplicationBuilder<SimpleJavaApplication> builder =
-            new LocalJavaApplicationBuilder<SimpleJavaApplication>();
-
         schema.addOption(Orphanable.enabled(Boolean.getBoolean("orphan.children")));
 
         ApplicationConsole console = new SystemApplicationConsole();
 
-        try (SimpleJavaApplication application = builder.realize(schema, "client", console))
+        try (SimpleJavaApplication application = LocalPlatform.getInstance().realize("client", schema, console))
         {
             application.waitFor();
         }

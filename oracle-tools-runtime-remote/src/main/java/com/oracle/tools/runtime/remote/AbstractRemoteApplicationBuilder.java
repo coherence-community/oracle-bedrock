@@ -39,8 +39,8 @@ import com.oracle.tools.runtime.options.PlatformSeparators;
 import com.oracle.tools.runtime.options.Shell;
 import com.oracle.tools.runtime.options.TemporaryDirectory;
 
-import com.oracle.tools.runtime.remote.options.Deployment;
 import com.oracle.tools.runtime.remote.options.Deployer;
+import com.oracle.tools.runtime.remote.options.Deployment;
 import com.oracle.tools.runtime.remote.ssh.SftpDeployer;
 
 import java.io.File;
@@ -50,8 +50,7 @@ import java.util.Calendar;
 import java.util.Iterator;
 
 /**
- * An {@link AbstractRemoteApplicationBuilder} is a base implementation of an {@link RemoteApplicationBuilder}
- * (over SSH).
+ * An abstract implementation of a {@link RemoteApplicationBuilder}.
  *
  * @param <A>  the type of the {@link Application}s the {@link RemoteApplicationBuilder} will realize
  * @param <E>  the type of the {@link RemoteApplicationEnvironment} used by the {@link RemoteApplicationBuilder}
@@ -64,28 +63,8 @@ import java.util.Iterator;
  */
 public abstract class AbstractRemoteApplicationBuilder<A extends Application, E extends RemoteApplicationEnvironment,
                                                        B extends AbstractRemoteApplicationBuilder<A, E, B>>
-    extends AbstractApplicationBuilder<A> implements RemoteApplicationBuilder<A>
+    extends AbstractApplicationBuilder<A, RemotePlatform> implements RemoteApplicationBuilder<A>
 {
-    /**
-     * The name of the remote host for the SSH-based session.
-     */
-    protected String hostName;
-
-    /**
-     * The port of the remote host to connect for the SSH-based session.
-     */
-    protected int port;
-
-    /**
-     * The {@link Authentication} to use for the SSH-based session.
-     */
-    protected Authentication authentication;
-
-    /**
-     * The user name to use for the SSH-based session.
-     */
-    protected String userName;
-
     /**
      * The {@link PropertiesBuilder} defining custom environment variables to
      * establish when realizing a remote {@link Application}.
@@ -94,39 +73,14 @@ public abstract class AbstractRemoteApplicationBuilder<A extends Application, E 
 
 
     /**
-     * Constructs an {@link AbstractRemoteApplicationBuilder} (using the default port).
+     * Constructs an {@link AbstractRemoteApplicationBuilder} for a specified
+     * {@link RemotePlatform}.
      *
-     * @param hostName        the remote host name
-     * @param userName        the user name on the remote host
-     * @param authentication  the {@link Authentication} for connecting to the host
+     * @param platform  the {@link RemotePlatform}
      */
-    public AbstractRemoteApplicationBuilder(String         hostName,
-                                            String         userName,
-                                            Authentication authentication)
+    public AbstractRemoteApplicationBuilder(RemotePlatform platform)
     {
-        this(hostName, DEFAULT_PORT, userName, authentication);
-    }
-
-
-    /**
-     * Constructs an {@link AbstractRemoteApplicationBuilder}.
-     *
-     * @param hostName        the remote host name
-     * @param port            the remote port
-     * @param userName        the user name on the remote host
-     * @param authentication  the {@link Authentication} for connecting to the host
-     */
-    public AbstractRemoteApplicationBuilder(String         hostName,
-                                            int            port,
-                                            String         userName,
-                                            Authentication authentication)
-    {
-        super();
-
-        this.hostName       = hostName;
-        this.port           = port;
-        this.userName       = userName;
-        this.authentication = authentication;
+        super(platform);
 
         // by default there are no custom remote environment variables
         remoteEnvironmentVariablesBuilder = new PropertiesBuilder();
@@ -176,21 +130,18 @@ public abstract class AbstractRemoteApplicationBuilder<A extends Application, E 
      * to be used for configuring and realizing a remote {@link Application}.
      *
      * @param schema           the {@link com.oracle.tools.runtime.ApplicationSchema} defining the application
-     * @param platform         the {@link Platform} representing the remote O/S
      * @param options  the {@link Options} for the {@link Platform}
      *
      * @return the {@link RemoteApplicationEnvironment}
      */
-    abstract protected <T extends A, S extends ApplicationSchema<T>> E getRemoteApplicationEnvironment(S        schema,
-                                                                                                       Platform platform,
-                                                                                                       Options  options);
+    abstract protected <T extends A, S extends ApplicationSchema<T>> E getRemoteApplicationEnvironment(S       schema,
+                                                                                                       Options options);
 
 
     /**
      * Creates the {@link Application} representing the underlying
      * {@link RemoteApplicationProcess}.
      *
-     * @param platform         the {@link Platform} that this {@link Application} is running on
      * @param schema           the {@link ApplicationSchema} used to define the application
      * @param environment      the {@link RemoteApplicationEnvironment} for the application
      * @param applicationName  the name of the application
@@ -200,8 +151,7 @@ public abstract class AbstractRemoteApplicationBuilder<A extends Application, E 
      *
      * @return the {@link Application}
      */
-    protected abstract <T extends A, S extends ApplicationSchema<T>> T createApplication(Platform                 platform,
-                                                                                         Options                  options,
+    protected abstract <T extends A, S extends ApplicationSchema<T>> T createApplication(Options                  options,
                                                                                          S                        schema,
                                                                                          E                        environment,
                                                                                          String                   applicationName,
@@ -214,7 +164,6 @@ public abstract class AbstractRemoteApplicationBuilder<A extends Application, E 
     public <T extends A, S extends ApplicationSchema<T>> T realize(S                  applicationSchema,
                                                                    String             applicationName,
                                                                    ApplicationConsole console,
-                                                                   Platform           platform,
                                                                    Option...          applicationOptions)
     {
         // ---- establish the Options for the Application -----
@@ -243,7 +192,7 @@ public abstract class AbstractRemoteApplicationBuilder<A extends Application, E 
 
         // obtain the builder-specific remote application environment based on the schema
         // NOTE: This call will modify the Options so should be done before anything else!!
-        E environment = getRemoteApplicationEnvironment(applicationSchema, platform, options);
+        E environment = getRemoteApplicationEnvironment(applicationSchema, options);
 
         // ----- deploy remote application artifacts -----
 
@@ -256,7 +205,7 @@ public abstract class AbstractRemoteApplicationBuilder<A extends Application, E 
             try
             {
                 for (DeploymentArtifact deploymentArtifact :
-                        deployment.getDeploymentArtifacts(applicationSchema, platform, options))
+                    deployment.getDeploymentArtifacts(applicationSchema, platform, options))
                 {
                     artifactsToDeploy.add(deploymentArtifact);
                 }
@@ -279,15 +228,14 @@ public abstract class AbstractRemoteApplicationBuilder<A extends Application, E 
         {
             String   sanitizedApplicationName = separators.asSanitizedFileName(applicationName);
             Calendar now                      = Calendar.getInstance();
-            String temporaryDirectoryName     = String.format("%1$s-%2$tY%2$tm%2$td-%2$tH%2$tM%2$tS-%2$tL",
-                                                              sanitizedApplicationName,
-                                                              now);
+            String temporaryDirectoryName = String.format("%1$s-%2$tY%2$tm%2$td-%2$tH%2$tM%2$tS-%2$tL",
+                                                          sanitizedApplicationName,
+                                                          now);
 
             // determine the remote TemporaryDirectory
             TemporaryDirectory temporaryDirectory = options.get(TemporaryDirectory.class,
-                                                                TemporaryDirectory
-                                                                    .at(separators.getFileSeparator()
-                                                                        + "tmp"));
+                                                                TemporaryDirectory.at(separators.getFileSeparator()
+                                                                                      + "tmp"));
 
             remoteDirectoryFile = new File(temporaryDirectory.get().toFile(), temporaryDirectoryName);
             remoteDirectory     = separators.asRemotePlatformFileName(remoteDirectoryFile.toString());
@@ -298,11 +246,11 @@ public abstract class AbstractRemoteApplicationBuilder<A extends Application, E 
         }
 
         // Obtain the RemoteShell that will be used to realize the process
-        RemoteShellType          shellType   = options.get(RemoteShellType.class, RemoteShellType.sshShell());
-        RemoteShell<T,S,E>       shell       = shellType.createShell(userName, authentication, hostName, port);
+        RemoteTerminalBuilder   terminalBuilder = options.get(RemoteTerminalBuilder.class, RemoteTerminals.ssh());
+        RemoteTerminal<T, S, E> terminal        = terminalBuilder.realize(platform);
 
         // create the working directory
-        shell.makeDirectories(remoteDirectory, options);
+        terminal.makeDirectories(remoteDirectory, options);
 
         // Deploy any artifacts required
         Deployer deployer = options.get(Deployer.class, new SftpDeployer());
@@ -310,17 +258,14 @@ public abstract class AbstractRemoteApplicationBuilder<A extends Application, E 
         deployer.deploy(artifactsToDeploy, remoteDirectory, platform, options.asArray());
 
         // Realize the remote process
-        RemoteApplicationProcess process = shell.realize(applicationSchema, applicationName, platform,
-                                                             environment, remoteDirectory, options);
+        RemoteApplicationProcess process = terminal.realize(applicationSchema,
+                                                            applicationName,
+                                                            environment,
+                                                            remoteDirectory,
+                                                            options);
 
         // create the Application based on the RemoteApplicationProcess
-        T application = createApplication(platform,
-                                          options,
-                                          applicationSchema,
-                                          environment,
-                                          applicationName,
-                                          process,
-                                          console);
+        T application = createApplication(options, applicationSchema, environment, applicationName, process, console);
 
         // ----- notify all of the lifecycle listeners -----
 

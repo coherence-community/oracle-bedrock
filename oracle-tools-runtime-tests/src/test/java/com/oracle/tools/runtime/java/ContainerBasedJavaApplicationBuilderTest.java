@@ -54,17 +54,17 @@ import java.io.IOException;
  * @author Brian Oliver
  * @author Jonathan Knight
  */
-public class ContainerBasedJavaApplicationBuilderTest extends AbstractJavaApplicationBuilderTest
+public class ContainerBasedJavaApplicationBuilderTest extends AbstractJavaApplicationBuilderTest<JavaVirtualMachine>
 {
     @Override
-    public JavaApplicationBuilder<JavaApplication> newJavaApplicationBuilder()
+    public JavaApplicationBuilder<JavaApplication, JavaVirtualMachine> newJavaApplicationBuilder()
     {
-        return new ContainerBasedJavaApplicationBuilder<JavaApplication>();
+        return new ContainerBasedJavaApplicationBuilder<>(getPlatform());
     }
 
 
     @Override
-    public Platform getPlatform()
+    public JavaVirtualMachine getPlatform()
     {
         return JavaVirtualMachine.getInstance();
     }

@@ -1,5 +1,5 @@
 /*
- * File: RemoteApplicationProcess.java
+ * File: AbstractRemoteTerminal.java
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
@@ -26,21 +26,43 @@
 package com.oracle.tools.runtime.remote;
 
 import com.oracle.tools.runtime.Application;
-import com.oracle.tools.runtime.ApplicationProcess;
+import com.oracle.tools.runtime.ApplicationSchema;
 
 /**
- * An {@link ApplicationProcess} that is executing or executed on
- * a {@link RemotePlatform}.
+ * An abstract {@link RemoteTerminal}.
  * <p>
- * Typically application developers would not use this interface directly as
- * the {@link Application} interface provides both higher-level concepts and
- * increased functionality over that of which is defined here.
- * <p>
- * Copyright (c) 2014. All Rights Reserved. Oracle Corporation.<br>
+ * Copyright (c) 2015. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
- * @author Brian Oliver
+ * @author Jonathan Knight
  */
-public interface RemoteApplicationProcess extends ApplicationProcess
+public abstract class AbstractRemoteTerminal<A extends Application, S extends ApplicationSchema<A>,
+                                             E extends RemoteApplicationEnvironment> implements RemoteTerminal<A, S, E>
 {
+    /**
+     * The {@link RemotePlatform} on which the {@link RemoteTerminal} will operate.
+     */
+    private RemotePlatform platform;
+
+
+    /**
+     * Constructs an {@link AbstractRemoteTerminal} for a {@link RemotePlatform}
+     *
+     * @param platform  the {@link RemotePlatform}
+     */
+    public AbstractRemoteTerminal(RemotePlatform platform)
+    {
+        this.platform = platform;
+    }
+
+
+    /**
+     * Obtain the {@link RemotePlatform}.
+     *
+     * @return the {@link RemotePlatform}
+     */
+    public RemotePlatform getRemotePlatform()
+    {
+        return platform;
+    }
 }

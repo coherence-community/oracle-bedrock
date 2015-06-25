@@ -30,22 +30,38 @@ import com.oracle.tools.runtime.console.NullApplicationConsole;
 import java.util.UUID;
 
 /**
- * An {@link AbstractApplicationBuilder} is a base implementation of an {@link ApplicationBuilder}.
+ * An abstract implementation of an {@link ApplicationBuilder}.
  * <p>
  * Copyright (c) 2011. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Brian Oliver
- *
- * @param <A>  the type of the {@link Application}s the {@link ApplicationBuilder} will realize
  */
-public abstract class AbstractApplicationBuilder<A extends Application> implements ApplicationBuilder<A>
+public abstract class AbstractApplicationBuilder<A extends Application, P extends Platform>
+    implements ApplicationBuilder<A, P>
 {
     /**
-     * Constructs an {@link AbstractApplicationBuilder} with default {@link ApplicationSchema}.
+     * The {@link Platform} on which {@link Application}s will be realized.
      */
-    public AbstractApplicationBuilder()
+    protected P platform;
+
+
+    /**
+     * Constructs an {@link AbstractApplicationBuilder} for the specified
+     * {@link Platform}.
+     *
+     * @param platform  the {@link Platform}
+     */
+    public AbstractApplicationBuilder(P platform)
     {
+        this.platform = platform;
+    }
+
+
+    @Override
+    public P getPlatform()
+    {
+        return platform;
     }
 
 
@@ -61,15 +77,6 @@ public abstract class AbstractApplicationBuilder<A extends Application> implemen
                                                                    String applicationName)
     {
         return realize(applicationSchema, applicationName, new NullApplicationConsole());
-    }
-
-
-    @Override
-    public <T extends A, S extends ApplicationSchema<T>> T realize(S                  applicationSchema,
-                                                                   String             applicationName,
-                                                                   ApplicationConsole console)
-    {
-        return realize(applicationSchema, applicationName, console, null);
     }
 
 

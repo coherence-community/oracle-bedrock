@@ -1,5 +1,5 @@
 /*
- * File: JSchRemoteShell.java
+ * File: JSchRemoteTerminal.java
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
@@ -26,7 +26,6 @@
 package com.oracle.tools.runtime.remote.ssh;
 
 import com.jcraft.jsch.ChannelExec;
-import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
@@ -37,30 +36,28 @@ import com.oracle.tools.lang.StringHelper;
 
 import com.oracle.tools.runtime.Application;
 import com.oracle.tools.runtime.ApplicationSchema;
-import com.oracle.tools.runtime.Platform;
 
 import com.oracle.tools.runtime.options.Shell;
 
-import com.oracle.tools.runtime.remote.AbstractRemoteShell;
-import com.oracle.tools.runtime.remote.Authentication;
+import com.oracle.tools.runtime.remote.AbstractRemoteTerminal;
 import com.oracle.tools.runtime.remote.RemoteApplicationEnvironment;
 import com.oracle.tools.runtime.remote.RemoteApplicationProcess;
+import com.oracle.tools.runtime.remote.RemotePlatform;
+import com.oracle.tools.runtime.remote.RemoteTerminal;
 
-import java.io.File;
 import java.util.List;
 import java.util.Properties;
 
 /**
- * An implementation of a {@link com.oracle.tools.runtime.remote.RemoteShell} that wraps
- * an SSH session on a remote platform.
+ * A {@link RemoteTerminal} based on SSH (uses JSch) for a {@link RemotePlatform}.
  * <p>
  * Copyright (c) 2015. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Jonathan Knight
  */
-public class JSchRemoteShell<A extends Application, S extends ApplicationSchema<A>,
-                             E extends RemoteApplicationEnvironment> extends AbstractRemoteShell<A, S, E>
+public class JSchRemoteTerminal<A extends Application, S extends ApplicationSchema<A>,
+                                E extends RemoteApplicationEnvironment> extends AbstractRemoteTerminal<A, S, E>
 {
     /**
      * The {@link JSch} framework.
@@ -69,40 +66,28 @@ public class JSchRemoteShell<A extends Application, S extends ApplicationSchema<
 
 
     /**
-     * Create a {@link JSchRemoteShell} that will connect to a remote
+     * Create a {@link JSchRemoteTerminal} that will connect to a remote
      * platform with the specified connection details.
      *
-     * @param userName       the user name to use to create the SSH connection
-     * @param authentication the authentication type to use
-     * @param hostName       the host name of the remote platform
-     * @param port           the port the remote platform is listening on for SSH connections
+     * @param platform  the {@link RemotePlatform}
      */
-    public JSchRemoteShell(String         userName,
-                           Authentication authentication,
-                           String         hostName,
-                           int            port)
+    public JSchRemoteTerminal(RemotePlatform platform)
     {
-        this(userName, authentication, hostName, port, new JSchSessionFactory());
+        this(platform, new JSchSessionFactory());
     }
 
 
     /**
-     * Create a {@link JSchRemoteShell} that will connect to a remote
+     * Create a {@link JSchRemoteTerminal} that will connect to a remote
      * platform with the specified connection details.
      *
-     * @param userName         the user name to use to create the SSH connection
-     * @param authentication   the authentication type to use
-     * @param hostName         the host name of the remote platform
-     * @param port             the port the remote platform is listening on for SSH connections
+     * @param platform  the {@link RemotePlatform}
      * @param sessionFactory   the {@link JSchSessionFactory} to use to obtain a JSch {@link Session}
      */
-    public JSchRemoteShell(String             userName,
-                           Authentication     authentication,
-                           String             hostName,
-                           int                port,
-                           JSchSessionFactory sessionFactory)
+    public JSchRemoteTerminal(RemotePlatform     platform,
+                              JSchSessionFactory sessionFactory)
     {
-        super(userName, authentication, hostName, port);
+        super(platform);
 
         this.sessionFactory = sessionFactory;
     }
@@ -110,13 +95,15 @@ public class JSchRemoteShell<A extends Application, S extends ApplicationSchema<
 
     @Override
     @SuppressWarnings("unchecked")
-    public RemoteApplicationProcess realize(S        applicationSchema,
-                                            String   applicationName,
-                                            Platform platform,
-                                            E        environment,
-                                            String   workingDirectory,
-                                            Options  options)
+    public RemoteApplicationProcess realize(S       applicationSchema,
+                                            String  applicationName,
+                                            E       environment,
+                                            String  workingDirectory,
+                                            Options options)
     {
+        // acquire the remote platform on which to realize the application
+        RemotePlatform platform = getRemotePlatform();
+
         // establish a specialized SocketFactory for JSch
         JSchSocketFactory socketFactory = new JSchSocketFactory();
 
@@ -126,9 +113,9 @@ public class JSchRemoteShell<A extends Application, S extends ApplicationSchema<
         try
         {
             // create the remote session
-            session = sessionFactory.createSession(getHostName(), getPort(), getUserName(), getAuthentication(),
-                                                   socketFactory, options);
-
+            session = sessionFactory.createSession(platform.getAddress().getHostName(), platform.getPort(),
+                                                   platform.getUserName(), platform.getAuthentication(), socketFactory,
+                                                   options);
 
             ChannelExec execChannel = (ChannelExec) session.openChannel("exec");
 
@@ -182,9 +169,7 @@ public class JSchRemoteShell<A extends Application, S extends ApplicationSchema<
             }
 
             // the actual remote command must include changing to the remote directory
-            String remoteCommand = environmentVariables + String.format("cd %s ; %s",
-                                                                        workingDirectory,
-                                                                        command);
+            String remoteCommand = environmentVariables + String.format("cd %s ; %s", workingDirectory, command);
 
             execChannel.setCommand(remoteCommand);
 
@@ -213,19 +198,25 @@ public class JSchRemoteShell<A extends Application, S extends ApplicationSchema<
         }
     }
 
+
     @Override
-    public void makeDirectories(String directoryName, Options options)
+    public void makeDirectories(String  directoryName,
+                                Options options)
     {
         Session session = null;
 
         try
         {
+            // acquire the remote platform on which to realize the application
+            RemotePlatform platform = getRemotePlatform();
+
             // establish a specialized SocketFactory for JSch
             JSchSocketFactory socketFactory = new JSchSocketFactory();
 
             // create the remote session
-            session = sessionFactory.createSession(getHostName(), getPort(), getUserName(),
-                                                           getAuthentication(), socketFactory, options);
+            session = sessionFactory.createSession(platform.getAddress().getHostName(), platform.getPort(),
+                                                   platform.getUserName(), platform.getAuthentication(), socketFactory,
+                                                   options);
 
             ChannelExec execChannel = (ChannelExec) session.openChannel("exec");
 

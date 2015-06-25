@@ -76,7 +76,7 @@ import java.util.concurrent.ExecutionException;
  * @author Brian Oliver
  * @author Jonathan Knight
  */
-public abstract class AbstractJavaApplicationBuilderTest extends AbstractTest
+public abstract class AbstractJavaApplicationBuilderTest<P extends Platform> extends AbstractTest
 {
     /**
      * Creates a new {@link JavaApplicationBuilder} to use for a tests in this
@@ -84,7 +84,7 @@ public abstract class AbstractJavaApplicationBuilderTest extends AbstractTest
      *
      * @return the {@link JavaApplicationBuilder}
      */
-    public abstract JavaApplicationBuilder<JavaApplication> newJavaApplicationBuilder();
+    public abstract JavaApplicationBuilder<JavaApplication, P> newJavaApplicationBuilder();
 
 
     /**
@@ -92,7 +92,7 @@ public abstract class AbstractJavaApplicationBuilderTest extends AbstractTest
      *
      * @return  the {@link Platform} on which to realize applications
      */
-    public abstract Platform getPlatform();
+    public abstract P getPlatform();
 
 
     /**
@@ -110,16 +110,12 @@ public abstract class AbstractJavaApplicationBuilderTest extends AbstractTest
 
         schema.setPreferIPv4(true);
 
-        JavaApplicationBuilder<JavaApplication> builder  = newJavaApplicationBuilder();
-        Platform                                platform = getPlatform();
+        JavaApplicationBuilder<JavaApplication, P> builder  = newJavaApplicationBuilder();
+        P                                          platform = getPlatform();
 
-        PipedApplicationConsole                 console  = new PipedApplicationConsole();
+        PipedApplicationConsole                    console  = new PipedApplicationConsole();
 
-        try (JavaApplication application = builder.realize(schema,
-                                                           "java-app",
-                                                           console,
-                                                           platform,
-                                                           Diagnostics.enabled()))
+        try (JavaApplication application = builder.realize(schema, "java-app", console, Diagnostics.enabled()))
         {
             String stdout = console.getOutputReader().readLine();
 
@@ -155,16 +151,12 @@ public abstract class AbstractJavaApplicationBuilderTest extends AbstractTest
 
         schema.setPreferIPv4(true);
 
-        JavaApplicationBuilder<JavaApplication> builder  = newJavaApplicationBuilder();
-        Platform                                platform = getPlatform();
+        JavaApplicationBuilder<JavaApplication, P> builder  = newJavaApplicationBuilder();
+        P                                          platform = getPlatform();
 
-        PipedApplicationConsole                 console  = new PipedApplicationConsole();
+        PipedApplicationConsole                    console  = new PipedApplicationConsole();
 
-        try (JavaApplication application = builder.realize(schema,
-                                                           "java-app",
-                                                           console,
-                                                           platform,
-                                                           Diagnostics.enabled()))
+        try (JavaApplication application = builder.realize(schema, "java-app", console, Diagnostics.enabled()))
         {
             String stdout = console.getOutputReader().readLine();
 
@@ -196,9 +188,9 @@ public abstract class AbstractJavaApplicationBuilderTest extends AbstractTest
 
         schema.setSystemProperty("uuid", uuid);
 
-        JavaApplicationBuilder<JavaApplication> builder = newJavaApplicationBuilder();
+        JavaApplicationBuilder<JavaApplication, P> builder = newJavaApplicationBuilder();
 
-        ApplicationConsole                      console = new SystemApplicationConsole();
+        ApplicationConsole                         console = new SystemApplicationConsole();
 
         try (JavaApplication application = builder.realize(schema, "application", console))
         {
@@ -219,9 +211,9 @@ public abstract class AbstractJavaApplicationBuilderTest extends AbstractTest
 
         schema.setPreferIPv4(true);
 
-        JavaApplicationBuilder<JavaApplication> builder = newJavaApplicationBuilder();
+        JavaApplicationBuilder<JavaApplication, P> builder = newJavaApplicationBuilder();
 
-        ApplicationConsole                      console = new SystemApplicationConsole();
+        ApplicationConsole                         console = new SystemApplicationConsole();
 
         try (JavaApplication application = builder.realize(schema, "application", console))
         {
@@ -251,9 +243,9 @@ public abstract class AbstractJavaApplicationBuilderTest extends AbstractTest
 
         schema.setPreferIPv4(true);
 
-        JavaApplicationBuilder<JavaApplication> builder = newJavaApplicationBuilder();
+        JavaApplicationBuilder<JavaApplication, P> builder = newJavaApplicationBuilder();
 
-        ApplicationConsole                      console = new SystemApplicationConsole();
+        ApplicationConsole                         console = new SystemApplicationConsole();
 
         try (JavaApplication application = builder.realize(schema, "application", console))
         {
@@ -283,9 +275,9 @@ public abstract class AbstractJavaApplicationBuilderTest extends AbstractTest
         // we'll wait at most 5 seconds in the application
         schema.addArgument("5");
 
-        JavaApplicationBuilder<JavaApplication> builder = newJavaApplicationBuilder();
+        JavaApplicationBuilder<JavaApplication, P> builder = newJavaApplicationBuilder();
 
-        ApplicationConsole                      console = new SystemApplicationConsole();
+        ApplicationConsole                         console = new SystemApplicationConsole();
 
         try (JavaApplication application = builder.realize(schema, "sleeping", console))
         {
@@ -311,9 +303,9 @@ public abstract class AbstractJavaApplicationBuilderTest extends AbstractTest
         schema.setPreferIPv4(true);
         schema.setSystemProperty(propertyName, propertyValue);
 
-        JavaApplicationBuilder<JavaApplication> builder = newJavaApplicationBuilder();
+        JavaApplicationBuilder<JavaApplication, P> builder = newJavaApplicationBuilder();
 
-        ApplicationConsole                      console = new SystemApplicationConsole();
+        ApplicationConsole                         console = new SystemApplicationConsole();
 
         try (JavaApplication application = builder.realize(schema, "sleeping", console))
         {

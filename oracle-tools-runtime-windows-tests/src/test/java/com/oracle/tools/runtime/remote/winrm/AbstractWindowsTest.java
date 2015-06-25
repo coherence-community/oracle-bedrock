@@ -266,7 +266,7 @@ public abstract class AbstractWindowsTest
         Platform                    platform = LocalPlatform.getInstance();
         CapturingApplicationConsole console  = new CapturingApplicationConsole();
         SimpleApplicationSchema schema =
-                new SimpleApplicationSchema("cmd.exe").addArgument("/C").addArgument("winrm").addArgument("enumerate")
+            new SimpleApplicationSchema("cmd.exe").addArgument("/C").addArgument("winrm").addArgument("enumerate")
                 .addArgument("winrm/config/listener");
 
         try (SimpleApplication application = platform.realize("WinRMCheck", schema, console))

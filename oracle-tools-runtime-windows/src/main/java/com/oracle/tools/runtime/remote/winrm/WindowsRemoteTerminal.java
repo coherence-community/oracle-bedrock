@@ -1,5 +1,5 @@
 /*
- * File: WindowsRemoteShell.java
+ * File: WindowsRemoteTerminal.java
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
@@ -26,22 +26,20 @@
 package com.oracle.tools.runtime.remote.winrm;
 
 import com.oracle.tools.Options;
-
 import com.oracle.tools.runtime.Application;
 import com.oracle.tools.runtime.ApplicationSchema;
 import com.oracle.tools.runtime.LocalPlatform;
-import com.oracle.tools.runtime.Platform;
-
-import com.oracle.tools.runtime.remote.AbstractRemoteShell;
-import com.oracle.tools.runtime.remote.Authentication;
+import com.oracle.tools.runtime.remote.AbstractRemoteTerminal;
 import com.oracle.tools.runtime.remote.RemoteApplicationEnvironment;
 import com.oracle.tools.runtime.remote.RemoteApplicationProcess;
+import com.oracle.tools.runtime.remote.RemotePlatform;
+import com.oracle.tools.runtime.remote.RemoteTerminal;
 
 import java.util.Collections;
 import java.util.List;
 
 /**
- * A Windows implementation of a {@link com.oracle.tools.runtime.remote.RemoteShell}
+ * A Windows implementation of a {@link RemoteTerminal}
  * that uses the WinRM SOAP service to execute commands.
  * <p>
  * Copyright (c) 2015. All Rights Reserved. Oracle Corporation.<br>
@@ -49,35 +47,28 @@ import java.util.List;
  *
  * @author Jonathan Knight
  */
-public class WindowsRemoteShell<A extends Application, S extends ApplicationSchema<A>,
-                                E extends RemoteApplicationEnvironment> extends AbstractRemoteShell<A, S, E>
+public class WindowsRemoteTerminal<A extends Application, S extends ApplicationSchema<A>,
+                                   E extends RemoteApplicationEnvironment> extends AbstractRemoteTerminal<A, S, E>
 {
     /**
      * Create a Windows remote shell that will connect to the WinRM
-     * service running on the specified host.
+     * service running on the {@link RemotePlatform}.
      *
-     * @param userName       the user name to use to connect to the WinRM service
-     * @param authentication the {@link Authentication} use to connect to the WinRM service
-     * @param hostName       the host running the WinRM service
-     * @param port           the port that the WinRM service is listening on
+     * @param platform  the {@link RemotePlatform}
      */
-    public WindowsRemoteShell(String         userName,
-                              Authentication authentication,
-                              String         hostName,
-                              int            port)
+    public WindowsRemoteTerminal(RemotePlatform platform)
     {
-        super(userName, authentication, hostName, port);
+        super(platform);
     }
 
 
     @SuppressWarnings("unchecked")
     @Override
-    public RemoteApplicationProcess realize(S        applicationSchema,
-                                            String   applicationName,
-                                            Platform platform,
-                                            E        environment,
-                                            String   workingDirectory,
-                                            Options  options)
+    public RemoteApplicationProcess realize(S       applicationSchema,
+                                            String  applicationName,
+                                            E       environment,
+                                            String  workingDirectory,
+                                            Options options)
     {
         try
         {
@@ -110,7 +101,8 @@ public class WindowsRemoteShell<A extends Application, S extends ApplicationSche
 
 
     @Override
-    public void makeDirectories(String  directoryName, Options options)
+    public void makeDirectories(String  directoryName,
+                                Options options)
     {
         try (WindowsSession session = createSession())
         {
@@ -144,6 +136,11 @@ public class WindowsRemoteShell<A extends Application, S extends ApplicationSche
      */
     protected WindowsSession createSession()
     {
-        return new WindowsSession(getHostName(), getPort(), getUserName(), getAuthentication());
+        RemotePlatform platform = getRemotePlatform();
+
+        return new WindowsSession(platform.getAddress().getHostName(),
+                                  platform.getPort(),
+                                  platform.getUserName(),
+                                  platform.getAuthentication());
     }
 }

@@ -40,22 +40,25 @@ import java.util.List;
 import java.util.Properties;
 
 /**
- * A {@link SimpleApplicationBuilder} is an {@link ApplicationBuilder} for
- * {@link SimpleApplication}s.
+ * An {@link ApplicationBuilder} for {@link SimpleApplication}s on a
+ * {@link LocalPlatform}.
  * <p>
  * Copyright (c) 2011. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Jonathan Knight
  */
-public class SimpleApplicationBuilder extends AbstractApplicationBuilder<SimpleApplication>
+public class SimpleApplicationBuilder extends AbstractApplicationBuilder<SimpleApplication, LocalPlatform>
 {
     /**
-     * Constructs a {@link SimpleApplicationBuilder}.
+     * Constructs a {@link SimpleApplicationBuilder} for the specified
+     * {@link LocalPlatform}.
+     *
+     * @param platform  the {@link LocalPlatform}
      */
-    public SimpleApplicationBuilder()
+    public SimpleApplicationBuilder(LocalPlatform platform)
     {
-        super();
+        super(platform);
     }
 
 
@@ -63,7 +66,6 @@ public class SimpleApplicationBuilder extends AbstractApplicationBuilder<SimpleA
     public <T extends SimpleApplication, S extends ApplicationSchema<T>> T realize(S                  applicationSchema,
                                                                                    String             applicationName,
                                                                                    ApplicationConsole console,
-                                                                                   Platform           platform,
                                                                                    Option...          applicationOptions)
     {
         ApplicationSchema<T> schema = applicationSchema;

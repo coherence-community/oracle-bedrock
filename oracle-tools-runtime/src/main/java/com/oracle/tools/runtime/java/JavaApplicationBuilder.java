@@ -26,6 +26,7 @@
 package com.oracle.tools.runtime.java;
 
 import com.oracle.tools.runtime.ApplicationBuilder;
+import com.oracle.tools.runtime.Platform;
 
 /**
  * A {@link JavaApplicationBuilder} is Java specific {@link ApplicationBuilder}.
@@ -35,7 +36,7 @@ import com.oracle.tools.runtime.ApplicationBuilder;
  *
  * @author Brian Oliver
  */
-public interface JavaApplicationBuilder<A extends JavaApplication> extends ApplicationBuilder<A>
+public interface JavaApplicationBuilder<A extends JavaApplication, P extends Platform> extends ApplicationBuilder<A, P>
 {
     // this is deliberately empty
 }

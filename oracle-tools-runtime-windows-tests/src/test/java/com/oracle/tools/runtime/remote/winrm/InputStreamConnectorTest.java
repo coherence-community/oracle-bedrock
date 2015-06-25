@@ -26,6 +26,7 @@
 package com.oracle.tools.runtime.remote.winrm;
 
 import org.junit.Test;
+
 import org.mockito.ArgumentCaptor;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -56,9 +57,6 @@ import java.io.InputStream;
  */
 public class InputStreamConnectorTest
 {
-    /**
-     *
-     */
     @Test
     public void shouldCloseStream() throws Exception
     {
@@ -73,9 +71,6 @@ public class InputStreamConnectorTest
     }
 
 
-    /**
-     *
-     */
     @Test
     public void shouldSendInput() throws Exception
     {
@@ -94,9 +89,6 @@ public class InputStreamConnectorTest
     }
 
 
-    /**
-     *
-     */
     @Test
     public void shouldNotSendInputWhenStreamEnds() throws Exception
     {
@@ -115,9 +107,6 @@ public class InputStreamConnectorTest
     }
 
 
-    /**
-     *
-     */
     @Test
     public void shouldRunInputStreamConnector() throws Exception
     {

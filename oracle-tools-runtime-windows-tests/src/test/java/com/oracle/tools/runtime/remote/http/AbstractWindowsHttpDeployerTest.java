@@ -1,9 +1,9 @@
 /*
- * File: AbstractHttpDeployerTest.java
+ * File: AbstractWindowsHttpDeployerTest.java
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * The contents of this file are subject to the terms and conditions of
+ * The contents of this file are subject to the terms and conditions of 
  * the Common Development and Distribution License 1.0 (the "License").
  *
  * You may not use this file except in compliance with the License.
@@ -70,30 +70,30 @@ public abstract class AbstractWindowsHttpDeployerTest
      * @return a {@link List} containing the specified number
      *         of {@link DeploymentArtifact}s
      */
-     public List<DeploymentArtifact> createArtifactList(int count) throws Exception
-     {
-         List<DeploymentArtifact> artifacts = new ArrayList<>();
-         Random random    = new Random(System.currentTimeMillis());
-         File root      = temporaryFolder.newFolder();
+    public List<DeploymentArtifact> createArtifactList(int count) throws Exception
+    {
+        List<DeploymentArtifact> artifacts = new ArrayList<>();
+        Random                   random    = new Random(System.currentTimeMillis());
+        File                     root      = temporaryFolder.newFolder();
 
-         for (int i=0; i<count; i++)
-         {
-             File file = new File(root, "File-" + i + ".bin");
-             int  size = random.nextInt(1000) * 100;
+        for (int i = 0; i < count; i++)
+        {
+            File file = new File(root, "File-" + i + ".bin");
+            int  size = random.nextInt(1000) * 100;
 
-             try (FileOutputStream stream = new FileOutputStream(file))
-             {
-                 for (int b=0; b<size; b++)
-                 {
-                     stream.write(random.nextInt());
-                 }
-             }
+            try (FileOutputStream stream = new FileOutputStream(file))
+            {
+                for (int b = 0; b < size; b++)
+                {
+                    stream.write(random.nextInt());
+                }
+            }
 
-             artifacts.add(new DeploymentArtifact(file));
-         }
+            artifacts.add(new DeploymentArtifact(file));
+        }
 
-         return artifacts;
-     }
+        return artifacts;
+    }
 
 
     /**
@@ -105,20 +105,19 @@ public abstract class AbstractWindowsHttpDeployerTest
      *         of {@link DeploymentArtifact}s keyed on the
      *         encoded URL path of the artifacts source file name
      */
-     public Map<String,DeploymentArtifact> createArtifactMap(int count)
-             throws Exception
-     {
-         Map<String,DeploymentArtifact> artifacts = new LinkedHashMap<>();
+    public Map<String, DeploymentArtifact> createArtifactMap(int count) throws Exception
+    {
+        Map<String, DeploymentArtifact> artifacts = new LinkedHashMap<>();
 
-         for (DeploymentArtifact artifact : createArtifactList(count))
-         {
-             String urlPath = "/" + URLEncoder.encode(artifact.getSourceFile().getCanonicalPath(), "UTF-8");
+        for (DeploymentArtifact artifact : createArtifactList(count))
+        {
+            String urlPath = "/" + URLEncoder.encode(artifact.getSourceFile().getCanonicalPath(), "UTF-8");
 
-             artifacts.put(urlPath, artifact);
-         }
+            artifacts.put(urlPath, artifact);
+        }
 
-         return artifacts;
-     }
+        return artifacts;
+    }
 
 
     /**

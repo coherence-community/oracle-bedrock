@@ -235,11 +235,11 @@ public class WindowsShellOptions implements Option, ComposableOption<WindowsShel
     @Override
     public WindowsShellOptions compose(WindowsShellOptions other)
     {
-        // make a copy of the environment variables
+        // make a copy of the existing options
         WindowsShellOptions shellOptions = new WindowsShellOptions(new PropertiesBuilder(this.options),
                                                                    DEFAULT_SHELL_LIFETIME);
 
-        // add all of the other environment variables
+        // add all of the other options
         shellOptions.options.addProperties(other.options);
 
         shellOptions.shellLifetime = other.shellLifetime != null ? other.shellLifetime : this.shellLifetime;

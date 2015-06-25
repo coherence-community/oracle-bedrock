@@ -82,9 +82,6 @@ import javax.xml.bind.Marshaller;
  */
 public class SoapConnectionTest
 {
-    /**
-     *
-     */
     @Test
     public void shouldHaveCorrectURL() throws Exception
     {
@@ -94,9 +91,6 @@ public class SoapConnectionTest
     }
 
 
-    /**
-     *
-     */
     @Test
     public void shouldOpenAuthenticatedConnection() throws Exception
     {
@@ -112,7 +106,7 @@ public class SoapConnectionTest
         {
             @Override
             public List<Object> send(Envelope          envelope,
-                                HttpURLConnection httpConnection) throws IOException
+                                     HttpURLConnection httpConnection) throws IOException
             {
                 return Collections.emptyList();
             }
@@ -127,9 +121,6 @@ public class SoapConnectionTest
     }
 
 
-    /**
-     *
-     */
     @Test
     public void shouldOpenNonAuthenticatedConnectionWithNoProxy() throws Exception
     {
@@ -141,7 +132,7 @@ public class SoapConnectionTest
         {
             @Override
             public List<Object> send(Envelope          envelope,
-                                HttpURLConnection httpConnection) throws IOException
+                                     HttpURLConnection httpConnection) throws IOException
             {
                 return Collections.emptyList();
             }
@@ -162,9 +153,6 @@ public class SoapConnectionTest
     }
 
 
-    /**
-     *
-     */
     @Test
     public void shouldOpenNonAuthenticatedConnectionWithProxy() throws Exception
     {
@@ -180,7 +168,7 @@ public class SoapConnectionTest
         {
             @Override
             public List<Object> send(Envelope          envelope,
-                                HttpURLConnection httpConnection) throws IOException
+                                     HttpURLConnection httpConnection) throws IOException
             {
                 return Collections.emptyList();
             }
@@ -201,9 +189,6 @@ public class SoapConnectionTest
     }
 
 
-    /**
-     *
-     */
     @Test
     public void shouldUnmarshalSoapResponse() throws Exception
     {
@@ -241,19 +226,17 @@ public class SoapConnectionTest
         assertThat(content.getCommandId(), is("1234"));
     }
 
-    /**
-     *
-     */
+
     @Test(expected = SoapFaultException.class)
     public void shouldUnmarshalSoapFault() throws Exception
     {
-        SoapConnection  connection = new SoapConnection("http://oracle.com", 80, "/foo", "dummy", null);
-        Marshaller      marshaller = connection.getMarshaller();
+        SoapConnection connection = new SoapConnection("http://oracle.com", 80, "/foo", "dummy", null);
+        Marshaller     marshaller = connection.getMarshaller();
 
-        Envelope        envelope   = ObjectFactories.SOAP.createEnvelope();
-        Header          header     = ObjectFactories.SOAP.createHeader();
-        Body            body       = ObjectFactories.SOAP.createBody();
-        Fault           fault      = ObjectFactories.SOAP.createFault();
+        Envelope       envelope   = ObjectFactories.SOAP.createEnvelope();
+        Header         header     = ObjectFactories.SOAP.createHeader();
+        Body           body       = ObjectFactories.SOAP.createBody();
+        Fault          fault      = ObjectFactories.SOAP.createFault();
 
         envelope.setHeader(header);
         envelope.setBody(body);
@@ -264,7 +247,7 @@ public class SoapConnectionTest
 
         marshaller.marshal(ObjectFactories.SOAP.createEnvelope(envelope), outputStream);
 
-        InputStream stream   = new ByteArrayInputStream(outputStream.toByteArray());
+        InputStream stream = new ByteArrayInputStream(outputStream.toByteArray());
 
         connection.getSOAPBodyContents(stream);
     }

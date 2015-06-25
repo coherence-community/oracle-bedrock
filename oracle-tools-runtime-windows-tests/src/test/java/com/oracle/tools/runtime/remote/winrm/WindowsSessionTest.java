@@ -99,9 +99,6 @@ import javax.xml.datatype.Duration;
  */
 public class WindowsSessionTest
 {
-    /**
-     *
-     */
     @Test(expected = IllegalArgumentException.class)
     public void shouldNotCreateEnvelopeWitNullAction() throws Exception
     {
@@ -112,9 +109,6 @@ public class WindowsSessionTest
     }
 
 
-    /**
-     *
-     */
     @Test(expected = IllegalArgumentException.class)
     public void shouldNotCreateEnvelopeWitBlankAction() throws Exception
     {
@@ -125,9 +119,6 @@ public class WindowsSessionTest
     }
 
 
-    /**
-     *
-     */
     @Test
     public void shouldCreateEnvelope() throws Exception
     {
@@ -180,9 +171,6 @@ public class WindowsSessionTest
     }
 
 
-    /**
-     *
-     */
     @Test
     public void shouldCreateEnvelopeWithDefaultSoapOptions() throws Exception
     {
@@ -213,9 +201,6 @@ public class WindowsSessionTest
     }
 
 
-    /**
-     *
-     */
     @Test
     public void shouldCreateEnvelopeWithSpecifiedSoapOptions() throws Exception
     {
@@ -252,9 +237,6 @@ public class WindowsSessionTest
     }
 
 
-    /**
-     *
-     */
     @Test
     public void shouldCreateEnvelopeWithShellIdAfterConnection() throws Exception
     {
@@ -312,9 +294,6 @@ public class WindowsSessionTest
     }
 
 
-    /**
-     *
-     */
     @Test
     public void shouldConnectUsingDefaultWorkingDirectory() throws Exception
     {
@@ -348,9 +327,6 @@ public class WindowsSessionTest
     }
 
 
-    /**
-     *
-     */
     @Test
     public void shouldConnectWithCorrectShellLifetime() throws Exception
     {
@@ -384,9 +360,6 @@ public class WindowsSessionTest
     }
 
 
-    /**
-     *
-     */
     @Test
     public void shouldConnectAndRequestAllStreams() throws Exception
     {
@@ -419,9 +392,6 @@ public class WindowsSessionTest
     }
 
 
-    /**
-     *
-     */
     @Test
     public void shouldConnectAndApplyBasicOptionsByDefault() throws Exception
     {
@@ -481,9 +451,6 @@ public class WindowsSessionTest
     }
 
 
-    /**
-     *
-     */
     @Test
     public void shouldConnectAndApplySpecifiedOptionsByDefault() throws Exception
     {
@@ -551,9 +518,6 @@ public class WindowsSessionTest
     }
 
 
-    /**
-     *
-     */
     @Test(expected = IllegalStateException.class)
     public void shouldNotConnectTwice() throws Exception
     {
@@ -574,9 +538,6 @@ public class WindowsSessionTest
     }
 
 
-    /**
-     *
-     */
     @Test
     public void shouldConnectUsingSpecifiedWorkingDirectory() throws Exception
     {
@@ -608,9 +569,6 @@ public class WindowsSessionTest
     }
 
 
-    /**
-     *
-     */
     @Test
     public void shouldConnectUsingNoEnvironmentVariables() throws Exception
     {
@@ -642,9 +600,6 @@ public class WindowsSessionTest
     }
 
 
-    /**
-     *
-     */
     @Test
     public void shouldConnectUsingEnvironmentVariables() throws Exception
     {
@@ -689,9 +644,6 @@ public class WindowsSessionTest
     }
 
 
-    /**
-     *
-     */
     @Test
     public void shouldTerminateCommandAndDeleteShellOnClose() throws Exception
     {
@@ -731,9 +683,6 @@ public class WindowsSessionTest
     }
 
 
-    /**
-     *
-     */
     @Test
     public void shouldNotTerminateCommandIfNotRunningButShouldDeleteShellOnClose() throws Exception
     {
@@ -758,9 +707,6 @@ public class WindowsSessionTest
     }
 
 
-    /**
-     *
-     */
     @Test
     public void shouldNotTeminateShellIfNotConnected() throws Exception
     {
@@ -778,9 +724,6 @@ public class WindowsSessionTest
     }
 
 
-    /**
-     *
-     */
     @Test
     public void shouldPipeTextToStdIn() throws Exception
     {
@@ -821,9 +764,6 @@ public class WindowsSessionTest
     }
 
 
-    /**
-     *
-     */
     @Test(expected = IllegalStateException.class)
     public void shouldNotPipeTextToStdInIfNotRunningCommand() throws Exception
     {
@@ -837,9 +777,6 @@ public class WindowsSessionTest
     }
 
 
-    /**
-     *
-     */
     @Test
     public void shouldReadOutputStreams() throws Exception
     {
@@ -878,9 +815,6 @@ public class WindowsSessionTest
     }
 
 
-    /**
-     *
-     */
     @Test
     public void shouldReturnExitValueOfCommand() throws Exception
     {
@@ -899,9 +833,6 @@ public class WindowsSessionTest
     }
 
 
-    /**
-     *
-     */
     @Test
     public void shouldReturnMinusOneExitValueNoCommand() throws Exception
     {
@@ -918,9 +849,6 @@ public class WindowsSessionTest
     }
 
 
-    /**
-     *
-     */
     @Test
     public void shouldWaitForCommandCompletion() throws Exception
     {
@@ -943,9 +871,6 @@ public class WindowsSessionTest
     }
 
 
-    /**
-     *
-     */
     @Test
     public void shouldExecuteCommandWithArguments() throws Exception
     {
@@ -1006,9 +931,6 @@ public class WindowsSessionTest
     }
 
 
-    /**
-     *
-     */
     @Test
     public void shouldExecuteCommandWithNoArguments() throws Exception
     {
@@ -1069,9 +991,6 @@ public class WindowsSessionTest
     }
 
 
-    /**
-     *
-     */
     @Test
     public void shouldCreateInputStreamConnector() throws Exception
     {
@@ -1087,9 +1006,6 @@ public class WindowsSessionTest
     }
 
 
-    /**
-     *
-     */
     @Test
     public void shouldCreateOutputStreamConnector() throws Exception
     {
@@ -1181,9 +1097,6 @@ public class WindowsSessionTest
      */
     public static class EnvironmentVariableComparator implements Comparator<EnvironmentVariable>
     {
-        /**
-         *
-         */
         @Override
         public int compare(EnvironmentVariable o1,
                            EnvironmentVariable o2)
@@ -1198,14 +1111,6 @@ public class WindowsSessionTest
      */
     public static class OptionTypeComparator implements Comparator<OptionType>
     {
-        /**
-         * Method description
-         *
-         * @param o1
-         * @param o2
-         *
-         * @return
-         */
         @Override
         public int compare(OptionType o1,
                            OptionType o2)

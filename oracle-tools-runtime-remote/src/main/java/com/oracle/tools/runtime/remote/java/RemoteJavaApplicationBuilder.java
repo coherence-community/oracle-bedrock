@@ -35,17 +35,13 @@ import com.oracle.tools.options.Timeout;
 
 import com.oracle.tools.runtime.ApplicationConsole;
 import com.oracle.tools.runtime.ApplicationSchema;
-import com.oracle.tools.runtime.Platform;
 
 import com.oracle.tools.runtime.concurrent.ControllableRemoteExecutor;
 import com.oracle.tools.runtime.concurrent.RemoteCallable;
 import com.oracle.tools.runtime.concurrent.RemoteExecutor;
 import com.oracle.tools.runtime.concurrent.RemoteRunnable;
-import com.oracle.tools.runtime.concurrent.runnable.RuntimeExit;
-import com.oracle.tools.runtime.concurrent.runnable.RuntimeHalt;
 import com.oracle.tools.runtime.concurrent.socket.RemoteExecutorServer;
 
-import com.oracle.tools.runtime.java.ClassPath;
 import com.oracle.tools.runtime.java.JavaApplication;
 import com.oracle.tools.runtime.java.JavaApplicationBuilder;
 import com.oracle.tools.runtime.java.JavaApplicationProcess;
@@ -53,8 +49,8 @@ import com.oracle.tools.runtime.java.JavaApplicationSchema;
 import com.oracle.tools.runtime.java.options.RemoteDebugging;
 
 import com.oracle.tools.runtime.remote.AbstractRemoteApplicationBuilder;
-import com.oracle.tools.runtime.remote.Authentication;
 import com.oracle.tools.runtime.remote.RemoteApplicationProcess;
+import com.oracle.tools.runtime.remote.RemotePlatform;
 
 import com.oracle.tools.util.CompletionListener;
 
@@ -65,11 +61,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import java.util.HashSet;
-
 /**
  * A {@link JavaApplicationBuilder} that realizes {@link JavaApplication}s on
- * a remote server.
+ * a {@link RemotePlatform}.
  * <p>
  * Copyright (c) 2014. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
@@ -78,37 +72,17 @@ import java.util.HashSet;
  */
 public class RemoteJavaApplicationBuilder<A extends JavaApplication>
     extends AbstractRemoteApplicationBuilder<A, RemoteJavaApplicationEnvironment<A>, RemoteJavaApplicationBuilder<A>>
-    implements JavaApplicationBuilder<A>
+    implements JavaApplicationBuilder<A, RemotePlatform>
 {
     /**
-     * Constructs an {@link RemoteJavaApplicationBuilder} (using the default port).
+     * Constructs a {@link RemoteJavaApplicationBuilder} for the specified
+     * {@link RemotePlatform}.
      *
-     * @param hostName       the remote host name
-     * @param userName       the user name on the remote host
-     * @param authentication the {@link Authentication} for connecting to the host
+     * @param platform  the {@link RemotePlatform}
      */
-    public RemoteJavaApplicationBuilder(String         hostName,
-                                        String         userName,
-                                        Authentication authentication)
+    public RemoteJavaApplicationBuilder(RemotePlatform platform)
     {
-        this(hostName, DEFAULT_PORT, userName, authentication);
-    }
-
-
-    /**
-     * Constructs an {@link RemoteJavaApplicationBuilder}.
-     *
-     * @param hostName       the remote host name
-     * @param port           the remote port
-     * @param userName       the user name on the remote host
-     * @param authentication the {@link Authentication} for connecting to the host
-     */
-    public RemoteJavaApplicationBuilder(String         hostName,
-                                        int            port,
-                                        String         userName,
-                                        Authentication authentication)
-    {
-        super(hostName, port, userName, authentication);
+        super(platform);
     }
 
 
@@ -116,7 +90,6 @@ public class RemoteJavaApplicationBuilder<A extends JavaApplication>
     @SuppressWarnings("unchecked")
     protected <T extends A,
         S extends ApplicationSchema<T>> RemoteJavaApplicationEnvironment<A> getRemoteApplicationEnvironment(S applicationSchema,
-        Platform                                                                                              platform,
         Options                                                                                               options)
     {
         JavaApplicationSchema<A> schema = (JavaApplicationSchema) applicationSchema;
@@ -133,8 +106,7 @@ public class RemoteJavaApplicationBuilder<A extends JavaApplication>
 
 
     @Override
-    protected <T extends A, S extends ApplicationSchema<T>> T createApplication(Platform                            platform,
-                                                                                Options                             options,
+    protected <T extends A, S extends ApplicationSchema<T>> T createApplication(Options                             options,
                                                                                 S                                   schema,
                                                                                 RemoteJavaApplicationEnvironment<A> environment,
                                                                                 String                              applicationName,

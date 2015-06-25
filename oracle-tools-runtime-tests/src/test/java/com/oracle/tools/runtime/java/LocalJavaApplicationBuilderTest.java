@@ -99,17 +99,17 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * @author Brian Oliver
  * @author Jonathan Knight
  */
-public class LocalJavaApplicationBuilderTest extends AbstractJavaApplicationBuilderTest
+public class LocalJavaApplicationBuilderTest extends AbstractJavaApplicationBuilderTest<LocalPlatform>
 {
     @Override
-    public JavaApplicationBuilder<JavaApplication> newJavaApplicationBuilder()
+    public JavaApplicationBuilder<JavaApplication, LocalPlatform> newJavaApplicationBuilder()
     {
-        return new LocalJavaApplicationBuilder<JavaApplication>();
+        return new LocalJavaApplicationBuilder<>(getPlatform());
     }
 
 
     @Override
-    public Platform getPlatform()
+    public LocalPlatform getPlatform()
     {
         return LocalPlatform.getInstance();
     }
@@ -233,7 +233,7 @@ public class LocalJavaApplicationBuilderTest extends AbstractJavaApplicationBuil
         SimpleApplicationSchema jdbSchema =
             new SimpleApplicationSchema("jdb").addArgument("-connect")
                 .addArgument("com.sun.jdi.SocketListen:localAddress=" + platform.getAddress().getHostAddress()
-                        + ",port=" + debuggerPort.get());
+                             + ",port=" + debuggerPort.get());
 
         CapturingApplicationConsole jdbConsole = new CapturingApplicationConsole();
 
@@ -387,7 +387,7 @@ public class LocalJavaApplicationBuilderTest extends AbstractJavaApplicationBuil
             schema.setSystemProperty("orphan.children", true);
 
             LocalJavaApplicationBuilder<SimpleJavaApplication> builder =
-                new LocalJavaApplicationBuilder<SimpleJavaApplication>();
+                new LocalJavaApplicationBuilder<>(getPlatform());
 
             schema.addOption(Orphanable.disabled());
             schema.setPreferIPv4(true);
@@ -463,7 +463,7 @@ public class LocalJavaApplicationBuilderTest extends AbstractJavaApplicationBuil
             schema.setSystemProperty("orphan.children", false);
 
             LocalJavaApplicationBuilder<SimpleJavaApplication> builder =
-                new LocalJavaApplicationBuilder<SimpleJavaApplication>();
+                new LocalJavaApplicationBuilder<SimpleJavaApplication>(getPlatform());
 
             schema.addOption(Orphanable.disabled());
             schema.setPreferIPv4(true);
@@ -516,7 +516,7 @@ public class LocalJavaApplicationBuilderTest extends AbstractJavaApplicationBuil
         schema.setSystemProperty("uuid", uuid);
 
         // build and start the SleepingApplication
-        LocalJavaApplicationBuilder<JavaApplication> builder = new LocalJavaApplicationBuilder<JavaApplication>();
+        LocalJavaApplicationBuilder<JavaApplication> builder = new LocalJavaApplicationBuilder<>(getPlatform());
 
         ApplicationConsole                           console = new SystemApplicationConsole();
 
@@ -549,7 +549,7 @@ public class LocalJavaApplicationBuilderTest extends AbstractJavaApplicationBuil
         JavaHome javaHome     = JavaHome.at(javaHomePath);
 
         // build and start the SleepingApplication
-        LocalJavaApplicationBuilder<JavaApplication> builder = new LocalJavaApplicationBuilder<JavaApplication>();
+        LocalJavaApplicationBuilder<JavaApplication> builder = new LocalJavaApplicationBuilder<>(getPlatform());
 
         ApplicationConsole                           console = new SystemApplicationConsole();
 
@@ -572,7 +572,7 @@ public class LocalJavaApplicationBuilderTest extends AbstractJavaApplicationBuil
         schema.setPreferIPv4(true);
 
         // build and start the SleepingApplication
-        LocalJavaApplicationBuilder<JavaApplication> builder = new LocalJavaApplicationBuilder<JavaApplication>();
+        LocalJavaApplicationBuilder<JavaApplication> builder = new LocalJavaApplicationBuilder<>(getPlatform());
 
         ApplicationConsole                           console = new SystemApplicationConsole();
 

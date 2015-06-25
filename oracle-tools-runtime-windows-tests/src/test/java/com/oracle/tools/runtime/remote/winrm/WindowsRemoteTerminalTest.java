@@ -1,5 +1,5 @@
 /*
- * File: WindowsRemoteShellTest.java
+ * File: WindowsRemoteTerminalTest.java
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
@@ -36,6 +36,7 @@ import com.oracle.tools.runtime.remote.Authentication;
 import com.oracle.tools.runtime.remote.Password;
 import com.oracle.tools.runtime.remote.RemoteApplicationEnvironment;
 import com.oracle.tools.runtime.remote.RemoteApplicationProcess;
+import com.oracle.tools.runtime.remote.RemotePlatform;
 import com.oracle.tools.runtime.remote.SimpleRemoteApplicationEnvironment;
 import com.oracle.tools.runtime.remote.http.HttpBasedAuthentication;
 
@@ -54,26 +55,26 @@ import static org.mockito.Matchers.eq;
 
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.io.InputStream;
 import java.io.OutputStream;
+
+import java.net.InetAddress;
 
 import java.util.Arrays;
 import java.util.Properties;
 
 /**
- * Tests for {@link WindowsRemoteShell}.
+ * Tests for {@link WindowsRemoteTerminal}.
  * <p>
  * Copyright (c) 2015. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Jonathan Knight
  */
-public class WindowsRemoteShellTest
+public class WindowsRemoteTerminalTest
 {
-    /**
-     *
-     */
     @Test
     public void shouldCreateWindowsSession() throws Exception
     {
@@ -81,10 +82,16 @@ public class WindowsRemoteShellTest
         HttpBasedAuthentication authentication = new Password("secret");
         String                  hostName       = "foo.com";
         int                     port           = 1234;
+        RemotePlatform          platform       = mock(RemotePlatform.class);
 
-        WindowsRemoteShell      shell          = new WindowsRemoteShell(userName, authentication, hostName, port);
+        when(platform.getUserName()).thenReturn(userName);
+        when(platform.getAuthentication()).thenReturn(authentication);
+        when(platform.getAddress()).thenReturn(InetAddress.getByName(hostName));
+        when(platform.getPort()).thenReturn(port);
 
-        WindowsSession          session        = shell.createSession();
+        WindowsRemoteTerminal shell   = new WindowsRemoteTerminal(platform);
+
+        WindowsSession        session = shell.createSession();
 
         assertThat(session, is(notNullValue()));
 
@@ -97,20 +104,24 @@ public class WindowsRemoteShellTest
     }
 
 
-    /**
-     *
-     */
     @Test
     public void shouldMakeDirectories() throws Exception
     {
-        String             userName       = "Bob";
-        Authentication     authentication = new Password("secret");
-        String             hostName       = "foo.com";
-        int                port           = 1234;
-        Options            options        = new Options();
-        WindowsSession     session        = mock(WindowsSession.class);
+        String         userName       = "Bob";
+        Authentication authentication = new Password("secret");
+        String         hostName       = "foo.com";
+        int            port           = 1234;
+        Options        options        = new Options();
+        WindowsSession session        = mock(WindowsSession.class);
 
-        WindowsRemoteShell shell = new WindowsRemoteShellStub(userName, authentication, hostName, port, session);
+        RemotePlatform platform       = mock(RemotePlatform.class);
+
+        when(platform.getUserName()).thenReturn(userName);
+        when(platform.getAuthentication()).thenReturn(authentication);
+        when(platform.getAddress()).thenReturn(InetAddress.getByName(hostName));
+        when(platform.getPort()).thenReturn(port);
+
+        WindowsRemoteTerminal shell = new WindowsRemoteTerminalStub(platform, session);
 
         shell.makeDirectories("dir1\\dir2", options);
 
@@ -125,9 +136,6 @@ public class WindowsRemoteShellTest
     }
 
 
-    /**
-     *
-     */
     @SuppressWarnings("unchecked")
     @Test
     public void shouldRealizeRemoteApplicationProcess() throws Exception
@@ -138,20 +146,21 @@ public class WindowsRemoteShellTest
         int                          port           = 1234;
         WindowsSession               session        = mock(WindowsSession.class);
 
-        Platform                     platform       = mock(Platform.class);
+        RemotePlatform               platform       = mock(RemotePlatform.class);
 
         EnvironmentVariables         envVars = EnvironmentVariables.custom().set("Key1", "Val1").set("Key2", "Val2");
         Options                      options        = new Options(envVars);
 
-        SimpleApplicationSchema schema = new SimpleApplicationSchema("App").addArgument("Arg1").addArgument("Arg2");
+        SimpleApplicationSchema      schema =
+            new SimpleApplicationSchema("App").addArgument("Arg1").addArgument("Arg2");
 
         RemoteApplicationEnvironment environment    = new SimpleRemoteApplicationEnvironment(schema, platform, options);
 
-        WindowsRemoteShell shell = new WindowsRemoteShellStub(userName, authentication, hostName, port, session);
+        WindowsRemoteTerminal        shell          = new WindowsRemoteTerminalStub(platform, session);
 
         Properties                   envVariables   = environment.getRemoteEnvironmentVariables();
 
-        RemoteApplicationProcess     process = shell.realize(schema, "App-1", platform, environment, "Dir-1", options);
+        RemoteApplicationProcess     process        = shell.realize(schema, "App-1", environment, "Dir-1", options);
 
         assertThat(process, is(notNullValue()));
 
@@ -167,23 +176,20 @@ public class WindowsRemoteShellTest
 
 
     /**
-     * A stub class {@link WindowsRemoteShell} to use for testing that
+     * A stub class {@link WindowsRemoteTerminal} to use for testing that
      * can be provided with a {@link WindowsSession} to use.
      */
-    public static class WindowsRemoteShellStub extends WindowsRemoteShell
+    public static class WindowsRemoteTerminalStub extends WindowsRemoteTerminal
     {
         private WindowsSession session;
 
 
         /**
          */
-        public WindowsRemoteShellStub(String         userName,
-                                      Authentication authentication,
-                                      String         hostName,
-                                      int            port,
-                                      WindowsSession session)
+        public WindowsRemoteTerminalStub(RemotePlatform platform,
+                                         WindowsSession session)
         {
-            super(userName, authentication, hostName, port);
+            super(platform);
 
             this.session = session;
         }

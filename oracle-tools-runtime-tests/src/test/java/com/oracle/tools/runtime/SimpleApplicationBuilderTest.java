@@ -26,21 +26,14 @@
 package com.oracle.tools.runtime;
 
 import com.oracle.tools.junit.AbstractTest;
-
 import com.oracle.tools.options.Diagnostics;
-
 import com.oracle.tools.runtime.console.PipedApplicationConsole;
-
 import com.oracle.tools.runtime.options.ErrorStreamRedirection;
-
 import org.junit.Test;
-
 import org.mockito.Mockito;
 
 import static org.hamcrest.CoreMatchers.is;
-
 import static org.hamcrest.core.StringContains.containsString;
-
 import static org.junit.Assert.assertThat;
 
 /**
@@ -67,15 +60,11 @@ public class SimpleApplicationBuilderTest extends AbstractTest
 
         schema.addArgument("-help");
 
-        SimpleApplicationBuilder builder     = new SimpleApplicationBuilder();
+        LocalPlatform            platform    = LocalPlatform.getInstance();
+        SimpleApplicationBuilder builder     = new SimpleApplicationBuilder(platform);
         PipedApplicationConsole  console     = new PipedApplicationConsole();
-        Platform                 platform    = LocalPlatform.getInstance();
 
-        SimpleApplication        application = builder.realize(schema,
-                                                               "java",
-                                                               console,
-                                                               platform,
-                                                               Diagnostics.enabled());
+        SimpleApplication        application = builder.realize(schema, "java", console, Diagnostics.enabled());
 
         String                   stdout      = console.getOutputReader().readLine();
 
@@ -102,11 +91,11 @@ public class SimpleApplicationBuilderTest extends AbstractTest
 
         schema.addArgument("-help");
 
-        SimpleApplicationBuilder builder  = new SimpleApplicationBuilder();
+        LocalPlatform            platform = LocalPlatform.getInstance();
+        SimpleApplicationBuilder builder  = new SimpleApplicationBuilder(platform);
         PipedApplicationConsole  console  = new PipedApplicationConsole();
-        Platform                 platform = LocalPlatform.getInstance();
 
-        try (SimpleApplication application = builder.realize(schema, "java", console, platform, Diagnostics.enabled()))
+        try (SimpleApplication application = builder.realize(schema, "java", console, Diagnostics.enabled()))
         {
             Mockito.verify(listener, Mockito.times(1)).onRealized(Mockito.same(application));
 

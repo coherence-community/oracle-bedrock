@@ -548,6 +548,9 @@ reverse chronological order.
     LocalJavaApplicationBuilder logging to improve readability of application
     startup information.
 
+*   [ORACLETOOLS-255](https://java.net/jira/browse/ORACLETOOLS-255): Refactored
+    ApplicationBuilder interface to require a specific Platform type.
+
 <h4>oracle-tools-runtime-remote</h4>
 
 *   [ORACLETOOLS-91](https://java.net/jira/browse/ORACLETOOLS-91): Introduced
@@ -622,6 +625,12 @@ reverse chronological order.
 *   [ORACLETOOLS-214](https://java.net/jira/browse/ORACLETOOLS-214): Introduced
     Option support into VirtualPlatform implementations, includes refactoring
     CloseAction as an Option.
+
+<h4>oracle-tools-runtime-windows</h4>
+
+*   [ORACLETOOLS-239](https://java.net/jira/browse/ORACLETOOLS-239): Introduced
+    Microsoft Windows specific platform support for starting, stopping and
+    deploying applications on remote windows platforms.
 
 <h4>oracle-tools-testing-support</h4>
 
