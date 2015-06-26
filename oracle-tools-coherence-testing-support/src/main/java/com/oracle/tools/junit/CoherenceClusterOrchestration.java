@@ -30,18 +30,26 @@ import com.oracle.tools.Options;
 
 import com.oracle.tools.deferred.Eventually;
 
+import com.oracle.tools.predicate.Predicate;
 import com.oracle.tools.runtime.ApplicationConsole;
 import com.oracle.tools.runtime.ApplicationConsoleBuilder;
 import com.oracle.tools.runtime.LocalPlatform;
 import com.oracle.tools.runtime.Platform;
 
+import com.oracle.tools.runtime.PropertiesBuilder;
+import com.oracle.tools.runtime.actions.Block;
+import com.oracle.tools.runtime.actions.InteractiveActionExecutor;
+import com.oracle.tools.runtime.coherence.CoherenceCacheServer;
 import com.oracle.tools.runtime.coherence.CoherenceCacheServerSchema;
 import com.oracle.tools.runtime.coherence.CoherenceCluster;
 import com.oracle.tools.runtime.coherence.CoherenceClusterBuilder;
 import com.oracle.tools.runtime.coherence.CoherenceClusterMember;
 import com.oracle.tools.runtime.coherence.FluentCoherenceClusterSchema;
+import com.oracle.tools.runtime.coherence.ServiceStatus;
+import com.oracle.tools.runtime.coherence.actions.RestartCoherenceClusterMemberAction;
 import com.oracle.tools.runtime.coherence.callables.GetAutoStartServiceNames;
 
+import com.oracle.tools.runtime.coherence.callables.GetServiceStatus;
 import com.oracle.tools.runtime.console.SystemApplicationConsole;
 
 import com.oracle.tools.runtime.java.options.HeapSize;
@@ -64,9 +72,13 @@ import static com.oracle.tools.deferred.DeferredHelper.invoking;
 
 import static org.hamcrest.core.Is.is;
 
+import java.net.InetAddress;
+
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
+import java.util.List;
+import java.util.Random;
 import java.util.Set;
 
 import java.util.concurrent.ConcurrentHashMap;
@@ -135,6 +147,16 @@ public class CoherenceClusterOrchestration extends ExternalResource
 
     // the Coherence *Extend port
     private Capture<Integer> extendPort;
+
+    /**
+     * The number of storage enable members that will be started in the cluster.
+     */
+    private int storageMemberCount = 2;
+
+    /**
+     * The number of storage disabled enable proxy members that will be started in the cluster.
+     */
+    private int proxyMemberCount = 1;
 
 
     /**
@@ -212,8 +234,6 @@ public class CoherenceClusterOrchestration extends ExternalResource
         storageServerSchema.setRoleName("storage");
         storageServerSchema.setStorageEnabled(true);
 
-        int storageMemberCount = 2;
-
         clusterBuilder.addSchema("storage",
                                  storageServerSchema,
                                  storageMemberCount,
@@ -227,8 +247,6 @@ public class CoherenceClusterOrchestration extends ExternalResource
         proxyServerSchema.setRoleName("proxy");
         proxyServerSchema.setStorageEnabled(false);
         proxyServerSchema.setSystemProperty("tangosol.coherence.extend.enabled", true);
-
-        int proxyMemberCount = 1;
 
         clusterBuilder.addSchema("proxy",
                                  proxyServerSchema,
@@ -614,5 +632,35 @@ public class CoherenceClusterOrchestration extends ExternalResource
         }
 
         return session;
+    }
+
+
+    /**
+     * Sets the number of storage enabled members that will be started in the cluster.
+     *
+     * @param count  the number of storage enabled members
+     *
+     * @return  the {@link FluentCoherenceClusterSchema}
+     */
+    public CoherenceClusterOrchestration setStorageMemberCount(int count)
+    {
+        storageMemberCount = count;
+
+        return this;
+    }
+
+
+    /**
+     * Sets the number of proxy server members that will be started in the cluster.
+     *
+     * @param count  the number of proxy server members
+     *
+     * @return  the {@link FluentCoherenceClusterSchema}
+     */
+    public CoherenceClusterOrchestration setProxyServerCount(int count)
+    {
+        proxyMemberCount = count;
+
+        return this;
     }
 }
