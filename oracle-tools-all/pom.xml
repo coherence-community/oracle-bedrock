@@ -49,6 +49,12 @@
 
         <dependency>
             <groupId>com.oracle.tools</groupId>
+            <artifactId>oracle-tools-runtime-windows</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.oracle.tools</groupId>
             <artifactId>oracle-tools-testing-support</artifactId>
             <version>${project.version}</version>
         </dependency>
