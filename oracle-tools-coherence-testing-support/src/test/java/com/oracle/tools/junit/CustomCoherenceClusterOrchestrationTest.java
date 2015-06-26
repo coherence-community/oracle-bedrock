@@ -35,6 +35,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsNull.notNullValue;
 
 import static org.hamcrest.collection.IsIterableContainingInOrder.contains;
 
@@ -96,4 +97,22 @@ public class CustomCoherenceClusterOrchestrationTest
          }
      }
 
+    @Test
+     public void shouldPerformRollingRestart() throws Exception
+     {
+         orchestration.restartStorageMembers();
+
+         CoherenceCluster       cluster = orchestration.getCluster();
+         CoherenceClusterMember member1 = cluster.get("storage-1");
+         CoherenceClusterMember member2 = cluster.get("storage-2");
+         CoherenceClusterMember member3 = cluster.get("storage-3");
+
+         assertThat(member1, is(notNullValue()));
+         assertThat(member2, is(notNullValue()));
+         assertThat(member3, is(notNullValue()));
+
+         assertThat(member1.getLocalMemberId(), is(6));
+         assertThat(member2.getLocalMemberId(), is(7));
+         assertThat(member3.getLocalMemberId(), is(8));
+     }
 }

@@ -138,9 +138,6 @@ public class CoherenceClusterOrchestration extends ExternalResource
     // the Coherence Cluster Port
     private Capture<Integer> clusterPort;
 
-    // the Coherence *Extend port
-    private Capture<Integer> extendPort;
-
     /**
      * The number of storage enable members that will be started in the cluster.
      */
@@ -173,9 +170,12 @@ public class CoherenceClusterOrchestration extends ExternalResource
         // establish a Cluster port
         this.clusterPort = new Capture<>(platform.getAvailablePorts());
 
+<<<<<<< HEAD
         // establish the Extend port (is the same as the cluster port)
         this.extendPort = new Capture<>(platform.getAvailablePorts());
 
+=======
+>>>>>>> master
         // establish a common server schema on which to base storage enabled and proxy members
         this.commonServerSchema = new CoherenceCacheServerSchema();
 
@@ -188,7 +188,7 @@ public class CoherenceClusterOrchestration extends ExternalResource
 
         // we also define the proxy configuration (this will only be used if it's enabled)
         commonServerSchema.setSystemProperty("tangosol.coherence.extend.address", hostAddress);
-        commonServerSchema.setSystemProperty("tangosol.coherence.extend.port", extendPort);
+        commonServerSchema.setSystemProperty("tangosol.coherence.extend.port", platform.getAvailablePorts());
 
         // establish default java process configuration
         commonServerSchema.setHeadless(true);
@@ -719,5 +719,78 @@ public class CoherenceClusterOrchestration extends ExternalResource
         this.extendProxyServerProperties.setProperty(name, value);
 
         return this;
+    }
+
+    /**
+     * Perform a rolling restart of all of the storage members of the cluster.
+     * <p>
+     * This method performs a safe rolling restart, ensuring that the distributed
+     * cache services are in a "safe" state before restarting the next member.
+     * <p>
+     * Rolling restart is not supported on a cluster with only a single storage
+     * enabled member.
+     *
+     * @param options  the {@link Option}s to use when realizing each new {@link CoherenceClusterMember}
+     *
+     * @throws IllegalStateException if the cluster has only a single storage member.
+     */
+    public void restartStorageMembers(Option... options)
+    {
+        Predicate<CoherenceClusterMember>   predicate = new Predicate<CoherenceClusterMember>()
+        {
+            @Override
+            public boolean evaluate(CoherenceClusterMember member)
+            {
+                Set<String> setServiceNames = member.submit(new GetAutoStartServiceNames());
+                for (String sServiceName : setServiceNames)
+                {
+                    ServiceStatus status = member.submit(new GetServiceStatus(sServiceName));
+                    if (status == ServiceStatus.ENDANGERED || status == ServiceStatus.ORPHANED
+                        || status == ServiceStatus.STOPPED || status == ServiceStatus.UNKNOWN)
+                    {
+                        return false;
+                    }
+                }
+
+                return true;
+            }
+        };
+
+        restartStorageMembers(predicate, options);
+    }
+
+    /**
+     * Perform a rolling restart of all of the storage members of the cluster.
+     * <p>
+     * Rolling restart is not supported on a cluster with only a single storage
+     * enabled member.
+     *
+     * @param predicate  the {@link Predicate} that must evaluate to true before
+     *                   each member of the cluster is restarted.
+     * @param options    the {@link Option}s to use when realizing each new {@link CoherenceClusterMember}
+     *
+     * @throws IllegalStateException if the cluster has only a single storage member.
+     */
+    public void restartStorageMembers(Predicate<CoherenceClusterMember> predicate, Option... options)
+    {
+        if (storageMemberCount < 2)
+        {
+            throw new IllegalStateException("Cannot perform a rolling restart in a cluster with less than two " +
+                                            "storage enabled members");
+        }
+        CoherenceCacheServerSchema          schema    = createStorageEnabledMemberSchema();
+
+        Block block = new Block();
+
+        for (int i=1; i<=storageMemberCount; i++)
+        {
+            block.add(new RestartCoherenceClusterMemberAction("storage", schema, new SystemApplicationConsole(),
+                                                              predicate, platform, options));
+        }
+
+        InteractiveActionExecutor<CoherenceClusterMember, CoherenceCluster> executor =
+            new InteractiveActionExecutor<>(cluster, block);
+
+        executor.executeAll();
     }
 }
