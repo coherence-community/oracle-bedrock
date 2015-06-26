@@ -161,6 +161,16 @@ public class CoherenceClusterOrchestration extends ExternalResource
      */
     private int proxyMemberCount = 1;
 
+    /**
+     * Extra properties specific to the storage enabled cluster members.
+     */
+    private PropertiesBuilder storageMemberProperties;
+
+    /**
+     * Extra properties specific to the proxy server cluster members.
+     */
+    private PropertiesBuilder extendProxyServerProperties;
+
 
     /**
      * Constructs a {@link CoherenceClusterOrchestration}.
@@ -207,6 +217,9 @@ public class CoherenceClusterOrchestration extends ExternalResource
 
         // by default we have no sessions
         this.sessions = new HashMap<>();
+
+        this.storageMemberProperties     = new PropertiesBuilder();
+        this.extendProxyServerProperties = new PropertiesBuilder();
     }
 
 
@@ -232,10 +245,7 @@ public class CoherenceClusterOrchestration extends ExternalResource
         CoherenceClusterBuilder clusterBuilder = new CoherenceClusterBuilder();
 
         // define the schema for the storage enabled members of the cluster
-        CoherenceCacheServerSchema storageServerSchema = new CoherenceCacheServerSchema(commonServerSchema);
-
-        storageServerSchema.setRoleName("storage");
-        storageServerSchema.setStorageEnabled(true);
+        CoherenceCacheServerSchema storageServerSchema = createStorageEnabledMemberSchema();
 
         clusterBuilder.addSchema("storage",
                                  storageServerSchema,
@@ -245,11 +255,7 @@ public class CoherenceClusterOrchestration extends ExternalResource
                                  clusterCreationOptions.asArray());
 
         // define the schema for the proxy enabled members of the cluster
-        CoherenceCacheServerSchema proxyServerSchema = new CoherenceCacheServerSchema(commonServerSchema);
-
-        proxyServerSchema.setRoleName("proxy");
-        proxyServerSchema.setStorageEnabled(false);
-        proxyServerSchema.setSystemProperty("tangosol.coherence.extend.enabled", true);
+        CoherenceCacheServerSchema proxyServerSchema = createProxyServerSchema();
 
         clusterBuilder.addSchema("proxy",
                                  proxyServerSchema,
@@ -300,6 +306,32 @@ public class CoherenceClusterOrchestration extends ExternalResource
 
         // let the super-class perform it's cleanup as well
         super.after();
+    }
+
+
+    protected CoherenceCacheServerSchema createStorageEnabledMemberSchema()
+    {
+        // define the schema for the storage enabled members of the cluster
+        CoherenceCacheServerSchema storageServerSchema = new CoherenceCacheServerSchema(commonServerSchema);
+
+        storageServerSchema.getSystemPropertiesBuilder().addProperties(storageMemberProperties);
+        storageServerSchema.setRoleName("storage");
+        storageServerSchema.setStorageEnabled(true);
+
+        return storageServerSchema;
+    }
+
+
+    protected CoherenceCacheServerSchema createProxyServerSchema()
+    {
+        CoherenceCacheServerSchema proxyServerSchema = new CoherenceCacheServerSchema(commonServerSchema);
+
+        proxyServerSchema.getSystemPropertiesBuilder().addProperties(extendProxyServerProperties);
+        proxyServerSchema.setRoleName("proxy");
+        proxyServerSchema.setStorageEnabled(false);
+        proxyServerSchema.setSystemProperty("tangosol.coherence.extend.enabled", true);
+
+        return proxyServerSchema;
     }
 
 
@@ -651,6 +683,38 @@ public class CoherenceClusterOrchestration extends ExternalResource
     public CoherenceClusterOrchestration setProxyServerCount(int count)
     {
         proxyMemberCount = count;
+
+        return this;
+    }
+
+    /**
+     * Sets the specified system property that will apply only to
+     * storage enabled cluster members.
+     *
+     * @param name   the name of the system property
+     * @param value  the value for the system property
+     *
+     * @return  the {@link CoherenceClusterOrchestration} to permit fluent-style method-calls
+     */
+    public CoherenceClusterOrchestration setStorageMemberSystemProperty(String name, Object value)
+    {
+        this.storageMemberProperties.setProperty(name, value);
+
+        return this;
+    }
+
+    /**
+     * Sets the specified system property that will apply only to
+     * Extend proxy cluster members.
+     *
+     * @param name   the name of the system property
+     * @param value  the value for the system property
+     *
+     * @return  the {@link CoherenceClusterOrchestration} to permit fluent-style method-calls
+     */
+    public CoherenceClusterOrchestration setProxyServerSystemProperty(String name, Object value)
+    {
+        this.extendProxyServerProperties.setProperty(name, value);
 
         return this;
     }

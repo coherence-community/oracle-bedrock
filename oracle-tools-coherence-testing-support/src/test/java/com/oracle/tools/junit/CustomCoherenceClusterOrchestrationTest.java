@@ -28,7 +28,7 @@ package com.oracle.tools.junit;
 import com.oracle.tools.runtime.coherence.CoherenceCluster;
 import com.oracle.tools.runtime.coherence.CoherenceClusterMember;
 
-import org.junit.Rule;
+import org.junit.ClassRule;
 import org.junit.Test;
 
 import java.util.Set;
@@ -53,10 +53,12 @@ public class CustomCoherenceClusterOrchestrationTest
     /**
      * A {@link CoherenceClusterOrchestration} for a default {@link CoherenceCluster}.
      */
-    @Rule
-    public CoherenceClusterOrchestration orchestration = new CoherenceClusterOrchestration()
+    @ClassRule
+    public static CoherenceClusterOrchestration orchestration = new CoherenceClusterOrchestration()
             .setStorageMemberCount(3)
-            .setProxyServerCount(2);
+            .setProxyServerCount(2)
+            .setStorageMemberSystemProperty("test.property", "storageMember")
+            .setProxyServerSystemProperty("test.property", "proxyServer");
 
 
     /**
@@ -75,4 +77,23 @@ public class CustomCoherenceClusterOrchestrationTest
 
         assertThat(setNames, contains("proxy-1", "proxy-2", "storage-1", "storage-2", "storage-3"));
     }
+
+    @Test
+    public void shouldHaveSetProxyServerProperty() throws Exception
+    {
+        for (CoherenceClusterMember member : orchestration.getCluster().getAll("proxy"))
+        {
+            assertThat(member.getSystemProperty("test.property"), is("proxyServer"));
+        }
+    }
+
+    @Test
+     public void shouldHaveSetStorageMemberProperty() throws Exception
+     {
+         for (CoherenceClusterMember member : orchestration.getCluster().getAll("storage"))
+         {
+             assertThat(member.getSystemProperty("test.property"), is("storageMember"));
+         }
+     }
+
 }

@@ -739,6 +739,10 @@ reverse chronological order.
     the Coherence Cluster Orchestration JUnit Rule to allow the number of
     storage members and proxy servers to be specified.
 
+*   [ORACLETOOLS-257](https://java.net/jira/browse/ORACLETOOLS-257): Enhanced
+    the Coherence Cluster Orchestration JUnit Rule to allow System properties
+    to be specified separately for the storage members and proxy servers.
+
 <h4>oracle-tools-site</h4>
 
 *   (none)
