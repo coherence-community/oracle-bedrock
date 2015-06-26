@@ -170,12 +170,6 @@ public class CoherenceClusterOrchestration extends ExternalResource
         // establish a Cluster port
         this.clusterPort = new Capture<>(platform.getAvailablePorts());
 
-<<<<<<< HEAD
-        // establish the Extend port (is the same as the cluster port)
-        this.extendPort = new Capture<>(platform.getAvailablePorts());
-
-=======
->>>>>>> master
         // establish a common server schema on which to base storage enabled and proxy members
         this.commonServerSchema = new CoherenceCacheServerSchema();
 
