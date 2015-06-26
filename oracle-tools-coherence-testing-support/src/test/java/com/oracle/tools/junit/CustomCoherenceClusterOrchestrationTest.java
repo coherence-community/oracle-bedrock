@@ -57,7 +57,6 @@ public class CustomCoherenceClusterOrchestrationTest
     @ClassRule
     public static CoherenceClusterOrchestration orchestration = new CoherenceClusterOrchestration()
             .setStorageMemberCount(3)
-            .setProxyServerCount(2)
             .setStorageMemberSystemProperty("test.property", "storageMember")
             .setProxyServerSystemProperty("test.property", "proxyServer");
 
@@ -76,7 +75,7 @@ public class CustomCoherenceClusterOrchestrationTest
             setNames.add(member.getName());
         }
 
-        assertThat(setNames, contains("proxy-1", "proxy-2", "storage-1", "storage-2", "storage-3"));
+        assertThat(setNames, contains("proxy-1", "storage-1", "storage-2", "storage-3"));
     }
 
     @Test
@@ -111,8 +110,8 @@ public class CustomCoherenceClusterOrchestrationTest
          assertThat(member2, is(notNullValue()));
          assertThat(member3, is(notNullValue()));
 
-         assertThat(member1.getLocalMemberId(), is(6));
-         assertThat(member2.getLocalMemberId(), is(7));
-         assertThat(member3.getLocalMemberId(), is(8));
+         assertThat(member1.getLocalMemberId(), is(5));
+         assertThat(member2.getLocalMemberId(), is(6));
+         assertThat(member3.getLocalMemberId(), is(7));
      }
 }

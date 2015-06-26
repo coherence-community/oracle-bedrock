@@ -148,15 +148,13 @@ public class CoherenceClusterOrchestration extends ExternalResource
     // the Coherence Cluster Port
     private Capture<Integer> clusterPort;
 
+    // the Coherence *Extend port
+    private Capture<Integer> extendPort;
+
     /**
      * The number of storage enable members that will be started in the cluster.
      */
     private int storageMemberCount = 2;
-
-    /**
-     * The number of storage disabled enable proxy members that will be started in the cluster.
-     */
-    private int proxyMemberCount = 1;
 
     /**
      * Extra properties specific to the storage enabled cluster members.
@@ -180,6 +178,9 @@ public class CoherenceClusterOrchestration extends ExternalResource
         // establish a Cluster port
         this.clusterPort = new Capture<>(platform.getAvailablePorts());
 
+        // establish the Extend port (is the same as the cluster port)
+        this.extendPort = new Capture<>(platform.getAvailablePorts());
+
         // establish a common server schema on which to base storage enabled and proxy members
         this.commonServerSchema = new CoherenceCacheServerSchema();
 
@@ -192,7 +193,7 @@ public class CoherenceClusterOrchestration extends ExternalResource
 
         // we also define the proxy configuration (this will only be used if it's enabled)
         commonServerSchema.setSystemProperty("tangosol.coherence.extend.address", hostAddress);
-        commonServerSchema.setSystemProperty("tangosol.coherence.extend.port", platform.getAvailablePorts());
+        commonServerSchema.setSystemProperty("tangosol.coherence.extend.port", extendPort);
 
         // establish default java process configuration
         commonServerSchema.setHeadless(true);
@@ -250,6 +251,8 @@ public class CoherenceClusterOrchestration extends ExternalResource
 
         // define the schema for the proxy enabled members of the cluster
         CoherenceCacheServerSchema proxyServerSchema = createProxyServerSchema();
+
+        int proxyMemberCount = 1;
 
         clusterBuilder.addSchema("proxy",
                                  proxyServerSchema,
@@ -666,20 +669,6 @@ public class CoherenceClusterOrchestration extends ExternalResource
         return this;
     }
 
-
-    /**
-     * Sets the number of proxy server members that will be started in the cluster.
-     *
-     * @param count  the number of proxy server members
-     *
-     * @return  the {@link FluentCoherenceClusterSchema}
-     */
-    public CoherenceClusterOrchestration setProxyServerCount(int count)
-    {
-        proxyMemberCount = count;
-
-        return this;
-    }
 
     /**
      * Sets the specified system property that will apply only to
