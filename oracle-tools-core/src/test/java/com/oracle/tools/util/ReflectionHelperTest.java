@@ -3,7 +3,7 @@
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * The contents of this file are subject to the terms and conditions of 
+ * The contents of this file are subject to the terms and conditions of
  * the Common Development and Distribution License 1.0 (the "License").
  *
  * You may not use this file except in compliance with the License.
@@ -28,9 +28,8 @@ package com.oracle.tools.util;
 import org.junit.Assert;
 import org.junit.Test;
 
-import static org.hamcrest.core.IsNot.not;
-
-import static org.mockito.Matchers.isNull;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
 
 import java.lang.reflect.Method;
 
@@ -55,7 +54,7 @@ public class ReflectionHelperTest
         HashMap map    = new HashMap();
         Method  method = ReflectionHelper.getCompatibleMethod(map.getClass(), "put", "key", "value");
 
-        Assert.assertThat(method, not(isNull()));
+        Assert.assertThat(method, is(notNullValue()));
     }
 
 
@@ -69,7 +68,7 @@ public class ReflectionHelperTest
                                                              "main",
                                                              (Object) new String[] {"hello"});
 
-        Assert.assertThat(method, not(isNull()));
+        Assert.assertThat(method, is(notNullValue()));
     }
 
 
@@ -83,13 +82,13 @@ public class ReflectionHelperTest
         Method interfaceMethod = ReflectionHelper.getCompatibleMethod(ReflectionHelperInterface.class,
                                                                       "voidMethodWithZeroArguments");
 
-        Assert.assertThat(interfaceMethod, not(isNull()));
+        Assert.assertThat(interfaceMethod, is(notNullValue()));
 
         // find it on a class
         Method classMethod = ReflectionHelper.getCompatibleMethod(ReflectionHelperClass.class,
                                                                   "voidMethodWithZeroArguments");
 
-        Assert.assertThat(classMethod, not(isNull()));
+        Assert.assertThat(classMethod, is(notNullValue()));
     }
 
 
@@ -104,14 +103,14 @@ public class ReflectionHelperTest
                                                                       "voidMethodWithOnePrimitiveArgument",
                                                                       42);
 
-        Assert.assertThat(interfaceMethod, not(isNull()));
+        Assert.assertThat(interfaceMethod, is(notNullValue()));
 
         // find it on a class
         Method classMethod = ReflectionHelper.getCompatibleMethod(ReflectionHelperClass.class,
                                                                   "voidMethodWithOnePrimitiveArgument",
                                                                   42);
 
-        Assert.assertThat(classMethod, not(isNull()));
+        Assert.assertThat(classMethod, is(notNullValue()));
     }
 
 
@@ -126,14 +125,14 @@ public class ReflectionHelperTest
                                                                       "voidMethodWithOneWrapperArgument",
                                                                       42L);
 
-        Assert.assertThat(interfaceMethod, not(isNull()));
+        Assert.assertThat(interfaceMethod, is(notNullValue()));
 
         // find it on a class
         Method classMethod = ReflectionHelper.getCompatibleMethod(ReflectionHelperClass.class,
                                                                   "voidMethodWithOneWrapperArgument",
                                                                   42L);
 
-        Assert.assertThat(classMethod, not(isNull()));
+        Assert.assertThat(classMethod, is(notNullValue()));
     }
 
 
@@ -148,13 +147,13 @@ public class ReflectionHelperTest
                                                                       "voidMethodWithOneStringArgument",
                                                                       "42");
 
-        Assert.assertThat(interfaceMethod, not(isNull()));
+        Assert.assertThat(interfaceMethod, is(notNullValue()));
 
         // find it on a class
         Method classMethod = ReflectionHelper.getCompatibleMethod(ReflectionHelperClass.class,
                                                                   "voidMethodWithOneStringArgument",
                                                                   "42");
 
-        Assert.assertThat(classMethod, not(isNull()));
+        Assert.assertThat(classMethod, is(notNullValue()));
     }
 }
