@@ -48,7 +48,6 @@ import com.oracle.tools.runtime.java.options.RemoteDebugging;
 import com.oracle.tools.runtime.remote.AbstractRemoteTest;
 import com.oracle.tools.runtime.remote.RemotePlatform;
 import com.oracle.tools.runtime.remote.java.applications.SleepingApplication;
-import com.oracle.tools.runtime.remote.options.StrictHostChecking;
 
 import com.oracle.tools.util.Capture;
 
@@ -67,8 +66,12 @@ import static org.hamcrest.CoreMatchers.startsWith;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 
+import java.io.File;
+import java.io.IOException;
+
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.Socket;
 
 import java.util.List;
 
@@ -189,8 +192,9 @@ public class RemoteJavaApplicationBuilderTest extends AbstractRemoteTest
         CapturingApplicationConsole console         = new CapturingApplicationConsole();
         RemotePlatform              platform        = getRemotePlatform();
         RemoteDebugging             remoteDebugging = RemoteDebugging.enabled().startSuspended(true);
+        JavaHome                    javaHome        = JavaHome.at(System.getProperty("java.home"));
 
-        try (SimpleJavaApplication application = platform.realize("Java", schema, console, remoteDebugging))
+        try (SimpleJavaApplication application = platform.realize("Java", schema, console, remoteDebugging, javaHome))
         {
             assertCanConnectDebuggerToApplication(application);
 
@@ -230,7 +234,7 @@ public class RemoteJavaApplicationBuilderTest extends AbstractRemoteTest
         Capture<Integer> debugPort    = new Capture<>(LocalPlatform.getInstance().getAvailablePorts());
 
         SimpleApplicationSchema jdbSchema =
-            new SimpleApplicationSchema("jdb").addArgument("-connect")
+            new SimpleApplicationSchema(findJDB()).addArgument("-connect")
                     .addArgument(String.format("com.sun.jdi.SocketListen:port=%d",
                                                debugPort.get()));
 
@@ -268,9 +272,12 @@ public class RemoteJavaApplicationBuilderTest extends AbstractRemoteTest
 
         Assert.assertThat(socket, is(notNullValue()));
 
+        Eventually.assertThat(invoking(this).isListening(socket), is(true));
+
         SimpleApplicationSchema schema =
-            new SimpleApplicationSchema("jdb").addArgument("-attach").addArgument(socket.getHostName() + ":"
-                                        + socket.getPort());
+            new SimpleApplicationSchema(findJDB()).addArgument("-connect")
+                    .addArgument(String.format("com.sun.jdi.SocketAttach:hostname=%s,port=%d",
+                                               socket.getAddress().getHostAddress(), socket.getPort()));
 
         CapturingApplicationConsole console = new CapturingApplicationConsole();
 
@@ -283,6 +290,18 @@ public class RemoteJavaApplicationBuilderTest extends AbstractRemoteTest
         }
     }
 
+    public boolean isListening(InetSocketAddress socket)
+    {
+        try (Socket s = new Socket())
+        {
+            s.connect(socket, 100);
+            return true;
+        }
+        catch (IOException e)
+        {
+            return false;
+        }
+    }
 
     /**
      * Should run the application with remote debug disabled.
@@ -390,7 +409,8 @@ public class RemoteJavaApplicationBuilderTest extends AbstractRemoteTest
      */
     protected boolean hasJDB() throws Exception
     {
-        SimpleApplicationSchema     schema  = new SimpleApplicationSchema("jdb").addArgument("-version");
+        String                      command = findJDB();
+        SimpleApplicationSchema     schema  = new SimpleApplicationSchema(command).addArgument("-version");
 
         CapturingApplicationConsole console = new CapturingApplicationConsole();
 
@@ -407,5 +427,24 @@ public class RemoteJavaApplicationBuilderTest extends AbstractRemoteTest
         }
 
         return true;
+    }
+
+    protected String findJDB()
+    {
+        String javaHome = System.getProperty("java.home");
+
+        if (javaHome.endsWith("jre"))
+        {
+            javaHome = javaHome + File.separator + "..";
+        }
+
+        String jdbFileName = javaHome + File.separator + "bin" + File.separator + "jdb";
+
+        if (System.getProperty("os.name").toLowerCase().contains("win"))
+        {
+            jdbFileName = jdbFileName + ".exe";
+        }
+
+        return jdbFileName;
     }
 }
