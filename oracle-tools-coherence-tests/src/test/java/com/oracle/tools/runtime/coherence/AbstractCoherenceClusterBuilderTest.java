@@ -176,11 +176,12 @@ public abstract class AbstractCoherenceClusterBuilderTest extends AbstractTest
         Capture<Integer> wkaPort     = new Capture<Integer>(LocalPlatform.getInstance().getAvailablePorts());
         Capture<Integer> clusterPort = new Capture<Integer>(LocalPlatform.getInstance().getAvailablePorts());
         String           localHost   = Constants.getLocalHost();
+        String           clusterName = "WKA" + getClass().getSimpleName();
 
         CoherenceCacheServerSchema schema =
             new CoherenceCacheServerSchema().setStorageEnabled(true).setWellKnownAddress(localHost)
-                .setClusterName("WKA").setWellKnownAddressPort(wkaPort).setLocalHostAddress(localHost)
-                .setLocalHostPort(wkaPort).setClusterPort(clusterPort);
+                .setClusterName(clusterName).setWellKnownAddressPort(wkaPort).setLocalHostAddress(localHost)
+                    .setLocalHostPort(wkaPort).setClusterPort(clusterPort);
 
         SystemApplicationConsole console            = new SystemApplicationConsole();
         int                      desiredClusterSize = 4;
@@ -210,9 +211,11 @@ public abstract class AbstractCoherenceClusterBuilderTest extends AbstractTest
 
         AvailablePortIterator availablePorts = LocalPlatform.getInstance().getAvailablePorts();
         Capture<Integer>      clusterPort    = new Capture<Integer>(availablePorts);
+        String                clusterName    = "Rolling" + getClass().getSimpleName();
 
         CoherenceCacheServerSchema schema =
-            new CoherenceCacheServerSchema().useLocalHostMode().setClusterPort(clusterPort).setClusterName("Rolling");
+            new CoherenceCacheServerSchema().useLocalHostMode().setClusterPort(clusterPort)
+                    .setClusterName(clusterName);
 
         ApplicationConsole      console  = new SystemApplicationConsole();
         Platform                platform = getPlatform();
@@ -250,9 +253,12 @@ public abstract class AbstractCoherenceClusterBuilderTest extends AbstractTest
                                                                                         perpetualAction);
 
             executor.executeNext();
-            executor.executeNext();
-            executor.executeNext();
+            assertThat(invoking(cluster).getClusterSize(), is(CLUSTER_SIZE));
 
+            executor.executeNext();
+            assertThat(invoking(cluster).getClusterSize(), is(CLUSTER_SIZE));
+
+            executor.executeNext();
             assertThat(invoking(cluster).getClusterSize(), is(CLUSTER_SIZE));
         }
         catch (Exception e)
