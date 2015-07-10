@@ -66,7 +66,7 @@ public class SimpleRemoteApplicationBuilderTest extends AbstractRemoteTest
         RemotePlatform platform = getRemotePlatform();
 
         URL  testFileURL = Thread.currentThread().getContextClassLoader().getResource("test.txt");
-        File testFile    = new File(testFileURL.getFile());
+        File testFile    = new File(testFileURL.toURI().getPath());
 
         try (SimpleApplication application = platform.realize("ls",
                                                               schema,
