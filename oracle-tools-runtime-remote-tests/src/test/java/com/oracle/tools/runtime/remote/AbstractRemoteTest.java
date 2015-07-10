@@ -25,6 +25,7 @@
 
 package com.oracle.tools.runtime.remote;
 
+import com.oracle.tools.runtime.java.options.JavaHome;
 import com.oracle.tools.runtime.remote.options.StrictHostChecking;
 
 import java.io.File;
@@ -121,7 +122,8 @@ public abstract class AbstractRemoteTest
                                   InetAddress.getByName(getRemoteHostName()),
                                   getRemoteUserName(),
                                   getRemoteAuthentication(),
-                                  StrictHostChecking.disabled());
+                                  StrictHostChecking.disabled(),
+                                  JavaHome.at(System.getProperty("java.home")));
     }
 
 }
