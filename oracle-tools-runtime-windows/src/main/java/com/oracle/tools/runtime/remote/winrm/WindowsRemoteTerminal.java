@@ -35,6 +35,7 @@ import com.oracle.tools.runtime.remote.RemoteApplicationProcess;
 import com.oracle.tools.runtime.remote.RemotePlatform;
 import com.oracle.tools.runtime.remote.RemoteTerminal;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -123,6 +124,32 @@ public class WindowsRemoteTerminal<A extends Application, S extends ApplicationS
         catch (Exception e)
         {
             throw new RuntimeException("Error creating directory " + directoryName, e);
+        }
+    }
+
+
+    public void moveFile(String source, String destination, Options options)
+    {
+        try (WindowsSession session = createSession())
+        {
+            session.connect();
+
+            try (WindowsRemoteApplicationProcess process = new WindowsRemoteApplicationProcess(session))
+            {
+                process.execute("move", Arrays.asList(source, destination));
+
+                int rc = process.waitFor();
+
+                if (rc != 0 && rc != 1)
+                {
+                    throw new RuntimeException("Error moving file from " + source + " to " + destination
+                                               + " - move return code = " + rc);
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            throw new RuntimeException("Error moving file from " + source + " to " + destination, e);
         }
     }
 

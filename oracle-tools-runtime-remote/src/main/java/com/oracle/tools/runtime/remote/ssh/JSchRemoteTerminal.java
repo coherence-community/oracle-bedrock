@@ -30,6 +30,7 @@ import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 
+import com.oracle.tools.Option;
 import com.oracle.tools.Options;
 
 import com.oracle.tools.lang.StringHelper;
@@ -231,6 +232,48 @@ public class JSchRemoteTerminal<A extends Application, S extends ApplicationSche
         catch (Exception e)
         {
             throw new RuntimeException("Error creating remote directories " + directoryName, e);
+        }
+        finally
+        {
+            if (session != null)
+            {
+                session.disconnect();
+            }
+        }
+    }
+
+    public void moveFile(String source, String destination, Options options)
+    {
+        Session session = null;
+
+        try
+        {
+            // acquire the remote platform on which to realize the application
+            RemotePlatform platform = getRemotePlatform();
+
+            // establish a specialized SocketFactory for JSch
+            JSchSocketFactory socketFactory = new JSchSocketFactory();
+
+            // create the remote session
+            session = sessionFactory.createSession(platform.getAddress().getHostName(), platform.getPort(),
+                                                   platform.getUserName(), platform.getAuthentication(), socketFactory,
+                                                   options);
+
+
+            ChannelExec execChannel = (ChannelExec) session.openChannel("exec");
+            String      moveCommand = String.format("mv %s %s", source, destination);
+
+            execChannel.setCommand(moveCommand);
+
+            RemoteApplicationProcess process = new JschRemoteApplicationProcess(session, execChannel);
+
+            execChannel.connect(session.getTimeout());
+
+            process.waitFor();
+        }
+        catch (Exception e)
+        {
+            throw new RuntimeException("Error moving file from " + source + " to " + destination, e);
         }
         finally
         {
