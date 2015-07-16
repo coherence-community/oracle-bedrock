@@ -95,6 +95,11 @@ public class SocketBasedRemoteExecutor extends AbstractControllableRemoteExecuto
     private ExecutorService executorService;
 
     /**
+     * The {@link ExecutorService} for executing received {@link Operation}s asynchronously.
+     */
+    private ExecutorService requestExecutorService;
+
+    /**
      * The {@link Thread} to read {@link Callable}s from the {@link Socket}.
      * <p/>
      * When this is <code>null</code> the {@link SocketBasedRemoteExecutor} is not connected.
@@ -143,17 +148,18 @@ public class SocketBasedRemoteExecutor extends AbstractControllableRemoteExecuto
     public SocketBasedRemoteExecutor(int    executorId,
                                      Socket socket) throws IOException
     {
-        this.executorId            = executorId;
-        this.socket                = socket;
-        this.output                = new ObjectOutputStream(socket.getOutputStream());
-        this.input                 = new ObjectInputStream(socket.getInputStream());
-        this.executorService       = Executors.newSingleThreadExecutor();
-        this.requestAcceptorThread = null;
-        this.isReadable            = new AtomicBoolean(true);
-        this.isWritable            = new AtomicBoolean(true);
-        this.protocol              = new HashMap<String, Class<? extends Operation>>();
-        this.pendingListeners      = new ConcurrentHashMap<Long, CompletionListener<?>>();
-        this.nextSequenceNumber    = new AtomicLong(0);
+        this.executorId                 = executorId;
+        this.socket                     = socket;
+        this.output                     = new ObjectOutputStream(socket.getOutputStream());
+        this.input                      = new ObjectInputStream(socket.getInputStream());
+        this.executorService            = Executors.newSingleThreadExecutor();
+        this.requestExecutorService     = Executors.newCachedThreadPool();
+        this.requestAcceptorThread      = null;
+        this.isReadable                 = new AtomicBoolean(true);
+        this.isWritable                 = new AtomicBoolean(true);
+        this.protocol                   = new HashMap<String, Class<? extends Operation>>();
+        this.pendingListeners           = new ConcurrentHashMap<Long, CompletionListener<?>>();
+        this.nextSequenceNumber         = new AtomicLong(0);
 
         // we'll always attempt to reuse addresses
         this.socket.setReuseAddress(true);
@@ -246,7 +252,7 @@ public class SocketBasedRemoteExecutor extends AbstractControllableRemoteExecuto
                                 operation.read(stream);
 
                                 // submit the operation for asynchronous execution
-                                executorService.submit(new Executor(sequence, operation));
+                                requestExecutorService.submit(new Executor(sequence, operation));
                             }
                             catch (Exception e)
                             {
@@ -291,8 +297,9 @@ public class SocketBasedRemoteExecutor extends AbstractControllableRemoteExecuto
         // no longer accept any more requests
         isReadable.set(false);
 
-        // gracefully shutdown the executor service
+        // gracefully shutdown the executor services
         executorService.shutdown();
+        requestExecutorService.shutdown();
 
         // no longer write any more responses
         isWritable.set(false);
