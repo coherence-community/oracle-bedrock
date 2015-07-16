@@ -90,9 +90,16 @@ public class SocketBasedRemoteExecutor extends AbstractControllableRemoteExecuto
     private ObjectInputStream input;
 
     /**
-     * The {@link ExecutorService} for executing {@link Callable}s asynchronously.
+     * The {@link ExecutorService} for executing tasks asynchronously in sequence
+     * (a singled threaded worker queue).
      */
-    private ExecutorService executorService;
+    private ExecutorService sequentialExecutionService;
+
+    /**
+     * The {@link ExecutorService} for executing multiple tasks asynchronously and
+     * concurrently (using multiple worker threads).
+     */
+    private ExecutorService concurrentExecutionService;
 
     /**
      * The {@link Thread} to read {@link Callable}s from the {@link Socket}.
@@ -143,17 +150,18 @@ public class SocketBasedRemoteExecutor extends AbstractControllableRemoteExecuto
     public SocketBasedRemoteExecutor(int    executorId,
                                      Socket socket) throws IOException
     {
-        this.executorId            = executorId;
-        this.socket                = socket;
-        this.output                = new ObjectOutputStream(socket.getOutputStream());
-        this.input                 = new ObjectInputStream(socket.getInputStream());
-        this.executorService       = Executors.newSingleThreadExecutor();
-        this.requestAcceptorThread = null;
-        this.isReadable            = new AtomicBoolean(true);
-        this.isWritable            = new AtomicBoolean(true);
-        this.protocol              = new HashMap<String, Class<? extends Operation>>();
-        this.pendingListeners      = new ConcurrentHashMap<Long, CompletionListener<?>>();
-        this.nextSequenceNumber    = new AtomicLong(0);
+        this.executorId                 = executorId;
+        this.socket                     = socket;
+        this.output                     = new ObjectOutputStream(socket.getOutputStream());
+        this.input                      = new ObjectInputStream(socket.getInputStream());
+        this.sequentialExecutionService = Executors.newSingleThreadExecutor();
+        this.concurrentExecutionService = Executors.newCachedThreadPool();
+        this.requestAcceptorThread      = null;
+        this.isReadable                 = new AtomicBoolean(true);
+        this.isWritable                 = new AtomicBoolean(true);
+        this.protocol                   = new HashMap<String, Class<? extends Operation>>();
+        this.pendingListeners           = new ConcurrentHashMap<Long, CompletionListener<?>>();
+        this.nextSequenceNumber         = new AtomicLong(0);
 
         // we'll always attempt to reuse addresses
         this.socket.setReuseAddress(true);
@@ -168,7 +176,7 @@ public class SocketBasedRemoteExecutor extends AbstractControllableRemoteExecuto
     /**
      * Obtains the identity of the {@link SocketBasedRemoteExecutor}.
      *
-     * @return  the identity of the {@link SocketBasedRemoteExecutor}
+     * @return the identity of the {@link SocketBasedRemoteExecutor}
      */
     public int getExecutorId()
     {
@@ -180,7 +188,7 @@ public class SocketBasedRemoteExecutor extends AbstractControllableRemoteExecuto
     /**
      * Obtains the {@link InetAddress} of the {@link Socket}.
      *
-     * @return  the {@link InetAddress} of the {@link Socket}
+     * @return the {@link InetAddress} of the {@link Socket}
      */
     public InetAddress getInetAddress()
     {
@@ -191,7 +199,7 @@ public class SocketBasedRemoteExecutor extends AbstractControllableRemoteExecuto
     /**
      * Obtains the {@link InetAddress} port number for the {@link Socket}.
      *
-     * @return  the {@link InetAddress} port number
+     * @return the {@link InetAddress} port number
      */
     public int getPort()
     {
@@ -245,13 +253,13 @@ public class SocketBasedRemoteExecutor extends AbstractControllableRemoteExecuto
 
                                 operation.read(stream);
 
-                                // submit the operation for asynchronous execution
-                                executorService.submit(new Executor(sequence, operation));
+                                // submit the operation for concurrent execution
+                                concurrentExecutionService.submit(new Executor(sequence, operation));
                             }
                             catch (Exception e)
                             {
                                 // when we can't execute the operation we notify the sender of the exception
-                                executorService.submit(new Sender(sequence, new ResponseOperation(e)));
+                                sequentialExecutionService.submit(new Sender(sequence, new ResponseOperation(e)));
                             }
                         }
                         catch (Exception e)
@@ -291,8 +299,9 @@ public class SocketBasedRemoteExecutor extends AbstractControllableRemoteExecuto
         // no longer accept any more requests
         isReadable.set(false);
 
-        // gracefully shutdown the executor service
-        executorService.shutdown();
+        // gracefully shutdown the executor services
+        concurrentExecutionService.shutdown();
+        sequentialExecutionService.shutdown();
 
         // no longer write any more responses
         isWritable.set(false);
@@ -371,7 +380,7 @@ public class SocketBasedRemoteExecutor extends AbstractControllableRemoteExecuto
 
             CallableOperation operation = new CallableOperation(isResponseRequired, callable);
 
-            executorService.submit(new Sender(sequence, operation));
+            sequentialExecutionService.submit(new Sender(sequence, operation));
         }
         else
         {
@@ -388,7 +397,7 @@ public class SocketBasedRemoteExecutor extends AbstractControllableRemoteExecuto
             long              sequence  = nextSequenceNumber.getAndIncrement();
             RunnableOperation operation = new RunnableOperation(runnable);
 
-            executorService.submit(new Sender(sequence, operation));
+            sequentialExecutionService.submit(new Sender(sequence, operation));
         }
         else
         {
@@ -617,7 +626,7 @@ public class SocketBasedRemoteExecutor extends AbstractControllableRemoteExecuto
             // when there's a result, asynchronously send it back
             if (resultingOperation != null)
             {
-                executorService.submit(new Sender(sequence, resultingOperation));
+                sequentialExecutionService.submit(new Sender(sequence, resultingOperation));
             }
         }
     }
