@@ -228,7 +228,7 @@ public abstract class AbstractCoherenceClusterBuilderTest extends AbstractTest
         {
             assertThat(invoking(cluster).getClusterSize(), is(CLUSTER_SIZE));
 
-            // construct the action to restart a cluster member (iff the DistributedCache is NODE_SAFE)
+            // construct the action to restart a cluster member (iff the PartitionedCache Service is NODE_SAFE)
             RestartCoherenceClusterMemberAction restartAction = new RestartCoherenceClusterMemberAction("DCS",
                                                                                                         schema,
                                                                                                         console,
@@ -237,7 +237,7 @@ public abstract class AbstractCoherenceClusterBuilderTest extends AbstractTest
                 @Override
                 public boolean evaluate(CoherenceClusterMember member)
                 {
-                    ServiceStatus status = member.getServiceStatus("DistributedCache");
+                    ServiceStatus status = member.getServiceStatus("PartitionedCache");
 
                     return status == ServiceStatus.NODE_SAFE;
                 }
