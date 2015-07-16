@@ -551,6 +551,9 @@ reverse chronological order.
 *   [ORACLETOOLS-255](https://java.net/jira/browse/ORACLETOOLS-255): Refactored
     ApplicationBuilder interface to require a specific Platform type.
 
+*   [ORACLETOOLS-264](https://java.net/jira/browse/ORACLETOOLS-264): Introduced
+    concurrent request execution support for SocketBasedRemoteExecutors.
+
 <h4>oracle-tools-runtime-remote</h4>
 
 *   [ORACLETOOLS-91](https://java.net/jira/browse/ORACLETOOLS-91): Introduced
