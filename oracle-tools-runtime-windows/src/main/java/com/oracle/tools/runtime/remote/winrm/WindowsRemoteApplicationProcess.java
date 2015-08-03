@@ -25,6 +25,7 @@
 
 package com.oracle.tools.runtime.remote.winrm;
 
+import com.oracle.tools.Option;
 import com.oracle.tools.runtime.remote.RemoteApplicationProcess;
 
 import java.io.IOException;
@@ -180,7 +181,7 @@ public class WindowsRemoteApplicationProcess implements RemoteApplicationProcess
 
 
     @Override
-    public int waitFor()
+    public int waitFor(Option... options)
     {
         return session.waitFor();
     }

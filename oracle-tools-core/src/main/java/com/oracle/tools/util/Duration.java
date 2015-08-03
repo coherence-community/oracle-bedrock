@@ -105,7 +105,7 @@ public class Duration
     @Override
     public String toString()
     {
-        return getAmount() + getUnits().name();
+        return getAmount() + " " + getUnits().name();
     }
 
 

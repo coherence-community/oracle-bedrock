@@ -1,5 +1,5 @@
 /*
- * File: ApplicationClosingBehavior.java
+ * File: ApplicationWithHangingShutdownHook.java
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
@@ -23,29 +23,38 @@
  * "Portions Copyright [year] [name of copyright owner]"
  */
 
-package com.oracle.tools.runtime.options;
+package com.oracle.tools.runtime.java;
 
-import com.oracle.tools.Option;
-import com.oracle.tools.runtime.Application;
+import java.io.IOException;
 
 /**
- * An {@link Option} defining custom closing behavior for an {@link Application}.
+ * A simple application that registers a hanging shutdown hook.
  * <p>
- * Copyright (c) 2014. All Rights Reserved. Oracle Corporation.<br>
+ * Copyright (c) 2015. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Brian Oliver
- *
- * @param <A>
  */
-public interface ApplicationClosingBehavior<A extends Application> extends Option
+public class ApplicationWithHangingShutdownHook
 {
     /**
-     * Called prior to the {@link Application} being closed.
+     * The main for the application
      *
-     * @param application  the {@link Application} being closed
-     * @param options      the {@link Option}s for closing the application
+     * @param args  the arguments for the application
      */
-    public void onBeforeClosing(A         application,
-                                Option... options);
+    public static void main(String[] args) throws IOException
+    {
+        Runtime.getRuntime().addShutdownHook(new Thread()
+        {
+            @Override
+            public void run()
+            {
+                System.out.println("Waiting forever");
+
+                while (true);
+            }
+        });
+
+        System.out.println("Application Main Method Complete");
+    }
 }

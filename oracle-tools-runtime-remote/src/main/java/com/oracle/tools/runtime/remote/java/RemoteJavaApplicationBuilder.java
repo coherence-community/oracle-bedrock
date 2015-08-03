@@ -25,6 +25,7 @@
 
 package com.oracle.tools.runtime.remote.java;
 
+import com.oracle.tools.Option;
 import com.oracle.tools.Options;
 
 import com.oracle.tools.deferred.AbstractDeferred;
@@ -69,6 +70,8 @@ import java.io.OutputStream;
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Brian Oliver
+ *
+ * @param <A>
  */
 public class RemoteJavaApplicationBuilder<A extends JavaApplication>
     extends AbstractRemoteApplicationBuilder<A, RemoteJavaApplicationEnvironment<A>, RemoteJavaApplicationBuilder<A>>
@@ -86,6 +89,16 @@ public class RemoteJavaApplicationBuilder<A extends JavaApplication>
     }
 
 
+    /**
+     * Method description
+     *
+     * @param applicationSchema
+     * @param options
+     * @param <T>
+     * @param <S>
+     *
+     * @return
+     */
     @Override
     @SuppressWarnings("unchecked")
     protected <T extends A,
@@ -105,6 +118,20 @@ public class RemoteJavaApplicationBuilder<A extends JavaApplication>
     }
 
 
+    /**
+     * Method description
+     *
+     * @param options
+     * @param schema
+     * @param environment
+     * @param applicationName
+     * @param process
+     * @param console
+     * @param <T>
+     * @param <S>
+     *
+     * @return
+     */
     @Override
     protected <T extends A, S extends ApplicationSchema<T>> T createApplication(Options                             options,
                                                                                 S                                   schema,
@@ -144,6 +171,7 @@ public class RemoteJavaApplicationBuilder<A extends JavaApplication>
                         return true;
                     }
                 }
+
             }, within(timeout));
         }
 
@@ -240,9 +268,9 @@ public class RemoteJavaApplicationBuilder<A extends JavaApplication>
 
 
         @Override
-        public int waitFor()
+        public int waitFor(Option... options)
         {
-            return process.waitFor();
+            return process.waitFor(options);
         }
 
 

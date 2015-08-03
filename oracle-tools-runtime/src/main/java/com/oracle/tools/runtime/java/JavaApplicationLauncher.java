@@ -72,8 +72,9 @@ public class JavaApplicationLauncher
     {
         if (arguments.length == 0)
         {
-            // TODO: output we need at least one argument
-            System.exit(-1);
+            System.out
+                .println("JavaApplicationLauncher: No application (fqcn) was specified to start. An application must be specified as an argument.");
+            Runtime.getRuntime().halt(1);
         }
         else
         {
@@ -81,18 +82,36 @@ public class JavaApplicationLauncher
             final Integer port         = Integer.getInteger(Settings.PARENT_PORT, null);
             final boolean isOrphanable = Boolean.getBoolean(Settings.ORPHANABLE);
 
-            // a flag indicating if this application is in the process of terminating
-            final AtomicBoolean isTerminating = new AtomicBoolean(false);
+            // a flag indicating if this application is in the process of
+            // shutting down naturally
+            // (System.exit(...) or main has finished and shutdown hooks have started)
+            final AtomicBoolean isShuttingDown = new AtomicBoolean(false);
+
+            // add a shutdown hook so we can tell when the application is
+            // terminating due to natural causes
+            // (like it's finished or a System.exit(...) was called)
+            Runtime.getRuntime().addShutdownHook(new Thread()
+            {
+                @Override
+                public void run()
+                {
+                    isShuttingDown.set(true);
+                }
+            });
 
             if (address == null)
             {
-                // TODO: address can't be null
-                System.exit(-1);
+                System.out
+                    .println("JavaApplicationLauncher: No parent address was specified.  The parent address must be specified to start the application.");
+
+                Runtime.getRuntime().halt(1);
             }
             else if (port == null)
             {
-                // TODO: port must be real
-                System.exit(-1);
+                System.out
+                    .println("JavaApplicationLauncher: No parent port was specified.  The parent port must be specified to start the application.");
+
+                Runtime.getRuntime().halt(1);
             }
             else if (arguments.length >= 1)
             {
@@ -121,10 +140,10 @@ public class JavaApplicationLauncher
                         public void onClosed(RemoteExecutor executor)
                         {
                             // disconnected from the parent so terminate
-                            // if we're not orphanable
-                            if (!isTerminating.get() &&!isOrphanable)
+                            // (if we're not orphanable)
+                            if (!isOrphanable)
                             {
-                                System.exit(-2);
+                                Runtime.getRuntime().halt(2);
                             }
                         }
                     });
@@ -192,20 +211,6 @@ public class JavaApplicationLauncher
                         System.out.println("JavaApplicationLauncher: Failed to invoke the main method for "
                                            + applicationClassName);
                         e.printStackTrace(System.out);
-                    }
-                    finally
-                    {
-                        // we're now terminating!
-                        isTerminating.set(true);
-
-                        try
-                        {
-                            remoteExecutor.close();
-                        }
-                        catch (Exception e)
-                        {
-                            // don't care as we're terminating
-                        }
                     }
                 }
             }

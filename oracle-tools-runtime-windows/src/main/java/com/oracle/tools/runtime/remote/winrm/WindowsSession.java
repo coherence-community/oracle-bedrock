@@ -732,10 +732,13 @@ public class WindowsSession implements Closeable
      * Wait for the currently executing command to terminate and return
      * its exit value.
      *
+     * @param options  the {@link Option}s for waiting, including
+     *                 {@link com.oracle.tools.options.Timeout}
+     *
      * @return the exit value from the currently executing command
      */
-    public int waitFor()
+    public int waitFor(Option... options)
     {
-        return outputStreamConnector.waitFor();
+        return outputStreamConnector.waitFor(options);
     }
 }

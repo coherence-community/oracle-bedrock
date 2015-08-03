@@ -115,13 +115,16 @@ public interface Application extends Closeable
      * This method returns immediately if the {@link Application} has already
      * been terminated.
      *
+     * @param options  the {@link Option}s for waiting, including possible
+     *                 {@link Timeout}
+     *
      * @return the exit value of the {@link Application}
      *         (by convention <code>0</code> indicates normal termination)
      *
      * @throws RuntimeException  if it wasn't possible to wait for the
      *                           termination.
      */
-    public int waitFor();
+    public int waitFor(Option... options);
 
 
     /**

@@ -554,6 +554,11 @@ reverse chronological order.
 *   [ORACLETOOLS-264](https://java.net/jira/browse/ORACLETOOLS-264): Introduced
     concurrent request execution support for SocketBasedRemoteExecutors.
 
+*   [ORACLETOOLS-266](https://java.net/jira/browse/ORACLETOOLS-266): Changed
+    uses of System.exit(...) in the JavaApplicationLauncher to use
+    Runtime.getRuntime().halt(...) to ensure misbehaving shutdown hooks
+    don't unnecessary block / hang shutdowns.
+
 <h4>oracle-tools-runtime-remote</h4>
 
 *   [ORACLETOOLS-91](https://java.net/jira/browse/ORACLETOOLS-91): Introduced

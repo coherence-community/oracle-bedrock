@@ -25,6 +25,8 @@
 
 package com.oracle.tools.runtime.concurrent.socket;
 
+import com.oracle.tools.lang.ThreadFactories;
+
 import com.oracle.tools.runtime.concurrent.AbstractControllableRemoteExecutor;
 import com.oracle.tools.runtime.concurrent.RemoteCallable;
 import com.oracle.tools.runtime.concurrent.RemoteExecutorListener;
@@ -154,8 +156,8 @@ public class SocketBasedRemoteExecutor extends AbstractControllableRemoteExecuto
         this.socket                     = socket;
         this.output                     = new ObjectOutputStream(socket.getOutputStream());
         this.input                      = new ObjectInputStream(socket.getInputStream());
-        this.sequentialExecutionService = Executors.newSingleThreadExecutor();
-        this.concurrentExecutionService = Executors.newCachedThreadPool();
+        this.sequentialExecutionService = Executors.newSingleThreadExecutor(ThreadFactories.usingDaemonThreads(true));
+        this.concurrentExecutionService = Executors.newCachedThreadPool(ThreadFactories.usingDaemonThreads(true));
         this.requestAcceptorThread      = null;
         this.isReadable                 = new AtomicBoolean(true);
         this.isWritable                 = new AtomicBoolean(true);
