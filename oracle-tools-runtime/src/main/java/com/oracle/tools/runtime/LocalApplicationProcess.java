@@ -25,7 +25,17 @@
 
 package com.oracle.tools.runtime;
 
-import java.io.IOException;
+import com.oracle.tools.Option;
+import com.oracle.tools.Options;
+
+import com.oracle.tools.deferred.DeferredHelper;
+
+import com.oracle.tools.options.Timeout;
+
+import static com.oracle.tools.deferred.DeferredHelper.eventually;
+import static com.oracle.tools.deferred.DeferredHelper.invoking;
+import static com.oracle.tools.deferred.DeferredHelper.within;
+
 import java.io.InputStream;
 import java.io.OutputStream;
 
@@ -33,6 +43,8 @@ import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
 
 import java.lang.reflect.Field;
+
+import java.util.concurrent.TimeUnit;
 
 /**
  * An {@link ApplicationProcess} that represents a locally executing
@@ -171,15 +183,14 @@ public class LocalApplicationProcess implements ApplicationProcess
 
 
     @Override
-    public int waitFor()
+    public int waitFor(Option... options)
     {
-        try
-        {
-            return process.waitFor();
-        }
-        catch (InterruptedException e)
-        {
-            throw new RuntimeException("Interrupted while waiting for application to terminate", e);
-        }
+        Options optionsMap = new Options(options);
+
+        Timeout timeout    = optionsMap.get(Timeout.class, Timeout.autoDetect());
+
+        DeferredHelper.ensure(eventually(invoking(this).exitValue(), within(timeout)));
+
+        return exitValue();
     }
 }

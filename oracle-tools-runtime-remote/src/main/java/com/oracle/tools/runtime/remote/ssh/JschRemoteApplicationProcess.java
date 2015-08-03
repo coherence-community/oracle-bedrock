@@ -27,11 +27,21 @@ package com.oracle.tools.runtime.remote.ssh;
 
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.Session;
+
+import com.oracle.tools.Option;
+import com.oracle.tools.Options;
+
+import com.oracle.tools.deferred.DeferredHelper;
+
+import com.oracle.tools.options.Timeout;
+
 import com.oracle.tools.runtime.remote.RemoteApplicationProcess;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+
+import java.util.concurrent.TimeUnit;
 
 /**
  * Represents an {@link com.oracle.tools.runtime.ApplicationProcess} that is securely executing
@@ -88,7 +98,8 @@ public class JschRemoteApplicationProcess implements RemoteApplicationProcess
      * @throws RuntimeException when the {@link JschRemoteApplicationProcess} can't establish
      *                          the necessary input/output streams
      */
-    public JschRemoteApplicationProcess(Session session, ChannelExec channel)
+    public JschRemoteApplicationProcess(Session     session,
+                                        ChannelExec channel)
     {
         this.session = session;
         this.channel = channel;
@@ -129,7 +140,7 @@ public class JschRemoteApplicationProcess implements RemoteApplicationProcess
     public void close()
     {
         // prior to closing, attempt to get the exit status (if we can)
-        if (exitStatus == null && !channel.isClosed())
+        if (exitStatus == null &&!channel.isClosed())
         {
             exitStatus = channel.getExitStatus();
         }
@@ -140,7 +151,7 @@ public class JschRemoteApplicationProcess implements RemoteApplicationProcess
 
 
     @Override
-    public int waitFor()
+    public int waitFor(Option... options)
     {
         if (exitStatus == null)
         {
@@ -150,13 +161,29 @@ public class JschRemoteApplicationProcess implements RemoteApplicationProcess
             }
             else
             {
-                int status = channel.getExitStatus();
+                int     status        = channel.getExitStatus();
 
-                while (status == -1)
+                Options optionsMap    = new Options(options);
+
+                Timeout timeout       = optionsMap.get(Timeout.class, Timeout.autoDetect());
+
+                long    timeRemaining = timeout.to(TimeUnit.MILLISECONDS);
+
+                while (status == -1 && timeRemaining >= 0)
                 {
                     try
                     {
-                        Thread.sleep(500);
+                        // wait a little bit for the channel to exit
+                        long waitTime = 500;
+
+                        Thread.sleep(waitTime);
+                        timeRemaining = timeRemaining - waitTime;
+
+                        // for partial wait times, wait one cycle
+                        if (timeRemaining > 0 && timeRemaining < waitTime)
+                        {
+                            timeRemaining = waitTime;
+                        }
 
                         status = channel.getExitStatus();
                     }

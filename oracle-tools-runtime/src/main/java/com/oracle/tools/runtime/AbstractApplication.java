@@ -246,7 +246,7 @@ public abstract class AbstractApplication<A extends AbstractApplication<A, P, R>
         {
             try
             {
-                closingBehavior.onBeforeClosing(this);
+                closingBehavior.onBeforeClosing(this, options);
             }
             catch (Exception e)
             {
@@ -322,9 +322,8 @@ public abstract class AbstractApplication<A extends AbstractApplication<A, P, R>
 
         try
         {
-            // wait for the process to actually terminate (because the above statements may not finish for a while)
-            // (if we don't wait the process may be left hanging/orphaned)
-            runtime.getApplicationProcess().waitFor();
+            // wait for the application to terminate
+            waitFor(options);
         }
         catch (RuntimeException e)
         {
@@ -379,9 +378,12 @@ public abstract class AbstractApplication<A extends AbstractApplication<A, P, R>
 
 
     @Override
-    public int waitFor()
+    public int waitFor(Option... options)
     {
-        return runtime.getApplicationProcess().waitFor();
+        // include the application specific options for waiting
+        Options optionsMap = new Options(getOptions().asArray()).addAll(options);
+
+        return runtime.getApplicationProcess().waitFor(optionsMap.asArray());
     }
 
 

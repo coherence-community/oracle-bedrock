@@ -1,5 +1,5 @@
 /*
- * File: ApplicationClosingBehavior.java
+ * File: ThreadFactories.java
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
@@ -23,29 +23,40 @@
  * "Portions Copyright [year] [name of copyright owner]"
  */
 
-package com.oracle.tools.runtime.options;
+package com.oracle.tools.lang;
 
-import com.oracle.tools.Option;
-import com.oracle.tools.runtime.Application;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 
 /**
- * An {@link Option} defining custom closing behavior for an {@link Application}.
+ * Helper methods to produce {@link ThreadFactory}s.
  * <p>
- * Copyright (c) 2014. All Rights Reserved. Oracle Corporation.<br>
+ * Copyright (c) 2015. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Brian Oliver
- *
- * @param <A>
  */
-public interface ApplicationClosingBehavior<A extends Application> extends Option
+public class ThreadFactories
 {
     /**
-     * Called prior to the {@link Application} being closed.
+     * A {@link ThreadFactory} enabling choice of {@link Thread} types.
      *
-     * @param application  the {@link Application} being closed
-     * @param options      the {@link Option}s for closing the application
+     * @param isDaemonRequired  <code>true</code> when daemon {@link Thread}s are
+     *                          required, <code>false</code> otherwise
+     * @return an appropriate {@link ThreadFactory}
      */
-    public void onBeforeClosing(A         application,
-                                Option... options);
+    public static ThreadFactory usingDaemonThreads(final boolean isDaemonRequired)
+    {
+        return new ThreadFactory()
+        {
+            public Thread newThread(Runnable r)
+            {
+                Thread t = Executors.defaultThreadFactory().newThread(r);
+
+                t.setDaemon(isDaemonRequired);
+
+                return t;
+            }
+        };
+    }
 }

@@ -34,9 +34,10 @@ import com.oracle.tools.deferred.listener.DeferredCompletionListener;
 
 import com.oracle.tools.io.NetworkHelper;
 
+import com.oracle.tools.options.Timeout;
+
 import com.oracle.tools.runtime.ApplicationConsole;
 import com.oracle.tools.runtime.LocalPlatform;
-import com.oracle.tools.runtime.Platform;
 import com.oracle.tools.runtime.SimpleApplication;
 import com.oracle.tools.runtime.SimpleApplicationSchema;
 
@@ -271,6 +272,13 @@ public class LocalJavaApplicationBuilderTest extends AbstractJavaApplicationBuil
     }
 
 
+    /**
+     * Method description
+     *
+     * @param application
+     *
+     * @throws Exception
+     */
     protected void assertCanConnectDebuggerToApplication(JavaApplication application) throws Exception
     {
         InetSocketAddress socket = application.getRemoteDebugSocket();
@@ -295,6 +303,13 @@ public class LocalJavaApplicationBuilderTest extends AbstractJavaApplicationBuil
     }
 
 
+    /**
+     * Determine if Java Debugging is available
+     *
+     * @return <code>true</code> if "jdb" is available, <code>false</code> otherwise
+     *
+     * @throws Exception
+     */
     protected boolean hasJDB() throws Exception
     {
         SimpleApplicationSchema     schema  = new SimpleApplicationSchema("jdb").addArgument("-version");
@@ -605,7 +620,7 @@ public class LocalJavaApplicationBuilderTest extends AbstractJavaApplicationBuil
 
         try (SimpleJavaApplication application = platform.realize("sleeping", schema, console))
         {
-            application.close(SystemExit.withExitCode(42));
+            application.close(RuntimeExit.withExitCode(42));
 
             Eventually.assertThat(invoking(application).exitValue(), is(42));
         }
@@ -632,6 +647,30 @@ public class LocalJavaApplicationBuilderTest extends AbstractJavaApplicationBuil
             application.close(RuntimeHalt.withExitCode(42));
 
             Eventually.assertThat(invoking(application).exitValue(), is(42));
+        }
+    }
+
+
+    /**
+     * Ensure that local {@link JavaApplication}s with hanging shutdown hooks
+     * can be terminated.
+     */
+    @Test
+    public void shouldTerminateHangingApplication()
+    {
+        SimpleJavaApplicationSchema schema =
+            new SimpleJavaApplicationSchema(ApplicationWithHangingShutdownHook.class.getName()).setPreferIPv4(true);
+
+        // build and start the application
+        LocalPlatform      platform = LocalPlatform.getInstance();
+
+        ApplicationConsole console  = new SystemApplicationConsole();
+
+        try (SimpleJavaApplication application = platform.realize("faulty", schema, console))
+        {
+            application.close(SystemExit.withExitCode(42), Timeout.after(5, TimeUnit.SECONDS));
+
+            Eventually.assertThat(invoking(application).exitValue(), is(2));
         }
     }
 

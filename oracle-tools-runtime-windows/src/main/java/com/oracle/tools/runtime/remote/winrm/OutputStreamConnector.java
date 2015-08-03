@@ -29,9 +29,16 @@ import com.microsoft.wsman.shell.CommandStateType;
 import com.microsoft.wsman.shell.ReceiveResponse;
 import com.microsoft.wsman.shell.StreamType;
 
+import com.oracle.tools.Option;
+import com.oracle.tools.Options;
+
+import com.oracle.tools.options.Timeout;
+
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.OutputStream;
+
+import java.util.concurrent.TimeUnit;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -149,12 +156,15 @@ public class OutputStreamConnector extends Thread implements Closeable
      * Causes the current thread to wait, if necessary, until the remote
      * command has terminated.
      *
+     * @param options  the {@link Option}s for waiting, including
+     *                 {@link com.oracle.tools.options.Timeout}
+     *
      * @return the exit code of the remote command. By convention,
      *         the value 0 indicates normal termination
      *
      * @throws RuntimeException if there was a problem waiting for termination
      */
-    public Integer waitFor()
+    public Integer waitFor(Option... options)
     {
         synchronized (this)
         {
@@ -163,9 +173,13 @@ public class OutputStreamConnector extends Thread implements Closeable
                 return exitCode;
             }
 
+            Options optionsMap = new Options(options);
+
+            Timeout timeout    = optionsMap.get(Timeout.class, Timeout.autoDetect());
+
             try
             {
-                this.wait();
+                this.wait(timeout.to(TimeUnit.MILLISECONDS));
             }
             catch (InterruptedException e)
             {

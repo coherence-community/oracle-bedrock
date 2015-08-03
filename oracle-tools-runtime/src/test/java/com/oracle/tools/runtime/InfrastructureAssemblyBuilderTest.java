@@ -376,7 +376,7 @@ public class InfrastructureAssemblyBuilderTest
 
 
         @Override
-        public int waitFor()
+        public int waitFor(Option... options)
         {
             return 0;
         }

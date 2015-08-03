@@ -25,10 +25,9 @@
 
 package com.oracle.tools.runtime.concurrent.runnable;
 
+import com.oracle.tools.Option;
 import com.oracle.tools.runtime.concurrent.RemoteRunnable;
-
 import com.oracle.tools.runtime.java.JavaApplication;
-
 import com.oracle.tools.runtime.options.ApplicationClosingBehavior;
 
 /**
@@ -79,15 +78,15 @@ public class RuntimeExit implements RemoteRunnable, ApplicationClosingBehavior<J
 
 
     @Override
-    public void onBeforeClosing(JavaApplication application)
+    public void onBeforeClosing(JavaApplication application,
+                                Option...       options)
     {
         try
         {
-            // submit the System.exit request to the application
+            // submit the Runtime.exit request to the application
             application.submit(this);
 
-            // now wait for it to terminate
-            application.waitFor();
+            application.waitFor(options);
         }
         catch (IllegalStateException e)
         {

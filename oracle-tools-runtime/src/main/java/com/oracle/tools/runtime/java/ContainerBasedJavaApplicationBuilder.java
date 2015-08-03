@@ -30,7 +30,6 @@ import com.oracle.tools.Options;
 
 import com.oracle.tools.runtime.ApplicationConsole;
 import com.oracle.tools.runtime.ApplicationSchema;
-import com.oracle.tools.runtime.Platform;
 import com.oracle.tools.runtime.PropertiesBuilder;
 
 import com.oracle.tools.runtime.concurrent.RemoteCallable;
@@ -393,7 +392,7 @@ public class ContainerBasedJavaApplicationBuilder<A extends JavaApplication>
 
 
         @Override
-        public int waitFor()
+        public int waitFor(Option... options)
         {
             // when there's no application controller we don't have to wait to terminate
             // (as we've already been terminated)

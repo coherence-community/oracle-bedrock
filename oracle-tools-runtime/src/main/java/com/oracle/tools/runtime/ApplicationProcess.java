@@ -25,6 +25,9 @@
 
 package com.oracle.tools.runtime;
 
+import com.oracle.tools.Option;
+import com.oracle.tools.options.Timeout;
+
 import java.io.Closeable;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -64,7 +67,7 @@ public interface ApplicationProcess extends Closeable
 
     /**
      * <b>WARNING:</b>This method is now deprecated.  It is replaced by {@link #close()}.
-     * <p>>
+     * <p>
      * Attempts to kill the executing {@link ApplicationProcess}.  If the
      * {@link ApplicationProcess} has already terminated, calling this method
      * has no effect.
@@ -127,10 +130,13 @@ public interface ApplicationProcess extends Closeable
      * Causes the current thread to wait, if necessary, until the application
      * represented by this {@link ApplicationProcess} has terminated.
      *
+     * @param options  the {@link Option}s to be used for waiting, including
+     *                 {@link Timeout} requirements
+     *
      * @return the exit code of the {@link ApplicationProcess}. By convention,
      *         the value 0 indicates normal termination
      *
      * @throws RuntimeException  if there was a problem wait for termination
      */
-    public int waitFor();
+    public int waitFor(Option... options);
 }

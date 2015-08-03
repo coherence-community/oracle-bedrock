@@ -127,13 +127,7 @@ public class Options
         }
         else
         {
-            Option previousOption = options.put(classOfOption, option);
-
-            if (previousOption != null &&!previousOption.equals(option))
-            {
-                LOGGER.warning("The option [" + option + "] will replace the previously defined option ["
-                               + previousOption + "]");
-            }
+            options.put(classOfOption, option);
         }
 
         // make note that we're not using the option yet as it's new/changed
