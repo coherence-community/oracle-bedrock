@@ -37,6 +37,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import java.net.InetAddress;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -78,8 +80,7 @@ public class JavaApplicationLauncher
         }
         else
         {
-            final String  address      = System.getProperty(Settings.PARENT_ADDRESS, null);
-            final Integer port         = Integer.getInteger(Settings.PARENT_PORT, null);
+            final String  parent       = System.getProperty(Settings.PARENT_URI, null);
             final boolean isOrphanable = Boolean.getBoolean(Settings.ORPHANABLE);
 
             // a flag indicating if this application is in the process of
@@ -99,17 +100,10 @@ public class JavaApplicationLauncher
                 }
             });
 
-            if (address == null)
+            if (parent == null)
             {
                 System.out
-                    .println("JavaApplicationLauncher: No parent address was specified.  The parent address must be specified to start the application.");
-
-                Runtime.getRuntime().halt(1);
-            }
-            else if (port == null)
-            {
-                System.out
-                    .println("JavaApplicationLauncher: No parent port was specified.  The parent port must be specified to start the application.");
+                    .println("JavaApplicationLauncher: No parent URI was specified.  The parent URI must be specified to start the application.");
 
                 Runtime.getRuntime().halt(1);
             }
@@ -122,11 +116,13 @@ public class JavaApplicationLauncher
                 // attempt to connect to the parent application
                 try
                 {
+                    URI parentURI = new URI(parent);
+
                     // find the InetAddress of the host on which the parent is running
-                    InetAddress inetAddress = InetAddress.getByName(address);
+                    InetAddress inetAddress = InetAddress.getByName(parentURI.getHost());
 
                     // establish a RemoteExecutorClient to handle and send requests to the parent
-                    remoteExecutor = new RemoteExecutorClient(inetAddress, port);
+                    remoteExecutor = new RemoteExecutorClient(inetAddress, parentURI.getPort());
 
                     remoteExecutor.addListener(new RemoteExecutorListener()
                     {
@@ -150,6 +146,11 @@ public class JavaApplicationLauncher
 
                     // connect to the parent
                     remoteExecutor.open();
+                }
+                catch (URISyntaxException e)
+                {
+                    System.out.println("JavaApplicationLauncher: The specified parent URI [" + parent + "] is invalid");
+                    e.printStackTrace(System.out);
                 }
                 catch (UnknownHostException e)
                 {

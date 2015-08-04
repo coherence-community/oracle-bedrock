@@ -52,16 +52,10 @@ public class Settings
     public static final String ORPHANABLE = "oracletools.runtime.orphanable";
 
     /**
-     * The Java System (String) Property that defines the server address of the process
-     * that started a process (ie: the parent address).
+     * The Java System (String) Property that specifies the URI of the host and
+     * port of the process that started a process (ie: the parent address).
      */
-    public static final String PARENT_ADDRESS = "oracletools.runtime.parent.address";
-
-    /**
-     * The Java System (Integer) Property that defines the server port of the process
-     * that started a process (ie: the parent port).
-     */
-    public static final String PARENT_PORT = "oracletools.runtime.parent.port";
+    public static final String PARENT_URI = "oracletools.runtime.parent";
 
 
     /**
