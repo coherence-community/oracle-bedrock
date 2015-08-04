@@ -70,6 +70,8 @@ import java.io.File;
 import java.io.IOException;
 
 import java.net.InetAddress;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 
 import java.util.Map;
@@ -323,11 +325,12 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication>
         systemPropertiesTable.getOptions().add(Table.orderByColumn(0));
         systemPropertiesTable.getOptions().add(Cell.Separator.of(""));
 
-        systemPropertiesTable.addRow(Settings.PARENT_ADDRESS, parentAddress.getHostAddress());
-        systemPropertiesTable.addRow(Settings.PARENT_PORT, Integer.toString(server.getPort()));
+        // establish the URI for this (parent) process
+        String parentURI = "//" + parentAddress.getHostAddress() + ":" + server.getPort();
 
-        processBuilder.command().add("-D" + Settings.PARENT_ADDRESS + "=" + parentAddress.getHostAddress());
-        processBuilder.command().add("-D" + Settings.PARENT_PORT + "=" + server.getPort());
+        systemPropertiesTable.addRow(Settings.PARENT_URI, parentURI.toString());
+
+        processBuilder.command().add("-D" + Settings.PARENT_URI + "=" + parentURI);
 
         // add Orphanable configuration
         Orphanable orphanable = options.get(Orphanable.class, Orphanable.disabled());

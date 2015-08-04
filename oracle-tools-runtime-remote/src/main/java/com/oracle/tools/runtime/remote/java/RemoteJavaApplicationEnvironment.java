@@ -138,8 +138,9 @@ public class RemoteJavaApplicationEnvironment<A extends JavaApplication>
             // when an automatic deployment is specified,
             // we use our modified class-path
             // (which is where all of the deployed jars will be located)
-            String thisDir = ".";
+            String thisDir        = ".";
             String thisDirAllJars = thisDir + separators.getFileSeparator() + "*";
+
             remoteClassPath = new ClassPath(thisDir, thisDirAllJars);
         }
         else
@@ -213,6 +214,7 @@ public class RemoteJavaApplicationEnvironment<A extends JavaApplication>
         return commandBuilder.toString();
     }
 
+
     @Override
     public List<String> getRemoteCommandArguments(InetAddress remoteExecutorAddress)
     {
@@ -282,8 +284,10 @@ public class RemoteJavaApplicationEnvironment<A extends JavaApplication>
         }
 
         // add Oracle Tools specific system properties
-        remoteSystemProperties.setProperty(Settings.PARENT_ADDRESS, remoteExecutorAddress.getHostAddress());
-        remoteSystemProperties.setProperty(Settings.PARENT_PORT, Integer.toString(remoteExecutor.getPort()));
+        // establish the URI for this (parent) process
+        String parentURI = "//" + remoteExecutorAddress.getHostAddress() + ":" + remoteExecutor.getPort();
+
+        remoteSystemProperties.setProperty(Settings.PARENT_URI, parentURI);
 
         Orphanable orphanable = options.get(Orphanable.class, Orphanable.disabled());
 
@@ -292,7 +296,7 @@ public class RemoteJavaApplicationEnvironment<A extends JavaApplication>
         // add the system properties to the command
         for (String propertyName : remoteSystemProperties.stringPropertyNames())
         {
-            String propertyValue = remoteSystemProperties.getProperty(propertyName);
+            String        propertyValue = remoteSystemProperties.getProperty(propertyName);
             StringBuilder propBuilder   = new StringBuilder();
 
             propBuilder.append("-D");
@@ -341,10 +345,12 @@ public class RemoteJavaApplicationEnvironment<A extends JavaApplication>
         return properties;
     }
 
+
     public InetAddress getRemoteDebugAddress()
     {
         return remoteDebugAddress;
     }
+
 
     public int getRemoteDebugPort()
     {
