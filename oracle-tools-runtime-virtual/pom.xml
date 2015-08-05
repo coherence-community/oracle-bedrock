@@ -4,7 +4,7 @@
     <parent>
         <artifactId>oracle-tools</artifactId>
         <groupId>com.oracle.tools</groupId>
-        <version>3.0.0-RC9-SNAPSHOT</version>
+        <version>3.0.0-RC10-SNAPSHOT</version>
     </parent>
 
     <artifactId>oracle-tools-runtime-virtual</artifactId>
