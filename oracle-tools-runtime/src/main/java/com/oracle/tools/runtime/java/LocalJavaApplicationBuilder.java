@@ -74,6 +74,9 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 
+import java.text.SimpleDateFormat;
+
+import java.util.Date;
 import java.util.Map;
 import java.util.Properties;
 
@@ -454,6 +457,9 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication>
         processBuilder.redirectErrorStream(redirection.isEnabled());
 
         diagnosticsTable.addRow("Standard Error Device", redirection.isEnabled() ? "stdout" : "stderr");
+
+        diagnosticsTable.addRow("Application Launch Time",
+                                new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
 
         // ----- start the local process -----
 
