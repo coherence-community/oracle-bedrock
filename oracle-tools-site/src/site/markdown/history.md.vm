@@ -562,6 +562,9 @@ reverse chronological order.
 *   [ORACLETOOLS-267](https://java.net/jira/browse/ORACLETOOLS-267): Introduced
     "Application Launch Time" output for application diagnostics.
 
+*   [ORACLETOOLS-269](https://java.net/jira/browse/ORACLETOOLS-269): Refactored
+    Java Virtual Machine Platform builder to use new diagnostics table output.
+
 <h4>oracle-tools-runtime-remote</h4>
 
 *   [ORACLETOOLS-91](https://java.net/jira/browse/ORACLETOOLS-91): Introduced

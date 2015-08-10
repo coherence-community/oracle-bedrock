@@ -28,6 +28,8 @@ package com.oracle.tools.runtime.java;
 import com.oracle.tools.Option;
 import com.oracle.tools.Options;
 
+import com.oracle.tools.lang.StringHelper;
+
 import com.oracle.tools.runtime.ApplicationConsole;
 import com.oracle.tools.runtime.ApplicationSchema;
 import com.oracle.tools.runtime.PropertiesBuilder;
@@ -42,6 +44,9 @@ import com.oracle.tools.runtime.java.container.ContainerClassLoader;
 import com.oracle.tools.runtime.java.container.ContainerScope;
 import com.oracle.tools.runtime.java.io.Serialization;
 
+import com.oracle.tools.table.Cell;
+import com.oracle.tools.table.Table;
+
 import com.oracle.tools.util.CompletionListener;
 import com.oracle.tools.util.FutureCompletionListener;
 
@@ -49,7 +54,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import java.text.SimpleDateFormat;
+
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Properties;
 
@@ -160,6 +168,16 @@ public class ContainerBasedJavaApplicationBuilder<A extends JavaApplication>
         // TODO: this should be a safe cast but we should also check to make sure
         JavaApplicationSchema<T> schema = (JavaApplicationSchema) applicationSchema;
 
+        // establish the diagnostics output table
+        Table diagnosticsTable = new Table();
+
+        diagnosticsTable.getOptions().add(Table.orderByColumn(0));
+
+        if (platform != null)
+        {
+            diagnosticsTable.addRow("Target Platform", platform.getName());
+        }
+
         // ---- establish the Options for the Application -----
 
         // add the platform options
@@ -176,11 +194,31 @@ public class ContainerBasedJavaApplicationBuilder<A extends JavaApplication>
 
         try
         {
+            Table systemPropertiesTable = new Table();
+
+            systemPropertiesTable.getOptions().add(Table.orderByColumn(0));
+            systemPropertiesTable.getOptions().add(Cell.Separator.of(""));
+
             // establish the System Properties for the ContainerBasedJavaApplication
             Properties systemProperties = schema.getSystemProperties(platform);
 
             // sanity check the schema and realized properties
             sanityCheck(schema, systemProperties);
+
+            for (String propertyName : systemProperties.stringPropertyNames())
+            {
+                String propertyValue = systemProperties.getProperty(propertyName);
+
+                systemPropertiesTable.addRow(propertyName, propertyValue);
+            }
+
+            diagnosticsTable.addRow("System Properties", systemPropertiesTable.toString());
+
+            ClassPath classPath      = schema.getClassPath();
+            Table     classPathTable = classPath.getTable();
+
+            classPathTable.getOptions().add(Cell.Separator.of(""));
+            diagnosticsTable.addRow("Class Path", classPathTable.toString());
 
             // establish the ContainerClassLoader for the application
             ContainerClassLoader classLoader = ContainerClassLoader.newInstance(applicationName,
@@ -206,6 +244,33 @@ public class ContainerBasedJavaApplicationBuilder<A extends JavaApplication>
                 Class<?> applicationClass = classLoader.loadClass(schema.getApplicationClassName());
             }
 
+            diagnosticsTable.addRow("Application Class", schema.getApplicationClassName());
+            diagnosticsTable.addRow("Application", applicationName);
+
+            String arguments = "";
+
+            for (String argument : schema.getArguments())
+            {
+                arguments += argument + " ";
+            }
+
+            if (arguments.length() > 0)
+            {
+                diagnosticsTable.addRow("Application Arguments", arguments);
+            }
+
+            diagnosticsTable.addRow("Application Launch Time",
+                                    new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
+
+            if (LOGGER.isLoggable(Level.INFO))
+            {
+                LOGGER.log(Level.INFO,
+                           "Oracle Tools Diagnostics: Starting Application...\n"
+                           + "------------------------------------------------------------------------\n"
+                           + diagnosticsTable.toString() + "\n"
+                           + "------------------------------------------------------------------------\n");
+            }
+
             // establish the ContainerBasedJavaProcess
             ContainerBasedJavaApplicationProcess process = new ContainerBasedJavaApplicationProcess(classLoader,
                                                                                                     controller);
@@ -219,6 +284,8 @@ public class ContainerBasedJavaApplicationBuilder<A extends JavaApplication>
             // the environment variables for the ContainerBasedJavaApplication
             // will be the environment variables for the Java Virtual Machine
             Properties environmentVariables = PropertiesBuilder.fromCurrentEnvironmentVariables().realize();
+
+            diagnosticsTable.addRow("Environment Variables", "(based on this Java Virtual Machine)");
 
             // delegate Application creation to the Schema
             final T application = schema.createJavaApplication(process,
