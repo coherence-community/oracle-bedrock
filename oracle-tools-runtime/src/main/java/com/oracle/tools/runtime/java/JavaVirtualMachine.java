@@ -72,7 +72,7 @@ public class JavaVirtualMachine extends AbstractPlatform<JavaVirtualMachine>
      */
     private JavaVirtualMachine()
     {
-        super("JVM");
+        super("Java Virtual Machine");
 
         // ----- establish InetAddress of the LocalPlatform -----
 
