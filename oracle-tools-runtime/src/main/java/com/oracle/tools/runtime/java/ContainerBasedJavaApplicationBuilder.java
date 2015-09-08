@@ -612,7 +612,7 @@ public class ContainerBasedJavaApplicationBuilder<A extends JavaApplication>
                                                                                           originalClassLoader));
                                 }
                             }
-                            catch (Exception e)
+                            catch (Throwable e)
                             {
                                 // TODO: write the exception to the platform (if diagnostics are on?)
 

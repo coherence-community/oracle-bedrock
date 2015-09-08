@@ -53,10 +53,10 @@ public class DeferredCompletionListener<T> implements Deferred<T>, CompletionLis
     private T result;
 
     /**
-     * The {@link Exception} as provided by the {@link CompletionListener}.
+     * The {@link Throwable} as provided by the {@link CompletionListener}.
      * (null if no exception was raised)
      */
-    private Exception exception;
+    private Throwable exception;
 
     /**
      * A flag indicating if the {@link CompletionListener} has been
@@ -98,7 +98,7 @@ public class DeferredCompletionListener<T> implements Deferred<T>, CompletionLis
 
 
     @Override
-    public void onException(Exception exception)
+    public void onException(Throwable exception)
     {
         synchronized (this)
         {
