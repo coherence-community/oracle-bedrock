@@ -26,7 +26,7 @@
 package com.oracle.tools.util;
 
 /**
- * A listener to be called when an {@link Exception} occurs during
+ * A listener to be called when an {@link Throwable} occurs during
  * some operation.
  * <p>
  * Copyright (c) 2013. All Rights Reserved. Oracle Corporation.<br>
@@ -37,9 +37,9 @@ package com.oracle.tools.util;
 public interface ExceptionListener
 {
     /**
-     * Called when an operation failed and raised an {@link Exception}.
+     * Called when an operation failed and raised an {@link Throwable}.
      *
-     * @param exception  the {@link Exception}
+     * @param exception  the {@link Throwable}
      */
-    public void onException(Exception exception);
+    public void onException(Throwable exception);
 }

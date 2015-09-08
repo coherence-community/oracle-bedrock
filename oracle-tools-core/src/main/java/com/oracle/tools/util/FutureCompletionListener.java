@@ -53,7 +53,7 @@ public class FutureCompletionListener<T> implements CompletionListener<T>, Futur
     /**
      * The exception (null if there was no exception).
      */
-    private Exception exception;
+    private Throwable exception;
 
 
     /**
@@ -89,7 +89,7 @@ public class FutureCompletionListener<T> implements CompletionListener<T>, Futur
 
 
     @Override
-    public void onException(Exception exception)
+    public void onException(Throwable exception)
     {
         synchronized (this)
         {
