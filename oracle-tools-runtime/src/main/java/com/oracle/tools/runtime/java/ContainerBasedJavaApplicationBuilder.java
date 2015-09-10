@@ -612,14 +612,14 @@ public class ContainerBasedJavaApplicationBuilder<A extends JavaApplication>
                                                                                           originalClassLoader));
                                 }
                             }
-                            catch (Exception e)
+                            catch (Throwable throwable)
                             {
                                 // TODO: write the exception to the platform (if diagnostics are on?)
 
                                 // notify the listener (if there is one) of the exception
                                 if (listener != null)
                                 {
-                                    listener.onException(e);
+                                    listener.onException(throwable);
                                 }
                             }
                             finally

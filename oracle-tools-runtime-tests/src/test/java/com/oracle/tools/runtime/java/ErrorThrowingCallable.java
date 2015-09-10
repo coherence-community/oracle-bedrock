@@ -1,5 +1,5 @@
 /*
- * File: ExceptionListener.java
+ * File: ErrorThrowingCallable.java
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
@@ -23,23 +23,48 @@
  * "Portions Copyright [year] [name of copyright owner]"
  */
 
-package com.oracle.tools.util;
+package com.oracle.tools.runtime.java;
+
+import com.oracle.tools.runtime.concurrent.RemoteCallable;
 
 /**
- * A listener to be called when an {@link Throwable} occurs during
- * some operation.
+ * A {@link RemoteCallable} that will throw an {@link Error}
+ * with a given message when executed.
  * <p>
  * Copyright (c) 2013. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Brian Oliver
  */
-public interface ExceptionListener
+public class ErrorThrowingCallable implements RemoteCallable<Void>
 {
     /**
-     * Called when an operation failed and raised a {@link Throwable}.
-     *
-     * @param throwable  the {@link Throwable}
+     * The message for the {@link Error}.
      */
-    public void onException(Throwable throwable);
+    private String message;
+
+
+    /**
+     * Constructs a {@link ErrorThrowingCallable}
+     *
+     * @param message  the message for the {@link Error}
+     */
+    public ErrorThrowingCallable(String message)
+    {
+        this.message = message;
+    }
+
+
+    @Override
+    public Void call() throws Exception
+    {
+        throw new Error(message);
+    }
+
+
+    @Override
+    public String toString()
+    {
+        return "Error: " + message;
+    }
 }

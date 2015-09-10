@@ -10,6 +10,7 @@ reverse chronological order.
 
 *   Brian Oliver
 *   Jonathan Knight
+*   Alexande Chistyakov
 
 <h4>Global and Cross-Module Changes</h4>
 
@@ -125,6 +126,14 @@ reverse chronological order.
     upper-bound for ensured (deferred) polling times.  Introduced Duration
     class to represent Durations.  Refactored Timeout to use Durations.  Refactored
     internal implementations to use Durations where appropriate.
+
+*   [ORACLETOOLS-272](https://java.net/jira/browse/ORACLETOOLS-272): Changed
+    ExceptionListener.onException method to accept a Throwable instead of an
+    Exception to allow Errors to be handled.
+
+    *BREAKING CHANGE:* This may be a breaking change for any application
+    that implements this interface (thought it's only used internally in
+    Oracle Tools).
 
 <h4>oracle-tools-runtime</h4>
 
