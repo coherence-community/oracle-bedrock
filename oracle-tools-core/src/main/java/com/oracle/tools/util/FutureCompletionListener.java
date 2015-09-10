@@ -51,9 +51,9 @@ public class FutureCompletionListener<T> implements CompletionListener<T>, Futur
     private T result;
 
     /**
-     * The exception (null if there was no exception).
+     * The {@link Throwable} (null if there was no throwable).
      */
-    private Exception exception;
+    private Throwable throwable;
 
 
     /**
@@ -63,7 +63,7 @@ public class FutureCompletionListener<T> implements CompletionListener<T>, Futur
     {
         hasResult = false;
         result    = null;
-        exception = null;
+        throwable = null;
     }
 
 
@@ -80,7 +80,7 @@ public class FutureCompletionListener<T> implements CompletionListener<T>, Futur
             {
                 this.hasResult = true;
                 this.result    = result;
-                this.exception = null;
+                this.throwable = null;
 
                 notifyAll();
             }
@@ -89,7 +89,7 @@ public class FutureCompletionListener<T> implements CompletionListener<T>, Futur
 
 
     @Override
-    public void onException(Exception exception)
+    public void onException(Throwable throwable)
     {
         synchronized (this)
         {
@@ -101,7 +101,7 @@ public class FutureCompletionListener<T> implements CompletionListener<T>, Futur
             {
                 this.hasResult = true;
                 this.result    = null;
-                this.exception = exception;
+                this.throwable = throwable;
 
                 notifyAll();
             }
@@ -147,9 +147,9 @@ public class FutureCompletionListener<T> implements CompletionListener<T>, Futur
 
             if (hasResult)
             {
-                if (exception != null)
+                if (throwable != null)
                 {
-                    throw new ExecutionException(exception);
+                    throw new ExecutionException(throwable);
                 }
                 else
                 {
@@ -177,9 +177,9 @@ public class FutureCompletionListener<T> implements CompletionListener<T>, Futur
 
             if (hasResult)
             {
-                if (exception != null)
+                if (throwable != null)
                 {
-                    throw new ExecutionException(exception);
+                    throw new ExecutionException(throwable);
                 }
                 else
                 {

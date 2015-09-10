@@ -84,7 +84,7 @@ public abstract class AbstractControllableRemoteExecutor implements Controllable
                 {
                     listener.onClosed(this);
                 }
-                catch (Exception e)
+                catch (Throwable throwable)
                 {
                     // we ignore exceptions that occur while notifying the listeners
                 }

@@ -52,6 +52,7 @@ import com.oracle.tools.runtime.console.SystemApplicationConsole;
 
 import com.oracle.tools.util.FutureCompletionListener;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 import org.mockito.Mock;
@@ -62,6 +63,7 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.core.StringContains.containsString;
 
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
 import java.util.UUID;
 
@@ -195,7 +197,33 @@ public abstract class AbstractJavaApplicationBuilderTest<P extends Platform> ext
         try (JavaApplication application = builder.realize(schema, "application", console))
         {
             Eventually.assertThat(application, new GetSystemProperty("uuid"), is(uuid));
+        }
+    }
 
+
+    /**
+     * Ensure that a Callable that raises an exception is re-raised as an
+     * {@link ExecutionException}.
+     */
+    @Test
+    public void shouldRaiseExecutionExceptionFromCallable()
+    {
+        // define and start the SleepingApplication
+        SimpleJavaApplicationSchema schema = new SimpleJavaApplicationSchema(SleepingApplication.class.getName());
+
+        JavaApplicationBuilder<JavaApplication, P> builder = newJavaApplicationBuilder();
+
+        ApplicationConsole                         console = new SystemApplicationConsole();
+
+        try (JavaApplication application = builder.realize(schema, "application", console))
+        {
+            application.submit(new ErrorThrowingCallable("Submission Failed"));
+
+            fail();
+        }
+        catch (RuntimeException e)
+        {
+            Assert.assertThat(e.getCause().getCause().getMessage(), is("Submission Failed"));
         }
     }
 

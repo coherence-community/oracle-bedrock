@@ -529,11 +529,11 @@ public class SocketBasedRemoteExecutor extends AbstractControllableRemoteExecuto
                     operation = new ResponseOperation(result);
                 }
             }
-            catch (Exception e)
+            catch (Throwable throwable)
             {
                 if (isResponseRequired)
                 {
-                    operation = new ResponseOperation(e);
+                    operation = new ResponseOperation(throwable);
                 }
             }
 
@@ -681,16 +681,16 @@ public class SocketBasedRemoteExecutor extends AbstractControllableRemoteExecuto
             {
                 try
                 {
-                    if (response instanceof Exception)
+                    if (response instanceof Throwable)
                     {
-                        listener.onException((Exception) response);
+                        listener.onException((Throwable) response);
                     }
                     else
                     {
                         listener.onCompletion(response);
                     }
                 }
-                catch (Exception e)
+                catch (Throwable throwable)
                 {
                     // we ignore any exceptions that the listener may throw
                 }
@@ -788,7 +788,7 @@ public class SocketBasedRemoteExecutor extends AbstractControllableRemoteExecuto
             {
                 runnable.run();
             }
-            catch (Exception e)
+            catch (Throwable throwable)
             {
                 // SKIP: do nothing if there is an exception
             }

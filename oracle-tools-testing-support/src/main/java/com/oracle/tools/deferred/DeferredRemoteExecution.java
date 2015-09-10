@@ -73,9 +73,9 @@ public class DeferredRemoteExecution<T> implements Deferred<T>, CompletionListen
     private T result;
 
     /**
-     * The {@link Exception} produced by an execution (null if no exception occurred)
+     * The {@link Throwable} produced by an execution (null if no exception occurred)
      */
-    private Exception exception;
+    private Throwable throwable;
 
 
     /**
@@ -92,7 +92,7 @@ public class DeferredRemoteExecution<T> implements Deferred<T>, CompletionListen
         this.hasSubmittedCallable = false;
         this.hasResult            = false;
         this.result               = null;
-        this.exception            = null;
+        this.throwable            = null;
     }
 
 
@@ -112,14 +112,14 @@ public class DeferredRemoteExecution<T> implements Deferred<T>, CompletionListen
             {
                 this.hasResult = true;
                 this.result    = result;
-                this.exception = null;
+                this.throwable = null;
             }
         }
     }
 
 
     @Override
-    public void onException(Exception exception)
+    public void onException(Throwable throwable)
     {
         synchronized (this)
         {
@@ -131,7 +131,7 @@ public class DeferredRemoteExecution<T> implements Deferred<T>, CompletionListen
             {
                 this.hasResult = true;
                 this.result    = null;
-                this.exception = exception;
+                this.throwable = throwable;
             }
         }
     }
@@ -147,13 +147,13 @@ public class DeferredRemoteExecution<T> implements Deferred<T>, CompletionListen
                 hasResult            = false;
                 hasSubmittedCallable = false;
 
-                if (exception == null)
+                if (throwable == null)
                 {
                     return result;
                 }
                 else
                 {
-                    throw new TemporarilyUnavailableException(this, exception);
+                    throw new TemporarilyUnavailableException(this, throwable);
                 }
             }
             else
@@ -167,7 +167,7 @@ public class DeferredRemoteExecution<T> implements Deferred<T>, CompletionListen
                     hasSubmittedCallable = true;
                     hasResult            = false;
                     result               = null;
-                    exception            = null;
+                    throwable            = null;
 
                     try
                     {

@@ -53,10 +53,10 @@ public class DeferredCompletionListener<T> implements Deferred<T>, CompletionLis
     private T result;
 
     /**
-     * The {@link Exception} as provided by the {@link CompletionListener}.
-     * (null if no exception was raised)
+     * The {@link Throwable} as provided by the {@link CompletionListener}.
+     * (null if no throwable was raised)
      */
-    private Exception exception;
+    private Throwable throwable;
 
     /**
      * A flag indicating if the {@link CompletionListener} has been
@@ -72,7 +72,7 @@ public class DeferredCompletionListener<T> implements Deferred<T>, CompletionLis
     {
         this.deferredClass = deferredClass;
         this.result        = null;
-        this.exception     = null;
+        this.throwable     = null;
         this.hasResult     = false;
     }
 
@@ -91,14 +91,14 @@ public class DeferredCompletionListener<T> implements Deferred<T>, CompletionLis
                 hasResult      = true;
 
                 this.result    = result;
-                this.exception = null;
+                this.throwable = null;
             }
         }
     }
 
 
     @Override
-    public void onException(Exception exception)
+    public void onException(Throwable throwable)
     {
         synchronized (this)
         {
@@ -111,7 +111,7 @@ public class DeferredCompletionListener<T> implements Deferred<T>, CompletionLis
                 hasResult      = true;
 
                 this.result    = null;
-                this.exception = exception;
+                this.throwable = throwable;
             }
         }
     }
@@ -124,13 +124,13 @@ public class DeferredCompletionListener<T> implements Deferred<T>, CompletionLis
         {
             if (hasResult)
             {
-                if (exception == null)
+                if (throwable == null)
                 {
                     return result;
                 }
                 else
                 {
-                    throw new PermanentlyUnavailableException(this, exception);
+                    throw new PermanentlyUnavailableException(this, throwable);
                 }
             }
             else
@@ -154,7 +154,7 @@ public class DeferredCompletionListener<T> implements Deferred<T>, CompletionLis
         StringBuilder builder = new StringBuilder();
 
         builder.append("DeferredCompletionListener<" + deferredClass + ">{");
-        builder.append(hasResult ? (exception == null ? result : exception) : "(no result)");
+        builder.append(hasResult ? (throwable == null ? result : throwable) : "(no result)");
         builder.append("}");
 
         return builder.toString();
