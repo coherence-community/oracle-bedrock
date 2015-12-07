@@ -28,6 +28,7 @@ package com.oracle.tools.runtime.coherence;
 import com.oracle.tools.runtime.Platform;
 import com.oracle.tools.runtime.java.ContainerBasedJavaApplicationBuilder;
 import com.oracle.tools.runtime.java.JavaVirtualMachine;
+import org.junit.Ignore;
 
 /**
  * Functional Tests for {@link CoherenceClusterBuilder}s using a {@link ContainerBasedJavaApplicationBuilder}.
@@ -43,5 +44,13 @@ public class ContainerBasedCoherenceClusterBuilderTest extends AbstractCoherence
     public Platform getPlatform()
     {
         return JavaVirtualMachine.getInstance();
+    }
+
+    @Override
+    @Ignore
+    public void shouldPerformRollingRestartOfCluster()
+    {
+        // we skip this test as performing a rolling restart in single JVM
+        // container is not supported for Coherence 3.7.1.x
     }
 }
