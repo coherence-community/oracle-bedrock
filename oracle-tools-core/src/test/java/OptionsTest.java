@@ -30,6 +30,7 @@ import com.oracle.tools.options.Timeout;
 
 import org.junit.Test;
 
+import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.nullValue;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -275,6 +276,36 @@ public class OptionsTest
         assertThat(options.get(Beverage.class).toString(), is("Beer"));
     }
 
+
+    /**
+     * Ensure that {@link Options} can collect a single collectable,
+     * including creating a collector.
+     */
+    @Test
+    public void shouldCollectASingleCollectable()
+    {
+        Options options = new Options(new Message("Hello"));
+
+        assertThat(options.get(Message.class), is(nullValue()));
+        assertThat(options.get(Messages.class), is(not(nullValue())));
+        assertThat(options.get(Messages.class).get(), is("Hello"));
+    }
+
+
+    /**
+     * Ensure that {@link Options} can collect a multiple collectables,
+     * including creating a collector.
+     */
+    @Test
+    public void shouldCollectMultipleCollectables()
+    {
+        Options options = new Options(new Message("Hello"), new Message("G'day"));
+
+        assertThat(options.get(Message.class), is(nullValue()));
+        assertThat(options.get(Messages.class), is(not(nullValue())));
+        assertThat(options.get(Messages.class).get(), is("Hello, G'day"));
+    }
+
     /**
      * A simple {@link Option} using a {@link Options.Default}
      * annotation on a static getter method.
@@ -372,5 +403,61 @@ public class OptionsTest
      */
     public class ExtendedEnhanced extends Enhanced
     {
+    }
+
+
+    /**
+     * A {@link Collector} for testing.
+     */
+    public static class Messages implements Option.Collector<Message, Messages>
+    {
+        private String values;
+
+        @Options.Default
+        public Messages()
+        {
+            this.values = "";
+        }
+
+        public Messages(String values)
+        {
+            this.values = values;
+        }
+
+        public String get()
+        {
+            return values;
+        }
+
+        @Override
+        public Messages collect(Message collectable)
+        {
+            return new Messages(values.isEmpty() ? collectable.get() : this.values + ", " + collectable.get());
+        }
+    }
+
+
+    /**
+     * A {@link Collectable} for testing.
+     */
+    public static class Message implements Option.Collectable<Messages>
+    {
+        private String value;
+
+        public Message(String value)
+        {
+            this.value = value;
+        }
+
+        public String get()
+        {
+            return value;
+        }
+
+        @Override
+        public Class<Messages> getCollectorClass()
+        {
+            return Messages.class;
+        }
     }
 }
