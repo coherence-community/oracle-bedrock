@@ -165,7 +165,7 @@ public class JschRemoteApplicationProcess implements RemoteApplicationProcess
 
                 Options optionsMap    = new Options(options);
 
-                Timeout timeout       = optionsMap.get(Timeout.class, Timeout.autoDetect());
+                Timeout timeout       = optionsMap.get(Timeout.class);
 
                 long    timeRemaining = timeout.to(TimeUnit.MILLISECONDS);
 

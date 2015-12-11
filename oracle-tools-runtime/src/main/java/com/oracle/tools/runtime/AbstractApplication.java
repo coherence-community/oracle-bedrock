@@ -110,7 +110,7 @@ public abstract class AbstractApplication<A extends AbstractApplication<A, P, R>
         this.runtime = runtime;
 
         // establish the default Timeout for the application
-        this.defaultTimeout = runtime.getOptions().get(Timeout.class, Timeout.autoDetect());
+        this.defaultTimeout = runtime.getOptions().get(Timeout.class);
 
         // make a copy of the listeners
         this.listeners = new LinkedHashSet<>();
@@ -127,8 +127,7 @@ public abstract class AbstractApplication<A extends AbstractApplication<A, P, R>
         String             displayName = runtime.getApplicationName();
         P                  process     = runtime.getApplicationProcess();
         ApplicationConsole console     = runtime.getApplicationConsole();
-        boolean diagnosticsEnabled     = runtime.getOptions().get(Diagnostics.class,
-                                                                  Diagnostics.disabled()).isEnabled();
+        boolean diagnosticsEnabled     = runtime.getOptions().get(Diagnostics.class).isEnabled();
 
         // start a thread to redirect standard out to the console
         stdoutThread = new Thread(new OutputRedirector(displayName,

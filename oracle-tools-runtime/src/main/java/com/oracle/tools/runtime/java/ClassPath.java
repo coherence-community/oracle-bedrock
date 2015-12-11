@@ -316,8 +316,8 @@ public class ClassPath implements Iterable<String>, Tabular
     {
         StringBuilder      builder       = new StringBuilder();
         Options            opts          = new Options(options);
-        PlatformSeparators separators    = opts.get(PlatformSeparators.class, PlatformSeparators.autoDetect());
-        ClassPathModifier  modifier      = opts.get(ClassPathModifier.class, ClassPathModifier.none());
+        PlatformSeparators separators    = opts.get(PlatformSeparators.class);
+        ClassPathModifier  modifier      = opts.get(ClassPathModifier.class);
         String             pathSeparator = separators.getPathSeparator();
 
         for (String path : paths)

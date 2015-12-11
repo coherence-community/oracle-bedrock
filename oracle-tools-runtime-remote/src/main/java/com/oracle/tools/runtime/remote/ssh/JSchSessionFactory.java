@@ -119,8 +119,8 @@ public class JSchSessionFactory
         // ----- configure the session channel properties -----
         Properties config = new Properties();
 
-        // are we to use strict-host-checking? (when it's not defined we enabled it by default)
-        StrictHostChecking strictHostChecking = options.get(StrictHostChecking.class, StrictHostChecking.enabled());
+        // are we to use strict-host-checking? (when it's not defined it's enabled it by default)
+        StrictHostChecking strictHostChecking = options.get(StrictHostChecking.class);
 
         config.put("StrictHostKeyChecking", strictHostChecking.isEnabled() ? "yes" : "no");
         session.setConfig(config);

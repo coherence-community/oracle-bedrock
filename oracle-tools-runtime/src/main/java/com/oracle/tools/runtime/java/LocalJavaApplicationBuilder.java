@@ -167,8 +167,7 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication>
 
         // ----- establish environment variables -----
 
-        EnvironmentVariables environmentVariables = options.get(EnvironmentVariables.class,
-                                                                EnvironmentVariables.inherited());
+        EnvironmentVariables environmentVariables = options.get(EnvironmentVariables.class);
 
         switch (environmentVariables.getSource())
         {
@@ -336,7 +335,7 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication>
         processBuilder.command().add("-D" + Settings.PARENT_URI + "=" + parentURI);
 
         // add Orphanable configuration
-        Orphanable orphanable = options.get(Orphanable.class, Orphanable.disabled());
+        Orphanable orphanable = options.get(Orphanable.class);
 
         processBuilder.command().add("-D" + Settings.ORPHANABLE + "=" + orphanable.isOrphanable());
 
@@ -369,7 +368,7 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication>
 
         StringBuilder jvmOptions = new StringBuilder();
 
-        for (JvmOption jvmOption : options.getAll(JvmOption.class))
+        for (JvmOption jvmOption : options.getInstancesOf(JvmOption.class))
         {
             for (String option : jvmOption.getOptions())
             {
@@ -391,7 +390,7 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication>
 
         // ----- establish remote debugging JVM options -----
 
-        RemoteDebugging remoteDebugging = options.get(RemoteDebugging.class, RemoteDebugging.autoDetect());
+        RemoteDebugging remoteDebugging = options.get(RemoteDebugging.class);
 
         int             debugPort       = -1;
 
@@ -451,8 +450,7 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication>
         }
 
         // should the standard error be redirected to the standard out?
-        ErrorStreamRedirection redirection = options.get(ErrorStreamRedirection.class,
-                                                         ErrorStreamRedirection.disabled());
+        ErrorStreamRedirection redirection = options.get(ErrorStreamRedirection.class);
 
         processBuilder.redirectErrorStream(redirection.isEnabled());
 
@@ -503,7 +501,7 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication>
         // know that the application has started
         if (!(remoteDebugging.isEnabled() && remoteDebugging.isStartSuspended()))
         {
-            Timeout timeout = options.get(Timeout.class, Timeout.autoDetect());
+            Timeout timeout = options.get(Timeout.class);
 
             ensure(new AbstractDeferred<Boolean>()
             {

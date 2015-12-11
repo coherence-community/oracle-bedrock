@@ -27,6 +27,7 @@ package com.oracle.tools.runtime.options;
 
 import com.oracle.tools.Option;
 
+import com.oracle.tools.Options;
 import com.oracle.tools.runtime.Application;
 
 /**
@@ -123,6 +124,7 @@ public class Orphanable implements Option
      *
      * @return  a disabled {@link Orphanable}
      */
+    @Options.Default
     public static Orphanable disabled()
     {
         return new Orphanable(false);

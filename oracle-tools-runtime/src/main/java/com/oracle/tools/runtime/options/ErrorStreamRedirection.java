@@ -27,6 +27,7 @@ package com.oracle.tools.runtime.options;
 
 import com.oracle.tools.Option;
 
+import com.oracle.tools.Options;
 import com.oracle.tools.runtime.Settings;
 
 /**
@@ -122,6 +123,7 @@ public class ErrorStreamRedirection implements Option
      *
      * @return  a disabled {@link ErrorStreamRedirection}
      */
+    @Options.Default
     public static ErrorStreamRedirection disabled()
     {
         return new ErrorStreamRedirection(false);

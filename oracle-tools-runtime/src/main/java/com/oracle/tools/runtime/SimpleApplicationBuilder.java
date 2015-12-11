@@ -103,8 +103,7 @@ public class SimpleApplicationBuilder extends AbstractApplicationBuilder<SimpleA
 
         // ----- establish environment variables -----
 
-        EnvironmentVariables environmentVariables = options.get(EnvironmentVariables.class,
-                                                                EnvironmentVariables.inherited());
+        EnvironmentVariables environmentVariables = options.get(EnvironmentVariables.class);
 
         switch (environmentVariables.getSource())
         {
@@ -140,8 +139,7 @@ public class SimpleApplicationBuilder extends AbstractApplicationBuilder<SimpleA
         }
 
         // should the standard error be redirected to the standard out?
-        ErrorStreamRedirection redirection = options.get(ErrorStreamRedirection.class,
-                                                         ErrorStreamRedirection.disabled());
+        ErrorStreamRedirection redirection = options.get(ErrorStreamRedirection.class);
 
         processBuilder.redirectErrorStream(redirection.isEnabled());
 

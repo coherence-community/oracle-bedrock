@@ -26,6 +26,7 @@
 package com.oracle.tools.options;
 
 import com.oracle.tools.Option;
+import com.oracle.tools.Options;
 
 /**
  * An {@link Option} to define enabled Oracle Tools diagnostics.
@@ -119,6 +120,7 @@ public class Diagnostics implements Option
      *
      * @return  a disabled {@link Diagnostics}
      */
+    @Options.Default
     public static Diagnostics disabled()
     {
         return new Diagnostics(false);

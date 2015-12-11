@@ -1,6 +1,7 @@
 package com.oracle.tools.runtime.java;
 
 import com.oracle.tools.Option;
+import com.oracle.tools.Options;
 
 /**
  * An {@link Option} to define modifications that can be
@@ -78,6 +79,7 @@ public class ClassPathModifier
      * @return a ClassPathModifier that performs no modification
      *         on a class path String
      */
+    @Options.Default
     public static ClassPathModifier none()
     {
         return new ClassPathModifier(true);

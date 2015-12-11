@@ -50,6 +50,7 @@ public class Cell
         /**
          * {@link Cell} content should be left justified.
          */
+        @Options.Default
         LEFT,
 
         /**
@@ -253,6 +254,7 @@ public class Cell
          *
          * @return  the standard {@link Separator}
          */
+        @Options.Default
         public static Separator standard()
         {
             return STANDARD;
@@ -314,6 +316,7 @@ public class Cell
          *
          * @return  an automatic {@link Width}
          */
+        @Options.Default
         public static Width autodetect()
         {
             return AUTODETECT;

@@ -27,6 +27,7 @@ package com.oracle.tools.runtime.remote.options;
 
 import com.oracle.tools.Option;
 
+import com.oracle.tools.Options;
 import com.oracle.tools.runtime.Settings;
 
 import com.oracle.tools.runtime.remote.RemotePlatform;
@@ -113,6 +114,7 @@ public class StrictHostChecking implements Option
      *
      * @return  an enabled {@link StrictHostChecking}
      */
+    @Options.Default
     public static StrictHostChecking enabled()
     {
         return new StrictHostChecking(true);

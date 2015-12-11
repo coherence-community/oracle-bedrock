@@ -28,6 +28,7 @@ package com.oracle.tools.runtime.options;
 import com.oracle.tools.ComposableOption;
 import com.oracle.tools.Option;
 
+import com.oracle.tools.Options;
 import com.oracle.tools.runtime.PropertiesBuilder;
 
 import java.util.Iterator;
@@ -151,6 +152,7 @@ public class EnvironmentVariables implements Option, ComposableOption<Environmen
      *
      * @return  an {@link EnvironmentVariables}
      */
+    @Options.Default
     public static EnvironmentVariables inherited()
     {
         return new EnvironmentVariables(Source.ThisApplication, new PropertiesBuilder());

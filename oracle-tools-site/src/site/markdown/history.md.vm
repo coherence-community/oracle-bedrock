@@ -135,6 +135,9 @@ reverse chronological order.
     that implements this interface (thought it's only used internally in
     Oracle Tools).
 
+*   [ORACLETOOLS-277](https://java.net/jira/browse/ORACLETOOLS-277): Added support
+    for default options using the @Options.Default annotation.
+
 <h4>oracle-tools-runtime</h4>
 
 *   [ORACLETOOLS-61](https://java.net/jira/browse/ORACLETOOLS-61): Introduced

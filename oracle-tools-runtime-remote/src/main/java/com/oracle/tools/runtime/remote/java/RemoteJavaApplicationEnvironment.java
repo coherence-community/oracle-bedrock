@@ -232,7 +232,7 @@ public class RemoteJavaApplicationEnvironment<A extends JavaApplication>
 
         // ----- establish Java Virtual Machine options -----
 
-        for (JvmOption jvmOption : options.getAll(JvmOption.class))
+        for (JvmOption jvmOption : options.getInstancesOf(JvmOption.class))
         {
             for (String option : jvmOption.getOptions())
             {
@@ -242,7 +242,7 @@ public class RemoteJavaApplicationEnvironment<A extends JavaApplication>
 
         // ----- establish remote debugging JVM options -----
 
-        RemoteDebugging remoteDebugging = options.get(RemoteDebugging.class, RemoteDebugging.autoDetect());
+        RemoteDebugging remoteDebugging = options.get(RemoteDebugging.class);
 
         if (remoteDebugging.isEnabled())
         {

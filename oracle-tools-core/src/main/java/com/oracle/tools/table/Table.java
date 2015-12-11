@@ -210,7 +210,7 @@ public class Table implements Iterable<Row>
     public String toString()
     {
         // determine the Cell Separator
-        Cell.Separator cellSeparator = options.get(Cell.Separator.class, Cell.Separator.standard());
+        Cell.Separator cellSeparator = options.get(Cell.Separator.class);
 
         // -----------------------------------
         // determine the maximum widths of the cells each row in the table
@@ -237,8 +237,7 @@ public class Table implements Iterable<Row>
                 // (use the width is defined by the cell, then the row, then the table)
                 Cell.Width width = options.get(Cell.Width.class,
                                                row.getOptions().get(Cell.Width.class,
-                                                                    this.getOptions().get(Cell.Width.class,
-                                                                                          Cell.Width.autodetect())));
+                                                                    this.getOptions().get(Cell.Width.class)));
 
                 int cellWidth;
 
@@ -308,8 +307,7 @@ public class Table implements Iterable<Row>
                                                                                  .get(Cell.Justification.class,
                                                                                       this.getOptions()
                                                                                           .get(Cell
-                                                                                              .Justification.class, Cell
-                                                                                              .Justification.LEFT)));
+                                                                                              .Justification.class)));
 
                     int cellHeight = cell.height();
 

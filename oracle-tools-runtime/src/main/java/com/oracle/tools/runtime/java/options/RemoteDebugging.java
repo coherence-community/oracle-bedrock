@@ -27,6 +27,7 @@ package com.oracle.tools.runtime.java.options;
 
 import com.oracle.tools.Option;
 
+import com.oracle.tools.Options;
 import com.oracle.tools.runtime.LocalPlatform;
 import com.oracle.tools.runtime.Platform;
 
@@ -346,6 +347,7 @@ public class RemoteDebugging implements Option
      *
      * @return  a {@link RemoteDebugging} {@link Option}
      */
+    @Options.Default
     public static RemoteDebugging autoDetect()
     {
         return new RemoteDebugging(JavaVirtualMachine.getInstance().shouldEnableRemoteDebugging(),
