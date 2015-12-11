@@ -49,12 +49,24 @@ import java.util.concurrent.TimeUnit;
 public class OptionsTest
 {
     /**
+     * Ensure that we can get an {@link Option} that has a default.
+     */
+    @Test
+    public void shouldGetOptionWithDefault()
+    {
+        Options options = new Options();
+
+        assertThat(options.get(Timeout.class), is(Timeout.autoDetect()));
+    }
+
+
+    /**
      * Ensure that we can add and get a specific {@link Option}.
      */
     @Test
     public void shouldAddAndGetSpecificOption()
     {
-        Timeout option  = Timeout.after(5, TimeUnit.MINUTES);
+        Timeout option = Timeout.after(5, TimeUnit.MINUTES);
 
         Options options = new Options(option);
 
@@ -68,9 +80,9 @@ public class OptionsTest
     @Test
     public void shouldReplaceAndGetSpecificOption()
     {
-        Timeout option      = Timeout.after(5, TimeUnit.MINUTES);
+        Timeout option = Timeout.after(5, TimeUnit.MINUTES);
 
-        Options options     = new Options(option);
+        Options options = new Options(option);
 
         Timeout otherOption = Timeout.after(1, TimeUnit.SECONDS);
 
@@ -86,9 +98,9 @@ public class OptionsTest
     @Test
     public void shouldNotReplaceAndGetSpecificOption()
     {
-        Timeout option      = Timeout.after(5, TimeUnit.MINUTES);
+        Timeout option = Timeout.after(5, TimeUnit.MINUTES);
 
-        Options options     = new Options(option);
+        Options options = new Options(option);
 
         Timeout otherOption = Timeout.after(1, TimeUnit.SECONDS);
 
@@ -104,7 +116,7 @@ public class OptionsTest
     @Test
     public void shouldRemoveASpecificOption()
     {
-        Timeout option  = Timeout.after(5, TimeUnit.MINUTES);
+        Timeout option = Timeout.after(5, TimeUnit.MINUTES);
 
         Options options = new Options(option);
 
@@ -112,7 +124,9 @@ public class OptionsTest
 
         assertThat(options.remove(Timeout.class), is(true));
         assertThat(options.remove(Timeout.class), is(false));
-        assertThat(options.get(Timeout.class), is(nullValue()));
+
+        // the timeout should now be the default
+        assertThat(options.get(Timeout.class), is(Timeout.autoDetect()));
     }
 
 
@@ -124,9 +138,9 @@ public class OptionsTest
     @Test
     public void shouldDetermineDirectlyImplementedOptionClass()
     {
-        Timeout option      = Timeout.after(5, TimeUnit.MINUTES);
+        Timeout option = Timeout.after(5, TimeUnit.MINUTES);
 
-        Class   optionClass = Options.getClassOfOption(option);
+        Class optionClass = Options.getClassOf(option);
 
         assertThat(optionClass.equals(Timeout.class), is(true));
     }
@@ -141,9 +155,9 @@ public class OptionsTest
     @Test
     public void shouldDetermineIndirectlyImplementedOptionClass()
     {
-        Enhanced option      = new Enhanced();
+        Enhanced option = new Enhanced();
 
-        Class    optionClass = Options.getClassOfOption(option);
+        Class optionClass = Options.getClassOf(option);
 
         assertThat(optionClass.equals(EnhancedOption.class), is(true));
     }
@@ -158,9 +172,9 @@ public class OptionsTest
     @Test
     public void shouldDetermineExtendedOptionClass()
     {
-        ExtendedEnhanced option      = new ExtendedEnhanced();
+        ExtendedEnhanced option = new ExtendedEnhanced();
 
-        Class            optionClass = Options.getClassOfOption(option);
+        Class optionClass = Options.getClassOf(option);
 
         assertThat(optionClass.equals(EnhancedOption.class), is(true));
         assertThat(optionClass.equals(ExtendedEnhanced.class), is(false));
@@ -175,11 +189,159 @@ public class OptionsTest
     @Test
     public void shouldNotDetermineAbstractOptionClass()
     {
-        Class optionClass = Options.getClassOfOption(AbstractEnhanced.class);
+        Class optionClass = Options.getClassOf(AbstractEnhanced.class);
 
         assertThat(optionClass, is(nullValue()));
     }
 
+
+    /**
+     * Ensure that we can create {@link Options} and request an option
+     */
+    @Test
+    public void shouldCreateAndRequestAnOption()
+    {
+        Timeout timeout = Timeout.after(5, TimeUnit.MINUTES);
+
+        Options options = Options.from(timeout);
+
+        assertThat(options.get(Timeout.class), is(timeout));
+    }
+
+
+    /**
+     * Ensure that {@link Options} maintain a set by concrete type.
+     */
+    @Test
+    public void shouldMaintainASetByConcreteType()
+    {
+        Timeout fiveMinutes = Timeout.after(5, TimeUnit.MINUTES);
+        Timeout oneSecond = Timeout.after(1, TimeUnit.SECONDS);
+
+        Options options = Options.from(fiveMinutes, oneSecond);
+
+        assertThat(options.get(Timeout.class), is(oneSecond));
+    }
+
+
+    /**
+     * Ensure that {@link Options} can return a default using a
+     * static method annotated with {@link Options.Default}.
+     */
+    @Test
+    public void shouldDetermineDefaultUsingAnnotatedStaticMethod()
+    {
+        Options options = new Options();
+
+        assertThat(options.get(Duration.class), is(Duration.getDefault()));
+    }
+
+
+    /**
+     * Ensure that {@link Options} can return a default using a
+     * static field annotated with {@link Options.Default}.
+     */
+    @Test
+    public void shouldDetermineDefaultUsingAnnotatedStaticField()
+    {
+        Options options = new Options();
+
+        assertThat(options.get(Device.class), is(Device.DEFAULT));
+    }
+
+
+    /**
+     * Ensure that {@link Options} can return a default using an
+     * enum annotated with {@link Options.Default}.
+     */
+    @Test
+    public void shouldDetermineDefaultUsingAnnotatedEnum()
+    {
+        Options options = new Options();
+
+        assertThat(options.get(Meal.class), is(Meal.CHICKEN));
+    }
+
+
+    /**
+     * Ensure that {@link Options} can return a default using a
+     * constructor annotated with {@link Options.Default}.
+     */
+    @Test
+    public void shouldDetermineDefaultUsingAnnotatedConstructor()
+    {
+        Options options = new Options();
+
+        assertThat(options.get(Beverage.class).toString(), is("Beer"));
+    }
+
+    /**
+     * A simple {@link Option} using a {@link Options.Default}
+     * annotation on a static getter method.
+     */
+    public enum Duration implements Option
+    {
+        SECOND,
+        MINUTE,
+        HOUR;
+
+        @Options.Default
+        public static Duration getDefault()
+        {
+            return SECOND;
+        }
+    }
+
+
+    /**
+     * A simple {@link Option} using a {@link Options.Default}
+     * annotation on a static attribute.
+     */
+    public enum Device implements Option
+    {
+        CASSETTE,
+        FLOPPY,
+        TAPE,
+        HARD_DRIVE,
+        SOLID_STATE_DRIVE;
+
+        @Options.Default
+        public static Device DEFAULT = FLOPPY;
+    }
+
+    /**
+     * A simple {@link Option} using a {@link Options.Default}
+     * annotation on a enum.
+     */
+    public enum Meal implements Option
+    {
+        TOAST,
+        SOUP,
+        STEAK,
+
+        @Options.Default
+        CHICKEN,
+
+        FISH
+    }
+
+    /**
+     * A simple {@link Option} using a {@link Options.Default}
+     * annotation on a public no-args constructor.
+     */
+    public static class Beverage implements Option
+    {
+        @Options.Default
+        public Beverage()
+        {
+        }
+
+        @Override
+        public String toString()
+        {
+            return "Beer";
+        }
+    }
 
     /**
      * An {@link EnhancedOption}.

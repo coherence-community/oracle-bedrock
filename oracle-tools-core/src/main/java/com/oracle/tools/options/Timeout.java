@@ -27,6 +27,7 @@ package com.oracle.tools.options;
 
 import com.oracle.tools.Option;
 
+import com.oracle.tools.Options;
 import com.oracle.tools.util.Duration;
 
 import java.util.concurrent.TimeUnit;
@@ -126,6 +127,7 @@ public class Timeout implements Option
      *
      * @return  the default {@link Timeout}
      */
+    @Options.Default
     public static Timeout autoDetect()
     {
         return new Timeout(Duration.of(1, TimeUnit.MINUTES));

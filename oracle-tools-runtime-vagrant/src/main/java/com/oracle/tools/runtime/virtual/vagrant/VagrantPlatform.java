@@ -156,7 +156,7 @@ public class VagrantPlatform extends VirtualPlatform
     {
         SimpleApplicationSchema schema = instantiateSchema();
 
-        CloseAction             action = getOptions().get(CloseAction.class, CloseAction.Shutdown);
+        CloseAction             action = getOptions().get(CloseAction.class);
 
         switch (action)
         {

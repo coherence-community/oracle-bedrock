@@ -187,7 +187,7 @@ public class LocalApplicationProcess implements ApplicationProcess
     {
         Options optionsMap = new Options(options);
 
-        Timeout timeout    = optionsMap.get(Timeout.class, Timeout.autoDetect());
+        Timeout timeout    = optionsMap.get(Timeout.class);
 
         DeferredHelper.ensure(eventually(invoking(this).exitValue(), within(timeout)));
 

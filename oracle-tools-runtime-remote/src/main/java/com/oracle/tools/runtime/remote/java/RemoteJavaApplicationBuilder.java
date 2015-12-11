@@ -149,11 +149,11 @@ public class RemoteJavaApplicationBuilder<A extends JavaApplication>
 
         // ensure that the launcher process connects back to the server to
         // know that the application has started
-        RemoteDebugging remoteDebugging = options.get(RemoteDebugging.class, RemoteDebugging.autoDetect());
+        RemoteDebugging remoteDebugging = options.get(RemoteDebugging.class);
 
         if (!(remoteDebugging.isEnabled() && remoteDebugging.isStartSuspended()))
         {
-            Timeout                    timeout = options.get(Timeout.class, Timeout.autoDetect());
+            Timeout                    timeout = options.get(Timeout.class);
 
             final RemoteExecutorServer server  = environment.getRemoteExecutor();
 

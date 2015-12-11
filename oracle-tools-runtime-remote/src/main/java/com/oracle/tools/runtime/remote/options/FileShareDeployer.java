@@ -83,7 +83,7 @@ public abstract class FileShareDeployer implements Deployer
         combinedOptions.addAll(options.asArray());
         combinedOptions.addAll(deploymentOptions);
 
-        PlatformSeparators separators = combinedOptions.get(PlatformSeparators.class, PlatformSeparators.autoDetect());
+        PlatformSeparators separators = combinedOptions.get(PlatformSeparators.class);
 
         for (DeploymentArtifact artifact : artifactsToDeploy)
         {

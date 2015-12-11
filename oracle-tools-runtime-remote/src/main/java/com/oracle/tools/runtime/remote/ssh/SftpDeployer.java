@@ -121,7 +121,7 @@ public class SftpDeployer implements Deployer
             // ----- deploy remote application artifacts (using sftp) -----
 
             // determine the separators for the platform
-            PlatformSeparators separators = options.get(PlatformSeparators.class, PlatformSeparators.autoDetect());
+            PlatformSeparators separators = options.get(PlatformSeparators.class);
 
             if (artifactsToDeploy.size() > 0)
             {

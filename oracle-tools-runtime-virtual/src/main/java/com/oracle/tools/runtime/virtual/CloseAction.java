@@ -26,6 +26,7 @@
 package com.oracle.tools.runtime.virtual;
 
 import com.oracle.tools.Option;
+import com.oracle.tools.Options;
 
 /**
  * An enum of different options for closing a Virtual Machine.
@@ -47,5 +48,6 @@ public enum CloseAction implements Option
     SaveState,
 
     /** When close is called on the {@link VirtualPlatform} shutdown the VM */
+    @Options.Default
     Shutdown;
 }

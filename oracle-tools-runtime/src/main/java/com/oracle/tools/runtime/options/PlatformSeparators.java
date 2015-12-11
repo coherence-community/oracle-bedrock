@@ -27,6 +27,7 @@ package com.oracle.tools.runtime.options;
 
 import com.oracle.tools.Option;
 
+import com.oracle.tools.Options;
 import com.oracle.tools.lang.StringHelper;
 
 import com.oracle.tools.runtime.Platform;
@@ -69,9 +70,9 @@ public class PlatformSeparators implements Option
     /**
      * Privately constructs {@link PlatformSeparators} given explicit characters.
      *
-     * @param fileSeparator  the file separator
-     * @param pathSeparator  the path separator
-     * @param lineSeparator  the line separator
+     * @param fileSeparator the file separator
+     * @param pathSeparator the path separator
+     * @param lineSeparator the line separator
      */
     private PlatformSeparators(String fileSeparator,
                                String pathSeparator,
@@ -125,7 +126,7 @@ public class PlatformSeparators implements Option
      * Creates a remote-platform specific filename, given a fileName
      * represented in a format for this platform.
      *
-     * @param fileName  the file name to convert
+     * @param fileName the file name to convert
      *
      * @return the file as it would be represented by the remote platform
      */
@@ -140,9 +141,9 @@ public class PlatformSeparators implements Option
      * consecutive non-numerical, non-alphabetical, non ".", non "-" and non "~"
      * characters of a string with "-".
      *
-     * @param fileName  the un-sanitized file name
+     * @param fileName the un-sanitized file name
      *
-     * @return  the sanitized file name
+     * @return the sanitized file name
      */
     public String asSanitizedFileName(String fileName)
     {
@@ -153,8 +154,8 @@ public class PlatformSeparators implements Option
         else
         {
             StringBuilder builder = new StringBuilder(fileName.length());
-            String        valid   = "1234567890abcdefghijklmnopqrstuvwxyz.~" + File.separatorChar + getFileSeparator();
-            char          last    = '\0';
+            String valid = "1234567890abcdefghijklmnopqrstuvwxyz.~" + File.separatorChar + getFileSeparator();
+            char last = '\0';
 
             fileName = fileName.toLowerCase();
 
@@ -231,8 +232,9 @@ public class PlatformSeparators implements Option
      * Auto-detect the {@link PlatformSeparators} based on the platform the calling
      * thread is executing in.
      *
-     * @return  the current {@link Platform} {@link PlatformSeparators}
+     * @return the current {@link Platform} {@link PlatformSeparators}
      */
+    @Options.Default
     public static PlatformSeparators autoDetect()
     {
         return new PlatformSeparators(File.separator, File.pathSeparator, System.lineSeparator());
@@ -240,9 +242,20 @@ public class PlatformSeparators implements Option
 
 
     /**
+     * Constructs a custom {@link PlatformSeparators}.
+     *
+     * @return the custom {@link PlatformSeparators}
+     */
+    public static PlatformSeparators custom(String fileSeparator, String pathSeparator, String lineSeparator)
+    {
+        return new PlatformSeparators(fileSeparator, pathSeparator, lineSeparator);
+    }
+
+
+    /**
      * Obtains suitable {@link PlatformSeparators} for the Microsoft Windows Platform.
      *
-     * @return  the {@link PlatformSeparators} for Windows
+     * @return the {@link PlatformSeparators} for Windows
      */
     public static PlatformSeparators forWindows()
     {
@@ -253,7 +266,7 @@ public class PlatformSeparators implements Option
     /**
      * Obtains suitable {@link PlatformSeparators} for typical Unix-based platforms.
      *
-     * @return  the {@link PlatformSeparators} for Unix
+     * @return the {@link PlatformSeparators} for Unix
      */
     public static PlatformSeparators forUnix()
     {
@@ -263,7 +276,7 @@ public class PlatformSeparators implements Option
     /**
      * Obtains suitable {@link PlatformSeparators} for typical Cygwin-based platforms.
      *
-     * @return  the {@link PlatformSeparators} for Cygwin
+     * @return the {@link PlatformSeparators} for Cygwin
      */
     public static PlatformSeparators forCygwin()
     {

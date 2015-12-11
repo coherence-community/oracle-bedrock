@@ -175,7 +175,7 @@ public class OutputStreamConnector extends Thread implements Closeable
 
             Options optionsMap = new Options(options);
 
-            Timeout timeout    = optionsMap.get(Timeout.class, Timeout.autoDetect());
+            Timeout timeout    = optionsMap.get(Timeout.class);
 
             try
             {
