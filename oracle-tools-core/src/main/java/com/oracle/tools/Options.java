@@ -154,28 +154,28 @@ public class Options
      */
     public boolean contains(Option option)
     {
-        Class<? extends Option> clzOption = option.getClass();
+        Class<? extends Option> classOfOption = option.getClass();
 
-        return get(clzOption).equals(option);
+        return get(classOfOption).equals(option);
     }
 
     /**
      * Obtains an {@link Iterable} over all of the options in the collection
      * that are an instance of the specified class.
      *
-     * @param clz the required class
-     * @param <O> the type of option
+     * @param requiredClass the required class
+     * @param <O>           the type of option
      *
      * @return the options of the required class
      */
-    public <O> Iterable<O> getInstancesOf(Class<O> clz)
+    public <O> Iterable<O> getInstancesOf(Class<O> requiredClass)
     {
 
         ArrayList<O> result = new ArrayList<>();
 
         for (Option option : options.values())
         {
-            if (clz.isInstance(option))
+            if (requiredClass.isInstance(option))
             {
                 result.add((O) option);
             }
@@ -233,14 +233,14 @@ public class Options
     /**
      * Constructs an {@link Options} collection given an array of options
      *
-     * @param aOptions the array of options
+     * @param options the array of options
      *
      * @return an {@link Options} collection
      */
     @SafeVarargs
-    public static Options from(Option... aOptions)
+    public static Options from(Option... options)
     {
-        return new Options(aOptions);
+        return new Options(options);
     }
 
     /**
@@ -259,20 +259,54 @@ public class Options
         }
         else
         {
-            Class<? extends Option> classOfOption = getClassOf(option);
-
-            // compose the option if it's composable
-            if (option instanceof ComposableOption)
+            if (option instanceof Option.Collectable)
             {
-                Option existing = options.get(classOfOption);
+                Option.Collectable collectable = (Option.Collectable) option;
 
-                if (existing != null)
+                // determine the type of Collector in which we'll collect the Collectable
+                Class<? extends Option> classOfCollector = collectable.getCollectorClass();
+
+                // attempt to locate an existing Collector
+                Option.Collector collector = (Option.Collector) options.get(classOfCollector);
+
+                // create a new collector if we don't have one
+                if (collector == null)
                 {
-                    option = ((ComposableOption) existing).compose((ComposableOption) option);
+                    // attempt to create a new collector (using the @Option.Default annotation)
+                    collector = (Option.Collector) getDefaultFor(classOfCollector);
+                }
+
+                if (collector == null)
+                {
+                    throw new IllegalStateException("Failed to instantiate a default Collector of type " + classOfCollector + " for " + option);
+                }
+                else
+                {
+                    // collect the collectable into the collector
+                    collector = collector.collect(collectable);
+
+                    // replace the collector in the options
+                    options.put(classOfCollector, collector);
                 }
             }
+            else
+            {
+                // determine the class of option
+                Class<? extends Option> classOfOption = getClassOf(option);
 
-            options.put(classOfOption, option);
+                // compose the option if it's composable
+                if (option instanceof ComposableOption)
+                {
+                    Option existing = options.get(classOfOption);
+
+                    if (existing != null)
+                    {
+                        option = ((ComposableOption) existing).compose((ComposableOption) option);
+                    }
+                }
+
+                options.put(classOfOption, option);
+            }
 
             return this;
         }
@@ -302,15 +336,15 @@ public class Options
     /**
      * Adds an array of options to the collection.
      *
-     * @param aOptions the options to add
+     * @param options the options to add
      *
      * @return the {@link Options} to permit fluent-style method calls
      */
-    public Options addAll(Option[] aOptions)
+    public Options addAll(Option[] options)
     {
-        if (aOptions != null)
+        if (options != null)
         {
-            for (Option option : aOptions)
+            for (Option option : options)
             {
                 add(option);
             }
@@ -392,44 +426,44 @@ public class Options
      * Obtains the concrete type that directly implements / extends the {@link Option} interface,
      * implemented by the specified class.
      *
-     * @param aClass the class that somehow implements the {@link Option} interface
+     * @param classOfOption the class that somehow implements the {@link Option} interface
      *
      * @return the concrete {@link Class} that directly extends / implements the {@link Option} interface
      * or <code>null</code> if the specified {@link Class} doesn't implement {@link Option}
      */
-    public static Class<? extends Option> getClassOf(Class<?> aClass)
+    public static Class<? extends Option> getClassOf(Class<?> classOfOption)
     {
         // the hierarchy of classes we've visited
         // (so that we can traverse it later to find non-abstract classes)
         Stack<Class<?>> hierarchy = new Stack<>();
 
-        while (aClass != null)
+        while (classOfOption != null)
         {
             // remember the current class
-            hierarchy.push(aClass);
+            hierarchy.push(classOfOption);
 
-            for (Class<?> interfaceClass : aClass.getInterfaces())
+            for (Class<?> interfaceClass : classOfOption.getInterfaces())
             {
                 if (Option.class.equals(interfaceClass) || ComposableOption.class.equals(interfaceClass))
                 {
                     // when the Option/ComposableOption is directly implemented by a class,
                     // we return the first non-abstract class in the hierarchy.
-                    while (aClass != null && Modifier.isAbstract(aClass.getModifiers()) && !aClass.isInterface())
+                    while (classOfOption != null && Modifier.isAbstract(classOfOption.getModifiers()) && !classOfOption.isInterface())
                     {
-                        aClass = hierarchy.isEmpty() ? null : hierarchy.pop();
+                        classOfOption = hierarchy.isEmpty() ? null : hierarchy.pop();
                     }
 
-                    return (Class<? extends Option>) aClass;
+                    return (Class<? extends Option>) classOfOption;
                 }
                 else if (Option.class.isAssignableFrom(interfaceClass))
                 {
                     // ensure that we have a concrete class in our hierarchy
-                    while (aClass != null && Modifier.isAbstract(aClass.getModifiers()) && !aClass.isInterface())
+                    while (classOfOption != null && Modifier.isAbstract(classOfOption.getModifiers()) && !classOfOption.isInterface())
                     {
-                        aClass = hierarchy.isEmpty() ? null : hierarchy.pop();
+                        classOfOption = hierarchy.isEmpty() ? null : hierarchy.pop();
                     }
 
-                    if (aClass == null)
+                    if (classOfOption == null)
                     {
                         // when the hierarchy is entirely abstract, we can't determine a concrete Option type
                         return null;
@@ -447,7 +481,7 @@ public class Options
                 }
             }
 
-            aClass = aClass.getSuperclass();
+            classOfOption = classOfOption.getSuperclass();
         }
 
         return null;
