@@ -40,7 +40,6 @@ import com.oracle.tools.runtime.ApplicationConsole;
 import com.oracle.tools.runtime.ApplicationSchema;
 import com.oracle.tools.runtime.LocalApplicationProcess;
 import com.oracle.tools.runtime.LocalPlatform;
-import com.oracle.tools.runtime.Platform;
 import com.oracle.tools.runtime.Settings;
 
 import com.oracle.tools.runtime.concurrent.ControllableRemoteExecutor;
@@ -70,8 +69,6 @@ import java.io.File;
 import java.io.IOException;
 
 import java.net.InetAddress;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 
 import java.text.SimpleDateFormat;
@@ -194,7 +191,7 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication>
         }
 
         // add the optionally defined environment variables
-        Properties variables = environmentVariables.getBuilder().realize();
+        Properties variables = environmentVariables.realize(platform, schema);
 
         for (String variableName : variables.stringPropertyNames())
         {
@@ -344,7 +341,7 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication>
         // ----- establish the system properties for the java application -----
 
         // define the system properties based on those defined by the schema
-        Properties systemProperties = schema.getSystemProperties(platform);
+        Properties systemProperties = schema.getSystemProperties().realize(platform, schema);
 
         for (String propertyName : systemProperties.stringPropertyNames())
         {

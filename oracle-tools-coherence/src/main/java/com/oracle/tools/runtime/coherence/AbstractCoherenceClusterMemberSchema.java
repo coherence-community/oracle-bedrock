@@ -33,6 +33,8 @@ import com.oracle.tools.runtime.concurrent.callable.RemoteCallableStaticMethod;
 import com.oracle.tools.runtime.java.AbstractJavaApplicationSchema;
 import com.oracle.tools.runtime.java.ContainerBasedJavaApplicationBuilder;
 import com.oracle.tools.runtime.java.JavaApplicationSchema;
+import com.oracle.tools.runtime.java.options.SystemProperties;
+import com.oracle.tools.runtime.java.options.SystemProperty;
 
 import com.oracle.tools.runtime.remote.RemotePlatform;
 
@@ -60,7 +62,7 @@ public abstract class AbstractCoherenceClusterMemberSchema<A extends CoherenceCl
      * Constructs an {@link AbstractCoherenceClusterMemberSchema} based on
      * a {@link CoherenceClusterMemberSchema}.
      *
-     * @param schema  the other {@link CoherenceClusterMemberSchema}
+     * @param schema the other {@link CoherenceClusterMemberSchema}
      */
     public AbstractCoherenceClusterMemberSchema(CoherenceClusterMemberSchema<A> schema)
     {
@@ -72,7 +74,7 @@ public abstract class AbstractCoherenceClusterMemberSchema<A extends CoherenceCl
      * Constructs an {@link AbstractCoherenceClusterMemberSchema} based on
      * a {@link JavaApplicationSchema}.
      *
-     * @param schema  the {@link JavaApplicationSchema}
+     * @param schema the {@link JavaApplicationSchema}
      */
     public AbstractCoherenceClusterMemberSchema(JavaApplicationSchema<A> schema)
     {
@@ -84,7 +86,7 @@ public abstract class AbstractCoherenceClusterMemberSchema<A extends CoherenceCl
      * Construct a {@link AbstractCoherenceClusterMemberSchema} with a given application class name,
      * using the class path of the executing application.
      *
-     * @param applicationClassName  the fully qualified class name of the Java application
+     * @param applicationClassName the fully qualified class name of the Java application
      */
     public AbstractCoherenceClusterMemberSchema(String applicationClassName)
     {
@@ -96,8 +98,8 @@ public abstract class AbstractCoherenceClusterMemberSchema<A extends CoherenceCl
      * Construct a {@link AbstractCoherenceClusterMemberSchema} with a given application class name,
      * but using the class path of the executing application.
      *
-     * @param applicationClassName  the fully qualified class name of the Java application
-     * @param classPath             the class path for the Java application.
+     * @param applicationClassName the fully qualified class name of the Java application
+     * @param classPath            the class path for the Java application.
      */
     public AbstractCoherenceClusterMemberSchema(String applicationClassName,
                                                 String classPath)
@@ -109,50 +111,15 @@ public abstract class AbstractCoherenceClusterMemberSchema<A extends CoherenceCl
     /**
      * Construct a {@link AbstractCoherenceClusterMemberSchema}.
      *
-     * @param executableName        the executable name to run
-     * @param applicationClassName  the fully qualified class name of the Java application
-     * @param classPath             the class path for the Java application
+     * @param executableName       the executable name to run
+     * @param applicationClassName the fully qualified class name of the Java application
+     * @param classPath            the class path for the Java application
      */
     public AbstractCoherenceClusterMemberSchema(String executableName,
                                                 String applicationClassName,
                                                 String classPath)
     {
         super(executableName, applicationClassName, classPath);
-    }
-
-
-    @Override
-    public Properties getSystemProperties(Platform platform)
-    {
-        Properties properties = super.getSystemProperties(platform);
-
-        if (platform == null)
-        {
-            return properties;
-        }
-
-        if (platform instanceof RemotePlatform)
-        {
-            // in the case of a remote platform, attempt to set the coherence localhost
-            // information to that as defined by the remote platform (when it's not defined)
-            if (!properties.containsKey(CoherenceCacheServerSchema.PROPERTY_LOCALHOST_ADDRESS))
-            {
-                InetAddress inetAddress = platform.getAddress();
-
-                if (inetAddress != null)
-                {
-                    properties.setProperty(CoherenceClusterMemberSchema.PROPERTY_LOCALHOST_ADDRESS,
-                                           inetAddress.getHostAddress());
-                }
-            }
-
-            if (!properties.containsKey(CoherenceCacheServerSchema.PROPERTY_MACHINE_NAME))
-            {
-                properties.setProperty(CoherenceClusterMemberSchema.PROPERTY_MACHINE_NAME, platform.getName());
-            }
-        }
-
-        return properties;
     }
 
 
@@ -187,6 +154,62 @@ public abstract class AbstractCoherenceClusterMemberSchema<A extends CoherenceCl
 
         // ensure we're running in headless mode
         setHeadless(true);
+
+        SystemProperties systemProperties = getOptions().get(SystemProperties.class);
+
+        systemProperties =
+            systemProperties.addIfAbsent(SystemProperty.of(CoherenceCacheServerSchema.PROPERTY_LOCALHOST_ADDRESS,
+                                                           new SystemProperty.ContextSensitiveValue()
+                                                           {
+                                                               @Override
+                                                               public Object getValue(String                name,
+                                                                                      Platform              platform,
+                                                                                      JavaApplicationSchema schema)
+                                                               {
+                                                                   if (platform
+                                                                       instanceof RemotePlatform)
+                                                                   {
+                                                                       InetAddress inetAddress = platform.getAddress();
+
+                                                                       if (inetAddress == null)
+                                                                       {
+                                                                           return null;    // property doesn't exist
+                                                                       }
+                                                                       else
+                                                                       {
+                                                                           return inetAddress.getHostAddress();
+                                                                       }
+                                                                   }
+                                                                   else
+                                                                   {
+                                                                       return null;        // property doesn't exist
+                                                                   }
+
+                                                               }
+                                                           }));
+
+        systemProperties =
+            systemProperties.addIfAbsent(SystemProperty.of(CoherenceCacheServerSchema.PROPERTY_MACHINE_NAME,
+                                                           new SystemProperty.ContextSensitiveValue()
+                                                           {
+                                                               @Override
+                                                               public Object getValue(String                name,
+                                                                                      Platform              platform,
+                                                                                      JavaApplicationSchema schema)
+                                                               {
+                                                                   if (platform
+                                                                       instanceof RemotePlatform)
+                                                                   {
+                                                                       return platform.getName();
+                                                                   }
+                                                                   else
+                                                                   {
+                                                                       return null;
+                                                                   }
+                                                               }
+                                                           }));
+
+        getOptions().add(systemProperties);
     }
 
 

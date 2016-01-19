@@ -100,7 +100,7 @@ public abstract class HttpDeployer implements Deployer
      */
     public HttpDeployer withBufferSize(int size)
     {
-        options.replace(new BufferSize(size));
+        options.add(new BufferSize(size));
 
         return this;
     }

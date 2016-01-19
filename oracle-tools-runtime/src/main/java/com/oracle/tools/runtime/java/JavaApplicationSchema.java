@@ -32,6 +32,7 @@ import com.oracle.tools.runtime.ApplicationConsole;
 import com.oracle.tools.runtime.ApplicationSchema;
 import com.oracle.tools.runtime.Platform;
 import com.oracle.tools.runtime.PropertiesBuilder;
+import com.oracle.tools.runtime.java.options.SystemProperties;
 
 import java.util.Properties;
 
@@ -48,24 +49,12 @@ import java.util.Properties;
 public interface JavaApplicationSchema<A extends JavaApplication> extends ApplicationSchema<A>
 {
     /**
-     * Obtains the {@link PropertiesBuilder} that will be used as a basis for configuring the Java System Properties
+     * Obtains the {@link SystemProperties} that will be used as a basis for configuring the Java System Properties
      * of the realized {@link JavaApplication}s from an {@link JavaApplicationBuilder}.
      *
      * @return {@link PropertiesBuilder}
      */
-    public PropertiesBuilder getSystemPropertiesBuilder();
-
-
-    /**
-     * Obtains the system {@link Properties} that will be used as a basis for
-     * configuring the Java System Properties of the realized
-     * {@link JavaApplication}s from an {@link JavaApplicationBuilder} based on
-     * the properties set in this schema and any properties derived from the
-     * specified {@link Platform}.
-     *
-     * @return {@link PropertiesBuilder}
-     */
-    public Properties getSystemProperties(Platform platform);
+    public SystemProperties getSystemProperties();
 
 
     /**

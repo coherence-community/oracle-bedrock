@@ -28,8 +28,6 @@ package com.oracle.tools.runtime.java;
 import com.oracle.tools.Option;
 import com.oracle.tools.Options;
 
-import com.oracle.tools.lang.StringHelper;
-
 import com.oracle.tools.runtime.ApplicationConsole;
 import com.oracle.tools.runtime.ApplicationSchema;
 import com.oracle.tools.runtime.PropertiesBuilder;
@@ -200,7 +198,7 @@ public class ContainerBasedJavaApplicationBuilder<A extends JavaApplication>
             systemPropertiesTable.getOptions().add(Cell.Separator.of(""));
 
             // establish the System Properties for the ContainerBasedJavaApplication
-            Properties systemProperties = schema.getSystemProperties(platform);
+            Properties systemProperties = schema.getSystemProperties().realize(platform, schema);
 
             // sanity check the schema and realized properties
             sanityCheck(schema, systemProperties);

@@ -27,8 +27,10 @@ package com.oracle.tools.runtime.java;
 
 import com.oracle.tools.runtime.AbstractApplicationSchema;
 import com.oracle.tools.runtime.LocalPlatform;
-import com.oracle.tools.runtime.Platform;
 import com.oracle.tools.runtime.PropertiesBuilder;
+
+import com.oracle.tools.runtime.java.options.SystemProperties;
+import com.oracle.tools.runtime.java.options.SystemProperty;
 
 import com.oracle.tools.runtime.network.AvailablePortIterator;
 import com.oracle.tools.runtime.network.Constants;
@@ -41,7 +43,8 @@ import static com.oracle.tools.runtime.java.JavaApplication.SUN_MANAGEMENT_JMXRE
 import static com.oracle.tools.runtime.java.JavaApplication.SUN_MANAGEMENT_JMXREMOTE_PORT;
 import static com.oracle.tools.runtime.java.JavaApplication.SUN_MANAGEMENT_JMXREMOTE_SSL;
 
-import java.util.Properties;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * An {@link AbstractJavaApplicationSchema} is a base implementation of a {@link JavaApplicationSchema}.
@@ -63,12 +66,9 @@ public abstract class AbstractJavaApplicationSchema<A extends JavaApplication,
     /**
      * The {@link ClassPath} for the {@link JavaApplication}.
      */
-    private ClassPath classPath;
 
-    /**
-     * The system properties for the {@link JavaApplication}.
-     */
-    private PropertiesBuilder systemPropertiesBuilder;
+    // TODO: Remove this! We should use Options.get(ClassPath.class);
+    private ClassPath classPath;
 
 
     /**
@@ -81,11 +81,10 @@ public abstract class AbstractJavaApplicationSchema<A extends JavaApplication,
     {
         super(schema);
 
-        this.applicationClassName    = schema.getApplicationClassName();
-        this.classPath               = new ClassPath(schema.getClassPath());
-        this.systemPropertiesBuilder = new PropertiesBuilder(schema.getSystemPropertiesBuilder());
+        this.applicationClassName = schema.getApplicationClassName();
+        this.classPath            = new ClassPath(schema.getClassPath());
 
-        configureDefaults();
+        // TODO: we should replace the options from the schema (the parent class should do this)
     }
 
 
@@ -128,9 +127,8 @@ public abstract class AbstractJavaApplicationSchema<A extends JavaApplication,
     {
         super(executableName);
 
-        this.applicationClassName    = applicationClassName;
-        this.classPath               = new ClassPath(classPath);
-        this.systemPropertiesBuilder = new PropertiesBuilder();
+        this.applicationClassName = applicationClassName;
+        this.classPath            = new ClassPath(classPath);
 
         configureDefaults();
     }
@@ -143,16 +141,9 @@ public abstract class AbstractJavaApplicationSchema<A extends JavaApplication,
 
 
     @Override
-    public PropertiesBuilder getSystemPropertiesBuilder()
+    public SystemProperties getSystemProperties()
     {
-        return systemPropertiesBuilder;
-    }
-
-
-    @Override
-    public Properties getSystemProperties(Platform platform)
-    {
-        return getSystemPropertiesBuilder().realize(null, platform);
+        return getOptions().get(SystemProperties.class);
     }
 
 
@@ -213,7 +204,11 @@ public abstract class AbstractJavaApplicationSchema<A extends JavaApplication,
     public S setSystemProperty(String name,
                                Object value)
     {
-        systemPropertiesBuilder.setProperty(name, value);
+        SystemProperties systemProperties = getOptions().get(SystemProperties.class);
+
+        systemProperties = systemProperties.add(SystemProperty.of(name, value));
+
+        getOptions().add(systemProperties);
 
         return (S) this;
     }
@@ -236,9 +231,11 @@ public abstract class AbstractJavaApplicationSchema<A extends JavaApplication,
                                    Class<T> propertyClass,
                                    T        defaultValue)
     {
-        if (systemPropertiesBuilder.containsProperty(name))
+        SystemProperties systemProperties = getOptions().get(SystemProperties.class);
+
+        if (systemProperties.contains(name))
         {
-            Object property = systemPropertiesBuilder.getProperty(name);
+            Object property = systemProperties.get(name);
 
             return propertyClass.cast(property);
         }
@@ -253,7 +250,11 @@ public abstract class AbstractJavaApplicationSchema<A extends JavaApplication,
     public S setSystemPropertyIfAbsent(String name,
                                        Object value)
     {
-        systemPropertiesBuilder.setPropertyIfAbsent(name, value);
+        SystemProperties systemProperties = getOptions().get(SystemProperties.class);
+
+        systemProperties = systemProperties.addIfAbsent(SystemProperty.of(name, value));
+
+        getOptions().add(systemProperties);
 
         return (S) this;
     }
@@ -262,13 +263,25 @@ public abstract class AbstractJavaApplicationSchema<A extends JavaApplication,
     /**
      * Adds the properties defined by the {@link PropertiesBuilder} to this {@link JavaApplicationSchema}.
      *
-     * @param systemProperties The system {@link PropertiesBuilder}
+     * @param builder  the system {@link PropertiesBuilder}
      * @return the {@link JavaApplicationSchema}
      */
     @SuppressWarnings("unchecked")
-    public S setSystemProperties(PropertiesBuilder systemProperties)
+    @Deprecated
+    public S setSystemProperties(PropertiesBuilder builder)
     {
-        systemPropertiesBuilder.addProperties(systemProperties);
+        Map<String, Object> properties = new LinkedHashMap<>();
+
+        for (String propertyName : builder.getPropertyNames())
+        {
+            properties.put(propertyName, builder.getProperty(propertyName));
+        }
+
+        SystemProperties systemProperties = getOptions().get(SystemProperties.class);
+
+        systemProperties = systemProperties.addAll(properties);
+
+        getOptions().add(systemProperties);
 
         return (S) this;
     }
@@ -324,11 +337,15 @@ public abstract class AbstractJavaApplicationSchema<A extends JavaApplication,
         }
         else
         {
-            systemPropertiesBuilder.removeProperty(SUN_MANAGEMENT_JMXREMOTE);
-            systemPropertiesBuilder.removeProperty(SUN_MANAGEMENT_JMXREMOTE_PORT);
-            systemPropertiesBuilder.removeProperty(SUN_MANAGEMENT_JMXREMOTE_AUTHENTICATE);
-            systemPropertiesBuilder.removeProperty(SUN_MANAGEMENT_JMXREMOTE_SSL);
-            systemPropertiesBuilder.removeProperty(JAVA_RMI_SERVER_HOSTNAME);
+            SystemProperties systemProperties = getOptions().get(SystemProperties.class);
+
+            systemProperties = systemProperties.remove(SUN_MANAGEMENT_JMXREMOTE);
+            systemProperties = systemProperties.remove(SUN_MANAGEMENT_JMXREMOTE_PORT);
+            systemProperties = systemProperties.remove(SUN_MANAGEMENT_JMXREMOTE_AUTHENTICATE);
+            systemProperties = systemProperties.remove(SUN_MANAGEMENT_JMXREMOTE_SSL);
+            systemProperties = systemProperties.remove(JAVA_RMI_SERVER_HOSTNAME);
+
+            getOptions().add(systemProperties);
         }
 
         return (S) this;
@@ -351,15 +368,19 @@ public abstract class AbstractJavaApplicationSchema<A extends JavaApplication,
     @Override
     public boolean isIPv4Preferred()
     {
-        if (systemPropertiesBuilder.containsProperty(JAVA_NET_PREFER_IPV4_STACK))
-        {
-            Object isIPv4Preferred = systemPropertiesBuilder.getProperty(JAVA_NET_PREFER_IPV4_STACK);
+        SystemProperties systemProperties = getOptions().get(SystemProperties.class);
 
-            return isIPv4Preferred == null ? false : Boolean.valueOf(isIPv4Preferred.toString());
+        SystemProperty   systemProperty   = systemProperties.get(JAVA_NET_PREFER_IPV4_STACK);
+
+        if (systemProperty == null)
+        {
+            return false;
         }
         else
         {
-            return false;
+            Object isIPv4Preferred = systemProperty.getValue();
+
+            return isIPv4Preferred == null ? false : Boolean.valueOf(isIPv4Preferred.toString());
         }
     }
 
@@ -441,7 +462,11 @@ public abstract class AbstractJavaApplicationSchema<A extends JavaApplication,
      */
     public boolean isHeadless()
     {
-        Object value = systemPropertiesBuilder.getProperty(JAVA_AWT_HEADLESS);
+        SystemProperties systemProperties = getSystemProperties();
+
+        SystemProperty   systemProperty   = systemProperties.get(JAVA_AWT_HEADLESS);
+
+        Object           value            = systemProperty.getValue();
 
         return value instanceof Boolean && ((Boolean) value);
     }

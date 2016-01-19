@@ -25,6 +25,8 @@
 
 package com.oracle.tools.runtime;
 
+import com.oracle.tools.runtime.java.options.SystemProperties;
+
 import java.io.IOException;
 
 import java.net.URL;
@@ -54,39 +56,7 @@ public class PropertiesBuilder
     /**
      * The standard Java System properties.
      */
-    public static final HashSet<String> STANDARD_SYSTEM_PROPERTIES = new HashSet<String>()
-    {
-        {
-            add("java.version");
-            add("java.vendor");
-            add("java.vendor.url");
-            add("java.home");
-            add("java.vm.specification.version");
-            add("java.vm.specification.vendor");
-            add("java.vm.specification.name");
-            add("java.vm.version");
-            add("java.vm.vendor");
-            add("java.vm.name");
-            add("java.specification.version");
-            add("java.specification.vendor");
-            add("java.specification.name");
-            add("java.class.version");
-            add("java.class.path");
-            add("java.library.path");
-            add("java.io.tmpdir");
-            add("java.compiler");
-            add("java.ext.dirs");
-            add("os.name");
-            add("os.arch");
-            add("os.version");
-            add("file.separator");
-            add("path.separator");
-            add("line.separator");
-            add("user.name");
-            add("user.home");
-            add("user.dir");
-        }
-    };
+    public static final HashSet<String> STANDARD_SYSTEM_PROPERTIES = SystemProperties.STANDARD_SYSTEM_PROPERTY_NAMES;
 
     /**
      * The properties defined by the {@link PropertiesBuilder}.

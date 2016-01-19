@@ -31,15 +31,15 @@ import com.oracle.tools.Options;
 import com.oracle.tools.deferred.Eventually;
 
 import com.oracle.tools.predicate.Predicate;
+
 import com.oracle.tools.runtime.ApplicationConsole;
 import com.oracle.tools.runtime.ApplicationConsoleBuilder;
 import com.oracle.tools.runtime.LocalPlatform;
 import com.oracle.tools.runtime.Platform;
 
-import com.oracle.tools.runtime.PropertiesBuilder;
 import com.oracle.tools.runtime.actions.Block;
 import com.oracle.tools.runtime.actions.InteractiveActionExecutor;
-import com.oracle.tools.runtime.coherence.CoherenceCacheServer;
+
 import com.oracle.tools.runtime.coherence.CoherenceCacheServerSchema;
 import com.oracle.tools.runtime.coherence.CoherenceCluster;
 import com.oracle.tools.runtime.coherence.CoherenceClusterBuilder;
@@ -48,12 +48,14 @@ import com.oracle.tools.runtime.coherence.FluentCoherenceClusterSchema;
 import com.oracle.tools.runtime.coherence.ServiceStatus;
 import com.oracle.tools.runtime.coherence.actions.RestartCoherenceClusterMemberAction;
 import com.oracle.tools.runtime.coherence.callables.GetAutoStartServiceNames;
-
 import com.oracle.tools.runtime.coherence.callables.GetServiceStatus;
+
 import com.oracle.tools.runtime.console.SystemApplicationConsole;
 
 import com.oracle.tools.runtime.java.options.HeapSize;
 import com.oracle.tools.runtime.java.options.HotSpot;
+import com.oracle.tools.runtime.java.options.SystemProperties;
+import com.oracle.tools.runtime.java.options.SystemProperty;
 
 import com.oracle.tools.runtime.options.ApplicationClosingBehavior;
 
@@ -93,6 +95,11 @@ import java.util.Set;
 public class CoherenceClusterOrchestration extends ExternalResource
     implements FluentCoherenceClusterSchema<CoherenceClusterOrchestration>
 {
+    /**
+     * The number of storage enable members that will be started in the cluster.
+     */
+    private int storageMemberCount = 2;
+
     // TODO: Introduce the ability to specify Coherence Closing/Shutdown Options (CacheFactory.shutdown + System.exit / System.halt)
 
     // TODO: Ensure the start up / shutdown sequence of Coherence Members matches Coherence Abstract Functional Test
@@ -142,19 +149,14 @@ public class CoherenceClusterOrchestration extends ExternalResource
     private Capture<Integer> extendPort;
 
     /**
-     * The number of storage enable members that will be started in the cluster.
-     */
-    private int storageMemberCount = 2;
-
-    /**
      * Extra properties specific to the storage enabled cluster members.
      */
-    private PropertiesBuilder storageMemberProperties;
+    private SystemProperties storageMemberProperties;
 
     /**
      * Extra properties specific to the proxy server cluster members.
      */
-    private PropertiesBuilder extendProxyServerProperties;
+    private SystemProperties extendProxyServerProperties;
 
 
     /**
@@ -201,10 +203,10 @@ public class CoherenceClusterOrchestration extends ExternalResource
         this.clusterClosingOptions  = new Options();
 
         // by default we have no sessions
-        this.sessions = new HashMap<>();
+        this.sessions                    = new HashMap<>();
 
-        this.storageMemberProperties     = new PropertiesBuilder();
-        this.extendProxyServerProperties = new PropertiesBuilder();
+        this.storageMemberProperties     = new SystemProperties();
+        this.extendProxyServerProperties = new SystemProperties();
     }
 
 
@@ -242,7 +244,7 @@ public class CoherenceClusterOrchestration extends ExternalResource
         // define the schema for the proxy enabled members of the cluster
         CoherenceCacheServerSchema proxyServerSchema = createProxyServerSchema();
 
-        int proxyMemberCount = 1;
+        int                        proxyMemberCount  = 1;
 
         clusterBuilder.addSchema("proxy",
                                  proxyServerSchema,
@@ -310,7 +312,12 @@ public class CoherenceClusterOrchestration extends ExternalResource
         // define the schema for the storage enabled members of the cluster
         CoherenceCacheServerSchema storageServerSchema = new CoherenceCacheServerSchema(commonServerSchema);
 
-        storageServerSchema.getSystemPropertiesBuilder().addProperties(storageMemberProperties);
+        SystemProperties           systemProperties    = storageServerSchema.getSystemProperties();
+
+        systemProperties = systemProperties.addAll(storageMemberProperties);
+
+        storageServerSchema.getOptions().add(systemProperties);
+
         storageServerSchema.setRoleName("storage");
         storageServerSchema.setStorageEnabled(true);
 
@@ -322,7 +329,12 @@ public class CoherenceClusterOrchestration extends ExternalResource
     {
         CoherenceCacheServerSchema proxyServerSchema = new CoherenceCacheServerSchema(commonServerSchema);
 
-        proxyServerSchema.getSystemPropertiesBuilder().addProperties(extendProxyServerProperties);
+        SystemProperties           systemProperties  = proxyServerSchema.getSystemProperties();
+
+        systemProperties = systemProperties.addAll(extendProxyServerProperties);
+
+        proxyServerSchema.getOptions().add(systemProperties);
+
         proxyServerSchema.setRoleName("proxy");
         proxyServerSchema.setStorageEnabled(false);
         proxyServerSchema.setSystemProperty("tangosol.coherence.extend.enabled", true);
@@ -336,9 +348,9 @@ public class CoherenceClusterOrchestration extends ExternalResource
      * {@link ApplicationConsole}s for each {@link CoherenceClusterMember}
      * that is part of the orchestrated {@link CoherenceCluster}.
      *
-     * @param consoleBuilder  the {@link ApplicationConsoleBuilder}
+     * @param consoleBuilder the {@link ApplicationConsoleBuilder}
      *
-     * @return  the {@link CoherenceClusterOrchestration} to permit fluent-style method-calls
+     * @return the {@link CoherenceClusterOrchestration} to permit fluent-style method-calls
      */
     public CoherenceClusterOrchestration setConsoleBuilder(ApplicationConsoleBuilder consoleBuilder)
     {
@@ -351,11 +363,11 @@ public class CoherenceClusterOrchestration extends ExternalResource
     /**
      * Sets the {@link Option}s to be used when closing the {@link CoherenceCluster}.
      *
-     * @param options  the {@link Option}s
+     * @param options the {@link Option}s
+     *
+     * @return the {@link CoherenceClusterOrchestration} to permit fluent-style method-calls
      *
      * @see ApplicationClosingBehavior
-     *
-     * @return  the {@link CoherenceClusterOrchestration} to permit fluent-style method-calls
      */
     public CoherenceClusterOrchestration setClusterClosingOptions(Option... options)
     {
@@ -368,9 +380,9 @@ public class CoherenceClusterOrchestration extends ExternalResource
     /**
      * Sets the {@link Option}s to be used when creating the {@link CoherenceCluster}.
      *
-     * @param options  the {@link Option}s
+     * @param options the {@link Option}s
      *
-     * @return  the {@link CoherenceClusterOrchestration} to permit fluent-style method-calls
+     * @return the {@link CoherenceClusterOrchestration} to permit fluent-style method-calls
      */
     public CoherenceClusterOrchestration setClusterCreationOptions(Option... options)
     {
@@ -383,10 +395,10 @@ public class CoherenceClusterOrchestration extends ExternalResource
     /**
      * Sets the specified system property.
      *
-     * @param name   the name of the system property
-     * @param value  the value for the system property
+     * @param name  the name of the system property
+     * @param value the value for the system property
      *
-     * @return  the {@link CoherenceClusterOrchestration} to permit fluent-style method-calls
+     * @return the {@link CoherenceClusterOrchestration} to permit fluent-style method-calls
      */
     public CoherenceClusterOrchestration setSystemProperty(String name,
                                                            Object value)
@@ -400,7 +412,7 @@ public class CoherenceClusterOrchestration extends ExternalResource
     /**
      * Obtains the {@link CoherenceCluster} that was established by the orchestration.
      *
-     * @return  the {@link CoherenceCluster}
+     * @return the {@link CoherenceCluster}
      */
     public CoherenceCluster getCluster()
     {
@@ -612,7 +624,7 @@ public class CoherenceClusterOrchestration extends ExternalResource
      * NOTE: The orchestrated {@link CoherenceCluster} may be orchestrated on one or more other
      * {@link Platform}s.
      *
-     * @return  the {@link LocalPlatform}
+     * @return the {@link LocalPlatform}
      */
     public LocalPlatform getLocalPlatform()
     {
@@ -630,12 +642,12 @@ public class CoherenceClusterOrchestration extends ExternalResource
      * Attempts to request a session multiple times with the same {@link SessionBuilder}
      * will return the same session.
      *
-     * @param builder  the builder for the specific type of session
+     * @param builder the builder for the specific type of session
      *
-     * @return  a {@link ConfigurableCacheFactory} representing the Coherence Session.
+     * @return a {@link ConfigurableCacheFactory} representing the Coherence Session.
      *
-     * @throws IllegalStateException  when an attempt to request sessions for
-     *                                different {@link SessionBuilder}s is made
+     * @throws IllegalStateException when an attempt to request sessions for
+     *                               different {@link SessionBuilder}s is made
      */
     public synchronized ConfigurableCacheFactory getSessionFor(SessionBuilder builder)
     {
@@ -660,9 +672,9 @@ public class CoherenceClusterOrchestration extends ExternalResource
     /**
      * Sets the number of storage enabled members that will be started in the cluster.
      *
-     * @param count  the number of storage enabled members
+     * @param count the number of storage enabled members
      *
-     * @return  the {@link FluentCoherenceClusterSchema}
+     * @return the {@link FluentCoherenceClusterSchema}
      */
     public CoherenceClusterOrchestration setStorageMemberCount(int count)
     {
@@ -676,33 +688,37 @@ public class CoherenceClusterOrchestration extends ExternalResource
      * Sets the specified system property that will apply only to
      * storage enabled cluster members.
      *
-     * @param name   the name of the system property
-     * @param value  the value for the system property
+     * @param name  the name of the system property
+     * @param value the value for the system property
      *
-     * @return  the {@link CoherenceClusterOrchestration} to permit fluent-style method-calls
+     * @return the {@link CoherenceClusterOrchestration} to permit fluent-style method-calls
      */
-    public CoherenceClusterOrchestration setStorageMemberSystemProperty(String name, Object value)
+    public CoherenceClusterOrchestration setStorageMemberSystemProperty(String name,
+                                                                        Object value)
     {
-        this.storageMemberProperties.setProperty(name, value);
+        storageMemberProperties = storageMemberProperties.add(SystemProperty.of(name, value));
 
         return this;
     }
+
 
     /**
      * Sets the specified system property that will apply only to
      * Extend proxy cluster members.
      *
-     * @param name   the name of the system property
-     * @param value  the value for the system property
+     * @param name  the name of the system property
+     * @param value the value for the system property
      *
-     * @return  the {@link CoherenceClusterOrchestration} to permit fluent-style method-calls
+     * @return the {@link CoherenceClusterOrchestration} to permit fluent-style method-calls
      */
-    public CoherenceClusterOrchestration setProxyServerSystemProperty(String name, Object value)
+    public CoherenceClusterOrchestration setProxyServerSystemProperty(String name,
+                                                                      Object value)
     {
-        this.extendProxyServerProperties.setProperty(name, value);
+        extendProxyServerProperties = extendProxyServerProperties.add(SystemProperty.of(name, value));
 
         return this;
     }
+
 
     /**
      * Perform a rolling restart of all of the storage members of the cluster.
@@ -713,23 +729,27 @@ public class CoherenceClusterOrchestration extends ExternalResource
      * Rolling restart is not supported on a cluster with only a single storage
      * enabled member.
      *
-     * @param options  the {@link Option}s to use when realizing each new {@link CoherenceClusterMember}
+     * @param options the {@link Option}s to use when realizing each new {@link CoherenceClusterMember}
      *
      * @throws IllegalStateException if the cluster has only a single storage member.
      */
     public void restartStorageMembers(Option... options)
     {
-        Predicate<CoherenceClusterMember>   predicate = new Predicate<CoherenceClusterMember>()
+        Predicate<CoherenceClusterMember> predicate = new Predicate<CoherenceClusterMember>()
         {
             @Override
             public boolean evaluate(CoherenceClusterMember member)
             {
                 Set<String> setServiceNames = member.submit(new GetAutoStartServiceNames());
+
                 for (String sServiceName : setServiceNames)
                 {
                     ServiceStatus status = member.submit(new GetServiceStatus(sServiceName));
-                    if (status == ServiceStatus.ENDANGERED || status == ServiceStatus.ORPHANED
-                        || status == ServiceStatus.STOPPED || status == ServiceStatus.UNKNOWN)
+
+                    if (status == ServiceStatus.ENDANGERED
+                        || status == ServiceStatus.ORPHANED
+                        || status == ServiceStatus.STOPPED
+                        || status == ServiceStatus.UNKNOWN)
                     {
                         return false;
                     }
@@ -742,37 +762,45 @@ public class CoherenceClusterOrchestration extends ExternalResource
         restartStorageMembers(predicate, options);
     }
 
+
     /**
      * Perform a rolling restart of all of the storage members of the cluster.
      * <p>
      * Rolling restart is not supported on a cluster with only a single storage
      * enabled member.
      *
-     * @param predicate  the {@link Predicate} that must evaluate to true before
-     *                   each member of the cluster is restarted.
-     * @param options    the {@link Option}s to use when realizing each new {@link CoherenceClusterMember}
+     * @param predicate the {@link Predicate} that must evaluate to true before
+     *                  each member of the cluster is restarted.
+     * @param options   the {@link Option}s to use when realizing each new {@link CoherenceClusterMember}
      *
      * @throws IllegalStateException if the cluster has only a single storage member.
      */
-    public void restartStorageMembers(Predicate<CoherenceClusterMember> predicate, Option... options)
+    public void restartStorageMembers(Predicate<CoherenceClusterMember> predicate,
+                                      Option...                         options)
     {
         if (storageMemberCount < 2)
         {
-            throw new IllegalStateException("Cannot perform a rolling restart in a cluster with less than two " +
-                                            "storage enabled members");
+            throw new IllegalStateException("Cannot perform a rolling restart in a cluster with less than two "
+                                            + "storage enabled members");
         }
-        CoherenceCacheServerSchema          schema    = createStorageEnabledMemberSchema();
 
-        Block block = new Block();
+        CoherenceCacheServerSchema schema = createStorageEnabledMemberSchema();
 
-        for (int i=1; i<=storageMemberCount; i++)
+        Block                      block  = new Block();
+
+        for (int i = 1; i <= storageMemberCount; i++)
         {
-            block.add(new RestartCoherenceClusterMemberAction("storage", schema, new SystemApplicationConsole(),
-                                                              predicate, platform, options));
+            block.add(new RestartCoherenceClusterMemberAction("storage",
+                                                              schema,
+                                                              new SystemApplicationConsole(),
+                                                              predicate,
+                                                              platform,
+                                                              options));
         }
 
         InteractiveActionExecutor<CoherenceClusterMember, CoherenceCluster> executor =
-            new InteractiveActionExecutor<>(cluster, block);
+            new InteractiveActionExecutor<>(cluster,
+                                            block);
 
         executor.executeAll();
     }

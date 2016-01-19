@@ -68,7 +68,7 @@ public class StorageDisabledMember implements SessionBuilder
         Properties systemProperties = SystemProperties.createSnapshot();
 
         // modify the current system properties to include/override those in the schema
-        Properties properties = schema.getSystemProperties(platform);
+        Properties properties = schema.getSystemProperties().realize(platform, schema);
 
         for (String propertyName : properties.stringPropertyNames())
         {

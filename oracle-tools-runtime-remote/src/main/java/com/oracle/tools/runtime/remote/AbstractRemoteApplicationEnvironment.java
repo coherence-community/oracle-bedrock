@@ -36,6 +36,7 @@ import com.oracle.tools.runtime.java.JavaApplication;
 import com.oracle.tools.runtime.options.EnvironmentVariables;
 
 import java.net.InetAddress;
+
 import java.util.List;
 import java.util.Properties;
 
@@ -92,6 +93,7 @@ public abstract class AbstractRemoteApplicationEnvironment<A extends Application
         return schema.getExecutableName();
     }
 
+
     @Override
     public List<String> getRemoteCommandArguments(InetAddress remoteExecutorAddress)
     {
@@ -103,8 +105,8 @@ public abstract class AbstractRemoteApplicationEnvironment<A extends Application
     public Properties getRemoteEnvironmentVariables()
     {
         EnvironmentVariables environmentVariables = options.get(EnvironmentVariables.class,
-                                                                EnvironmentVariables
-                                                                    .of(EnvironmentVariables.Source.TargetPlatform));
+                                                                EnvironmentVariables.of(EnvironmentVariables.Source
+                                                                    .TargetPlatform));
 
         Properties variables = new Properties();
 
@@ -122,7 +124,7 @@ public abstract class AbstractRemoteApplicationEnvironment<A extends Application
         }
 
         // add the optionally defined environment variables
-        variables.putAll(environmentVariables.getBuilder().realize());
+        variables.putAll(environmentVariables.realize(platform, schema));
 
         return variables;
     }
