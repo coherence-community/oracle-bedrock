@@ -105,7 +105,7 @@ public class CoherenceCacheServerSchemaTest extends AbstractTest
         CoherenceCacheServerSchema schema = new CoherenceCacheServerSchema();
 
         assertThat(schema.setCacheConfigURI(value), is(sameInstance(schema)));
-        assertThat(schema.getSystemPropertiesBuilder().getProperty(CoherenceCacheServerSchema.PROPERTY_CACHECONFIG),
+        assertThat(schema.getSystemProperties().getProperty(CoherenceCacheServerSchema.PROPERTY_CACHECONFIG),
                    is((Object) value));
     }
 
@@ -122,7 +122,7 @@ public class CoherenceCacheServerSchemaTest extends AbstractTest
         CoherenceCacheServerSchema schema = new CoherenceCacheServerSchema();
 
         assertThat(schema.setClusterName(value), is(sameInstance(schema)));
-        assertThat(schema.getSystemPropertiesBuilder().getProperty(CoherenceCacheServerSchema.PROPERTY_CLUSTER_NAME),
+        assertThat(schema.getSystemProperties().getProperty(CoherenceCacheServerSchema.PROPERTY_CLUSTER_NAME),
                    is((Object) value));
     }
 
@@ -139,7 +139,7 @@ public class CoherenceCacheServerSchemaTest extends AbstractTest
         CoherenceCacheServerSchema schema = new CoherenceCacheServerSchema();
 
         assertThat(schema.setClusterPort(value), is(sameInstance(schema)));
-        assertThat(schema.getSystemPropertiesBuilder().getProperty(CoherenceCacheServerSchema.PROPERTY_CLUSTER_PORT),
+        assertThat(schema.getSystemProperties().getProperty(CoherenceCacheServerSchema.PROPERTY_CLUSTER_PORT),
                    is((Object) value));
     }
 
@@ -156,7 +156,7 @@ public class CoherenceCacheServerSchemaTest extends AbstractTest
         CoherenceCacheServerSchema schema = new CoherenceCacheServerSchema();
 
         assertThat(schema.setClusterPort(value), is(sameInstance(schema)));
-        assertThat((AvailablePortIterator) schema.getSystemPropertiesBuilder()
+        assertThat((AvailablePortIterator) schema.getSystemProperties()
             .getProperty(CoherenceCacheServerSchema.PROPERTY_CLUSTER_PORT),
                    sameInstance(value));
     }
@@ -174,7 +174,7 @@ public class CoherenceCacheServerSchemaTest extends AbstractTest
         CoherenceCacheServerSchema schema = new CoherenceCacheServerSchema();
 
         assertThat(schema.setLocalHostAddress(value), is(sameInstance(schema)));
-        assertThat(schema.getSystemPropertiesBuilder()
+        assertThat(schema.getSystemProperties()
             .getProperty(CoherenceCacheServerSchema.PROPERTY_LOCALHOST_ADDRESS),
                    is((Object) value));
     }
@@ -192,7 +192,7 @@ public class CoherenceCacheServerSchemaTest extends AbstractTest
         CoherenceCacheServerSchema schema = new CoherenceCacheServerSchema();
 
         assertThat(schema.setLogLevel(value), is(sameInstance(schema)));
-        assertThat(schema.getSystemPropertiesBuilder().getProperty(CoherenceCacheServerSchema.PROPERTY_LOG_LEVEL),
+        assertThat(schema.getSystemProperties().getProperty(CoherenceCacheServerSchema.PROPERTY_LOG_LEVEL),
                    is((Object) value));
     }
 
@@ -209,7 +209,7 @@ public class CoherenceCacheServerSchemaTest extends AbstractTest
         CoherenceCacheServerSchema schema = new CoherenceCacheServerSchema();
 
         assertThat(schema.setMulticastTTL(value), is(sameInstance(schema)));
-        assertThat(schema.getSystemPropertiesBuilder().getProperty(CoherenceCacheServerSchema.PROPERTY_MULTICAST_TTL),
+        assertThat(schema.getSystemProperties().getProperty(CoherenceCacheServerSchema.PROPERTY_MULTICAST_TTL),
                    is((Object) value));
     }
 
@@ -226,7 +226,7 @@ public class CoherenceCacheServerSchemaTest extends AbstractTest
         CoherenceCacheServerSchema schema = new CoherenceCacheServerSchema();
 
         assertThat(schema.setPofConfigURI(value), is(sameInstance(schema)));
-        assertThat(schema.getSystemPropertiesBuilder().getProperty(CoherenceCacheServerSchema.PROPERTY_POF_CONFIG),
+        assertThat(schema.getSystemProperties().getProperty(CoherenceCacheServerSchema.PROPERTY_POF_CONFIG),
                    is((Object) value));
     }
 
@@ -242,7 +242,7 @@ public class CoherenceCacheServerSchemaTest extends AbstractTest
         CoherenceCacheServerSchema schema = new CoherenceCacheServerSchema();
 
         assertThat(schema.setPofEnabled(true), is(sameInstance(schema)));
-        assertThat(schema.getSystemPropertiesBuilder().getProperty(CoherenceCacheServerSchema.PROPERTY_POF_ENABLED),
+        assertThat(schema.getSystemProperties().getProperty(CoherenceCacheServerSchema.PROPERTY_POF_ENABLED),
                    is((Object) true));
     }
 
@@ -258,7 +258,7 @@ public class CoherenceCacheServerSchemaTest extends AbstractTest
         CoherenceCacheServerSchema schema = new CoherenceCacheServerSchema();
 
         assertThat(schema.setPofEnabled(false), is(sameInstance(schema)));
-        assertThat(schema.getSystemPropertiesBuilder().getProperty(CoherenceCacheServerSchema.PROPERTY_POF_ENABLED),
+        assertThat(schema.getSystemProperties().getProperty(CoherenceCacheServerSchema.PROPERTY_POF_ENABLED),
                    is((Object) false));
     }
 
@@ -274,7 +274,7 @@ public class CoherenceCacheServerSchemaTest extends AbstractTest
         CoherenceCacheServerSchema schema = new CoherenceCacheServerSchema();
 
         assertThat(schema.setRemoteJMXManagement(true), is(sameInstance(schema)));
-        assertThat(schema.getSystemPropertiesBuilder()
+        assertThat(schema.getSystemProperties()
             .getProperty(CoherenceCacheServerSchema.PROPERTY_MANAGEMENT_REMOTE),
                    is((Object) true));
     }
@@ -291,7 +291,7 @@ public class CoherenceCacheServerSchemaTest extends AbstractTest
         CoherenceCacheServerSchema schema = new CoherenceCacheServerSchema();
 
         assertThat(schema.setRemoteJMXManagement(false), is(sameInstance(schema)));
-        assertThat(schema.getSystemPropertiesBuilder()
+        assertThat(schema.getSystemProperties()
             .getProperty(CoherenceCacheServerSchema.PROPERTY_MANAGEMENT_REMOTE),
                    is((Object) false));
     }
@@ -308,7 +308,7 @@ public class CoherenceCacheServerSchemaTest extends AbstractTest
         CoherenceCacheServerSchema schema = new CoherenceCacheServerSchema();
 
         assertThat(schema.useLocalHostMode(), is(sameInstance(schema)));
-        assertThat(schema.getSystemPropertiesBuilder()
+        assertThat(schema.getSystemProperties()
             .getProperty(CoherenceCacheServerSchema.PROPERTY_LOCALHOST_ADDRESS),
                    is((Object) Constants.getLocalHost()));
     }
@@ -325,7 +325,7 @@ public class CoherenceCacheServerSchemaTest extends AbstractTest
         CoherenceCacheServerSchema schema = new CoherenceCacheServerSchema();
 
         assertThat(schema.useLocalHostMode(), is(sameInstance(schema)));
-        assertThat(schema.getSystemPropertiesBuilder().getProperty(CoherenceCacheServerSchema.PROPERTY_MULTICAST_TTL),
+        assertThat(schema.getSystemProperties().getProperty(CoherenceCacheServerSchema.PROPERTY_MULTICAST_TTL),
                    is((Object) 0));
     }
 
@@ -342,7 +342,7 @@ public class CoherenceCacheServerSchemaTest extends AbstractTest
         CoherenceCacheServerSchema schema = new CoherenceCacheServerSchema();
 
         assertThat(schema.setSiteName(value), is(sameInstance(schema)));
-        assertThat(schema.getSystemPropertiesBuilder().getProperty(CoherenceCacheServerSchema.PROPERTY_SITE_NAME),
+        assertThat(schema.getSystemProperties().getProperty(CoherenceCacheServerSchema.PROPERTY_SITE_NAME),
                    is((Object) value));
     }
 
@@ -358,7 +358,7 @@ public class CoherenceCacheServerSchemaTest extends AbstractTest
         CoherenceCacheServerSchema schema = new CoherenceCacheServerSchema();
 
         assertThat(schema.setStorageEnabled(true), is(sameInstance(schema)));
-        assertThat(schema.getSystemPropertiesBuilder()
+        assertThat(schema.getSystemProperties()
             .getProperty(CoherenceCacheServerSchema.PROPERTY_DISTRIBUTED_LOCALSTORAGE),
                    is((Object) true));
     }
@@ -375,7 +375,7 @@ public class CoherenceCacheServerSchemaTest extends AbstractTest
         CoherenceCacheServerSchema schema = new CoherenceCacheServerSchema();
 
         assertThat(schema.setStorageEnabled(false), is(sameInstance(schema)));
-        assertThat(schema.getSystemPropertiesBuilder()
+        assertThat(schema.getSystemProperties()
             .getProperty(CoherenceCacheServerSchema.PROPERTY_DISTRIBUTED_LOCALSTORAGE),
                    is((Object) false));
     }
@@ -392,7 +392,7 @@ public class CoherenceCacheServerSchemaTest extends AbstractTest
         CoherenceCacheServerSchema schema = new CoherenceCacheServerSchema();
 
         assertThat(schema.setTCMPEnabled(true), is(sameInstance(schema)));
-        assertThat(schema.getSystemPropertiesBuilder().getProperty(CoherenceCacheServerSchema.PROPERTY_TCMP_ENABLED),
+        assertThat(schema.getSystemProperties().getProperty(CoherenceCacheServerSchema.PROPERTY_TCMP_ENABLED),
                    is((Object) true));
     }
 
@@ -408,7 +408,7 @@ public class CoherenceCacheServerSchemaTest extends AbstractTest
         CoherenceCacheServerSchema schema = new CoherenceCacheServerSchema();
 
         assertThat(schema.setTCMPEnabled(false), is(sameInstance(schema)));
-        assertThat(schema.getSystemPropertiesBuilder().getProperty(CoherenceCacheServerSchema.PROPERTY_TCMP_ENABLED),
+        assertThat(schema.getSystemProperties().getProperty(CoherenceCacheServerSchema.PROPERTY_TCMP_ENABLED),
                    is((Object) false));
     }
 
@@ -425,7 +425,7 @@ public class CoherenceCacheServerSchemaTest extends AbstractTest
         CoherenceCacheServerSchema schema = new CoherenceCacheServerSchema();
 
         assertThat(schema.setWellKnownAddress(value), is(sameInstance(schema)));
-        assertThat(schema.getSystemPropertiesBuilder()
+        assertThat(schema.getSystemProperties()
             .getProperty(CoherenceCacheServerSchema.PROPERTY_WELL_KNOWN_ADDRESS),
                    is((Object) value));
     }

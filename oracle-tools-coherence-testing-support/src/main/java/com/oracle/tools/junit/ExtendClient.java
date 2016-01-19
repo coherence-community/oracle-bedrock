@@ -55,7 +55,7 @@ public class ExtendClient implements SessionBuilder
     /**
      * Creates an {@link ExtendClient} for the specified Cache Configuration URI.
      *
-     * @param cacheConfigURI  the cache configuration URI
+     * @param cacheConfigURI the cache configuration URI
      */
     public ExtendClient(String cacheConfigURI)
     {
@@ -71,14 +71,14 @@ public class ExtendClient implements SessionBuilder
         // build a schema for a local storage-disabled member
         CoherenceCacheServerSchema schema =
             new CoherenceCacheServerSchema(serverSchema).setRoleName("extend-client").setStorageEnabled(false)
-                .setTCMPEnabled(false).setSystemProperty("tangosol.coherence.extend.enabled",
-                                                         true).setCacheConfigURI(cacheConfigURI);
+            .setTCMPEnabled(false).setSystemProperty("tangosol.coherence.extend.enabled",
+                                                     true).setCacheConfigURI(cacheConfigURI);
 
         // take a snapshot of the system properties as we're about to mess with them
         Properties systemProperties = SystemProperties.createSnapshot();
 
         // modify the current system properties to include/override those in the schema
-        Properties properties = schema.getSystemProperties(platform);
+        Properties properties = schema.getSystemProperties().realize(platform, schema);
 
         for (String propertyName : properties.stringPropertyNames())
         {
@@ -87,8 +87,7 @@ public class ExtendClient implements SessionBuilder
 
         // create the session
         ConfigurableCacheFactory session = new ScopedCacheFactoryBuilder().getConfigurableCacheFactory(cacheConfigURI,
-                                                                                                       getClass()
-                                                                                                           .getClassLoader());
+                                                                                                       getClass().getClassLoader());
 
         // replace the system properties
         SystemProperties.replaceWith(systemProperties);

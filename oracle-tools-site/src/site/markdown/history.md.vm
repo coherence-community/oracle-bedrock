@@ -138,6 +138,15 @@ reverse chronological order.
 *   [ORACLETOOLS-277](https://java.net/jira/browse/ORACLETOOLS-277): Added support
     for default options using the @Options.Default annotation.
 
+*   [ORACLETOOLS-279](https://java.net/jira/browse/ORACLETOOLS-279): Refactored
+    SystemProperty(ies) and EnvironmentVarible(s) classes to be Collector(ables).
+
+    *BREAKING CHANGE:* This change may break any application using the
+    SystemProperty(ies) and/or EnvironmentVariable(s) classes.
+
+    With this change, there's no longer a reason to use the PropertiesBuilder
+    class.
+
 <h4>oracle-tools-runtime</h4>
 
 *   [ORACLETOOLS-61](https://java.net/jira/browse/ORACLETOOLS-61): Introduced

@@ -121,7 +121,7 @@ public class SimpleApplicationBuilder extends AbstractApplicationBuilder<SimpleA
         }
 
         // add the optionally defined environment variables
-        Properties variables = environmentVariables.getBuilder().realize();
+        Properties variables = environmentVariables.realize(platform, schema);
 
         for (String variableName : variables.stringPropertyNames())
         {
@@ -168,8 +168,8 @@ public class SimpleApplicationBuilder extends AbstractApplicationBuilder<SimpleA
         // create the SimpleApplication
         final T application = (T) new SimpleApplication(environment,
                                                         schema instanceof FluentApplicationSchema
-                                                        ? ((FluentApplicationSchema<SimpleApplication, ?>) schema)
-                                                            .getApplicationListeners() : null);
+                                                        ? ((FluentApplicationSchema<SimpleApplication,
+                                                            ?>) schema).getApplicationListeners() : null);
 
         // ----- notify all of the application listeners -----
 

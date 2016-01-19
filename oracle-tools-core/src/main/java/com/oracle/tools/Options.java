@@ -30,10 +30,12 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Stack;
@@ -54,6 +56,7 @@ public class Options
      */
     private LinkedHashMap<Class<? extends Option>, Option> options;
 
+
     /**
      * Constructs a {@link Options} given an array of {@link Option}s
      *
@@ -72,10 +75,11 @@ public class Options
         }
     }
 
+
     /**
-     * Obtains the option for a specified concrete type from the collection.
+     * Obtains the {@link Option} for a specified concrete type from the collection.
      *
-     * <p>Should the option not exist in the collection, an attempt is made
+     * <p>Should the {@link Option} not exist in the collection, an attempt is made
      * to determine a suitable default based on the use of the {@link Default}
      * annotation in the specified class, firstly by looking for and evaluating
      * the annotated "public static T getter()" method, failing that, looking for
@@ -85,10 +89,10 @@ public class Options
      * (assuming the class is an enum).  Failing these approaches,
      * <code>null</code> is returned.</p>
      *
-     * @param classOfOption the concrete type of option to obtain
+     * @param classOfOption the concrete type of {@link Option} to obtain
      * @param <T>           the type of value
      *
-     * @return the option of the specified type or if undefined, the
+     * @return the {@link Option} of the specified type or if undefined, the
      * suitable default value (or <code>null</code> if one can't be
      * determined)
      */
@@ -97,19 +101,21 @@ public class Options
         return get(classOfOption, getDefaultFor(classOfOption));
     }
 
+
     /**
-     * Obtains the option of a specified concrete type from the collection.
+     * Obtains the {@link Option} of a specified concrete type from the collection.
      * <p>
-     * Should the type of option not exist, the specified default is returned.
+     * Should the type of {@link Option} not exist, the specified default is returned.
      *
-     * @param classOfOption the type of option to obtain
-     * @param defaultOption the option to return if the specified type is not defined
+     * @param classOfOption the type of {@link Option} to obtain
+     * @param defaultOption the {@link Option} to return if the specified type is not defined
      * @param <T>           the type of value
      *
      * @return the option of the specified type or
      * the default if it's not defined
      */
-    public <T extends Option> T get(Class<T> classOfOption, T defaultOption)
+    public <T extends Option> T get(Class<T> classOfOption,
+                                    T        defaultOption)
     {
         if (classOfOption == null)
         {
@@ -130,13 +136,14 @@ public class Options
         }
     }
 
+
     /**
-     * Determines if an option of the specified concrete type is in the
+     * Determines if an {@link Option} of the specified concrete type is in the
      * collection.
      *
-     * @param classOfOption the class of option
+     * @param classOfOption the class of {@link Option}
      *
-     * @return <code>true</code> if the class of option is in the {@link Options}
+     * @return <code>true</code> if the class of {@link Option} is in the {@link Options}
      * <code>false</code> otherwise
      */
     public boolean contains(Class<? extends Option> classOfOption)
@@ -144,12 +151,13 @@ public class Options
         return get(classOfOption) != null;
     }
 
+
     /**
-     * Determines if the specified option (and type) is in the {@link Options}.
+     * Determines if the specified {@link Option} (and type) is in the {@link Options}.
      *
-     * @param option the option
+     * @param option the {@link Option}
      *
-     * @return <code>true</code> if the options is defined,
+     * @return <code>true</code> if the {@link Option} is defined,
      * <code>false</code> otherwise
      */
     public boolean contains(Option option)
@@ -159,8 +167,9 @@ public class Options
         return get(classOfOption).equals(option);
     }
 
+
     /**
-     * Obtains an {@link Iterable} over all of the options in the collection
+     * Obtains an {@link Iterable} over all of the {@link Option}s in the collection
      * that are an instance of the specified class.
      *
      * @param requiredClass the required class
@@ -170,7 +179,6 @@ public class Options
      */
     public <O> Iterable<O> getInstancesOf(Class<O> requiredClass)
     {
-
         ArrayList<O> result = new ArrayList<>();
 
         for (Option option : options.values())
@@ -179,20 +187,32 @@ public class Options
             {
                 result.add((O) option);
             }
+
+            if (option instanceof Option.Collector)
+            {
+                for (Option collectable : ((Option.Collector<?, ?>) option))
+                {
+                    if (requiredClass.isInstance(collectable))
+                    {
+                        result.add((O) collectable);
+                    }
+                }
+            }
         }
 
         return result;
     }
 
+
     /**
-     * Obtains the current collection of options as an array.
+     * Obtains the current collection of {@link Option}s as an array.
      *
      * @return an array of options
      */
     public Option[] asArray()
     {
         Option[] aOptions = new Option[options.size()];
-        int i = 0;
+        int      i        = 0;
 
         for (Option option : options.values())
         {
@@ -201,6 +221,7 @@ public class Options
 
         return aOptions;
     }
+
 
     @Override
     public String toString()
@@ -230,10 +251,11 @@ public class Options
         return bldrResult.toString();
     }
 
+
     /**
-     * Constructs an {@link Options} collection given an array of options
+     * Constructs an {@link Options} collection given an array of {@link Option}s
      *
-     * @param options the array of options
+     * @param options the array of {@link Option}s
      *
      * @return an {@link Options} collection
      */
@@ -243,11 +265,12 @@ public class Options
         return new Options(options);
     }
 
+
     /**
      * Adds an option to the collection, replacing an
-     * existing option of the same concrete type if one exists.
+     * existing {@link Option} of the same concrete type if one exists.
      *
-     * @param option the option to add
+     * @param option the {@link Option} to add
      *
      * @return the {@link Options} to permit fluent-style method calls
      */
@@ -264,7 +287,7 @@ public class Options
                 Option.Collectable collectable = (Option.Collectable) option;
 
                 // determine the type of Collector in which we'll collect the Collectable
-                Class<? extends Option> classOfCollector = collectable.getCollectorClass();
+                Class<? extends Option> classOfCollector = getClassOf(collectable.getCollectorClass());
 
                 // attempt to locate an existing Collector
                 Option.Collector collector = (Option.Collector) options.get(classOfCollector);
@@ -278,12 +301,13 @@ public class Options
 
                 if (collector == null)
                 {
-                    throw new IllegalStateException("Failed to instantiate a default Collector of type " + classOfCollector + " for " + option);
+                    throw new IllegalStateException("Failed to instantiate a default Collector of type "
+                                                    + classOfCollector + " for " + option);
                 }
                 else
                 {
                     // collect the collectable into the collector
-                    collector = collector.collect(collectable);
+                    collector = collector.with(collectable);
 
                     // replace the collector in the options
                     options.put(classOfCollector, collector);
@@ -312,6 +336,7 @@ public class Options
         }
     }
 
+
     /**
      * Adds an {@link Option} to the collection if and only if an {@link Option} of the
      * same type is not already present.
@@ -334,9 +359,9 @@ public class Options
 
 
     /**
-     * Adds an array of options to the collection.
+     * Adds an array of {@link Option}s to the collection.
      *
-     * @param options the options to add
+     * @param options the {@link Option}s to add
      *
      * @return the {@link Options} to permit fluent-style method calls
      */
@@ -353,8 +378,9 @@ public class Options
         return this;
     }
 
+
     /**
-     * Adds all of the options in the specified {@link Options}
+     * Adds all of the {@link Options} in the specified {@link Options}
      * to this collection.
      *
      * @param options the {@link Options} to add
@@ -371,6 +397,7 @@ public class Options
         return this;
     }
 
+
     /**
      * Removes the specified type of {@link Option}
      *
@@ -381,30 +408,78 @@ public class Options
      */
     public <T extends Option> boolean remove(Class<T> classOfOption)
     {
+        if (classOfOption == null)
+        {
+            return false;
+        }
+        else
+        {
+            Option option = options.remove(getClassOf(classOfOption));
 
-        Option option = options.remove(classOfOption);
-
-        return option != null;
+            return option != null;
+        }
     }
 
+
     /**
-     * Replaces an existing type of {@link Option} with a new {@link Option}, regardless
-     * of whether it is composable or not (ie: it implements {@link ComposableOption}).
+     * Removes the specific {@link Option}
      *
-     * @param option the new {@link Option}, replacing any existing {@link Option}
-     *               of the same type
+     * @param option the {@link Option} to remove
      *
-     * @return the {@link Options} to permit fluent-style method calls
+     * @return <code>true</code> if the {@link Option} was removed,
+     * <code>false</code> otherwise, perhaps because it wasn't defined
      */
-    public Options replace(Option option)
+    public boolean remove(Option option)
     {
-        // determine the class of the option
-        Class<? extends Option> classOfOption = getClassOf(option);
+        if (option == null)
+        {
+            return false;
+        }
+        else
+        {
+            if (option instanceof Option.Collectable)
+            {
+                Option.Collectable collectable = (Option.Collectable) option;
 
-        // overwrite the existing option (if there is one)
-        options.put(classOfOption, option);
+                // determine the type of Collector
+                Class<? extends Option> classOfCollector = getClassOf(collectable.getCollectorClass());
 
-        return this;
+                // attempt to locate an existing Collector
+                Option.Collector collector = (Option.Collector) options.get(classOfCollector);
+
+                if (collector == null)
+                {
+                    return false;
+                }
+                else
+                {
+                    // remove the collectable
+                    collector = collector.without(collectable);
+
+                    // replace the collector
+                    options.put(classOfCollector, collector);
+
+                    return true;
+                }
+            }
+            else
+            {
+                Class<? extends Option> classOfOption  = getClassOf(option);
+
+                Option                  existingOption = get(classOfOption);
+
+                if (existingOption == null ||!existingOption.equals(option))
+                {
+                    return false;
+                }
+                else
+                {
+                    options.remove(classOfOption);
+
+                    return true;
+                }
+            }
+        }
     }
 
 
@@ -444,11 +519,15 @@ public class Options
 
             for (Class<?> interfaceClass : classOfOption.getInterfaces())
             {
-                if (Option.class.equals(interfaceClass) || ComposableOption.class.equals(interfaceClass))
+                if (Option.class.equals(interfaceClass)
+                    || ComposableOption.class.equals(interfaceClass)
+                    || Option.Collector.class.equals(interfaceClass))
                 {
                     // when the Option/ComposableOption is directly implemented by a class,
                     // we return the first non-abstract class in the hierarchy.
-                    while (classOfOption != null && Modifier.isAbstract(classOfOption.getModifiers()) && !classOfOption.isInterface())
+                    while (classOfOption != null
+                           && Modifier.isAbstract(classOfOption.getModifiers())
+                           &&!classOfOption.isInterface())
                     {
                         classOfOption = hierarchy.isEmpty() ? null : hierarchy.pop();
                     }
@@ -458,7 +537,9 @@ public class Options
                 else if (Option.class.isAssignableFrom(interfaceClass))
                 {
                     // ensure that we have a concrete class in our hierarchy
-                    while (classOfOption != null && Modifier.isAbstract(classOfOption.getModifiers()) && !classOfOption.isInterface())
+                    while (classOfOption != null
+                           && Modifier.isAbstract(classOfOption.getModifiers())
+                           &&!classOfOption.isInterface())
                     {
                         classOfOption = hierarchy.isEmpty() ? null : hierarchy.pop();
                     }
@@ -486,6 +567,7 @@ public class Options
 
         return null;
     }
+
 
     /**
      * Attempts to determine a "default" value for a given class.
@@ -518,11 +600,11 @@ public class Options
             {
                 int modifiers = method.getModifiers();
 
-                if (method.getAnnotation(Default.class) != null &&
-                        method.getParameterTypes().length == 0 &&
-                        Modifier.isStatic(modifiers) &&
-                        Modifier.isPublic(modifiers) &&
-                        classOfOption.isAssignableFrom(method.getReturnType()))
+                if (method.getAnnotation(Default.class) != null
+                    && method.getParameterTypes().length == 0
+                    && Modifier.isStatic(modifiers)
+                    && Modifier.isPublic(modifiers)
+                    && classOfOption.isAssignableFrom(method.getReturnType()))
                 {
                     try
                     {
@@ -530,7 +612,7 @@ public class Options
                     }
                     catch (Exception e)
                     {
-                        //carry on... perhaps we can use another approach?
+                        // carry on... perhaps we can use another approach?
                     }
                 }
             }
@@ -540,10 +622,10 @@ public class Options
         {
             int modifiers = field.getModifiers();
 
-            if (field.getAnnotation(Default.class) != null &&
-                    Modifier.isStatic(modifiers) &&
-                    Modifier.isPublic(modifiers) &&
-                    classOfOption.isAssignableFrom(field.getType()))
+            if (field.getAnnotation(Default.class) != null
+                && Modifier.isStatic(modifiers)
+                && Modifier.isPublic(modifiers)
+                && classOfOption.isAssignableFrom(field.getType()))
             {
                 try
                 {
@@ -560,10 +642,9 @@ public class Options
         {
             Constructor constructor = classOfOption.getConstructor();
 
-            int modifiers = constructor.getModifiers();
+            int         modifiers   = constructor.getModifiers();
 
-            if (constructor.getAnnotation(Default.class) != null &&
-                    Modifier.isPublic(modifiers))
+            if (constructor.getAnnotation(Default.class) != null && Modifier.isPublic(modifiers))
             {
                 try
                 {
@@ -571,7 +652,7 @@ public class Options
                 }
                 catch (Exception e)
                 {
-                    //carry on... perhaps we can use another approach?
+                    // carry on... perhaps we can use another approach?
                 }
             }
         }

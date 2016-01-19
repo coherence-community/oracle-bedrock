@@ -95,7 +95,7 @@ public class SimpleApplicationSchemaTest
 
         SimpleApplicationSchema schema = new SimpleApplicationSchema("test.sh").addOption(environmentVariables);
 
-        Properties              variables = schema.getOptions().get(EnvironmentVariables.class).getBuilder().realize();
+        Properties              variables = schema.getOptions().get(EnvironmentVariables.class).realize(LocalPlatform.getInstance(), schema);
 
         assertThat(variables.getProperty("test"), Matchers.is("value"));
     }
@@ -115,7 +115,7 @@ public class SimpleApplicationSchemaTest
 
         SimpleApplicationSchema schema    = new SimpleApplicationSchema("test.sh").addOption(environmentVariables);
 
-        Properties              variables = schema.getOptions().get(EnvironmentVariables.class).getBuilder().realize();
+        Properties              variables = schema.getOptions().get(EnvironmentVariables.class).realize(LocalPlatform.getInstance(), schema);
 
         assertThat(variables.getProperty("key-1"), Matchers.is("value-1"));
         assertThat(variables.getProperty("key-2"), Matchers.is("value-2"));
@@ -136,7 +136,7 @@ public class SimpleApplicationSchemaTest
 
         SimpleApplicationSchema schema = new SimpleApplicationSchema("test.sh").addOption(environmentVariables);
 
-        Properties              variables = schema.getOptions().get(EnvironmentVariables.class).getBuilder().realize();
+        Properties              variables = schema.getOptions().get(EnvironmentVariables.class).realize(LocalPlatform.getInstance(), schema);
 
         assertThat(variables.getProperty("test"), Matchers.is("value-1"));
     }

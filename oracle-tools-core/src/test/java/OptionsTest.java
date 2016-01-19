@@ -28,6 +28,7 @@ import com.oracle.tools.Options;
 
 import com.oracle.tools.options.Timeout;
 
+import org.hamcrest.CoreMatchers;
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.not;
@@ -37,6 +38,10 @@ import static org.hamcrest.MatcherAssert.assertThat;
 
 import static org.hamcrest.core.Is.is;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -306,6 +311,72 @@ public class OptionsTest
         assertThat(options.get(Messages.class).get(), is("Hello, G'day"));
     }
 
+
+    /**
+     * Ensure that {@link Options} can discard a single collectable.
+     */
+    @Test
+    public void shouldDiscardASingleCollectable()
+    {
+        Options options = new Options(new Message("Hello"));
+
+        assertThat(options.get(Message.class), is(nullValue()));
+        assertThat(options.get(Messages.class), is(not(nullValue())));
+        assertThat(options.get(Messages.class).get(), is("Hello"));
+
+        options.remove(new Message("Hello"));
+
+        assertThat(options.get(Message.class), is(nullValue()));
+        assertThat(options.get(Messages.class), is(not(nullValue())));
+        assertThat(options.get(Messages.class).get(), is(""));
+    }
+
+
+    /**
+     * Ensure that {@link Options} can discard a multiple collectables
+     */
+    @Test
+    public void shouldDiscardMultipleCollectables()
+    {
+        Options options = new Options(new Message("Hello"), new Message("G'day"));
+
+        assertThat(options.get(Message.class), is(nullValue()));
+        assertThat(options.get(Messages.class), is(not(nullValue())));
+        assertThat(options.get(Messages.class).get(), is("Hello, G'day"));
+
+        options.remove(new Message("G'day"));
+        options.remove(new Message("Hello"));
+
+        assertThat(options.get(Message.class), is(nullValue()));
+        assertThat(options.get(Messages.class), is(not(nullValue())));
+        assertThat(options.get(Messages.class).get(), is(""));
+    }
+
+
+    /**
+     * Ensure that {@link Options} iterate over collectables.
+     */
+    @Test
+    public void shouldIterateOverCollectables()
+    {
+        Options options = new Options(new Message("Hello"), new Message("G'day"));
+
+        assertThat(options.get(Message.class), is(nullValue()));
+        assertThat(options.get(Messages.class), is(not(nullValue())));
+        assertThat(options.get(Messages.class).get(), is("Hello, G'day"));
+
+        HashSet<Message> messages = new HashSet<>();
+        for (Message message : options.getInstancesOf(Message.class))
+        {
+            messages.add(message);
+        }
+
+        assertThat(messages.size(), is(2));
+        assertThat(messages.contains(new Message("Hello")), is(true));
+        assertThat(messages.contains(new Message("G'day")), is(true));
+    }
+
+
     /**
      * A simple {@link Option} using a {@link Options.Default}
      * annotation on a static getter method.
@@ -315,6 +386,7 @@ public class OptionsTest
         SECOND,
         MINUTE,
         HOUR;
+
 
         @Options.Default
         public static Duration getDefault()
@@ -367,6 +439,7 @@ public class OptionsTest
         {
         }
 
+
         @Override
         public String toString()
         {
@@ -411,28 +484,87 @@ public class OptionsTest
      */
     public static class Messages implements Option.Collector<Message, Messages>
     {
-        private String values;
+        private ArrayList<Message> messageList;
+
 
         @Options.Default
         public Messages()
         {
-            this.values = "";
+            this.messageList = new ArrayList<>();
         }
 
-        public Messages(String values)
+
+        public Messages(Message... messages)
         {
-            this.values = values;
+            if (messages == null)
+            {
+                this.messageList = new ArrayList<>();
+            }
+            else
+            {
+                this.messageList = new ArrayList<>(messages.length);
+
+                for (Message message : messages)
+                {
+                    this.messageList.add(message);
+                }
+            }
         }
+
+
+        public Messages(Messages messages)
+        {
+            this.messageList = new ArrayList<>(messages.messageList.size());
+
+            for (Message message : messages.messageList)
+            {
+                this.messageList.add(message);
+            }
+        }
+
 
         public String get()
         {
-            return values;
+            StringBuilder builder = new StringBuilder();
+
+            for (Message message : messageList)
+            {
+                if (builder.length() > 0)
+                {
+                    builder.append(", ");
+                }
+
+                builder.append(message.get());
+            }
+
+            return builder.toString();
         }
 
+
         @Override
-        public Messages collect(Message collectable)
+        public Messages with(Message message)
         {
-            return new Messages(values.isEmpty() ? collectable.get() : this.values + ", " + collectable.get());
+            Messages messages = new Messages(this);
+            messages.messageList.add(message);
+
+            return messages;
+        }
+
+
+        @Override
+        public Messages without(Message message)
+        {
+            Messages messages = new Messages(this);
+            messages.messageList.remove(message);
+
+            return messages;
+        }
+
+
+        @Override
+        public Iterator<Message> iterator()
+        {
+            return messageList.iterator();
         }
     }
 
@@ -440,24 +572,47 @@ public class OptionsTest
     /**
      * A {@link Collectable} for testing.
      */
-    public static class Message implements Option.Collectable<Messages>
+    public static class Message implements Option.Collectable
     {
         private String value;
+
 
         public Message(String value)
         {
             this.value = value;
         }
 
+
         public String get()
         {
             return value;
         }
 
+
         @Override
         public Class<Messages> getCollectorClass()
         {
             return Messages.class;
+        }
+
+
+        @Override
+        public boolean equals(Object o)
+        {
+            if (this == o) return true;
+            if (!(o instanceof Message)) return false;
+
+            Message message = (Message) o;
+
+            return value != null ? value.equals(message.value) : message.value == null;
+
+        }
+
+
+        @Override
+        public int hashCode()
+        {
+            return value != null ? value.hashCode() : 0;
         }
     }
 }
