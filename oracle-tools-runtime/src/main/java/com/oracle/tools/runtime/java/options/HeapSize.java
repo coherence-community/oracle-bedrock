@@ -25,29 +25,18 @@
 
 package com.oracle.tools.runtime.java.options;
 
-import com.oracle.tools.ComposableOption;
-import com.oracle.tools.Option;
-
 import java.util.ArrayList;
 
 /**
- * An {@link Option} for configuring the {@link HeapSize} of a Java Virtual Machine.
+ * A {@link JvmOption} for configuring the {@link HeapSize} of a Java Virtual Machine.
  * <p>
  * Copyright (c) 2014. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Brian Oliver
  */
-public class HeapSize implements ComposableOption<HeapSize>, JvmOption
+public class HeapSize implements JvmOption
 {
-    /**
-     * The units of measure for the {@link HeapSize}.
-     */
-    public static enum Units {KB,
-                              MB,
-                              GB}
-
-
     /**
      * The initial heap size in {@link #initialUnits}.
      * (-1 means use the default)
@@ -69,6 +58,14 @@ public class HeapSize implements ComposableOption<HeapSize>, JvmOption
      * The {@link Units} of the maximum heap size.
      */
     private Units maximumUnits;
+
+
+    /**
+     * The units of measure for the {@link HeapSize}.
+     */
+    public static enum Units {KB,
+                              MB,
+                              GB}
 
 
     /**
@@ -178,58 +175,21 @@ public class HeapSize implements ComposableOption<HeapSize>, JvmOption
 
 
     @Override
-    public Iterable<String> getOptions()
+    public Iterable<String> getValues()
     {
-        ArrayList<String> options = new ArrayList<>(2);
+        ArrayList<String> values = new ArrayList<>(2);
 
         if (initial >= 0)
         {
-            options.add("-Xms" + initial + initialUnits.toString().charAt(0));
+            values.add("-Xms" + initial + initialUnits.toString().charAt(0));
         }
 
         if (maximum >= 0)
         {
-            options.add("-Xmx" + maximum + maximumUnits.toString().charAt(0));
+            values.add("-Xmx" + maximum + maximumUnits.toString().charAt(0));
         }
 
-        return options;
-    }
-
-
-    @Override
-    public HeapSize compose(HeapSize other)
-    {
-        HeapSize result       = new HeapSize();
-
-        long     initial      = this.initial <= 0 ? 0 : this.initial * ((this.initialUnits.ordinal() ^ 10) * 1024);
-        long     otherInitial = other.initial <= 0 ? 0 : other.initial * ((other.initialUnits.ordinal() ^ 10) * 1024);
-
-        if (initial > otherInitial)
-        {
-            result.initial      = this.initial;
-            result.initialUnits = this.initialUnits;
-        }
-        else
-        {
-            result.initial      = other.initial;
-            result.initialUnits = other.initialUnits;
-        }
-
-        long maximum      = this.maximum <= 0 ? 0 : this.maximum * ((this.maximumUnits.ordinal() ^ 10) * 1024);
-        long otherMaximum = other.maximum <= 0 ? 0 : other.maximum * ((other.maximumUnits.ordinal() ^ 10) * 1024);
-
-        if (maximum > otherMaximum)
-        {
-            result.maximum      = this.maximum;
-            result.maximumUnits = this.maximumUnits;
-        }
-        else
-        {
-            result.maximum      = other.maximum;
-            result.maximumUnits = other.maximumUnits;
-        }
-
-        return result;
+        return values;
     }
 
 

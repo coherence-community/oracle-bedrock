@@ -586,6 +586,9 @@ reverse chronological order.
 *   [ORACLETOOLS-269](https://java.net/jira/browse/ORACLETOOLS-269): Refactored
     Java Virtual Machine Platform builder to use new diagnostics table output.
 
+*   [ORACLETOOLS-280](https://java.net/jira/browse/ORACLETOOLS-280): Introduced
+    Freeform JvmOptions and refactored the need for JvmOptions class.
+
 <h4>oracle-tools-runtime-remote</h4>
 
 *   [ORACLETOOLS-91](https://java.net/jira/browse/ORACLETOOLS-91): Introduced
