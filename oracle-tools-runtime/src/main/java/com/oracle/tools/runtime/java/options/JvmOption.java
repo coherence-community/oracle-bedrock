@@ -27,31 +27,20 @@ package com.oracle.tools.runtime.java.options;
 
 import com.oracle.tools.Option;
 
-import com.oracle.tools.runtime.java.JavaApplicationBuilder;
-
 /**
- * Represents one or more related Java Virtual Machine configuration options.
- * <p>
- * This is an internal interface is used by {@link JavaApplicationBuilder}s
- * to help identify {@link Option}s that are specific to Java Virtual Machine
- * configuration.  However it is not a requirement that implementations of
- * this interface also implement the {@link Option} interface.
- * <p>
+ * Represents a Java Virtual Machine specific {@link Option}.
  * <p>
  * Copyright (c) 2014. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Brian Oliver
  */
-public interface JvmOption
+public interface JvmOption extends Option
 {
     /**
-     * Obtains the individual Java Virtual Machine option configuration
-     * strings for the {@link JvmOption}.
+     * Obtains the values for the {@link JvmOption}.
      *
-     * eg: The heap size option may return two strings; ["-Xms256m", "-Xmx512m"]
-     *
-     * @return an {@link Iterable} over the configuration strings
+     * @return the values for the {@link JvmOption}
      */
-    public Iterable<String> getOptions();
+    Iterable<String> getValues();
 }

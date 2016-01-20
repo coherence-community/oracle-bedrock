@@ -25,85 +25,18 @@
 
 package com.oracle.tools.runtime.java.options;
 
-import com.oracle.tools.ComposableOption;
 import com.oracle.tools.Option;
 
-import java.util.LinkedHashSet;
-
 /**
- * A {@link ComposableOption} representing a set of Java Virtual Machine options.
+ * A help to create {@link Freeform} {@link JvmOption}s.
  * <p>
- * Copyright (c) 2014. All Rights Reserved. Oracle Corporation.<br>
+ * Copyright (c) 2016. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Brian Oliver
  */
-public class JvmOptions implements JvmOption, ComposableOption<JvmOptions>
+public class JvmOptions
 {
-    /**
-     * The custom {@link JvmOption} strings.
-     */
-    private LinkedHashSet<String> options;
-
-
-    private JvmOptions(String... options)
-    {
-        this.options = new LinkedHashSet<>();
-
-        if (options != null)
-        {
-            for (String option : options)
-            {
-                this.options.add(option);
-            }
-        }
-    }
-
-
-    @Override
-    public JvmOptions compose(JvmOptions other)
-    {
-        JvmOptions set = new JvmOptions();
-
-        set.options.addAll(this.options);
-        set.options.addAll(other.options);
-
-        return set;
-    }
-
-
-    @Override
-    public Iterable<String> getOptions()
-    {
-        return options;
-    }
-
-
-    /**
-     * Add all of the specified Java Virtual Machine options to the {@link JvmOptions}.
-     *
-     * @param options  the options to add
-     *
-     * @return  a new {@link JvmOptions}
-     */
-    public JvmOptions addAll(String... options)
-    {
-        JvmOptions set = new JvmOptions();
-
-        set.options.addAll(this.options);
-
-        if (options != null)
-        {
-            for (String option : options)
-            {
-                set.options.add(option);
-            }
-        }
-
-        return set;
-    }
-
-
     /**
      * Creates an {@link Option} representing a set of strings
      * representing Java Virtual Machine options.
@@ -112,8 +45,8 @@ public class JvmOptions implements JvmOption, ComposableOption<JvmOptions>
      *
      * @return the {@link JvmOptions}
      */
-    public static JvmOptions include(String... options)
+    public static Freeforms include(String... options)
     {
-        return new JvmOptions(options);
+        return new Freeforms(options);
     }
 }

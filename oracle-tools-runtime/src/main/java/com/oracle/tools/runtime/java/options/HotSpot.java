@@ -25,9 +25,6 @@
 
 package com.oracle.tools.runtime.java.options;
 
-import com.oracle.tools.ComposableOption;
-import com.oracle.tools.Option;
-
 import java.util.Collections;
 
 /**
@@ -43,13 +40,13 @@ public class HotSpot
     /**
      * The {@link HotSpot} Mode (ie: -server or -client)
      */
-    public static enum Mode implements JvmOption, Option
+    public enum Mode implements JvmOption
     {
         SERVER,
         CLIENT;
 
         @Override
-        public Iterable<String> getOptions()
+        public Iterable<String> getValues()
         {
             return Collections.singletonList("-" + this.name().toLowerCase());
         }
