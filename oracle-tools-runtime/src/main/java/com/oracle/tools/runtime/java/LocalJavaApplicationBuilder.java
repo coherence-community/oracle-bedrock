@@ -367,7 +367,7 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication>
 
         for (JvmOption jvmOption : options.getInstancesOf(JvmOption.class))
         {
-            for (String value : jvmOption.getValues())
+            for (String value : jvmOption.getValues(options.asArray()))
             {
                 processBuilder.command().add(value);
 

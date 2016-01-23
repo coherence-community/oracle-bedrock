@@ -25,6 +25,8 @@
 
 package com.oracle.tools.runtime.java.options;
 
+import com.oracle.tools.Option;
+
 import java.util.Collections;
 
 /**
@@ -46,7 +48,7 @@ public class HotSpot
         CLIENT;
 
         @Override
-        public Iterable<String> getValues()
+        public Iterable<String> getValues(Option... options)
         {
             return Collections.singletonList("-" + this.name().toLowerCase());
         }

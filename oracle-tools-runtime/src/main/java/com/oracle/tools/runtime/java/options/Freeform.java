@@ -75,7 +75,7 @@ public class Freeform implements JvmOption, Option.Collectable
 
 
     @Override
-    public Iterable<String> getValues()
+    public Iterable<String> getValues(Option... options)
     {
         return values;
     }

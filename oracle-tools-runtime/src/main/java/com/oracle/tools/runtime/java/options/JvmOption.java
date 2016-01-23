@@ -40,7 +40,9 @@ public interface JvmOption extends Option
     /**
      * Obtains the values for the {@link JvmOption}.
      *
+     * @param options  {@link Option}s to be used for resolving the values.
+     *
      * @return the values for the {@link JvmOption}
      */
-    Iterable<String> getValues();
+    Iterable<String> getValues(Option... options);
 }
