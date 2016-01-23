@@ -234,7 +234,7 @@ public class RemoteJavaApplicationEnvironment<A extends JavaApplication>
 
         for (JvmOption jvmOption : options.getInstancesOf(JvmOption.class))
         {
-            for (String value : jvmOption.getValues())
+            for (String value : jvmOption.getValues(options.asArray()))
             {
                 arguments.add(value);
             }

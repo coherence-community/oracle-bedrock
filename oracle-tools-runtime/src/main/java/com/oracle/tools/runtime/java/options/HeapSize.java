@@ -25,6 +25,8 @@
 
 package com.oracle.tools.runtime.java.options;
 
+import com.oracle.tools.Option;
+
 import java.util.ArrayList;
 
 /**
@@ -175,7 +177,7 @@ public class HeapSize implements JvmOption
 
 
     @Override
-    public Iterable<String> getValues()
+    public Iterable<String> getValues(Option... options)
     {
         ArrayList<String> values = new ArrayList<>(2);
 
