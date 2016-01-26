@@ -127,6 +127,10 @@ reverse chronological order.
     class to represent Durations.  Refactored Timeout to use Durations.  Refactored
     internal implementations to use Durations where appropriate.
 
+*   [ORACLETOOLS-219](https://java.net/jira/browse/ORACLETOOLS-219): Introduced
+    initial support for resolving Java Expression Language expressions in various
+    places, including System Properties and Environment Variables.
+
 *   [ORACLETOOLS-272](https://java.net/jira/browse/ORACLETOOLS-272): Changed
     ExceptionListener.onException method to accept a Throwable instead of an
     Exception to allow Errors to be handled.

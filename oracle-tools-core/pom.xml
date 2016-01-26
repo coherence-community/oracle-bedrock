@@ -28,6 +28,12 @@
     		<version>${objenesis.version}</version>
     	</dependency>
 
+		<dependency>
+			<groupId>org.glassfish</groupId>
+			<artifactId>javax.el</artifactId>
+			<version>${glassfish.el.version}</version>
+		</dependency>
+
         <dependency>
             <groupId>org.hamcrest</groupId>
             <artifactId>hamcrest-library</artifactId>

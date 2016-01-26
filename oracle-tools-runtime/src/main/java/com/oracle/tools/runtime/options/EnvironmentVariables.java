@@ -28,6 +28,8 @@ package com.oracle.tools.runtime.options;
 import com.oracle.tools.Option;
 import com.oracle.tools.Options;
 
+import com.oracle.tools.lang.ExpressionEvaluator;
+
 import com.oracle.tools.runtime.ApplicationSchema;
 import com.oracle.tools.runtime.Platform;
 
@@ -201,15 +203,21 @@ public class EnvironmentVariables implements Option.Collector<EnvironmentVariabl
      * {@link EnvironmentVariable.ContextSensitiveValue#getValue(String, Platform, ApplicationSchema)} is called
      * to resolve the value.
      *
-     * @param platform the target {@link Platform} for the returned {@link Properties}
-     * @param schema   the target {@link ApplicationSchema} for the returned {@link Properties}
+     * @param platform        the target {@link Platform} for the returned {@link Properties}
+     * @param schema          the target {@link ApplicationSchema} for the returned {@link Properties}
+     * @param realizeOptions  the {@link Option}s for realizing the {@link Properties}
      *
      * @return a new {@link Properties} instance
      */
     public Properties realize(Platform          platform,
-                              ApplicationSchema schema)
+                              ApplicationSchema schema,
+                              Option...         realizeOptions)
     {
-        Properties properties = new Properties();
+        Options             options    = new Options(realizeOptions);
+
+        ExpressionEvaluator evaluator  = new ExpressionEvaluator(options);
+
+        Properties          properties = new Properties();
 
         for (EnvironmentVariable variable : this.variables.values())
         {
@@ -243,7 +251,18 @@ public class EnvironmentVariables implements Option.Collector<EnvironmentVariabl
 
                 if (value != null)
                 {
-                    properties.put(name, value.toString());
+                    String expression = value.toString().trim();
+
+                    if (!expression.isEmpty())
+                    {
+                        // resolve the use of expressions in the values
+                        Object result = evaluator.evaluate(expression, Object.class);
+
+                        expression = result == null ? "" : result.toString();
+                    }
+
+                    // record the property
+                    properties.put(name, expression);
                 }
             }
         }

@@ -28,6 +28,8 @@ package com.oracle.tools.runtime.remote;
 import com.oracle.tools.Option;
 import com.oracle.tools.Options;
 
+import com.oracle.tools.options.Variable;
+
 import com.oracle.tools.runtime.AbstractApplicationBuilder;
 import com.oracle.tools.runtime.Application;
 import com.oracle.tools.runtime.ApplicationConsole;
@@ -48,6 +50,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Iterator;
+import java.util.UUID;
 
 /**
  * An abstract implementation of a {@link RemoteApplicationBuilder}.
@@ -188,6 +191,11 @@ public abstract class AbstractRemoteApplicationBuilder<A extends Application, E 
         // define the default Platform Shell (assume BASH)
         options.addIfAbsent(Shell.is(Shell.Type.BASH));
 
+        // ----- establish an identity for the application -----
+
+        // add a unique runtime id for expression support
+        options.add(Variable.of("oracletools.runtime.id", UUID.randomUUID()));
+
         // ---- establish the environment for the application ----
 
         // obtain the builder-specific remote application environment based on the schema
@@ -204,8 +212,9 @@ public abstract class AbstractRemoteApplicationBuilder<A extends Application, E 
         {
             try
             {
-                for (DeploymentArtifact deploymentArtifact :
-                    deployment.getDeploymentArtifacts(applicationSchema, platform, options))
+                for (DeploymentArtifact deploymentArtifact : deployment.getDeploymentArtifacts(applicationSchema,
+                                                                                               platform,
+                                                                                               options))
                 {
                     artifactsToDeploy.add(deploymentArtifact);
                 }

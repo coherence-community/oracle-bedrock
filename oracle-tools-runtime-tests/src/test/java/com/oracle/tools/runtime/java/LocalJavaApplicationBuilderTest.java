@@ -74,6 +74,7 @@ import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.CoreMatchers.startsWith;
@@ -599,6 +600,36 @@ public class LocalJavaApplicationBuilderTest extends AbstractJavaApplicationBuil
                                                                  HeapSize.initial(256, HeapSize.Units.MB),
                                                                  HeapSize.maximum(1, HeapSize.Units.GB)))
         {
+        }
+    }
+
+
+    /**
+     * Ensure that {@link LocalJavaApplicationBuilder}s resolves SystemProperties that use Expressions.
+     */
+    @Test
+    public void shouldResolveExpressionsInASystemProperty()
+    {
+        // define the SleepingApplication
+        SimpleJavaApplicationSchema schema = new SimpleJavaApplicationSchema(SleepingApplication.class.getName());
+
+        schema.setPreferIPv4(true);
+
+        schema.setSystemProperty("id", "${oracletools.runtime.id}");
+
+        // build and start the SleepingApplication
+        LocalJavaApplicationBuilder<JavaApplication> builder = new LocalJavaApplicationBuilder<>(getPlatform());
+
+        ApplicationConsole                           console = new SystemApplicationConsole();
+
+        try (SimpleJavaApplication application = builder.realize(schema,
+                "sleeping",
+                console))
+        {
+            String id = application.getSystemProperty("id");
+
+            assertThat(id, is(not(nullValue())));
+            assertThat(id, is(not("${oracletools.runtime.id}")));
         }
     }
 

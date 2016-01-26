@@ -28,6 +28,7 @@ package com.oracle.tools.runtime.java;
 import com.oracle.tools.Option;
 import com.oracle.tools.Options;
 
+import com.oracle.tools.options.Variable;
 import com.oracle.tools.runtime.ApplicationConsole;
 import com.oracle.tools.runtime.ApplicationSchema;
 import com.oracle.tools.runtime.PropertiesBuilder;
@@ -59,6 +60,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Properties;
 
+import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -176,7 +178,7 @@ public class ContainerBasedJavaApplicationBuilder<A extends JavaApplication>
             diagnosticsTable.addRow("Target Platform", platform.getName());
         }
 
-        // ---- establish the Options for the Application -----
+        // ----- establish the Options for the Application -----
 
         // add the platform options
         Options options = new Options(platform == null ? null : platform.getOptions().asArray());
@@ -190,6 +192,12 @@ public class ContainerBasedJavaApplicationBuilder<A extends JavaApplication>
         // add the custom application options
         options.addAll(applicationOptions);
 
+        // ----- establish an identity for the application -----
+
+        // add a unique runtime id for expression support
+        options.add(Variable.of("oracletools.runtime.id", UUID.randomUUID()));
+
+        // ----- create and start the application in it's own classloader -----
         try
         {
             Table systemPropertiesTable = new Table();
@@ -198,7 +206,7 @@ public class ContainerBasedJavaApplicationBuilder<A extends JavaApplication>
             systemPropertiesTable.getOptions().add(Cell.Separator.of(""));
 
             // establish the System Properties for the ContainerBasedJavaApplication
-            Properties systemProperties = schema.getSystemProperties().realize(platform, schema);
+            Properties systemProperties = schema.getSystemProperties().realize(platform, schema, options.asArray());
 
             // sanity check the schema and realized properties
             sanityCheck(schema, systemProperties);

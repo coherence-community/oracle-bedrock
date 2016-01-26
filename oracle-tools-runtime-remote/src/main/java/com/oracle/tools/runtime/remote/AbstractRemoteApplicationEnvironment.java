@@ -124,7 +124,7 @@ public abstract class AbstractRemoteApplicationEnvironment<A extends Application
         }
 
         // add the optionally defined environment variables
-        variables.putAll(environmentVariables.realize(platform, schema));
+        variables.putAll(environmentVariables.realize(platform, schema, options.asArray()));
 
         return variables;
     }
