@@ -118,6 +118,7 @@
         <coherence.version>12.2.1-0-0-SNAPSHOT</coherence.version>
         <hamcrest.version>1.3</hamcrest.version>
         <jsch.version>0.1.53</jsch.version>
+        <glassfish.el.version>3.0.1-b08</glassfish.el.version>
         <junit.version>4.11</junit.version>
         <mockito.version>1.9.5</mockito.version>
         <objenesis.version>2.1</objenesis.version>

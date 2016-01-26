@@ -269,7 +269,7 @@ public class RemoteJavaApplicationEnvironment<A extends JavaApplication>
 
         // ----- establish the system properties for the java application -----
 
-        Properties properties = schema.getSystemProperties().realize(platform, schema);
+        Properties properties = schema.getSystemProperties().realize(platform, schema, options.asArray());
 
         for (String propertyName : properties.stringPropertyNames())
         {

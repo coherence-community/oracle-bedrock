@@ -35,6 +35,7 @@ import com.oracle.tools.deferred.TemporarilyUnavailableException;
 import com.oracle.tools.lang.StringHelper;
 
 import com.oracle.tools.options.Timeout;
+import com.oracle.tools.options.Variable;
 
 import com.oracle.tools.runtime.ApplicationConsole;
 import com.oracle.tools.runtime.ApplicationSchema;
@@ -76,6 +77,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
 import java.util.Properties;
+import java.util.UUID;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -130,7 +132,7 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication>
             diagnosticsTable.addRow("Target Platform", platform.getName());
         }
 
-        // ---- establish the Options for the Application -----
+        // ----- establish the Options for the Application -----
 
         // add the platform options
         Options options = new Options(platform == null ? null : platform.getOptions().asArray());
@@ -144,7 +146,12 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication>
         // add the custom application options
         options.addAll(applicationOptions);
 
-        // ---- establish the underlying ProcessBuilder -----
+        // ----- establish an identity for the application -----
+
+        // add a unique runtime id for expression support
+        options.add(Variable.of("oracletools.runtime.id", UUID.randomUUID()));
+
+        // ----- establish the underlying ProcessBuilder -----
 
         // we'll use the native operating system process builder to create
         // and manage the local application process
@@ -191,7 +198,7 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication>
         }
 
         // add the optionally defined environment variables
-        Properties variables = environmentVariables.realize(platform, schema);
+        Properties variables = environmentVariables.realize(platform, schema, options.asArray());
 
         for (String variableName : variables.stringPropertyNames())
         {
@@ -341,7 +348,7 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication>
         // ----- establish the system properties for the java application -----
 
         // define the system properties based on those defined by the schema
-        Properties systemProperties = schema.getSystemProperties().realize(platform, schema);
+        Properties systemProperties = schema.getSystemProperties().realize(platform, schema, options.asArray());
 
         for (String propertyName : systemProperties.stringPropertyNames())
         {
@@ -451,7 +458,8 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication>
 
         processBuilder.redirectErrorStream(redirection.isEnabled());
 
-        diagnosticsTable.addRow("Standard Error Device", redirection.isEnabled() ? "stdout" : "stderr");
+        diagnosticsTable.addRow("Standard Error Device",
+                                redirection.isEnabled() ? "stdout" : "stderr");
 
         diagnosticsTable.addRow("Application Launch Time",
                                 new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
@@ -501,20 +509,20 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication>
             Timeout timeout = options.get(Timeout.class);
 
             ensure(new AbstractDeferred<Boolean>()
-            {
-                @Override
-                public Boolean get() throws TemporarilyUnavailableException, PermanentlyUnavailableException
-                {
-                    if (!server.getRemoteExecutors().iterator().hasNext())
-                    {
-                        throw new TemporarilyUnavailableException(this);
-                    }
-                    else
-                    {
-                        return true;
-                    }
-                }
-            }, within(timeout));
+                   {
+                       @Override
+                       public Boolean get() throws TemporarilyUnavailableException, PermanentlyUnavailableException
+                       {
+                           if (!server.getRemoteExecutors().iterator().hasNext())
+                           {
+                               throw new TemporarilyUnavailableException(this);
+                           }
+                           else
+                           {
+                               return true;
+                           }
+                       }
+                   },within(timeout));
         }
 
         // ----- notify all of the application listeners -----

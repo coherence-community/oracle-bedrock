@@ -26,6 +26,9 @@
 package com.oracle.tools.runtime.java.options;
 
 import com.oracle.tools.Option;
+import com.oracle.tools.Options;
+
+import com.oracle.tools.lang.ExpressionEvaluator;
 
 import java.util.ArrayList;
 
@@ -77,7 +80,16 @@ public class Freeform implements JvmOption, Option.Collectable
     @Override
     public Iterable<String> getValues(Option... options)
     {
-        return values;
+        ExpressionEvaluator evaluator = new ExpressionEvaluator(new Options(options));
+
+        ArrayList<String>   result    = new ArrayList<>(values.size());
+
+        for (String value : this.values)
+        {
+            result.add(evaluator.evaluate(value, String.class));
+        }
+
+        return result;
     }
 
 
