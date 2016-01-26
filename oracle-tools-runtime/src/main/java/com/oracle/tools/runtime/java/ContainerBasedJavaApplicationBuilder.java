@@ -29,6 +29,7 @@ import com.oracle.tools.Option;
 import com.oracle.tools.Options;
 
 import com.oracle.tools.options.Variable;
+
 import com.oracle.tools.runtime.ApplicationConsole;
 import com.oracle.tools.runtime.ApplicationSchema;
 import com.oracle.tools.runtime.PropertiesBuilder;
@@ -59,8 +60,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Properties;
-
 import java.util.UUID;
+
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -195,7 +196,7 @@ public class ContainerBasedJavaApplicationBuilder<A extends JavaApplication>
         // ----- establish an identity for the application -----
 
         // add a unique runtime id for expression support
-        options.add(Variable.of("oracletools.runtime.id", UUID.randomUUID()));
+        options.add(Variable.with("oracletools.runtime.id", UUID.randomUUID()));
 
         // ----- create and start the application in it's own classloader -----
         try

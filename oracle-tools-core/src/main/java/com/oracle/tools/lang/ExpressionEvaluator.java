@@ -115,7 +115,7 @@ public class ExpressionEvaluator
     public void defineVariable(String name,
                                Object value)
     {
-        defineVariable(Variable.of(name, value));
+        defineVariable(Variable.with(name, value));
     }
 
 
