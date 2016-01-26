@@ -593,6 +593,9 @@ reverse chronological order.
 *   [ORACLETOOLS-280](https://java.net/jira/browse/ORACLETOOLS-280): Introduced
     Freeform JvmOptions and refactored the need for JvmOptions class.
 
+*   [ORACLETOOLS-281](https://java.net/jira/browse/ORACLETOOLS-281): Introduced
+    JavaAgent option to define JavaAgents for Java Applications.
+
 *   [ORACLETOOLS-282(https://java.net/jira/browse/ORACLETOOLS-282): Enhanced
     JvmOption.getValues() method to allow Options to be provided.
 

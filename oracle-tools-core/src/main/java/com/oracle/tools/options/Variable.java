@@ -27,9 +27,11 @@ package com.oracle.tools.options;
 
 import com.oracle.tools.Option;
 
+import com.oracle.tools.lang.ExpressionEvaluator;
+
 /**
  * A {@link Collectable} {@link Option} representing a variable, consisting
- * of a name and value, for an {@link ExpressionSupport}.
+ * of a name and value, for an {@link ExpressionEvaluator}.
  * <p>
  * Copyright (c) 2016. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
@@ -96,8 +98,8 @@ public class Variable implements Option.Collectable
      * @param name   the name of the {@link Variable}
      * @param object the values for the {@link Variable}
      */
-    public static Variable of(String name,
-                              Object object)
+    public static Variable with(String name,
+                                Object object)
     {
         return new Variable(name, object);
     }

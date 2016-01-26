@@ -234,8 +234,8 @@ public class LocalJavaApplicationBuilderTest extends AbstractJavaApplicationBuil
 
         SimpleApplicationSchema jdbSchema =
             new SimpleApplicationSchema("jdb").addArgument("-connect")
-                .addArgument("com.sun.jdi.SocketListen:localAddress=" + platform.getAddress().getHostAddress()
-                             + ",port=" + debuggerPort.get());
+            .addArgument("com.sun.jdi.SocketListen:localAddress=" + platform.getAddress().getHostAddress() + ",port="
+                         + debuggerPort.get());
 
         CapturingApplicationConsole jdbConsole = new CapturingApplicationConsole();
 
@@ -258,7 +258,7 @@ public class LocalJavaApplicationBuilderTest extends AbstractJavaApplicationBuil
                                                               schema,
                                                               console,
                                                               RemoteDebugging.enabled().startSuspended(false)
-                                                                  .attachToDebugger(debuggerPort.get())))
+                                                              .attachToDebugger(debuggerPort.get())))
             {
                 Eventually.assertThat(invoking(console).getCapturedOutputLines(), hasItem(startsWith("Now sleeping")));
 
@@ -274,7 +274,7 @@ public class LocalJavaApplicationBuilderTest extends AbstractJavaApplicationBuil
 
 
     /**
-     * Method description
+     * Ensure that we can connect a debugger to the specified application.
      *
      * @param application
      *
@@ -622,9 +622,7 @@ public class LocalJavaApplicationBuilderTest extends AbstractJavaApplicationBuil
 
         ApplicationConsole                           console = new SystemApplicationConsole();
 
-        try (SimpleJavaApplication application = builder.realize(schema,
-                "sleeping",
-                console))
+        try (SimpleJavaApplication application = builder.realize(schema, "sleeping", console))
         {
             String id = application.getSystemProperty("id");
 

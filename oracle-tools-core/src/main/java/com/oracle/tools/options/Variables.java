@@ -74,7 +74,7 @@ public class Variables implements Option.Collector<Variable, Variables>
 
         for (String name : variables.keySet())
         {
-            this.variables.put(name, Variable.of(name, variables.get(name)));
+            this.variables.put(name, Variable.with(name, variables.get(name)));
         }
     }
 
@@ -92,7 +92,7 @@ public class Variables implements Option.Collector<Variable, Variables>
 
         for (String key : properties.stringPropertyNames())
         {
-            this.variables.put(key, Variable.of(key, properties.getProperty(key)));
+            this.variables.put(key, Variable.with(key, properties.getProperty(key)));
         }
     }
 
@@ -240,7 +240,7 @@ public class Variables implements Option.Collector<Variable, Variables>
 
         for (String name : properties.keySet())
         {
-            result.variables.put(name, Variable.of(name, properties.get(name)));
+            result.variables.put(name, Variable.with(name, properties.get(name)));
         }
 
         return result;

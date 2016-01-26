@@ -149,7 +149,7 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication>
         // ----- establish an identity for the application -----
 
         // add a unique runtime id for expression support
-        options.add(Variable.of("oracletools.runtime.id", UUID.randomUUID()));
+        options.add(Variable.with("oracletools.runtime.id", UUID.randomUUID()));
 
         // ----- establish the underlying ProcessBuilder -----
 

@@ -194,7 +194,7 @@ public abstract class AbstractRemoteApplicationBuilder<A extends Application, E 
         // ----- establish an identity for the application -----
 
         // add a unique runtime id for expression support
-        options.add(Variable.of("oracletools.runtime.id", UUID.randomUUID()));
+        options.add(Variable.with("oracletools.runtime.id", UUID.randomUUID()));
 
         // ---- establish the environment for the application ----
 
