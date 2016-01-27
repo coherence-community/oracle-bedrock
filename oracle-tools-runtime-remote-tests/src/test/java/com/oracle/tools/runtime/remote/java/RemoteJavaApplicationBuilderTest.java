@@ -33,6 +33,7 @@ import com.oracle.tools.runtime.Platform;
 import com.oracle.tools.runtime.SimpleApplication;
 import com.oracle.tools.runtime.SimpleApplicationSchema;
 
+import com.oracle.tools.runtime.concurrent.callable.GetSystemProperty;
 import com.oracle.tools.runtime.concurrent.runnable.RuntimeExit;
 import com.oracle.tools.runtime.concurrent.runnable.RuntimeHalt;
 
@@ -40,6 +41,7 @@ import com.oracle.tools.runtime.console.CapturingApplicationConsole;
 import com.oracle.tools.runtime.console.SystemApplicationConsole;
 
 import com.oracle.tools.runtime.java.JavaApplication;
+import com.oracle.tools.runtime.java.LocalJavaApplicationBuilder;
 import com.oracle.tools.runtime.java.SimpleJavaApplication;
 import com.oracle.tools.runtime.java.SimpleJavaApplicationSchema;
 import com.oracle.tools.runtime.java.options.JavaHome;
@@ -398,6 +400,38 @@ public class RemoteJavaApplicationBuilderTest extends AbstractRemoteTest
             int exitStatus = application.waitFor();
 
             assertThat(exitStatus, is(42));
+        }
+    }
+
+
+    /**
+     * Ensure that {@link LocalJavaApplicationBuilder}s correctly inherits arguments based on system properties
+     * starting with oracletools.runtime.inherit.xxx=
+     */
+    @Test
+    public void shouldInheritOracleToolsRuntimeProperties() throws Exception
+    {
+        // define the SleepingApplication
+        SimpleJavaApplicationSchema schema = new SimpleJavaApplicationSchema(SleepingApplication.class.getName());
+
+        schema.setPreferIPv4(true);
+
+        System.getProperties().setProperty("oracletools.runtime.inherit.property", "-Dmessage=hello");
+
+        // build and start the SleepingApplication
+        Platform           platform = getRemotePlatform();
+
+        ApplicationConsole console  = new SystemApplicationConsole();
+
+        try (SimpleJavaApplication application = platform.realize("sleeping", schema, console))
+        {
+            String message = application.submit(new GetSystemProperty("message"));
+
+            Assert.assertThat(message, is("hello"));
+        }
+        finally
+        {
+            System.getProperties().remove("oracletools.runtime.inherit.property");
         }
     }
 

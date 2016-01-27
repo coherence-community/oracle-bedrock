@@ -30,7 +30,6 @@ import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 
-import com.oracle.tools.Option;
 import com.oracle.tools.Options;
 
 import com.oracle.tools.lang.StringHelper;
@@ -114,8 +113,11 @@ public class JSchRemoteTerminal<A extends Application, S extends ApplicationSche
         try
         {
             // create the remote session
-            session = sessionFactory.createSession(platform.getAddress().getHostName(), platform.getPort(),
-                                                   platform.getUserName(), platform.getAuthentication(), socketFactory,
+            session = sessionFactory.createSession(platform.getAddress().getHostName(),
+                                                   platform.getPort(),
+                                                   platform.getUserName(),
+                                                   platform.getAuthentication(),
+                                                   socketFactory,
                                                    options);
 
             ChannelExec execChannel = (ChannelExec) session.openChannel("exec");
@@ -153,16 +155,18 @@ public class JSchRemoteTerminal<A extends Application, S extends ApplicationSche
 
             for (String variableName : variables.stringPropertyNames())
             {
-                environmentVariables +=
-                    String.format(format, variableName,
-                                  StringHelper.doubleQuoteIfNecessary(variables.getProperty(variableName)));
+                environmentVariables += String.format(format,
+                                                      variableName,
+                                                      StringHelper.doubleQuoteIfNecessary(variables.getProperty(variableName)));
             }
 
             // ----- establish the application command line to execute -----
 
             // determine the command to execute remotely
-            StringBuilder command   = new StringBuilder(environment.getRemoteCommandToExecute());
-            List<String>  arguments = environment.getRemoteCommandArguments(socketFactory.getLastLocalAddress());
+            StringBuilder command = new StringBuilder(environment.getRemoteCommandToExecute());
+
+            // add the arguments
+            List<String> arguments = environment.getRemoteCommandArguments(socketFactory.getLastLocalAddress());
 
             for (String arg : arguments)
             {
@@ -215,8 +219,11 @@ public class JSchRemoteTerminal<A extends Application, S extends ApplicationSche
             JSchSocketFactory socketFactory = new JSchSocketFactory();
 
             // create the remote session
-            session = sessionFactory.createSession(platform.getAddress().getHostName(), platform.getPort(),
-                                                   platform.getUserName(), platform.getAuthentication(), socketFactory,
+            session = sessionFactory.createSession(platform.getAddress().getHostName(),
+                                                   platform.getPort(),
+                                                   platform.getUserName(),
+                                                   platform.getAuthentication(),
+                                                   socketFactory,
                                                    options);
 
             ChannelExec execChannel = (ChannelExec) session.openChannel("exec");
@@ -242,7 +249,10 @@ public class JSchRemoteTerminal<A extends Application, S extends ApplicationSche
         }
     }
 
-    public void moveFile(String source, String destination, Options options)
+
+    public void moveFile(String  source,
+                         String  destination,
+                         Options options)
     {
         Session session = null;
 
@@ -255,10 +265,12 @@ public class JSchRemoteTerminal<A extends Application, S extends ApplicationSche
             JSchSocketFactory socketFactory = new JSchSocketFactory();
 
             // create the remote session
-            session = sessionFactory.createSession(platform.getAddress().getHostName(), platform.getPort(),
-                                                   platform.getUserName(), platform.getAuthentication(), socketFactory,
+            session = sessionFactory.createSession(platform.getAddress().getHostName(),
+                                                   platform.getPort(),
+                                                   platform.getUserName(),
+                                                   platform.getAuthentication(),
+                                                   socketFactory,
                                                    options);
-
 
             ChannelExec execChannel = (ChannelExec) session.openChannel("exec");
             String      moveCommand = String.format("mv %s %s", source, destination);

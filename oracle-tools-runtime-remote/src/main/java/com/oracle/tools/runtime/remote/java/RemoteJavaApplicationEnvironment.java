@@ -27,7 +27,10 @@ package com.oracle.tools.runtime.remote.java;
 
 import com.oracle.tools.Options;
 
+import com.oracle.tools.lang.ExpressionEvaluator;
 import com.oracle.tools.lang.StringHelper;
+
+import com.oracle.tools.options.Variables;
 
 import com.oracle.tools.runtime.LocalPlatform;
 import com.oracle.tools.runtime.Platform;
@@ -219,6 +222,24 @@ public class RemoteJavaApplicationEnvironment<A extends JavaApplication>
     public List<String> getRemoteCommandArguments(InetAddress remoteExecutorAddress)
     {
         List<String> arguments = new ArrayList<>();
+
+        // ----- add oracletools.runtime.inherit.xxx values to the arguments -----
+
+        for (String propertyName : System.getProperties().stringPropertyNames())
+        {
+            if (propertyName.startsWith("oracletools.runtime.inherit."))
+            {
+                // resolve the property value
+                String propertyValue = System.getProperty(propertyName);
+
+                // evaluate any expressions in the property value
+                ExpressionEvaluator evaluator = new ExpressionEvaluator(options.get(Variables.class));
+
+                propertyValue = evaluator.evaluate(propertyValue, String.class);
+
+                arguments.add(propertyValue);
+            }
+        }
 
         // ----- establish the remote application class path -----
 

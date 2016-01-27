@@ -596,15 +596,20 @@ reverse chronological order.
 *   [ORACLETOOLS-281](https://java.net/jira/browse/ORACLETOOLS-281): Introduced
     JavaAgent option to define JavaAgents for Java Applications.
 
-*   [ORACLETOOLS-282(https://java.net/jira/browse/ORACLETOOLS-282): Enhanced
+*   [ORACLETOOLS-282](https://java.net/jira/browse/ORACLETOOLS-282): Enhanced
     JvmOption.getValues() method to allow Options to be provided.
 
-*   [ORACLETOOLS-283(https://java.net/jira/browse/ORACLETOOLS-283): Introduced
+*   [ORACLETOOLS-283](https://java.net/jira/browse/ORACLETOOLS-283): Introduced
     tests demonstrating definition and use of JaCoCo with JavaApplications.
 
     *IMPORTANT:* For JaCoCo to correctly generate Code Coverage telemetrics,
     JavaApplications must be closed with either a SystemExit or RuntimeExit
     ApplicationClosingBehavior.
+
+*   [ORACLETOOLS-284](https://java.net/jira/browse/ORACLETOOLS-284): Introduced
+    the ability to include all "oracletools.runtime.inherit.*" system property
+    values (defined for the process using Oracle Tools) automatically included
+    in the command-line for any applications started (by Oracle Tools).
 
 <h4>oracle-tools-runtime-remote</h4>
 
