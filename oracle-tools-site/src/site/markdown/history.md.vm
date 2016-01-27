@@ -599,6 +599,12 @@ reverse chronological order.
 *   [ORACLETOOLS-282(https://java.net/jira/browse/ORACLETOOLS-282): Enhanced
     JvmOption.getValues() method to allow Options to be provided.
 
+*   [ORACLETOOLS-283(https://java.net/jira/browse/ORACLETOOLS-283): Introduced
+    tests demonstrating definition and use of JaCoCo with JavaApplications.
+
+    *IMPORTANT:* For JaCoCo to correctly generate Code Coverage telemetrics,
+    JavaApplications must be closed with either a SystemExit or RuntimeExit
+    ApplicationClosingBehavior.
 
 <h4>oracle-tools-runtime-remote</h4>
 
