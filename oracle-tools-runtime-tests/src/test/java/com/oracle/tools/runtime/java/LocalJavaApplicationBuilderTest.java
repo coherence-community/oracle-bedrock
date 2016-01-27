@@ -34,6 +34,8 @@ import com.oracle.tools.deferred.listener.DeferredCompletionListener;
 
 import com.oracle.tools.io.NetworkHelper;
 
+import com.oracle.tools.lang.ExpressionEvaluator;
+
 import com.oracle.tools.options.Timeout;
 
 import com.oracle.tools.runtime.ApplicationConsole;
@@ -55,12 +57,15 @@ import com.oracle.tools.runtime.console.SystemApplicationConsole;
 
 import com.oracle.tools.runtime.java.options.HeapSize;
 import com.oracle.tools.runtime.java.options.HotSpot;
+import com.oracle.tools.runtime.java.options.JavaAgent;
 import com.oracle.tools.runtime.java.options.JavaHome;
 import com.oracle.tools.runtime.java.options.RemoteDebugging;
 
 import com.oracle.tools.runtime.options.Orphanable;
 
 import com.oracle.tools.util.Capture;
+
+import org.jacoco.agent.rt.RT;
 
 import org.junit.Assume;
 import org.junit.Ignore;
@@ -79,8 +84,11 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.CoreMatchers.startsWith;
 
+import static org.hamcrest.Matchers.greaterThan;
+
 import static org.junit.Assert.assertThat;
 
+import java.io.File;
 import java.io.IOException;
 
 import java.net.InetSocketAddress;
@@ -701,6 +709,51 @@ public class LocalJavaApplicationBuilderTest extends AbstractJavaApplicationBuil
 
             Eventually.assertThat(invoking(application).exitValue(), is(2));
         }
+    }
+
+
+    /**
+     * Ensure that a local {@link JavaApplication} can be started with a Java Agent (JaCoCo).
+     */
+    @Test
+    public void shouldStartJaCoCoJavaAgent() throws Exception
+    {
+        // determine the classpath of the JaCoCo runtime agent jar (should be something like jacocoagent-x.y.z.jar)
+        ClassPath jacocoPath                = ClassPath.ofClass(RT.class);
+
+        String    jacocoDestinationFileName = "jacoco-${oracletools.runtime.id}.exec";
+
+        // create a temp file name for JaCoCo to output the code coverage report to
+        File destinationFile = new File(System.getProperty("java.io.tmpdir"), jacocoDestinationFileName);
+
+        // define the SleepingApplication
+        SimpleJavaApplicationSchema schema =
+            new SimpleJavaApplicationSchema(SleepingApplication.class.getName()).setPreferIPv4(true);
+
+        schema.addOption(JavaAgent.using(jacocoPath.toString(), "destfile=" + destinationFile));
+        schema.addOption(RuntimeExit.withExitCode(0));
+
+        // build and start the SleepingApplication
+        LocalPlatform      platform = LocalPlatform.getInstance();
+
+        ApplicationConsole console  = new SystemApplicationConsole();
+
+        File telemetricsFile;
+
+        try (SimpleJavaApplication application = platform.realize("sleeping", schema, console))
+        {
+            ExpressionEvaluator evaluator = new ExpressionEvaluator(application.getOptions());
+
+            // create a File representing the JaCoCo telemetrics file
+            telemetricsFile = new File(System.getProperty("java.io.tmpdir"),
+                                            evaluator.evaluate(jacocoDestinationFileName, String.class));
+        }
+
+        // assert that JaCoCo created the telemetrics file (and thus the agent ran)
+        assertThat(telemetricsFile.exists(), is(true));
+
+        // assert that the telemetrics file contains something
+        assertThat(telemetricsFile.length(), is(greaterThan(0L)));
     }
 
 

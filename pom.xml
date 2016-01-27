@@ -122,6 +122,7 @@
         <junit.version>4.11</junit.version>
         <mockito.version>1.9.5</mockito.version>
         <objenesis.version>2.1</objenesis.version>
+        <jacoco.version>0.7.5.201505241946</jacoco.version>
     </properties>
 
     <dependencyManagement>
