@@ -641,6 +641,38 @@ public class LocalJavaApplicationBuilderTest extends AbstractJavaApplicationBuil
 
 
     /**
+     * Ensure that {@link LocalJavaApplicationBuilder}s correctly inherits arguments based on system properties
+     * starting with oracletools.runtime.inherit.xxx=
+     */
+    @Test
+    public void shouldInheritOracleToolsRuntimeProperties()
+    {
+        // define the SleepingApplication
+        SimpleJavaApplicationSchema schema = new SimpleJavaApplicationSchema(SleepingApplication.class.getName());
+
+        schema.setPreferIPv4(true);
+
+        System.getProperties().setProperty("oracletools.runtime.inherit.property", "-Dmessage=hello");
+
+        // build and start the SleepingApplication
+        LocalJavaApplicationBuilder<JavaApplication> builder = new LocalJavaApplicationBuilder<>(getPlatform());
+
+        ApplicationConsole                           console = new SystemApplicationConsole();
+
+        try (SimpleJavaApplication application = builder.realize(schema, "sleeping", console))
+        {
+            String message = application.submit(new GetSystemProperty("message"));
+
+            assertThat(message, is("hello"));
+        }
+        finally
+        {
+            System.getProperties().remove("oracletools.runtime.inherit.property");
+        }
+    }
+
+
+    /**
      * Ensure that local {@link JavaApplication}s can be terminated using {@link RuntimeExit}.
      */
     @Test
@@ -738,7 +770,7 @@ public class LocalJavaApplicationBuilderTest extends AbstractJavaApplicationBuil
 
         ApplicationConsole console  = new SystemApplicationConsole();
 
-        File telemetricsFile;
+        File               telemetricsFile;
 
         try (SimpleJavaApplication application = platform.realize("sleeping", schema, console))
         {
@@ -746,7 +778,7 @@ public class LocalJavaApplicationBuilderTest extends AbstractJavaApplicationBuil
 
             // create a File representing the JaCoCo telemetrics file
             telemetricsFile = new File(System.getProperty("java.io.tmpdir"),
-                                            evaluator.evaluate(jacocoDestinationFileName, String.class));
+                                       evaluator.evaluate(jacocoDestinationFileName, String.class));
         }
 
         // assert that JaCoCo created the telemetrics file (and thus the agent ran)

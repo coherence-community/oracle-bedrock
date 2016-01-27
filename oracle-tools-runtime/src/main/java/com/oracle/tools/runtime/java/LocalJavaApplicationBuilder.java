@@ -32,10 +32,12 @@ import com.oracle.tools.deferred.AbstractDeferred;
 import com.oracle.tools.deferred.PermanentlyUnavailableException;
 import com.oracle.tools.deferred.TemporarilyUnavailableException;
 
+import com.oracle.tools.lang.ExpressionEvaluator;
 import com.oracle.tools.lang.StringHelper;
 
 import com.oracle.tools.options.Timeout;
 import com.oracle.tools.options.Variable;
+import com.oracle.tools.options.Variables;
 
 import com.oracle.tools.runtime.ApplicationConsole;
 import com.oracle.tools.runtime.ApplicationSchema;
@@ -419,6 +421,24 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication>
             processBuilder.command().add(option);
 
             diagnosticsTable.addRow("Remote Debugging Options", option);
+        }
+
+        // ----- add oracletools.runtime.inherit.xxx values to the command -----
+
+        for (String propertyName : System.getProperties().stringPropertyNames())
+        {
+            if (propertyName.startsWith("oracletools.runtime.inherit."))
+            {
+                // resolve the property value
+                String              propertyValue = System.getProperty(propertyName);
+
+                // evaluate any expressions in the property value
+                ExpressionEvaluator evaluator     = new ExpressionEvaluator(options.get(Variables.class));
+
+                propertyValue = evaluator.evaluate(propertyValue, String.class);
+
+                processBuilder.command().add(propertyValue);
+            }
         }
 
         // ----- establish the application command line to execute -----

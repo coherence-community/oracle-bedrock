@@ -27,6 +27,10 @@ package com.oracle.tools.runtime.remote;
 
 import com.oracle.tools.Options;
 
+import com.oracle.tools.lang.ExpressionEvaluator;
+
+import com.oracle.tools.options.Variables;
+
 import com.oracle.tools.runtime.Application;
 import com.oracle.tools.runtime.ApplicationSchema;
 import com.oracle.tools.runtime.Platform;
@@ -37,6 +41,7 @@ import com.oracle.tools.runtime.options.EnvironmentVariables;
 
 import java.net.InetAddress;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
@@ -97,7 +102,32 @@ public abstract class AbstractRemoteApplicationEnvironment<A extends Application
     @Override
     public List<String> getRemoteCommandArguments(InetAddress remoteExecutorAddress)
     {
-        return schema.getArguments();
+        ArrayList<String> arguments = new ArrayList<>();
+
+        // ----- add oracletools.runtime.inherit.xxx values to the arguments -----
+
+        for (String propertyName : System.getProperties().stringPropertyNames())
+        {
+            if (propertyName.startsWith("oracletools.runtime.inherit."))
+            {
+                // resolve the property value
+                String propertyValue = System.getProperty(propertyName);
+
+                // evaluate any expressions in the property value
+                ExpressionEvaluator evaluator = new ExpressionEvaluator(options.get(Variables.class));
+
+                propertyValue = evaluator.evaluate(propertyValue, String.class);
+
+                arguments.add(propertyValue);
+            }
+        }
+
+        for (String argument : schema.getArguments())
+        {
+            arguments.add(argument);
+        }
+
+        return arguments;
     }
 
 
