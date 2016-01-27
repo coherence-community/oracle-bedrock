@@ -25,7 +25,9 @@
 
 package com.oracle.tools.runtime.java.options;
 
+import com.oracle.tools.ComposableOption;
 import com.oracle.tools.Option;
+import com.oracle.tools.Options;
 
 import java.util.ArrayList;
 
@@ -37,7 +39,7 @@ import java.util.ArrayList;
  *
  * @author Brian Oliver
  */
-public class HeapSize implements JvmOption
+public class HeapSize implements ComposableOption<HeapSize>, JvmOption
 {
     /**
      * The initial heap size in {@link #initialUnits}.
@@ -101,6 +103,7 @@ public class HeapSize implements JvmOption
      *
      * @return  the default {@link HeapSize}
      */
+    @Options.Default
     public static HeapSize useDefaults()
     {
         return new HeapSize();
@@ -176,6 +179,32 @@ public class HeapSize implements JvmOption
     }
 
 
+    /**
+     * Obtains the initial {@link HeapSize} in the specified {@link Units}.
+     *
+     * @param units  the required {@link Units}
+     *
+     * @return  the initial heap size in {@link Units}
+     */
+    public long getInitialSizeAs(Units units)
+    {
+        return initial * (initialUnits.ordinal() ^ 10) / (units.ordinal() ^ 10);
+    }
+
+
+    /**
+     * Obtains the maximum {@link HeapSize} in the specified {@link Units}.
+     *
+     * @param units  the required {@link Units}
+     *
+     * @return  the maximum heap size in {@link Units}
+     */
+    public long getMaximumSizeAs(Units units)
+    {
+        return maximum * (maximumUnits.ordinal() ^ 10) / (units.ordinal() ^ 10);
+    }
+
+
     @Override
     public Iterable<String> getValues(Option... options)
     {
@@ -196,41 +225,64 @@ public class HeapSize implements JvmOption
 
 
     @Override
-    public boolean equals(Object other)
+    public HeapSize compose(HeapSize other)
     {
-        if (this == other)
+        HeapSize result       = new HeapSize();
+
+        long     initial      = this.initial <= 0 ? 0 : this.getInitialSizeAs(Units.KB);
+        long     otherInitial = other.initial <= 0 ? 0 : other.getInitialSizeAs(Units.KB);
+
+        if (initial > otherInitial)
+        {
+            result.initial      = this.initial;
+            result.initialUnits = this.initialUnits;
+        }
+        else
+        {
+            result.initial      = other.initial;
+            result.initialUnits = other.initialUnits;
+        }
+
+        long maximum      = this.maximum <= 0 ? 0 : this.getMaximumSizeAs(Units.KB);
+        long otherMaximum = other.maximum <= 0 ? 0 : other.getMaximumSizeAs(Units.KB);
+
+        if (maximum > otherMaximum)
+        {
+            result.maximum      = this.maximum;
+            result.maximumUnits = this.maximumUnits;
+        }
+        else
+        {
+            result.maximum      = other.maximum;
+            result.maximumUnits = other.maximumUnits;
+        }
+
+        return result;
+    }
+
+
+    @Override
+    public boolean equals(Object object)
+    {
+        if (this == object)
         {
             return true;
         }
 
-        if (!(other instanceof HeapSize))
+        if (!(object instanceof HeapSize))
         {
             return false;
         }
 
-        HeapSize heapSize = (HeapSize) other;
+        HeapSize other = (HeapSize) object;
 
-        if (initial != heapSize.initial)
+        if (getInitialSizeAs(Units.KB) != other.getInitialSizeAs(Units.KB))
         {
             return false;
         }
 
-        if (maximum != heapSize.maximum)
-        {
-            return false;
-        }
+        return getMaximumSizeAs(Units.KB) == other.getMaximumSizeAs(Units.KB);
 
-        if (initialUnits != heapSize.initialUnits)
-        {
-            return false;
-        }
-
-        if (maximumUnits != heapSize.maximumUnits)
-        {
-            return false;
-        }
-
-        return true;
     }
 
 
@@ -239,10 +291,27 @@ public class HeapSize implements JvmOption
     {
         int result = initial;
 
-        result = 31 * result + (initialUnits != null ? initialUnits.hashCode() : 0);
         result = 31 * result + maximum;
-        result = 31 * result + (maximumUnits != null ? maximumUnits.hashCode() : 0);
 
         return result;
+    }
+
+
+    @Override
+    public String toString()
+    {
+        StringBuilder builder = new StringBuilder();
+
+        for (String value : getValues())
+        {
+            if (builder.length() > 0)
+            {
+                builder.append(" ");
+            }
+
+            builder.append(value);
+        }
+
+        return builder.toString();
     }
 }
