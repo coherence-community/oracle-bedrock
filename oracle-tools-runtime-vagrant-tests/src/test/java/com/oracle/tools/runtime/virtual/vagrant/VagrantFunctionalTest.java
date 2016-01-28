@@ -42,14 +42,10 @@ import com.oracle.tools.runtime.coherence.CoherenceCacheServerSchema;
 
 import com.oracle.tools.runtime.console.SystemApplicationConsole;
 
+import com.oracle.tools.runtime.java.ClassPath;
 import com.oracle.tools.runtime.java.SimpleJavaApplicationSchema;
 
-import com.oracle.tools.runtime.remote.Authentication;
-import com.oracle.tools.runtime.remote.RemotePlatform;
-
 import com.oracle.tools.runtime.virtual.HostAddressIterator;
-
-import com.tangosol.util.Resources;
 
 import org.junit.AfterClass;
 import org.junit.Assume;
@@ -112,9 +108,8 @@ public class VagrantFunctionalTest
 
         VagrantPlatformSchema schema = new VagrantPlatformSchema("VM",
                                                                  vmRoot,
-                                                                 "rel65-java")
-                                                                     .addNetworkAdapter(new VagrantHostOnlyNetworkSchema("eth1",
-            addresses));
+                                                                 "rel65-java").addNetworkAdapter(new VagrantHostOnlyNetworkSchema("eth1",
+                                                                     addresses));
 
         InfrastructureBuilder<Platform> builder = new InfrastructureBuilder<Platform>();
 
@@ -236,7 +231,7 @@ public class VagrantFunctionalTest
 
             CoherenceCacheServerSchema schema =
                 new CoherenceCacheServerSchema().setCacheConfigURI("coherence-cache-config.xml")
-                    .setLocalHostAddress("192.168.56.1");
+                .setLocalHostAddress("192.168.56.1");
 
             localMember = LocalPlatform.getInstance().realize("Data-1@Local", schema, new SystemApplicationConsole());
             Eventually.assertThat(invoking(localMember).getClusterSize(), is(expectedSize + 1));
@@ -253,7 +248,7 @@ public class VagrantFunctionalTest
     public void shouldCreateVagrantPlatformFromFile() throws Exception
     {
         File vmRoot = temporaryFolder.newFolder();
-        URL  url    = Resources.findFileOrResource("Single-VM-Vagrantfile.rb", null);
+        URL  url    = ClassPath.ofResource("Single-VM-Vagrantfile.rb").getURLs()[0];
         VagrantFilePlatformSchema schema = new VagrantFilePlatformSchema("VM-3",
                                                                          vmRoot,
                                                                          url).setPublicHostName("192.168.56.210");

@@ -41,6 +41,14 @@ reverse chronological order.
 *   [ORACLETOOLS-213](https://java.net/jira/browse/ORACLETOOLS-213): Introduced
     Object.equals() and Object.hashCode() methods for all Option implementations.
 
+*   [ORACLETOOLS-268](https://java.net/jira/browse/ORACLETOOLS-268): Refactored
+    project to support multiple independent versions of Coherence support.
+
+    *BREAKING CHANGE:* Applications will now need to depend on specific versions
+    of Oracle Tools for Coherence, rather than assume one version will work for
+    all releases of Coherence.   Additionally, "oracle-tools-all" will no longer
+    include Coherence tools.
+
 <h4>oracle-tools-core</h4>
 
 *   [ORACLETOOLS-87](https://java.net/jira/browse/ORACLETOOLS-87): Increased
