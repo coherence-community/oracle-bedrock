@@ -2,23 +2,31 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <artifactId>oracle-tools</artifactId>
-        <groupId>com.oracle.tools</groupId>
+        <artifactId>3.7.1</artifactId>
+        <groupId>com.oracle.tools.coherence</groupId>
         <version>3.0.0-RC10-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>oracle-tools-runtime-vagrant-tests</artifactId>
+    <artifactId>coherence-3.7.1-tests</artifactId>
 
-    <name>Oracle Tools for Vagrant Runtime Management (Tests)</name>
+    <name>Oracle Tools for Coherence 3.7.1 (Tests)</name>
 
     <description>
-        Functional and Integration tests for the Vagrant Runtime Management module.
+        Functional and Integration tests for the Oracle Tools Coherence 3.7.1 module.
     </description>
 
     <dependencies>
         <dependency>
+            <groupId>com.oracle.coherence</groupId>
+            <artifactId>coherence</artifactId>
+            <version>${coherence.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
             <groupId>com.oracle.tools</groupId>
-            <artifactId>oracle-tools-runtime-vagrant</artifactId>
+            <artifactId>oracle-tools-runtime</artifactId>
             <version>${project.version}</version>
         </dependency>
 
@@ -26,41 +34,25 @@
             <groupId>com.oracle.tools.coherence</groupId>
             <artifactId>coherence-3.7.1</artifactId>
             <version>${project.version}</version>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>com.oracle.tools.coherence</groupId>
-            <artifactId>coherence-3.7.1-testing-support</artifactId>
-            <version>${project.version}</version>
-            <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>com.oracle.tools</groupId>
             <artifactId>oracle-tools-testing-support</artifactId>
             <version>${project.version}</version>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.hamcrest</groupId>
-            <artifactId>hamcrest-library</artifactId>
-            <version>${hamcrest.version}</version>
-            <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>${junit.version}</version>
-            <scope>test</scope>
         </dependency>
 
         <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-core</artifactId>
-            <version>${mockito.version}</version>
+            <groupId>org.jacoco</groupId>
+            <artifactId>org.jacoco.agent</artifactId>
+            <version>${jacoco.version}</version>
+            <classifier>runtime</classifier>
             <scope>test</scope>
         </dependency>
     </dependencies>
