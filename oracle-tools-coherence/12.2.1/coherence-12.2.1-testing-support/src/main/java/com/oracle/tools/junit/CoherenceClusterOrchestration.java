@@ -179,7 +179,8 @@ public class CoherenceClusterOrchestration extends ExternalResource
         // establish the common server schema address and port details
         String hostAddress = platform.getLoopbackAddress().getHostAddress();
 
-//        commonServerSchema.setLocalHostAddress(hostAddress);
+        //TODO: remove when NameService respects localhost system property
+        //commonServerSchema.setLocalHostAddress(hostAddress);
         commonServerSchema.setClusterPort(clusterPort);
         commonServerSchema.setMulticastTTL(0);
 
