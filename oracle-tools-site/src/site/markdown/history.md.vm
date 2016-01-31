@@ -49,6 +49,9 @@ reverse chronological order.
     all releases of Coherence.   Additionally, "oracle-tools-all" will no longer
     include Coherence tools.
 
+*   [ORACLETOOLS-285](https://java.net/jira/browse/ORACLETOOLS-285): Introduced
+    Maven Flatten Plugin to reduce published pom.xml noise.
+
 <h4>oracle-tools-core</h4>
 
 *   [ORACLETOOLS-87](https://java.net/jira/browse/ORACLETOOLS-87): Increased
