@@ -235,9 +235,9 @@ public abstract class AbstractJavaApplicationSchema<A extends JavaApplication,
 
         if (systemProperties.contains(name))
         {
-            Object property = systemProperties.get(name);
+            SystemProperty property = systemProperties.get(name);
 
-            return propertyClass.cast(property);
+            return propertyClass.cast(property.getValue());
         }
         else
         {
