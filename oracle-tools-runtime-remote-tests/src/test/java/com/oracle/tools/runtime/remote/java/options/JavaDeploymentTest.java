@@ -15,8 +15,8 @@ public class JavaDeploymentTest
     @Test
     public void shouldWorkAsAnOption() throws Exception
     {
-        JavaDeployment deployment = JavaDeployment.automatic();
-        Options        options    = new Options(deployment);
+        Deployment deployment = JavaDeployment.automatic();
+        Options    options    = new Options(deployment);
 
         assertThat(options.get(Deployment.class), is(deployment));
     }
