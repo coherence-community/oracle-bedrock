@@ -52,6 +52,7 @@ import com.oracle.tools.runtime.options.PlatformSeparators;
 
 import com.oracle.tools.runtime.remote.AbstractRemoteApplicationEnvironment;
 import com.oracle.tools.runtime.remote.java.options.JavaDeployment;
+import com.oracle.tools.runtime.remote.options.Deployment;
 
 import java.io.IOException;
 
@@ -123,7 +124,7 @@ public class RemoteJavaApplicationEnvironment<A extends JavaApplication>
 
         // ----- determine the remote classpath based on the deployment option -----
 
-        JavaDeployment deployment = options.get(JavaDeployment.class);
+        JavaDeployment deployment = (JavaDeployment) options.get(Deployment.class);
 
         if (deployment == null)
         {
