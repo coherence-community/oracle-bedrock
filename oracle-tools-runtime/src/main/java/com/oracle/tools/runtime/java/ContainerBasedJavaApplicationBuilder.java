@@ -301,8 +301,7 @@ public class ContainerBasedJavaApplicationBuilder<A extends JavaApplication>
                                                                options,
                                                                console,
                                                                environmentVariables,
-                                                               systemProperties,
-                                                               -1);
+                                                               systemProperties);
 
             // raise life-cycle events for the application
             raiseOnRealizedFor(application);

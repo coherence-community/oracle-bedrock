@@ -35,6 +35,7 @@ import com.oracle.tools.runtime.Application;
 import com.oracle.tools.runtime.ApplicationConsole;
 import com.oracle.tools.runtime.ApplicationSchema;
 import com.oracle.tools.runtime.Platform;
+import com.oracle.tools.runtime.Profile;
 import com.oracle.tools.runtime.PropertiesBuilder;
 
 import com.oracle.tools.runtime.options.PlatformSeparators;
@@ -275,6 +276,13 @@ public abstract class AbstractRemoteApplicationBuilder<A extends Application, E 
 
         // create the Application based on the RemoteApplicationProcess
         T application = createApplication(options, applicationSchema, environment, applicationName, process, console);
+
+        // ----- notify the Profiles that the application has been realized -----
+
+        for (Profile profile : options.getInstancesOf(Profile.class))
+        {
+            profile.onAfterRealize(platform, application, options);
+        }
 
         // ----- notify all of the lifecycle listeners -----
 

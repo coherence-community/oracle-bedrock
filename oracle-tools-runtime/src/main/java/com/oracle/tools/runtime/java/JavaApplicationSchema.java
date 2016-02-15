@@ -95,8 +95,6 @@ public interface JavaApplicationSchema<A extends JavaApplication> extends Applic
      *                              realized {@link Application}. This may be <code>null</code> if not required
      * @param environmentVariables  the environment variables used when starting the {@link JavaApplication}
      * @param systemProperties      the system properties provided to the {@link JavaApplication}
-     * @param remoteDebuggingPort   the port this process is listening on for remote debugger connections if
-     *                              enabled, or <= 0 if disabled
      *
      * @return a {@link JavaApplication}
      */
@@ -106,6 +104,5 @@ public interface JavaApplicationSchema<A extends JavaApplication> extends Applic
                                    Options                options,
                                    ApplicationConsole     console,
                                    Properties             environmentVariables,
-                                   Properties             systemProperties,
-                                   int                    remoteDebuggingPort);
+                                   Properties             systemProperties);
 }

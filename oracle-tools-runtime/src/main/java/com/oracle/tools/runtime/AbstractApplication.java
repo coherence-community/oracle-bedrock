@@ -124,10 +124,10 @@ public abstract class AbstractApplication<A extends AbstractApplication<A, P, R>
         }
 
         // establish the standard input, output and error redirection threads
-        String             displayName = runtime.getApplicationName();
-        P                  process     = runtime.getApplicationProcess();
-        ApplicationConsole console     = runtime.getApplicationConsole();
-        boolean diagnosticsEnabled     = runtime.getOptions().get(Diagnostics.class).isEnabled();
+        String             displayName        = runtime.getApplicationName();
+        P                  process            = runtime.getApplicationProcess();
+        ApplicationConsole console            = runtime.getApplicationConsole();
+        boolean            diagnosticsEnabled = runtime.getOptions().get(Diagnostics.class).isEnabled();
 
         // start a thread to redirect standard out to the console
         stdoutThread = new Thread(new OutputRedirector(displayName,
@@ -210,6 +210,13 @@ public abstract class AbstractApplication<A extends AbstractApplication<A, P, R>
     @Override
     public void close(Option... options)
     {
+        // ----- notify the Profiles that the application is closing -----
+
+        for (Profile profile : getOptions().getInstancesOf(Profile.class))
+        {
+            profile.onBeforeClose(runtime.getPlatform(), this, getOptions());
+        }
+
         // ------ notify ApplicationListeners (about closing) ------
 
         // notify the ApplicationListener-based Options that the application is about to close
@@ -551,13 +558,14 @@ public abstract class AbstractApplication<A extends AbstractApplication<A, P, R>
                             break;
                         }
 
-                        String diagnosticOutput = (diagnosticsEnabled || consoleDiagnosticsEnabled)
-                                                  ? String.format("[%s:%s%s] %4d: %s",
-                                                                  applicationName,
-                                                                  prefix,
-                                                                  processId < 0 ? "" : ":" + processId,
-                                                                  lineNumber++,
-                                                                  line) : null;
+                        String diagnosticOutput = (diagnosticsEnabled
+                                                   || consoleDiagnosticsEnabled) ? String.format("[%s:%s%s] %4d: %s",
+                                                                                                 applicationName,
+                                                                                                 prefix,
+                                                                                                 processId < 0
+                                                                                                 ? "" : ":" + processId,
+                                                                                                 lineNumber++,
+                                                                                                 line) : null;
 
                         String output = consoleDiagnosticsEnabled ? diagnosticOutput : line;
 
@@ -583,12 +591,13 @@ public abstract class AbstractApplication<A extends AbstractApplication<A, P, R>
 
             try
             {
-                String diagnosticOutput = (diagnosticsEnabled || consoleDiagnosticsEnabled)
-                                          ? String.format("[%s:%s%s] %4d: (terminated)",
-                                                          applicationName,
-                                                          prefix,
-                                                          processId < 0 ? "" : ":" + processId,
-                                                          lineNumber) : null;
+                String diagnosticOutput = (diagnosticsEnabled
+                                           || consoleDiagnosticsEnabled) ? String.format("[%s:%s%s] %4d: (terminated)",
+                                                                                         applicationName,
+                                                                                         prefix,
+                                                                                         processId < 0
+                                                                                         ? "" : ":" + processId,
+                                                                                         lineNumber) : null;
 
                 String output = consoleDiagnosticsEnabled ? diagnosticOutput : "(terminated)";
 

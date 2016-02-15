@@ -47,7 +47,8 @@ import com.oracle.tools.runtime.java.JavaApplication;
 import com.oracle.tools.runtime.java.JavaApplicationBuilder;
 import com.oracle.tools.runtime.java.JavaApplicationProcess;
 import com.oracle.tools.runtime.java.JavaApplicationSchema;
-import com.oracle.tools.runtime.java.options.RemoteDebugging;
+import com.oracle.tools.runtime.java.options.WaitToStart;
+import com.oracle.tools.runtime.java.profiles.RemoteDebugging;
 
 import com.oracle.tools.runtime.remote.AbstractRemoteApplicationBuilder;
 import com.oracle.tools.runtime.remote.RemoteApplicationProcess;
@@ -89,26 +90,23 @@ public class RemoteJavaApplicationBuilder<A extends JavaApplication>
     }
 
 
-    /**
-     * Method description
-     *
-     * @param applicationSchema
-     * @param options
-     * @param <T>
-     * @param <S>
-     *
-     * @return
-     */
     @Override
     @SuppressWarnings("unchecked")
     protected <T extends A,
         S extends ApplicationSchema<T>> RemoteJavaApplicationEnvironment<A> getRemoteApplicationEnvironment(S applicationSchema,
-        Options                                                                                               options)
+            Options                                                                                           options)
     {
+        // ----- establish default Profiles for this Platform (and Builder) -----
+
+        options.get(RemoteDebugging.class);
+
+        // ----- attempt to create a Java-based Application Environment -----
+
         JavaApplicationSchema<A> schema = (JavaApplicationSchema) applicationSchema;
 
         try
         {
+            // construct the builder for the remote application
             return new RemoteJavaApplicationEnvironment(schema, platform, options);
         }
         catch (IOException e)
@@ -118,20 +116,6 @@ public class RemoteJavaApplicationBuilder<A extends JavaApplication>
     }
 
 
-    /**
-     * Method description
-     *
-     * @param options
-     * @param schema
-     * @param environment
-     * @param applicationName
-     * @param process
-     * @param console
-     * @param <T>
-     * @param <S>
-     *
-     * @return
-     */
     @Override
     protected <T extends A, S extends ApplicationSchema<T>> T createApplication(Options                             options,
                                                                                 S                                   schema,
@@ -144,35 +128,34 @@ public class RemoteJavaApplicationBuilder<A extends JavaApplication>
 
         // create a JavaProcess representation of the RemoteApplicationProcess
         RemoteJavaApplicationProcess remoteJavaProcess = new RemoteJavaApplicationProcess(process,
-                                                                                          environment
-                                                                                              .getRemoteExecutor());
+                                                                                          environment.getRemoteExecutor());
 
         // ensure that the launcher process connects back to the server to
         // know that the application has started
-        RemoteDebugging remoteDebugging = options.get(RemoteDebugging.class);
+        WaitToStart waitToStart = options.get(WaitToStart.class);
 
-        if (!(remoteDebugging.isEnabled() && remoteDebugging.isStartSuspended()))
+        if (waitToStart.isEnabled())
         {
             Timeout                    timeout = options.get(Timeout.class);
 
             final RemoteExecutorServer server  = environment.getRemoteExecutor();
 
             ensure(new AbstractDeferred<Boolean>()
-            {
-                @Override
-                public Boolean get() throws TemporarilyUnavailableException, PermanentlyUnavailableException
-                {
-                    if (!server.getRemoteExecutors().iterator().hasNext())
-                    {
-                        throw new TemporarilyUnavailableException(this);
-                    }
-                    else
-                    {
-                        return true;
-                    }
-                }
+                   {
+                       @Override
+                       public Boolean get() throws TemporarilyUnavailableException, PermanentlyUnavailableException
+                       {
+                           if (!server.getRemoteExecutors().iterator().hasNext())
+                           {
+                               throw new TemporarilyUnavailableException(this);
+                           }
+                           else
+                           {
+                               return true;
+                           }
+                       }
 
-            }, within(timeout));
+                   },within(timeout));
         }
 
         return javaSchema.createJavaApplication(remoteJavaProcess,
@@ -181,8 +164,7 @@ public class RemoteJavaApplicationBuilder<A extends JavaApplication>
                                                 options,
                                                 console,
                                                 environment.getRemoteEnvironmentVariables(),
-                                                environment.getRemoteSystemProperties(),
-                                                environment.getRemoteDebugPort());
+                                                environment.getRemoteSystemProperties());
     }
 
 

@@ -313,29 +313,6 @@ public abstract class AbstractJavaApplication<A extends AbstractJavaApplication<
 
 
     @Override
-    public InetSocketAddress getRemoteDebugSocket()
-    {
-        int remoteDebuggingPort = runtime.getRemoteDebuggingPort();
-
-        if (remoteDebuggingPort <= 0)
-        {
-            return null;
-        }
-
-        Platform platform = getPlatform();
-
-        if (platform == null)
-        {
-            return null;
-        }
-
-        InetAddress address = platform.getAddress();
-
-        return new InetSocketAddress(address, remoteDebuggingPort);
-    }
-
-
-    @Override
     public <T> T getProxyFor(Class<T>                           classToProxy,
                              RemoteCallable<T>                  instanceProducer,
                              RemoteMethodInvocation.Interceptor interceptor)
@@ -397,7 +374,8 @@ public abstract class AbstractJavaApplication<A extends AbstractJavaApplication<
             AbstractJavaApplication.this.submit(new RemoteMethodInvocation<T>(instanceProducer,
                                                                               method.getName(),
                                                                               args,
-                                                                              interceptor), listener);
+                                                                              interceptor),
+                                                listener);
 
             try
             {

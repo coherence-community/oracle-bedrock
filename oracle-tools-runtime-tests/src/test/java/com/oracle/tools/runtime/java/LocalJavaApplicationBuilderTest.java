@@ -59,7 +59,7 @@ import com.oracle.tools.runtime.java.options.HeapSize;
 import com.oracle.tools.runtime.java.options.HotSpot;
 import com.oracle.tools.runtime.java.options.JavaAgent;
 import com.oracle.tools.runtime.java.options.JavaHome;
-import com.oracle.tools.runtime.java.options.RemoteDebugging;
+import com.oracle.tools.runtime.java.profiles.RemoteDebugging;
 
 import com.oracle.tools.runtime.options.Orphanable;
 
@@ -225,7 +225,7 @@ public class LocalJavaApplicationBuilderTest extends AbstractJavaApplicationBuil
 
     /**
      * Start the application with remote debugging enabled and mode set to
-     * {@link com.oracle.tools.runtime.java.options.RemoteDebugging.Behavior#ATTACH_TO_DEBUGGER}
+     * {@link com.oracle.tools.runtime.java.profiles.RemoteDebugging.Behavior#ATTACH_TO_DEBUGGER}
      * and assert the process connects back to the debugger
      */
     @Ignore("This test can cause JVMs to crash on various platforms.  Disabled for now until there is a fix.")
@@ -265,8 +265,8 @@ public class LocalJavaApplicationBuilderTest extends AbstractJavaApplicationBuil
             try (SimpleJavaApplication app = platform.realize("TestApp",
                                                               schema,
                                                               console,
-                                                              RemoteDebugging.enabled().startSuspended(false)
-                                                              .attachToDebugger(debuggerPort.get())))
+                                                              RemoteDebugging.enabled().attach()
+                                                              .at(new RemoteDebugging.TransportAddress(debuggerPort))))
             {
                 Eventually.assertThat(invoking(console).getCapturedOutputLines(), hasItem(startsWith("Now sleeping")));
 
@@ -290,7 +290,10 @@ public class LocalJavaApplicationBuilderTest extends AbstractJavaApplicationBuil
      */
     protected void assertCanConnectDebuggerToApplication(JavaApplication application) throws Exception
     {
-        InetSocketAddress socket = application.getRemoteDebugSocket();
+        RemoteDebugging.TransportAddress transportAddress =
+            application.getOptions().get(RemoteDebugging.TransportAddress.class);
+
+        InetSocketAddress socket = transportAddress.getSocketAddress();
 
         assertThat(socket, is(notNullValue()));
 

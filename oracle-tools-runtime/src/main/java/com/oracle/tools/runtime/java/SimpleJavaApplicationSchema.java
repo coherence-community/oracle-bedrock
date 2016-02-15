@@ -100,8 +100,7 @@ public class SimpleJavaApplicationSchema
                                                        Options                options,
                                                        ApplicationConsole     console,
                                                        Properties             environmentVariables,
-                                                       Properties             systemProperties,
-                                                       int                    remoteDebuggingPort)
+                                                       Properties             systemProperties)
     {
         SimpleJavaApplicationRuntime environment = new SimpleJavaApplicationRuntime(displayName,
                                                                                     platform,
@@ -109,8 +108,7 @@ public class SimpleJavaApplicationSchema
                                                                                     process,
                                                                                     console,
                                                                                     environmentVariables,
-                                                                                    systemProperties,
-                                                                                    remoteDebuggingPort);
+                                                                                    systemProperties);
 
         return new SimpleJavaApplication(environment, this.getApplicationListeners());
     }

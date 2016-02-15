@@ -54,13 +54,4 @@ public interface JavaApplicationRuntime<P extends JavaApplicationProcess> extend
      * @return  the system properties
      */
     public Properties getSystemProperties();
-
-
-    /**
-     * Obtains the port this Java Virtual Machine is listening on for remote debug
-     * connections or <= 0 if remote debugging is disabled.
-     *
-     * @return  the remote debugging port
-     */
-    public int getRemoteDebuggingPort();
 }
