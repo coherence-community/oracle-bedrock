@@ -76,8 +76,6 @@
         <module>oracle-tools-runtime-vagrant-tests</module>
 
         <module>oracle-tools-site</module>
-
-        <module>oracle-tools-all</module>
     </modules>
 
     <properties>

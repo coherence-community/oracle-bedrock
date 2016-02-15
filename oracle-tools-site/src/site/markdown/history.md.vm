@@ -52,6 +52,9 @@ reverse chronological order.
 *   [ORACLETOOLS-285](https://java.net/jira/browse/ORACLETOOLS-285): Introduced
     Maven Flatten Plugin to reduce published pom.xml noise.
 
+*   [ORACLETOOLS-288](https://java.net/jira/browse/ORACLETOOLS-288): Removed the
+    Oracle Tools All module (no longer required).
+
 <h4>oracle-tools-core</h4>
 
 *   [ORACLETOOLS-87](https://java.net/jira/browse/ORACLETOOLS-87): Increased
