@@ -26,6 +26,7 @@
 package com.oracle.tools.runtime.java.options;
 
 import com.oracle.tools.Option;
+import com.oracle.tools.Options;
 
 import java.util.Iterator;
 import java.util.LinkedHashSet;
@@ -44,6 +45,7 @@ public class Freeforms implements Option.Collector<Freeform, Freeforms>
     /**
      * Constructs an empty {@link Freeforms}.
      */
+    @Options.Default
     public Freeforms()
     {
         this.freeforms = new LinkedHashSet<>();

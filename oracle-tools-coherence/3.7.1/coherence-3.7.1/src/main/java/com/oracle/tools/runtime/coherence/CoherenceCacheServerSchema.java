@@ -146,8 +146,7 @@ public class CoherenceCacheServerSchema
                                                       Options                options,
                                                       ApplicationConsole     console,
                                                       Properties             environmentVariables,
-                                                      Properties             systemProperties,
-                                                      int                    remoteDebuggingPort)
+                                                      Properties             systemProperties)
     {
         SimpleJavaApplicationRuntime environment = new SimpleJavaApplicationRuntime(name,
                                                                                     platform,
@@ -155,8 +154,7 @@ public class CoherenceCacheServerSchema
                                                                                     process,
                                                                                     console,
                                                                                     environmentVariables,
-                                                                                    systemProperties,
-                                                                                    remoteDebuggingPort);
+                                                                                    systemProperties);
 
         return new CoherenceCacheServer(environment, getApplicationListeners());
     }

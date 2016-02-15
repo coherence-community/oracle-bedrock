@@ -55,12 +55,6 @@ public abstract class AbstractJavaApplicationRuntime<P extends JavaApplicationPr
      */
     private Properties systemProperties;
 
-    /**
-     * The port this Java Virtual Machine is listening on for remote debug connections
-     * or <= 0 if remote debugging is disabled.
-     */
-    private int remoteDebuggingPort;
-
 
     /**
      * Constructs an {@link AbstractJavaApplicationRuntime}.
@@ -72,8 +66,6 @@ public abstract class AbstractJavaApplicationRuntime<P extends JavaApplicationPr
      * @param console               the {@link ApplicationConsole} for the {@link JavaApplicationProcess}
      * @param environmentVariables  the environment variables established for the {@link JavaApplicationProcess}
      * @param systemProperties      the system properties for the {@link JavaApplication}
-     * @param remoteDebuggingPort   the port the {@link JavaApplication} should connect back to for remote debugging
-     *                              (< 0 if remote debugging is not required)
      */
     public AbstractJavaApplicationRuntime(String             applicationName,
                                           Platform           platform,
@@ -81,13 +73,11 @@ public abstract class AbstractJavaApplicationRuntime<P extends JavaApplicationPr
                                           P                  process,
                                           ApplicationConsole console,
                                           Properties         environmentVariables,
-                                          Properties         systemProperties,
-                                          int                remoteDebuggingPort)
+                                          Properties         systemProperties)
     {
         super(applicationName, platform, options, process, console, environmentVariables);
 
-        this.systemProperties    = systemProperties;
-        this.remoteDebuggingPort = remoteDebuggingPort;
+        this.systemProperties = systemProperties;
     }
 
 
@@ -95,12 +85,5 @@ public abstract class AbstractJavaApplicationRuntime<P extends JavaApplicationPr
     public Properties getSystemProperties()
     {
         return systemProperties;
-    }
-
-
-    @Override
-    public int getRemoteDebuggingPort()
-    {
-        return remoteDebuggingPort;
     }
 }

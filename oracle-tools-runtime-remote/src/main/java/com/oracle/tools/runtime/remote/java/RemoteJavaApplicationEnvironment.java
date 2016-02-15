@@ -32,7 +32,6 @@ import com.oracle.tools.lang.StringHelper;
 
 import com.oracle.tools.options.Variables;
 
-import com.oracle.tools.runtime.LocalPlatform;
 import com.oracle.tools.runtime.Platform;
 import com.oracle.tools.runtime.Settings;
 
@@ -45,7 +44,6 @@ import com.oracle.tools.runtime.java.JavaApplication;
 import com.oracle.tools.runtime.java.JavaApplicationSchema;
 import com.oracle.tools.runtime.java.options.JavaHome;
 import com.oracle.tools.runtime.java.options.JvmOption;
-import com.oracle.tools.runtime.java.options.RemoteDebugging;
 
 import com.oracle.tools.runtime.options.Orphanable;
 import com.oracle.tools.runtime.options.PlatformSeparators;
@@ -88,16 +86,6 @@ public class RemoteJavaApplicationEnvironment<A extends JavaApplication>
      * The {@link ClassPath} for the remote {@link JavaApplication}.
      */
     private ClassPath remoteClassPath;
-
-    /**
-     * The remote debugging address assigned to the remote {@link JavaApplication}.
-     */
-    private InetAddress remoteDebugAddress;
-
-    /**
-     * The remote debugging port assigned to the remote {@link JavaApplication}.
-     */
-    private int remoteDebugPort;
 
 
     /**
@@ -262,33 +250,6 @@ public class RemoteJavaApplicationEnvironment<A extends JavaApplication>
             }
         }
 
-        // ----- establish remote debugging JVM options -----
-
-        RemoteDebugging remoteDebugging = options.get(RemoteDebugging.class);
-
-        if (remoteDebugging.isEnabled())
-        {
-            boolean isDebugServer = remoteDebugging.getBehavior() == RemoteDebugging.Behavior.LISTEN_FOR_DEBUGGER;
-            boolean suspend       = remoteDebugging.isStartSuspended();
-
-            remoteDebugAddress = isDebugServer ? platform.getAddress() : remoteDebugging.getAttachAddress();
-            remoteDebugPort    = isDebugServer ? remoteDebugging.getListenPort() : remoteDebugging.getAttachPort();
-
-            if (remoteDebugPort <= 0)
-            {
-                remoteDebugPort = LocalPlatform.getInstance().getAvailablePorts().next();
-            }
-
-            String debugAddress = remoteDebugAddress.getHostName() + ":" + remoteDebugPort;
-
-            String debugOption = String.format(" -agentlib:jdwp=transport=dt_socket,server=%s,suspend=%s,address=%s",
-                                               (isDebugServer ? "y" : "n"),
-                                               (suspend ? "y" : "n"),
-                                               debugAddress);
-
-            arguments.add(debugOption);
-        }
-
         // ----- establish the system properties for the java application -----
 
         Properties properties = schema.getSystemProperties().realize(platform, schema, options.asArray());
@@ -365,18 +326,6 @@ public class RemoteJavaApplicationEnvironment<A extends JavaApplication>
         }
 
         return properties;
-    }
-
-
-    public InetAddress getRemoteDebugAddress()
-    {
-        return remoteDebugAddress;
-    }
-
-
-    public int getRemoteDebugPort()
-    {
-        return remoteDebugPort;
     }
 
 

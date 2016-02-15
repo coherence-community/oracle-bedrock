@@ -35,6 +35,7 @@ import com.oracle.tools.runtime.Application;
 import com.oracle.tools.runtime.ApplicationSchema;
 import com.oracle.tools.runtime.Platform;
 
+import com.oracle.tools.runtime.Profile;
 import com.oracle.tools.runtime.java.JavaApplication;
 
 import com.oracle.tools.runtime.options.EnvironmentVariables;
@@ -89,6 +90,13 @@ public abstract class AbstractRemoteApplicationEnvironment<A extends Application
         this.schema   = schema;
         this.platform = platform;
         this.options  = options;
+
+        // ----- notify the Profiles that the application is about to be realized -----
+
+        for (Profile profile : options.getInstancesOf(Profile.class))
+        {
+            profile.onBeforeRealize(platform, schema, options);
+        }
     }
 
 

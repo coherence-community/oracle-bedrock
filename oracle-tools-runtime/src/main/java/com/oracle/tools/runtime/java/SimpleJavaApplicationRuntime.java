@@ -54,8 +54,6 @@ public class SimpleJavaApplicationRuntime extends AbstractJavaApplicationRuntime
      * @param console               the {@link ApplicationConsole} for the {@link JavaApplicationProcess}
      * @param environmentVariables  the environment variables established for the {@link JavaApplicationProcess}
      * @param systemProperties      the system properties for the {@link JavaApplication}
-     * @param remoteDebuggingPort   the port the {@link JavaApplication} should connect back to for remote debugging
-     *                              (< 0 if remote debugging is not required)
      */
     public SimpleJavaApplicationRuntime(String                 applicationName,
                                         Platform               platform,
@@ -63,8 +61,7 @@ public class SimpleJavaApplicationRuntime extends AbstractJavaApplicationRuntime
                                         JavaApplicationProcess process,
                                         ApplicationConsole     console,
                                         Properties             environmentVariables,
-                                        Properties             systemProperties,
-                                        int                    remoteDebuggingPort)
+                                        Properties             systemProperties)
     {
         super(applicationName,
               platform,
@@ -72,7 +69,6 @@ public class SimpleJavaApplicationRuntime extends AbstractJavaApplicationRuntime
               process,
               console,
               environmentVariables,
-              systemProperties,
-              remoteDebuggingPort);
+              systemProperties);
     }
 }

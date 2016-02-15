@@ -368,6 +368,17 @@ public class AvailablePortIterator implements Iterator<Integer>, Iterable<Intege
 
 
     /**
+     * Obtains the {@link InetAddress}es over which the {@link AvailablePortIterator} is reserving ports.
+     *
+     * @return  the {@link InetAddress}es
+     */
+    public Iterable<InetAddress> getInetAddresses()
+    {
+        return inetAddresses;
+    }
+
+
+    /**
      * Attempts to identify a specified number of the available ports.
      * Each available port is placed in a queue, ready for consumption by a
      * call to {@link #next()}.

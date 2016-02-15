@@ -346,16 +346,6 @@ public interface JavaApplication extends Application, RemoteExecutor
 
 
     /**
-     * Obtain the socket that the {@link JavaApplication} is listening on for remote
-     * debugging.
-     *
-     * @return the socket that the {@link JavaApplication} is listening on for remote
-     *         debugging, or null if remote debugging is not enabled
-     */
-    public InetSocketAddress getRemoteDebugSocket();
-
-
-    /**
      * Submits a {@link RemoteCallable} for execution by the
      * {@link JavaApplication}, waiting for the result to be returned.
      *

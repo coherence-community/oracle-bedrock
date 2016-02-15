@@ -426,6 +426,12 @@ reverse chronological order.
 *   [ORACLETOOLS-156](https://java.net/jira/browse/ORACLETOOLS-156): Introduced
     the ability to add default platform specific Options to ApplicationSchema
 
+*   [ORACLETOOLS-157](https://java.net/jira/browse/ORACLETOOLS-157): Refactored
+    RemoteDebugging option and implementation into the RemoteDebugging Profile
+
+    *BREAKING CHANGE:* Any application currently using the RemoteDebugging Option
+    will need to switch to use the RemoteDebugging Profile.
+
 *   [ORACLETOOLS-158](https://java.net/jira/browse/ORACLETOOLS-158): Replaced
     the JavaApplicationSchema.isOrphanable configuration and associated
     setters/getters with the new Orphanable Option.
@@ -621,6 +627,10 @@ reverse chronological order.
     the ability to include all "oracletools.runtime.inherit.*" system property
     values (defined for the process using Oracle Tools) automatically included
     in the command-line for any applications started (by Oracle Tools).
+
+*   [ORACLETOOLS-286](https://java.net/jira/browse/ORACLETOOLS-286): Introduced
+    the concept of a runtime Profile, allowing interception of configuration,
+    starting and stopping applications.
 
 <h4>oracle-tools-runtime-remote</h4>
 

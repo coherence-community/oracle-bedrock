@@ -30,7 +30,7 @@ import com.oracle.tools.Options;
 import com.oracle.tools.runtime.ApplicationConsole;
 import com.oracle.tools.runtime.Platform;
 
-import com.oracle.tools.runtime.java.options.RemoteDebugging;
+import com.oracle.tools.runtime.java.profiles.RemoteDebugging;
 
 import org.junit.After;
 import org.junit.Before;
@@ -157,8 +157,7 @@ public class AbstractJavaApplicationSchemaTest
                                        Options                options,
                                        ApplicationConsole     console,
                                        Properties             environmentVariables,
-                                       Properties             systemProperties,
-                                       int                    remoteDebuggingPort)
+                                       Properties             systemProperties)
         {
             return null;
         }

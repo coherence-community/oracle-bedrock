@@ -43,6 +43,7 @@ import com.oracle.tools.runtime.ApplicationConsole;
 import com.oracle.tools.runtime.ApplicationSchema;
 import com.oracle.tools.runtime.LocalApplicationProcess;
 import com.oracle.tools.runtime.LocalPlatform;
+import com.oracle.tools.runtime.Profile;
 import com.oracle.tools.runtime.Settings;
 
 import com.oracle.tools.runtime.concurrent.ControllableRemoteExecutor;
@@ -53,7 +54,8 @@ import com.oracle.tools.runtime.concurrent.socket.RemoteExecutorServer;
 
 import com.oracle.tools.runtime.java.options.JavaHome;
 import com.oracle.tools.runtime.java.options.JvmOption;
-import com.oracle.tools.runtime.java.options.RemoteDebugging;
+import com.oracle.tools.runtime.java.options.WaitToStart;
+import com.oracle.tools.runtime.java.profiles.RemoteDebugging;
 
 import com.oracle.tools.runtime.options.EnvironmentVariables;
 import com.oracle.tools.runtime.options.ErrorStreamRedirection;
@@ -152,6 +154,17 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication>
 
         // add a unique runtime id for expression support
         options.add(Variable.with("oracletools.runtime.id", UUID.randomUUID()));
+
+        // ----- establish default Profiles for this Platform (and Builder) -----
+
+        options.get(RemoteDebugging.class);
+
+        // ----- notify the Profiles that the application is about to be realized -----
+
+        for (Profile profile : options.getInstancesOf(Profile.class))
+        {
+            profile.onBeforeRealize(platform, schema, options);
+        }
 
         // ----- establish the underlying ProcessBuilder -----
 
@@ -394,46 +407,19 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication>
             diagnosticsTable.addRow("Java Options", jvmOptions.toString());
         }
 
-        // ----- establish remote debugging JVM options -----
-
-        RemoteDebugging remoteDebugging = options.get(RemoteDebugging.class);
-
-        int             debugPort       = -1;
-
-        if (remoteDebugging.isEnabled())
-        {
-            debugPort = remoteDebugging.getBehavior() == RemoteDebugging.Behavior.LISTEN_FOR_DEBUGGER
-                        ? remoteDebugging.getListenPort() : remoteDebugging.getAttachPort();
-
-            if (debugPort <= 0)
-            {
-                debugPort = LocalPlatform.getInstance().getAvailablePorts().next();
-            }
-
-            boolean isDebugServer = remoteDebugging.getBehavior() == RemoteDebugging.Behavior.LISTEN_FOR_DEBUGGER;
-
-            // construct the Java option
-            String option = String.format("-agentlib:jdwp=transport=dt_socket,server=%s,suspend=%s,address=%d",
-                                          (isDebugServer ? "y" : "n"),
-                                          (remoteDebugging.isStartSuspended() ? "y" : "n"),
-                                          debugPort);
-
-            processBuilder.command().add(option);
-
-            diagnosticsTable.addRow("Remote Debugging Options", option);
-        }
-
         // ----- add oracletools.runtime.inherit.xxx values to the command -----
+
+        // TODO: add the oracletools.profiles as well?
 
         for (String propertyName : System.getProperties().stringPropertyNames())
         {
             if (propertyName.startsWith("oracletools.runtime.inherit."))
             {
                 // resolve the property value
-                String              propertyValue = System.getProperty(propertyName);
+                String propertyValue = System.getProperty(propertyName);
 
                 // evaluate any expressions in the property value
-                ExpressionEvaluator evaluator     = new ExpressionEvaluator(options.get(Variables.class));
+                ExpressionEvaluator evaluator = new ExpressionEvaluator(options.get(Variables.class));
 
                 propertyValue = evaluator.evaluate(propertyValue, String.class);
 
@@ -484,6 +470,8 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication>
         diagnosticsTable.addRow("Application Launch Time",
                                 new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
 
+        // TODO: add all of the Profile options to the table
+
         // ----- start the local process -----
 
         if (LOGGER.isLoggable(Level.INFO))
@@ -519,12 +507,13 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication>
                                                            options,
                                                            console,
                                                            variables,
-                                                           systemProperties,
-                                                           debugPort);
+                                                           systemProperties);
 
         // ensure that the launcher process connects back to the server to
         // know that the application has started
-        if (!(remoteDebugging.isEnabled() && remoteDebugging.isStartSuspended()))
+        WaitToStart waitToStart = options.get(WaitToStart.class);
+
+        if (waitToStart.isEnabled())
         {
             Timeout timeout = options.get(Timeout.class);
 
@@ -543,6 +532,13 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication>
                            }
                        }
                    },within(timeout));
+        }
+
+        // ----- notify the Profiles that the application has been realized -----
+
+        for (Profile profile : options.getInstancesOf(Profile.class))
+        {
+            profile.onAfterRealize(platform, application, options);
         }
 
         // ----- notify all of the application listeners -----
