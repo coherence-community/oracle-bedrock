@@ -35,11 +35,7 @@ import com.tangosol.net.CacheService;
 import com.tangosol.net.NamedCache;
 
 import com.tangosol.util.Filter;
-import com.tangosol.util.InvocableMap;
 import com.tangosol.util.MapListener;
-import com.tangosol.util.ValueExtractor;
-
-import com.tangosol.util.function.Remote;
 
 import java.io.Serializable;
 
@@ -469,6 +465,13 @@ class CoherenceNamedCache<K, V> implements NamedCache<K, V>
     public void clear()
     {
         remotelyInvoke("clear");
+    }
+
+
+    @Override
+    public void truncate()
+    {
+        remotelyInvoke("truncate");
     }
 
 

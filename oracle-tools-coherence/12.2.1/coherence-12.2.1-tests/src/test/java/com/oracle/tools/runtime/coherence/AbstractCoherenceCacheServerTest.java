@@ -307,6 +307,13 @@ public abstract class AbstractCoherenceCacheServerTest extends AbstractTest
 
             assertThat(namedCache.size(), is(0));
 
+            // ----- use NamedCache.truncate -----
+            namedCache.put("key", "value");
+
+            namedCache.truncate();
+
+            assertThat(namedCache.size(), is(0));
+
             // ----- use NamedCache.putAll -----
             NamedCache<String, Integer> otherNamedCache = server.getCache("dist-other", String.class, Integer.class);
 
