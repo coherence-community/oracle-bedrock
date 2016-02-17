@@ -36,6 +36,7 @@ import com.oracle.tools.runtime.ApplicationConsole;
 import com.oracle.tools.runtime.ApplicationSchema;
 import com.oracle.tools.runtime.Platform;
 import com.oracle.tools.runtime.Profile;
+import com.oracle.tools.runtime.Profiles;
 import com.oracle.tools.runtime.PropertiesBuilder;
 
 import com.oracle.tools.runtime.options.PlatformSeparators;
@@ -196,6 +197,11 @@ public abstract class AbstractRemoteApplicationBuilder<A extends Application, E 
 
         // add a unique runtime id for expression support
         options.add(Variable.with("oracletools.runtime.id", UUID.randomUUID()));
+
+        // ----- establish default Profiles for this Platform (and Builder) -----
+
+        // auto-detect and add externally defined profiles
+        options.addAll(Profiles.getProfiles());
 
         // ---- establish the environment for the application ----
 

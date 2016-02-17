@@ -87,25 +87,43 @@ public class Options
      * that, looking for an evaluating the annotated public no args constructor
      * and finally, failing that, looking for an annotated field on an enum
      * (assuming the class is an enum).  Failing these approaches,
-     * <code>null</code> is returned.</p>
+     * <code>null</code> is returned.  Should a default be found, it is added to
+     * the collection prior to returning.</p>
      *
      * @param classOfOption the concrete type of {@link Option} to obtain
      * @param <T>           the type of value
      *
      * @return the {@link Option} of the specified type or if undefined, the
-     * suitable default value (or <code>null</code> if one can't be
-     * determined)
+     *         suitable default value (or <code>null</code> if one can't be determined)
      */
-    public <T extends Option> T get(Class<T> classOfOption)
+    public <T extends Option> T get(Class<T>  classOfOption,
+                                    Object... arguments)
     {
-        return get(classOfOption, getDefaultFor(classOfOption));
+        if (classOfOption == null)
+        {
+            return null;
+        }
+        else
+        {
+            T option = (T) options.get(classOfOption);
+
+            if (option == null)
+            {
+                option = getDefaultFor(classOfOption, arguments);
+
+                add(option);
+            }
+
+            return option;
+        }
     }
 
 
     /**
      * Obtains the {@link Option} of a specified concrete type from the collection.
      * <p>
-     * Should the type of {@link Option} not exist, the specified default is returned.
+     * Should the type of {@link Option} not exist, the specified default is added to the collection
+     * and returned.
      *
      * @param classOfOption the type of {@link Option} to obtain
      * @param defaultOption the {@link Option} to return if the specified type is not defined
@@ -127,12 +145,12 @@ public class Options
 
             if (option == null)
             {
-                return defaultOption;
+                option = defaultOption;
+
+                add(option);
             }
-            else
-            {
-                return option;
-            }
+
+            return option;
         }
     }
 
@@ -582,13 +600,15 @@ public class Options
      * (assuming the class is an enum).  Failing these approaches,
      * <code>null</code> is returned.</p>
      *
-     * @param classOfOption the class
-     * @param <T>           the type of value
+     * @param classOfOption  the class
+     * @param arguments      the optional arguments for static methods / constructors
+     * @param <T>            the type of value
      *
      * @return a default value or <code>null</code> if a default can't be
      * determined
      */
-    protected <T extends Option> T getDefaultFor(Class<T> classOfOption)
+    protected <T extends Option> T getDefaultFor(Class<T>  classOfOption,
+                                                 Object... arguments)
     {
         if (classOfOption == null)
         {
@@ -601,14 +621,14 @@ public class Options
                 int modifiers = method.getModifiers();
 
                 if (method.getAnnotation(Default.class) != null
-                    && method.getParameterTypes().length == 0
+                    && method.getParameterTypes().length == arguments.length
                     && Modifier.isStatic(modifiers)
                     && Modifier.isPublic(modifiers)
                     && classOfOption.isAssignableFrom(method.getReturnType()))
                 {
                     try
                     {
-                        return (T) method.invoke(null);
+                        return (T) method.invoke(null, arguments);
                     }
                     catch (Exception e)
                     {
@@ -638,27 +658,23 @@ public class Options
             }
         }
 
-        try
+        for (Constructor constructor : classOfOption.getConstructors())
         {
-            Constructor constructor = classOfOption.getConstructor();
+            int modifiers = constructor.getModifiers();
 
-            int         modifiers   = constructor.getModifiers();
-
-            if (constructor.getAnnotation(Default.class) != null && Modifier.isPublic(modifiers))
+            if (constructor.getAnnotation(Default.class) != null
+                && Modifier.isPublic(modifiers)
+                && constructor.getParameterTypes().length == arguments.length)
             {
                 try
                 {
-                    return (T) constructor.newInstance();
+                    return (T) constructor.newInstance(arguments);
                 }
                 catch (Exception e)
                 {
                     // carry on... perhaps we can use another approach?
                 }
             }
-        }
-        catch (NoSuchMethodException e)
-        {
-            // carry on... there's no no-args constructor
         }
 
         // couldn't find a default so let's return null
@@ -722,7 +738,7 @@ public class Options
      * }
      * </code></pre>
      *
-     * @see Options#get(Class)
+     * @see Options#get(Class, Object...)
      */
     @Documented
     @Retention(RetentionPolicy.RUNTIME)

@@ -40,7 +40,6 @@ import com.oracle.tools.deferred.jmx.DeferredMBeanProxy;
 import com.oracle.tools.runtime.AbstractApplication;
 import com.oracle.tools.runtime.Application;
 import com.oracle.tools.runtime.ApplicationListener;
-import com.oracle.tools.runtime.Platform;
 
 import com.oracle.tools.runtime.concurrent.RemoteCallable;
 import com.oracle.tools.runtime.concurrent.RemoteRunnable;
@@ -60,9 +59,6 @@ import static com.oracle.tools.deferred.DeferredHelper.within;
 import java.io.IOException;
 
 import java.lang.reflect.Method;
-
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
 
 import java.util.Properties;
 import java.util.Set;

@@ -98,6 +98,7 @@ public class RemoteJavaApplicationBuilder<A extends JavaApplication>
     {
         // ----- establish default Profiles for this Platform (and Builder) -----
 
+        // java applications automatically support remote debugging
         options.get(RemoteDebugging.class);
 
         // ----- attempt to create a Java-based Application Environment -----

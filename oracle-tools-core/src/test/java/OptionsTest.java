@@ -31,6 +31,7 @@ import com.oracle.tools.options.Timeout;
 import org.hamcrest.CoreMatchers;
 import org.junit.Test;
 
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.nullValue;
 
@@ -63,6 +64,20 @@ public class OptionsTest
         Options options = new Options();
 
         assertThat(options.get(Timeout.class), is(Timeout.autoDetect()));
+    }
+    /**
+     * Ensure that the default instance returned is the same value.
+     */
+    @Test
+    public void shouldReturnSameDefaultInstance()
+    {
+        Options options = new Options();
+
+        Timeout timeout = options.get(Timeout.class);
+
+        assertThat(timeout, is(Timeout.autoDetect()));
+
+        assertThat(options.get(Timeout.class), equalTo(timeout));
     }
 
 

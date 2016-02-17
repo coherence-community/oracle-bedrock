@@ -258,9 +258,9 @@ public class RemoteJavaApplicationEnvironment<A extends JavaApplication>
         {
             String propertyValue = properties.getProperty(propertyName);
 
-            // filter out (don't set) system properties that start with "oracletools"
+            // filter out (don't set) system properties that start with "oracletools", unless it's a profile
             // (we don't want to have "parents" applications effect child applications
-            if (!propertyName.startsWith("oracletools"))
+            if (propertyName.startsWith("oracletools.profile.") ||!propertyName.startsWith("oracletools"))
             {
                 remoteSystemProperties.setProperty(propertyName, propertyValue);
             }
