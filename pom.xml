@@ -112,14 +112,14 @@
         <maven.surefire.plugin.version>2.17</maven.surefire.plugin.version>
 
         <!-- dependency versions -->
-        <asm.version>5.0.3</asm.version>
-        <cglib.version>3.1</cglib.version>
+        <asm.version>5.0.4</asm.version>
+        <cglib.version>3.2.0</cglib.version>
         <hamcrest.version>1.3</hamcrest.version>
         <jsch.version>0.1.53</jsch.version>
         <glassfish.el.version>3.0.1-b08</glassfish.el.version>
-        <junit.version>4.11</junit.version>
-        <mockito.version>1.9.5</mockito.version>
-        <objenesis.version>2.1</objenesis.version>
+        <junit.version>4.12</junit.version>
+        <mockito.version>1.10.19</mockito.version>
+        <objenesis.version>2.2</objenesis.version>
         <jacoco.version>0.7.5.201505241946</jacoco.version>
     </properties>
 

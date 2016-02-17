@@ -31,12 +31,13 @@ reverse chronological order.
     Maven Source Plugin:   Version 2.1.2 -> 2.2.1
     Maven Surefire Plugin: Version 2.13 -> 2.17
 
-    ASM Dependency:        Version (inherited) -> 5.0.3
+    ASM Dependency:        Version (inherited) -> 5.0.4
     COHERENCE Dependency:  Version 3.7.1.11 -> 3.7.1.13
-    CGLIB Dependency:      Version 2.2.2 -> 3.1
+    CGLIB Dependency:      Version 2.2.2 -> 3.2.0
     JSCH Dependency:       Version 0.1.50 -> 0.1.53
-    MOCKITO Dependency:    Version 1.9.0 -> 1.9.5
-    OBJENESIS Dependency:  Version 1.2 -> 2.1
+    JUNIT Dependency:      Version 4.11 -> 4.12
+    MOCKITO Dependency:    Version 1.9.0 -> 1.10.19
+    OBJENESIS Dependency:  Version 1.2 -> 2.2
 
 *   [ORACLETOOLS-213](https://java.net/jira/browse/ORACLETOOLS-213): Introduced
     Object.equals() and Object.hashCode() methods for all Option implementations.
