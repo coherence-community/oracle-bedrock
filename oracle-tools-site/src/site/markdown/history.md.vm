@@ -55,6 +55,9 @@ reverse chronological order.
 *   [ORACLETOOLS-288](https://java.net/jira/browse/ORACLETOOLS-288): Removed the
     Oracle Tools All module (no longer required).
 
+*   [ORACLETOOLS-290](https://java.net/jira/browse/ORACLETOOLS-290): Introduced
+    JaCoCo module to support Code Coverage analysis.
+
 <h4>oracle-tools-core</h4>
 
 *   [ORACLETOOLS-87](https://java.net/jira/browse/ORACLETOOLS-87): Increased
@@ -164,6 +167,10 @@ reverse chronological order.
 
     With this change, there's no longer a reason to use the PropertiesBuilder
     class.
+
+*   [ORACLETOOLS-289](https://java.net/jira/browse/ORACLETOOLS-289): Introduced
+    the ability to pass parameters to Options.get(Class, ...) to allow them to
+    be used when calling @Options.Default
 
 <h4>oracle-tools-runtime</h4>
 
@@ -634,6 +641,11 @@ reverse chronological order.
 *   [ORACLETOOLS-286](https://java.net/jira/browse/ORACLETOOLS-286): Introduced
     the concept of a runtime Profile, allowing interception of configuration,
     starting and stopping applications.
+
+<h4>oracle-tools-runtime-jacoco</h4>
+
+*   [ORACLETOOLS-290](https://java.net/jira/browse/ORACLETOOLS-290): Introduced
+    JaCoCo Profile (in an optional module) to support Code Coverage analysis.
 
 <h4>oracle-tools-runtime-remote</h4>
 

@@ -44,6 +44,7 @@ import com.oracle.tools.runtime.ApplicationSchema;
 import com.oracle.tools.runtime.LocalApplicationProcess;
 import com.oracle.tools.runtime.LocalPlatform;
 import com.oracle.tools.runtime.Profile;
+import com.oracle.tools.runtime.Profiles;
 import com.oracle.tools.runtime.Settings;
 
 import com.oracle.tools.runtime.concurrent.ControllableRemoteExecutor;
@@ -157,7 +158,11 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication>
 
         // ----- establish default Profiles for this Platform (and Builder) -----
 
+        // java applications automatically support remote debugging
         options.get(RemoteDebugging.class);
+
+        // auto-detect and add externally defined profiles
+        options.addAll(Profiles.getProfiles());
 
         // ----- notify the Profiles that the application is about to be realized -----
 
@@ -369,9 +374,9 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication>
         {
             String propertyValue = systemProperties.getProperty(propertyName);
 
-            // filter out (don't set) system properties that start with "oracletools"
+            // filter out (don't set) system properties that start with "oracletools", unless it's a profile
             // (we don't want to have "parents" applications effect child applications
-            if (!propertyName.startsWith("oracletools"))
+            if (propertyName.startsWith("oracletools.profile.") ||!propertyName.startsWith("oracletools"))
             {
                 processBuilder.command().add("-D" + propertyName
                                              + (propertyValue.isEmpty()
@@ -408,8 +413,6 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication>
         }
 
         // ----- add oracletools.runtime.inherit.xxx values to the command -----
-
-        // TODO: add the oracletools.profiles as well?
 
         for (String propertyName : System.getProperties().stringPropertyNames())
         {
