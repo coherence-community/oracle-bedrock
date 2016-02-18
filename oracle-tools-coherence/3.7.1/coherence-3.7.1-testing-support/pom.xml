@@ -4,7 +4,7 @@
     <parent>
         <artifactId>3.7.1</artifactId>
         <groupId>com.oracle.tools.coherence</groupId>
-        <version>3.0.0-RC10-SNAPSHOT</version>
+        <version>3.0.0-RC11-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
