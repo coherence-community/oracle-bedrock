@@ -59,6 +59,9 @@ reverse chronological order.
 *   [ORACLETOOLS-290](https://java.net/jira/browse/ORACLETOOLS-290): Introduced
     JaCoCo module to support Code Coverage analysis.
 
+*   [ORACLETOOLS-291](https://java.net/jira/browse/ORACLETOOLS-291): Introduced
+    JProfiler module to support Java application profiling.
+
 <h4>oracle-tools-core</h4>
 
 *   [ORACLETOOLS-87](https://java.net/jira/browse/ORACLETOOLS-87): Increased
@@ -651,6 +654,11 @@ reverse chronological order.
 
 *   [ORACLETOOLS-290](https://java.net/jira/browse/ORACLETOOLS-290): Introduced
     JaCoCo Profile (in an optional module) to support Code Coverage analysis.
+
+<h4>oracle-tools-runtime-jprofiler</h4>
+
+*   [ORACLETOOLS-291](https://java.net/jira/browse/ORACLETOOLS-291): Introduced
+    JProfiler module to support Java application profiling.
 
 <h4>oracle-tools-runtime-remote</h4>
 
