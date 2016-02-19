@@ -57,4 +57,18 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+
+    <!-- the el-technologies JProfiler Agent is only published in their repository -->
+    <repositories>
+        <repository>
+            <id>el-technologies</id>
+            <url>https://maven.ej-technologies.com/repository/</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
 </project>
