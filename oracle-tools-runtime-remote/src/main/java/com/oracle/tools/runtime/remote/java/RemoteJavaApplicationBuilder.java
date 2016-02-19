@@ -48,6 +48,7 @@ import com.oracle.tools.runtime.java.JavaApplicationBuilder;
 import com.oracle.tools.runtime.java.JavaApplicationProcess;
 import com.oracle.tools.runtime.java.JavaApplicationSchema;
 import com.oracle.tools.runtime.java.options.WaitToStart;
+import com.oracle.tools.runtime.java.profiles.CommercialFeatures;
 import com.oracle.tools.runtime.java.profiles.RemoteDebugging;
 
 import com.oracle.tools.runtime.remote.AbstractRemoteApplicationBuilder;
@@ -98,8 +99,9 @@ public class RemoteJavaApplicationBuilder<A extends JavaApplication>
     {
         // ----- establish default Profiles for this Platform (and Builder) -----
 
-        // java applications automatically support remote debugging
+        // java applications can automatically detect the following profiles
         options.get(RemoteDebugging.class);
+        options.get(CommercialFeatures.class);
 
         // ----- attempt to create a Java-based Application Environment -----
 
