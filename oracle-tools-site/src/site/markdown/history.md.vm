@@ -601,6 +601,10 @@ reverse chronological order.
     LocalJavaApplicationBuilder logging to improve readability of application
     startup information.
 
+*   [ORACLETOOLS-252](https://java.net/jira/browse/ORACLETOOLS-252): Introduced
+    CommercialFeatures Profile to enable unlocking "commercial features" of
+    the Java Virtual Machine.
+
 *   [ORACLETOOLS-255](https://java.net/jira/browse/ORACLETOOLS-255): Refactored
     ApplicationBuilder interface to require a specific Platform type.
 

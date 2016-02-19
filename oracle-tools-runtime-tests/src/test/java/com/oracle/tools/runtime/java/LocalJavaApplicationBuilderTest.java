@@ -56,6 +56,7 @@ import com.oracle.tools.runtime.console.SystemApplicationConsole;
 import com.oracle.tools.runtime.java.options.HeapSize;
 import com.oracle.tools.runtime.java.options.HotSpot;
 import com.oracle.tools.runtime.java.options.JavaHome;
+import com.oracle.tools.runtime.java.profiles.CommercialFeatures;
 import com.oracle.tools.runtime.java.profiles.RemoteDebugging;
 
 import com.oracle.tools.runtime.options.Orphanable;
@@ -735,6 +736,43 @@ public class LocalJavaApplicationBuilderTest extends AbstractJavaApplicationBuil
             application.close(SystemExit.withExitCode(42), Timeout.after(5, TimeUnit.SECONDS));
 
             Eventually.assertThat(invoking(application).exitValue(), is(2));
+        }
+    }
+
+
+    /**
+     * Should run the application with commercial features.
+     *
+     * NOTE: This test is ignored when running in an IDE with commercial features
+     */
+    @Test
+    public void shouldUnlockCommercialFeatures() throws Exception
+    {
+        Assume.assumeThat(CommercialFeatures.autoDetect().isEnabled(), is(false));
+
+        SimpleJavaApplicationSchema schema = new SimpleJavaApplicationSchema(SleepingApplication.class.getName());
+
+        schema.setPreferIPv4(true);
+
+        try (SimpleJavaApplication app = LocalPlatform.getInstance().realize("TestApp",
+                                                                             schema,
+                                                                             new SystemApplicationConsole(),
+                                                                             CommercialFeatures.enabled()))
+        {
+            List<String> args                       = app.submit(new GetProgramArgs());
+
+            String       commercialFeaturesArgument = null;
+
+            for (String arg : args)
+            {
+                if (arg.startsWith("-XX:+UnlockCommercialFeatures"))
+                {
+                    commercialFeaturesArgument = arg;
+                    break;
+                }
+            }
+
+            assertThat(commercialFeaturesArgument, is(not(nullValue())));
         }
     }
 

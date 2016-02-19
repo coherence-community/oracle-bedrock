@@ -35,6 +35,7 @@ import com.oracle.tools.runtime.Profile;
 
 import com.oracle.tools.runtime.java.ClassPath;
 import com.oracle.tools.runtime.java.JavaApplication;
+import com.oracle.tools.runtime.java.JavaApplicationSchema;
 import com.oracle.tools.runtime.java.options.JavaAgent;
 
 import org.jacoco.agent.rt.RT;
@@ -72,18 +73,21 @@ public class JacocoProfile implements Profile, Option
                                 ApplicationSchema schema,
                                 Options           options)
     {
-        try
+        if (schema instanceof JavaApplicationSchema)
         {
-            // determine the classpath of the JaCoCo runtime agent jar (should be something like jacocoagent-x.y.z.jar)
-            ClassPath jacocoPath = ClassPath.ofClass(RT.class);
+            try
+            {
+                // determine the classpath of the JaCoCo runtime agent jar (should be something like jacocoagent-x.y.z.jar)
+                ClassPath jacocoPath = ClassPath.ofClass(RT.class);
 
-            // define a JavaAgent for JaCoCo
-            JavaAgent javaAgent = JavaAgent.using(jacocoPath.toString(), parameters);
+                // define a JavaAgent for JaCoCo
+                JavaAgent javaAgent = JavaAgent.using(jacocoPath.toString(), parameters);
 
-            options.add(javaAgent);
-        }
-        catch (Exception e)
-        {
+                options.add(javaAgent);
+            }
+            catch (Exception e)
+            {
+            }
         }
     }
 

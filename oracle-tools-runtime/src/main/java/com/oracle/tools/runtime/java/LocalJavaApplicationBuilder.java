@@ -56,6 +56,7 @@ import com.oracle.tools.runtime.concurrent.socket.RemoteExecutorServer;
 import com.oracle.tools.runtime.java.options.JavaHome;
 import com.oracle.tools.runtime.java.options.JvmOption;
 import com.oracle.tools.runtime.java.options.WaitToStart;
+import com.oracle.tools.runtime.java.profiles.CommercialFeatures;
 import com.oracle.tools.runtime.java.profiles.RemoteDebugging;
 
 import com.oracle.tools.runtime.options.EnvironmentVariables;
@@ -158,8 +159,9 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication>
 
         // ----- establish default Profiles for this Platform (and Builder) -----
 
-        // java applications automatically support remote debugging
+        // java applications can automatically detect the following profiles
         options.get(RemoteDebugging.class);
+        options.get(CommercialFeatures.class);
 
         // auto-detect and add externally defined profiles
         options.addAll(Profiles.getProfiles());
