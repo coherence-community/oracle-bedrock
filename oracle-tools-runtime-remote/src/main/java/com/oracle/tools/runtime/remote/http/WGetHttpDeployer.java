@@ -67,7 +67,7 @@ public class WGetHttpDeployer extends HttpDeployer
      */
     public WGetHttpDeployer(Option... options)
     {
-        this(DEFAULT_WGET);
+        this(DEFAULT_WGET, options);
     }
 
 
@@ -94,25 +94,32 @@ public class WGetHttpDeployer extends HttpDeployer
                 .addArgument(sourceURL.toExternalForm());
 
         CapturingApplicationConsole console     = new CapturingApplicationConsole();
-        SimpleApplication           application = platform.realize("Deploy", schema, console);
 
-        if (application.waitFor() != 0)
+        try (SimpleApplication application = platform.realize("Deploy", schema, console))
         {
-            StringBuilder message =
-                new StringBuilder("Error deploying ").append(targetFileName).append(" - wget returned ")
-                    .append(application.exitValue()).append("\n").append("wget output:");
+            int exitCode = application.waitFor();
 
-            for (String line : console.getCapturedOutputLines())
+            application.close();
+
+            if (exitCode != 0)
             {
-                message.append(line);
-            }
+                StringBuilder message =
+                    new StringBuilder("Error deploying ").append(targetFileName).append(" - wget returned ")
+                        .append(exitCode).append("\n").append("wget output:");
 
-            for (String line : console.getCapturedErrorLines())
-            {
-                message.append(line);
-            }
+                for (String line : console.getCapturedOutputLines())
+                {
+                    message.append(line);
+                }
 
-            throw new RuntimeException(message.toString());
+                for (String line : console.getCapturedErrorLines())
+                {
+                    message.append(line);
+                }
+
+                throw new RuntimeException(message.toString());
+            }
         }
+
     }
 }

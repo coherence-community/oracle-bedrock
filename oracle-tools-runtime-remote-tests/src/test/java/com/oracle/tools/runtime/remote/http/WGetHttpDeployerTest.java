@@ -39,6 +39,7 @@ import com.oracle.tools.runtime.console.SystemApplicationConsole;
 import com.oracle.tools.runtime.java.SimpleJavaApplication;
 import com.oracle.tools.runtime.java.SimpleJavaApplicationSchema;
 
+import com.oracle.tools.runtime.options.EnvironmentVariable;
 import com.oracle.tools.runtime.remote.DeploymentArtifact;
 import com.oracle.tools.runtime.remote.RemotePlatform;
 import com.oracle.tools.runtime.remote.java.applications.SleepingApplication;
@@ -132,7 +133,7 @@ public class WGetHttpDeployerTest extends AbstractHttpDeployerTest
     {
         Platform                       platform    = mock(Platform.class);
         int                            port        = 1234;
-        String                         hostName    = InetAddress.getLocalHost().getHostAddress();
+        String                         hostName    = InetAddress.getLocalHost().getCanonicalHostName();
         InetSocketAddress              address     = new InetSocketAddress(hostName, port);
         Options                        options     = new Options();
         SimpleApplication              application = mock(SimpleApplication.class, "1");
@@ -171,7 +172,7 @@ public class WGetHttpDeployerTest extends AbstractHttpDeployerTest
         String                         destination = "/foo";
         Platform                       platform    = mock(Platform.class);
         int                            port        = 1234;
-        String                         hostName    = InetAddress.getLocalHost().getHostAddress();
+        String                         hostName    = InetAddress.getLocalHost().getCanonicalHostName();
         InetSocketAddress              address     = new InetSocketAddress(hostName, port);
         Options                        options     = new Options();
         SimpleApplication              application = mock(SimpleApplication.class, "1");

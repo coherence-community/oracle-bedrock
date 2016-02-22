@@ -252,7 +252,7 @@ public abstract class HttpDeployer implements Deployer
         try
         {
             PlatformSeparators separators = options.get(PlatformSeparators.class);
-            String             hostName   = httpServerAddress.getAddress().getHostAddress();
+            String             hostName   = httpServerAddress.getAddress().getCanonicalHostName();
             int                port       = httpServerAddress.getPort();
 
             for (Map.Entry<String, DeploymentArtifact> entry : artifacts.entrySet())

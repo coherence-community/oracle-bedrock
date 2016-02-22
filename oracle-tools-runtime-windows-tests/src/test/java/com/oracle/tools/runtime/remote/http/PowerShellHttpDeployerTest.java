@@ -126,7 +126,7 @@ public class PowerShellHttpDeployerTest extends AbstractWindowsHttpDeployerTest
     {
         Platform                        platform    = mock(Platform.class);
         int                             port        = 1234;
-        String                          hostName    = InetAddress.getLocalHost().getHostAddress();
+        String                          hostName    = InetAddress.getLocalHost().getCanonicalHostName();
         InetSocketAddress               address     = new InetSocketAddress(hostName, port);
         Options                         options     = new Options();
         SimpleApplication               application = mock(SimpleApplication.class, "1");
@@ -170,7 +170,7 @@ public class PowerShellHttpDeployerTest extends AbstractWindowsHttpDeployerTest
         String                          destination = "/foo";
         Platform                        platform    = mock(Platform.class);
         int                             port        = 1234;
-        String                          hostName    = InetAddress.getLocalHost().getHostAddress();
+        String                          hostName    = InetAddress.getLocalHost().getCanonicalHostName();
         InetSocketAddress               address     = new InetSocketAddress(hostName, port);
         Options                         options     = new Options();
         SimpleApplication               application = mock(SimpleApplication.class, "1");
