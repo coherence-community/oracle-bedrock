@@ -49,6 +49,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 
 /**
  * A local immutable representation of a Java class path.
@@ -70,7 +71,7 @@ public class ClassPath implements Iterable<String>, Tabular
     /**
      * The paths that make up the {@link ClassPath}.
      */
-    private final ArrayList<String> paths;
+    private final LinkedHashSet<String> paths;
 
 
     /**
@@ -79,7 +80,7 @@ public class ClassPath implements Iterable<String>, Tabular
      */
     public ClassPath()
     {
-        paths = new ArrayList<String>();
+        paths = new LinkedHashSet<>();
     }
 
 
@@ -91,7 +92,7 @@ public class ClassPath implements Iterable<String>, Tabular
      */
     public ClassPath(ClassPath... classPaths)
     {
-        paths = new ArrayList<String>();
+        paths = new LinkedHashSet<>();
 
         if (classPaths != null && classPaths.length > 0)
         {
@@ -115,7 +116,7 @@ public class ClassPath implements Iterable<String>, Tabular
      */
     public ClassPath(Iterable<ClassPath> classPaths)
     {
-        paths = new ArrayList<String>();
+        paths = new LinkedHashSet<>();
 
         if (classPaths != null)
         {
@@ -139,7 +140,7 @@ public class ClassPath implements Iterable<String>, Tabular
      */
     public ClassPath(String... classPaths)
     {
-        paths = new ArrayList<String>();
+        paths = new LinkedHashSet<>();
 
         if (classPaths != null)
         {

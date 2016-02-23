@@ -140,16 +140,6 @@ public abstract class AbstractCoherenceClusterBuilderTest extends AbstractTest
             // ensure the cluster size is as expected
             assertThat(invoking(cluster).getClusterSize(), is(3));
 
-            // ensure the member id's are different
-            HashSet<Integer> memberIds = new HashSet<Integer>();
-
-            for (CoherenceClusterMember member : cluster)
-            {
-                memberIds.add(member.getLocalMemberId());
-            }
-
-            Assert.assertEquals(3, memberIds.size());
-
             CoherenceClusterMember extendMember = cluster.get("extend-1");
 
             assertThat(invoking(extendMember).isServiceRunning("ExtendTcpProxyService"), is(true));
