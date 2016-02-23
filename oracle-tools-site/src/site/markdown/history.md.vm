@@ -650,6 +650,9 @@ reverse chronological order.
     the concept of a runtime Profile, allowing interception of configuration,
     starting and stopping applications.
 
+*   [ORACLETOOLS-296](https://java.net/jira/browse/ORACLETOOLS-296): Resolved
+    issue where a ClassPath may contain duplicate entries.
+
 <h4>oracle-tools-runtime-jacoco</h4>
 
 *   [ORACLETOOLS-290](https://java.net/jira/browse/ORACLETOOLS-290): Introduced
