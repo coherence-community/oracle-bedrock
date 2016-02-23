@@ -193,7 +193,7 @@ public class SoapConnectionTest
     public void shouldUnmarshalSoapResponse() throws Exception
     {
         SoapConnection  connection = new SoapConnection("http://oracle.com", 80, "/foo", "dummy", null);
-        Marshaller      marshaller = connection.getMarshaller();
+        Marshaller      marshaller = connection.createMarshaller();
 
         Envelope        envelope   = ObjectFactories.SOAP.createEnvelope();
         Header          header     = ObjectFactories.SOAP.createHeader();
@@ -231,7 +231,7 @@ public class SoapConnectionTest
     public void shouldUnmarshalSoapFault() throws Exception
     {
         SoapConnection connection = new SoapConnection("http://oracle.com", 80, "/foo", "dummy", null);
-        Marshaller     marshaller = connection.getMarshaller();
+        Marshaller     marshaller = connection.createMarshaller();
 
         Envelope       envelope   = ObjectFactories.SOAP.createEnvelope();
         Header         header     = ObjectFactories.SOAP.createHeader();
