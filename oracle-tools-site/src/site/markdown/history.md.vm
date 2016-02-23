@@ -750,6 +750,10 @@ reverse chronological order.
     Microsoft Windows specific platform support for starting, stopping and
     deploying applications on remote windows platforms.
 
+*   [ORACLETOOLS-295](https://java.net/jira/browse/ORACLETOOLS-295): Fixed an
+    issue with the SoapConnection class to properly synchronize access to the
+    SOAP message marshaller and unmarshaller.
+
 <h4>oracle-tools-testing-support</h4>
 
 *   [ORACLETOOLS-84](https://java.net/jira/browse/ORACLETOOLS-84): Introduced

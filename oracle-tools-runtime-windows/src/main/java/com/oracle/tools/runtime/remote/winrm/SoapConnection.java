@@ -88,14 +88,19 @@ public class SoapConnection
     private final Options options;
 
     /**
+     * The JAXB context to use for handling the SOAP messages.
+     */
+    private JAXBContext jaxbContext;
+
+    /**
      * The {@link Marshaller} to use to marshal objects to XML
      */
-    private Marshaller marshaller;
+    private final Marshaller marshaller;
 
     /**
      * The {@link Unmarshaller} to use to un-marshal XML to objects
      */
-    private Unmarshaller unmarshaller;
+    private final Unmarshaller unmarshaller;
 
 
     /**
@@ -140,14 +145,9 @@ public class SoapConnection
 
             props.load(classLoader.getResourceAsStream("ws-man.properties"));
 
-            JAXBContext context = JAXBContext.newInstance(props.getProperty("ws-man.packages"), classLoader);
-
-            marshaller = context.createMarshaller();
-            marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
-            marshaller.setProperty(Marshaller.JAXB_FRAGMENT, Boolean.TRUE);
-            marshaller.setProperty(Marshaller.JAXB_ENCODING, "UTF-8");
-
-            unmarshaller = context.createUnmarshaller();
+            jaxbContext  = JAXBContext.newInstance(props.getProperty("ws-man.packages"), classLoader);
+            marshaller   = createMarshaller();
+            unmarshaller = createUnmarshaller();
         }
         catch (IOException | JAXBException e)
         {
@@ -168,19 +168,6 @@ public class SoapConnection
 
 
     /**
-     * Obtain the {@link Marshaller} to use to marshal
-     * objects to XML.
-     *
-     * @return the {@link Marshaller} to use to marshal
-     * objects to XML
-     */
-    public Marshaller getMarshaller()
-    {
-        return marshaller;
-    }
-
-
-    /**
      * Obtain the user name used by this {@link SoapConnection}
      * to connect to the SOAP service.
      *
@@ -191,6 +178,7 @@ public class SoapConnection
     {
         return userName;
     }
+
 
     /**
      * Obtain the user name used by this {@link SoapConnection}
@@ -205,15 +193,32 @@ public class SoapConnection
     }
 
     /**
-     * Obtain the {@link Unmarshaller} to use to un-marshal
+     * Obtain a {@link Marshaller} to use to marshal
+     * objects to XML.
+     *
+     * @return a {@link Marshaller} to use to marshal
+     * objects to XML
+     */
+    Marshaller createMarshaller() throws JAXBException
+    {
+        Marshaller marshaller = jaxbContext.createMarshaller();
+        marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
+        marshaller.setProperty(Marshaller.JAXB_FRAGMENT, Boolean.TRUE);
+        marshaller.setProperty(Marshaller.JAXB_ENCODING, "UTF-8");
+
+        return marshaller;
+    }
+
+    /**
+     * Obtain an {@link Unmarshaller} to use to un-marshal
      * XML to objects.
      *
-     * @return the {@link Unmarshaller} to use to un-marshal
+     * @return an {@link Unmarshaller} to use to un-marshal
      *         XML to objects
      */
-    public Unmarshaller getUnmarshaller()
+    Unmarshaller createUnmarshaller() throws JAXBException
     {
-        return unmarshaller;
+        return jaxbContext.createUnmarshaller();
     }
 
 
@@ -268,7 +273,10 @@ public class SoapConnection
         {
             try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(httpConnection.getOutputStream())))
             {
-                marshaller.marshal(ObjectFactories.SOAP.createEnvelope(envelope), writer);
+                synchronized (marshaller)
+                {
+                    marshaller.marshal(ObjectFactories.SOAP.createEnvelope(envelope), writer);
+                }
             }
 
             int responseCode = httpConnection.getResponseCode();
@@ -312,7 +320,10 @@ public class SoapConnection
 
         try
         {
-            result = unmarshaller.unmarshal(stream);
+            synchronized (unmarshaller)
+            {
+                result = unmarshaller.unmarshal(stream);
+            }
         }
         finally
         {
