@@ -16,7 +16,7 @@
     <name>Oracle Tools for Coherence 12.2.1 Project</name>
 
     <properties>
-        <coherence.version>12.2.1-0-0-SNAPSHOT</coherence.version>
+        <coherence.version>12.2.1-0-1</coherence.version>
     </properties>
 
     <modules>
