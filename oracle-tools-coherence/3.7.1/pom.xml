@@ -16,7 +16,7 @@
     <name>Oracle Tools for Coherence 3.7.1 Project</name>
 
     <properties>
-        <coherence.version>3.7.1.13</coherence.version>
+        <coherence.version>3.7.1.14</coherence.version>
     </properties>
 
     <modules>
