@@ -4,7 +4,7 @@
     <parent>
         <artifactId>12.2.1</artifactId>
         <groupId>com.oracle.tools.coherence</groupId>
-        <version>3.0.0-RC11-SNAPSHOT</version>
+        <version>3.0.0-RC12-SNAPSHOT</version>
     </parent>
 
     <artifactId>coherence-12.2.1</artifactId>
