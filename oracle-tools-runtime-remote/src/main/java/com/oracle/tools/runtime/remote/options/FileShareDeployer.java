@@ -78,12 +78,13 @@ public abstract class FileShareDeployer implements Deployer
     public void deploy(List<DeploymentArtifact> artifactsToDeploy, String remoteDirectory, Platform platform,
                        Option... deploymentOptions)
     {
-        Options combinedOptions = new Options(platform.getOptions().asArray());
+        Options combinedOptions = new Options(platform == null ? null : platform.getOptions().asArray());
 
         combinedOptions.addAll(options.asArray());
         combinedOptions.addAll(deploymentOptions);
 
-        PlatformSeparators separators = combinedOptions.get(PlatformSeparators.class);
+        PlatformSeparators separators      = combinedOptions.get(PlatformSeparators.class);
+        File               remoteShareFile = new File(remoteShareName);
 
         for (DeploymentArtifact artifact : artifactsToDeploy)
         {
@@ -102,10 +103,21 @@ public abstract class FileShareDeployer implements Deployer
                 }
                 else
                 {
-                    destination = destinationFile.getPath();
+                    String destinationFilePath = separators.asRemotePlatformFileName(destinationFile.getParent());
+
+                    String dirName;
+                    if (destinationFilePath == null)
+                    {
+                        dirName     = separators.asRemotePlatformFileName(remoteDirectory);
+                        destination = dirName + separators.getFileSeparator() + destinationFile.getPath();
+                    }
+                    else
+                    {
+                        destination = separators.asRemotePlatformFileName(destinationFile.getCanonicalPath());
+                    }
                 }
 
-                String  source  = remoteShareName + separators.getFileSeparator() + sourceName;
+                String source = new File(remoteShareFile, sourceName).getCanonicalPath();
 
                 if (!source.equals(destination))
                 {
