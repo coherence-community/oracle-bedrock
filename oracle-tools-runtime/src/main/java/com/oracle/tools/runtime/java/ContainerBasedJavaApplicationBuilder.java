@@ -44,6 +44,7 @@ import com.oracle.tools.runtime.java.container.ContainerClassLoader;
 import com.oracle.tools.runtime.java.container.ContainerScope;
 import com.oracle.tools.runtime.java.io.Serialization;
 
+import com.oracle.tools.runtime.options.Arguments;
 import com.oracle.tools.table.Cell;
 import com.oracle.tools.table.Table;
 
@@ -231,6 +232,11 @@ public class ContainerBasedJavaApplicationBuilder<A extends JavaApplication>
             ContainerClassLoader classLoader = ContainerClassLoader.newInstance(applicationName,
                                                                                 schema.getClassPath(),
                                                                                 systemProperties);
+            // Get the command line arguments
+            List<String> argList = options.get(Arguments.class).realize(platform, schema, options.asArray());
+
+            // Set the actual arguments used back into the options
+            options.add(Arguments.of(argList));
 
             // determine the ApplicationController to use to control the process
             ApplicationController controller;
@@ -245,7 +251,7 @@ public class ContainerBasedJavaApplicationBuilder<A extends JavaApplication>
                 // ContainerBasedJavaProcesses, we default to using the
                 // standard approach of executing the "main" method on the
                 // specified Application Class
-                controller = new StandardController(schema.getApplicationClassName(), schema.getArguments());
+                controller = new StandardController(schema.getApplicationClassName(), argList);
 
                 // as a courtesy let's make sure the application class is accessible via the classloader
                 Class<?> applicationClass = classLoader.loadClass(schema.getApplicationClassName());
@@ -256,7 +262,7 @@ public class ContainerBasedJavaApplicationBuilder<A extends JavaApplication>
 
             String arguments = "";
 
-            for (String argument : schema.getArguments())
+            for (String argument : argList)
             {
                 arguments += argument + " ";
             }

@@ -39,6 +39,7 @@ import com.oracle.tools.runtime.Profile;
 import com.oracle.tools.runtime.Profiles;
 import com.oracle.tools.runtime.PropertiesBuilder;
 
+import com.oracle.tools.runtime.options.Arguments;
 import com.oracle.tools.runtime.options.PlatformSeparators;
 import com.oracle.tools.runtime.options.Shell;
 import com.oracle.tools.runtime.options.TemporaryDirectory;
@@ -52,6 +53,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Iterator;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -272,6 +274,13 @@ public abstract class AbstractRemoteApplicationBuilder<A extends Application, E 
         Deployer deployer = options.get(Deployer.class, new SftpDeployer());
 
         deployer.deploy(artifactsToDeploy, remoteDirectory, platform, options.asArray());
+
+        // Realize the application arguments
+        Arguments     arguments = options.get(Arguments.class);
+        List<String>  argList   = arguments.realize(platform, applicationSchema, options.asArray());
+
+        // Set the actual arguments used back into the options
+        options.add(Arguments.of(argList));
 
         // Realize the remote process
         RemoteApplicationProcess process = terminal.realize(applicationSchema,

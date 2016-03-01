@@ -59,6 +59,7 @@ import com.oracle.tools.runtime.java.options.WaitToStart;
 import com.oracle.tools.runtime.java.profiles.CommercialFeatures;
 import com.oracle.tools.runtime.java.profiles.RemoteDebugging;
 
+import com.oracle.tools.runtime.options.Arguments;
 import com.oracle.tools.runtime.options.EnvironmentVariables;
 import com.oracle.tools.runtime.options.ErrorStreamRedirection;
 import com.oracle.tools.runtime.options.Orphanable;
@@ -81,6 +82,7 @@ import java.net.UnknownHostException;
 import java.text.SimpleDateFormat;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.UUID;
@@ -450,9 +452,14 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication>
         diagnosticsTable.addRow("Application", applicationName);
 
         // add the arguments to the command for the process
+        List<String> argList = options.get(Arguments.class).realize(platform, schema, options.asArray());
+
+        // Set the actual arguments used back into the options
+        options.add(Arguments.of(argList));
+
         String arguments = "";
 
-        for (String argument : schema.getArguments())
+        for (String argument : argList)
         {
             processBuilder.command().add(argument);
 

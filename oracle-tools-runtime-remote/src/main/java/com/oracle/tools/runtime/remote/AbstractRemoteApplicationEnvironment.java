@@ -38,6 +38,7 @@ import com.oracle.tools.runtime.Platform;
 import com.oracle.tools.runtime.Profile;
 import com.oracle.tools.runtime.java.JavaApplication;
 
+import com.oracle.tools.runtime.options.Arguments;
 import com.oracle.tools.runtime.options.EnvironmentVariables;
 
 import java.net.InetAddress;
@@ -130,10 +131,10 @@ public abstract class AbstractRemoteApplicationEnvironment<A extends Application
             }
         }
 
-        for (String argument : schema.getArguments())
-        {
-            arguments.add(argument);
-        }
+        List<String> argList = schema.getOptions().get(Arguments.class)
+                .realize(platform, schema, options.asArray());
+
+        arguments.addAll(argList);
 
         return arguments;
     }

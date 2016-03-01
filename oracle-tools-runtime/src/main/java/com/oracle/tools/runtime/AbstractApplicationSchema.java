@@ -29,10 +29,11 @@ import com.oracle.tools.Option;
 import com.oracle.tools.Options;
 
 import com.oracle.tools.options.Timeout;
+import com.oracle.tools.runtime.options.Argument;
+import com.oracle.tools.runtime.options.Arguments;
 
 import java.io.File;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -61,11 +62,6 @@ public abstract class AbstractApplicationSchema<A extends Application, S extends
     private File workingDirectory;
 
     /**
-     * The arguments for the {@link Application}.
-     */
-    private ArrayList<String> applicationArguments;
-
-    /**
      * The {@link ApplicationListener}s for {@link Application}s
      * realized from the {@link ApplicationSchema}.
      */
@@ -87,9 +83,8 @@ public abstract class AbstractApplicationSchema<A extends Application, S extends
     {
         this.executableName       = schema.getExecutableName();
         this.workingDirectory     = schema.getWorkingDirectory();
-        this.applicationArguments = new ArrayList<String>(schema.getArguments());
         this.listeners            = new LinkedList<ApplicationListener<? super A>>();
-        this.options              = new Options(schema.getOptions().asArray());
+        this.options              = new Options(schema.getOptions());
 
         for (ApplicationListener<? super A> interceptor : schema.getApplicationListeners())
         {
@@ -107,7 +102,6 @@ public abstract class AbstractApplicationSchema<A extends Application, S extends
     public AbstractApplicationSchema(String executableName)
     {
         this.executableName       = executableName;
-        this.applicationArguments = new ArrayList<String>();
         this.listeners            = new LinkedList<ApplicationListener<? super A>>();
         this.options              = new Options();
 
@@ -147,23 +141,15 @@ public abstract class AbstractApplicationSchema<A extends Application, S extends
 
 
     @Override
-    public S addArgument(String argument)
+    public S addArgument(Object argument)
     {
-        applicationArguments.add(argument);
-
-        return (S) this;
-    }
-
-
-    @Override
-    public S addArguments(String... arguments)
-    {
-        if (arguments != null)
+        if (argument instanceof Argument)
         {
-            for (String argument : arguments)
-            {
-                applicationArguments.add(argument);
-            }
+            options.add((Argument) argument);
+        }
+        else
+        {
+            options.add(Argument.of(argument));
         }
 
         return (S) this;
@@ -171,42 +157,44 @@ public abstract class AbstractApplicationSchema<A extends Application, S extends
 
 
     @Override
-    public S addArguments(List<String> arguments)
+    public S addArguments(Object... arguments)
     {
-        if (arguments != null)
+        if (arguments == null || arguments.length == 0)
         {
-            for (String argument : arguments)
-            {
-                applicationArguments.add(argument);
-            }
+            return (S) this;
         }
 
-        return (S) this;
+        Arguments current = options.get(Arguments.class);
+
+        return addOption(current.with(arguments));
     }
 
 
     @Override
-    public S setArguments(String... arguments)
+    public S addArguments(List<? extends Object> arguments)
     {
-        applicationArguments.clear();
+        if (arguments == null || arguments.isEmpty())
+        {
+            return (S) this;
+        }
 
-        return addArguments(arguments);
+        Arguments current = options.get(Arguments.class);
+
+        return addOption(current.with(arguments));
     }
 
 
     @Override
-    public S setArguments(List<String> arguments)
+    public S setArguments(Object... arguments)
     {
-        applicationArguments.clear();
-
-        return addArguments(arguments);
+        return addOption(Arguments.of(arguments));
     }
 
 
     @Override
-    public List<String> getArguments()
+    public S setArguments(List<?> arguments)
     {
-        return applicationArguments;
+        return addOption(Arguments.of(arguments));
     }
 
 
@@ -217,7 +205,7 @@ public abstract class AbstractApplicationSchema<A extends Application, S extends
      *
      * @return  the {@link ApplicationSchema} (so that we can perform method chaining)
      *
-     * @deprecated  use {@link #addArgument(String)} instead
+     * @deprecated  use {@link FluentApplicationSchema#addArgument(Object)} instead
      */
     @Deprecated
     public S setArgument(String argument)
@@ -287,7 +275,11 @@ public abstract class AbstractApplicationSchema<A extends Application, S extends
     @Override
     public S setOptions(Option... options)
     {
-        this.options = new Options(options);
+        Options newOptions = new Options(options);
+
+        newOptions.addIfAbsent(this.options.get(Arguments.class));
+
+        this.options = newOptions;
 
         return (S) this;
     }
