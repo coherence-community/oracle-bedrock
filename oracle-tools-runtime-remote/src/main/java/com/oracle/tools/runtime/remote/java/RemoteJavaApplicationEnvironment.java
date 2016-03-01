@@ -45,6 +45,7 @@ import com.oracle.tools.runtime.java.JavaApplicationSchema;
 import com.oracle.tools.runtime.java.options.JavaHome;
 import com.oracle.tools.runtime.java.options.JvmOption;
 
+import com.oracle.tools.runtime.options.Arguments;
 import com.oracle.tools.runtime.options.Orphanable;
 import com.oracle.tools.runtime.options.PlatformSeparators;
 
@@ -210,6 +211,36 @@ public class RemoteJavaApplicationEnvironment<A extends JavaApplication>
     @Override
     public List<String> getRemoteCommandArguments(InetAddress remoteExecutorAddress)
     {
+        // add Oracle Tools specific system properties
+        // establish the URI for this (parent) process
+        String parentURI = "//" + remoteExecutorAddress.getHostAddress() + ":" + remoteExecutor.getPort();
+
+        remoteSystemProperties.setProperty(Settings.PARENT_URI, parentURI);
+
+        Orphanable orphanable = options.get(Orphanable.class, Orphanable.disabled());
+
+        remoteSystemProperties.setProperty(Settings.ORPHANABLE, Boolean.toString(orphanable.isOrphanable()));
+
+        List<String> arguments = getBaseCommandArguments();
+
+        // we use the launcher to launch the application
+        // (we don't start the application directly itself)
+        arguments.add("com.oracle.tools.runtime.java.JavaApplicationLauncher");
+
+        // set the java application class name we need to launch
+        arguments.add(schema.getApplicationClassName());
+
+        // add the arguments to the command
+        List<String> argList = options.get(Arguments.class).realize(platform, schema, options.asArray());
+
+        arguments.addAll(argList);
+
+        return arguments;
+    }
+
+
+    protected List<String> getBaseCommandArguments()
+    {
         List<String> arguments = new ArrayList<>();
 
         // ----- add oracletools.runtime.inherit.xxx values to the arguments -----
@@ -266,16 +297,6 @@ public class RemoteJavaApplicationEnvironment<A extends JavaApplication>
             }
         }
 
-        // add Oracle Tools specific system properties
-        // establish the URI for this (parent) process
-        String parentURI = "//" + remoteExecutorAddress.getHostAddress() + ":" + remoteExecutor.getPort();
-
-        remoteSystemProperties.setProperty(Settings.PARENT_URI, parentURI);
-
-        Orphanable orphanable = options.get(Orphanable.class, Orphanable.disabled());
-
-        remoteSystemProperties.setProperty(Settings.ORPHANABLE, Boolean.toString(orphanable.isOrphanable()));
-
         // add the system properties to the command
         for (String propertyName : remoteSystemProperties.stringPropertyNames())
         {
@@ -294,22 +315,8 @@ public class RemoteJavaApplicationEnvironment<A extends JavaApplication>
             arguments.add(propBuilder.toString());
         }
 
-        // we use the launcher to launch the application
-        // (we don't start the application directly itself)
-        arguments.add("com.oracle.tools.runtime.java.JavaApplicationLauncher");
-
-        // set the java application class name we need to launch
-        arguments.add(schema.getApplicationClassName());
-
-        // add the arguments to the command
-        for (String argument : schema.getArguments())
-        {
-            arguments.add(argument);
-        }
-
         return arguments;
     }
-
 
     @Override
     public Properties getRemoteEnvironmentVariables()

@@ -63,7 +63,7 @@ public interface FluentApplicationSchema<A extends Application, S extends Fluent
      *
      * @return  the {@link FluentApplicationSchema} to permit fluent-style method invocation
      */
-    public S addArgument(String argument);
+    public S addArgument(Object argument);
 
 
     /**
@@ -73,7 +73,7 @@ public interface FluentApplicationSchema<A extends Application, S extends Fluent
      *
      * @return  the {@link FluentApplicationSchema} to permit fluent-style method invocation
      */
-    public S addArguments(String... arguments);
+    public S addArguments(Object... arguments);
 
 
     /**
@@ -83,7 +83,7 @@ public interface FluentApplicationSchema<A extends Application, S extends Fluent
      *
      * @return  the {@link FluentApplicationSchema} to permit fluent-style method invocation
      */
-    public S addArguments(List<String> arguments);
+    public S addArguments(List<?> arguments);
 
 
     /**
@@ -93,7 +93,7 @@ public interface FluentApplicationSchema<A extends Application, S extends Fluent
      *
      * @return  the {@link FluentApplicationSchema} to permit fluent-style method invocation
      */
-    public S setArguments(String... arguments);
+    public S setArguments(Object... arguments);
 
 
     /**
@@ -103,7 +103,7 @@ public interface FluentApplicationSchema<A extends Application, S extends Fluent
      *
      * @return  the {@link FluentApplicationSchema} to permit fluent-style method invocation
      */
-    public S setArguments(List<String> arguments);
+    public S setArguments(List<?> arguments);
 
 
     /**

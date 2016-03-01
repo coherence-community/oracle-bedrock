@@ -73,14 +73,6 @@ public interface ApplicationSchema<A extends Application>
 
 
     /**
-     * Obtains the arguments for the {@link Application}.
-     *
-     * @return a {@link List} of {@link String}s
-     */
-    public List<String> getArguments();
-
-
-    /**
      * Obtains the {@link ApplicationListener}s that will be attached to
      * {@link Application}s produced by this {@link ApplicationSchema}.
      * <p>

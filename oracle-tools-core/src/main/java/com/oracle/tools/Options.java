@@ -54,7 +54,7 @@ public class Options
     /**
      * A map of the {@link Options} values, keyed by their concrete class.
      */
-    private LinkedHashMap<Class<? extends Option>, Option> options;
+    private final LinkedHashMap<Class<? extends Option>, Option> options;
 
 
     /**
@@ -73,6 +73,20 @@ public class Options
                 add(option);
             }
         }
+    }
+
+
+    /**
+     * A copy constructor that creates an {@link Options} containing all
+     * of the {@link Option}s from the specified {@link Options} instance.
+     *
+     * @param options the {@link Options} to copy
+     */
+    public Options(Options options)
+    {
+        this.options = new LinkedHashMap<>();
+
+        addAll(options);
     }
 
 

@@ -25,6 +25,7 @@
 
 package com.oracle.tools.runtime;
 
+import com.oracle.tools.runtime.options.Arguments;
 import com.oracle.tools.runtime.options.EnvironmentVariables;
 
 import org.hamcrest.Matchers;
@@ -41,6 +42,7 @@ import java.io.File;
 
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Properties;
 
 /**
@@ -155,6 +157,9 @@ public class SimpleApplicationSchemaTest
         schema.addArgument("arg1");
         schema.addArgument("arg2");
 
-        assertThat(schema.getArguments(), contains("arg1", "arg2"));
+        List<String> argList = schema.getOptions().get(Arguments.class)
+                .realize(null, schema);
+
+        assertThat(argList, contains("arg1", "arg2"));
     }
 }

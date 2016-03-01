@@ -39,7 +39,7 @@ import com.oracle.tools.runtime.console.SystemApplicationConsole;
 import com.oracle.tools.runtime.java.SimpleJavaApplication;
 import com.oracle.tools.runtime.java.SimpleJavaApplicationSchema;
 
-import com.oracle.tools.runtime.options.EnvironmentVariable;
+import com.oracle.tools.runtime.options.Arguments;
 import com.oracle.tools.runtime.remote.DeploymentArtifact;
 import com.oracle.tools.runtime.remote.RemotePlatform;
 import com.oracle.tools.runtime.remote.java.applications.SleepingApplication;
@@ -161,9 +161,11 @@ public class WGetHttpDeployerTest extends AbstractHttpDeployerTest
         SimpleApplicationSchema schema = schemaCaptor.getValue();
 
         assertThat(schema.getExecutableName(), is("wget"));
-        assertThat(schema.getArguments().get(0), is("-O"));
-        assertThat(schema.getArguments().get(1), is(target.getCanonicalPath()));
-        assertThat(schema.getArguments().get(2), is(url.toExternalForm()));
+
+        List<String> argList = schema.getOptions().get(Arguments.class).realize(platform, schema);
+        assertThat(argList.get(0), is("-O"));
+        assertThat(argList.get(1), is(target.getCanonicalPath()));
+        assertThat(argList.get(2), is(url.toExternalForm()));
     }
 
     @Test
@@ -199,9 +201,11 @@ public class WGetHttpDeployerTest extends AbstractHttpDeployerTest
         SimpleApplicationSchema schema = schemaCaptor.getValue();
 
         assertThat(schema.getExecutableName(), is("wget"));
-        assertThat(schema.getArguments().get(0), is("-O"));
-        assertThat(schema.getArguments().get(1), is(destination + "/" + source.getName()));
-        assertThat(schema.getArguments().get(2), is(url.toExternalForm()));
+
+        List<String> argList = schema.getOptions().get(Arguments.class).realize(platform, schema);
+        assertThat(argList.get(0), is("-O"));
+        assertThat(argList.get(1), is(destination + "/" + source.getName()));
+        assertThat(argList.get(2), is(url.toExternalForm()));
     }
 
     @Test

@@ -39,6 +39,7 @@ import com.oracle.tools.runtime.console.SystemApplicationConsole;
 import com.oracle.tools.runtime.java.SimpleJavaApplication;
 import com.oracle.tools.runtime.java.SimpleJavaApplicationSchema;
 
+import com.oracle.tools.runtime.options.Arguments;
 import com.oracle.tools.runtime.remote.DeploymentArtifact;
 import com.oracle.tools.runtime.remote.RemotePlatform;
 import com.oracle.tools.runtime.remote.java.applications.SleepingApplication;
@@ -160,10 +161,12 @@ public class CurlHttpDeployerTest extends AbstractHttpDeployerTest
         SimpleApplicationSchema schema1 = schemaCaptor.getValue();
 
         assertThat(schema1.getExecutableName(),   is("curl"));
-        assertThat(schema1.getArguments().get(0), is(url.toExternalForm()));
-        assertThat(schema1.getArguments().get(1), is("--create-dirs"));
-        assertThat(schema1.getArguments().get(2), is("-o"));
-        assertThat(schema1.getArguments().get(3), is(target.getCanonicalPath()));
+
+        List<String> argList = schema1.getOptions().get(Arguments.class).realize(platform, schema1);
+        assertThat(argList.get(0), is(url.toExternalForm()));
+        assertThat(argList.get(1), is("--create-dirs"));
+        assertThat(argList.get(2), is("-o"));
+        assertThat(argList.get(3), is(target.getCanonicalPath()));
     }
 
     @Test
@@ -199,10 +202,12 @@ public class CurlHttpDeployerTest extends AbstractHttpDeployerTest
         SimpleApplicationSchema schema2 = schemaCaptor.getValue();
 
         assertThat(schema2.getExecutableName(), is("curl"));
-        assertThat(schema2.getArguments().get(0), is(url.toExternalForm()));
-        assertThat(schema2.getArguments().get(1), is("--create-dirs"));
-        assertThat(schema2.getArguments().get(2), is("-o"));
-        assertThat(schema2.getArguments().get(3), is(destination + "/" + source.getName()));
+
+        List<String> argList = schema2.getOptions().get(Arguments.class).realize(platform, schema2);
+        assertThat(argList.get(0), is(url.toExternalForm()));
+        assertThat(argList.get(1), is("--create-dirs"));
+        assertThat(argList.get(2), is("-o"));
+        assertThat(argList.get(3), is(destination + "/" + source.getName()));
     }
 
     @Test

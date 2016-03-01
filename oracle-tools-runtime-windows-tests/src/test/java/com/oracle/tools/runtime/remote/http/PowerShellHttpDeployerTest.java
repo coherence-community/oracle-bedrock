@@ -34,6 +34,7 @@ import com.oracle.tools.runtime.Platform;
 import com.oracle.tools.runtime.SimpleApplication;
 import com.oracle.tools.runtime.SimpleApplicationSchema;
 
+import com.oracle.tools.runtime.options.Arguments;
 import com.oracle.tools.runtime.remote.*;
 import com.oracle.tools.runtime.remote.options.Deployer;
 import com.oracle.tools.runtime.remote.winrm.AbstractWindowsTest;
@@ -155,12 +156,14 @@ public class PowerShellHttpDeployerTest extends AbstractWindowsHttpDeployerTest
         SimpleApplicationSchema schema = schemaCaptor.getValue();
 
         assertThat(schema.getExecutableName(), is("powershell"));
-        assertThat(schema.getArguments().get(0), is("-Command"));
-        assertThat(schema.getArguments().get(1), is("Invoke-WebRequest"));
-        assertThat(schema.getArguments().get(2), is("-Uri"));
-        assertThat(schema.getArguments().get(3), is(url.toExternalForm()));
-        assertThat(schema.getArguments().get(4), is("-OutFile"));
-        assertThat(schema.getArguments().get(5), is(target.toString()));
+
+        List<String> argList = schema.getOptions().get(Arguments.class).realize(platform, schema);
+        assertThat(argList.get(0), is("-Command"));
+        assertThat(argList.get(1), is("Invoke-WebRequest"));
+        assertThat(argList.get(2), is("-Uri"));
+        assertThat(argList.get(3), is(url.toExternalForm()));
+        assertThat(argList.get(4), is("-OutFile"));
+        assertThat(argList.get(5), is(target.toString()));
     }
 
 
@@ -198,12 +201,14 @@ public class PowerShellHttpDeployerTest extends AbstractWindowsHttpDeployerTest
         SimpleApplicationSchema schema = schemaCaptor.getValue();
 
         assertThat(schema.getExecutableName(), is("powershell"));
-        assertThat(schema.getArguments().get(0), is("-Command"));
-        assertThat(schema.getArguments().get(1), is("Invoke-WebRequest"));
-        assertThat(schema.getArguments().get(2), is("-Uri"));
-        assertThat(schema.getArguments().get(3), is(url.toExternalForm()));
-        assertThat(schema.getArguments().get(4), is("-OutFile"));
-        assertThat(schema.getArguments().get(5), is(destination + File.separator + source.getName()));
+
+        List<String> argList = schema.getOptions().get(Arguments.class).realize(platform, schema);
+        assertThat(argList.get(0), is("-Command"));
+        assertThat(argList.get(1), is("Invoke-WebRequest"));
+        assertThat(argList.get(2), is("-Uri"));
+        assertThat(argList.get(3), is(url.toExternalForm()));
+        assertThat(argList.get(4), is("-OutFile"));
+        assertThat(argList.get(5), is(destination + File.separator + source.getName()));
     }
 
 

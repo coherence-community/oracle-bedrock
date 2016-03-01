@@ -30,6 +30,7 @@ import com.oracle.tools.Options;
 
 import com.oracle.tools.lang.StringHelper;
 
+import com.oracle.tools.runtime.options.Arguments;
 import com.oracle.tools.runtime.options.EnvironmentVariables;
 import com.oracle.tools.runtime.options.ErrorStreamRedirection;
 
@@ -130,13 +131,15 @@ public class SimpleApplicationBuilder extends AbstractApplicationBuilder<SimpleA
 
         // ----- establish the application command line to execute -----
 
-        List<String> command = processBuilder.command();
+        List<String> command   = processBuilder.command();
 
         // add the arguments to the command for the process
-        for (String argument : schema.getArguments())
-        {
-            command.add(argument);
-        }
+        List<String> arguments = options.get(Arguments.class).realize(platform, schema, options.asArray());
+
+        command.addAll(arguments);
+
+        // Set the actual arguments used back into the options
+        options.add(Arguments.of(arguments));
 
         // should the standard error be redirected to the standard out?
         ErrorStreamRedirection redirection = options.get(ErrorStreamRedirection.class);
