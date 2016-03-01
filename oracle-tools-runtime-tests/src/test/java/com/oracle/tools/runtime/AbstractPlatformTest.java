@@ -73,15 +73,30 @@ public class AbstractPlatformTest
 
 
     @Test
+    public void shouldNotRealizeApplicationIfBuilderSupplierIsNull() throws Exception
+    {
+        ApplicationConsole          console  = mock(ApplicationConsole.class);
+        SimpleJavaApplicationSchema schema   = new SimpleJavaApplicationSchema("Dummy");
+        AbstractPlatform            stub     = new AbstractPlatformStub("Test");
+        AbstractPlatform            platform = spy(stub);
+
+        Application result = platform.realize("TestApp", schema, console);
+
+        assertThat(result, is(nullValue()));
+    }
+
+    @Test
     public void shouldNotRealizeApplicationIfBuilderIsNull() throws Exception
     {
         ApplicationConsole          console  = mock(ApplicationConsole.class);
         SimpleJavaApplicationSchema schema   = new SimpleJavaApplicationSchema("Dummy");
-
+        ApplicationBuilder.Supplier supplier = mock(ApplicationBuilder.Supplier.class);
         AbstractPlatform            stub     = new AbstractPlatformStub("Test");
         AbstractPlatform            platform = spy(stub);
 
-        when(platform.getApplicationBuilder(SimpleJavaApplication.class)).thenReturn(null);
+        stub.getOptions().add(supplier);
+
+        when(supplier.getApplicationBuilder(same(platform), eq(SimpleJavaApplication.class))).thenReturn(null);
 
         Application result = platform.realize("TestApp", schema, console);
 
@@ -107,14 +122,6 @@ public class AbstractPlatformTest
 
         @Override
         public InetAddress getAddress()
-        {
-            return null;
-        }
-
-
-        @Override
-        public <A extends Application,
-                B extends ApplicationBuilder<A, P>> B getApplicationBuilder(Class<A> applicationClass)
         {
             return null;
         }

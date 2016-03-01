@@ -31,6 +31,7 @@ import com.oracle.tools.runtime.AbstractPlatform;
 import com.oracle.tools.runtime.Application;
 import com.oracle.tools.runtime.ApplicationBuilder;
 import com.oracle.tools.runtime.Platform;
+import com.oracle.tools.runtime.options.ApplicationBuilders;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
@@ -96,6 +97,9 @@ public class JavaVirtualMachine extends AbstractPlatform<JavaVirtualMachine>
                 this.address = NetworkHelper.getFeasibleLocalHost();
             }
         }
+
+        // ----- set any default options ------
+        getOptions().add(ApplicationBuilders.container());
     }
 
 
@@ -103,20 +107,6 @@ public class JavaVirtualMachine extends AbstractPlatform<JavaVirtualMachine>
     public InetAddress getAddress()
     {
         return address;
-    }
-
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public <A extends Application,
-            B extends ApplicationBuilder<A, JavaVirtualMachine>> B getApplicationBuilder(Class<A> applicationClass)
-    {
-        if (JavaApplication.class.isAssignableFrom(applicationClass))
-        {
-            return (B) new ContainerBasedJavaApplicationBuilder(this);
-        }
-
-        return null;
     }
 
 

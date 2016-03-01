@@ -25,6 +25,7 @@
 
 package com.oracle.tools.runtime.remote;
 
+import com.oracle.tools.Options;
 import com.oracle.tools.runtime.ApplicationBuilder;
 import com.oracle.tools.runtime.Platform;
 import com.oracle.tools.runtime.SimpleApplication;
@@ -64,11 +65,12 @@ public class RemotePlatformTest
     @Test
     public void shouldReturnJavaApplicationBuilder() throws Exception
     {
-        InetAddress        address  = InetAddress.getLocalHost();
-        Authentication     auth     = new Password("bar");
-        RemotePlatform     platform = new RemotePlatform("foo", address, 1234, "jk", auth);
-
-        ApplicationBuilder builder  = platform.getApplicationBuilder(JavaApplication.class);
+        InetAddress                 address  = InetAddress.getLocalHost();
+        Authentication              auth     = new Password("bar");
+        RemotePlatform              platform = new RemotePlatform("foo", address, 1234, "jk", auth);
+        Options                     options  = platform.getOptions();
+        ApplicationBuilder.Supplier supplier = options.get(ApplicationBuilder.Supplier.class);
+        ApplicationBuilder          builder  = supplier.getApplicationBuilder(platform, JavaApplication.class);
 
         assertThat(builder, instanceOf(RemoteJavaApplicationBuilder.class));
         assertThat((RemotePlatform) builder.getPlatform(), is(sameInstance(platform)));
@@ -78,11 +80,12 @@ public class RemotePlatformTest
     @Test
     public void shouldReturnLocalApplicationBuilder() throws Exception
     {
-        Authentication     auth     = new Password("bar");
-        InetAddress        address  = InetAddress.getLocalHost();
-        RemotePlatform     platform = new RemotePlatform("foo", address, 1234, "jk", auth);
-
-        ApplicationBuilder builder  = platform.getApplicationBuilder(SimpleApplication.class);
+        Authentication              auth     = new Password("bar");
+        InetAddress                 address  = InetAddress.getLocalHost();
+        RemotePlatform              platform = new RemotePlatform("foo", address, 1234, "jk", auth);
+        Options                     options  = platform.getOptions();
+        ApplicationBuilder.Supplier supplier = options.get(ApplicationBuilder.Supplier.class);
+        ApplicationBuilder          builder  = supplier.getApplicationBuilder(platform, SimpleApplication.class);
 
         assertThat(builder, instanceOf(SimpleRemoteApplicationBuilder.class));
         assertThat((RemotePlatform) builder.getPlatform(), is(sameInstance(platform)));

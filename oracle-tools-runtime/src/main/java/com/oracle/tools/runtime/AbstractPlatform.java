@@ -28,8 +28,6 @@ package com.oracle.tools.runtime;
 import com.oracle.tools.Option;
 import com.oracle.tools.Options;
 
-import java.net.InetAddress;
-
 /**
  * An abstract implementation of a {@link Platform}.
  * <p>
@@ -82,12 +80,25 @@ public abstract class AbstractPlatform<P extends Platform> implements Platform
 
 
     @Override
+    @SuppressWarnings("unchecked")
     public <A extends Application, S extends ApplicationSchema<A>> A realize(String             applicationName,
                                                                              S                  applicationSchema,
                                                                              ApplicationConsole console,
                                                                              Option...          options)
     {
-        ApplicationBuilder<A, P> builder = getApplicationBuilder(applicationSchema.getApplicationClass());
+        Options realizeOptions = new Options(getOptions().asArray());
+
+        realizeOptions.addAll(options);
+
+        ApplicationBuilder.Supplier<A,P> supplier = realizeOptions.get(ApplicationBuilder.Supplier.class);
+
+        if (supplier == null)
+        {
+            return null;
+        }
+
+        ApplicationBuilder<A, P> builder = supplier
+                .getApplicationBuilder((P) this, applicationSchema.getApplicationClass());
 
         if (builder == null)
         {
@@ -108,7 +119,15 @@ public abstract class AbstractPlatform<P extends Platform> implements Platform
      *                          is required
      * @return  the {@link ApplicationBuilder} or null if this {@link Platform} cannot supply a builder for
      *          the specified {@link Application} {@link Class}
+     *
+     * @deprecated  the {@link ApplicationBuilder} is now obtained from the {@link Options} and hence may have been
+     *              overridden by the schema or other {@link Options} so the value returned from this method may not
+     *              be the {@link ApplicationBuilder} that is actually used.
      */
-    public abstract <A extends Application,
-                     B extends ApplicationBuilder<A, P>> B getApplicationBuilder(Class<A> applicationClass);
+    public <A extends Application, B extends ApplicationBuilder<A, P>> B getApplicationBuilder(Class<A> applicationClass)
+    {
+        ApplicationBuilder.Supplier<A,P> supplier = getOptions().get(ApplicationBuilder.Supplier.class);
+
+        return (B) (supplier == null ? null : supplier.getApplicationBuilder((P) this, applicationClass));
+    }
 }

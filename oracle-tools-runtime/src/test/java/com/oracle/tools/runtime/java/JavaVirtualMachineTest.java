@@ -25,6 +25,7 @@
 
 package com.oracle.tools.runtime.java;
 
+import com.oracle.tools.Options;
 import com.oracle.tools.runtime.ApplicationBuilder;
 import com.oracle.tools.runtime.LocalPlatform;
 import com.oracle.tools.runtime.Platform;
@@ -72,9 +73,10 @@ public class JavaVirtualMachineTest
     @Test
     public void shouldReturnJavaApplicationBuilder()
     {
-        JavaVirtualMachine platform = JavaVirtualMachine.getInstance();
-
-        ApplicationBuilder builder  = platform.getApplicationBuilder(JavaApplication.class);
+        JavaVirtualMachine          platform = JavaVirtualMachine.getInstance();
+        Options                     options  = platform.getOptions();
+        ApplicationBuilder.Supplier supplier = options.get(ApplicationBuilder.Supplier.class);
+        ApplicationBuilder          builder  = supplier.getApplicationBuilder(platform, JavaApplication.class);
 
         assertThat(builder, instanceOf(ContainerBasedJavaApplicationBuilder.class));
     }
@@ -83,9 +85,10 @@ public class JavaVirtualMachineTest
     @Test
     public void shouldReturnLocalApplicationBuilder()
     {
-        JavaVirtualMachine platform = JavaVirtualMachine.getInstance();
-
-        ApplicationBuilder builder  = platform.getApplicationBuilder(SimpleApplication.class);
+        JavaVirtualMachine          platform = JavaVirtualMachine.getInstance();
+        Options                     options  = platform.getOptions();
+        ApplicationBuilder.Supplier supplier = options.get(ApplicationBuilder.Supplier.class);
+        ApplicationBuilder          builder  = supplier.getApplicationBuilder(platform, SimpleApplication.class);
 
         assertThat(builder, is(nullValue()));
     }

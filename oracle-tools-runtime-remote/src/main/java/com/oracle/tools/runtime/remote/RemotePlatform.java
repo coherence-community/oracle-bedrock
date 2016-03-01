@@ -33,7 +33,9 @@ import com.oracle.tools.runtime.ApplicationBuilder;
 
 import com.oracle.tools.runtime.java.JavaApplication;
 
+import com.oracle.tools.runtime.options.ApplicationBuilders;
 import com.oracle.tools.runtime.remote.java.RemoteJavaApplicationBuilder;
+import com.oracle.tools.runtime.remote.options.RemoteApplicationBuilders;
 
 import java.net.InetAddress;
 
@@ -130,6 +132,9 @@ public class RemotePlatform extends AbstractPlatform<RemotePlatform>
         this.port           = port;
         this.userName       = userName;
         this.authentication = authentication;
+
+        // ----- set any default options ------
+        getOptions().addIfAbsent(RemoteApplicationBuilders.remote());
     }
 
 
@@ -172,25 +177,5 @@ public class RemotePlatform extends AbstractPlatform<RemotePlatform>
     public Authentication getAuthentication()
     {
         return authentication;
-    }
-
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public <A extends Application,
-            B extends ApplicationBuilder<A, RemotePlatform>> B getApplicationBuilder(Class<A> applicationClass)
-    {
-        AbstractRemoteApplicationBuilder builder;
-
-        if (JavaApplication.class.isAssignableFrom(applicationClass))
-        {
-            builder = new RemoteJavaApplicationBuilder(this);
-        }
-        else
-        {
-            builder = new SimpleRemoteApplicationBuilder(this);
-        }
-
-        return (B) builder;
     }
 }

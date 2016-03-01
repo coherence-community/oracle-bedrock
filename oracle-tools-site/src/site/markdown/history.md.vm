@@ -654,6 +654,12 @@ reverse chronological order.
 *   [ORACLETOOLS-296](https://java.net/jira/browse/ORACLETOOLS-296): Resolved
     issue where a ClassPath may contain duplicate entries.
 
+*   [ORACLETOOLS-299](https://java.net/jira/browse/ORACLETOOLS-299): Introduced
+    ApplicationBuilder.Supplier as an Option to allow the default
+    ApplicationBuilder instances to be overridden by specifying a different
+    ApplicationBuilder.Supplier as an Option when defining or realizing an
+    Applicaton.
+
 <h4>oracle-tools-runtime-jacoco</h4>
 
 *   [ORACLETOOLS-290](https://java.net/jira/browse/ORACLETOOLS-290): Introduced
