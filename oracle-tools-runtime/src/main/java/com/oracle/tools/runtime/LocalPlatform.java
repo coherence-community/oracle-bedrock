@@ -40,6 +40,7 @@ import com.oracle.tools.runtime.java.LocalJavaApplicationBuilder;
 
 import com.oracle.tools.runtime.network.AvailablePortIterator;
 
+import com.oracle.tools.runtime.options.ApplicationBuilders;
 import com.oracle.tools.util.FutureCompletionListener;
 
 import java.io.IOException;
@@ -120,6 +121,10 @@ public class LocalPlatform extends AbstractPlatform<LocalPlatform>
         this.availablePortIterator = new AvailablePortIterator(30000,
                                                                AvailablePortIterator.MAXIMUM_PORT,
                                                                bindableAddresses);
+
+
+        // ----- set any default options ------
+        getOptions().add(ApplicationBuilders.local());
     }
 
 
@@ -152,22 +157,6 @@ public class LocalPlatform extends AbstractPlatform<LocalPlatform>
     public AvailablePortIterator getAvailablePorts()
     {
         return availablePortIterator;
-    }
-
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public <A extends Application,
-            B extends ApplicationBuilder<A, LocalPlatform>> B getApplicationBuilder(Class<A> applicationClass)
-    {
-        if (JavaApplication.class.isAssignableFrom(applicationClass))
-        {
-            return (B) new LocalJavaApplicationBuilder(this);
-        }
-        else
-        {
-            return (B) new SimpleApplicationBuilder(this);
-        }
     }
 
 

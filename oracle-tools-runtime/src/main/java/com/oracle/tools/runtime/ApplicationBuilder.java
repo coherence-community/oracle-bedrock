@@ -101,4 +101,11 @@ public interface ApplicationBuilder<A extends Application, P extends Platform>
      * @throws RuntimeException  when a problem occurs while starting the application
      */
     public <T extends A, S extends ApplicationSchema<T>> T realize(S applicationSchema);
+
+
+    public interface Supplier<A extends Application, P extends Platform> extends Option
+    {
+        public ApplicationBuilder<A,P> getApplicationBuilder(P platform, Class<? extends A> applicationClass);
+
+    }
 }

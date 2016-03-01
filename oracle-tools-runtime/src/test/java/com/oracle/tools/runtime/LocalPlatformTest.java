@@ -25,6 +25,7 @@
 
 package com.oracle.tools.runtime;
 
+import com.oracle.tools.Options;
 import com.oracle.tools.io.NetworkHelper;
 
 import com.oracle.tools.runtime.java.JavaApplication;
@@ -63,7 +64,10 @@ public class LocalPlatformTest
     @Test
     public void shouldReturnJavaApplicationBuilder()
     {
-        ApplicationBuilder builder = LocalPlatform.getInstance().getApplicationBuilder(JavaApplication.class);
+        Options                     options  = LocalPlatform.getInstance().getOptions();
+        ApplicationBuilder.Supplier supplier = options.get(ApplicationBuilder.Supplier.class);
+        ApplicationBuilder          builder = supplier.getApplicationBuilder(LocalPlatform.getInstance(),
+                                                                             JavaApplication.class);
 
         assertThat(builder, instanceOf(JavaApplicationBuilder.class));
     }
@@ -72,7 +76,10 @@ public class LocalPlatformTest
     @Test
     public void shouldReturnLocalApplicationBuilder()
     {
-        ApplicationBuilder builder = LocalPlatform.getInstance().getApplicationBuilder(SimpleApplication.class);
+        Options                     options  = LocalPlatform.getInstance().getOptions();
+        ApplicationBuilder.Supplier supplier = options.get(ApplicationBuilder.Supplier.class);
+        ApplicationBuilder          builder = supplier.getApplicationBuilder(LocalPlatform.getInstance(),
+                                                                             SimpleApplication.class);
 
         assertThat(builder, instanceOf(SimpleApplicationBuilder.class));
     }
