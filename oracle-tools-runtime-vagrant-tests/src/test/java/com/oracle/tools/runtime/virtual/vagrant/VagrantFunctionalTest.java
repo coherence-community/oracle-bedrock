@@ -25,24 +25,16 @@
 
 package com.oracle.tools.runtime.virtual.vagrant;
 
-import com.oracle.tools.deferred.Eventually;
-
 import com.oracle.tools.runtime.Application;
 import com.oracle.tools.runtime.ApplicationSchema;
 import com.oracle.tools.runtime.Assembly;
 import com.oracle.tools.runtime.Infrastructure;
 import com.oracle.tools.runtime.InfrastructureAssemblyBuilder;
 import com.oracle.tools.runtime.InfrastructureBuilder;
-import com.oracle.tools.runtime.LocalPlatform;
 import com.oracle.tools.runtime.Platform;
-import com.oracle.tools.runtime.SimpleAssembly;
-
-import com.oracle.tools.runtime.coherence.CoherenceCacheServer;
-import com.oracle.tools.runtime.coherence.CoherenceCacheServerSchema;
 
 import com.oracle.tools.runtime.console.SystemApplicationConsole;
 
-import com.oracle.tools.runtime.java.ClassPath;
 import com.oracle.tools.runtime.java.SimpleJavaApplicationSchema;
 
 import com.oracle.tools.runtime.virtual.HostAddressIterator;
@@ -54,8 +46,6 @@ import org.junit.ClassRule;
 import org.junit.Test;
 
 import org.junit.rules.TemporaryFolder;
-
-import static com.oracle.tools.deferred.DeferredHelper.invoking;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
@@ -101,15 +91,17 @@ public class VagrantFunctionalTest
     @BeforeClass
     public static void checkEnvironment() throws Exception
     {
-        Assume.assumeTrue(VagrantChecker.vagrantExists());
+        String boxName = System.getProperty("oracle.tools.test.vagrant.box", "oracle/java8");
+
+        Assume.assumeThat("Vagrant does not exist, skipping tests", VagrantChecker.vagrantExists(), is(true));
+        Assume.assumeThat("Vagrant box " + boxName + " does not exist, skipping tests",
+                          VagrantChecker.vagrantExistsWithBox(boxName), is(true));
 
         File                vmRoot    = temporaryFolder.newFolder();
         HostAddressIterator addresses = new HostAddressIterator("192.168.56.200");
 
-        VagrantPlatformSchema schema = new VagrantPlatformSchema("VM",
-                                                                 vmRoot,
-                                                                 "rel65-java").addNetworkAdapter(new VagrantHostOnlyNetworkSchema("eth1",
-                                                                     addresses));
+        VagrantPlatformSchema schema = new VagrantPlatformSchema("VM", vmRoot, boxName)
+                .addNetworkAdapter(new VagrantHostOnlyNetworkSchema("eth1", addresses));
 
         InfrastructureBuilder<Platform> builder = new InfrastructureBuilder<Platform>();
 
@@ -136,110 +128,12 @@ public class VagrantFunctionalTest
 
         assemblyBuilder.addApplication("Test", appSchema, 1);
 
-        Assembly<Application> assembly = assemblyBuilder.realize(infrastructure, new SystemApplicationConsole());
-
-        for (Application app : assembly)
+        try (Assembly<Application> assembly = assemblyBuilder.realize(infrastructure, new SystemApplicationConsole()))
         {
-            try
+            for (Application app : assembly)
             {
-                app.waitFor();
+                assertThat("Non-Zero exit code for application " + app.getName(), app.waitFor(), is(0));
             }
-            catch (RuntimeException e)
-            {
-                // ignored
-            }
-        }
-
-        close(assembly);
-    }
-
-
-    @Test
-    public void shouldRunCluster() throws Exception
-    {
-        CoherenceCacheServerSchema schema =
-            new CoherenceCacheServerSchema().setCacheConfigURI("coherence-cache-config.xml");
-
-        Platform             platform1 = infrastructure.getPlatform("VM-1");
-        Platform             platform2 = infrastructure.getPlatform("VM-2");
-
-        CoherenceCacheServer app1      = null;
-        CoherenceCacheServer app2      = null;
-        CoherenceCacheServer app3      = null;
-        CoherenceCacheServer app4      = null;
-
-        try
-        {
-            schema.setLocalHostAddress(platform1.getAddress().getHostAddress());
-
-            app1 = platform1.realize("Data-1@VM-1", schema, new SystemApplicationConsole());
-            app2 = platform1.realize("Data-2@VM-1", schema, new SystemApplicationConsole());
-
-            schema.setLocalHostAddress(platform2.getAddress().getHostAddress());
-
-            app3 = platform2.realize("Data-1@VM-2", schema, new SystemApplicationConsole());
-            app4 = platform2.realize("Data-2@VM-2", schema, new SystemApplicationConsole());
-
-            assertThat(app1, is(notNullValue()));
-            Eventually.assertThat(invoking(app1).getClusterSize(), is(4));
-        }
-        finally
-        {
-            close(app1);
-            close(app2);
-            close(app3);
-            close(app4);
-        }
-    }
-
-
-    @Test
-    public void shouldRunClusterUsingInfrastructure() throws Exception
-    {
-        SimpleAssembly<CoherenceCacheServer> assembly = startCluster(infrastructure, 2);
-
-        assertThat(assembly, is(notNullValue()));
-
-        try
-        {
-            CoherenceCacheServer cacheServer = assembly.get("Data-1@VM-1");
-
-            Eventually.assertThat(invoking(cacheServer).getClusterSize(), is(4));
-        }
-        finally
-        {
-            close(assembly);
-        }
-    }
-
-
-    @Test
-    public void shouldAddLocalPlatformMemberToCluster() throws Exception
-    {
-        int                                  membersPerVM = 2;
-        CoherenceCacheServer                 localMember  = null;
-        SimpleAssembly<CoherenceCacheServer> assembly     = startCluster(infrastructure, membersPerVM);
-
-        assertThat(assembly, is(notNullValue()));
-
-        try
-        {
-            int                  expectedSize = membersPerVM * infrastructure.size();
-            CoherenceCacheServer cacheServer  = assembly.get("Data-1@VM-1");
-
-            Eventually.assertThat(invoking(cacheServer).getClusterSize(), is(expectedSize));
-
-            CoherenceCacheServerSchema schema =
-                new CoherenceCacheServerSchema().setCacheConfigURI("coherence-cache-config.xml")
-                .setLocalHostAddress("192.168.56.1");
-
-            localMember = LocalPlatform.getInstance().realize("Data-1@Local", schema, new SystemApplicationConsole());
-            Eventually.assertThat(invoking(localMember).getClusterSize(), is(expectedSize + 1));
-        }
-        finally
-        {
-            close(localMember);
-            close(assembly);
         }
     }
 
@@ -248,10 +142,12 @@ public class VagrantFunctionalTest
     public void shouldCreateVagrantPlatformFromFile() throws Exception
     {
         File vmRoot = temporaryFolder.newFolder();
-        URL  url    = ClassPath.ofResource("Single-VM-Vagrantfile.rb").getURLs()[0];
-        VagrantFilePlatformSchema schema = new VagrantFilePlatformSchema("VM-3",
-                                                                         vmRoot,
-                                                                         url).setPublicHostName("192.168.56.210");
+        URL  url    = getClass().getResource("/Single-VM-Vagrantfile.rb");
+
+        assertThat(url, is(notNullValue()));
+
+        VagrantFilePlatformSchema schema = new VagrantFilePlatformSchema("VM-3", vmRoot, url)
+                .setPublicHostName("192.168.56.210");
 
         InfrastructureBuilder<Platform> builder = new InfrastructureBuilder<Platform>();
 
@@ -276,82 +172,6 @@ public class VagrantFunctionalTest
         {
             close(infra);
         }
-    }
-
-
-//  TODO: re-enable this test when Platforms support "default" options
-//     @Test
-//     public void shouldBuildInfrastructureFromExistingRemoteHosts() throws Exception
-//     {
-//         VagrantPlatform vagrant1        = (VagrantPlatform) infrastructure.getPlatform("VM-1");
-//         InetAddress     address1        = vagrant1.getPrivateInetAddress();
-//         int             port1           = vagrant1.getPort();
-//         String          userName1       = vagrant1.getUserName();
-//         Authentication  auth1           = vagrant1.getAuthentication();
-//
-//         VagrantPlatform vagrant2        = (VagrantPlatform) infrastructure.getPlatform("VM-2");
-//         InetAddress     address2        = vagrant2.getPrivateInetAddress();
-//         int             port2           = vagrant2.getPort();
-//         String          userName2       = vagrant2.getUserName();
-//         Authentication  auth2           = vagrant2.getAuthentication();
-//
-//         RemotePlatform  remotePlatform1 = new RemotePlatform("Remote-1", address1, port1, userName1, auth1);
-//         RemotePlatform  remotePlatform2 = new RemotePlatform("Remote-2", address2, port2, userName2, auth2);
-//
-//         remotePlatform1.setPublicAddress(vagrant1.getPublicInetAddress());
-//         remotePlatform1.setStrictHostChecking(false);
-//         remotePlatform2.setPublicAddress(vagrant2.getPublicInetAddress());
-//         remotePlatform2.setStrictHostChecking(false);
-//
-//         InfrastructureBuilder<Platform> builder = new InfrastructureBuilder<Platform>();
-//
-//         builder.addPlatform(remotePlatform1);
-//         builder.addPlatform(remotePlatform2);
-//
-//         Infrastructure<Platform> infra = builder.realize();
-//
-//         assertThat(infra.size(), is(2));
-//
-//         SimpleAssembly<CoherenceCacheServer> assembly = startCluster(infra, 2);
-//
-//         assertThat(assembly, is(notNullValue()));
-//
-//         try
-//         {
-//             CoherenceCacheServer cacheServer = assembly.get("Data-1@Remote-1");
-//
-//             assertThat(cacheServer, is(notNullValue()));
-//
-//             Eventually.assertThat(invoking(cacheServer).getClusterSize(), is(4));
-//         }
-//         finally
-//         {
-//             close(assembly);
-//         }
-//
-//     }
-
-    /**
-     * Start two Coherence cache server members on each of the {@link Platform}s
-     * in the specified {@link Infrastructure}.
-     *
-     * @param infra        the {@link Infrastructure} to start the storage nodes on
-     * @param memberCount  the number of Coherence members to start per {@link Platform}
-     *
-     * @return a {@link SimpleAssembly} containing the realized storage nodes
-     */
-    protected SimpleAssembly<CoherenceCacheServer> startCluster(Infrastructure<Platform> infra,
-                                                                int                      memberCount)
-    {
-        CoherenceCacheServerSchema schema =
-            new CoherenceCacheServerSchema().setCacheConfigURI("coherence-cache-config.xml");
-
-        InfrastructureAssemblyBuilder<Platform, CoherenceCacheServer, SimpleAssembly<CoherenceCacheServer>> builder =
-            new InfrastructureAssemblyBuilder<Platform, CoherenceCacheServer, SimpleAssembly<CoherenceCacheServer>>();
-
-        builder.addApplication("Data", schema, memberCount);
-
-        return builder.realize(infra, new SystemApplicationConsole());
     }
 
 

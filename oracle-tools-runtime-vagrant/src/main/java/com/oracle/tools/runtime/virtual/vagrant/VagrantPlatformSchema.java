@@ -28,9 +28,11 @@ package com.oracle.tools.runtime.virtual.vagrant;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -64,6 +66,20 @@ public class VagrantPlatformSchema extends AbstractVagrantPlatformSchema<Vagrant
     /** The network interfaces to add to the VM */
     private Map<String, VagrantNetworkSchema> networks;
 
+    /**
+     * The O/S of the Vagrant platform.
+     */
+    private String operatingSystem;
+
+    /**
+     * A {@link List} of {@link VagrantProvisioner}s to be run
+     */
+    private final List<VagrantProvisioner> provisioners;
+
+    /**
+     * A {@link List} of custom configuration lines.
+     */
+    private final List<String> configurationLines;
 
     /**
      * Constructs a new VagrantPlatformSchema
@@ -79,11 +95,14 @@ public class VagrantPlatformSchema extends AbstractVagrantPlatformSchema<Vagrant
         super(name, true, workingDirectory);
 
         this.boxName = boxName;
-        properties   = new LinkedHashMap<String, Object>();
-        networks     = new HashMap<String, VagrantNetworkSchema>();
+        properties   = new LinkedHashMap<>();
+        networks     = new HashMap<>();
 
         properties.put(CONFIG_VM_BOX, boxName);
         properties.put(CONFIG_VM_BOX_CHECK_UPDATE, false);
+
+        provisioners       = new ArrayList<>();
+        configurationLines = new ArrayList<>();
     }
 
 
@@ -193,6 +212,51 @@ public class VagrantPlatformSchema extends AbstractVagrantPlatformSchema<Vagrant
     }
 
 
+    public VagrantPlatformSchema withOS(String operatingSystem)
+    {
+        this.operatingSystem = operatingSystem;
+
+        return this;
+    }
+
+
+    /**
+     * Add the specified {@link VagrantProvisioner}s to the
+     * configuration.
+     *
+     * @param provisioners  the {@link VagrantProvisioner}s to add
+     *
+     * @return this {@link VagrantPlatformSchema} for method chaining
+     */
+    public VagrantPlatformSchema addProvisioner(VagrantProvisioner... provisioners)
+        {
+        for (VagrantProvisioner provisioner : provisioners)
+        {
+            if (provisioner != null)
+            {
+                this.provisioners.add(provisioner);
+            }
+        }
+
+            return this;
+        }
+
+
+    /**
+     * Add the specified custom configuration line to the Vagrantfile.
+     *
+     * @param configuration  the configuration to add
+     *
+     * @return this {@link VagrantPlatformSchema} for method chaining
+     */
+    public VagrantPlatformSchema addConfiguration(String configuration)
+    {
+        configurationLines.add(configuration);
+
+        return  this;
+    }
+
+
     /**
      * Write the vagrantFile configuration using the Vagrant VM
      * definition in this schema to the specified file.
@@ -247,6 +311,17 @@ public class VagrantPlatformSchema extends AbstractVagrantPlatformSchema<Vagrant
                                           String      prefix,
                                           String      padding)
     {
+        if (operatingSystem != null && !operatingSystem.isEmpty())
+            {
+            writer.println();
+            writer.println("" + operatingSystem);
+            }
+
+        writeProvisioners(writer, prefix, padding);
+        writer.println();
+        writeConfiguration(writer, padding);
+        writer.println();
+
         for (Map.Entry<String, Object> entry : properties.entrySet())
         {
             writeProperty(writer, entry.getKey(), entry.getValue(), prefix, padding);
@@ -320,6 +395,21 @@ public class VagrantPlatformSchema extends AbstractVagrantPlatformSchema<Vagrant
         }
 
         writer.printf("%s    %s%s = %s\n", sPad, sPrefix, sPropertyName, sValue);
-
     }
+
+    protected void writeProvisioners(PrintWriter writer, String prefix, String padding)
+        {
+        for (VagrantProvisioner provision : provisioners)
+            {
+            provision.write(writer, prefix, padding);
+            }
+        }
+
+    protected void writeConfiguration(PrintWriter writer, String padding)
+        {
+        for (String line : configurationLines)
+            {
+            writer.printf("%s%s\n", padding, line);
+            }
+        }
 }

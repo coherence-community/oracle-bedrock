@@ -29,6 +29,7 @@ import com.oracle.tools.runtime.Application;
 import com.oracle.tools.runtime.LocalPlatform;
 import com.oracle.tools.runtime.SimpleApplicationSchema;
 
+import com.oracle.tools.runtime.console.CapturingApplicationConsole;
 import com.oracle.tools.runtime.console.PipedApplicationConsole;
 
 import java.util.regex.Matcher;
@@ -96,6 +97,49 @@ public class VagrantChecker
         catch (Throwable e)
         {
             System.err.println("Error checking for Vagrant - assume not present. " + e.getMessage());
+
+            return false;
+        }
+    }
+
+    public synchronized static boolean vagrantExistsWithBox(String boxName)
+    {
+        if (!vagrantExists())
+        {
+            return false;
+        }
+
+        String                  command = VagrantPlatform.getDefaultVagrantCommand();
+        SimpleApplicationSchema schema  = new SimpleApplicationSchema(command)
+                .addArgument("box")
+                .addArgument("list");
+
+        try (CapturingApplicationConsole console = new CapturingApplicationConsole();
+             Application application = LocalPlatform.getInstance().realize("Vagrant", schema, console);)
+        {
+            int exitCode = application.waitFor();
+
+            if (exitCode != 0)
+            {
+                return false;
+            }
+
+            application.close();
+
+            for (String line : console.getCapturedOutputLines())
+            {
+                String[] parts = line.split(" ");
+                if (parts[0].equals(boxName))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+        catch (Throwable e)
+        {
+            System.err.println("Error checking for Vagrant box " + boxName + " - assume not present. " + e.getMessage());
 
             return false;
         }

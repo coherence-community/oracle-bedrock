@@ -5,7 +5,7 @@
 VAGRANTFILE_API_VERSION = "2"
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
-  config.vm.box = 'rel65-java'
+  config.vm.box = 'oracle/java8'
   config.vm.box_check_update=false
   config.vm.network 'private_network', ip: '192.168.56.210'
 end
