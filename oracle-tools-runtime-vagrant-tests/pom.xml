@@ -23,20 +23,6 @@
         </dependency>
 
         <dependency>
-            <groupId>com.oracle.tools.coherence</groupId>
-            <artifactId>coherence-3.7.1</artifactId>
-            <version>${project.version}</version>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>com.oracle.tools.coherence</groupId>
-            <artifactId>coherence-3.7.1-testing-support</artifactId>
-            <version>${project.version}</version>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
             <groupId>com.oracle.tools</groupId>
             <artifactId>oracle-tools-testing-support</artifactId>
             <version>${project.version}</version>

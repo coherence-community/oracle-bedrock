@@ -28,6 +28,7 @@ package com.oracle.tools.runtime.virtual.vagrant;
 import com.oracle.tools.Option;
 import com.oracle.tools.Options;
 
+import com.oracle.tools.options.Timeout;
 import com.oracle.tools.runtime.Application;
 import com.oracle.tools.runtime.ApplicationBuilder;
 import com.oracle.tools.runtime.ApplicationConsole;
@@ -57,6 +58,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 
 import java.util.Properties;
+import java.util.concurrent.TimeUnit;
 
 /**
  * A {@link com.oracle.tools.runtime.Platform} implementation that represents
@@ -190,7 +192,8 @@ public class VagrantPlatform extends VirtualPlatform
      */
     public void start()
     {
-        SimpleApplicationSchema schemaUp = instantiateSchema().addArgument("up");
+        SimpleApplicationSchema schemaUp = instantiateSchema()
+                .addArgument("up");
 
         execute(schemaUp);
 
@@ -261,6 +264,11 @@ public class VagrantPlatform extends VirtualPlatform
                     String key   = line.substring(0, index).trim();
                     String value = line.substring(index + 1).trim();
 
+                    if (value.charAt(0) == '"' && value.charAt(value.length() - 1) == '"')
+                    {
+                        value = value.substring(1, value.length() - 1);
+                    }
+
                     sshProperties.setProperty(key, value);
                 }
 
@@ -299,15 +307,6 @@ public class VagrantPlatform extends VirtualPlatform
     }
 
 
-    @SuppressWarnings("unchecked")
-    @Override
-    public <A extends Application,
-            B extends ApplicationBuilder<A, RemotePlatform>> B getApplicationBuilder(Class<A> applicationClass)
-    {
-        return super.getApplicationBuilder(applicationClass);
-    }
-
-
     /**
      * Execute the application defined by the specified {@link SimpleApplicationSchema}.
      *
@@ -316,10 +315,11 @@ public class VagrantPlatform extends VirtualPlatform
     protected void execute(SimpleApplicationSchema schema)
     {
         LocalPlatform platform = LocalPlatform.getInstance();
+        Timeout       timeout  = schema.getOptions().get(Timeout.class, Timeout.after(5, TimeUnit.MINUTES));
 
         try (Application application = platform.realize("Vagrant", schema, new SystemApplicationConsole()))
         {
-            application.waitFor();
+            application.waitFor(timeout);
         }
         catch (Exception e)
         {
@@ -337,7 +337,9 @@ public class VagrantPlatform extends VirtualPlatform
      */
     protected SimpleApplicationSchema instantiateSchema()
     {
-        return new SimpleApplicationSchema(vagrantCommand).setWorkingDirectory(vagrantFile);
+        return new SimpleApplicationSchema(vagrantCommand)
+                .setWorkingDirectory(vagrantFile)
+                .addOption(Timeout.after(5, TimeUnit.MINUTES));
     }
 
 
