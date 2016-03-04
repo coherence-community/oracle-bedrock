@@ -25,6 +25,8 @@
 
 package com.oracle.tools.runtime;
 
+import com.oracle.tools.Option;
+
 /**
  * A {@link PlatformBuilder} is responsible the creation of {@link Platform}s based on {@link PlatformSchema}s.
  * <p>
@@ -42,10 +44,11 @@ public interface PlatformBuilder<P extends Platform>
      *
      * @param name            the name for the {@link Platform} that will be realized
      * @param platformSchema  the {@link PlatformSchema} to use for realizing the {@link Platform}
+     * @param options         the {@link Option}s to use
      *
      * @return a {@link Platform} representing the platform realized by the {@link PlatformBuilder}
      *
      * @throws RuntimeException  when a problem occurs while starting the platform
      */
-    public <T extends P, S extends PlatformSchema<T>> T realize(String name, S platformSchema);
+    public <T extends P, S extends PlatformSchema<T>> T realize(String name, S platformSchema, Option... options);
 }

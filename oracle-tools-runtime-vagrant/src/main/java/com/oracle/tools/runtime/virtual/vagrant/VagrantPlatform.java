@@ -156,15 +156,26 @@ public class VagrantPlatform extends VirtualPlatform
     @Override
     public void close() throws IOException
     {
-        SimpleApplicationSchema schema = instantiateSchema();
+        close(new Option[0]);
+    }
 
-        CloseAction             action = getOptions().get(CloseAction.class);
+
+    @Override
+    public void close(Option... closeOptions) throws IOException
+    {
+        SimpleApplicationSchema schema = instantiateSchema();
+        Options                 options = new Options(getOptions());
+
+        options.addAll(closeOptions);
+
+        CloseAction action = options.get(CloseAction.class, CloseAction.Destroy);
 
         switch (action)
         {
         case None :
             return;
 
+        case Destroy:
         case PowerButton :
             schema.addArgument("destroy").addArgument("--force");
             break;

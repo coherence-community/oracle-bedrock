@@ -25,6 +25,8 @@
 
 package com.oracle.tools.runtime.virtual;
 
+import com.oracle.tools.Option;
+import com.oracle.tools.Options;
 import com.oracle.tools.runtime.FluentPlatformSchema;
 
 /**
@@ -45,8 +47,8 @@ public abstract class VirtualPlatformSchema<P extends VirtualPlatform,
     /** The name of the virtual machine */
     private String      name;
 
-    /** The {@link CloseAction} to take when the VM is closed */
-    private CloseAction closeAction;
+    /** The {@link Options} to pass to the platform */
+    private Options options;
 
     /** A flag indicating whether this schema can be used to realize multiple VMs */
     private boolean isSingleton = true;
@@ -62,6 +64,7 @@ public abstract class VirtualPlatformSchema<P extends VirtualPlatform,
     {
         this.name        = name;
         this.isSingleton = isSingleton;
+        this.options     = new Options();
     }
 
 
@@ -89,7 +92,7 @@ public abstract class VirtualPlatformSchema<P extends VirtualPlatform,
      */
     public CloseAction getCloseAction()
     {
-        return closeAction;
+        return this.options.get(CloseAction.class);
     }
 
 
@@ -98,13 +101,38 @@ public abstract class VirtualPlatformSchema<P extends VirtualPlatform,
      *
      * @param closeAction  the action to take on closing the VM
      *
-     * @return this {@Link VirtualPlatformSchema} for method chaining
+     * @return this {@link VirtualPlatformSchema} for method chaining
      */
     @SuppressWarnings("unchecked")
     public S setCloseAction(CloseAction closeAction)
     {
-        this.closeAction = closeAction;
+        this.options.add(closeAction);
 
         return (S) this;
+    }
+
+
+    /**
+     * Add an {@link Option} to be passed to the {@link VirtualPlatform}.
+     *
+     * @param option  the  {@link Option} to be passed to the {@link VirtualPlatform}
+     *
+     * @return this {@link VirtualPlatformSchema} for method chaining
+     */
+    public S addOption(Option option)
+    {
+        this.options.add(option);
+
+        return (S) this;
+    }
+
+    /**
+     * Obtain the {@link Options} that will be passed to the {@link VirtualPlatform}.
+     *
+     * @return  the {@link Options} that will be passed to the {@link VirtualPlatform}
+     */
+    public Options getOptions()
+    {
+        return options;
     }
 }

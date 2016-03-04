@@ -80,4 +80,17 @@ public abstract class VirtualPlatform extends RemotePlatform implements Closeabl
      */
     @Override
     public abstract void close() throws IOException;
+
+    /**
+     * Closes the {@link VirtualPlatform} by performing the
+     * any necessary {@link CloseAction} that has been specified
+     * as a {@link VirtualPlatform} {@link Option}.
+     *
+     * @param options  the {@link Option}s controlling the close operation
+     *
+     * @throws IOException
+     *
+     * @see java.io.Closeable
+     */
+    public abstract void close(Option... options) throws IOException;
 }

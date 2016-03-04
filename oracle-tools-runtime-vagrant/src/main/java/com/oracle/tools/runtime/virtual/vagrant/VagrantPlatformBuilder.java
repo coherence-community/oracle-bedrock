@@ -25,6 +25,7 @@
 
 package com.oracle.tools.runtime.virtual.vagrant;
 
+import com.oracle.tools.Option;
 import com.oracle.tools.runtime.PlatformBuilder;
 import com.oracle.tools.runtime.PlatformSchema;
 
@@ -53,10 +54,10 @@ public class VagrantPlatformBuilder<P extends VagrantPlatform> implements Platfo
 
     @Override
     @SuppressWarnings("unchecked")
-    public <T extends P, S extends PlatformSchema<T>> T realize(String name, S platformSchema)
+    public <T extends P, S extends PlatformSchema<T>> T realize(String name, S platformSchema, Option... options)
     {
         AbstractVagrantPlatformSchema schema   = (AbstractVagrantPlatformSchema) platformSchema;
-        VagrantPlatform               platform = schema.realize(name);
+        VagrantPlatform               platform = schema.realize(name, options);
 
         platform.start();
 

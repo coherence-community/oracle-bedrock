@@ -27,11 +27,13 @@ package com.oracle.tools.runtime.virtual.vagrant;
 
 import com.oracle.tools.Option;
 
+import com.oracle.tools.options.Timeout;
 import com.oracle.tools.runtime.virtual.CloseAction;
 import com.oracle.tools.runtime.virtual.VirtualPlatformSchema;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 /**
  * A base {@link com.oracle.tools.runtime.PlatformSchema} to represent the definition
@@ -65,7 +67,9 @@ public abstract class AbstractVagrantPlatformSchema<S extends AbstractVagrantPla
     {
         super(name, isSingleton);
         this.workingDirectory = workingDirectory != null ? workingDirectory : new File(".");
-        setCloseAction(CloseAction.PowerButton);
+
+        addOption(CloseAction.Destroy);
+        addOption(Timeout.after(5, TimeUnit.MINUTES));
     }
 
 
@@ -119,9 +123,10 @@ public abstract class AbstractVagrantPlatformSchema<S extends AbstractVagrantPla
      * definition in this schema to the working directory and instantiate
      * a {@link VagrantPlatform} based on the configuration.
      *
-     * @param name  the name to assign to the {@link VagrantPlatform}
+     * @param name     the name to assign to the {@link VagrantPlatform}
+     * @param options  the {@link Option}s to use
      */
-    public VagrantPlatform realize(String name)
+    public VagrantPlatform realize(String name, Option... options)
     {
         File workingDir = ensureWorkingDirectory(name);
 
@@ -129,7 +134,7 @@ public abstract class AbstractVagrantPlatformSchema<S extends AbstractVagrantPla
         {
             File vagrantFile = new File(workingDir, "Vagrantfile");
 
-            return realize(name, vagrantFile);
+            return realize(name, vagrantFile, options);
         }
         catch (IOException e)
         {
@@ -145,9 +150,11 @@ public abstract class AbstractVagrantPlatformSchema<S extends AbstractVagrantPla
      *
      * @param name         the name to assign to the {@link VagrantPlatform}
      * @param vagrantFile  the {@link java.io.File} to write the Vagrant configuration to
+     * @param options      the {@link Option}s to use
      */
-    protected abstract VagrantPlatform realize(String name,
-                                               File   vagrantFile) throws IOException;
+    protected abstract VagrantPlatform realize(String    name,
+                                               File      vagrantFile,
+                                               Option... options) throws IOException;
 
 
     /**

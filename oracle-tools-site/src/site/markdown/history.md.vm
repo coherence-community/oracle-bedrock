@@ -757,6 +757,10 @@ reverse chronological order.
 *   [ORACLETOOLS-232](https://java.net/jira/browse/ORACLETOOLS-232): Fixed bug
     where a VagrantPlatform may use the wrong port for SSH connections.
 
+*   [ORACLETOOLS-301](https://java.net/jira/browse/ORACLETOOLS-301): Fixed bug
+    where a VagrantPlatform uses the default CloseAction of shutdown instead
+    of destroy.
+
 <h4>oracle-tools-runtime-virtual</h4>
 
 *   [ORACLETOOLS-115](https://java.net/jira/browse/ORACLETOOLS-115): Introduced
