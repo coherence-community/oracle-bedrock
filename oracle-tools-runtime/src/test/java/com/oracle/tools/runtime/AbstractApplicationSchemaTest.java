@@ -1,14 +1,18 @@
 package com.oracle.tools.runtime;
 
+import com.oracle.tools.Options;
 import com.oracle.tools.runtime.options.Argument;
 import com.oracle.tools.runtime.options.Arguments;
+import com.oracle.tools.runtime.options.WorkingDirectory;
 import org.junit.Test;
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.CoreMatchers.sameInstance;
 import static org.junit.Assert.assertThat;
 
 /**
@@ -167,6 +171,52 @@ public class AbstractApplicationSchemaTest
         List<String> argList = arguments.realize(LocalPlatform.getInstance(), schema);
 
         assertThat(argList, is(Arrays.asList(args)));
+    }
+
+
+    @Test
+    public void shouldSetWorkingDirectoryToFile() throws Exception
+    {
+        AbstractApplicationSchema schema  = new AbstractApplicationSchemaStub();
+        Options                   options = schema.getOptions();
+        File                      file    = new File(".");
+
+        schema.setWorkingDirectory(file);
+
+        WorkingDirectory workingDirectory = options.get(WorkingDirectory.class);
+
+        assertThat(workingDirectory, is(notNullValue()));
+        assertThat(workingDirectory.getValue(), is((Object) file));
+    }
+
+
+    @Test
+    public void shouldSetWorkingDirectoryToObject() throws Exception
+    {
+        AbstractApplicationSchema schema  = new AbstractApplicationSchemaStub();
+        Options                   options = schema.getOptions();
+
+        schema.setWorkingDirectory("foo");
+
+        WorkingDirectory workingDirectory = options.get(WorkingDirectory.class);
+
+        assertThat(workingDirectory, is(notNullValue()));
+        assertThat(workingDirectory.getValue(), is((Object) "foo"));
+    }
+
+
+    @Test
+    public void shouldSetWorkingDirectory() throws Exception
+    {
+        AbstractApplicationSchema schema  = new AbstractApplicationSchemaStub();
+        Options                   options = schema.getOptions();
+        WorkingDirectory          tempDir = WorkingDirectory.temporaryDirectory();
+
+        schema.setWorkingDirectory(tempDir);
+
+        WorkingDirectory workingDirectory = options.get(WorkingDirectory.class);
+
+        assertThat(workingDirectory, is(sameInstance(tempDir)));
     }
 
 

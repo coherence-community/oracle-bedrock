@@ -31,6 +31,7 @@ import com.oracle.tools.Options;
 import com.oracle.tools.options.Timeout;
 import com.oracle.tools.runtime.options.Argument;
 import com.oracle.tools.runtime.options.Arguments;
+import com.oracle.tools.runtime.options.WorkingDirectory;
 
 import java.io.File;
 
@@ -57,11 +58,6 @@ public abstract class AbstractApplicationSchema<A extends Application, S extends
     private String executableName;
 
     /**
-     * The working directory for the application.
-     */
-    private File workingDirectory;
-
-    /**
      * The {@link ApplicationListener}s for {@link Application}s
      * realized from the {@link ApplicationSchema}.
      */
@@ -82,7 +78,6 @@ public abstract class AbstractApplicationSchema<A extends Application, S extends
     public AbstractApplicationSchema(ApplicationSchema<A> schema)
     {
         this.executableName       = schema.getExecutableName();
-        this.workingDirectory     = schema.getWorkingDirectory();
         this.listeners            = new LinkedList<ApplicationListener<? super A>>();
         this.options              = new Options(schema.getOptions());
 
@@ -117,13 +112,6 @@ public abstract class AbstractApplicationSchema<A extends Application, S extends
     }
 
 
-    @Override
-    public File getWorkingDirectory()
-    {
-        return workingDirectory;
-    }
-
-
     /**
      * Sets the working directory in which the {@link Application} will start.
      *
@@ -134,7 +122,36 @@ public abstract class AbstractApplicationSchema<A extends Application, S extends
     @SuppressWarnings("unchecked")
     public S setWorkingDirectory(File workingDirectory)
     {
-        this.workingDirectory = workingDirectory;
+        return setWorkingDirectory(WorkingDirectory.at(workingDirectory));
+    }
+
+
+    /**
+     * Sets the working directory in which the {@link Application} will start.
+     *
+     * @param  workingDirectory the value to use to determine the working directory to use
+     *
+     * @return the {@link ApplicationSchema} (so that we can perform method chaining)
+     */
+    @SuppressWarnings("unchecked")
+    public S setWorkingDirectory(Object workingDirectory)
+    {
+        return setWorkingDirectory(WorkingDirectory.at(workingDirectory));
+    }
+
+
+    /**
+     * Sets the working directory in which the {@link Application} will start.
+     *
+     * @param  workingDirectory the {@link WorkingDirectory} option to use to
+     *                          determine the working directory to use
+     *
+     * @return the {@link ApplicationSchema} (so that we can perform method chaining)
+     */
+    @SuppressWarnings("unchecked")
+    public S setWorkingDirectory(WorkingDirectory workingDirectory)
+    {
+        this.addOption(workingDirectory);
 
         return (S) this;
     }

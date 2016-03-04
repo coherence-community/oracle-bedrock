@@ -47,6 +47,8 @@ import com.oracle.tools.runtime.java.SimpleJavaApplicationSchema;
 import com.oracle.tools.runtime.java.options.JavaHome;
 import com.oracle.tools.runtime.java.profiles.RemoteDebugging;
 
+import com.oracle.tools.runtime.options.PlatformSeparators;
+import com.oracle.tools.runtime.options.WorkingDirectory;
 import com.oracle.tools.runtime.remote.AbstractRemoteTest;
 import com.oracle.tools.runtime.remote.RemotePlatform;
 import com.oracle.tools.runtime.remote.java.applications.SleepingApplication;
@@ -55,7 +57,9 @@ import com.oracle.tools.util.Capture;
 
 import org.junit.Assert;
 import org.junit.Assume;
+import org.junit.ClassRule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 
 import static com.oracle.tools.deferred.DeferredHelper.invoking;
 
@@ -87,6 +91,10 @@ import java.util.List;
  */
 public class RemoteJavaApplicationBuilderTest extends AbstractRemoteTest
 {
+    @ClassRule
+    public static TemporaryFolder temporaryFolder = new TemporaryFolder();
+
+
     /**
      * Ensure that we can launch Java remotely.
      */
@@ -442,6 +450,36 @@ public class RemoteJavaApplicationBuilderTest extends AbstractRemoteTest
         finally
         {
             System.getProperties().remove("oracletools.runtime.inherit.property");
+        }
+    }
+
+
+    @Test
+    public void shouldSetWorkingDirectory() throws Exception
+    {
+        String                      appName = "sleeping";
+        File                        folder  = temporaryFolder.newFolder();
+        SimpleJavaApplicationSchema schema  = new SimpleJavaApplicationSchema(SleepingApplication.class.getName())
+                .setWorkingDirectory(WorkingDirectory.subDirectoryOf(folder));
+
+        String appNameSanitized  = PlatformSeparators.autoDetect().asSanitizedFileName(appName);
+        File   expectedDirectory = new File(folder, appNameSanitized);
+
+        // build and start the SleepingApplication
+        Platform           platform = getRemotePlatform();
+
+        ApplicationConsole console  = new SystemApplicationConsole();
+
+        try (SimpleJavaApplication application = platform.realize(appName, schema, console))
+        {
+            String dir = application.submit(new GetWorkingDirectory());
+
+            Assert.assertThat(dir, is(expectedDirectory.getCanonicalPath()));
+
+            WorkingDirectory workingDir = application.getOptions().get(WorkingDirectory.class);
+
+            Assert.assertThat(workingDir, is(notNullValue()));
+            Assert.assertThat(workingDir.getValue(), is((Object) expectedDirectory));
         }
     }
 

@@ -33,6 +33,7 @@ import com.oracle.tools.lang.StringHelper;
 import com.oracle.tools.runtime.options.Arguments;
 import com.oracle.tools.runtime.options.EnvironmentVariables;
 import com.oracle.tools.runtime.options.ErrorStreamRedirection;
+import com.oracle.tools.runtime.options.WorkingDirectory;
 
 import java.io.File;
 import java.io.IOException;
@@ -95,7 +96,14 @@ public class SimpleApplicationBuilder extends AbstractApplicationBuilder<SimpleA
         // ----- establish the working directory -----
 
         // set the working directory for the Process
-        File directory = schema.getWorkingDirectory();
+        WorkingDirectory workingDirectory = options.get(WorkingDirectory.class, WorkingDirectory.currentDirectory());
+        File             directory        = workingDirectory.realize(applicationName,
+                                                                     platform,
+                                                                     schema,
+                                                                     options.asArray());
+
+        // Set the resolved working directory back into the options
+        options.add(WorkingDirectory.at(directory));
 
         if (directory != null)
         {

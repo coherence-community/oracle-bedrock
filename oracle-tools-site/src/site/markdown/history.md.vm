@@ -665,6 +665,10 @@ reverse chronological order.
     ApplicationBuilder.Supplier as an Option when defining or realizing an
     Applicaton.
 
+*   [ORACLETOOLS-300](https://java.net/jira/browse/ORACLETOOLS-300): Introduced
+    the WorkingDirectory option to allow more flexible ways to specify the
+    value to use to determine the working directory when realizing an application.
+
 <h4>oracle-tools-runtime-jacoco</h4>
 
 *   [ORACLETOOLS-290](https://java.net/jira/browse/ORACLETOOLS-290): Introduced

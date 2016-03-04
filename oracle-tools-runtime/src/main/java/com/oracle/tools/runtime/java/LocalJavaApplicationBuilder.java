@@ -64,6 +64,7 @@ import com.oracle.tools.runtime.options.EnvironmentVariables;
 import com.oracle.tools.runtime.options.ErrorStreamRedirection;
 import com.oracle.tools.runtime.options.Orphanable;
 
+import com.oracle.tools.runtime.options.WorkingDirectory;
 import com.oracle.tools.table.Cell;
 import com.oracle.tools.table.Table;
 import com.oracle.tools.table.Tabularize;
@@ -184,7 +185,14 @@ public class LocalJavaApplicationBuilder<A extends JavaApplication>
         // ----- establish the working directory -----
 
         // set the working directory for the Process
-        File directory = schema.getWorkingDirectory();
+        WorkingDirectory workingDirectory = options.get(WorkingDirectory.class, WorkingDirectory.currentDirectory());
+        File             directory        = workingDirectory.realize(applicationName,
+                                                                     platform,
+                                                                     schema,
+                                                                     options.asArray());
+
+        // Set the resolved working directory back into the options
+        options.add(WorkingDirectory.at(directory));
 
         if (directory != null)
         {
