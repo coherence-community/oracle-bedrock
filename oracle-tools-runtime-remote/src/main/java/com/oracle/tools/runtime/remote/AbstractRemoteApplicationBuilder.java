@@ -239,7 +239,7 @@ public abstract class AbstractRemoteApplicationBuilder<A extends Application, E 
         PlatformSeparators separators = options.get(PlatformSeparators.class);
 
         // assume the remote directory is the working directory
-        WorkingDirectory workingDirectory    = options.get(WorkingDirectory.class, WorkingDirectory.currentDirectory());
+        WorkingDirectory workingDirectory    = options.get(WorkingDirectory.class, WorkingDirectory.temporaryDirectory());
         File             remoteDirectoryFile = workingDirectory.realize(applicationName,
                                                                      platform,
                                                                      applicationSchema,
