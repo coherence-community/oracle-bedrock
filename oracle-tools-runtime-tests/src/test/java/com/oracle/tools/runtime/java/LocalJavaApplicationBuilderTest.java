@@ -61,11 +61,15 @@ import com.oracle.tools.runtime.java.profiles.RemoteDebugging;
 
 import com.oracle.tools.runtime.options.Orphanable;
 
+import com.oracle.tools.runtime.options.PlatformSeparators;
+import com.oracle.tools.runtime.options.WorkingDirectory;
 import com.oracle.tools.util.Capture;
 
 import org.junit.Assume;
+import org.junit.ClassRule;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 
 import static com.oracle.tools.deferred.DeferredHelper.delayedBy;
 import static com.oracle.tools.deferred.DeferredHelper.invoking;
@@ -82,6 +86,7 @@ import static org.hamcrest.CoreMatchers.startsWith;
 
 import static org.junit.Assert.assertThat;
 
+import java.io.File;
 import java.io.IOException;
 
 import java.net.InetSocketAddress;
@@ -104,6 +109,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class LocalJavaApplicationBuilderTest extends AbstractJavaApplicationBuilderTest<LocalPlatform>
 {
+    @ClassRule
+    public static TemporaryFolder temporaryFolder = new TemporaryFolder();
+
+
     @Override
     public JavaApplicationBuilder<JavaApplication, LocalPlatform> newJavaApplicationBuilder()
     {
@@ -773,6 +782,36 @@ public class LocalJavaApplicationBuilderTest extends AbstractJavaApplicationBuil
             }
 
             assertThat(commercialFeaturesArgument, is(not(nullValue())));
+        }
+    }
+
+
+    @Test
+    public void shouldSetWorkingDirectory() throws Exception
+    {
+        String                      appName = "TestApp";
+        File                        folder  = temporaryFolder.newFolder();
+        SimpleJavaApplicationSchema schema  = new SimpleJavaApplicationSchema(SleepingApplication.class.getName())
+                .setWorkingDirectory(WorkingDirectory.subDirectoryOf(folder));
+
+        String appNameSanitized  = PlatformSeparators.autoDetect().asSanitizedFileName(appName);
+        File   expectedDirectory = new File(folder, appNameSanitized);
+
+        expectedDirectory.mkdirs();
+
+        try (SimpleJavaApplication app = LocalPlatform.getInstance().realize(appName,
+                                                                             schema,
+                                                                             new SystemApplicationConsole(),
+                                                                             CommercialFeatures.enabled()))
+        {
+            String dir = app.submit(new GetWorkingDirectory());
+
+            assertThat(dir, is(expectedDirectory.getCanonicalPath()));
+
+            WorkingDirectory workingDir = app.getOptions().get(WorkingDirectory.class);
+
+            assertThat(workingDir, is(notNullValue()));
+            assertThat(workingDir.getValue(), is((Object) expectedDirectory));
         }
     }
 

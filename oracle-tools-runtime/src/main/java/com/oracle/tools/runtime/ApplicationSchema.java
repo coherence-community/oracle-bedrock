@@ -64,15 +64,6 @@ public interface ApplicationSchema<A extends Application>
 
 
     /**
-     * Obtains the {@link File} representing the directory in which the
-     * application will execute.
-     *
-     * @return the directory in which the application will run
-     */
-    public File getWorkingDirectory();
-
-
-    /**
      * Obtains the {@link ApplicationListener}s that will be attached to
      * {@link Application}s produced by this {@link ApplicationSchema}.
      * <p>

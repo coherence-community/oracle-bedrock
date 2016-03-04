@@ -28,6 +28,7 @@ package com.oracle.tools.runtime;
 import com.oracle.tools.runtime.options.Arguments;
 import com.oracle.tools.runtime.options.EnvironmentVariables;
 
+import com.oracle.tools.runtime.options.WorkingDirectory;
 import org.hamcrest.Matchers;
 
 import org.junit.Test;
@@ -81,7 +82,10 @@ public class SimpleApplicationSchemaTest
         SimpleApplicationSchema schema    = new SimpleApplicationSchema("test.sh");
 
         schema.setWorkingDirectory(directory);
-        assertThat(schema.getWorkingDirectory(), Matchers.is(directory));
+
+        WorkingDirectory workingDirectory = schema.getOptions().get(WorkingDirectory.class);
+
+        assertThat(workingDirectory.getValue(), is((Object) directory));
     }
 
 

@@ -44,6 +44,7 @@ import com.oracle.tools.runtime.options.PlatformSeparators;
 import com.oracle.tools.runtime.options.Shell;
 import com.oracle.tools.runtime.options.TemporaryDirectory;
 
+import com.oracle.tools.runtime.options.WorkingDirectory;
 import com.oracle.tools.runtime.remote.options.Deployer;
 import com.oracle.tools.runtime.remote.options.Deployment;
 import com.oracle.tools.runtime.remote.ssh.SftpDeployer;
@@ -238,30 +239,24 @@ public abstract class AbstractRemoteApplicationBuilder<A extends Application, E 
         PlatformSeparators separators = options.get(PlatformSeparators.class);
 
         // assume the remote directory is the working directory
-        File   remoteDirectoryFile = applicationSchema.getWorkingDirectory();
-
-        String remoteDirectory;
+        WorkingDirectory workingDirectory    = options.get(WorkingDirectory.class, WorkingDirectory.currentDirectory());
+        File             remoteDirectoryFile = workingDirectory.realize(applicationName,
+                                                                     platform,
+                                                                     applicationSchema,
+                                                                     options.asArray());
 
         if (remoteDirectoryFile == null)
         {
-            String   sanitizedApplicationName = separators.asSanitizedFileName(applicationName);
-            Calendar now                      = Calendar.getInstance();
-            String temporaryDirectoryName = String.format("%1$s-%2$tY%2$tm%2$td-%2$tH%2$tM%2$tS-%2$tL",
-                                                          sanitizedApplicationName,
-                                                          now);
-
-            // determine the remote TemporaryDirectory
-            TemporaryDirectory temporaryDirectory = options.get(TemporaryDirectory.class,
-                                                                TemporaryDirectory.at(separators.getFileSeparator()
-                                                                                      + "tmp"));
-
-            remoteDirectoryFile = new File(temporaryDirectory.get().toFile(), temporaryDirectoryName);
-            remoteDirectory     = separators.asRemotePlatformFileName(remoteDirectoryFile.toString());
+            remoteDirectoryFile = WorkingDirectory.temporaryDirectory().realize(applicationName,
+                                                          platform,
+                                                          applicationSchema,
+                                                          options.asArray());
         }
-        else
-        {
-            remoteDirectory = separators.asRemotePlatformFileName(remoteDirectoryFile.toString());
-        }
+
+        String remoteDirectory = separators.asRemotePlatformFileName(remoteDirectoryFile.toString());
+
+        // Set the resolved working directory back into the options
+        options.add(WorkingDirectory.at(remoteDirectoryFile));
 
         // Obtain the RemoteShell that will be used to realize the process
         RemoteTerminalBuilder   terminalBuilder = options.get(RemoteTerminalBuilder.class, RemoteTerminals.ssh());
