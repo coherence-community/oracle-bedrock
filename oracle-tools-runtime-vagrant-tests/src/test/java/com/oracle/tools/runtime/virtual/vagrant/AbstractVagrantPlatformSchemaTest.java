@@ -25,6 +25,7 @@
 
 package com.oracle.tools.runtime.virtual.vagrant;
 
+import com.oracle.tools.Option;
 import com.oracle.tools.runtime.virtual.CloseAction;
 
 import org.junit.ClassRule;
@@ -85,7 +86,7 @@ public class AbstractVagrantPlatformSchemaTest
     {
         AbstractVagrantPlatformSchema schema = new AbstractVagrantPlatformSchemaStub("Test", true, null);
 
-        assertThat(schema.getCloseAction(), is(CloseAction.PowerButton));
+        assertThat(schema.getCloseAction(), is(CloseAction.Destroy));
     }
 
 
@@ -170,8 +171,9 @@ public class AbstractVagrantPlatformSchemaTest
 
 
         @Override
-        protected VagrantPlatform realize(String name,
-                                          File   vagrantFile) throws IOException
+        protected VagrantPlatform realize(String    name,
+                                          File      vagrantFile,
+                                          Option... options) throws IOException
         {
             return null;
         }

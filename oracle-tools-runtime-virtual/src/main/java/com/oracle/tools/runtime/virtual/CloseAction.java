@@ -41,6 +41,9 @@ public enum CloseAction implements Option
     /** When close is called on the {@link VirtualPlatform} do nothing */
     None,
 
+    /** When close is called on the {@link VirtualPlatform} shut down and destroy the VM */
+    Destroy,
+
     /** When close is called on the {@link VirtualPlatform} simulate pressing the power button */
     PowerButton,
 

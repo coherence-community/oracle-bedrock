@@ -25,6 +25,9 @@
 
 package com.oracle.tools.runtime.virtual.vagrant;
 
+import com.oracle.tools.Option;
+import com.oracle.tools.Options;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -261,10 +264,12 @@ public class VagrantPlatformSchema extends AbstractVagrantPlatformSchema<Vagrant
      * Write the vagrantFile configuration using the Vagrant VM
      * definition in this schema to the specified file.
      *
-     * @param name         the name to assign to the{@link VagrantPlatform}
-     * @param vagrantFile  the {@link java.io.File} to wrote the Vagrant configuration to
+     * @param name             the name to assign to the{@link VagrantPlatform}
+     * @param vagrantFile      the {@link java.io.File} to wrote the Vagrant configuration to
+     * @param platformOptions  the {@link Option}s to use
      */
-    protected VagrantPlatform realize(String name, File vagrantFile) throws IOException
+    @Override
+    protected VagrantPlatform realize(String name, File vagrantFile, Option... platformOptions) throws IOException
     {
         PrintWriter writer = null;
 
@@ -287,8 +292,10 @@ public class VagrantPlatformSchema extends AbstractVagrantPlatformSchema<Vagrant
             writer.println("end");
             writer.flush();
 
+            Options options = new Options(getOptions()).addAll(platformOptions);
+
             return instantiatePlatform(name, vagrantFile.getParentFile(), publicHostName,
-                                       getRemotePort(), getCloseAction());
+                                       getRemotePort(), options.asArray());
         }
         finally
         {
