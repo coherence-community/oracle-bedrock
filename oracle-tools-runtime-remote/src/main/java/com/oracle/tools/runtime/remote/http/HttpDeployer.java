@@ -272,7 +272,7 @@ public abstract class HttpDeployer implements Deployer
                 }
                 else
                 {
-                    destinationParentFolder = separators.asRemotePlatformFileName(destinationFile.getParent());
+                    destinationParentFolder = separators.asPlatformFileName(destinationFile.getParent());
 
                     if (destinationParentFolder == null)
                     {

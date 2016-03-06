@@ -42,7 +42,6 @@ import com.oracle.tools.runtime.PropertiesBuilder;
 import com.oracle.tools.runtime.options.Arguments;
 import com.oracle.tools.runtime.options.PlatformSeparators;
 import com.oracle.tools.runtime.options.Shell;
-import com.oracle.tools.runtime.options.TemporaryDirectory;
 
 import com.oracle.tools.runtime.options.WorkingDirectory;
 import com.oracle.tools.runtime.remote.options.Deployer;
@@ -52,7 +51,6 @@ import com.oracle.tools.runtime.remote.ssh.SftpDeployer;
 import java.io.File;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
@@ -253,7 +251,7 @@ public abstract class AbstractRemoteApplicationBuilder<A extends Application, E 
                                                           options.asArray());
         }
 
-        String remoteDirectory = separators.asRemotePlatformFileName(remoteDirectoryFile.toString());
+        String remoteDirectory = separators.asPlatformFileName(remoteDirectoryFile.toString());
 
         // Set the resolved working directory back into the options
         options.add(WorkingDirectory.at(remoteDirectoryFile));

@@ -26,10 +26,11 @@
 package com.oracle.tools.runtime.options;
 
 import com.oracle.tools.Option;
-
 import com.oracle.tools.Options;
+
 import com.oracle.tools.lang.StringHelper;
 
+import com.oracle.tools.runtime.LocalPlatform;
 import com.oracle.tools.runtime.Platform;
 
 import java.io.File;
@@ -123,14 +124,14 @@ public class PlatformSeparators implements Option
 
 
     /**
-     * Creates a remote-platform specific filename, given a fileName
-     * represented in a format for this platform.
+     * Obtains a platform specific representation of the specified filename (represented according
+     * to the current {@link LocalPlatform}) using the {@link PlatformSeparators}.
      *
-     * @param fileName the file name to convert
+     * @param fileName  the file name for the current {@link LocalPlatform}
      *
-     * @return the file as it would be represented by the remote platform
+     * @return  the file as it would be represented by a {@link Platform} using these {@link PlatformSeparators}
      */
-    public String asRemotePlatformFileName(String fileName)
+    public String asPlatformFileName(String fileName)
     {
         return fileName == null ? null : fileName.replace(File.separator, getFileSeparator());
     }
@@ -154,8 +155,8 @@ public class PlatformSeparators implements Option
         else
         {
             StringBuilder builder = new StringBuilder(fileName.length());
-            String valid = "1234567890abcdefghijklmnopqrstuvwxyz.~" + File.separatorChar + getFileSeparator();
-            char last = '\0';
+            String        valid   = "1234567890abcdefghijklmnopqrstuvwxyz.~" + File.separatorChar + getFileSeparator();
+            char          last    = '\0';
 
             fileName = fileName.toLowerCase();
 
@@ -246,7 +247,9 @@ public class PlatformSeparators implements Option
      *
      * @return the custom {@link PlatformSeparators}
      */
-    public static PlatformSeparators custom(String fileSeparator, String pathSeparator, String lineSeparator)
+    public static PlatformSeparators custom(String fileSeparator,
+                                            String pathSeparator,
+                                            String lineSeparator)
     {
         return new PlatformSeparators(fileSeparator, pathSeparator, lineSeparator);
     }
@@ -272,6 +275,7 @@ public class PlatformSeparators implements Option
     {
         return new PlatformSeparators("/", ":", "\n");
     }
+
 
     /**
      * Obtains suitable {@link PlatformSeparators} for typical Cygwin-based platforms.

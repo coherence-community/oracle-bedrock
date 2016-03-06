@@ -103,17 +103,17 @@ public abstract class FileShareDeployer implements Deployer
                 }
                 else
                 {
-                    String destinationFilePath = separators.asRemotePlatformFileName(destinationFile.getParent());
+                    String destinationFilePath = separators.asPlatformFileName(destinationFile.getParent());
 
                     String dirName;
                     if (destinationFilePath == null)
                     {
-                        dirName     = separators.asRemotePlatformFileName(remoteDirectory);
+                        dirName     = separators.asPlatformFileName(remoteDirectory);
                         destination = dirName + separators.getFileSeparator() + destinationFile.getPath();
                     }
                     else
                     {
-                        destination = separators.asRemotePlatformFileName(destinationFile.getCanonicalPath());
+                        destination = separators.asPlatformFileName(destinationFile.getCanonicalPath());
                     }
                 }
 
