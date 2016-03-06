@@ -162,16 +162,16 @@ public class SftpDeployer implements Deployer
                         }
                         else
                         {
-                            String destinationFilePath = separators.asRemotePlatformFileName(destinationFile.getParent());
+                            String destinationFilePath = separators.asPlatformFileName(destinationFile.getParent());
 
                             String dirName;
                             if (destinationFilePath == null)
                             {
-                                dirName = separators.asRemotePlatformFileName(remoteDirectory);
+                                dirName = separators.asPlatformFileName(remoteDirectory);
                             }
                             else
                             {
-                                dirName = separators.asRemotePlatformFileName(destinationFilePath);
+                                dirName = separators.asPlatformFileName(destinationFilePath);
                             }
 
                             sftpChannel.cd(dirName);
