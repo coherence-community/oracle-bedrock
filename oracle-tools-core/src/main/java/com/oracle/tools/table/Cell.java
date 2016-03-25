@@ -43,41 +43,6 @@ import java.util.ArrayList;
 public class Cell
 {
     /**
-     * An {@link Option} to define how the content of a {@link Cell} is to be justified.
-     */
-    public enum Justification implements Option
-    {
-        /**
-         * {@link Cell} content should be left justified.
-         */
-        @Options.Default
-        LEFT,
-
-        /**
-         * {@link Cell} content should be right justified.
-         */
-        RIGHT;
-
-        /**
-         * Formats the specified content in the specified width according
-         * to the mode of justification.
-         *
-         * @param content  the content to format
-         * @param width    the width of the field in which to format the content
-         *
-         * @return  the content formatted and justified in the specified field width
-         *          (including padding with white space)
-         */
-        public String format(String content,
-                             int    width)
-        {
-            return this == LEFT ? String.format("%1$-" + width + "s",
-                                                content) : String.format("%1$" + width + "s", content);
-        }
-    }
-
-
-    /**
      * The lines of content (zero or more) in the {@link Cell}.
      */
     private ArrayList<String> lines;
@@ -111,6 +76,42 @@ public class Cell
         }
 
         this.options = new Options();
+    }
+
+
+    /**
+     * An {@link Option} to define how the content of a {@link Cell} is to be justified.
+     */
+    public enum Justification implements Option
+    {
+        /**
+         * {@link Cell} content should be left justified.
+         */
+        @Options.Default
+        LEFT,
+
+        /**
+         * {@link Cell} content should be right justified.
+         */
+        RIGHT;
+
+        /**
+         * Formats the specified content in the specified width according
+         * to the mode of justification.
+         *
+         * @param content  the content to format
+         * @param width    the width of the field in which to format the content
+         *
+         * @return  the content formatted and justified in the specified field width
+         *          (including padding with white space)
+         */
+        public String format(String content,
+                             int    width)
+        {
+            return width <= 0 ? "" : this == LEFT ? String.format("%1$-" + width + "s",
+                                                                  content) : String.format("%1$" + width + "s",
+                                                                                           content);
+        }
     }
 
 

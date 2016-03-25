@@ -29,9 +29,9 @@ import com.oracle.tools.junit.AbstractTest;
 
 import com.oracle.tools.runtime.LocalPlatform;
 
-import org.junit.Test;
+import com.oracle.tools.runtime.java.features.JmxFeature;
 
-import static com.oracle.tools.runtime.java.JavaApplication.SUN_MANAGEMENT_JMXREMOTE;
+import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.is;
 
@@ -79,12 +79,12 @@ public class ContainerMBeanServerBuilderTest extends AbstractTest
             // here as it defaults to using the "hostname", which when on VPN
             // is often incorrect (ie: the real IP address instead of the routable
             // VPN address).
-            System.setProperty("java.rmi.server.hostname", LocalPlatform.getInstance().getAddress().getHostAddress());
+            System.setProperty("java.rmi.server.hostname", LocalPlatform.get().getAddress().getHostAddress());
 
             // we're going to be performing jmx container
             System.setProperty("javax.management.builder.initial",
                                DelegatingMBeanServerBuilder.class.getCanonicalName());
-            System.setProperty(SUN_MANAGEMENT_JMXREMOTE, "true");
+            System.setProperty(JmxFeature.SUN_MANAGEMENT_JMXREMOTE, "true");
 
             String domain = "Test";
 

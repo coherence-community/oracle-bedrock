@@ -25,7 +25,6 @@
 
 package com.oracle.tools.table;
 
-import com.oracle.tools.Option;
 import com.oracle.tools.Options;
 
 import static com.oracle.tools.lang.StringHelper.trimTrailingWhiteSpace;
@@ -235,8 +234,8 @@ public class Table implements Iterable<Row>
 
                 // determine the width of the cell
                 // (use the width is defined by the cell, then the row, then the table)
-                Cell.Width width = options.get(Cell.Width.class,
-                                               row.getOptions().get(Cell.Width.class,
+                Cell.Width width = options.getOrDefault(Cell.Width.class,
+                                               row.getOptions().getOrDefault(Cell.Width.class,
                                                                     this.getOptions().get(Cell.Width.class)));
 
                 int cellWidth;
@@ -302,9 +301,9 @@ public class Table implements Iterable<Row>
 
                     // determine the cell justification
                     // (use the justification defined by the cell, then the row, then the table)
-                    Cell.Justification justification = cell.getOptions().get(Cell.Justification.class,
+                    Cell.Justification justification = cell.getOptions().getOrDefault(Cell.Justification.class,
                                                                              row.getOptions()
-                                                                                 .get(Cell.Justification.class,
+                                                                                 .getOrDefault(Cell.Justification.class,
                                                                                       this.getOptions()
                                                                                           .get(Cell
                                                                                               .Justification.class)));

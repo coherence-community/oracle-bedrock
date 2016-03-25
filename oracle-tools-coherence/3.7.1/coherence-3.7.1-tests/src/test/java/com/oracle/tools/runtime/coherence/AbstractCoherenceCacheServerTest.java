@@ -26,47 +26,42 @@
 package com.oracle.tools.runtime.coherence;
 
 import com.oracle.tools.junit.AbstractTest;
-
 import com.oracle.tools.matchers.MapMatcher;
-
 import com.oracle.tools.options.Diagnostics;
-
 import com.oracle.tools.runtime.LocalPlatform;
 import com.oracle.tools.runtime.Platform;
-
 import com.oracle.tools.runtime.coherence.callables.GetClusterName;
 import com.oracle.tools.runtime.coherence.callables.GetClusterSize;
 import com.oracle.tools.runtime.coherence.callables.GetLocalMemberId;
 import com.oracle.tools.runtime.coherence.callables.GetServiceStatus;
-
+import com.oracle.tools.runtime.coherence.options.ClusterPort;
+import com.oracle.tools.runtime.coherence.options.LocalHost;
+import com.oracle.tools.runtime.coherence.options.OperationalOverride;
+import com.oracle.tools.runtime.coherence.options.RoleName;
+import com.oracle.tools.runtime.coherence.options.SiteName;
 import com.oracle.tools.runtime.console.SystemApplicationConsole;
-
+import com.oracle.tools.runtime.java.features.JmxFeature;
+import com.oracle.tools.runtime.java.options.SystemProperty;
 import com.oracle.tools.runtime.network.AvailablePortIterator;
-
+import com.oracle.tools.runtime.options.Discriminator;
+import com.oracle.tools.util.Capture;
 import com.tangosol.net.NamedCache;
-
 import com.tangosol.util.aggregator.LongSum;
-
 import com.tangosol.util.extractor.IdentityExtractor;
-
 import com.tangosol.util.filter.PresentFilter;
-
 import org.junit.Test;
 
-import static com.oracle.tools.deferred.DeferredHelper.invoking;
-
-import static com.oracle.tools.deferred.Eventually.assertThat;
-
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.notNullValue;
-
+import javax.management.ObjectName;
 import java.util.AbstractMap;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import javax.management.ObjectName;
+import static com.oracle.tools.deferred.DeferredHelper.invoking;
+import static com.oracle.tools.deferred.Eventually.assertThat;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
 
 /**
  * Functional Tests for {@link CoherenceCacheServer}s.
@@ -85,31 +80,67 @@ public abstract class AbstractCoherenceCacheServerTest extends AbstractTest
 
 
     /**
-     * Ensure we can start and connect to the Coherence JMX infrastructure.
+     * Ensure we can start and connect to the Coherence using the {@link JmxFeature}.
      *
      * @throws Exception
      */
     @Test
     public void shouldStartJMXConnection() throws Exception
     {
-        AvailablePortIterator availablePorts = LocalPlatform.getInstance().getAvailablePorts();
+        AvailablePortIterator availablePorts = LocalPlatform.get().getAvailablePorts();
 
-        CoherenceCacheServerSchema schema =
-            new CoherenceCacheServerSchema().setClusterPort(availablePorts).useLocalHostMode().setRoleName("test-role")
-                .setSiteName("test-site").setJMXManagementMode(JMXManagementMode.LOCAL_ONLY).setJMXPort(availablePorts);
+        Platform              platform       = getPlatform();
 
-        Platform platform = getPlatform();
+        try (CoherenceCacheServer server = platform.launch(CoherenceCacheServer.class,
+                                                           ClusterPort.from(availablePorts),
+                                                           LocalHost.only(),
+                                                           RoleName.of("test-role"),
+                                                           SiteName.of("test-site"),
+                                                           SystemProperty.of(JmxFeature.SUN_MANAGEMENT_JMXREMOTE_PORT,
+                                                                             availablePorts),
+                                                           SystemProperty.of(JmxFeature.SUN_MANAGEMENT_JMXREMOTE_SSL,
+                                                                             "false"),
+                                                           SystemProperty.of(JmxFeature
+                                                               .SUN_MANAGEMENT_JMXREMOTE_AUTHENTICATE,
+                                                                             "false"),
+                                                           JMXManagementMode.LOCAL_ONLY))
 
-        try (CoherenceCacheServer server = platform.realize("TEST", schema, new SystemApplicationConsole()))
         {
             assertThat(invoking(server).getClusterSize(), is(1));
             assertThat(server.getRoleName(), is("test-role"));
             assertThat(server.getSiteName(), is("test-site"));
 
+            JmxFeature jmxFeature = server.get(JmxFeature.class);
+
+            assertThat(jmxFeature, is(notNullValue()));
+
             // use JMX to determine the cluster size
-            int size = server.getMBeanAttribute(new ObjectName("Coherence:type=Cluster"), "ClusterSize", Integer.class);
+            int size = jmxFeature.getMBeanAttribute(new ObjectName("Coherence:type=Cluster"),
+                                                    "ClusterSize",
+                                                    Integer.class);
 
             assertThat(size, is(1));
+        }
+    }
+
+
+    /**
+     * Ensure that we can start and stop a single Coherence Cluster Member.
+     */
+    @Test
+    public void shouldStartSingletonCluster()
+    {
+        Platform platform = getPlatform();
+
+        try (CoherenceCacheServer server = platform.launch(CoherenceCacheServer.class,
+                                                           ClusterPort.automatic(),
+                                                           LocalHost.only(),
+                                                           Diagnostics.enabled(),
+                                                           SystemApplicationConsole.builder()))
+        {
+            assertThat(server, new GetLocalMemberId(), is(1));
+            assertThat(server, new GetClusterSize(), is(1));
+            assertThat(server, new GetServiceStatus("DistributedCache"), is(ServiceStatus.ENDANGERED));
         }
     }
 
@@ -121,52 +152,29 @@ public abstract class AbstractCoherenceCacheServerTest extends AbstractTest
     @Test
     public void shouldStartStopMultipleTimes()
     {
-        AvailablePortIterator availablePorts = LocalPlatform.getInstance().getAvailablePorts();
+        AvailablePortIterator availablePorts = LocalPlatform.get().getAvailablePorts();
 
-        CoherenceCacheServerSchema schema =
-            new CoherenceCacheServerSchema().setClusterPort(availablePorts).useLocalHostMode().setRoleName("test-role")
-                .setSiteName("test-site");
+        Platform              platform       = getPlatform();
 
-        Platform platform = getPlatform();
+        ClusterPort           clusterPort    = ClusterPort.from(new Capture<>(availablePorts));
 
         for (int i = 1; i <= 10; i++)
         {
             System.out.println("Building Instance: " + i);
 
-            try (CoherenceCacheServer server = platform.realize("TEST",
-                                                                schema,
-                                                                new SystemApplicationConsole(),
-                                                                Diagnostics.enabled()))
+            try (CoherenceCacheServer server = platform.launch(CoherenceCacheServer.class,
+                                                               clusterPort,
+                                                               LocalHost.only(),
+                                                               RoleName.of("test-role"),
+                                                               SiteName.of("test-site"),
+                                                               Diagnostics.enabled(),
+                                                               Discriminator.of(i),
+                                                               SystemApplicationConsole.builder()))
             {
                 assertThat(invoking(server).getClusterSize(), is(1));
                 assertThat(server.getRoleName(), is("test-role"));
                 assertThat(server.getSiteName(), is("test-site"));
             }
-        }
-    }
-
-
-    /**
-     * Ensure that we can start and stop a single Coherence Cluster Member.
-     */
-    @Test
-    public void shouldStartSingletonCluster()
-    {
-        AvailablePortIterator availablePorts = LocalPlatform.getInstance().getAvailablePorts();
-
-        CoherenceCacheServerSchema schema =
-            new CoherenceCacheServerSchema().setClusterPort(availablePorts).useLocalHostMode();
-
-        Platform platform = getPlatform();
-
-        try (CoherenceCacheServer server = platform.realize("TEST",
-                                                            schema,
-                                                            new SystemApplicationConsole(),
-                                                            Diagnostics.enabled()))
-        {
-            assertThat(server, new GetLocalMemberId(), is(1));
-            assertThat(server, new GetClusterSize(), is(1));
-            assertThat(server, new GetServiceStatus("DistributedCache"), is(ServiceStatus.ENDANGERED));
         }
     }
 
@@ -178,18 +186,14 @@ public abstract class AbstractCoherenceCacheServerTest extends AbstractTest
     @Test
     public void shouldUseCustomOperationalOverride()
     {
-        AvailablePortIterator availablePorts = LocalPlatform.getInstance().getAvailablePorts();
-
-        CoherenceCacheServerSchema schema =
-            new CoherenceCacheServerSchema().setClusterPort(availablePorts)
-                .setOperationalOverrideURI("test-operational-override.xml").useLocalHostMode();
-
         Platform platform = getPlatform();
 
-        try (CoherenceCacheServer server = platform.realize("TEST",
-                                                            schema,
-                                                            new SystemApplicationConsole(),
-                                                            Diagnostics.enabled()))
+        try (CoherenceCacheServer server = platform.launch(CoherenceCacheServer.class,
+                                                           ClusterPort.automatic(),
+                                                           OperationalOverride.of("test-operational-override.xml"),
+                                                           LocalHost.only(),
+                                                           Diagnostics.enabled(),
+                                                           SystemApplicationConsole.builder()))
         {
             assertThat(server, new GetLocalMemberId(), is(1));
             assertThat(server, new GetClusterSize(), is(1));
@@ -204,14 +208,12 @@ public abstract class AbstractCoherenceCacheServerTest extends AbstractTest
     @Test
     public void shouldAccessNamedCache()
     {
-        AvailablePortIterator availablePorts = LocalPlatform.getInstance().getAvailablePorts();
-
-        CoherenceCacheServerSchema schema =
-            new CoherenceCacheServerSchema().setClusterPort(availablePorts).useLocalHostMode();
-
         Platform platform = getPlatform();
 
-        try (CoherenceCacheServer server = platform.realize("TEST", schema, new SystemApplicationConsole()))
+        try (CoherenceCacheServer server = platform.launch(CoherenceCacheServer.class,
+                                                           ClusterPort.automatic(),
+                                                           LocalHost.only(),
+                                                           SystemApplicationConsole.builder()))
         {
             assertThat(server, new GetLocalMemberId(), is(1));
             assertThat(server, new GetClusterSize(), is(1));

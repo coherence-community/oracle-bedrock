@@ -54,7 +54,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import java.net.URLEncoder;
 import java.util.Collection;
 import java.util.List;
 import java.util.Properties;
@@ -377,7 +376,7 @@ public class WindowsSession implements Closeable
             throw new IllegalStateException("Already connected to shell " + shellReferenceId);
         }
 
-        WindowsShellOptions shellOptions = options.get(WindowsShellOptions.class, WindowsShellOptions.basic());
+        WindowsShellOptions shellOptions = options.getOrDefault(WindowsShellOptions.class, WindowsShellOptions.basic());
         ShellType           shellType    = ObjectFactories.SHELL.createShellType();
 
         if (workingDirectory == null || workingDirectory.isEmpty())
@@ -659,7 +658,7 @@ public class WindowsSession implements Closeable
 
         resourceURI.setValue(URI_WINRM_RESOURCE);
 
-        WindowsSoapOptions  soapOptions     = options.get(WindowsSoapOptions.class, WindowsSoapOptions.basic());
+        WindowsSoapOptions  soapOptions     = options.getOrDefault(WindowsSoapOptions.class, WindowsSoapOptions.basic());
 
         MaxEnvelopeSizeType maxEnvelopeSize = ObjectFactories.WSMAN.createMaxEnvelopeSizeType();
 

@@ -26,13 +26,18 @@
 package com.oracle.tools.runtime.remote.http;
 
 import com.oracle.tools.Option;
+
 import com.oracle.tools.lang.StringHelper;
 
+import com.oracle.tools.runtime.Application;
 import com.oracle.tools.runtime.Platform;
-import com.oracle.tools.runtime.SimpleApplication;
-import com.oracle.tools.runtime.SimpleApplicationSchema;
 
 import com.oracle.tools.runtime.console.CapturingApplicationConsole;
+import com.oracle.tools.runtime.console.Console;
+
+import com.oracle.tools.runtime.options.Argument;
+import com.oracle.tools.runtime.options.DisplayName;
+import com.oracle.tools.runtime.options.Executable;
 
 import java.net.URL;
 
@@ -48,8 +53,8 @@ import java.net.URL;
  */
 public class CurlHttpDeployer extends HttpDeployer
 {
-    /** 
-     *Field description 
+    /**
+     * Field description
      */
     public static final String DEFAULT_CURL = "curl";
 
@@ -76,7 +81,8 @@ public class CurlHttpDeployer extends HttpDeployer
      * @param curlCommand the location of the curl executable
      * @param options     the {@link Option}s controlling the deployer
      */
-    public CurlHttpDeployer(String curlCommand, Option... options)
+    public CurlHttpDeployer(String    curlCommand,
+                            Option... options)
     {
         super(options);
         this.curlCommand = curlCommand;
@@ -88,31 +94,35 @@ public class CurlHttpDeployer extends HttpDeployer
                                   String   targetFileName,
                                   Platform platform)
     {
-        SimpleApplicationSchema schema =
-            new SimpleApplicationSchema(curlCommand).addArgument(sourceURL.toExternalForm())
-                .addArgument("--create-dirs").addArgument("-o")
-                .addArgument(StringHelper.doubleQuoteIfNecessary(targetFileName));
+        CapturingApplicationConsole console = new CapturingApplicationConsole();
 
-        CapturingApplicationConsole console     = new CapturingApplicationConsole();
-        SimpleApplication           application = platform.realize("Deploy", schema, console);
-
-        if (application.waitFor() != 0)
+        try (Application application = platform.launch(Application.class,
+                                                       Executable.named(curlCommand),
+                                                       Argument.of(sourceURL.toExternalForm()),
+                                                       Argument.of("--create-dirs"),
+                                                       Argument.of("-o"),
+                                                       Argument.of(StringHelper.doubleQuoteIfNecessary(targetFileName)),
+                                                       DisplayName.of("Deploy"),
+                                                       Console.of(console)))
         {
-            StringBuilder message =
-                new StringBuilder("Error deploying ").append(targetFileName).append(" - curl returned ")
-                        .append(application.exitValue()).append("\n").append("curl output:");
-
-            for (String line : console.getCapturedOutputLines())
+            if (application.waitFor() != 0)
             {
-                message.append(line);
-            }
+                StringBuilder message =
+                    new StringBuilder("Error deploying ").append(targetFileName).append(" - curl returned ")
+                    .append(application.exitValue()).append("\n").append("curl output:");
 
-            for (String line : console.getCapturedErrorLines())
-            {
-                message.append(line);
-            }
+                for (String line : console.getCapturedOutputLines())
+                {
+                    message.append(line);
+                }
 
-            throw new RuntimeException(message.toString());
+                for (String line : console.getCapturedErrorLines())
+                {
+                    message.append(line);
+                }
+
+                throw new RuntimeException(message.toString());
+            }
         }
     }
 }

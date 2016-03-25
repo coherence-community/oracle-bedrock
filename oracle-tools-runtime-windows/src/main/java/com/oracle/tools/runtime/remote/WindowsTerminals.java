@@ -25,9 +25,6 @@
 
 package com.oracle.tools.runtime.remote;
 
-import com.oracle.tools.runtime.Application;
-import com.oracle.tools.runtime.ApplicationSchema;
-
 import com.oracle.tools.runtime.remote.winrm.WindowsRemoteTerminal;
 
 /**
@@ -53,10 +50,9 @@ public class WindowsTerminals
         return new RemoteTerminalBuilder()
         {
             @Override
-            public <A extends Application, S extends ApplicationSchema<A>,
-                    E extends RemoteApplicationEnvironment> RemoteTerminal<A, S, E> realize(RemotePlatform platform)
+            public RemoteTerminal realize(RemotePlatform platform)
             {
-                return new WindowsRemoteTerminal<>(platform);
+                return new WindowsRemoteTerminal(platform);
             }
         };
     }

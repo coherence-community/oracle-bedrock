@@ -25,11 +25,15 @@
 
 package classloader.applications;
 
-import com.oracle.tools.runtime.ApplicationConsole;
 import com.oracle.tools.runtime.LocalPlatform;
+
 import com.oracle.tools.runtime.console.SystemApplicationConsole;
-import com.oracle.tools.runtime.java.SimpleJavaApplication;
-import com.oracle.tools.runtime.java.SimpleJavaApplicationSchema;
+
+import com.oracle.tools.runtime.java.JavaApplication;
+import com.oracle.tools.runtime.java.options.ClassName;
+import com.oracle.tools.runtime.java.options.SystemProperty;
+
+import com.oracle.tools.runtime.options.DisplayName;
 import com.oracle.tools.runtime.options.Orphanable;
 
 import java.io.IOException;
@@ -45,7 +49,7 @@ import java.io.IOException;
 public class ParentApplication
 {
     /**
-     * Entry Point of the Application
+     * Entry Point of the Application.
      *
      * @param arguments
      */
@@ -57,16 +61,15 @@ public class ParentApplication
         System.out.printf("server.port     : %s\n", System.getProperty("server.port"));
         System.out.printf("orphan.children : %s\n", System.getProperty("orphan.children"));
 
-        SimpleJavaApplicationSchema schema = new SimpleJavaApplicationSchema(ChildApplication.class.getName());
-
-        schema.setSystemProperty("server.address", System.getProperty("server.address"));
-        schema.setSystemProperty("server.port", System.getProperty("server.port"));
-
-        schema.addOption(Orphanable.enabled(Boolean.getBoolean("orphan.children")));
-
-        ApplicationConsole console = new SystemApplicationConsole();
-
-        try (SimpleJavaApplication application = LocalPlatform.getInstance().realize("client", schema, console))
+        try (JavaApplication application = LocalPlatform.get().launch(JavaApplication.class,
+                                                                      DisplayName.of("client"),
+                                                                      ClassName.of(ChildApplication.class),
+                                                                      SystemProperty.of("server.address",
+                                                                                        System.getProperty("server.address")),
+                                                                      SystemProperty.of("server.port",
+                                                                                        System.getProperty("server.port")),
+                                                                      Orphanable.enabled(Boolean.getBoolean("orphan.children")),
+                                                                      SystemApplicationConsole.builder()))
         {
             application.waitFor();
         }

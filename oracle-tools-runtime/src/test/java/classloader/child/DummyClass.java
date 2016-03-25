@@ -25,11 +25,11 @@
 
 package classloader.child;
 
-import com.oracle.tools.runtime.java.ContainerBasedJavaApplicationBuilder;
+import com.oracle.tools.runtime.java.ContainerBasedJavaApplicationLauncher;
 
 /**
  * A simple test class for setting and getting properties that should
- * be isolated by a {@link ContainerBasedJavaApplicationBuilder.ContainerBasedJavaApplicationProcess}.
+ * be isolated by a {@link ContainerBasedJavaApplicationLauncher.ContainerBasedJavaApplicationProcess}.
  * <p>
  * Copyright (c) 2011. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.

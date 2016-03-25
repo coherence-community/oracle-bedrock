@@ -29,12 +29,16 @@ import com.oracle.tools.Option;
 
 import com.oracle.tools.deferred.Eventually;
 
+import com.oracle.tools.runtime.Application;
 import com.oracle.tools.runtime.LocalPlatform;
 import com.oracle.tools.runtime.Platform;
-import com.oracle.tools.runtime.SimpleApplication;
-import com.oracle.tools.runtime.SimpleApplicationSchema;
 
 import com.oracle.tools.runtime.console.CapturingApplicationConsole;
+import com.oracle.tools.runtime.console.Console;
+
+import com.oracle.tools.runtime.options.Argument;
+import com.oracle.tools.runtime.options.DisplayName;
+import com.oracle.tools.runtime.options.Executable;
 
 import com.oracle.tools.runtime.remote.Password;
 import com.oracle.tools.runtime.remote.RemotePlatform;
@@ -93,7 +97,7 @@ public abstract class AbstractWindowsTest
      */
     public String getRemoteHostName()
     {
-        String defaultHost = LocalPlatform.getInstance().getAddress().getHostAddress();
+        String defaultHost = LocalPlatform.get().getAddress().getHostAddress();
 
         return System.getProperty("oracletools.remote.windows.hostname", defaultHost);
     }
@@ -199,11 +203,13 @@ public abstract class AbstractWindowsTest
 
         double                      version = -1.0;
         CapturingApplicationConsole console = new CapturingApplicationConsole();
-        SimpleApplicationSchema schema =
-            new SimpleApplicationSchema("powershell").addArgument("-Command")
-                .addArgument("&{$PSVersionTable.PSVersion}");
 
-        try (SimpleApplication ignored = platform.realize("PSVersionCheck", schema, console))
+        try (Application application = platform.launch(Application.class,
+                                                       Executable.named("powershell"),
+                                                       Argument.of("-Command"),
+                                                       Argument.of("&{$PSVersionTable.PSVersion}"),
+                                                       DisplayName.of("PSVersionCheck"),
+                                                       Console.of(console)))
         {
             try
             {
@@ -263,13 +269,17 @@ public abstract class AbstractWindowsTest
         }
 
         int                         exitCode = -1;
-        Platform                    platform = LocalPlatform.getInstance();
+        Platform                    platform = LocalPlatform.get();
         CapturingApplicationConsole console  = new CapturingApplicationConsole();
-        SimpleApplicationSchema schema =
-            new SimpleApplicationSchema("cmd.exe").addArgument("/C").addArgument("winrm").addArgument("enumerate")
-                .addArgument("winrm/config/listener");
 
-        try (SimpleApplication application = platform.realize("WinRMCheck", schema, console))
+        try (Application application = platform.launch(Application.class,
+                                                       Executable.named("cmd.exe"),
+                                                       Argument.of("/C"),
+                                                       Argument.of("winrm"),
+                                                       Argument.of("enumerate"),
+                                                       Argument.of("winrm/config/listener"),
+                                                       DisplayName.of("WinRMCheck"),
+                                                       Console.of(console)))
         {
             try
             {

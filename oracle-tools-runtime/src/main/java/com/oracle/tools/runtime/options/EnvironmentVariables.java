@@ -27,12 +27,10 @@ package com.oracle.tools.runtime.options;
 
 import com.oracle.tools.Option;
 import com.oracle.tools.Options;
-
 import com.oracle.tools.lang.ExpressionEvaluator;
-
-import com.oracle.tools.runtime.ApplicationSchema;
 import com.oracle.tools.runtime.Platform;
 
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Properties;
@@ -195,23 +193,21 @@ public class EnvironmentVariables implements Option.Collector<EnvironmentVariabl
 
     /**
      * Creates a standard {@link Properties} instance containing the
-     * {@link EnvironmentVariable}s based on the specified {@link Platform} and {@link ApplicationSchema}.
+     * {@link EnvironmentVariable}s based on the specified {@link Platform} and {@link Option}s.
      * <p>
      * If the value of a {@link EnvironmentVariable} is defined as an {@link Iterator}, the next value from the
      * said {@link Iterator} will be used as a value for the returned property.  If the value of a
      * {@link EnvironmentVariable} is defined as a {@link EnvironmentVariable.ContextSensitiveValue}, the
-     * {@link EnvironmentVariable.ContextSensitiveValue#getValue(String, Platform, ApplicationSchema)} is called
+     * {@link EnvironmentVariable.ContextSensitiveValue#getValue(String, Platform, Option...)} is called
      * to resolve the value.
      *
      * @param platform        the target {@link Platform} for the returned {@link Properties}
-     * @param schema          the target {@link ApplicationSchema} for the returned {@link Properties}
      * @param realizeOptions  the {@link Option}s for realizing the {@link Properties}
      *
      * @return a new {@link Properties} instance
      */
-    public Properties realize(Platform          platform,
-                              ApplicationSchema schema,
-                              Option...         realizeOptions)
+    public Properties realize(Platform  platform,
+                              Option... realizeOptions)
     {
         Options             options    = new Options(realizeOptions);
 
@@ -231,7 +227,7 @@ public class EnvironmentVariables implements Option.Collector<EnvironmentVariabl
                     EnvironmentVariable.ContextSensitiveValue contextSensitiveValue =
                         (EnvironmentVariable.ContextSensitiveValue) value;
 
-                    value = contextSensitiveValue.getValue(name, platform, schema);
+                    value = contextSensitiveValue.getValue(name, platform, realizeOptions);
                 }
 
                 if (value instanceof Iterator<?>)
@@ -296,6 +292,20 @@ public class EnvironmentVariables implements Option.Collector<EnvironmentVariabl
         else
         {
             return this;
+        }
+    }
+
+
+    @Override
+    public <O> Iterable<O> getInstancesOf(Class<O> requiredClass)
+    {
+        if (requiredClass.isAssignableFrom(EnvironmentVariable.class))
+        {
+            return (Iterable<O>) variables.values();
+        }
+        else
+        {
+            return Collections.EMPTY_LIST;
         }
     }
 

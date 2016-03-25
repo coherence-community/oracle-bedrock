@@ -25,6 +25,8 @@
 
 package com.oracle.tools.runtime;
 
+import com.oracle.tools.Option;
+
 /**
  * A builder for {@link ApplicationConsole}s.
  * <p>
@@ -33,7 +35,7 @@ package com.oracle.tools.runtime;
  *
  * @author Brian Oliver
  */
-public interface ApplicationConsoleBuilder
+public interface ApplicationConsoleBuilder extends Option
 {
     /**
      * Realizes an {@link ApplicationConsole} for the specified application name.
@@ -43,5 +45,5 @@ public interface ApplicationConsoleBuilder
      *
      * @return  an {@link ApplicationConsole} for the specified application name
      */
-    public ApplicationConsole realize(String applicationName);
+    ApplicationConsole build(String applicationName);
 }

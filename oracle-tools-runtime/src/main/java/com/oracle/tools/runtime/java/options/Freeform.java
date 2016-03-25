@@ -78,9 +78,9 @@ public class Freeform implements JvmOption, Option.Collectable
 
 
     @Override
-    public Iterable<String> getValues(Option... options)
+    public Iterable<String> resolve(Options options)
     {
-        ExpressionEvaluator evaluator = new ExpressionEvaluator(new Options(options));
+        ExpressionEvaluator evaluator = new ExpressionEvaluator(options);
 
         ArrayList<String>   result    = new ArrayList<>(values.size());
 

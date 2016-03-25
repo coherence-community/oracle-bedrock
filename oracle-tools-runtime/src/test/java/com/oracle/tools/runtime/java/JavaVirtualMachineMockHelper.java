@@ -47,7 +47,7 @@ public class JavaVirtualMachineMockHelper
      */
     public static void mockJavaVirtualMachine() throws Exception
     {
-        if (JavaVirtualMachine.getInstance().getClass().getCanonicalName().contains("$$"))
+        if (JavaVirtualMachine.get().getClass().getCanonicalName().contains("$$"))
         {
             // We've already mocked the JavaVirtualMachine.INSTANCE
             return;
@@ -56,7 +56,7 @@ public class JavaVirtualMachineMockHelper
         Class clazz         = JavaVirtualMachine.class;
         Field instanceField = clazz.getDeclaredField("INSTANCE");
 
-        savedJVM = JavaVirtualMachine.getInstance();
+        savedJVM = JavaVirtualMachine.get();
 
         JavaVirtualMachine mock = spy(savedJVM);
 

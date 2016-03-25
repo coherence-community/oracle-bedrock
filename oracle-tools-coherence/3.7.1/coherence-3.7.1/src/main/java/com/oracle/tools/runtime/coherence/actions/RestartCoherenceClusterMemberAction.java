@@ -26,21 +26,21 @@
 package com.oracle.tools.runtime.coherence.actions;
 
 import com.oracle.tools.Option;
+import com.oracle.tools.Options;
 
 import com.oracle.tools.deferred.DeferredPredicate;
 
 import com.oracle.tools.predicate.Predicate;
 
-import com.oracle.tools.runtime.ApplicationConsole;
 import com.oracle.tools.runtime.Platform;
 
 import com.oracle.tools.runtime.actions.CustomAction;
 
 import com.oracle.tools.runtime.coherence.CoherenceCluster;
 import com.oracle.tools.runtime.coherence.CoherenceClusterMember;
-import com.oracle.tools.runtime.coherence.CoherenceClusterMemberSchema;
 
-import com.oracle.tools.runtime.java.JavaApplicationBuilder;
+import com.oracle.tools.runtime.options.Discriminator;
+import com.oracle.tools.runtime.options.DisplayName;
 
 import com.tangosol.util.UID;
 
@@ -59,18 +59,16 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * A {@link CustomAction} to destroy a {@link CoherenceClusterMember} that is defined as part
- * of a {@link CoherenceCluster} and then immediately restart a new {@link CoherenceClusterMember} given
- * a specified {@link CoherenceClusterMemberSchema} and {@link JavaApplicationBuilder}.
+ * A {@link CustomAction} to close a {@link CoherenceClusterMember} that is defined as part
+ * of a {@link CoherenceCluster} and then launch a new {@link CoherenceClusterMember} given
+ * a specified {@link Options}.
  * <p>
  * Copyright (c) 2014. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Brian Oliver
  */
-public class RestartCoherenceClusterMemberAction<A extends CoherenceClusterMember,
-                                                 S extends CoherenceClusterMemberSchema<A>>
-    implements CustomAction<CoherenceClusterMember, CoherenceCluster>
+public class RestartCoherenceClusterMemberAction implements CustomAction<CoherenceClusterMember, CoherenceCluster>
 {
     /**
      * The {@link Logger} for this class.
@@ -78,19 +76,9 @@ public class RestartCoherenceClusterMemberAction<A extends CoherenceClusterMembe
     private static Logger LOGGER = Logger.getLogger(RestartCoherenceClusterMemberAction.class.getName());
 
     /**
-     * The prefix of {@link CoherenceClusterMember}s to consider for restarting.
+     * The prefix / {@link DisplayName} of the {@link CoherenceClusterMember} to close.
      */
     private String prefix;
-
-    /**
-     * The {@link CoherenceClusterMemberSchema} for the new {@link CoherenceClusterMember}.
-     */
-    private S schema;
-
-    /**
-     * The {@link ApplicationConsole} to use for a new {@link CoherenceClusterMember}.
-     */
-    private ApplicationConsole console;
 
     /**
      * The optional {@link Predicate} that must be satisfied before a {@link CoherenceClusterMember} is closed.
@@ -98,7 +86,7 @@ public class RestartCoherenceClusterMemberAction<A extends CoherenceClusterMembe
     private Predicate<CoherenceClusterMember> closePredicate;
 
     /**
-     * The {@link Platform} to realize the new {@link CoherenceClusterMember}.
+     * The {@link Platform} to launch the new {@link CoherenceClusterMember}.
      */
     private Platform platform;
 
@@ -111,24 +99,18 @@ public class RestartCoherenceClusterMemberAction<A extends CoherenceClusterMembe
     /**
      * Constructs a {@link RestartCoherenceClusterMemberAction}.
      *
-     * @param prefix          the prefix that must match existing {@link CoherenceClusterMember} names
-     * @param schema          the {@link CoherenceClusterMemberSchema} for new {@link CoherenceClusterMember}s
-     * @param console         the {@link ApplicationConsole} for new {@link CoherenceClusterMember}s
+     * @param prefix          the prefix / {@link DisplayName} of {@link CoherenceClusterMember} to close
      * @param closePredicate  the optional {@link Predicate} that must be satisfied before restarting a
      *                        {@link CoherenceClusterMember} (may be <code>null</code>)
-     * @param platform        the {@link Platform} to realize new {@link CoherenceClusterMember}s on
+     * @param platform        the {@link Platform} to launch new {@link CoherenceClusterMember}s on
      * @param options         the {@link Option}s to use when realizing the new {@link CoherenceClusterMember}
      */
     public RestartCoherenceClusterMemberAction(String                            prefix,
-                                               S                                 schema,
-                                               ApplicationConsole                console,
                                                Predicate<CoherenceClusterMember> closePredicate,
                                                Platform                          platform,
                                                Option...                         options)
     {
-        this.prefix  = prefix;
-        this.schema  = schema;
-        this.console = console;
+        this.prefix = prefix;
         this.closePredicate = closePredicate == null
                               ? com.oracle.tools.predicate.Predicates.<CoherenceClusterMember>always() : closePredicate;
         this.platform = platform;
@@ -144,15 +126,18 @@ public class RestartCoherenceClusterMemberAction<A extends CoherenceClusterMembe
 
         if (clusterMembers.hasNext())
         {
-            // assume we want to realize a new member
-            boolean realizeNewMember = true;
+            // assume we want to launch a new member
+            boolean launchNewMember = true;
 
             // choose the first cluster member from the candidates
             CoherenceClusterMember member    = clusterMembers.next();
             UID                    memberUID = member.getLocalMemberUID();
 
             // we'll use the same ClusterMember name for the new ClusterMember
-            String name = member.getName();
+            String        name          = member.getName();
+
+            DisplayName   displayName   = member.getOptions().get(DisplayName.class);
+            Discriminator discriminator = member.getOptions().get(Discriminator.class);
 
             // close the ClusterMember
             try
@@ -163,7 +148,7 @@ public class RestartCoherenceClusterMemberAction<A extends CoherenceClusterMembe
                 }
 
                 // ensure that the predicate is satisfied (using a deferred)
-                ensure(new DeferredPredicate<CoherenceClusterMember>(member, closePredicate));
+                ensure(new DeferredPredicate<>(member, closePredicate));
 
                 if (cluster.remove(member))
                 {
@@ -171,7 +156,7 @@ public class RestartCoherenceClusterMemberAction<A extends CoherenceClusterMembe
                 }
                 else
                 {
-                    realizeNewMember = false;
+                    launchNewMember = false;
                 }
             }
             catch (Exception e)
@@ -180,10 +165,10 @@ public class RestartCoherenceClusterMemberAction<A extends CoherenceClusterMembe
                            "Failed to close member [" + member + "].  Skipping restarting another member",
                            e);
 
-                realizeNewMember = false;
+                launchNewMember = false;
             }
 
-            if (realizeNewMember)
+            if (launchNewMember)
             {
                 try
                 {
@@ -204,11 +189,16 @@ public class RestartCoherenceClusterMemberAction<A extends CoherenceClusterMembe
                             ensure(eventually(invoking(cluster).getClusterMemberUIDs()), doesNotContain(memberUID));
 
                             // ensure that the predicate is satisfied (using a deferred)
-                            ensure(new DeferredPredicate<CoherenceClusterMember>(clusterMembers.next(),
-                                                                                 closePredicate));
+                            ensure(new DeferredPredicate<>(clusterMembers.next(), closePredicate));
+
+                            // establish the launch options
+                            Options launchOptions = new Options(options);
+
+                            launchOptions.addIfAbsent(displayName);
+                            launchOptions.addIfAbsent(discriminator);
 
                             // start a new ClusterMember (with the same name as the old member)
-                            member = platform.realize(name, schema, console, options);
+                            member = platform.launch(CoherenceClusterMember.class, launchOptions.asArray());
 
                             // ensure that the new member has joined the cluster
                             ensure(eventually(invoking(member).getClusterSize()), is(greaterThan(1)));

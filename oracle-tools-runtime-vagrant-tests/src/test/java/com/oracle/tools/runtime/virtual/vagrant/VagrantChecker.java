@@ -27,10 +27,14 @@ package com.oracle.tools.runtime.virtual.vagrant;
 
 import com.oracle.tools.runtime.Application;
 import com.oracle.tools.runtime.LocalPlatform;
-import com.oracle.tools.runtime.SimpleApplicationSchema;
 
 import com.oracle.tools.runtime.console.CapturingApplicationConsole;
+import com.oracle.tools.runtime.console.Console;
 import com.oracle.tools.runtime.console.PipedApplicationConsole;
+
+import com.oracle.tools.runtime.options.Argument;
+import com.oracle.tools.runtime.options.DisplayName;
+import com.oracle.tools.runtime.options.Executable;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -72,11 +76,14 @@ public class VagrantChecker
             return false;
         }
 
-        String                  command = VagrantPlatform.getDefaultVagrantCommand();
-        SimpleApplicationSchema schema  = new SimpleApplicationSchema(command).addArgument("--version");
+        String command = VagrantPlatform.getDefaultVagrantCommand();
 
         try (PipedApplicationConsole console = new PipedApplicationConsole();
-            Application application = LocalPlatform.getInstance().realize("Vagrant", schema, console);)
+            Application application = LocalPlatform.get().launch(Application.class,
+                                                                 Executable.named(command),
+                                                                 Argument.of("--version"),
+                                                                 DisplayName.of("Vagrant"),
+                                                                 Console.of(console)))
         {
             int exitCode = application.waitFor();
 
@@ -102,6 +109,7 @@ public class VagrantChecker
         }
     }
 
+
     public synchronized static boolean vagrantExistsWithBox(String boxName)
     {
         if (!vagrantExists())
@@ -109,13 +117,15 @@ public class VagrantChecker
             return false;
         }
 
-        String                  command = VagrantPlatform.getDefaultVagrantCommand();
-        SimpleApplicationSchema schema  = new SimpleApplicationSchema(command)
-                .addArgument("box")
-                .addArgument("list");
+        String command = VagrantPlatform.getDefaultVagrantCommand();
 
         try (CapturingApplicationConsole console = new CapturingApplicationConsole();
-             Application application = LocalPlatform.getInstance().realize("Vagrant", schema, console);)
+            Application application = LocalPlatform.get().launch(Application.class,
+                                                                 Executable.named(command),
+                                                                 Argument.of("box"),
+                                                                 Argument.of("list"),
+                                                                 DisplayName.of("Vagrant"),
+                                                                 Console.of(console)))
         {
             int exitCode = application.waitFor();
 
@@ -129,6 +139,7 @@ public class VagrantChecker
             for (String line : console.getCapturedOutputLines())
             {
                 String[] parts = line.split(" ");
+
                 if (parts[0].equals(boxName))
                 {
                     return true;
@@ -139,7 +150,8 @@ public class VagrantChecker
         }
         catch (Throwable e)
         {
-            System.err.println("Error checking for Vagrant box " + boxName + " - assume not present. " + e.getMessage());
+            System.err.println("Error checking for Vagrant box " + boxName + " - assume not present. "
+                               + e.getMessage());
 
             return false;
         }

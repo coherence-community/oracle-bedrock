@@ -28,6 +28,7 @@ package com.oracle.tools.runtime.java.options;
 import com.oracle.tools.Option;
 import com.oracle.tools.Options;
 
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 
@@ -111,6 +112,20 @@ public class JavaAgents implements Option.Collector<JavaAgent, JavaAgents>
         result.agents.remove(agent);
 
         return result;
+    }
+
+
+    @Override
+    public <O> Iterable<O> getInstancesOf(Class<O> requiredClass)
+    {
+        if (requiredClass.isAssignableFrom(JavaAgent.class))
+        {
+            return (Iterable<O>) agents;
+        }
+        else
+        {
+            return Collections.EMPTY_LIST;
+        }
     }
 
 

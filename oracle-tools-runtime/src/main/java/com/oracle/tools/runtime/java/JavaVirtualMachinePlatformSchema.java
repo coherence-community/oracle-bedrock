@@ -29,7 +29,7 @@ import com.oracle.tools.runtime.PlatformSchema;
 
 /**
  * A {@link PlatformSchema} encapsulating configuration and operational settings that a
- * {@link com.oracle.tools.runtime.PlatformBuilder} will use to realize a
+ * {@link com.oracle.tools.runtime.PlatformBuilder} will use to build a
  * {@link JavaVirtualMachine} platform.
  * <p>
  * Copyright (c) 2011. All Rights Reserved. Oracle Corporation.<br>
@@ -57,7 +57,7 @@ public class JavaVirtualMachinePlatformSchema implements PlatformSchema<JavaVirt
     @Override
     public String getName()
     {
-        return JavaVirtualMachine.getInstance().getName();
+        return JavaVirtualMachine.get().getName();
     }
 
     @Override

@@ -28,10 +28,10 @@ package com.oracle.tools.runtime.coherence;
 import com.oracle.tools.runtime.LocalPlatform;
 import com.oracle.tools.runtime.Platform;
 
-import com.oracle.tools.runtime.java.LocalJavaApplicationBuilder;
+import com.oracle.tools.runtime.java.LocalJavaApplicationLauncher;
 
 /**
- * Functional Test for {@link CoherenceCacheServer}s using a {@link LocalJavaApplicationBuilder}.
+ * Functional Test for {@link CoherenceCacheServer}s using a {@link LocalJavaApplicationLauncher}.
  * <p>
  * Copyright (c) 2014. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
@@ -43,6 +43,6 @@ public class LocalCoherenceCacheServerTest extends AbstractCoherenceCacheServerT
     @Override
     public Platform getPlatform()
     {
-        return LocalPlatform.getInstance();
+        return LocalPlatform.get();
     }
 }

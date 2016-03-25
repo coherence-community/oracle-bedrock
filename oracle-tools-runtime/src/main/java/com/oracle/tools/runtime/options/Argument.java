@@ -26,9 +26,11 @@
 package com.oracle.tools.runtime.options;
 
 import com.oracle.tools.Option;
+import com.oracle.tools.Options;
 
 import com.oracle.tools.lang.ExpressionEvaluator;
-import com.oracle.tools.runtime.ApplicationSchema;
+
+import com.oracle.tools.runtime.Application;
 import com.oracle.tools.runtime.Platform;
 
 import java.util.Iterator;
@@ -59,6 +61,7 @@ public class Argument implements Option.Collectable
      */
     private final Object value;
 
+
     /**
      * Create an {@link Argument} with the specified value.
      *
@@ -77,7 +80,8 @@ public class Argument implements Option.Collectable
      * @param name       the name of the {@link Argument}
      * @param value      the value of the {@link Argument}
      */
-    public Argument(String name, Object value)
+    public Argument(String name,
+                    Object value)
     {
         this(name, ' ', value);
     }
@@ -91,7 +95,9 @@ public class Argument implements Option.Collectable
      * @param separator  the separator to use between the name and value
      * @param value      the value of the {@link Argument}
      */
-    public Argument(String name, char separator, Object value)
+    public Argument(String name,
+                    char   separator,
+                    Object value)
     {
         this.name      = name;
         this.separator = separator;
@@ -150,15 +156,18 @@ public class Argument implements Option.Collectable
 
 
     /**
-     * Realize the String representation of this {@link Argument}.
+     * Resolve the String representation of this {@link Argument} using the provided {@link Platform}
+     * and {@link Application} launch {@link Option}s.
      *
      * @param platform   the {@link Platform} that the {@link Argument} is being realized for
-     * @param schema     the {@link ApplicationSchema} that the {@link Argument} is being realized for
      * @param evaluator  the {@link ExpressionEvaluator} to use for expression values
+     * @param options    the {@link Application} launch {@link Option}s
      *
      * @return  the String representation of this {@link Argument}
      */
-    public String realizeValue(Platform platform, ApplicationSchema<?> schema, ExpressionEvaluator evaluator)
+    public String resolve(Platform            platform,
+                          ExpressionEvaluator evaluator,
+                          Options             options)
     {
         if (value == null)
         {
@@ -169,10 +178,9 @@ public class Argument implements Option.Collectable
 
         if (argValue instanceof Argument.ContextSensitiveArgument)
         {
-            Argument.ContextSensitiveArgument contextSensitiveValue =
-                    (Argument.ContextSensitiveArgument) argValue;
+            Argument.ContextSensitiveArgument contextSensitiveValue = (Argument.ContextSensitiveArgument) argValue;
 
-            argValue = contextSensitiveValue.getValue(platform, schema);
+            argValue = contextSensitiveValue.resolve(platform, options);
         }
 
         if (argValue instanceof Iterator<?>)
@@ -185,8 +193,8 @@ public class Argument implements Option.Collectable
             }
             else
             {
-                throw new IndexOutOfBoundsException(
-                        String.format("No more values available for the argument [%s]", value));
+                throw new IndexOutOfBoundsException(String.format("No more values available for the argument [%s]",
+                                                                  value));
             }
         }
 
@@ -211,6 +219,7 @@ public class Argument implements Option.Collectable
         {
             return true;
         }
+
         if (o == null || getClass() != o.getClass())
         {
             return false;
@@ -236,8 +245,10 @@ public class Argument implements Option.Collectable
     public int hashCode()
     {
         int result = name != null ? name.hashCode() : 0;
+
         result = 31 * result + (int) separator;
         result = 31 * result + (value != null ? value.hashCode() : 0);
+
         return result;
     }
 
@@ -276,29 +287,29 @@ public class Argument implements Option.Collectable
      *
      * @return  an {@link Argument} with the specified value
      */
-    public static Argument of(String name, Object arg)
+    public static Argument of(String name,
+                              Object arg)
     {
         return new Argument(name, arg);
     }
 
 
     /**
-     * A context sensitive argument, possibly based on the {@link Platform} and/or {@link ApplicationSchema} in
-     * which the {@link Argument} is being used.
+     * A context sensitive argument, possibly based on the {@link Platform} and/or {@link Application}
+     * launch {@link Option}s in which the {@link Argument} is being used.
      */
     public interface ContextSensitiveArgument
     {
         /**
          * Obtains the value for the {@link Argument}, possibly based on the provided
-         * {@link Platform} and {@link ApplicationSchema}.
+         * {@link Platform} and {@link Option}s.
          *
-         * @param platform the {@link Platform} in which {@link Argument} is being used.
-         * @param schema   the {@link ApplicationSchema} in which {@link Argument} is being used.
+         * @param platform  the {@link Platform} in which {@link Argument} is being used
+         * @param options   the {@link Application} launch {@link Options}
          *
          * @return the value
          */
-        Object getValue(Platform          platform,
-                        ApplicationSchema schema);
+        Object resolve(Platform platform,
+                       Options  options);
     }
 }
-

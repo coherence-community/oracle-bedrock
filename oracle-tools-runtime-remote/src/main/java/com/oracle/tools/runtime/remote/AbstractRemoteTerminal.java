@@ -25,9 +25,6 @@
 
 package com.oracle.tools.runtime.remote;
 
-import com.oracle.tools.runtime.Application;
-import com.oracle.tools.runtime.ApplicationSchema;
-
 /**
  * An abstract {@link RemoteTerminal}.
  * <p>
@@ -36,8 +33,7 @@ import com.oracle.tools.runtime.ApplicationSchema;
  *
  * @author Jonathan Knight
  */
-public abstract class AbstractRemoteTerminal<A extends Application, S extends ApplicationSchema<A>,
-                                             E extends RemoteApplicationEnvironment> implements RemoteTerminal<A, S, E>
+public abstract class AbstractRemoteTerminal implements RemoteTerminal
 {
     /**
      * The {@link RemotePlatform} on which the {@link RemoteTerminal} will operate.

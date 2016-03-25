@@ -29,7 +29,6 @@ import com.oracle.tools.Option;
 import com.oracle.tools.Options;
 
 import com.oracle.tools.runtime.Application;
-import com.oracle.tools.runtime.ApplicationSchema;
 import com.oracle.tools.runtime.Platform;
 import com.oracle.tools.runtime.Profile;
 
@@ -73,17 +72,16 @@ public class ExampleProfile implements Profile, Option
 
 
     @Override
-    public void onBeforeRealize(Platform          platform,
-                                ApplicationSchema schema,
-                                Options           options)
+    public void onBeforeLaunch(Platform platform,
+                               Options  options)
     {
     }
 
 
     @Override
-    public void onAfterRealize(Platform    platform,
-                               Application application,
-                               Options     options)
+    public void onAfterLaunch(Platform    platform,
+                              Application application,
+                              Options     options)
     {
     }
 

@@ -32,32 +32,35 @@ import com.oracle.tools.deferred.Eventually;
 
 import com.oracle.tools.predicate.Predicate;
 
-import com.oracle.tools.runtime.ApplicationConsole;
-import com.oracle.tools.runtime.ApplicationConsoleBuilder;
 import com.oracle.tools.runtime.LocalPlatform;
 import com.oracle.tools.runtime.Platform;
 
 import com.oracle.tools.runtime.actions.Block;
 import com.oracle.tools.runtime.actions.InteractiveActionExecutor;
 
-import com.oracle.tools.runtime.coherence.CoherenceCacheServerSchema;
 import com.oracle.tools.runtime.coherence.CoherenceCluster;
 import com.oracle.tools.runtime.coherence.CoherenceClusterBuilder;
 import com.oracle.tools.runtime.coherence.CoherenceClusterMember;
-import com.oracle.tools.runtime.coherence.FluentCoherenceClusterSchema;
 import com.oracle.tools.runtime.coherence.ServiceStatus;
 import com.oracle.tools.runtime.coherence.actions.RestartCoherenceClusterMemberAction;
 import com.oracle.tools.runtime.coherence.callables.GetAutoStartServiceNames;
 import com.oracle.tools.runtime.coherence.callables.GetServiceStatus;
+import com.oracle.tools.runtime.coherence.options.ClusterName;
+import com.oracle.tools.runtime.coherence.options.ClusterPort;
+import com.oracle.tools.runtime.coherence.options.LocalHost;
+import com.oracle.tools.runtime.coherence.options.LocalStorage;
+import com.oracle.tools.runtime.coherence.options.Multicast;
+import com.oracle.tools.runtime.coherence.options.RoleName;
 
 import com.oracle.tools.runtime.console.SystemApplicationConsole;
 
+import com.oracle.tools.runtime.java.options.Headless;
 import com.oracle.tools.runtime.java.options.HeapSize;
 import com.oracle.tools.runtime.java.options.HotSpot;
-import com.oracle.tools.runtime.java.options.SystemProperties;
 import com.oracle.tools.runtime.java.options.SystemProperty;
 
 import com.oracle.tools.runtime.options.ApplicationClosingBehavior;
+import com.oracle.tools.runtime.options.DisplayName;
 
 import com.oracle.tools.util.Capture;
 
@@ -75,7 +78,6 @@ import static com.oracle.tools.deferred.DeferredHelper.invoking;
 import static org.hamcrest.core.Is.is;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Set;
 
 /**
@@ -93,16 +95,11 @@ import java.util.Set;
  * @author Aleks Seovic
  */
 public class CoherenceClusterOrchestration extends ExternalResource
-    implements FluentCoherenceClusterSchema<CoherenceClusterOrchestration>
 {
     /**
      * The number of storage enable members that will be started in the cluster.
      */
     private int storageMemberCount = 2;
-
-    // TODO: Introduce the ability to specify Coherence Closing/Shutdown Options (CacheFactory.shutdown + System.exit / System.halt)
-
-    // TODO: Ensure the start up / shutdown sequence of Coherence Members matches Coherence Abstract Functional Test
 
     /**
      * The {@link LocalPlatform} on which the Coherence Cluster will be orchestrated.
@@ -110,10 +107,19 @@ public class CoherenceClusterOrchestration extends ExternalResource
     private LocalPlatform platform;
 
     /**
-     * The {@link CoherenceCacheServerSchema} to use as a basis for
-     * constructing a variety of {@link CoherenceClusterMember}s.
+     * The {@link Options} to use as a basis for constructing a variety of {@link CoherenceClusterMember}s.
      */
-    private CoherenceCacheServerSchema commonServerSchema;
+    private Options commonMemberOptions;
+
+    /**
+     * The {@link Options} to use as a basis for constructing storage-enabled {@link CoherenceClusterMember}s.
+     */
+    private Options storageMemberOptions;
+
+    /**
+     * The {@link Options} to use as a basis for constructing proxy {@link CoherenceClusterMember}s.
+     */
+    private Options proxyMemberOptions;
 
     /**
      * The {@link Options} to use when creating the {@link CoherenceCluster}.
@@ -124,12 +130,6 @@ public class CoherenceClusterOrchestration extends ExternalResource
      * The {@link Options} to use when closing the {@link CoherenceCluster}.
      */
     private Options clusterClosingOptions;
-
-    /**
-     * The {@link ApplicationConsoleBuilder} to use for constructing
-     * {@link ApplicationConsole}s for each {@link CoherenceClusterMember}.
-     */
-    private ApplicationConsoleBuilder consoleBuilder;
 
     /**
      * The {@link CoherenceCluster} established by the orchestrator.
@@ -148,16 +148,6 @@ public class CoherenceClusterOrchestration extends ExternalResource
     // the Coherence *Extend port
     private Capture<Integer> extendPort;
 
-    /**
-     * Extra properties specific to the storage enabled cluster members.
-     */
-    private SystemProperties storageMemberProperties;
-
-    /**
-     * Extra properties specific to the proxy server cluster members.
-     */
-    private SystemProperties extendProxyServerProperties;
-
 
     /**
      * Constructs a {@link CoherenceClusterOrchestration}.
@@ -165,7 +155,7 @@ public class CoherenceClusterOrchestration extends ExternalResource
     public CoherenceClusterOrchestration()
     {
         // we're going to orchestrate the cluster using the LocalPlatform
-        this.platform = LocalPlatform.getInstance();
+        this.platform = LocalPlatform.get();
 
         // establish a Cluster port
         this.clusterPort = new Capture<>(platform.getAvailablePorts());
@@ -173,27 +163,31 @@ public class CoherenceClusterOrchestration extends ExternalResource
         // establish the Extend port (is the same as the cluster port)
         this.extendPort = new Capture<>(platform.getAvailablePorts());
 
-        // establish a common server schema on which to base storage enabled and proxy members
-        this.commonServerSchema = new CoherenceCacheServerSchema();
+        // establish a common member options on which to base storage enabled and proxy members
+        this.commonMemberOptions = new Options();
 
         // establish the common server schema address and port details
         String hostAddress = platform.getLoopbackAddress().getHostAddress();
 
-        commonServerSchema.setLocalHostAddress(hostAddress);
-        commonServerSchema.setClusterPort(clusterPort);
-        commonServerSchema.setMulticastTTL(0);
+        this.commonMemberOptions.add(LocalHost.of(hostAddress));
+        this.commonMemberOptions.add(ClusterPort.of(clusterPort));
+        this.commonMemberOptions.add(Multicast.ttl(0));
 
         // we also define the proxy configuration (this will only be used if it's enabled)
-        commonServerSchema.setSystemProperty("tangosol.coherence.extend.address", hostAddress);
-        commonServerSchema.setSystemProperty("tangosol.coherence.extend.port", extendPort);
+        this.commonMemberOptions.add(SystemProperty.of("tangosol.coherence.extend.address", hostAddress));
+        this.commonMemberOptions.add(SystemProperty.of("tangosol.coherence.extend.port", extendPort));
 
         // establish default java process configuration
-        commonServerSchema.setHeadless(true);
-        commonServerSchema.addOption(HotSpot.Mode.SERVER);
-        commonServerSchema.addOption(HeapSize.of(256, HeapSize.Units.MB, 1024, HeapSize.Units.MB));
+        this.commonMemberOptions.add(Headless.enabled());
+        this.commonMemberOptions.add(HotSpot.Mode.SERVER);
+        this.commonMemberOptions.add(HeapSize.of(256, HeapSize.Units.MB, 1024, HeapSize.Units.MB));
 
         // by default we'll use the SystemApplicationConsole
-        this.consoleBuilder = SystemApplicationConsole.builder();
+        this.commonMemberOptions.add(SystemApplicationConsole.builder());
+
+        // by default we don't have any special options for storage or proxy members
+        this.storageMemberOptions = new Options();
+        this.proxyMemberOptions   = new Options();
 
         // by default we don't have a cluster
         this.cluster = null;
@@ -203,10 +197,7 @@ public class CoherenceClusterOrchestration extends ExternalResource
         this.clusterClosingOptions  = new Options();
 
         // by default we have no sessions
-        this.sessions                    = new HashMap<>();
-
-        this.storageMemberProperties     = new SystemProperties();
-        this.extendProxyServerProperties = new SystemProperties();
+        this.sessions = new HashMap<>();
     }
 
 
@@ -216,9 +207,9 @@ public class CoherenceClusterOrchestration extends ExternalResource
     {
         // automatically set the cluster name to the test class name
         // if the cluster name isn't configured
-        if (commonServerSchema.getClusterName() == null)
+        if (commonMemberOptions.get(ClusterName.class) == null)
         {
-            commonServerSchema.setClusterName(description.getClassName());
+            commonMemberOptions.add(ClusterName.of(description.getClassName()));
         }
 
         return super.apply(base, description);
@@ -231,32 +222,29 @@ public class CoherenceClusterOrchestration extends ExternalResource
         // establish a CoherenceClusterBuilder with the required configuration
         CoherenceClusterBuilder clusterBuilder = new CoherenceClusterBuilder();
 
-        // define the schema for the storage enabled members of the cluster
-        CoherenceCacheServerSchema storageServerSchema = createStorageEnabledMemberSchema();
+        // define the options for the storage enabled members of the cluster
+        Options storageServerOptions = createStorageEnabledMemberOptions();
 
-        clusterBuilder.addSchema("storage",
-                                 storageServerSchema,
-                                 storageMemberCount,
-                                 consoleBuilder,
-                                 platform,
-                                 clusterCreationOptions.asArray());
+        storageServerOptions.addAll(clusterCreationOptions);
+
+        clusterBuilder.include(storageMemberCount,
+                               platform,
+                               CoherenceClusterMember.class,
+                               storageServerOptions.asArray());
 
         // define the schema for the proxy enabled members of the cluster
-        CoherenceCacheServerSchema proxyServerSchema = createProxyServerSchema();
+        Options proxyServerOptions = createProxyServerOptions();
 
-        int                        proxyMemberCount  = 1;
+        proxyServerOptions.addAll(clusterCreationOptions);
 
-        clusterBuilder.addSchema("proxy",
-                                 proxyServerSchema,
-                                 proxyMemberCount,
-                                 consoleBuilder,
-                                 platform,
-                                 clusterCreationOptions.asArray());
+        int proxyMemberCount = 1;
+
+        clusterBuilder.include(proxyMemberCount, platform, CoherenceClusterMember.class, proxyServerOptions.asArray());
 
         int preferredClusterSize = storageMemberCount + proxyMemberCount;
 
         // establish the cluster
-        cluster = clusterBuilder.realize();
+        cluster = clusterBuilder.build();
 
         // ensure that the cluster has been orchestrated correctly
         Eventually.assertThat(invoking(cluster).getClusterSize(), is(preferredClusterSize));
@@ -298,56 +286,33 @@ public class CoherenceClusterOrchestration extends ExternalResource
     }
 
 
-    protected CoherenceCacheServerSchema createStorageEnabledMemberSchema()
+    protected Options createStorageEnabledMemberOptions()
     {
-        // define the schema for the storage enabled members of the cluster
-        CoherenceCacheServerSchema storageServerSchema = new CoherenceCacheServerSchema(commonServerSchema);
+        // define the options for the storage enabled members of the cluster
+        Options options = new Options(commonMemberOptions);
 
-        SystemProperties           systemProperties    = storageServerSchema.getSystemProperties();
+        options.add(DisplayName.of("storage"));
+        options.add(RoleName.of("storage"));
+        options.add(LocalStorage.enabled());
 
-        systemProperties = systemProperties.addAll(storageMemberProperties);
+        options.addAll(storageMemberOptions);
 
-        storageServerSchema.getOptions().add(systemProperties);
-
-        storageServerSchema.setRoleName("storage");
-        storageServerSchema.setStorageEnabled(true);
-
-        return storageServerSchema;
+        return options;
     }
 
 
-    protected CoherenceCacheServerSchema createProxyServerSchema()
+    protected Options createProxyServerOptions()
     {
-        CoherenceCacheServerSchema proxyServerSchema = new CoherenceCacheServerSchema(commonServerSchema);
+        Options options = new Options(commonMemberOptions);
 
-        SystemProperties           systemProperties  = proxyServerSchema.getSystemProperties();
+        options.add(DisplayName.of("proxy"));
+        options.add(RoleName.of("proxy"));
+        options.add(LocalStorage.disabled());
+        options.add(SystemProperty.of("tangosol.coherence.extend.enabled", true));
 
-        systemProperties = systemProperties.addAll(extendProxyServerProperties);
+        options.addAll(proxyMemberOptions);
 
-        proxyServerSchema.getOptions().add(systemProperties);
-
-        proxyServerSchema.setRoleName("proxy");
-        proxyServerSchema.setStorageEnabled(false);
-        proxyServerSchema.setSystemProperty("tangosol.coherence.extend.enabled", true);
-
-        return proxyServerSchema;
-    }
-
-
-    /**
-     * Sets the {@link ApplicationConsoleBuilder} to use for constructing
-     * {@link ApplicationConsole}s for each {@link CoherenceClusterMember}
-     * that is part of the orchestrated {@link CoherenceCluster}.
-     *
-     * @param consoleBuilder the {@link ApplicationConsoleBuilder}
-     *
-     * @return the {@link CoherenceClusterOrchestration} to permit fluent-style method-calls
-     */
-    public CoherenceClusterOrchestration setConsoleBuilder(ApplicationConsoleBuilder consoleBuilder)
-    {
-        this.consoleBuilder = consoleBuilder;
-
-        return this;
+        return options;
     }
 
 
@@ -360,7 +325,7 @@ public class CoherenceClusterOrchestration extends ExternalResource
      *
      * @see ApplicationClosingBehavior
      */
-    public CoherenceClusterOrchestration setClusterClosingOptions(Option... options)
+    public CoherenceClusterOrchestration withClosingOptions(Option... options)
     {
         this.clusterClosingOptions = new Options(options);
 
@@ -369,32 +334,16 @@ public class CoherenceClusterOrchestration extends ExternalResource
 
 
     /**
-     * Sets the {@link Option}s to be used when creating the {@link CoherenceCluster}.
+     * Sets the {@link Option}s to be passed to the {@link CoherenceClusterBuilder} when building the
+     * {@link CoherenceCluster}.
      *
      * @param options the {@link Option}s
      *
      * @return the {@link CoherenceClusterOrchestration} to permit fluent-style method-calls
      */
-    public CoherenceClusterOrchestration setClusterCreationOptions(Option... options)
+    public CoherenceClusterOrchestration withBuilderOptions(Option... options)
     {
         this.clusterCreationOptions = new Options(options);
-
-        return this;
-    }
-
-
-    /**
-     * Sets the specified system property.
-     *
-     * @param name  the name of the system property
-     * @param value the value for the system property
-     *
-     * @return the {@link CoherenceClusterOrchestration} to permit fluent-style method-calls
-     */
-    public CoherenceClusterOrchestration setSystemProperty(String name,
-                                                           Object value)
-    {
-        this.commonServerSchema.setSystemProperty(name, value);
 
         return this;
     }
@@ -411,203 +360,6 @@ public class CoherenceClusterOrchestration extends ExternalResource
     }
 
 
-    @Override
-    public CoherenceClusterOrchestration setClusterName(String name)
-    {
-        commonServerSchema.setClusterName(name);
-
-        return this;
-    }
-
-
-    @Override
-    public CoherenceClusterOrchestration setClusterPort(int port)
-    {
-        commonServerSchema.setClusterPort(port);
-
-        return this;
-    }
-
-
-    @Override
-    public CoherenceClusterOrchestration setClusterPort(Iterator<Integer> ports)
-    {
-        commonServerSchema.setClusterPort(ports);
-
-        return this;
-    }
-
-
-    @Override
-    public CoherenceClusterOrchestration setMulticastTTL(int ttl)
-    {
-        commonServerSchema.setMulticastTTL(ttl);
-
-        return this;
-    }
-
-
-    @Override
-    public CoherenceClusterOrchestration setSiteName(String name)
-    {
-        commonServerSchema.setSiteName(name);
-
-        return this;
-    }
-
-
-    @Override
-    public CoherenceClusterOrchestration setWellKnownAddress(String address)
-    {
-        commonServerSchema.setWellKnownAddress(address);
-
-        return this;
-    }
-
-
-    @Override
-    public CoherenceClusterOrchestration setWellKnownAddressPort(int port)
-    {
-        commonServerSchema.setWellKnownAddressPort(port);
-
-        return this;
-    }
-
-
-    @Override
-    public CoherenceClusterOrchestration setWellKnownAddressPort(Iterator<Integer> ports)
-    {
-        commonServerSchema.setWellKnownAddressPort(ports);
-
-        return this;
-    }
-
-
-    @Override
-    public String getClusterName()
-    {
-        return commonServerSchema.getClusterName();
-    }
-
-
-    @Override
-    public int getMulticastTTL()
-    {
-        return commonServerSchema.getMulticastTTL();
-    }
-
-
-    @Override
-    public String getSiteName()
-    {
-        return commonServerSchema.getSiteName();
-    }
-
-
-    @Override
-    public String getWellKnownAddress()
-    {
-        return commonServerSchema.getWellKnownAddress();
-    }
-
-
-    @Override
-    public CoherenceClusterOrchestration setCacheConfigURI(String cacheConfigURI)
-    {
-        commonServerSchema.setCacheConfigURI(cacheConfigURI);
-
-        return this;
-    }
-
-
-    @Override
-    public CoherenceClusterOrchestration setLog(String destination)
-    {
-        commonServerSchema.setLog(destination);
-
-        return this;
-    }
-
-
-    @Override
-    public CoherenceClusterOrchestration setLogLevel(int level)
-    {
-        commonServerSchema.setLogLevel(level);
-
-        return this;
-    }
-
-
-    @Override
-    public CoherenceClusterOrchestration setOperationalOverrideURI(String operationalOverrideURI)
-    {
-        commonServerSchema.setOperationalOverrideURI(operationalOverrideURI);
-
-        return this;
-    }
-
-
-    @Override
-    public CoherenceClusterOrchestration setPofConfigURI(String pofConfigURI)
-    {
-        commonServerSchema.setPofConfigURI(pofConfigURI);
-        commonServerSchema.setPofEnabled(true);
-
-        return this;
-    }
-
-
-    @Override
-    public CoherenceClusterOrchestration setPofEnabled(boolean isEnabled)
-    {
-        commonServerSchema.setPofEnabled(isEnabled);
-
-        return this;
-    }
-
-
-    @Override
-    public String getCacheConfigURI()
-    {
-        return commonServerSchema.getCacheConfigURI();
-    }
-
-
-    @Override
-    public String getLog()
-    {
-        return commonServerSchema.getLog();
-    }
-
-
-    @Override
-    public int getLogLevel()
-    {
-        return commonServerSchema.getLogLevel();
-    }
-
-
-    @Override
-    public String getOperationalOverrideURI()
-    {
-        return commonServerSchema.getOperationalOverrideURI();
-    }
-
-
-    @Override
-    public String getPofConfigURI()
-    {
-        return commonServerSchema.getPofConfigURI();
-    }
-
-
-    @Override
-    public boolean isPofEnabled()
-    {
-        return commonServerSchema.isPofEnabled();
-    }
-
-
     /**
      * Obtains the {@link LocalPlatform} on which the {@link CoherenceClusterOrchestration} will
      * create sessions.
@@ -620,6 +372,54 @@ public class CoherenceClusterOrchestration extends ExternalResource
     public LocalPlatform getLocalPlatform()
     {
         return platform;
+    }
+
+
+    /**
+     * Adds the specified {@link Option}s to the {@link CoherenceClusterOrchestration} for
+     * launching all {@link CoherenceClusterMember}s.
+     *
+     * @param options  the {@link Option}s
+     *
+     * @return  the {@link CoherenceClusterOrchestration}
+     */
+    public CoherenceClusterOrchestration withOptions(Option... options)
+    {
+        commonMemberOptions.addAll(options);
+
+        return this;
+    }
+
+
+    /**
+     * Adds the specified {@link Option}s to the {@link CoherenceClusterOrchestration} for
+     * launching all storage-enabled {@link CoherenceClusterMember}s.
+     *
+     * @param options  the {@link Option}s for storage-enabled {@link CoherenceClusterMember}s
+     *
+     * @return  the {@link CoherenceClusterOrchestration}
+     */
+    public CoherenceClusterOrchestration withStorageMemberOptions(Option... options)
+    {
+        storageMemberOptions.addAll(options);
+
+        return this;
+    }
+
+
+    /**
+     * Adds the specified {@link Option}s to the {@link CoherenceClusterOrchestration} for
+     * launching all proxy server {@link CoherenceClusterMember}s.
+     *
+     * @param options  the {@link Option}s for proxy server {@link CoherenceClusterMember}s
+     *
+     * @return  the {@link CoherenceClusterOrchestration}
+     */
+    public CoherenceClusterOrchestration withProxyMemberOptions(Option... options)
+    {
+        proxyMemberOptions.addAll(options);
+
+        return this;
     }
 
 
@@ -643,12 +443,12 @@ public class CoherenceClusterOrchestration extends ExternalResource
 
         if (session == null)
         {
-            CoherenceCacheServerSchema sessionSchema = new CoherenceCacheServerSchema(commonServerSchema);
+            Options options = new Options(commonMemberOptions);
 
-            sessionSchema.setRoleName("client");
-            sessionSchema.setStorageEnabled(false);
+            options.add(RoleName.of("client"));
+            options.add(LocalStorage.disabled());
 
-            session = builder.realize(platform, this, sessionSchema);
+            session = builder.build(platform, this, options.asArray());
 
             sessions.put(builder, session);
         }
@@ -662,47 +462,11 @@ public class CoherenceClusterOrchestration extends ExternalResource
      *
      * @param count the number of storage enabled members
      *
-     * @return the {@link FluentCoherenceClusterSchema}
+     * @return the {@link CoherenceClusterOrchestration}
      */
     public CoherenceClusterOrchestration setStorageMemberCount(int count)
     {
         storageMemberCount = count;
-
-        return this;
-    }
-
-
-    /**
-     * Sets the specified system property that will apply only to
-     * storage enabled cluster members.
-     *
-     * @param name  the name of the system property
-     * @param value the value for the system property
-     *
-     * @return the {@link CoherenceClusterOrchestration} to permit fluent-style method-calls
-     */
-    public CoherenceClusterOrchestration setStorageMemberSystemProperty(String name,
-                                                                        Object value)
-    {
-        storageMemberProperties = storageMemberProperties.add(SystemProperty.of(name, value));
-
-        return this;
-    }
-
-
-    /**
-     * Sets the specified system property that will apply only to
-     * Extend proxy cluster members.
-     *
-     * @param name  the name of the system property
-     * @param value the value for the system property
-     *
-     * @return the {@link CoherenceClusterOrchestration} to permit fluent-style method-calls
-     */
-    public CoherenceClusterOrchestration setProxyServerSystemProperty(String name,
-                                                                      Object value)
-    {
-        extendProxyServerProperties = extendProxyServerProperties.add(SystemProperty.of(name, value));
 
         return this;
     }
@@ -772,18 +536,15 @@ public class CoherenceClusterOrchestration extends ExternalResource
                                             + "storage enabled members");
         }
 
-        CoherenceCacheServerSchema schema = createStorageEnabledMemberSchema();
-
-        Block                      block  = new Block();
+        Block block = new Block();
 
         for (int i = 1; i <= storageMemberCount; i++)
         {
-            block.add(new RestartCoherenceClusterMemberAction("storage",
-                                                              schema,
-                                                              new SystemApplicationConsole(),
-                                                              predicate,
-                                                              platform,
-                                                              options));
+            Options launchOptions = createStorageEnabledMemberOptions();
+
+            launchOptions.addAll(options);
+
+            block.add(new RestartCoherenceClusterMemberAction("storage", predicate, platform, launchOptions.asArray()));
         }
 
         InteractiveActionExecutor<CoherenceClusterMember, CoherenceCluster> executor =

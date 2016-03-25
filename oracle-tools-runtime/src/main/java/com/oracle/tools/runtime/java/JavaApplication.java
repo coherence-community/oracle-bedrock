@@ -25,9 +25,12 @@
 
 package com.oracle.tools.runtime.java;
 
-import com.oracle.tools.deferred.Deferred;
+import com.oracle.tools.Options;
 
 import com.oracle.tools.runtime.Application;
+import com.oracle.tools.runtime.Platform;
+
+import com.oracle.tools.runtime.annotations.PreferredMetaClass;
 
 import com.oracle.tools.runtime.concurrent.RemoteCallable;
 import com.oracle.tools.runtime.concurrent.RemoteExecutor;
@@ -36,14 +39,6 @@ import com.oracle.tools.runtime.concurrent.callable.RemoteMethodInvocation;
 import java.io.NotSerializableException;
 
 import java.util.Properties;
-import java.util.Set;
-
-import javax.management.MBeanInfo;
-import javax.management.ObjectInstance;
-import javax.management.ObjectName;
-import javax.management.QueryExp;
-
-import javax.management.remote.JMXConnector;
 
 /**
  * An {@link Application} specifically representing Java-based applications.
@@ -54,60 +49,11 @@ import javax.management.remote.JMXConnector;
  * @author Brian Oliver
  *
  * @see Application
- * @see JavaApplicationBuilder
+ * @see JavaApplicationLauncher
  */
+@PreferredMetaClass(JavaApplication.MetaClass.class)
 public interface JavaApplication extends Application, RemoteExecutor
 {
-    /**
-     * The com.sun.management.jmxremote JVM property.
-     */
-    public static final String SUN_MANAGEMENT_JMXREMOTE = "com.sun.management.jmxremote";
-
-    /**
-     * The com.sun.management.jmxremote.url JVM property.
-     */
-    public static final String SUN_MANAGEMENT_JMXREMOTE_URL = "com.sun.management.jmxremote.url";
-
-    /**
-     * The com.sun.management.jmxremote.port JVM property.
-     */
-    public static final String SUN_MANAGEMENT_JMXREMOTE_PORT = "com.sun.management.jmxremote.port";
-
-    /**
-     * The com.sun.management.jmxremote.authenticate JVM property.
-     */
-    public static final String SUN_MANAGEMENT_JMXREMOTE_AUTHENTICATE = "com.sun.management.jmxremote.authenticate";
-
-    /**
-     * The com.sun.management.jmxremote.user JVM property.
-     */
-    public static final String SUN_MANAGEMENT_JMXREMOTE_USER = "com.sun.management.jmxremote.user";
-
-    /**
-     * The com.sun.management.jmxremote.password JVM property.
-     */
-    public static final String SUN_MANAGEMENT_JMXREMOTE_PASSWORD = "com.sun.management.jmxremote.password";
-
-    /**
-     * The com.sun.management.jmxremote.ssl JVM property.
-     */
-    public static final String SUN_MANAGEMENT_JMXREMOTE_SSL = "com.sun.management.jmxremote.ssl";
-
-    /**
-     * The com.sun.management.jmxremote.password.file JVM property.
-     */
-    public static final String SUN_MANAGEMENT_JMXREMOTE_PASSWORD_FILE = "com.sun.management.jmxremote.password.file";
-
-    /**
-     * The com.sun.management.jmxremote.access.file JVM property.
-     */
-    public static final String SUN_MANAGEMENT_JMXREMOTE_ACCESS_FILE = "com.sun.management.jmxremote.access.file";
-
-    /**
-     * The java.awt.headless JVM property.
-     */
-    public static final String JAVA_AWT_HEADLESS = "java.awt.headless";
-
     /**
      * The java.home JVM property.
      */
@@ -130,8 +76,8 @@ public interface JavaApplication extends Application, RemoteExecutor
 
 
     /**
-     * Obtains the system {@link Properties} that were supplied to the
-     * {@link JavaApplication} when it was realized.
+     * Obtains the resolved System {@link Properties} that were provided to the {@link JavaApplication}
+     * when it was launched.
      *
      * @return a {@link Properties} of name value pairs, each one representing
      *         a system property provided to the {@link JavaApplication} as
@@ -141,8 +87,7 @@ public interface JavaApplication extends Application, RemoteExecutor
 
 
     /**
-     * Obtains an individual system property value for a specified system
-     * property name, or <code>null</code> if the property is undefined.
+     * Obtains the current value for a system property.
      *
      * @param name  the name of the system property
      *
@@ -150,168 +95,6 @@ public interface JavaApplication extends Application, RemoteExecutor
      *         if undefined
      */
     public String getSystemProperty(String name);
-
-
-    /**
-     * Determines if JMX has been configured and is enabled for the
-     * {@link JavaApplication}.
-     *
-     * @return <code>true</code> if enabled, <code>false</code> otherwise
-     */
-    public boolean isJMXEnabled();
-
-
-    /**
-     * Obtains the {@link Deferred} for the {@link JMXConnector}
-     * to the {@link JavaApplication}.
-     *
-     * @return  the {@link Deferred} of the {@link JMXConnector}
-     */
-    public Deferred<JMXConnector> getDeferredJMXConnector();
-
-
-    /**
-     * Obtains a {@link Deferred} representing the value of an
-     * MBean attribute registered with the JMX infrastructure of the
-     * {@link JavaApplication}.
-     *
-     * @param <T>             the type of the MBean attribute
-     * @param objectName      the name of the MBean defining the attribute
-     * @param attributeName   the name of the MBean attribute
-     * @param attributeClass  the {@link Class} of the MBean attribute
-     *
-     * @return a {@link Deferred} of type T for the attribute value
-     */
-    public <T> Deferred<T> getDeferredMBeanAttribute(ObjectName objectName,
-                                                     String     attributeName,
-                                                     Class<T>   attributeClass);
-
-
-    /**
-     * Obtains the value of the specified MBean attribute registered with the
-     * JMX infrastructure of the {@link JavaApplication}.
-     * <p>
-     * If the JMX infrastructure in the {@link JavaApplication} is not yet
-     * available, it will block at wait for the default application timeout
-     * until it becomes available.
-     *
-     * @param <T>             the type of the MBean attribute
-     * @param objectName      the name of the MBean defining the attribute
-     * @param attributeName   the name of the MBean attribute
-     * @param attributeClass  the {@link Class} of the MBean attribute
-     *
-     * @return the MBean attribute value
-     *
-     * @throws com.oracle.tools.deferred.UnresolvableInstanceException
-     *                         when resource is unavailable
-     */
-    public <T> T getMBeanAttribute(ObjectName objectName,
-                                   String     attributeName,
-                                   Class<T>   attributeClass);
-
-
-    /**
-     * Obtains a {@link Deferred} representing a local proxy to an MBean
-     * registered with the JMX infrastructure of the {@link JavaApplication}.
-     *
-     * @param <T>
-     * @param objectName  the name of the MBean
-     * @param proxyClass  the type of the proxy
-     *
-     * @return a {@link Deferred} of type T
-     */
-    public <T> Deferred<T> getDeferredMBeanProxy(ObjectName objectName,
-                                                 Class<T>   proxyClass);
-
-
-    /**
-     * Obtains a local proxy of an MBean registered with the JMX infrastructure
-     * in the {@link JavaApplication}.
-     * <p>
-     * If the JMX infrastructure in the {@link JavaApplication} is not yet
-     * available, it will block and wait for the default application timeout
-     * until it becomes available.
-     *
-     * @param <T>         the type of the MBean
-     * @param objectName  the name of the MBean
-     * @param clazz       the class of the proxy to create
-     *
-     * @return a proxy of type T
-     *
-     * @throws com.oracle.tools.deferred.UnresolvableInstanceException
-     *                                        when resource is unavailable
-     * @throws UnsupportedOperationException  when JMX is not enabled for the
-     *                                        {@link JavaApplication}
-     */
-    public <T> T getMBeanProxy(ObjectName objectName,
-                               Class<T>   clazz);
-
-
-    /**
-     * Obtains a {@link Deferred} representing an {@link MBeanInfo}
-     * registered with the JMX infrastructure of the {@link JavaApplication}.
-     *
-     * @param objectName  the name of the MBean
-     *
-     * @return a {@link Deferred} of an {@link MBeanInfo}
-     */
-    public Deferred<MBeanInfo> getDeferredMBeanInfo(ObjectName objectName);
-
-
-    /**
-     * Obtains the {@link MBeanInfo} of the specified MBean using the JMX
-     * infrastructure in the {@link JavaApplication}.
-     * <p>
-     * If the JMX infrastructure in the {@link JavaApplication} is not yet
-     * available, it will block at wait for the default application timeout
-     * until it becomes available.
-     *
-     * @param objectName  the name of the MBean
-     *
-     * @return an {@link MBeanInfo}
-     *
-     * @throws com.oracle.tools.deferred.UnresolvableInstanceException
-     *                                        when resource is unavailable
-     * @throws UnsupportedOperationException  when JMX is not enabled for the
-     *                                        {@link JavaApplication}
-     */
-    public MBeanInfo getMBeanInfo(ObjectName objectName);
-
-
-    /**
-     * Obtains a the result of an MBeans Query against the JMX infrastructure
-     * of the {@link JavaApplication}.
-     *
-     * @param name   the object name pattern identifying the MBeans to be retrieved.
-     *               If <code>null</code> or no domain and key properties are
-     *               specified, all the MBeans registered will be retrieved
-     * @param query  the query expression to be applied for selecting MBeans
-     *               If <code>null</code> no query expression will be applied
-     *               for selecting MBeans
-     *
-     * @return a {@link Set} of {@link ObjectInstance}s
-     */
-    public Set<ObjectInstance> queryMBeans(ObjectName name,
-                                           QueryExp   query);
-
-
-    /**
-     * Obtains the configured JMX port of the application (which by definition is remote)
-     *
-     * @return Port Number
-     * @throws UnsupportedOperationException  when JMX is not enabled on the
-     *                                        {@link JavaApplication}
-     */
-    public int getRemoteJMXPort();
-
-
-    /**
-     * Obtains the configured RMI Server Host Name for the RMI server possibly running in the
-     * {@link SimpleJavaApplication}.
-     *
-     * @return {@link String} (<code>null</code> if not defined).
-     */
-    public String getRMIServerHostName();
 
 
     /**
@@ -346,4 +129,44 @@ public interface JavaApplication extends Application, RemoteExecutor
      * @param <T>       the type of the result
      */
     public <T> T submit(RemoteCallable<T> callable);
+
+
+    /**
+     * The {@link com.oracle.tools.runtime.options.MetaClass} for {@link JavaApplication}s.
+     */
+    class MetaClass implements com.oracle.tools.runtime.options.MetaClass<JavaApplication>
+    {
+        /**
+         * Constructs a {@link MetaClass} for a {@link JavaApplication}.
+         */
+        @Options.Default
+        public MetaClass()
+        {
+        }
+
+
+        @Override
+        public Class<? extends JavaApplication> getImplementationClass(Platform platform,
+                                                                       Options  options)
+        {
+            return SimpleJavaApplication.class;
+        }
+
+
+        @Override
+        public void onBeforeLaunch(Platform platform,
+                                   Options  options)
+        {
+            // there's nothing to do before launching the application
+        }
+
+
+        @Override
+        public void onAfterLaunch(Platform    platform,
+                                  Application application,
+                                  Options     options)
+        {
+            // there's nothing to do after launching the application
+        }
+    }
 }

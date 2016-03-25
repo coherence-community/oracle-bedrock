@@ -29,7 +29,6 @@ import com.oracle.tools.Option;
 import com.oracle.tools.Options;
 
 import com.oracle.tools.runtime.Application;
-import com.oracle.tools.runtime.ApplicationSchema;
 import com.oracle.tools.runtime.Platform;
 
 import com.oracle.tools.runtime.remote.DeploymentArtifact;
@@ -48,12 +47,11 @@ import java.util.List;
  *
  * @author Brian Oliver
  */
-public interface Deployment<A extends Application, S extends ApplicationSchema<A>> extends Option
+public interface Deployment extends Option
 {
     /**
      * Obtain the {@link DeploymentArtifact}s to deploy.
      *
-     * @param schema    the {@link ApplicationSchema} of the {@link Application} being deployed
      * @param platform  the {@link Platform} on which the {@link Application} will be deployed
      * @param options   the {@link Options} for realizing the {@link Application}
      *
@@ -62,7 +60,6 @@ public interface Deployment<A extends Application, S extends ApplicationSchema<A
      * @throws FileNotFoundException  when a {@link DeploymentArtifact} cannot be found
      * @throws IOException            when a {@link DeploymentArtifact} fail to be created/accessed
      */
-    public List<DeploymentArtifact> getDeploymentArtifacts(S        schema,
-                                                           Platform platform,
-                                                           Options  options) throws IOException;
+    List<DeploymentArtifact> getDeploymentArtifacts(Platform platform,
+                                                    Options  options) throws IOException;
 }

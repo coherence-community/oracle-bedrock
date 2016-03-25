@@ -25,24 +25,23 @@
 
 package com.oracle.tools.runtime.java;
 
-import com.oracle.tools.Options;
-import com.oracle.tools.runtime.ApplicationBuilder;
 import com.oracle.tools.runtime.LocalPlatform;
 import com.oracle.tools.runtime.Platform;
-import com.oracle.tools.runtime.SimpleApplication;
+
+import com.oracle.tools.runtime.java.profiles.RemoteDebugging;
 
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.nullValue;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 
-import static org.hamcrest.core.IsInstanceOf.instanceOf;
-
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.lang.management.RuntimeMXBean;
@@ -61,43 +60,57 @@ import java.util.List;
  */
 public class JavaVirtualMachineTest
 {
+    /**
+     * Test that remote debug mode is set to the value returned
+     * from {@link JavaVirtualMachine#shouldEnableRemoteDebugging()}
+     */
+    @Test
+    @SuppressWarnings("unchecked")
+    public void shouldDefaultDebugModeToFalseFromJVM() throws Exception
+    {
+        JavaVirtualMachine jvm = JavaVirtualMachine.get();
+
+        when(jvm.shouldEnableRemoteDebugging()).thenReturn(false);
+
+        RemoteDebugging remoteDebugging = RemoteDebugging.autoDetect();
+
+        Assert.assertThat(remoteDebugging.isEnabled(), is(false));
+        verify(jvm, atLeastOnce()).shouldEnableRemoteDebugging();
+    }
+
+
+    /**
+     * Test that remote debug mode is set to the value returned
+     * from {@link JavaVirtualMachine#shouldEnableRemoteDebugging()}
+     */
+    @Test
+    @SuppressWarnings("unchecked")
+    public void shouldDefaultDebugModeToTrueFromJVM() throws Exception
+    {
+        JavaVirtualMachine jvm = JavaVirtualMachine.get();
+
+        when(jvm.shouldEnableRemoteDebugging()).thenReturn(true);
+
+        RemoteDebugging remoteDebugging = RemoteDebugging.autoDetect();
+
+        Assert.assertThat(remoteDebugging.isEnabled(), is(true));
+        verify(jvm, atLeastOnce()).shouldEnableRemoteDebugging();
+    }
+
+
     @Test
     public void shouldReturnLocalPlatformAddress() throws Exception
     {
-        Platform platform = JavaVirtualMachine.getInstance();
+        Platform platform = JavaVirtualMachine.get();
 
-        assertThat(platform.getAddress(), is(LocalPlatform.getInstance().getAddress()));
-    }
-
-
-    @Test
-    public void shouldReturnJavaApplicationBuilder()
-    {
-        JavaVirtualMachine          platform = JavaVirtualMachine.getInstance();
-        Options                     options  = platform.getOptions();
-        ApplicationBuilder.Supplier supplier = options.get(ApplicationBuilder.Supplier.class);
-        ApplicationBuilder          builder  = supplier.getApplicationBuilder(platform, JavaApplication.class);
-
-        assertThat(builder, instanceOf(ContainerBasedJavaApplicationBuilder.class));
-    }
-
-
-    @Test
-    public void shouldReturnLocalApplicationBuilder()
-    {
-        JavaVirtualMachine          platform = JavaVirtualMachine.getInstance();
-        Options                     options  = platform.getOptions();
-        ApplicationBuilder.Supplier supplier = options.get(ApplicationBuilder.Supplier.class);
-        ApplicationBuilder          builder  = supplier.getApplicationBuilder(platform, SimpleApplication.class);
-
-        assertThat(builder, is(nullValue()));
+        assertThat(platform.getAddress(), is(LocalPlatform.get().getAddress()));
     }
 
 
     @Test
     public void shouldSetDebugModeToFalseBasedOnProcessArguments() throws Exception
     {
-        JavaVirtualMachine jvm           = JavaVirtualMachine.getInstance();
+        JavaVirtualMachine jvm           = JavaVirtualMachine.get();
         RuntimeMXBean      runtimeMXBean = mock(RuntimeMXBean.class);
         List<String>       args          = Arrays.asList("foo", "bar");
 
@@ -111,7 +124,7 @@ public class JavaVirtualMachineTest
     @Test
     public void shouldSetDebugModeToTrueBasedOnProcessArguments() throws Exception
     {
-        JavaVirtualMachine jvm           = JavaVirtualMachine.getInstance();
+        JavaVirtualMachine jvm           = JavaVirtualMachine.get();
         RuntimeMXBean      runtimeMXBean = mock(RuntimeMXBean.class);
         List<String> args = Arrays.asList("foo",
                                           "-agentlib:jdwp=transport=dt_socket,address=127.0.0.1:52429,suspend=y,server=n",
@@ -127,7 +140,7 @@ public class JavaVirtualMachineTest
     @Test
     public void shouldNotRunWithDebugMode() throws Exception
     {
-        JavaVirtualMachine jvm           = JavaVirtualMachine.getInstance();
+        JavaVirtualMachine jvm           = JavaVirtualMachine.get();
         RuntimeMXBean      runtimeMXBean = mock(RuntimeMXBean.class);
         List<String>       args          = Arrays.asList("foo", "bar");
 
@@ -141,7 +154,7 @@ public class JavaVirtualMachineTest
     @Test
     public void shouldRunWithDebugMode() throws Exception
     {
-        JavaVirtualMachine jvm           = JavaVirtualMachine.getInstance();
+        JavaVirtualMachine jvm           = JavaVirtualMachine.get();
         RuntimeMXBean      runtimeMXBean = mock(RuntimeMXBean.class);
         List<String> args = Arrays.asList("foo",
                                           "-agentlib:jdwp=transport=dt_socket,address=127.0.0.1:52429,suspend=y,server=n",
@@ -157,7 +170,7 @@ public class JavaVirtualMachineTest
     @Test
     public void shouldNotRunWithDebugModeIfAutoDebugModeIsFalse() throws Exception
     {
-        JavaVirtualMachine jvm           = JavaVirtualMachine.getInstance();
+        JavaVirtualMachine jvm           = JavaVirtualMachine.get();
         RuntimeMXBean      runtimeMXBean = mock(RuntimeMXBean.class);
         List<String> args = Arrays.asList("foo",
                                           "-agentlib:jdwp=transport=dt_socket,address=127.0.0.1:52429,suspend=y,server=n",

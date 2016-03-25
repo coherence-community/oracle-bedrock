@@ -65,7 +65,7 @@ public class PropertiesBuilder
 
 
     /**
-     * Constructs a {@link PropertiesBuilder} that will realize an empty
+     * Constructs a {@link PropertiesBuilder} that will build an empty
      * {@link PropertiesBuilder} if no properties definitions are added.
      */
     public PropertiesBuilder()

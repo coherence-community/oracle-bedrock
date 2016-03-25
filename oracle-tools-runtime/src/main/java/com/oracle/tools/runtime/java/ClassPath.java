@@ -58,7 +58,7 @@ import java.util.LinkedHashSet;
  *
  * @author Brian Oliver
  */
-public class ClassPath implements Iterable<String>, Tabular
+public class ClassPath implements Iterable<String>, Tabular, Option
 {
     /**
      * The known of Java Archives Types, typically used in class-paths and
@@ -313,12 +313,11 @@ public class ClassPath implements Iterable<String>, Tabular
      *
      * @return the Java class-path
      */
-    public String toString(Option... options)
+    public String toString(Options options)
     {
         StringBuilder      builder       = new StringBuilder();
-        Options            opts          = new Options(options);
-        PlatformSeparators separators    = opts.get(PlatformSeparators.class);
-        ClassPathModifier  modifier      = opts.get(ClassPathModifier.class);
+        PlatformSeparators separators    = options.get(PlatformSeparators.class);
+        ClassPathModifier  modifier      = options.get(ClassPathModifier.class);
         String             pathSeparator = separators.getPathSeparator();
 
         for (String path : paths)
@@ -339,6 +338,22 @@ public class ClassPath implements Iterable<String>, Tabular
     }
 
 
+    /**
+     * Obtains a String representation of the {@link ClassPath} that is suitable
+     * for using as a Java class-path property (using the specified
+     * file and path separators).
+     * <p>
+     * Note:  The returned String may contain spaces in which case the caller should
+     * appropriate double-quote the String for their appropriate Platform.
+     *
+     * @return the Java class-path
+     */
+    public String toString(Option... options)
+    {
+        return toString(new Options(options));
+    }
+
+
     @Override
     public Table getTable()
     {
@@ -350,7 +365,8 @@ public class ClassPath implements Iterable<String>, Tabular
 
             String parent = file.getParent();
 
-            table.addRow(file.getName(), parent == null ? "" : "(" + parent + ")");
+            table.addRow(file.getName(),
+                         parent == null ? "" : "(" + parent + ")");
         }
 
         return table;
@@ -408,8 +424,9 @@ public class ClassPath implements Iterable<String>, Tabular
             if (!path.isEmpty())
             {
                 // add a file separator iff it's not an archive
-                path = isResourceAnArchive(path) || path.endsWith(File.separator) || path.endsWith("*")
-                       ? path : path + File.separator;
+                path = isResourceAnArchive(path)
+                       || path.endsWith(File.separator)
+                       || path.endsWith("*") ? path : path + File.separator;
             }
 
             return path;
@@ -622,6 +639,7 @@ public class ClassPath implements Iterable<String>, Tabular
      *
      * @return a {@link ClassPath} representing the System java.class.path property.
      */
+    @Options.Default
     public static ClassPath ofSystem()
     {
         return new ClassPath(System.getProperty("java.class.path"));

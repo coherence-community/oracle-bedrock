@@ -27,21 +27,15 @@ package com.oracle.tools.runtime.java.container;
 
 import com.oracle.tools.runtime.LocalPlatform;
 
+import com.oracle.tools.runtime.java.JavaApplication;
+import com.oracle.tools.runtime.java.features.JmxFeature;
+
 import com.oracle.tools.runtime.network.AvailablePortIterator;
 
 import static com.oracle.tools.runtime.java.JavaApplication.JAVA_HOME;
-import static com.oracle.tools.runtime.java.JavaApplication.JAVA_RMI_SERVER_HOSTNAME;
-import static com.oracle.tools.runtime.java.JavaApplication.SUN_MANAGEMENT_JMXREMOTE;
-import static com.oracle.tools.runtime.java.JavaApplication.SUN_MANAGEMENT_JMXREMOTE_ACCESS_FILE;
-import static com.oracle.tools.runtime.java.JavaApplication.SUN_MANAGEMENT_JMXREMOTE_AUTHENTICATE;
-import static com.oracle.tools.runtime.java.JavaApplication.SUN_MANAGEMENT_JMXREMOTE_PASSWORD_FILE;
-import static com.oracle.tools.runtime.java.JavaApplication.SUN_MANAGEMENT_JMXREMOTE_PORT;
-import static com.oracle.tools.runtime.java.JavaApplication.SUN_MANAGEMENT_JMXREMOTE_SSL;
-import static com.oracle.tools.runtime.java.JavaApplication.SUN_MANAGEMENT_JMXREMOTE_URL;
 
 import java.io.IOException;
 
-import java.net.InetAddress;
 import java.net.URL;
 
 import java.rmi.RemoteException;
@@ -190,8 +184,8 @@ public class ContainerMBeanServerBuilder extends MBeanServerBuilder
                                         ? System.getProperty(PROPERTY_JMX_MBEAN_SERVER_BUILDER)
                                         : MBeanServerBuilder.class.getCanonicalName();
 
-        m_mBeanServers          = new HashMap<String, MBeanServer>();
-        m_jmxConnectorServers   = new HashMap<MBeanServer, JMXConnectorServer>();
+        m_mBeanServers          = new HashMap<>();
+        m_jmxConnectorServers   = new HashMap<>();
 
         m_jmxConnectorFactory   = jmxConnectorFactory;
         m_rmiRegistryFactory    = rmiRegistryFactory;
@@ -262,8 +256,9 @@ public class ContainerMBeanServerBuilder extends MBeanServerBuilder
             m_mBeanServers.put(domain, mBeanServer);
 
             // establish an server connector for the mbean server when remote jmx is enabled
-            boolean isRemoteJMXEnabled = System.getProperties().containsKey(SUN_MANAGEMENT_JMXREMOTE)
-                                         &&!"false".equalsIgnoreCase(System.getProperty(SUN_MANAGEMENT_JMXREMOTE));
+            boolean isRemoteJMXEnabled = System.getProperties().containsKey(JmxFeature.SUN_MANAGEMENT_JMXREMOTE)
+                                         &&!"false".equalsIgnoreCase(System.getProperty(JmxFeature
+                                             .SUN_MANAGEMENT_JMXREMOTE));
 
             if (isRemoteJMXEnabled)
             {
@@ -299,40 +294,40 @@ public class ContainerMBeanServerBuilder extends MBeanServerBuilder
         {
             String hostName;
 
-            if (properties.containsKey(JAVA_RMI_SERVER_HOSTNAME))
+            if (properties.containsKey(JavaApplication.JAVA_RMI_SERVER_HOSTNAME))
             {
-                hostName = properties.getProperty(JAVA_RMI_SERVER_HOSTNAME);
+                hostName = properties.getProperty(JavaApplication.JAVA_RMI_SERVER_HOSTNAME);
             }
             else
             {
-                hostName = LocalPlatform.getInstance().getAddress().getHostAddress();
+                hostName = LocalPlatform.get().getAddress().getHostAddress();
             }
 
             int port;
 
-            if (properties.containsKey(SUN_MANAGEMENT_JMXREMOTE_PORT))
+            if (properties.containsKey(JmxFeature.SUN_MANAGEMENT_JMXREMOTE_PORT))
             {
-                port = Integer.parseInt(properties.getProperty(SUN_MANAGEMENT_JMXREMOTE_PORT));
+                port = Integer.parseInt(properties.getProperty(JmxFeature.SUN_MANAGEMENT_JMXREMOTE_PORT));
             }
             else
             {
                 port = m_availablePortIterator.next();
-                properties.setProperty(SUN_MANAGEMENT_JMXREMOTE_PORT, String.valueOf(port));
+                properties.setProperty(JmxFeature.SUN_MANAGEMENT_JMXREMOTE_PORT, String.valueOf(port));
             }
 
             m_rmiRegistryFactory.createRegistry(port);
 
             String remoteJMXConnectionUrl = String.format(JMX_RMI_URL_FORMAT, hostName, port);
 
-            properties.setProperty(SUN_MANAGEMENT_JMXREMOTE_URL, remoteJMXConnectionUrl);
+            properties.setProperty(JmxFeature.SUN_MANAGEMENT_JMXREMOTE_URL, remoteJMXConnectionUrl);
 
             JMXServiceURL       url         = new JMXServiceURL(remoteJMXConnectionUrl);
             Map<String, Object> environment = new HashMap<String, Object>();
 
-            if (Boolean.parseBoolean(properties.getProperty(SUN_MANAGEMENT_JMXREMOTE_AUTHENTICATE)))
+            if (Boolean.parseBoolean(properties.getProperty(JmxFeature.SUN_MANAGEMENT_JMXREMOTE_AUTHENTICATE)))
             {
                 String javaHome     = System.getProperty(JAVA_HOME);
-                String authFileName = properties.getProperty(SUN_MANAGEMENT_JMXREMOTE_PASSWORD_FILE);
+                String authFileName = properties.getProperty(JmxFeature.SUN_MANAGEMENT_JMXREMOTE_PASSWORD_FILE);
 
                 if (authFileName == null)
                 {
@@ -344,7 +339,7 @@ public class ContainerMBeanServerBuilder extends MBeanServerBuilder
                     environment.put(PROPERTY_JMX_REMOTE_PASSWORD_FILE, authFileName);
                 }
 
-                String accessFileName = properties.getProperty(SUN_MANAGEMENT_JMXREMOTE_ACCESS_FILE);
+                String accessFileName = properties.getProperty(JmxFeature.SUN_MANAGEMENT_JMXREMOTE_ACCESS_FILE);
 
                 if (accessFileName == null)
                 {
@@ -357,7 +352,7 @@ public class ContainerMBeanServerBuilder extends MBeanServerBuilder
                 }
             }
 
-            if (Boolean.parseBoolean(properties.getProperty(SUN_MANAGEMENT_JMXREMOTE_SSL)))
+            if (Boolean.parseBoolean(properties.getProperty(JmxFeature.SUN_MANAGEMENT_JMXREMOTE_SSL)))
             {
                 try
                 {

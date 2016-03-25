@@ -28,6 +28,7 @@ package com.oracle.tools.options;
 import com.oracle.tools.Option;
 import com.oracle.tools.Options;
 
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -306,6 +307,20 @@ public class Variables implements Option.Collector<Variable, Variables>
     public Variables without(Variable variable)
     {
         return remove(variable.getName());
+    }
+
+
+    @Override
+    public <O> Iterable<O> getInstancesOf(Class<O> requiredClass)
+    {
+        if (requiredClass.isAssignableFrom(Variable.class))
+        {
+            return (Iterable<O>) variables.values();
+        }
+        else
+        {
+            return Collections.EMPTY_LIST;
+        }
     }
 
 

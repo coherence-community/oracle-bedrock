@@ -27,11 +27,13 @@ package com.oracle.tools.runtime.options;
 
 import com.oracle.tools.Option;
 import com.oracle.tools.Options;
+
 import com.oracle.tools.lang.ExpressionEvaluator;
-import com.oracle.tools.runtime.ApplicationSchema;
+
 import com.oracle.tools.runtime.Platform;
 
 import java.io.File;
+
 import java.util.Calendar;
 import java.util.Iterator;
 
@@ -50,6 +52,7 @@ public class WorkingDirectory implements Option
      * The value that will be used to determine the working directory.
      */
     private final Object workingDirectory;
+
 
     /**
      * Create a {@link WorkingDirectory} that will use the specified
@@ -75,19 +78,15 @@ public class WorkingDirectory implements Option
 
 
     /**
-     * Realize the {@link File} pointing to the working directory to use for an application.
+     * Resolve and obtain the {@link File} representing the working directory to use for an application.
      *
-     * @param applicationName  the name of the application
      * @param platform         the {@link Platform} that the application will run on
-     * @param schema           the {@link ApplicationSchema} that defines the application
-     * @param options          the {@link Option}s to use
+     * @param options          the {@link Options} to use
      *
      * @return  the {@link File} pointing to the working directory to use for an application
      */
-    public File realize(String               applicationName,
-                        Platform             platform,
-                        ApplicationSchema<?> schema,
-                        Option...            options)
+    public File resolve(Platform platform,
+                        Options  options)
     {
         if (workingDirectory == null)
         {
@@ -99,21 +98,30 @@ public class WorkingDirectory implements Option
             return (File) workingDirectory;
         }
 
-        Options             opts       = new Options(options);
-        ExpressionEvaluator evaluator  = new ExpressionEvaluator(opts);
+        DisplayName         displayName   = options.get(DisplayName.class);
 
-        evaluator.defineVariable("applicationName", applicationName);
+        Discriminator       discriminator = options.get(Discriminator.class);
+
+        ExpressionEvaluator evaluator     = new ExpressionEvaluator(options);
+
+        evaluator.defineVariable("applicationName", displayName.resolve(options));
+        evaluator.defineVariable("displayName", displayName.resolve(null));
+
+        if (discriminator != null)
+        {
+            evaluator.defineVariable("discriminator", discriminator.getValue());
+        }
+
         evaluator.defineVariable("platform", platform);
-        evaluator.defineVariable("schema", schema);
 
         Object directoryValue = workingDirectory;
 
         if (directoryValue instanceof WorkingDirectory.ContextSensitiveDirectoryName)
         {
             WorkingDirectory.ContextSensitiveDirectoryName contextSensitiveValue =
-                    (WorkingDirectory.ContextSensitiveDirectoryName) directoryValue;
+                (WorkingDirectory.ContextSensitiveDirectoryName) directoryValue;
 
-            directoryValue = contextSensitiveValue.getValue(applicationName, platform, schema, options);
+            directoryValue = contextSensitiveValue.resolve(platform, options);
         }
 
         if (directoryValue instanceof Iterator<?>)
@@ -126,8 +134,8 @@ public class WorkingDirectory implements Option
             }
             else
             {
-                throw new IndexOutOfBoundsException(
-                        String.format("No more values available for the working directory [%s]",  workingDirectory));
+                throw new IndexOutOfBoundsException(String.format("No more values available for the working directory [%s]",
+                                                                  workingDirectory));
             }
         }
 
@@ -138,7 +146,7 @@ public class WorkingDirectory implements Option
 
         String expression = directoryValue.toString().trim();
 
-        Object result = evaluator.evaluate(expression, Object.class);
+        Object result     = evaluator.evaluate(expression, Object.class);
 
         return new File(String.valueOf(result));
     }
@@ -162,21 +170,19 @@ public class WorkingDirectory implements Option
         ContextSensitiveDirectoryName name = new ContextSensitiveDirectoryName()
         {
             @Override
-            public Object getValue(String            applicationName,
-                                   Platform          platform,
-                                   ApplicationSchema schema,
-                                   Option...         options)
+            public Object resolve(Platform platform,
+                                  Options  options)
             {
-                Options            opts                     = new Options(options);
-                PlatformSeparators separators               = opts.get(PlatformSeparators.class);
-                String             sanitizedApplicationName = separators.asSanitizedFileName(applicationName);
-                Calendar           now                      = Calendar.getInstance();
-                String             temporaryDirectoryName   = String.format("%1$s-%2$tY%2$tm%2$td-%2$tH%2$tM%2$tS-%2$tL",
-                                                                            sanitizedApplicationName,
-                                                                            now);
+                DisplayName        displayName          = options.get(DisplayName.class);
+                PlatformSeparators separators           = options.get(PlatformSeparators.class);
+                String             sanitizedDisplayName = separators.asSanitizedFileName(displayName.resolve(options));
+                Calendar           now                  = Calendar.getInstance();
+                String temporaryDirectoryName = String.format("%1$s-%2$tY%2$tm%2$td-%2$tH%2$tM%2$tS-%2$tL",
+                                                              sanitizedDisplayName,
+                                                              now);
 
                 TemporaryDirectory defaultTemp        = TemporaryDirectory.at(separators.getFileSeparator() + "tmp");
-                TemporaryDirectory temporaryDirectory = opts.get(TemporaryDirectory.class, defaultTemp);
+                TemporaryDirectory temporaryDirectory = options.getOrDefault(TemporaryDirectory.class, defaultTemp);
 
                 return new File(temporaryDirectory.get().toFile(), temporaryDirectoryName);
             }
@@ -231,17 +237,15 @@ public class WorkingDirectory implements Option
         ContextSensitiveDirectoryName name = new ContextSensitiveDirectoryName()
         {
             @Override
-            public Object getValue(String            applicationName,
-                                   Platform          platform,
-                                   ApplicationSchema schema,
-                                   Option...         valueOptions)
+            public Object resolve(Platform platform,
+                                  Options  options)
             {
-                Options            options                  = new Options(valueOptions);
-                PlatformSeparators separators               = options.get(PlatformSeparators.class);
-                String             sanitizedApplicationName = separators.asSanitizedFileName(applicationName);
-                File               parentFile               = (parent != null) ? parent : new File(System.getProperty("user.dir"));
+                DisplayName        displayName          = options.get(DisplayName.class);
+                PlatformSeparators separators           = options.get(PlatformSeparators.class);
+                String             sanitizedDisplayName = separators.asSanitizedFileName(displayName.resolve(options));
+                File               parentFile = (parent != null) ? parent : new File(System.getProperty("user.dir"));
 
-                return new File(parentFile, sanitizedApplicationName);
+                return new File(parentFile, sanitizedDisplayName);
             }
         };
 
@@ -251,23 +255,20 @@ public class WorkingDirectory implements Option
 
     /**
      * A context sensitive directory name, possibly based on the application name,
-     * the {@link Platform} and/or {@link ApplicationSchema}.
+     * the {@link Platform} and/or {@link Option}s.
      */
     public interface ContextSensitiveDirectoryName
     {
         /**
-         * Obtains the value for the working directory, possibly based on the provided
-         * application name, {@link Platform} and {@link ApplicationSchema}.
+         * Obtains the value for the working directory, possibly based on the provided {@link Platform}
+         * and {@link Option}s.
          *
-         * @param applicationName  the name of the application
-         * @param platform         the {@link Platform} in which {@link Argument} is being used.
-         * @param schema           the {@link ApplicationSchema} in which {@link Argument} is being used.
-         * @param options          the {@link Option}s to control directory creation
+         * @param platform  the {@link Platform} in which {@link Argument} is being used.
+         * @param options   the {@link Options} to control directory creation
+         *
          * @return the value
          */
-        Object getValue(String            applicationName,
-                        Platform          platform,
-                        ApplicationSchema schema,
-                        Option...         options);
+        Object resolve(Platform platform,
+                       Options  options);
     }
 }

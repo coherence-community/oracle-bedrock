@@ -29,6 +29,8 @@ import com.oracle.tools.runtime.ApplicationProcess;
 
 import com.oracle.tools.runtime.concurrent.RemoteExecutor;
 
+import java.util.Properties;
+
 /**
  * A {@link ApplicationProcess} specifically for managing Java-based
  * Applications at runtime.
@@ -40,4 +42,11 @@ import com.oracle.tools.runtime.concurrent.RemoteExecutor;
  */
 public interface JavaApplicationProcess extends ApplicationProcess, RemoteExecutor
 {
+    /**
+     * Obtains the resolved System {@link Properties} provided to the {@link JavaApplicationProcess}
+     * when it was launched.
+     *
+     * @return  the resolved System {@link Properties}
+     */
+    Properties getSystemProperties();
 }

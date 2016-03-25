@@ -28,6 +28,13 @@ package com.oracle.tools.runtime;
 import com.oracle.tools.Option;
 import com.oracle.tools.Options;
 
+import com.oracle.tools.runtime.annotations.PreferredMetaClass;
+
+import com.oracle.tools.runtime.options.Executable;
+import com.oracle.tools.runtime.options.MetaClass;
+
+import com.oracle.tools.util.ReflectionHelper;
+
 /**
  * An abstract implementation of a {@link Platform}.
  * <p>
@@ -36,7 +43,7 @@ import com.oracle.tools.Options;
  *
  * @author Jonathan Knight
  *
- * @param <P>  the type of {@link Platform} used by {@link ApplicationBuilder}s
+ * @param <P>  the type of {@link Platform} used by {@link ApplicationLauncher}s
  */
 public abstract class AbstractPlatform<P extends Platform> implements Platform
 {
@@ -80,54 +87,100 @@ public abstract class AbstractPlatform<P extends Platform> implements Platform
 
 
     @Override
-    @SuppressWarnings("unchecked")
-    public <A extends Application, S extends ApplicationSchema<A>> A realize(String             applicationName,
-                                                                             S                  applicationSchema,
-                                                                             ApplicationConsole console,
-                                                                             Option...          options)
+    public Application launch(String    executable,
+                              Option... options)
     {
-        Options realizeOptions = new Options(getOptions().asArray());
+        // add the program as a launch option
+        Options launchOptions = new Options(options).add(Executable.named(executable));
 
-        realizeOptions.addAll(options);
+        // launch as a regular Application.class
+        return launch(Application.class, launchOptions.asArray());
+    }
 
-        ApplicationBuilder.Supplier<A,P> supplier = realizeOptions.get(ApplicationBuilder.Supplier.class);
 
-        if (supplier == null)
+    @Override
+    public <A extends Application> A launch(Class<A>  applicationClass,
+                                            Option... options)
+    {
+        // establish the initial launch options based on those defined by the platform
+        Options launchOptions = new Options(getOptions().asArray());
+
+        // include the options specified when this method was called
+        launchOptions.addAll(options);
+
+        // attempt to locate the meta-class using the launchOptions
+        MetaClass<A> metaClass = launchOptions.get(MetaClass.class);
+
+        if (metaClass == null)
         {
-            return null;
+            // attempt to find the meta-class for the application based on the @PreferredMetaClass annotation
+            PreferredMetaClass preferredMetaClass = ReflectionHelper.getAnnotation(applicationClass,
+                                                                                   PreferredMetaClass.class);
+
+            if (preferredMetaClass == null)
+            {
+                throw new UnsupportedOperationException("Failed to locate the MetaClass option and PreferredMetaClass annotation for "
+                                                        + applicationClass);
+            }
+            else
+            {
+                // establish a new instance of the MetaClass
+                Class<? extends MetaClass> metaClassClass = preferredMetaClass.value();
+
+                try
+                {
+                    metaClass = metaClassClass.newInstance();
+                }
+                catch (Exception e)
+                {
+                    throw new UnsupportedOperationException("Failed to create MetaClass instance for "
+                                                            + applicationClass,
+                                                            e);
+                }
+            }
         }
 
-        ApplicationBuilder<A, P> builder = supplier
-                .getApplicationBuilder((P) this, applicationSchema.getApplicationClass());
+        // obtain the application launcher for the class of application
+        ApplicationLauncher<A, P> builder = getApplicationBuilder(applicationClass, metaClass, launchOptions);
 
         if (builder == null)
         {
-            return null;
+            throw new IllegalArgumentException("Can't determine ApplicationBuilder for " + applicationClass + " using "
+                                               + launchOptions);
         }
+        else
+        {
+            // add the meta-class and application builder as options
+            Options builderOptions = new Options(options);
 
-        return builder.realize(applicationSchema, applicationName, console, options);
+            // add the meta-class as a launcher option (if and only if it's not already defined)
+            builderOptions.addIfAbsent(metaClass);
+
+            // now launch the application
+            return builder.launch(builderOptions);
+        }
     }
 
 
     /**
-     * Obtains a suitable {@link ApplicationBuilder} for a specific class of {@link Application}.
+     * Obtains the {@link ApplicationLauncher} for the given {@link Class} of {@link Application} with the provided
+     * {@link MetaClass} and launch {@link Options}.
      *
-     * @param <A>  the type of {@link Application}
-     * @param <B>  the type of {@link ApplicationBuilder}
+     * @param applicationClass  the {@link Class} of {@link Application}
+     * @param metaClass         the {@link MetaClass} for the {@link Application}
+     * @param options           the launch {@link Options} for the {@link Application}
      *
-     * @param applicationClass  the {@link Class} of {@link Application} for which a {@link ApplicationBuilder}
-     *                          is required
-     * @return  the {@link ApplicationBuilder} or null if this {@link Platform} cannot supply a builder for
-     *          the specified {@link Application} {@link Class}
+     * @param <A>               the type of the {@link Application}
+     * @param <B>               the type of the {@link ApplicationLauncher}
      *
-     * @deprecated  the {@link ApplicationBuilder} is now obtained from the {@link Options} and hence may have been
-     *              overridden by the schema or other {@link Options} so the value returned from this method may not
-     *              be the {@link ApplicationBuilder} that is actually used.
+     * @throws UnsupportedOperationException  when an {@link ApplicationLauncher} for the specified {@link Application}
+     *                                        {@link Class} and {@link MetaClass} with the provided {@link Options}
+     *                                        is unavailable and/or unsupported
+     * @return  an {@link ApplicationLauncher} capable of launching the {@link Class} of {@link Application}
      */
-    public <A extends Application, B extends ApplicationBuilder<A, P>> B getApplicationBuilder(Class<A> applicationClass)
-    {
-        ApplicationBuilder.Supplier<A,P> supplier = getOptions().get(ApplicationBuilder.Supplier.class);
-
-        return (B) (supplier == null ? null : supplier.getApplicationBuilder((P) this, applicationClass));
-    }
+    abstract protected <A extends Application,
+                        B extends ApplicationLauncher<A, P>> B getApplicationBuilder(Class<A>     applicationClass,
+                                                                                     MetaClass<A> metaClass,
+                                                                                     Options      options)
+                                                                                    throws UnsupportedOperationException;
 }

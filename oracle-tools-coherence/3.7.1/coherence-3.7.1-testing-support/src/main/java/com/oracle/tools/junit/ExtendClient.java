@@ -25,9 +25,18 @@
 
 package com.oracle.tools.junit;
 
-import com.oracle.tools.runtime.LocalPlatform;
+import com.oracle.tools.Option;
+import com.oracle.tools.Options;
 
-import com.oracle.tools.runtime.coherence.CoherenceCacheServerSchema;
+import com.oracle.tools.runtime.LocalPlatform;
+import com.oracle.tools.runtime.Profile;
+
+import com.oracle.tools.runtime.coherence.options.CacheConfig;
+import com.oracle.tools.runtime.coherence.options.LocalHost;
+import com.oracle.tools.runtime.coherence.options.LocalStorage;
+import com.oracle.tools.runtime.coherence.options.RoleName;
+
+import com.oracle.tools.runtime.java.options.SystemProperty;
 
 import com.oracle.tools.util.SystemProperties;
 
@@ -64,21 +73,36 @@ public class ExtendClient implements SessionBuilder
 
 
     @Override
-    public ConfigurableCacheFactory realize(LocalPlatform                 platform,
-                                            CoherenceClusterOrchestration orchestration,
-                                            CoherenceCacheServerSchema    serverSchema)
+    public ConfigurableCacheFactory build(LocalPlatform                 platform,
+                                          CoherenceClusterOrchestration orchestration,
+                                          Option...                     options)
     {
-        // build a schema for a local storage-disabled member
-        CoherenceCacheServerSchema schema =
-            new CoherenceCacheServerSchema(serverSchema).setRoleName("extend-client").setStorageEnabled(false)
-            .setTCMPEnabled(false).setSystemProperty("tangosol.coherence.extend.enabled",
-                                                     true).setCacheConfigURI(cacheConfigURI);
+        // ----- establish the options for launching a local extend-based member -----
+        Options launchOptions = new Options(options);
+
+        launchOptions.add(RoleName.of("extend-client"));
+        launchOptions.add(LocalStorage.disabled());
+        launchOptions.add(LocalHost.only());
+        launchOptions.add(SystemProperty.of("tangosol.coherence.extend.enabled", true));
+        launchOptions.add(CacheConfig.of(cacheConfigURI));
+
+        // ----- notify the Profiles that we're about to launch an application -----
+
+        for (Profile profile : launchOptions.getInstancesOf(Profile.class))
+        {
+            profile.onBeforeLaunch(platform, launchOptions);
+        }
+
+        // ----- create local system properties based on those defined by the launch options -----
 
         // take a snapshot of the system properties as we're about to mess with them
-        Properties systemProperties = SystemProperties.createSnapshot();
+        Properties systemPropertiesSnapshot = SystemProperties.createSnapshot();
 
         // modify the current system properties to include/override those in the schema
-        Properties properties = schema.getSystemProperties().realize(platform, schema);
+        com.oracle.tools.runtime.java.options.SystemProperties systemProperties =
+            launchOptions.get(com.oracle.tools.runtime.java.options.SystemProperties.class);
+
+        Properties properties = systemProperties.resolve(platform, launchOptions);
 
         for (String propertyName : properties.stringPropertyNames())
         {
@@ -90,7 +114,7 @@ public class ExtendClient implements SessionBuilder
                                                                                                        getClass().getClassLoader());
 
         // replace the system properties
-        SystemProperties.replaceWith(systemProperties);
+        SystemProperties.replaceWith(systemPropertiesSnapshot);
 
         return session;
     }

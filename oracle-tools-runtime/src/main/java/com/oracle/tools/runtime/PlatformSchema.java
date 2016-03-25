@@ -27,7 +27,7 @@ package com.oracle.tools.runtime;
 
 /**
  * A schema encapsulating configuration and operational settings that a
- * {@link PlatformBuilder} will use to realize a {@link Platform}.
+ * {@link PlatformBuilder} will use to build a {@link Platform}.
  * <p>
  * Copyright (c) 2011. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.

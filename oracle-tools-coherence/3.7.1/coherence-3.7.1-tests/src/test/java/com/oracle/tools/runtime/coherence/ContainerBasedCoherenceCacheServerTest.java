@@ -27,11 +27,13 @@ package com.oracle.tools.runtime.coherence;
 
 import com.oracle.tools.runtime.Platform;
 
-import com.oracle.tools.runtime.java.ContainerBasedJavaApplicationBuilder;
+import com.oracle.tools.runtime.java.ContainerBasedJavaApplicationLauncher;
 import com.oracle.tools.runtime.java.JavaVirtualMachine;
 
+import org.junit.Ignore;
+
 /**
- * Functional Test for {@link CoherenceCacheServer}s using a {@link ContainerBasedJavaApplicationBuilder}.
+ * Functional Test for {@link CoherenceCacheServer}s using a {@link ContainerBasedJavaApplicationLauncher}.
  * <p>
  * Copyright (c) 2014. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
@@ -43,6 +45,15 @@ public class ContainerBasedCoherenceCacheServerTest extends AbstractCoherenceCac
     @Override
     public Platform getPlatform()
     {
-        return JavaVirtualMachine.getInstance();
+        return JavaVirtualMachine.get();
+    }
+
+
+    @Override
+    @Ignore
+    public void shouldStartStopMultipleTimes()
+    {
+        // we skip this test as performing fast starting/stopping in
+        // container is not supported for Coherence 3.7.1.x
     }
 }

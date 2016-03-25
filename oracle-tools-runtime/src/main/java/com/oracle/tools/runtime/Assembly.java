@@ -40,8 +40,6 @@ import java.io.Closeable;
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Brian Oliver
- *
- * @param <A>  the type of the {@link Application} in the {@link Assembly}
  */
 public interface Assembly<A extends Application> extends Iterable<A>, Closeable
 {

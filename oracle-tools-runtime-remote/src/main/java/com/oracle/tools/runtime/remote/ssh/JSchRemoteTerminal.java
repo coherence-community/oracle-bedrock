@@ -34,13 +34,12 @@ import com.oracle.tools.Options;
 
 import com.oracle.tools.lang.StringHelper;
 
-import com.oracle.tools.runtime.Application;
-import com.oracle.tools.runtime.ApplicationSchema;
+import com.oracle.tools.options.Variable;
 
 import com.oracle.tools.runtime.options.Shell;
+import com.oracle.tools.runtime.options.WorkingDirectory;
 
 import com.oracle.tools.runtime.remote.AbstractRemoteTerminal;
-import com.oracle.tools.runtime.remote.RemoteApplicationEnvironment;
 import com.oracle.tools.runtime.remote.RemoteApplicationProcess;
 import com.oracle.tools.runtime.remote.RemotePlatform;
 import com.oracle.tools.runtime.remote.RemoteTerminal;
@@ -56,8 +55,7 @@ import java.util.Properties;
  *
  * @author Jonathan Knight
  */
-public class JSchRemoteTerminal<A extends Application, S extends ApplicationSchema<A>,
-                                E extends RemoteApplicationEnvironment> extends AbstractRemoteTerminal<A, S, E>
+public class JSchRemoteTerminal extends AbstractRemoteTerminal
 {
     /**
      * The {@link JSch} framework.
@@ -94,14 +92,10 @@ public class JSchRemoteTerminal<A extends Application, S extends ApplicationSche
 
 
     @Override
-    @SuppressWarnings("unchecked")
-    public RemoteApplicationProcess realize(S       applicationSchema,
-                                            String  applicationName,
-                                            E       environment,
-                                            String  workingDirectory,
-                                            Options options)
+    public RemoteApplicationProcess launch(Launchable launchable,
+                                           Options    options)
     {
-        // acquire the remote platform on which to realize the application
+        // acquire the remote platform on which to launch the application
         RemotePlatform platform = getRemotePlatform();
 
         // establish a specialized SocketFactory for JSch
@@ -122,17 +116,20 @@ public class JSchRemoteTerminal<A extends Application, S extends ApplicationSche
 
             ChannelExec execChannel = (ChannelExec) session.openChannel("exec");
 
+            // (re)define the "local.address" variable so that we can use for resolving the platform
+            options.add(Variable.with("local.address", socketFactory.getLastLocalAddress().getHostAddress()));
+
             // ----- establish the remote environment variables -----
 
             String environmentVariables = "";
 
             // get the remote environment variables for the remote application
-            Properties variables = environment.getRemoteEnvironmentVariables();
+            Properties variables = launchable.getEnvironmentVariables(platform, options);
 
             // determine the format to use for setting variables
             String format;
 
-            Shell  shell = options.get(Shell.class, Shell.isUnknown());
+            Shell  shell = options.getOrDefault(Shell.class, Shell.isUnknown());
 
             switch (shell.getType())
             {
@@ -163,18 +160,22 @@ public class JSchRemoteTerminal<A extends Application, S extends ApplicationSche
             // ----- establish the application command line to execute -----
 
             // determine the command to execute remotely
-            StringBuilder command = new StringBuilder(environment.getRemoteCommandToExecute());
+            StringBuilder command = new StringBuilder(launchable.getCommandToExecute(platform, options));
 
             // add the arguments
-            List<String> arguments = environment.getRemoteCommandArguments(socketFactory.getLastLocalAddress());
+            List<String> arguments = launchable.getCommandLineArguments(platform, options);
 
             for (String arg : arguments)
             {
                 command.append(" ").append(arg);
             }
 
+            WorkingDirectory workingDirectory = options.get(WorkingDirectory.class);
+
             // the actual remote command must include changing to the remote directory
-            String remoteCommand = environmentVariables + String.format("cd %s ; %s", workingDirectory, command);
+            String remoteCommand = environmentVariables + String.format("cd %s ; %s",
+                                                                        workingDirectory.resolve(platform, options),
+                                                                        command);
 
             execChannel.setCommand(remoteCommand);
 
@@ -197,8 +198,6 @@ public class JSchRemoteTerminal<A extends Application, S extends ApplicationSche
                 session.disconnect();
             }
 
-            environment.close();
-
             throw new RuntimeException("Failed to create remote application", e);
         }
     }
@@ -212,7 +211,7 @@ public class JSchRemoteTerminal<A extends Application, S extends ApplicationSche
 
         try
         {
-            // acquire the remote platform on which to realize the application
+            // acquire the remote platform
             RemotePlatform platform = getRemotePlatform();
 
             // establish a specialized SocketFactory for JSch
@@ -258,7 +257,7 @@ public class JSchRemoteTerminal<A extends Application, S extends ApplicationSche
 
         try
         {
-            // acquire the remote platform on which to realize the application
+            // acquire the remote platform
             RemotePlatform platform = getRemotePlatform();
 
             // establish a specialized SocketFactory for JSch

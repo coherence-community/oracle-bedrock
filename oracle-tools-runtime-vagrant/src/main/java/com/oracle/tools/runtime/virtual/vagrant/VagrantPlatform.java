@@ -29,21 +29,19 @@ import com.oracle.tools.Option;
 import com.oracle.tools.Options;
 
 import com.oracle.tools.options.Timeout;
+
 import com.oracle.tools.runtime.Application;
-import com.oracle.tools.runtime.ApplicationBuilder;
-import com.oracle.tools.runtime.ApplicationConsole;
-import com.oracle.tools.runtime.ApplicationSchema;
 import com.oracle.tools.runtime.LocalPlatform;
-import com.oracle.tools.runtime.Platform;
-import com.oracle.tools.runtime.SimpleApplication;
-import com.oracle.tools.runtime.SimpleApplicationBuilder;
-import com.oracle.tools.runtime.SimpleApplicationSchema;
 
+import com.oracle.tools.runtime.console.Console;
 import com.oracle.tools.runtime.console.PipedApplicationConsole;
-import com.oracle.tools.runtime.console.SystemApplicationConsole;
 
-import com.oracle.tools.runtime.remote.AbstractRemoteApplicationBuilder;
-import com.oracle.tools.runtime.remote.RemotePlatform;
+import com.oracle.tools.runtime.options.Argument;
+import com.oracle.tools.runtime.options.Arguments;
+import com.oracle.tools.runtime.options.DisplayName;
+import com.oracle.tools.runtime.options.Executable;
+import com.oracle.tools.runtime.options.WorkingDirectory;
+
 import com.oracle.tools.runtime.remote.SecureKeys;
 import com.oracle.tools.runtime.remote.options.StrictHostChecking;
 
@@ -58,6 +56,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 
 import java.util.Properties;
+
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -163,36 +162,35 @@ public class VagrantPlatform extends VirtualPlatform
     @Override
     public void close(Option... closeOptions) throws IOException
     {
-        SimpleApplicationSchema schema = instantiateSchema();
-        Options                 options = new Options(getOptions());
+        Options options = new Options(getOptions()).addAll(getDefaultOptions());
 
         options.addAll(closeOptions);
 
-        CloseAction action = options.get(CloseAction.class, CloseAction.Destroy);
+        CloseAction action = options.getOrDefault(CloseAction.class, CloseAction.Destroy);
 
         switch (action)
         {
         case None :
             return;
 
-        case Destroy:
+        case Destroy :
         case PowerButton :
-            schema.addArgument("destroy").addArgument("--force");
+            options.add(Arguments.of("destroy", "--force"));
             break;
 
         case Shutdown :
-            schema.addArgument("halt");
+            options.add(Argument.of("halt"));
             break;
 
         case SaveState :
-            schema.addArgument("suspend");
+            options.add(Argument.of("suspend"));
             break;
 
         default :
             throw new IllegalArgumentException("Unsupported CloseAction " + action);
         }
 
-        execute(schema);
+        execute(options);
     }
 
 
@@ -203,10 +201,9 @@ public class VagrantPlatform extends VirtualPlatform
      */
     public void start()
     {
-        SimpleApplicationSchema schemaUp = instantiateSchema()
-                .addArgument("up");
+        Options options = getDefaultOptions().add(Argument.of("up"));
 
-        execute(schemaUp);
+        execute(options);
 
         Properties sshProperties = detectSSH();
 
@@ -246,12 +243,12 @@ public class VagrantPlatform extends VirtualPlatform
      */
     protected Properties detectSSH()
     {
-        SimpleApplicationSchema schema   = instantiateSchema().addArgument("ssh-config");
+        Options       options  = getDefaultOptions().add(Argument.of("ssh-config"));
 
-        LocalPlatform           platform = LocalPlatform.getInstance();
+        LocalPlatform platform = LocalPlatform.get();
 
         try (PipedApplicationConsole console = new PipedApplicationConsole();
-            Application application = platform.realize("Vagrant", schema, console))
+            Application application = platform.launch(Application.class, options.add(Console.of(console)).asArray()))
         {
             application.waitFor();
             application.close();
@@ -304,31 +301,29 @@ public class VagrantPlatform extends VirtualPlatform
 
 
     @Override
-    public <A extends Application, S extends ApplicationSchema<A>> A realize(String             applicationName,
-                                                                             S                  applicationSchema,
-                                                                             ApplicationConsole console,
-                                                                             Option...          options)
+    public <A extends Application> A launch(Class<A>  applicationClass,
+                                            Option... options)
     {
         // TODO: we need to use "default platform options" here to automatically turn off strict-host-checking
-        Options managedOptions = new Options(options);
+        Options launchOptions = new Options(options);
 
-        managedOptions.addIfAbsent(StrictHostChecking.disabled());
+        launchOptions.addIfAbsent(StrictHostChecking.disabled());
 
-        return super.realize(applicationName, applicationSchema, console, managedOptions.asArray());
+        return super.launch(applicationClass, launchOptions.asArray());
     }
 
 
     /**
-     * Execute the application defined by the specified {@link SimpleApplicationSchema}.
+     * Execute the application defined by the specified {@link Options}.
      *
-     * @param schema  the {@link SimpleApplicationSchema} defining the application to execute
+     * @param options  the {@link Options}
      */
-    protected void execute(SimpleApplicationSchema schema)
+    protected void execute(Options options)
     {
-        LocalPlatform platform = LocalPlatform.getInstance();
-        Timeout       timeout  = schema.getOptions().get(Timeout.class, Timeout.after(5, TimeUnit.MINUTES));
+        LocalPlatform platform = LocalPlatform.get();
+        Timeout       timeout  = options.getOrDefault(Timeout.class, Timeout.after(5, TimeUnit.MINUTES));
 
-        try (Application application = platform.realize("Vagrant", schema, new SystemApplicationConsole()))
+        try (Application application = platform.launch(Application.class, options.asArray()))
         {
             application.waitFor(timeout);
         }
@@ -340,17 +335,16 @@ public class VagrantPlatform extends VirtualPlatform
 
 
     /**
-     * Create a {@link SimpleApplicationSchema} to execute the Vagrant
-     * command line.
+     * Options the default {@link Options} to use when launching Vagrant.
      *
-     * @return a {@link SimpleApplicationSchema} to execute the Vagrant
-     *         command line
+     * @return the default {@link Options}
      */
-    protected SimpleApplicationSchema instantiateSchema()
+    protected Options getDefaultOptions()
     {
-        return new SimpleApplicationSchema(vagrantCommand)
-                .setWorkingDirectory(vagrantFile)
-                .addOption(Timeout.after(5, TimeUnit.MINUTES));
+        return new Options(Executable.named(vagrantCommand),
+                           WorkingDirectory.at(vagrantFile),
+                           Timeout.after(5, TimeUnit.MINUTES),
+                           DisplayName.of("Vagrant"));
     }
 
 

@@ -28,41 +28,37 @@ package com.oracle.tools.runtime.remote;
 import com.oracle.tools.Options;
 
 import com.oracle.tools.runtime.Application;
-import com.oracle.tools.runtime.ApplicationSchema;
 import com.oracle.tools.runtime.Platform;
+
+import java.net.InetAddress;
+
+import java.util.List;
+import java.util.Properties;
 
 /**
  * An internal mechanism for interacting with a {@link RemotePlatform}, including
- * realizing {@link RemoteApplicationProcess}es and creating remote directories.
+ * launching {@link RemoteApplicationProcess}es and creating remote directories.
  * <p>
  * Copyright (c) 2015. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Jonathan Knight
  */
-public interface RemoteTerminal<A extends Application, S extends ApplicationSchema<A>,
-                                E extends RemoteApplicationEnvironment>
+public interface RemoteTerminal
 {
     /**
-     * Realizes an {@link RemoteApplicationProcess}.
+     * Launches an {@link Application}, represented as a {@link RemoteApplicationProcess},
+     * according to the information provided by the {@link Launchable} and specified {@link Options}.
      *
-     * @param applicationSchema  the {@link ApplicationSchema} to use for realizing
-     *                           the {@link RemoteApplicationProcess}
-     * @param applicationName    the name of the application
-     * @param environment        the {@link RemoteApplicationEnvironment} for the application
-     * @param workingDirectory   the working directory for the process
-     * @param options            the {@link Options} to use when realizing the {@link RemoteApplicationProcess}
+     * @param launchable  the {@link Launchable} defining how to launch the {@link Application}
+     * @param options     the {@link Options} to use when launching the {@link Application}
      *
-     * @return an {@link RemoteApplicationProcess} representing the application realized by
-     *         the {@link RemoteTerminal}
+     * @return an {@link RemoteApplicationProcess} representing the launched {@link Application}
      *
      * @throws RuntimeException when a problem occurs while starting the application
      */
-    RemoteApplicationProcess realize(S        applicationSchema,
-                                     String   applicationName,
-                                     E        environment,
-                                     String   workingDirectory,
-                                     Options  options);
+    RemoteApplicationProcess launch(Launchable launchable,
+                                    Options    options);
 
 
     /**
@@ -72,4 +68,38 @@ public interface RemoteTerminal<A extends Application, S extends ApplicationSche
      */
     void makeDirectories(String  directoryName,
                          Options options);
+
+
+    /**
+     * A callback interface defining how an {@link Application} should be launched remotely using a
+     * {@link RemoteTerminal}.
+     */
+    interface Launchable
+    {
+        /**
+         * Obtains the command to launch an {@link Application} using a {@link RemoteTerminal}.
+         *
+         * @return  the command
+         */
+        String getCommandToExecute(Platform platform,
+                                   Options  options);
+
+
+        /**
+         * Obtains the command line arguments when launching an {@link Application} using a {@link RemoteTerminal}.
+         *
+         * @return  the command line arguments to use when launching the {@link Application}
+         */
+        List<String> getCommandLineArguments(Platform platform,
+                                             Options  options);
+
+
+        /**
+         * Obtains the environment variables to use when launching an {@link Application} using a {@link RemoteTerminal}.
+         *
+         * @return  a {@link Properties} representing the required remote environment variables
+         */
+        Properties getEnvironmentVariables(Platform platform,
+                                           Options  options);
+    }
 }

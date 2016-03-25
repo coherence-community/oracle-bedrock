@@ -25,21 +25,35 @@
 
 package com.oracle.tools.runtime.coherence;
 
+import com.oracle.tools.Option;
+import com.oracle.tools.Options;
+import com.oracle.tools.runtime.Application;
+import com.oracle.tools.runtime.Platform;
+import com.oracle.tools.runtime.Profile;
+import com.oracle.tools.runtime.java.features.JmxFeature;
+import com.oracle.tools.runtime.java.options.SystemProperties;
+import com.oracle.tools.runtime.java.options.SystemProperty;
+
 /**
- * Defines valid JMX Management Modes for a {@link CoherenceClusterMember} as configured
- * by a {@link CoherenceClusterMemberSchema}.
+ * Defines valid JMX Management Modes for a {@link CoherenceClusterMember}.
  * <p>
  * Copyright (c) 2014. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Brian Oliver
  */
-public enum JMXManagementMode
+public enum JMXManagementMode implements Option, Profile
 {
     ALL,
     NONE,
     REMOTE_ONLY,
     LOCAL_ONLY;
+
+    /**
+     * The tangosol.coherence.management property.
+     */
+    public static final String PROPERTY = "tangosol.coherence.management";
+
 
     /**
      * Determines the system property representation of the {@link JMXManagementMode}
@@ -103,5 +117,37 @@ public enum JMXManagementMode
         {
             return null;
         }
+    }
+
+
+    @Override
+    public void onBeforeLaunch(Platform platform,
+                               Options  options)
+    {
+        SystemProperties systemProperties = options.get(SystemProperties.class);
+
+        if (systemProperties != null)
+        {
+            options.add(SystemProperty.of(PROPERTY, toSystemProperty()));
+
+            // automatically enable remote jmx management
+            options.add(SystemProperty.of(JmxFeature.SUN_MANAGEMENT_JMXREMOTE, "true"));
+        }
+    }
+
+
+    @Override
+    public void onAfterLaunch(Platform    platform,
+                              Application application,
+                              Options     options)
+    {
+    }
+
+
+    @Override
+    public void onBeforeClose(Platform    platform,
+                              Application application,
+                              Options     options)
+    {
     }
 }

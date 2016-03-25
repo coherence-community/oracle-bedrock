@@ -25,21 +25,13 @@
 
 package com.oracle.tools.runtime;
 
-import com.oracle.tools.Options;
 import com.oracle.tools.io.NetworkHelper;
-
-import com.oracle.tools.runtime.java.JavaApplication;
-import com.oracle.tools.runtime.java.JavaApplicationBuilder;
-
 import org.junit.Test;
 
-import static org.hamcrest.CoreMatchers.is;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-
-import static org.hamcrest.core.IsInstanceOf.instanceOf;
-
 import java.net.InetAddress;
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 /**
  * Unit tests for {@link LocalPlatform}s.
@@ -55,32 +47,8 @@ public class LocalPlatformTest
     @Test
     public void shouldReturnFeasibleLocalHost() throws Exception
     {
-        InetAddress address = LocalPlatform.getInstance().getAddress();
+        InetAddress address = LocalPlatform.get().getAddress();
 
         assertThat(address, is(NetworkHelper.getFeasibleLocalHost()));
-    }
-
-
-    @Test
-    public void shouldReturnJavaApplicationBuilder()
-    {
-        Options                     options  = LocalPlatform.getInstance().getOptions();
-        ApplicationBuilder.Supplier supplier = options.get(ApplicationBuilder.Supplier.class);
-        ApplicationBuilder          builder = supplier.getApplicationBuilder(LocalPlatform.getInstance(),
-                                                                             JavaApplication.class);
-
-        assertThat(builder, instanceOf(JavaApplicationBuilder.class));
-    }
-
-
-    @Test
-    public void shouldReturnLocalApplicationBuilder()
-    {
-        Options                     options  = LocalPlatform.getInstance().getOptions();
-        ApplicationBuilder.Supplier supplier = options.get(ApplicationBuilder.Supplier.class);
-        ApplicationBuilder          builder = supplier.getApplicationBuilder(LocalPlatform.getInstance(),
-                                                                             SimpleApplication.class);
-
-        assertThat(builder, instanceOf(SimpleApplicationBuilder.class));
     }
 }

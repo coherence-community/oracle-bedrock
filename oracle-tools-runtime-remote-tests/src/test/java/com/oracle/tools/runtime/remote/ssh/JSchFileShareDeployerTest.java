@@ -25,13 +25,18 @@
 
 package com.oracle.tools.runtime.remote.ssh;
 
-import com.oracle.tools.runtime.SimpleApplication;
-import com.oracle.tools.runtime.SimpleApplicationSchema;
+import com.oracle.tools.runtime.Application;
 
 import com.oracle.tools.runtime.console.SystemApplicationConsole;
 
-import com.oracle.tools.runtime.java.SimpleJavaApplication;
-import com.oracle.tools.runtime.java.SimpleJavaApplicationSchema;
+import com.oracle.tools.runtime.java.JavaApplication;
+import com.oracle.tools.runtime.java.options.ClassName;
+
+import com.oracle.tools.runtime.options.Argument;
+import com.oracle.tools.runtime.options.Arguments;
+import com.oracle.tools.runtime.options.DisplayName;
+import com.oracle.tools.runtime.options.Executable;
+
 import com.oracle.tools.runtime.remote.AbstractRemoteTest;
 import com.oracle.tools.runtime.remote.DeploymentArtifact;
 import com.oracle.tools.runtime.remote.RemotePlatform;
@@ -44,6 +49,10 @@ import org.junit.Test;
 
 import org.junit.rules.TemporaryFolder;
 
+import static org.hamcrest.CoreMatchers.is;
+
+import static org.junit.Assert.assertThat;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -52,11 +61,6 @@ import java.io.PrintWriter;
 import java.util.Collections;
 import java.util.List;
 
-import static org.hamcrest.CoreMatchers.is;
-
-import static org.junit.Assert.assertThat;
-
-
 /**
  * Functional tests for {@link JSchFileShareDeployer}.
  *
@@ -64,35 +68,38 @@ import static org.junit.Assert.assertThat;
  */
 public class JSchFileShareDeployerTest extends AbstractRemoteTest
 {
+    /**
+     * Field description
+     */
     @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder();
+    private String         localShare;
+    private String         remoteShare;
+    private String         workingDirectory;
 
-    private String localShare;
-
-    private String remoteShare;
-
-    private String workingDirectory;
 
     @Before
     public void setup() throws Exception
     {
         RemotePlatform platform = getRemotePlatform();
 
-        localShare        = temporaryFolder.newFolder().getAbsolutePath();
-        workingDirectory  = temporaryFolder.newFolder().getAbsolutePath();
+        localShare       = temporaryFolder.newFolder().getAbsolutePath();
+        workingDirectory = temporaryFolder.newFolder().getAbsolutePath();
 
         File remoteParent = temporaryFolder.newFolder();
 
         remoteShare = new File(remoteParent, "share").getAbsolutePath();
 
-        String                  command = String.format("ln -s %s %s", localShare, remoteShare);
-        SimpleApplicationSchema schema = new SimpleApplicationSchema(command);
-
-        try (SimpleApplication app = platform.realize("Link", schema, new SystemApplicationConsole()))
+        try (Application app = platform.launch(Application.class,
+                                               Executable.named("ln"),
+                                               Arguments.of("-s", localShare, remoteShare),
+                                               DisplayName.of("Link"),
+                                               SystemApplicationConsole.builder()))
         {
             app.waitFor();
         }
     }
+
 
     @Test
     public void shouldDeployArtifactWithNoDestination() throws Exception
@@ -116,6 +123,7 @@ public class JSchFileShareDeployerTest extends AbstractRemoteTest
             assertThat(line, is(content));
         }
     }
+
 
     @Test
     public void shouldDeployArtifactWithDestination() throws Exception
@@ -141,6 +149,7 @@ public class JSchFileShareDeployerTest extends AbstractRemoteTest
         }
     }
 
+
     private File createArtifact(String content) throws Exception
     {
         File file = temporaryFolder.newFile();
@@ -153,16 +162,19 @@ public class JSchFileShareDeployerTest extends AbstractRemoteTest
         return file;
     }
 
+
     @Test
     public void shouldRunApplicationUsingDeployer() throws Exception
     {
-        SimpleJavaApplicationSchema schema = new SimpleJavaApplicationSchema(SleepingApplication.class.getName())
-                                                .addArgument("3")
-                                                .addOption(JSchFileShareDeployer.sshFileShareDeployer(localShare, remoteShare));
-
         RemotePlatform platform = getRemotePlatform();
 
-        try (SimpleJavaApplication application = platform.realize("Java", schema, new SystemApplicationConsole()))
+        try (JavaApplication application = platform.launch(JavaApplication.class,
+                                                           ClassName.of(SleepingApplication.class),
+                                                           Argument.of("3"),
+                                                           JSchFileShareDeployer.sshFileShareDeployer(localShare,
+                                                                                                      remoteShare),
+                                                           DisplayName.of("Java"),
+                                                           SystemApplicationConsole.builder()))
         {
             assertThat(application.waitFor(), is(0));
 
@@ -171,5 +183,4 @@ public class JSchFileShareDeployerTest extends AbstractRemoteTest
             assertThat(application.exitValue(), is(0));
         }
     }
-
 }

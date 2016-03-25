@@ -27,9 +27,7 @@ package com.oracle.tools.runtime.coherence;
 
 import com.oracle.tools.runtime.AbstractAssembly;
 import com.oracle.tools.runtime.Assembly;
-
 import com.tangosol.net.NamedCache;
-
 import com.tangosol.util.UID;
 
 import java.util.Iterator;

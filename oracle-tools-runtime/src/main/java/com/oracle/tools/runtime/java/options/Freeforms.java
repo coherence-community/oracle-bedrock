@@ -28,6 +28,9 @@ package com.oracle.tools.runtime.java.options;
 import com.oracle.tools.Option;
 import com.oracle.tools.Options;
 
+import com.oracle.tools.runtime.options.EnvironmentVariable;
+
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 
@@ -119,6 +122,20 @@ public class Freeforms implements Option.Collector<Freeform, Freeforms>
     public Iterator<Freeform> iterator()
     {
         return freeforms.iterator();
+    }
+
+
+    @Override
+    public <O> Iterable<O> getInstancesOf(Class<O> requiredClass)
+    {
+        if (requiredClass.isAssignableFrom(Freeform.class))
+        {
+            return (Iterable<O>) freeforms;
+        }
+        else
+        {
+            return Collections.EMPTY_LIST;
+        }
     }
 
 

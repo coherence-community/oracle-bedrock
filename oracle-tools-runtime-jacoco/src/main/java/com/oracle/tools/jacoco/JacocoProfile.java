@@ -29,14 +29,14 @@ import com.oracle.tools.Option;
 import com.oracle.tools.Options;
 
 import com.oracle.tools.runtime.Application;
-import com.oracle.tools.runtime.ApplicationSchema;
 import com.oracle.tools.runtime.Platform;
 import com.oracle.tools.runtime.Profile;
 
 import com.oracle.tools.runtime.java.ClassPath;
 import com.oracle.tools.runtime.java.JavaApplication;
-import com.oracle.tools.runtime.java.JavaApplicationSchema;
 import com.oracle.tools.runtime.java.options.JavaAgent;
+
+import com.oracle.tools.runtime.options.MetaClass;
 
 import org.jacoco.agent.rt.RT;
 
@@ -69,11 +69,13 @@ public class JacocoProfile implements Profile, Option
 
 
     @Override
-    public void onBeforeRealize(Platform          platform,
-                                ApplicationSchema schema,
-                                Options           options)
+    public void onBeforeLaunch(Platform platform,
+                               Options  options)
     {
-        if (schema instanceof JavaApplicationSchema)
+        MetaClass metaClass = options.get(MetaClass.class);
+
+        if (metaClass != null
+            && JavaApplication.class.isAssignableFrom(metaClass.getImplementationClass(platform, options)))
         {
             try
             {
@@ -93,9 +95,9 @@ public class JacocoProfile implements Profile, Option
 
 
     @Override
-    public void onAfterRealize(Platform    platform,
-                               Application application,
-                               Options     options)
+    public void onAfterLaunch(Platform    platform,
+                              Application application,
+                              Options     options)
     {
         // there's nothing to after an application has been realized
     }

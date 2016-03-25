@@ -26,11 +26,9 @@
 package com.oracle.tools.runtime.java.options;
 
 import com.oracle.tools.Option;
+import com.oracle.tools.Options;
 
-import com.oracle.tools.runtime.ApplicationSchema;
 import com.oracle.tools.runtime.Platform;
-
-import com.oracle.tools.runtime.java.JavaApplicationSchema;
 
 import java.util.Iterator;
 
@@ -42,7 +40,7 @@ import java.util.Iterator;
  * if they are an {@link Iterator}, the value of a System Property will be the next
  * value taken from the {@link Iterator}.   When the value is a
  * {@link ContextSensitiveValue}, the value will be based on a provided {@link Platform}
- * and {@link ApplicationSchema}.
+ * and {@link Options}.
  * <p>
  * Copyright (c) 2015. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
@@ -202,23 +200,23 @@ public class SystemProperty implements Option.Collectable
 
 
     /**
-     * A context sensitive value, possibly based on the {@link Platform} and/or {@link JavaApplicationSchema} in
+     * A context sensitive value, possibly based on the {@link Platform} and/or {@link Option}s in
      * which the {@link SystemProperty} is being used.
      */
     public interface ContextSensitiveValue
     {
         /**
          * Obtains the value for the {@link SystemProperty}, possibly based on the provided
-         * {@link Platform} and {@link JavaApplicationSchema}.
+         * {@link Platform} and {@link Option}s.
          *
-         * @param name     the name of the {@link SystemProperty}
-         * @param platform the {@link Platform} in which {@link SystemProperty} is being used.
-         * @param schema   the {@link ApplicationSchema} in which {@link SystemProperty} is being used.
+         * @param name      the name of the {@link SystemProperty}
+         * @param platform  the {@link Platform} in which {@link SystemProperty} is being used.
+         * @param options   the {@link Options}
          *
          * @return the value
          */
-        Object getValue(String                name,
-                        Platform              platform,
-                        JavaApplicationSchema schema);
+        Object resolve(String   name,
+                       Platform platform,
+                       Options  options);
     }
 }

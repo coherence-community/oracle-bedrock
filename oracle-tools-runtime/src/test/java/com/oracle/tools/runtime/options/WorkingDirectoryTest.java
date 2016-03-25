@@ -26,19 +26,21 @@
 package com.oracle.tools.runtime.options;
 
 import com.oracle.tools.Options;
+
 import com.oracle.tools.runtime.LocalPlatform;
 import com.oracle.tools.runtime.Platform;
-import com.oracle.tools.runtime.SimpleApplicationSchema;
-import org.junit.Test;
 
-import java.io.File;
-import java.util.Arrays;
-import java.util.Iterator;
+import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.CoreMatchers.nullValue;
+
 import static org.junit.Assert.assertThat;
+
+import java.io.File;
+
+import java.util.Arrays;
+import java.util.Iterator;
 
 /**
  * Unit tests for the {@link WorkingDirectory} class.
@@ -50,123 +52,117 @@ import static org.junit.Assert.assertThat;
  */
 public class WorkingDirectoryTest
 {
-    private Platform                platform = LocalPlatform.getInstance();
-    private SimpleApplicationSchema schema   = new SimpleApplicationSchema("bash");
+    private Platform platform = LocalPlatform.get();
+    private Options  options  = new Options();
+
 
     @Test
     public void shouldCreateAtSpecifiedFileLocation() throws Exception
     {
-        File    file    = new File("/foo");
-        Options options = new Options(WorkingDirectory.at(file));
+        File             file             = new File("/foo");
 
-        WorkingDirectory workingDirectory = options.get(WorkingDirectory.class);
+        WorkingDirectory workingDirectory = WorkingDirectory.at(file);
 
         assertThat(workingDirectory, is(notNullValue()));
         assertThat(workingDirectory.getValue(), is((Object) file));
 
-        assertThat(workingDirectory.realize("MyApp", platform, schema), is(file));
+        assertThat(workingDirectory.resolve(platform, options), is(file));
     }
 
 
     @Test
     public void shouldCreateAtSpecifiedFileLocationWithNullFile() throws Exception
     {
-        File    file    = null;
-        File    current = new File(System.getProperty("user.dir"));
-        Options options = new Options(WorkingDirectory.at(file));
+        File             file             = null;
+        File             current          = new File(System.getProperty("user.dir"));
 
-        WorkingDirectory workingDirectory = options.get(WorkingDirectory.class);
+        WorkingDirectory workingDirectory = WorkingDirectory.at(file);
 
         assertThat(workingDirectory, is(notNullValue()));
 
-        assertThat(workingDirectory.realize("MyApp", platform, schema), is(current));
+        assertThat(workingDirectory.resolve(platform, options), is(current));
     }
+
 
     @Test
     public void shouldCreateAtSpecifiedStringLocation() throws Exception
     {
-        File    file    = new File("/foo");
-        Options options = new Options(WorkingDirectory.at("/foo"));
+        File             file             = new File("/foo");
 
-        WorkingDirectory workingDirectory = options.get(WorkingDirectory.class);
+        WorkingDirectory workingDirectory = WorkingDirectory.at("/foo");
 
         assertThat(workingDirectory, is(notNullValue()));
         assertThat(workingDirectory.getValue(), is((Object) "/foo"));
 
-        assertThat(workingDirectory.realize("MyApp", platform, schema), is(file));
+        assertThat(workingDirectory.resolve(platform, options), is(file));
     }
 
 
     @Test
     public void shouldCreateAtSpecifiedNullLocationWithNull() throws Exception
     {
-        Object  location = null;
-        File    current  = new File(System.getProperty("user.dir"));
-        Options options  = new Options(WorkingDirectory.at(location));
+        Object           location         = null;
+        File             current          = new File(System.getProperty("user.dir"));
 
-        WorkingDirectory workingDirectory = options.get(WorkingDirectory.class);
+        WorkingDirectory workingDirectory = WorkingDirectory.at(location);
 
         assertThat(workingDirectory, is(notNullValue()));
 
-        assertThat(workingDirectory.realize("MyApp", platform, schema), is(current));
+        assertThat(workingDirectory.resolve(platform, options), is(current));
     }
+
 
     @Test
     public void shouldCreateAsSubDirectory() throws Exception
     {
-        File    file    = new File("/foo");
-        Options options = new Options(WorkingDirectory.subDirectoryOf(file));
+        File             file             = new File("/foo");
 
-        WorkingDirectory workingDirectory = options.get(WorkingDirectory.class);
+        WorkingDirectory workingDirectory = WorkingDirectory.subDirectoryOf(file);
 
         assertThat(workingDirectory, is(notNullValue()));
 
         File expected = new File(file, "myapp");
 
-        assertThat(workingDirectory.realize("MyApp", platform, schema), is(expected));
+        assertThat(workingDirectory.resolve(platform, new Options(DisplayName.of("myapp"))), is(expected));
     }
 
 
     @Test
     public void shouldCreateAsSubDirectoryOfNullParent() throws Exception
     {
-        File    current = new File(System.getProperty("user.dir"));
-        Options options = new Options(WorkingDirectory.subDirectoryOf(null));
+        File             current          = new File(System.getProperty("user.dir"));
 
-        WorkingDirectory workingDirectory = options.get(WorkingDirectory.class);
+        WorkingDirectory workingDirectory = WorkingDirectory.subDirectoryOf(null);
 
         assertThat(workingDirectory, is(notNullValue()));
 
         File expected = new File(current, "myapp");
 
-        assertThat(workingDirectory.realize("MyApp", platform, schema), is(expected));
+        assertThat(workingDirectory.resolve(platform, new Options(DisplayName.of("myapp"))), is(expected));
     }
 
 
     @Test
     public void shouldCreateAtCurrentDirectory() throws Exception
     {
-        File    file    = new File(System.getProperty("user.dir"));
-        Options options = new Options(WorkingDirectory.currentDirectory());
+        File             file             = new File(System.getProperty("user.dir"));
 
-        WorkingDirectory workingDirectory = options.get(WorkingDirectory.class);
+        WorkingDirectory workingDirectory = WorkingDirectory.currentDirectory();
 
         assertThat(workingDirectory, is(notNullValue()));
 
-        assertThat(workingDirectory.realize("MyApp", platform, schema), is(file));
+        assertThat(workingDirectory.resolve(platform, options), is(file));
     }
 
 
     @Test
     public void shouldCreateAtTempDirectory() throws Exception
     {
-        Options options = new Options(WorkingDirectory.temporaryDirectory());
-
-        WorkingDirectory workingDirectory = options.get(WorkingDirectory.class);
+        WorkingDirectory workingDirectory = WorkingDirectory.temporaryDirectory();
 
         assertThat(workingDirectory, is(notNullValue()));
 
-        File file = workingDirectory.realize("MyApp", platform, schema);
+        File file = workingDirectory.resolve(platform, options);
 
         assertThat(file, is(notNullValue()));
     }
@@ -175,13 +171,11 @@ public class WorkingDirectoryTest
     @Test
     public void shouldCreateAtExpression() throws Exception
     {
-        Options options = new Options(WorkingDirectory.at("/tmp/${platform.name}/${applicationName}"));
-
-        WorkingDirectory workingDirectory = options.get(WorkingDirectory.class);
+        WorkingDirectory workingDirectory = WorkingDirectory.at("/tmp/${platform.name}/${applicationName}");
 
         assertThat(workingDirectory, is(notNullValue()));
 
-        File file = workingDirectory.realize("MyApp", platform, schema);
+        File file = workingDirectory.resolve(platform, new Options(DisplayName.of("MyApp")));
 
         assertThat(file, is(new File("/tmp/Local/MyApp")));
     }
@@ -190,15 +184,14 @@ public class WorkingDirectoryTest
     @Test
     public void shouldCreateFromIterator() throws Exception
     {
-        Iterator<?> iterator = Arrays.asList("/foo", "/bar").iterator();
-        Options     options  = new Options(WorkingDirectory.at(iterator));
+        Iterator<?>      iterator         = Arrays.asList("/foo", "/bar").iterator();
 
-        WorkingDirectory workingDirectory = options.get(WorkingDirectory.class);
+        WorkingDirectory workingDirectory = WorkingDirectory.at(iterator);
 
         assertThat(workingDirectory, is(notNullValue()));
 
-        File file1 = workingDirectory.realize("MyApp", platform, schema);
-        File file2 = workingDirectory.realize("MyApp", platform, schema);
+        File file1 = workingDirectory.resolve(platform, options);
+        File file2 = workingDirectory.resolve(platform, options);
 
         assertThat(file1, is(new File("/foo")));
         assertThat(file2, is(new File("/bar")));

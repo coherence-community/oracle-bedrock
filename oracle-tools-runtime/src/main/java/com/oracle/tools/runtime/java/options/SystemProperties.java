@@ -32,8 +32,9 @@ import com.oracle.tools.lang.ExpressionEvaluator;
 
 import com.oracle.tools.runtime.Platform;
 
-import com.oracle.tools.runtime.java.JavaApplicationSchema;
+import com.oracle.tools.runtime.java.JavaApplication;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -363,25 +364,23 @@ public class SystemProperties implements Option.Collector<SystemProperty, System
 
     /**
      * Creates a standard java {@link Properties} instance containing the
-     * {@link SystemProperty}s based on the specified {@link Platform} and {@link JavaApplicationSchema}.
+     * {@link SystemProperty}s based on the specified {@link Platform} and {@link JavaApplication}
+     * launch {@link Option}s.
      * <p>
      * If the value of a {@link SystemProperty} is defined as an {@link Iterator}, the next value from the
      * said {@link Iterator} will be used as a value for the returned property.  If the value of a
      * {@link SystemProperty} is defined as a {@link SystemProperty.ContextSensitiveValue}, the
-     * {@link SystemProperty.ContextSensitiveValue#getValue(String, Platform, JavaApplicationSchema)} is called
+     * {@link SystemProperty.ContextSensitiveValue#resolve(String, Platform, Options)} is called
      * to resolve the value.
      *
-     * @param platform        the target {@link Platform} for the returned {@link Properties}
-     * @param schema          the target {@link JavaApplicationSchema} for the returned {@link Properties}
-     * @param realizeOptions  the {@link Option}s for realizing the {@link Properties}
+     * @param platform  the target {@link Platform} for the returned {@link Properties}
+     * @param options   the {@link Options} for resolving the {@link Properties}
      *
      * @return a new {@link Properties} instance
      */
-    public Properties realize(Platform              platform,
-                              JavaApplicationSchema schema,
-                              Option...             realizeOptions)
+    public Properties resolve(Platform platform,
+                              Options  options)
     {
-        Options             options    = new Options(realizeOptions);
         ExpressionEvaluator evaluator  = new ExpressionEvaluator(options);
 
         Properties          properties = new Properties();
@@ -398,7 +397,7 @@ public class SystemProperties implements Option.Collector<SystemProperty, System
                     SystemProperty.ContextSensitiveValue contextSensitiveValue =
                         (SystemProperty.ContextSensitiveValue) value;
 
-                    value = contextSensitiveValue.getValue(name, platform, schema);
+                    value = contextSensitiveValue.resolve(name, platform, options);
                 }
 
                 if (value instanceof Iterator<?>)
@@ -449,6 +448,20 @@ public class SystemProperties implements Option.Collector<SystemProperty, System
     public SystemProperties without(SystemProperty property)
     {
         return remove(property.getName());
+    }
+
+
+    @Override
+    public <O> Iterable<O> getInstancesOf(Class<O> requiredClass)
+    {
+        if (requiredClass.isAssignableFrom(SystemProperty.class))
+        {
+            return (Iterable<O>) properties.values();
+        }
+        else
+        {
+            return Collections.EMPTY_LIST;
+        }
     }
 
 

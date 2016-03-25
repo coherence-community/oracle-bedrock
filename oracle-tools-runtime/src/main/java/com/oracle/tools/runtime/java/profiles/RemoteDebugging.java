@@ -29,13 +29,11 @@ import com.oracle.tools.Option;
 import com.oracle.tools.Options;
 
 import com.oracle.tools.runtime.Application;
-import com.oracle.tools.runtime.ApplicationSchema;
 import com.oracle.tools.runtime.LocalPlatform;
 import com.oracle.tools.runtime.Platform;
 import com.oracle.tools.runtime.Profile;
 
 import com.oracle.tools.runtime.java.JavaApplication;
-import com.oracle.tools.runtime.java.JavaApplicationSchema;
 import com.oracle.tools.runtime.java.JavaVirtualMachine;
 import com.oracle.tools.runtime.java.options.Freeform;
 import com.oracle.tools.runtime.java.options.WaitToStart;
@@ -158,11 +156,10 @@ public class RemoteDebugging implements Profile, Option
 
 
     @Override
-    public void onBeforeRealize(Platform          platform,
-                                ApplicationSchema schema,
-                                Options           options)
+    public void onBeforeLaunch(Platform platform,
+                               Options  options)
     {
-        if (schema instanceof JavaApplicationSchema && enabled)
+        if (enabled)
         {
             // determine the TransportAddress to use
             TransportAddress transportAddress = this.transportAddress == null
@@ -174,7 +171,7 @@ public class RemoteDebugging implements Profile, Option
                 if (behavior == Behavior.LISTEN_FOR_DEBUGGER)
                 {
                     // when we don't have an address we use the platform provides
-                    transportAddress = new TransportAddress(LocalPlatform.getInstance().getAvailablePorts());
+                    transportAddress = new TransportAddress(LocalPlatform.get().getAvailablePorts());
 
                     // add the TransportAddress as an Option
                     options.add(transportAddress);
@@ -223,9 +220,9 @@ public class RemoteDebugging implements Profile, Option
 
 
     @Override
-    public void onAfterRealize(Platform    platform,
-                               Application application,
-                               Options     options)
+    public void onAfterLaunch(Platform    platform,
+                              Application application,
+                              Options     options)
     {
     }
 
@@ -375,7 +372,7 @@ public class RemoteDebugging implements Profile, Option
     @Options.Default
     public static RemoteDebugging autoDetect()
     {
-        return new RemoteDebugging(JavaVirtualMachine.getInstance().shouldEnableRemoteDebugging(),
+        return new RemoteDebugging(JavaVirtualMachine.get().shouldEnableRemoteDebugging(),
                                    false,
                                    Behavior.LISTEN_FOR_DEBUGGER,
                                    null);

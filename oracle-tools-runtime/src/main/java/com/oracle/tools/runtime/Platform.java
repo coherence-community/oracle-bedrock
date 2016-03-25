@@ -79,29 +79,32 @@ public interface Platform
      * or used by the {@link Platform} after it was created.</strong>
      *
      * @return the {@link Options}
-     *
-     * @see #realize(String, ApplicationSchema, ApplicationConsole, Option...)
      */
     public Options getOptions();
 
 
     /**
-     * Realizes an instance of an {@link Application}.
+     * Launches a new {@link Application} based on the specified program executable / command
+     * and {@link Option}s.
      *
-     * @param applicationName    the name of the application
-     * @param applicationSchema  the {@link ApplicationSchema} to use for realizing the {@link Application}
-     * @param console            the {@link ApplicationConsole} that will be used for I/O by the
-     *                           realized {@link Application}. This may be <code>null</code> if not required
-     * @param options            the custom {@link Option}s to be used when realizing the {@link Application},
-     *                           overriding those defined by the {@link ApplicationSchema} and the
-     *                           {@link Platform} itself.
+     * @param executable  the name of the executable / command to launch the application on the {@link Platform}
+     * @param options  the {@link Option}s for the {@link Application}
      *
-     * @return an {@link Application} representing the realized application
-     *
-     * @throws RuntimeException when a problem occurs while starting the application
+     * @return  an {@link Application} representing the launched application
      */
-    public <A extends Application, S extends ApplicationSchema<A>> A realize(String             applicationName,
-                                                                             S                  applicationSchema,
-                                                                             ApplicationConsole console,
-                                                                             Option...          options);
+    public Application launch(String    executable,
+                              Option... options);
+
+
+    /**
+     * Launches a new {@link Application} based on the specified class of {@link Application} and
+     * {@link Option}s.
+     *
+     * @param applicationClass  type of {@link Application} to launch on the {@link Platform}
+     * @param options           the {@link Option}s for the {@link Application}
+     *
+     * @return  an {@link Application} representing the launched application
+     */
+    public <A extends Application> A launch(Class<A>  applicationClass,
+                                            Option... options);
 }

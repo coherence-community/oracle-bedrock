@@ -91,6 +91,19 @@ public class Options
 
 
     /**
+     * Constructs a new {@link Options} instance based on the specified {@link Option}s.
+     *
+     * @param options  the {@link Option}s
+     *
+     * @return  a new {@link Options} containing the specified {@link Option}s
+     */
+    public static Options of(Option... options)
+    {
+        return new Options(options);
+    }
+
+
+    /**
      * Obtains the {@link Option} for a specified concrete type from the collection.
      *
      * <p>Should the {@link Option} not exist in the collection, an attempt is made
@@ -134,20 +147,41 @@ public class Options
 
 
     /**
-     * Obtains the {@link Option} of a specified concrete type from the collection.
+     * Obtains the {@link Option} of a specified concrete type from the collection.  Should the type of
+     * {@link Option} not exist, the specified default is added to the collection and returned.
      * <p>
-     * Should the type of {@link Option} not exist, the specified default is added to the collection
-     * and returned.
+     * DEPRECATED: Use {@link #getOrDefault(Class, Option)} instead.
      *
-     * @param classOfOption the type of {@link Option} to obtain
-     * @param defaultOption the {@link Option} to return if the specified type is not defined
-     * @param <T>           the type of value
+     * @param <T>            the type of value
+     * @param <D>            the type of the default value
      *
-     * @return the option of the specified type or
-     * the default if it's not defined
+     * @param classOfOption  the type of {@link Option} to obtain
+     * @param defaultOption  the {@link Option} to return if the specified type is not defined
+     *
+     * @return the option of the specified type or the default if it's not defined
      */
-    public <T extends Option> T get(Class<T> classOfOption,
-                                    T        defaultOption)
+    @Deprecated
+    public <T extends Option, D extends T> T get(Class<T> classOfOption,
+                                                 D        defaultOption)
+    {
+        return getOrDefault(classOfOption, defaultOption);
+    }
+
+
+    /**
+     * Obtains the {@link Option} of a specified concrete type from the collection.  Should the type of
+     * {@link Option} not exist, the specified default is added to the collection and returned.
+     *
+     * @param <T>            the type of value
+     * @param <D>            the type of the default value
+     *
+     * @param classOfOption  the type of {@link Option} to obtain
+     * @param defaultOption  the {@link Option} to return if the specified type is not defined
+     *
+     * @return the option of the specified type or the default if it's not defined
+     */
+    public <T extends Option, D extends T> T getOrDefault(Class<T> classOfOption,
+                                                          D        defaultOption)
     {
         if (classOfOption == null)
         {
@@ -222,12 +256,9 @@ public class Options
 
             if (option instanceof Option.Collector)
             {
-                for (Option collectable : ((Option.Collector<?, ?>) option))
+                for (Object o : ((Option.Collector) option).getInstancesOf(requiredClass))
                 {
-                    if (requiredClass.isInstance(collectable))
-                    {
-                        result.add((O) collectable);
-                    }
+                    result.add((O) o);
                 }
             }
         }
@@ -397,7 +428,7 @@ public class Options
      *
      * @return the {@link Options} to permit fluent-style method calls
      */
-    public Options addAll(Option[] options)
+    public Options addAll(Option... options)
     {
         if (options != null)
         {

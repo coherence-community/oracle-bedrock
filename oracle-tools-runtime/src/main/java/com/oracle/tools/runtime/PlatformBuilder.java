@@ -35,7 +35,7 @@ import com.oracle.tools.Option;
  *
  * @author Jonathan Knight
  *
- * @param <P>  the type of the {@link Platform}s the {@link PlatformBuilder} will realize
+ * @param <P>  the type of the {@link Platform}s the {@link PlatformBuilder} will build
  */
 public interface PlatformBuilder<P extends Platform>
 {

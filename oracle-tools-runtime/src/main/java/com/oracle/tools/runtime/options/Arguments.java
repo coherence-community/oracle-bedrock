@@ -30,10 +30,7 @@ import com.oracle.tools.Options;
 
 import com.oracle.tools.lang.ExpressionEvaluator;
 
-import com.oracle.tools.runtime.ApplicationSchema;
 import com.oracle.tools.runtime.Platform;
-
-import com.oracle.tools.runtime.java.JavaApplicationSchema;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -54,7 +51,8 @@ public class Arguments implements Option.Collector<Argument, Arguments>
 {
     private static final Arguments EMPTY = new Arguments();
 
-    private final List<Argument> arguments;
+    private final List<Argument>   arguments;
+
 
     private Arguments()
     {
@@ -69,20 +67,22 @@ public class Arguments implements Option.Collector<Argument, Arguments>
      * If the value of a {@link Argument} is defined as an {@link Iterator}, the next value from the
      * said {@link Iterator} will be used as a argument value. If the value of a {@link Argument} is
      * defined as a {@link Argument.ContextSensitiveArgument}, the
-     * {@link Argument.ContextSensitiveArgument#getValue(Platform, ApplicationSchema)} method is called
+     * {@link Argument.ContextSensitiveArgument#resolve(Platform, Options)} method is called
      * to resolve the value.
      *
-     * @param platform        the target {@link Platform} for the returned {@link List} of arguments
-     * @param schema          the target {@link JavaApplicationSchema} for the returned {@link List} of arguments
-     * @param realizeOptions  the {@link Option}s for realizing the {@link List} of arguments
+     * @param platform  the target {@link Platform} for the returned {@link List} of arguments
+     * @param options   the {@link Option}s for realizing the {@link List} of arguments
      *
      * @return a new {@link List} of application command line arguments
      */
-    public List<String> realize(Platform          platform,
-                                ApplicationSchema schema,
-                                Option...         realizeOptions)
+    public List<String> resolve(Platform platform,
+                                Options  options)
     {
-        Options             options   = new Options(realizeOptions);
+        if (options == null)
+        {
+            options = new Options();
+        }
+
         ExpressionEvaluator evaluator = new ExpressionEvaluator(options);
         List<String>        argList   = new ArrayList<>();
 
@@ -90,11 +90,11 @@ public class Arguments implements Option.Collector<Argument, Arguments>
         {
             String name      = argument.getName();
             char   separator = argument.getSeparator();
-            String value     = argument.realizeValue(platform, schema, evaluator);
+            String value     = argument.resolve(platform, evaluator, options);
 
-            if (name != null && !name.isEmpty())
+            if (name != null &&!name.isEmpty())
             {
-                if (value != null && !value.isEmpty())
+                if (value != null &&!value.isEmpty())
                 {
                     if (separator == ' ')
                     {
@@ -107,7 +107,7 @@ public class Arguments implements Option.Collector<Argument, Arguments>
                     }
                 }
             }
-            else if (value != null && !value.isEmpty())
+            else if (value != null &&!value.isEmpty())
             {
                 argList.add(value);
             }
@@ -301,6 +301,20 @@ public class Arguments implements Option.Collector<Argument, Arguments>
 
 
     @Override
+    public <O> Iterable<O> getInstancesOf(Class<O> requiredClass)
+    {
+        if (requiredClass.isAssignableFrom(Argument.class))
+        {
+            return (Iterable<O>) arguments;
+        }
+        else
+        {
+            return Collections.EMPTY_LIST;
+        }
+    }
+
+
+    @Override
     public Iterator<Argument> iterator()
     {
         return Collections.unmodifiableCollection(arguments).iterator();
@@ -317,7 +331,8 @@ public class Arguments implements Option.Collector<Argument, Arguments>
      * @return  a new {@link Arguments} instance with the specified
      *          argument replaced
      */
-    public Arguments replace(String name, Object value)
+    public Arguments replace(String name,
+                             Object value)
     {
         Argument argument = Argument.of(name, value);
 
@@ -365,7 +380,8 @@ public class Arguments implements Option.Collector<Argument, Arguments>
     }
 
 
-    private boolean safeEquals(String s1, String s2)
+    private boolean safeEquals(String s1,
+                               String s2)
     {
         if (s1 == null && s2 == null)
         {

@@ -90,5 +90,17 @@ public interface Option
          * @return a new {@link Collector} instance, without the specified {@link Collector}
          */
         T without(C collectable);
+
+
+        /**
+         * Obtains all of the instance of the specified class that have been collected
+         * by the {@link Collector}.
+         *
+         * @param requiredClass  the required class
+         * @param <O>            the type of the required class
+         *
+         * @return  an {@link Iterable} over the {@link Collectable} instances of the required class
+         */
+        <O> Iterable<O> getInstancesOf(Class<O> requiredClass);
     }
 }

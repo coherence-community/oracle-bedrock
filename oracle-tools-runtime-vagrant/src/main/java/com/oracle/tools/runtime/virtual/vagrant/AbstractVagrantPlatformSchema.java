@@ -58,7 +58,7 @@ public abstract class AbstractVagrantPlatformSchema<S extends AbstractVagrantPla
      *
      * @param name              the name of the Vagrant VM
      * @param isSingleton       flag indicating whether this schema can
-     *                          be used to realize multiple VMs
+     *                          be used to build multiple VMs
      * @param workingDirectory  the directory to contain the vagrantFile
      */
     protected AbstractVagrantPlatformSchema(String  name,

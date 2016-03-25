@@ -163,7 +163,7 @@ public class ContainerClassLoader extends ContainerScopeClassLoader
                            ClassPath.ofSystem(),
                            builder.realize(),
                            System.getProperties(),
-                           LocalPlatform.getInstance().getAvailablePorts(),
+                           LocalPlatform.get().getAvailablePorts(),
                            false,
                            Container.PIPE_BUFFER_SIZE_BYTES);
     }
@@ -188,7 +188,7 @@ public class ContainerClassLoader extends ContainerScopeClassLoader
                            classPath,
                            localProperties,
                            System.getProperties(),
-                           LocalPlatform.getInstance().getAvailablePorts(),
+                           LocalPlatform.get().getAvailablePorts(),
                            false,
                            Container.PIPE_BUFFER_SIZE_BYTES);
     }
@@ -230,7 +230,7 @@ public class ContainerClassLoader extends ContainerScopeClassLoader
 
         // establish an MBeanServerBuilder
         ContainerMBeanServerBuilder mBeanServerBuilder =
-            new ContainerMBeanServerBuilder(LocalPlatform.getInstance().getAvailablePorts());
+            new ContainerMBeanServerBuilder(LocalPlatform.get().getAvailablePorts());
 
         // establish the Scope for the application
         ContainerScope scope = new ContainerScope(applicationName,

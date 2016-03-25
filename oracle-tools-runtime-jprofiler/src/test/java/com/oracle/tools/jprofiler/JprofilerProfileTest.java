@@ -1,5 +1,5 @@
 /*
- * File: JProfilerTest.java
+ * File: JprofilerProfileTest.java
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
@@ -26,14 +26,15 @@
 package com.oracle.tools.jprofiler;
 
 import applications.WaitingApplication;
+import com.oracle.tools.Option;
 import com.oracle.tools.Options;
 import com.oracle.tools.deferred.Eventually;
 import com.oracle.tools.runtime.LocalPlatform;
 import com.oracle.tools.runtime.concurrent.RemoteCallable;
 import com.oracle.tools.runtime.console.CapturingApplicationConsole;
+import com.oracle.tools.runtime.console.Console;
 import com.oracle.tools.runtime.java.JavaApplication;
-import com.oracle.tools.runtime.java.JavaApplicationSchema;
-import com.oracle.tools.runtime.java.SimpleJavaApplicationSchema;
+import com.oracle.tools.runtime.java.options.ClassName;
 import com.oracle.tools.runtime.java.options.Freeform;
 import com.oracle.tools.runtime.java.options.Freeforms;
 import org.junit.After;
@@ -64,10 +65,15 @@ public class JprofilerProfileTest
      * set the oracletools.profile.jprofiler System property to the location
      * of the JProfiler agent.
      */
-    public static final String DEFAULT_AGENT
-            = "/Applications/JProfiler.app/Contents/Resources/app/bin/macos/libjprofilerti.jnilib";
+    public static final String DEFAULT_AGENT =
+        "/Applications/JProfiler.app/Contents/Resources/app/bin/macos/libjprofilerti.jnilib";
 
-    private JavaApplicationSchema schema  = new SimpleJavaApplicationSchema("");
+    /**
+     * A JUnit rule to create temporary folders.
+     */
+    @ClassRule
+    public static TemporaryFolder temporaryFolder = new TemporaryFolder();
+
 
     @After
     public void cleanupProperties()
@@ -75,15 +81,16 @@ public class JprofilerProfileTest
         System.clearProperty("oracletools.profile.jprofiler");
     }
 
+
     @Test
     public void shouldCreateEnabledProfileWithDefaultAddress() throws Exception
     {
-        Options               options = new Options();
-        JprofilerProfile      profile = JprofilerProfile.enabled("mylib");
+        Options          options = new Options();
+        JprofilerProfile profile = JprofilerProfile.enabled("mylib");
 
         assertThat(profile.isEnabled(), is(true));
 
-        profile.onBeforeRealize(null, schema, options);
+        profile.onBeforeLaunch(null, options);
 
         assertAgentString(options, "-agentpath:mylib=", "port=8849");
 
@@ -97,12 +104,12 @@ public class JprofilerProfileTest
     @Test
     public void shouldCreateEnabledNoWaitProfile() throws Exception
     {
-        Options               options = new Options();
-        JprofilerProfile      profile = JprofilerProfile.enabledNoWait("mylib");
+        Options          options = new Options();
+        JprofilerProfile profile = JprofilerProfile.enabledNoWait("mylib");
 
         assertThat(profile.isEnabled(), is(true));
 
-        profile.onBeforeRealize(null, schema, options);
+        profile.onBeforeLaunch(null, options);
 
         assertAgentString(options, "-agentpath:mylib=", "port=8849", "nowait");
     }
@@ -111,10 +118,10 @@ public class JprofilerProfileTest
     @Test
     public void shouldAddNoWait() throws Exception
     {
-        Options               options = new Options();
-        JprofilerProfile      profile = JprofilerProfile.enabled("mylib").noWait();
+        Options          options = new Options();
+        JprofilerProfile profile = JprofilerProfile.enabled("mylib").noWait();
 
-        profile.onBeforeRealize(null, schema, options);
+        profile.onBeforeLaunch(null, options);
 
         assertAgentString(options, "-agentpath:mylib=", "port=8849", "nowait");
     }
@@ -123,10 +130,10 @@ public class JprofilerProfileTest
     @Test
     public void shouldAddVerbose() throws Exception
     {
-        Options               options = new Options();
-        JprofilerProfile      profile = JprofilerProfile.enabled("mylib").verbose(true);
+        Options          options = new Options();
+        JprofilerProfile profile = JprofilerProfile.enabled("mylib").verbose(true);
 
-        profile.onBeforeRealize(null, schema, options);
+        profile.onBeforeLaunch(null, options);
 
         assertAgentString(options, "-agentpath:mylib=", "port=8849", "verbose-instr");
     }
@@ -135,10 +142,10 @@ public class JprofilerProfileTest
     @Test
     public void shouldSetSamplingStack() throws Exception
     {
-        Options               options = new Options();
-        JprofilerProfile      profile = JprofilerProfile.enabled("mylib").samplingStack(1234);
+        Options          options = new Options();
+        JprofilerProfile profile = JprofilerProfile.enabled("mylib").samplingStack(1234);
 
-        profile.onBeforeRealize(null, schema, options);
+        profile.onBeforeLaunch(null, options);
 
         assertAgentString(options, "-agentpath:mylib=", "port=8849", "samplingstack=1234");
     }
@@ -147,12 +154,10 @@ public class JprofilerProfileTest
     @Test
     public void shouldSetDefaultSamplingStack() throws Exception
     {
-        Options               options = new Options();
-        JprofilerProfile      profile = JprofilerProfile.enabled("mylib")
-                                                        .samplingStack(1234)
-                                                        .defaultSamplingStack();
+        Options          options = new Options();
+        JprofilerProfile profile = JprofilerProfile.enabled("mylib").samplingStack(1234).defaultSamplingStack();
 
-        profile.onBeforeRealize(null, schema, options);
+        profile.onBeforeLaunch(null, options);
 
         assertAgentString(options, "-agentpath:mylib=", "port=8849");
     }
@@ -161,10 +166,10 @@ public class JprofilerProfileTest
     @Test
     public void shouldSetStack() throws Exception
     {
-        Options               options = new Options();
-        JprofilerProfile      profile = JprofilerProfile.enabled("mylib").stack(1234);
+        Options          options = new Options();
+        JprofilerProfile profile = JprofilerProfile.enabled("mylib").stack(1234);
 
-        profile.onBeforeRealize(null, schema, options);
+        profile.onBeforeLaunch(null, options);
 
         assertAgentString(options, "-agentpath:mylib=", "port=8849", "stack=1234");
     }
@@ -173,12 +178,10 @@ public class JprofilerProfileTest
     @Test
     public void shouldSetDefaultStack() throws Exception
     {
-        Options               options = new Options();
-        JprofilerProfile      profile = JprofilerProfile.enabled("mylib")
-                                                        .stack(1234)
-                                                        .defaultStack();
+        Options          options = new Options();
+        JprofilerProfile profile = JprofilerProfile.enabled("mylib").stack(1234).defaultStack();
 
-        profile.onBeforeRealize(null, schema, options);
+        profile.onBeforeLaunch(null, options);
 
         assertAgentString(options, "-agentpath:mylib=", "port=8849");
     }
@@ -187,12 +190,12 @@ public class JprofilerProfileTest
     @Test
     public void shouldCreateDisabledProfile() throws Exception
     {
-        Options               options = new Options();
-        JprofilerProfile      profile = JprofilerProfile.disabled();
+        Options          options = new Options();
+        JprofilerProfile profile = JprofilerProfile.disabled();
 
         assertThat(profile.isEnabled(), is(false));
 
-        profile.onBeforeRealize(null, schema, options);
+        profile.onBeforeLaunch(null, options);
 
         Freeforms freeforms = options.get(Freeforms.class);
 
@@ -204,10 +207,10 @@ public class JprofilerProfileTest
     @Test
     public void shouldAddJniInterception() throws Exception
     {
-        Options               options = new Options();
-        JprofilerProfile      profile = JprofilerProfile.enabled("mylib").jniInterception(true);
+        Options          options = new Options();
+        JprofilerProfile profile = JprofilerProfile.enabled("mylib").jniInterception(true);
 
-        profile.onBeforeRealize(null, schema, options);
+        profile.onBeforeLaunch(null, options);
 
         assertAgentString(options, "-agentpath:mylib=", "port=8849", "jniInterception");
     }
@@ -216,10 +219,10 @@ public class JprofilerProfileTest
     @Test
     public void shouldSetListenMode() throws Exception
     {
-        Options               options = new Options();
-        JprofilerProfile      profile = JprofilerProfile.enabled("mylib").listenMode();
+        Options          options = new Options();
+        JprofilerProfile profile = JprofilerProfile.enabled("mylib").listenMode();
 
-        profile.onBeforeRealize(null, schema, options);
+        profile.onBeforeLaunch(null, options);
 
         assertAgentString(options, "-agentpath:mylib=", "port=8849");
     }
@@ -235,9 +238,9 @@ public class JprofilerProfileTest
 
         JprofilerProfile               profile     = JprofilerProfile.enabled("mylib").listenMode(address);
 
-        profile.onBeforeRealize(null, schema, options);
+        profile.onBeforeLaunch(null, options);
 
-        assertAgentString(options, "-agentpath:mylib=", "address=" + inetAddress.getHostName(), "port="+ port);
+        assertAgentString(options, "-agentpath:mylib=", "address=" + inetAddress.getHostName(), "port=" + port);
 
         JprofilerProfile.ListenAddress result = options.get(JprofilerProfile.ListenAddress.class);
 
@@ -248,12 +251,12 @@ public class JprofilerProfileTest
     @Test
     public void shouldSetOfflineModeWithFileAndSession() throws Exception
     {
-        File                  file    = new File("config.xml");
-        int                   session = 1234;
-        Options               options = new Options();
-        JprofilerProfile      profile = JprofilerProfile.enabled("mylib").offlineMode(file, session);
+        File             file    = new File("config.xml");
+        int              session = 1234;
+        Options          options = new Options();
+        JprofilerProfile profile = JprofilerProfile.enabled("mylib").offlineMode(file, session);
 
-        profile.onBeforeRealize(null, schema, options);
+        profile.onBeforeLaunch(null, options);
 
         assertAgentString(options, "-agentpath:mylib=offline", "id=1234", "nowait", "config=config.xml");
     }
@@ -262,17 +265,19 @@ public class JprofilerProfileTest
     @Test
     public void shouldSetOfflineModeWithSession() throws Exception
     {
-        int                   session = 1234;
-        Options               options = new Options();
-        JprofilerProfile      profile = JprofilerProfile.enabled("mylib").offlineMode(session);
+        int              session = 1234;
+        Options          options = new Options();
+        JprofilerProfile profile = JprofilerProfile.enabled("mylib").offlineMode(session);
 
-        profile.onBeforeRealize(null, schema, options);
+        profile.onBeforeLaunch(null, options);
 
         assertAgentString(options, "-agentpath:mylib=offline", "id=1234", "nowait");
     }
 
 
-    public void assertAgentString(Options options, String agent, String... expectedValues)
+    public void assertAgentString(Options   options,
+                                  String    agent,
+                                  String... expectedValues)
     {
         Freeforms freeforms = options.get(Freeforms.class);
 
@@ -280,7 +285,7 @@ public class JprofilerProfileTest
         assertThat(freeforms.iterator().hasNext(), is(true));
 
         Freeform         freeform = freeforms.iterator().next();
-        Iterator<String> iterator = freeform.getValues().iterator();
+        Iterator<String> iterator = freeform.resolve(options).iterator();
 
         assertThat(iterator.hasNext(), is(true));
 
@@ -291,11 +296,12 @@ public class JprofilerProfileTest
 
         assertThat(parts.length, is(expectedValues.length + 1));
 
-        for (int i=0; i<expectedValues.length; i++)
+        for (int i = 0; i < expectedValues.length; i++)
         {
-            assertThat(parts[i+1], is(expectedValues[i]));
+            assertThat(parts[i + 1], is(expectedValues[i]));
         }
     }
+
 
     @Test
     public void shouldRunWithJProfilerProfileAsOption() throws Exception
@@ -307,12 +313,11 @@ public class JprofilerProfileTest
 
         // Create a schema to run the SleepingApplication with a JProfilerProfile
 
-        JprofilerProfile            profile   = JprofilerProfile.enabled(agent).noWait();
-        String                      className = WaitingApplication.class.getCanonicalName();
-        SimpleJavaApplicationSchema schema    = new SimpleJavaApplicationSchema(className).addOption(profile);
+        JprofilerProfile profile = JprofilerProfile.enabled(agent).noWait();
 
-        assertApplicationUsesJProfiler(schema);
+        assertApplicationUsesJProfiler(ClassName.of(WaitingApplication.class), profile);
     }
+
 
     @Test
     public void shouldRunWithJProfilerProfileAsSystemProperty() throws Exception
@@ -325,19 +330,20 @@ public class JprofilerProfileTest
         // define the JProfiler profile as a System Property
         System.getProperties().setProperty("oracletools.profile.jprofiler", agent);
 
-        // Create a schema to run the SleepingApplication without any JProfilerProfile specified
-        String                      className = WaitingApplication.class.getCanonicalName();
-        SimpleJavaApplicationSchema schema    = new SimpleJavaApplicationSchema(className);
-
-        assertApplicationUsesJProfiler(schema);
+        assertApplicationUsesJProfiler(ClassName.of(WaitingApplication.class));
     }
 
-    private void assertApplicationUsesJProfiler(SimpleJavaApplicationSchema schema) throws Exception
+
+    private void assertApplicationUsesJProfiler(Option... options) throws Exception
     {
         // The console to capture application output to verify JProfiler starts
-        CapturingApplicationConsole console = new CapturingApplicationConsole();
+        CapturingApplicationConsole console       = new CapturingApplicationConsole();
 
-        try (JavaApplication application = LocalPlatform.getInstance().realize("Sleeper", schema, console))
+        Options                     launchOptions = new Options(options);
+
+        launchOptions.add(Console.of(console));
+
+        try (JavaApplication application = LocalPlatform.get().launch(JavaApplication.class, launchOptions.asArray()))
         {
             // assert the JProfiler is initialized
             Eventually.assertThat(invoking(console).getCapturedErrorLines(), hasItem("JProfiler> VM initialized"));
@@ -355,10 +361,4 @@ public class JprofilerProfileTest
             application.submit(new WaitingApplication.Terminate());
         }
     }
-
-    /**
-     * A JUnit rule to create temporary folders.
-     */
-    @ClassRule
-    public static TemporaryFolder temporaryFolder = new TemporaryFolder();
 }

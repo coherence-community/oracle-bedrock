@@ -25,7 +25,11 @@
 
 package com.oracle.tools.runtime.java;
 
-import com.oracle.tools.runtime.ApplicationListener;
+import com.oracle.tools.Options;
+
+import com.oracle.tools.runtime.Application;
+import com.oracle.tools.runtime.ApplicationProcess;
+import com.oracle.tools.runtime.Platform;
 
 /**
  * A {@link SimpleJavaApplication} is concrete implementation of a {@link JavaApplication}.
@@ -35,18 +39,19 @@ import com.oracle.tools.runtime.ApplicationListener;
  *
  * @author Brian Oliver
  */
-public class SimpleJavaApplication
-    extends AbstractJavaApplication<SimpleJavaApplication, JavaApplicationProcess, SimpleJavaApplicationRuntime>
+public class SimpleJavaApplication extends AbstractJavaApplication<JavaApplicationProcess>
 {
     /**
      * Constructs a {@link SimpleJavaApplication}.
      *
-     * @param runtime    the {@link JavaApplicationRuntime}
-     * @param listeners  the {@link ApplicationListener}s
+     * @param platform  the {@link Platform} on which the {@link Application} was launched
+     * @param process   the underlying {@link ApplicationProcess} representing the {@link Application}
+     * @param options   the {@link Options} used to launch the {@link Application}
      */
-    public SimpleJavaApplication(SimpleJavaApplicationRuntime                                 runtime,
-                                 Iterable<ApplicationListener<? super SimpleJavaApplication>> listeners)
+    public SimpleJavaApplication(Platform               platform,
+                                 JavaApplicationProcess process,
+                                 Options                options)
     {
-        super(runtime, listeners);
+        super(platform, process, options);
     }
 }

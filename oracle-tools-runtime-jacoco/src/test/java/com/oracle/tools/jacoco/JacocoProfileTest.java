@@ -26,20 +26,26 @@
 package com.oracle.tools.jacoco;
 
 import applications.SleepingApplication;
+
 import com.oracle.tools.Option;
+
 import com.oracle.tools.lang.ExpressionEvaluator;
-import com.oracle.tools.runtime.ApplicationConsole;
+
 import com.oracle.tools.runtime.LocalPlatform;
-import com.oracle.tools.runtime.console.SystemApplicationConsole;
-import com.oracle.tools.runtime.java.SimpleJavaApplication;
-import com.oracle.tools.runtime.java.SimpleJavaApplicationSchema;
+
+import com.oracle.tools.runtime.java.JavaApplication;
+import com.oracle.tools.runtime.java.options.ClassName;
+import com.oracle.tools.runtime.java.options.IPv4Preferred;
+
 import org.junit.Test;
 
-import java.io.File;
-
 import static org.hamcrest.Matchers.greaterThan;
+
 import static org.hamcrest.core.Is.is;
+
 import static org.junit.Assert.assertThat;
+
+import java.io.File;
 
 /**
  * Tests for the {@link JacocoProfile}.
@@ -66,18 +72,15 @@ public class JacocoProfileTest
         // define the JaCoCo profile
         JacocoProfile profile = new JacocoProfile("destfile=" + destinationFile);
 
-        // define the SleepingApplication
-        SimpleJavaApplicationSchema schema =
-            new SimpleJavaApplicationSchema(SleepingApplication.class.getName()).setPreferIPv4(true).addOption(profile);
-
         // build and start the SleepingApplication
-        LocalPlatform      platform = LocalPlatform.getInstance();
+        LocalPlatform platform = LocalPlatform.get();
 
-        ApplicationConsole console  = new SystemApplicationConsole();
+        File          telemetricsFile;
 
-        File               telemetricsFile;
-
-        try (SimpleJavaApplication application = platform.realize("sleeping", schema, console))
+        try (JavaApplication application = platform.launch(JavaApplication.class,
+                                                           ClassName.of(SleepingApplication.class),
+                                                           IPv4Preferred.yes(),
+                                                           profile))
         {
             ExpressionEvaluator evaluator = new ExpressionEvaluator(application.getOptions());
 
@@ -109,18 +112,14 @@ public class JacocoProfileTest
         // define the JaCoCo profile as a System Property
         System.getProperties().setProperty("oracletools.profile.jacoco", "destfile=" + destinationFile);
 
-        // define the SleepingApplication
-        SimpleJavaApplicationSchema schema =
-            new SimpleJavaApplicationSchema(SleepingApplication.class.getName()).setPreferIPv4(true);
-
         // build and start the SleepingApplication
-        LocalPlatform      platform = LocalPlatform.getInstance();
+        LocalPlatform platform = LocalPlatform.get();
 
-        ApplicationConsole console  = new SystemApplicationConsole();
+        File          telemetricsFile;
 
-        File               telemetricsFile;
-
-        try (SimpleJavaApplication application = platform.realize("sleeping", schema, console))
+        try (JavaApplication application = platform.launch(JavaApplication.class,
+                                                           ClassName.of(SleepingApplication.class),
+                                                           IPv4Preferred.yes()))
         {
             ExpressionEvaluator evaluator = new ExpressionEvaluator(application.getOptions());
 

@@ -25,10 +25,13 @@
 
 package com.oracle.tools.runtime.coherence;
 
-import com.oracle.tools.runtime.ApplicationListener;
+import com.oracle.tools.Options;
+
+import com.oracle.tools.runtime.Application;
+import com.oracle.tools.runtime.ApplicationProcess;
+import com.oracle.tools.runtime.Platform;
 
 import com.oracle.tools.runtime.java.JavaApplicationProcess;
-import com.oracle.tools.runtime.java.JavaApplicationRuntime;
 
 /**
  * A runtime representation of a {@link CoherenceCacheServer}.
@@ -38,17 +41,19 @@ import com.oracle.tools.runtime.java.JavaApplicationRuntime;
  *
  * @author Brian Oliver
  */
-public class CoherenceCacheServer extends AbstractCoherenceClusterMember<CoherenceCacheServer>
+public class CoherenceCacheServer extends AbstractCoherenceClusterMember
 {
     /**
-     * Construct a {@link CoherenceCacheServer}.
+     * Constructs a {@link CoherenceCacheServer}.
      *
-     * @param runtime    the {@link JavaApplicationRuntime} for the {@link CoherenceCacheServer}
-     * @param listeners  the {@link ApplicationListener}s
+     * @param platform  the {@link Platform} on which the {@link Application} was launched
+     * @param process   the underlying {@link ApplicationProcess} representing the {@link Application}
+     * @param options   the {@link Options} used to launch the {@link Application}
      */
-    CoherenceCacheServer(JavaApplicationRuntime<JavaApplicationProcess>              runtime,
-                         Iterable<ApplicationListener<? super CoherenceCacheServer>> listeners)
+    public CoherenceCacheServer(Platform               platform,
+                                JavaApplicationProcess process,
+                                Options                options)
     {
-        super(runtime, listeners);
+        super(platform, process, options);
     }
 }

@@ -25,6 +25,8 @@
 
 package com.oracle.tools.runtime;
 
+import com.oracle.tools.Options;
+
 import com.oracle.tools.io.NetworkHelper;
 
 import com.oracle.tools.runtime.concurrent.RemoteCallable;
@@ -34,13 +36,13 @@ import com.oracle.tools.runtime.concurrent.socket.RemoteExecutorClient;
 import com.oracle.tools.runtime.concurrent.socket.RemoteExecutorServer;
 import com.oracle.tools.runtime.concurrent.socket.SocketBasedRemoteExecutor;
 
-import com.oracle.tools.runtime.java.FluentJavaApplication;
 import com.oracle.tools.runtime.java.JavaApplication;
-import com.oracle.tools.runtime.java.LocalJavaApplicationBuilder;
+import com.oracle.tools.runtime.java.LocalJavaApplicationLauncher;
 
 import com.oracle.tools.runtime.network.AvailablePortIterator;
 
-import com.oracle.tools.runtime.options.ApplicationBuilders;
+import com.oracle.tools.runtime.options.MetaClass;
+
 import com.oracle.tools.util.FutureCompletionListener;
 
 import java.io.IOException;
@@ -121,10 +123,6 @@ public class LocalPlatform extends AbstractPlatform<LocalPlatform>
         this.availablePortIterator = new AvailablePortIterator(30000,
                                                                AvailablePortIterator.MAXIMUM_PORT,
                                                                bindableAddresses);
-
-
-        // ----- set any default options ------
-        getOptions().add(ApplicationBuilders.local());
     }
 
 
@@ -162,12 +160,43 @@ public class LocalPlatform extends AbstractPlatform<LocalPlatform>
 
     /**
      * Obtain the singleton instance of the {@link LocalPlatform}.
+     * <p>
+     * DEPRECATED: use {@link #get()} instead.
      *
      * @return the singleton instance of the {@link LocalPlatform}
      */
+    @Deprecated
     public static LocalPlatform getInstance()
     {
+        return get();
+    }
+
+
+    /**
+     * Obtain the singleton instance of the {@link LocalPlatform}.
+     *
+     * @return the singleton instance of the {@link LocalPlatform}
+     */
+    public static LocalPlatform get()
+    {
         return INSTANCE;
+    }
+
+
+    @Override
+    protected <A extends Application,
+               B extends ApplicationLauncher<A, LocalPlatform>> B getApplicationBuilder(Class<A>     applicationClass,
+                                                                                        MetaClass<A> metaClass,
+                                                                                        Options      options) throws UnsupportedOperationException
+    {
+        if (JavaApplication.class.isAssignableFrom(applicationClass))
+        {
+            return (B) new LocalJavaApplicationLauncher(this);
+        }
+        else
+        {
+            return (B) new SimpleApplicationLauncher(this);
+        }
     }
 
 
@@ -178,7 +207,7 @@ public class LocalPlatform extends AbstractPlatform<LocalPlatform>
      */
     public static void main(String[] arguments) throws UnknownHostException, SocketException
     {
-        LocalPlatform platform = LocalPlatform.getInstance();
+        LocalPlatform platform = LocalPlatform.get();
 
         System.out.println("---------------------------------------");
         System.out.println("Oracle Tools: LocalPlatform Diagnostics");
@@ -195,10 +224,10 @@ public class LocalPlatform extends AbstractPlatform<LocalPlatform>
         System.out.println("---------------------------------");
         System.out.println("LocalHost Address   : " + InetAddress.getLocalHost());
         System.out.println("Loopback Address    : " + InetAddress.getLoopbackAddress());
-        System.out.println("Prefer IPv4         : "
-                           + System.getProperty(FluentJavaApplication.JAVA_NET_PREFER_IPV4_STACK, "(undefined)"));
-        System.out.println("Prefer IPv6         : "
-                           + System.getProperty(FluentJavaApplication.JAVA_NET_PREFER_IPV6_STACK, "(undefined)"));
+        System.out.println("Prefer IPv4         : " + System.getProperty(JavaApplication.JAVA_NET_PREFER_IPV4_STACK,
+                                                                         "(undefined)"));
+        System.out.println("Prefer IPv6         : " + System.getProperty(JavaApplication.JAVA_NET_PREFER_IPV6_STACK,
+                                                                         "(undefined)"));
 
         System.out.println();
         System.out.println("Network Interfaces:");
@@ -228,8 +257,8 @@ public class LocalPlatform extends AbstractPlatform<LocalPlatform>
             {
                 for (int i = 0; i < hardwareAddress.length; i++)
                 {
-                    System.out.print((i > 0 ? ":" : "")
-                                     + Integer.toString((hardwareAddress[i] & 0xff) + 0x100, 16).substring(1));
+                    System.out.print((i > 0 ? ":" : "") + Integer.toString((hardwareAddress[i] & 0xff) + 0x100,
+                                                                           16).substring(1));
                 }
 
                 System.out.println();
@@ -258,31 +287,33 @@ public class LocalPlatform extends AbstractPlatform<LocalPlatform>
             System.out.println("---------------------------");
 
             server.addListener(new RemoteExecutorListener()
-            {
-                @Override
-                public void onOpened(RemoteExecutor executor)
-                {
-                    if (executor instanceof SocketBasedRemoteExecutor)
-                    {
-                        SocketBasedRemoteExecutor socketBasedExecutor = (SocketBasedRemoteExecutor) executor;
+                               {
+                                   @Override
+                                   public void onOpened(RemoteExecutor executor)
+                                   {
+                                       if (executor instanceof SocketBasedRemoteExecutor)
+                                       {
+                                           SocketBasedRemoteExecutor socketBasedExecutor =
+                                               (SocketBasedRemoteExecutor) executor;
 
-                        System.out.println("[Server]: Connection Opened (for client executor #"
-                                           + socketBasedExecutor.getExecutorId() + ")");
-                    }
-                }
+                                           System.out.println("[Server]: Connection Opened (for client executor #"
+                                                              + socketBasedExecutor.getExecutorId() + ")");
+                                       }
+                                   }
 
-                @Override
-                public void onClosed(RemoteExecutor executor)
-                {
-                    if (executor instanceof SocketBasedRemoteExecutor)
-                    {
-                        SocketBasedRemoteExecutor socketBasedExecutor = (SocketBasedRemoteExecutor) executor;
+                                   @Override
+                                   public void onClosed(RemoteExecutor executor)
+                                   {
+                                       if (executor instanceof SocketBasedRemoteExecutor)
+                                       {
+                                           SocketBasedRemoteExecutor socketBasedExecutor =
+                                               (SocketBasedRemoteExecutor) executor;
 
-                        System.out.println("[Server]: Connection Closed (for client executor #"
-                                           + socketBasedExecutor.getExecutorId() + ")\n");
-                    }
-                }
-            });
+                                           System.out.println("[Server]: Connection Closed (for client executor #"
+                                                              + socketBasedExecutor.getExecutorId() + ")\n");
+                                       }
+                                   }
+                               });
 
             InetAddress serverAddress = server.open();
 

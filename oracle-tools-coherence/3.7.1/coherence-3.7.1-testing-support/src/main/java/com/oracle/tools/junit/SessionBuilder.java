@@ -25,10 +25,9 @@
 
 package com.oracle.tools.junit;
 
-import com.oracle.tools.runtime.LocalPlatform;
-import com.oracle.tools.runtime.Platform;
+import com.oracle.tools.Option;
 
-import com.oracle.tools.runtime.coherence.CoherenceCacheServerSchema;
+import com.oracle.tools.runtime.LocalPlatform;
 
 import com.tangosol.net.ConfigurableCacheFactory;
 
@@ -46,16 +45,16 @@ import net.sf.cglib.core.Local;
 public interface SessionBuilder
 {
     /**
-     * Creates a {@link ConfigurableCacheFactory} based on a {@link CoherenceCacheServerSchema}.
+     * Creates a {@link ConfigurableCacheFactory} for a Coherence Session.
      *
      * @param platform       the {@link Local} on which the {@link ConfigurableCacheFactory} will be established
      * @param orchestration  the {@link CoherenceClusterOrchestration} establishing the session
-     * @param schema         the {@link CoherenceCacheServerSchema} on which to base the
+     * @param options        the {@link Option}s on which to base the
      *                       newly created {@link ConfigurableCacheFactory}
      *
      * @return a {@link ConfigurableCacheFactory}
      */
-    public ConfigurableCacheFactory realize(LocalPlatform                 platform,
-                                            CoherenceClusterOrchestration orchestration,
-                                            CoherenceCacheServerSchema    schema);
+    ConfigurableCacheFactory build(LocalPlatform                 platform,
+                                   CoherenceClusterOrchestration orchestration,
+                                   Option...                     options);
 }

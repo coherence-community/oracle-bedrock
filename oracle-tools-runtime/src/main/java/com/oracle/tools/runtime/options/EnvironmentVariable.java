@@ -27,7 +27,7 @@ package com.oracle.tools.runtime.options;
 
 import com.oracle.tools.Option;
 
-import com.oracle.tools.runtime.ApplicationSchema;
+import com.oracle.tools.runtime.Application;
 import com.oracle.tools.runtime.Platform;
 
 import java.util.Iterator;
@@ -40,7 +40,7 @@ import java.util.Iterator;
  * if they are an {@link Iterator}, the value of a Environment Variable will be the next
  * value taken from the {@link Iterator}.   When the value is a
  * {@link ContextSensitiveValue}, the value will be based on a provided {@link Platform}
- * and {@link ApplicationSchema}.
+ * and {@link Option}s.
  * <p>
  * Copyright (c) 2015. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
@@ -207,16 +207,16 @@ public class EnvironmentVariable implements Option.Collectable
     {
         /**
          * Obtains the value for the {@link EnvironmentVariable}, possibly based on the provided
-         * {@link Platform} and {@link ApplicationSchema}.
+         * {@link Platform} and {@link Option}s.
          *
-         * @param name     the name of the {@link EnvironmentVariable}
-         * @param platform the {@link Platform} in which {@link EnvironmentVariable} is being used.
-         * @param schema   the {@link ApplicationSchema} in which {@link EnvironmentVariable} is being used.
+         * @param name      the name of the {@link EnvironmentVariable}
+         * @param platform  the {@link Platform} in which {@link EnvironmentVariable} is being used
+         * @param options   the {@link Option}s used for launching the {@link Application}
          *
          * @return the value
          */
-        Object getValue(String            name,
-                        Platform          platform,
-                        ApplicationSchema schema);
+        Object getValue(String    name,
+                        Platform  platform,
+                        Option... options);
     }
 }

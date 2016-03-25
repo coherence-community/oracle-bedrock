@@ -25,26 +25,19 @@
 
 package com.oracle.tools.runtime.java;
 
-import com.oracle.tools.Option;
-
-import com.oracle.tools.deferred.Cached;
-import com.oracle.tools.deferred.Deferred;
-import com.oracle.tools.deferred.NeverAvailable;
-import com.oracle.tools.deferred.PermanentlyUnavailableException;
-
-import com.oracle.tools.deferred.jmx.DeferredJMXConnector;
-import com.oracle.tools.deferred.jmx.DeferredMBeanAttribute;
-import com.oracle.tools.deferred.jmx.DeferredMBeanInfo;
-import com.oracle.tools.deferred.jmx.DeferredMBeanProxy;
+import com.oracle.tools.Options;
 
 import com.oracle.tools.runtime.AbstractApplication;
 import com.oracle.tools.runtime.Application;
-import com.oracle.tools.runtime.ApplicationListener;
+import com.oracle.tools.runtime.ApplicationProcess;
+import com.oracle.tools.runtime.Platform;
 
 import com.oracle.tools.runtime.concurrent.RemoteCallable;
 import com.oracle.tools.runtime.concurrent.RemoteRunnable;
+import com.oracle.tools.runtime.concurrent.callable.GetSystemProperty;
 import com.oracle.tools.runtime.concurrent.callable.RemoteMethodInvocation;
 
+import com.oracle.tools.runtime.java.options.SystemProperties;
 import com.oracle.tools.util.CompletionListener;
 import com.oracle.tools.util.FutureCompletionListener;
 import com.oracle.tools.util.ReflectionHelper;
@@ -52,25 +45,11 @@ import com.oracle.tools.util.ReflectionHelper;
 import net.sf.cglib.proxy.MethodInterceptor;
 import net.sf.cglib.proxy.MethodProxy;
 
-import static com.oracle.tools.deferred.DeferredHelper.cached;
-import static com.oracle.tools.deferred.DeferredHelper.ensured;
-import static com.oracle.tools.deferred.DeferredHelper.within;
-
-import java.io.IOException;
-
 import java.lang.reflect.Method;
 
 import java.util.Properties;
-import java.util.Set;
 
 import java.util.concurrent.Callable;
-
-import javax.management.MBeanInfo;
-import javax.management.ObjectInstance;
-import javax.management.ObjectName;
-import javax.management.QueryExp;
-
-import javax.management.remote.JMXConnector;
 
 /**
  * A {@link AbstractJavaApplication} is a base implementation of a {@link JavaApplication} that has
@@ -81,48 +60,21 @@ import javax.management.remote.JMXConnector;
  *
  * @author Brian Oliver
  */
-public abstract class AbstractJavaApplication<A extends AbstractJavaApplication<A, P, R>,
-                                              P extends JavaApplicationProcess, R extends JavaApplicationRuntime<P>>
-    extends AbstractApplication<A, P, R> implements FluentJavaApplication<A>
+public abstract class AbstractJavaApplication<P extends JavaApplicationProcess> extends AbstractApplication<P>
+    implements JavaApplication
 {
     /**
-     * The {@link Cached} representing the {@link JMXConnector}.
-     */
-    protected Cached<JMXConnector> cachedJmxConnector;
-
-
-    /**
-     * Construct a {@link AbstractJavaApplication}.
+     * Constructs a {@link AbstractJavaApplication}.
      *
-     * @param runtime    the {@link JavaApplicationRuntime} for the {@link JavaApplication}
-     * @param listeners  the {@link ApplicationListener}s
+     * @param platform  the {@link Platform} on which the {@link Application} was launched
+     * @param process   the underlying {@link ApplicationProcess} representing the {@link Application}
+     * @param options   the {@link Options} used to launch the {@link Application}
      */
-    public AbstractJavaApplication(R                                        runtime,
-                                   Iterable<ApplicationListener<? super A>> listeners)
+    public AbstractJavaApplication(Platform platform,
+                                   P        process,
+                                   Options  options)
     {
-        super(runtime, listeners);
-
-        // ensure that the RMI server doesn't eagerly load JMX classes
-        System.setProperty("java.rmi.server.useCodebaseOnly", "true");
-
-        // establish our JMX connector
-        if (isJMXEnabled())
-        {
-            // define a DeferredResource representation of a JMXConnector
-            // for this application.  we use a DeferredResource as the
-            // application may not have started, or be ready for JMX connections
-            String url = String.format("service:jmx:rmi:///jndi/rmi://%s:%d/jmxrmi",
-                                       getRMIServerHostName(),
-                                       getRemoteJMXPort());
-
-            // use a CachedResource as once the JMXConnector is established
-            // we don't want to create another JMXConnector for the application
-            cachedJmxConnector = cached(new DeferredJMXConnector(url));
-        }
-        else
-        {
-            cachedJmxConnector = cached(new NeverAvailable<JMXConnector>(JMXConnector.class));
-        }
+        super(platform, process, options);
     }
 
 
@@ -135,7 +87,7 @@ public abstract class AbstractJavaApplication<A extends AbstractJavaApplication<
      */
     public <T> T submit(RemoteCallable<T> callable)
     {
-        FutureCompletionListener<T> future = new FutureCompletionListener<T>();
+        FutureCompletionListener<T> future = new FutureCompletionListener<>();
 
         submit(callable, future);
 
@@ -158,116 +110,14 @@ public abstract class AbstractJavaApplication<A extends AbstractJavaApplication<
     @Override
     public Properties getSystemProperties()
     {
-        return runtime.getSystemProperties();
+        return process.getSystemProperties();
     }
 
 
     @Override
     public String getSystemProperty(String name)
     {
-        return getSystemProperties().getProperty(name);
-    }
-
-
-    @Override
-    public boolean isJMXEnabled()
-    {
-        return getSystemProperties().containsKey(SUN_MANAGEMENT_JMXREMOTE_PORT);
-    }
-
-
-    @Override
-    public int getRemoteJMXPort()
-    {
-        if (isJMXEnabled())
-        {
-            return Integer.parseInt(getSystemProperties().getProperty(SUN_MANAGEMENT_JMXREMOTE_PORT));
-        }
-        else
-        {
-            throw new UnsupportedOperationException("Application is not enabled for remote JMX management");
-        }
-    }
-
-
-    @Override
-    public String getRMIServerHostName()
-    {
-        String hostname = getSystemProperties().getProperty(JAVA_RMI_SERVER_HOSTNAME);
-
-        return hostname == null ? getPlatform().getAddress().getHostAddress() : hostname;
-    }
-
-
-    @Override
-    public Deferred<JMXConnector> getDeferredJMXConnector()
-    {
-        return cachedJmxConnector;
-    }
-
-
-    @Override
-    public <T> Deferred<T> getDeferredMBeanProxy(ObjectName objectName,
-                                                 Class<T>   proxyClass)
-    {
-        return new Cached<T>(new DeferredMBeanProxy<T>(cachedJmxConnector, objectName, proxyClass));
-    }
-
-
-    @Override
-    public <T> T getMBeanProxy(ObjectName objectName,
-                               Class<T>   proxyClass)
-    {
-        return ensured(getDeferredMBeanProxy(objectName, proxyClass), within(getDefaultTimeout())).get();
-    }
-
-
-    @Override
-    public Deferred<MBeanInfo> getDeferredMBeanInfo(ObjectName objectName)
-    {
-        return new DeferredMBeanInfo(cachedJmxConnector, objectName);
-    }
-
-
-    @Override
-    public MBeanInfo getMBeanInfo(ObjectName objectName)
-    {
-        return ensured(getDeferredMBeanInfo(objectName), within(getDefaultTimeout())).get();
-    }
-
-
-    @Override
-    public <T> Deferred<T> getDeferredMBeanAttribute(ObjectName objectName,
-                                                     String     attributeName,
-                                                     Class<T>   attributeClass)
-    {
-        return new DeferredMBeanAttribute<T>(cachedJmxConnector, objectName, attributeName, attributeClass);
-    }
-
-
-    @Override
-    public <T> T getMBeanAttribute(ObjectName objectName,
-                                   String     attributeName,
-                                   Class<T>   attributeClass)
-    {
-        return ensured(getDeferredMBeanAttribute(objectName, attributeName, attributeClass),
-                       within(getDefaultTimeout())).get();
-    }
-
-
-    @Override
-    public Set<ObjectInstance> queryMBeans(ObjectName name,
-                                           QueryExp   query)
-    {
-        try
-        {
-            return ensured(getDeferredJMXConnector(),
-                           within(getDefaultTimeout())).get().getMBeanServerConnection().queryMBeans(name, query);
-        }
-        catch (IOException e)
-        {
-            throw new PermanentlyUnavailableException(getDeferredJMXConnector(), e);
-        }
+        return submit(new GetSystemProperty(name));
     }
 
 
@@ -275,36 +125,14 @@ public abstract class AbstractJavaApplication<A extends AbstractJavaApplication<
     public <T> void submit(RemoteCallable<T>     callable,
                            CompletionListener<T> listener)
     {
-        runtime.getApplicationProcess().submit(callable, listener);
+        process.submit(callable, listener);
     }
 
 
     @Override
     public void submit(RemoteRunnable runnable) throws IllegalStateException
     {
-        runtime.getApplicationProcess().submit(runnable);
-    }
-
-
-    @Override
-    public void close(Option... options)
-    {
-        // close the JMXConnector (if we've got one)
-        JMXConnector jmxConnector = cachedJmxConnector.release();
-
-        if (jmxConnector != null)
-        {
-            try
-            {
-                jmxConnector.close();
-            }
-            catch (IOException e)
-            {
-                // nothing to do here as we don't care
-            }
-        }
-
-        super.close(options);
+        process.submit(runnable);
     }
 
 

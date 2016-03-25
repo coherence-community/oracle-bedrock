@@ -124,7 +124,7 @@ public class ContainerScope extends AbstractContainerScope
     {
         this(name,
              new Properties(),
-             LocalPlatform.getInstance().getAvailablePorts(),
+             LocalPlatform.get().getAvailablePorts(),
              null,
              false,
              Container.PIPE_BUFFER_SIZE_BYTES);
@@ -142,7 +142,7 @@ public class ContainerScope extends AbstractContainerScope
     {
         this(name,
              properties,
-             LocalPlatform.getInstance().getAvailablePorts(),
+             LocalPlatform.get().getAvailablePorts(),
              null,
              false,
              Container.PIPE_BUFFER_SIZE_BYTES);

@@ -27,17 +27,9 @@ package com.oracle.tools.runtime.remote.winrm;
 
 import com.oracle.tools.Options;
 
-import com.oracle.tools.runtime.Platform;
-import com.oracle.tools.runtime.SimpleApplicationSchema;
-
-import com.oracle.tools.runtime.options.EnvironmentVariables;
-
 import com.oracle.tools.runtime.remote.Authentication;
 import com.oracle.tools.runtime.remote.Password;
-import com.oracle.tools.runtime.remote.RemoteApplicationEnvironment;
-import com.oracle.tools.runtime.remote.RemoteApplicationProcess;
 import com.oracle.tools.runtime.remote.RemotePlatform;
-import com.oracle.tools.runtime.remote.SimpleRemoteApplicationEnvironment;
 import com.oracle.tools.runtime.remote.http.HttpBasedAuthentication;
 
 import org.junit.Test;
@@ -63,7 +55,6 @@ import java.io.OutputStream;
 import java.net.InetAddress;
 
 import java.util.Arrays;
-import java.util.Properties;
 
 /**
  * Tests for {@link WindowsRemoteTerminal}.
@@ -130,45 +121,6 @@ public class WindowsRemoteTerminalTest
         inOrder.verify(session).connect();
         inOrder.verify(session).execute(eq("mkdir"),
                                         eq(Arrays.asList("dir1\\dir2")),
-                                        any(InputStream.class),
-                                        any(OutputStream.class),
-                                        any(OutputStream.class));
-    }
-
-
-    @SuppressWarnings("unchecked")
-    @Test
-    public void shouldRealizeRemoteApplicationProcess() throws Exception
-    {
-        String                       userName       = "Bob";
-        Authentication               authentication = new Password("secret");
-        String                       hostName       = "foo.com";
-        int                          port           = 1234;
-        WindowsSession               session        = mock(WindowsSession.class);
-
-        RemotePlatform               platform       = mock(RemotePlatform.class);
-
-        EnvironmentVariables         envVars = EnvironmentVariables.custom().set("Key1", "Val1").set("Key2", "Val2");
-        Options                      options        = new Options(envVars);
-
-        SimpleApplicationSchema      schema =
-            new SimpleApplicationSchema("App").addArgument("Arg1").addArgument("Arg2");
-
-        RemoteApplicationEnvironment environment    = new SimpleRemoteApplicationEnvironment(schema, platform, options);
-
-        WindowsRemoteTerminal        shell          = new WindowsRemoteTerminalStub(platform, session);
-
-        Properties                   envVariables   = environment.getRemoteEnvironmentVariables();
-
-        RemoteApplicationProcess     process        = shell.realize(schema, "App-1", environment, "Dir-1", options);
-
-        assertThat(process, is(notNullValue()));
-
-        InOrder inOrder = inOrder(session);
-
-        inOrder.verify(session).connect("Dir-1", envVariables);
-        inOrder.verify(session).execute(eq("App"),
-                                        eq(Arrays.asList("Arg1", "Arg2")),
                                         any(InputStream.class),
                                         any(OutputStream.class),
                                         any(OutputStream.class));

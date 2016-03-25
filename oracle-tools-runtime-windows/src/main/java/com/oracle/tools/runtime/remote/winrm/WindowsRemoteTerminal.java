@@ -26,11 +26,10 @@
 package com.oracle.tools.runtime.remote.winrm;
 
 import com.oracle.tools.Options;
-import com.oracle.tools.runtime.Application;
-import com.oracle.tools.runtime.ApplicationSchema;
-import com.oracle.tools.runtime.LocalPlatform;
+
+import com.oracle.tools.runtime.options.WorkingDirectory;
+
 import com.oracle.tools.runtime.remote.AbstractRemoteTerminal;
-import com.oracle.tools.runtime.remote.RemoteApplicationEnvironment;
 import com.oracle.tools.runtime.remote.RemoteApplicationProcess;
 import com.oracle.tools.runtime.remote.RemotePlatform;
 import com.oracle.tools.runtime.remote.RemoteTerminal;
@@ -48,8 +47,7 @@ import java.util.List;
  *
  * @author Jonathan Knight
  */
-public class WindowsRemoteTerminal<A extends Application, S extends ApplicationSchema<A>,
-                                   E extends RemoteApplicationEnvironment> extends AbstractRemoteTerminal<A, S, E>
+public class WindowsRemoteTerminal extends AbstractRemoteTerminal
 {
     /**
      * Create a Windows remote shell that will connect to the WinRM
@@ -64,26 +62,26 @@ public class WindowsRemoteTerminal<A extends Application, S extends ApplicationS
 
 
     @SuppressWarnings("unchecked")
-    @Override
-    public RemoteApplicationProcess realize(S       applicationSchema,
-                                            String  applicationName,
-                                            E       environment,
-                                            String  workingDirectory,
-                                            Options options)
+    public RemoteApplicationProcess launch(Launchable launchable,
+                                           Options    options)
     {
         try
         {
             // ----- establish the application command line to execute -----
 
             // determine the command to execute remotely
-            String       command = environment.getRemoteCommandToExecute();
-            List<String> args    = environment.getRemoteCommandArguments(LocalPlatform.getInstance().getAddress());
+            String       command = launchable.getCommandToExecute(getRemotePlatform(), options);
+
+            List<String> args    = launchable.getCommandLineArguments(getRemotePlatform(), options);
 
             // ----- establish the remote application process to represent the remote application -----
 
-            WindowsSession session = createSession();
+            WindowsSession   session          = createSession();
 
-            session.connect(workingDirectory, environment.getRemoteEnvironmentVariables());
+            WorkingDirectory workingDirectory = options.get(WorkingDirectory.class);
+
+            session.connect(workingDirectory.resolve(getRemotePlatform(), options).toString(),
+                            launchable.getEnvironmentVariables(getRemotePlatform(), options));
 
             // establish a RemoteApplicationProcess representing the remote application
             WindowsRemoteApplicationProcess process = new WindowsRemoteApplicationProcess(session);
@@ -128,7 +126,9 @@ public class WindowsRemoteTerminal<A extends Application, S extends ApplicationS
     }
 
 
-    public void moveFile(String source, String destination, Options options)
+    public void moveFile(String  source,
+                         String  destination,
+                         Options options)
     {
         try (WindowsSession session = createSession())
         {

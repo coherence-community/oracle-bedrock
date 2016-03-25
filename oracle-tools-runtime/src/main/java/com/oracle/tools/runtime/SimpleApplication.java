@@ -25,6 +25,8 @@
 
 package com.oracle.tools.runtime;
 
+import com.oracle.tools.Options;
+
 /**
  * A {@link SimpleApplication} is a simple implementation of an {@link Application}.
  * <p>
@@ -33,18 +35,19 @@ package com.oracle.tools.runtime;
  *
  * @author Jonathan Knight
  */
-public class SimpleApplication
-    extends AbstractApplication<SimpleApplication, ApplicationProcess, SimpleApplicationRuntime>
+public class SimpleApplication extends AbstractApplication<ApplicationProcess>
 {
     /**
-     * Construct a {@link SimpleApplication}.
+     * Constructs a {@link SimpleApplication}
      *
-     * @param runtime    the {@link SimpleApplicationRuntime}
-     * @param listeners  the {@link ApplicationListener}s
+     * @param platform  the {@link Platform} on which the {@link Application} was launched
+     * @param process   the underlying {@link ApplicationProcess} representing the {@link Application}
+     * @param options   the {@link Options} used to launch the {@link Application}
      */
-    public SimpleApplication(SimpleApplicationRuntime                                 runtime,
-                             Iterable<ApplicationListener<? super SimpleApplication>> listeners)
+    public SimpleApplication(Platform           platform,
+                             ApplicationProcess process,
+                             Options            options)
     {
-        super(runtime, listeners);
+        super(platform, process, options);
     }
 }

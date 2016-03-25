@@ -29,16 +29,16 @@ import com.oracle.tools.Option;
 import com.oracle.tools.Options;
 
 import com.oracle.tools.runtime.Application;
-import com.oracle.tools.runtime.ApplicationSchema;
 import com.oracle.tools.runtime.Platform;
 import com.oracle.tools.runtime.Profile;
 
-import com.oracle.tools.runtime.java.JavaApplicationSchema;
-
+import com.oracle.tools.runtime.java.JavaApplication;
 import com.oracle.tools.runtime.java.options.Freeform;
 import com.oracle.tools.runtime.java.options.WaitToStart;
 
 import com.oracle.tools.runtime.network.AvailablePortIterator;
+
+import com.oracle.tools.runtime.options.MetaClass;
 
 import com.oracle.tools.util.Capture;
 import com.oracle.tools.util.PerpetualIterator;
@@ -46,7 +46,6 @@ import com.oracle.tools.util.PerpetualIterator;
 import java.io.File;
 
 import java.net.InetAddress;
-
 
 /**
  * The JProfiler {@link Profile}.
@@ -127,9 +126,17 @@ public class JprofilerProfile implements Profile, Option
     /**
      * Constructs a {@link JprofilerProfile}.
      */
-    public JprofilerProfile(boolean enabled, String agentLibraryFile, ListenAddress listenAddress,
-                            boolean offline, File configurationFile, int sessionId, boolean startSuspended,
-                            boolean verbose, boolean jniInterception, Integer stack, Integer samplingStack)
+    public JprofilerProfile(boolean       enabled,
+                            String        agentLibraryFile,
+                            ListenAddress listenAddress,
+                            boolean       offline,
+                            File          configurationFile,
+                            int           sessionId,
+                            boolean       startSuspended,
+                            boolean       verbose,
+                            boolean       jniInterception,
+                            Integer       stack,
+                            Integer       samplingStack)
     {
         this.enabled           = enabled;
         this.agentLibraryFile  = agentLibraryFile;
@@ -184,7 +191,8 @@ public class JprofilerProfile implements Profile, Option
      *
      * @throws IllegalStateException if start suspended has been set to true
      */
-    public JprofilerProfile offlineMode(File configurationFile, int sessionId)
+    public JprofilerProfile offlineMode(File configurationFile,
+                                        int  sessionId)
     {
         return new JprofilerProfile(this.enabled,
                                     this.agentLibraryFile,
@@ -233,6 +241,7 @@ public class JprofilerProfile implements Profile, Option
                                     this.samplingStack);
     }
 
+
     /**
      * Do not wait for JProfiler to connect when the application JVM starts.
      *
@@ -252,6 +261,7 @@ public class JprofilerProfile implements Profile, Option
                                     this.stack,
                                     this.samplingStack);
     }
+
 
     /**
      * Start the application suspended and wait for JProfiler to connect.
@@ -411,34 +421,34 @@ public class JprofilerProfile implements Profile, Option
 
 
     @Override
-    public void onBeforeRealize(Platform platform, ApplicationSchema schema, Options options)
+    public void onBeforeLaunch(Platform platform,
+                               Options  options)
     {
-        if (schema instanceof JavaApplicationSchema && isEnabled())
+        MetaClass metaClass = options.getOrDefault(MetaClass.class, new JavaApplication.MetaClass());
+
+        if (metaClass != null
+            && JavaApplication.class.isAssignableFrom(metaClass.getImplementationClass(platform, options))
+            && isEnabled())
         {
-            StringBuilder agentLib = new StringBuilder("-agentpath:")
-                    .append(agentLibraryFile)
-                    .append('=');
+            StringBuilder agentLib = new StringBuilder("-agentpath:").append(agentLibraryFile).append('=');
 
             if (offline)
             {
-                agentLib.append("offline,id=")
-                        .append(sessionId)
-                        .append(",nowait");
+                agentLib.append("offline,id=").append(sessionId).append(",nowait");
 
                 if (configurationFile != null)
                 {
-                    agentLib.append(",config=")
-                            .append(configurationFile);
+                    agentLib.append(",config=").append(configurationFile);
                 }
             }
             else
             {
                 ListenAddress address = this.listenAddress == null
-                        ? options.get(ListenAddress.class) : this.listenAddress;
+                                        ? options.get(ListenAddress.class) : this.listenAddress;
 
                 if (address == null)
                 {
-                address = DEFAULT_ADDRESS;
+                    address = DEFAULT_ADDRESS;
                 }
 
                 InetAddress listenAddress = address.getInetAddress();
@@ -448,9 +458,7 @@ public class JprofilerProfile implements Profile, Option
                     agentLib.append(",address=" + listenAddress.getHostName());
                 }
 
-                agentLib.append(",port=")
-                        .append(address.getPort().get())
-                        .append(startSuspended ? "" : ",nowait");
+                agentLib.append(",port=").append(address.getPort().get()).append(startSuspended ? "" : ",nowait");
 
                 // replace the TransportAddress with the one we've resolved / created
                 options.add(address);
@@ -468,15 +476,12 @@ public class JprofilerProfile implements Profile, Option
 
             if (stack != null)
             {
-                agentLib.append(",stack=")
-                        .append(stack);
+                agentLib.append(",stack=").append(stack);
             }
-
 
             if (samplingStack != null)
             {
-                agentLib.append(",samplingstack=")
-                        .append(samplingStack);
+                agentLib.append(",samplingstack=").append(samplingStack);
             }
 
             // add the agent as a Freeform JvmOption
@@ -492,12 +497,17 @@ public class JprofilerProfile implements Profile, Option
 
 
     @Override
-    public void onAfterRealize(Platform platform, Application application, Options options)
+    public void onAfterLaunch(Platform    platform,
+                              Application application,
+                              Options     options)
     {
     }
 
+
     @Override
-    public void onBeforeClose(Platform platform, Application application, Options options)
+    public void onBeforeClose(Platform    platform,
+                              Application application,
+                              Options     options)
     {
     }
 
@@ -512,8 +522,7 @@ public class JprofilerProfile implements Profile, Option
      */
     public static JprofilerProfile enabled(String agentLibraryFile)
     {
-        return new JprofilerProfile(true, agentLibraryFile, null, false, null, 0,
-                                    true, false, false, null, null);
+        return new JprofilerProfile(true, agentLibraryFile, null, false, null, 0, true, false, false, null, null);
     }
 
 
@@ -531,8 +540,7 @@ public class JprofilerProfile implements Profile, Option
     @Options.Default
     public static JprofilerProfile enabledNoWait(String agentLibraryFile)
     {
-        return new JprofilerProfile(true, agentLibraryFile, null, false, null, 0,
-                                    false, false, false, null, null);
+        return new JprofilerProfile(true, agentLibraryFile, null, false, null, 0, false, false, false, null, null);
     }
 
 
@@ -543,8 +551,7 @@ public class JprofilerProfile implements Profile, Option
      */
     public static JprofilerProfile disabled()
     {
-        return new JprofilerProfile(false, null, null, false, null, 0,
-                                    false, false, false, null, null);
+        return new JprofilerProfile(false, null, null, false, null, 0, false, false, false, null, null);
     }
 
 
@@ -555,6 +562,7 @@ public class JprofilerProfile implements Profile, Option
         {
             return true;
         }
+
         if (o == null || getClass() != o.getClass())
         {
             return false;
@@ -566,42 +574,54 @@ public class JprofilerProfile implements Profile, Option
         {
             return false;
         }
+
         if (startSuspended != profile.startSuspended)
         {
             return false;
         }
+
         if (offline != profile.offline)
         {
             return false;
         }
+
         if (sessionId != profile.sessionId)
         {
             return false;
         }
+
         if (verbose != profile.verbose)
         {
             return false;
         }
+
         if (jniInterception != profile.jniInterception)
         {
             return false;
         }
-        if (agentLibraryFile != null ? !agentLibraryFile.equals(profile.agentLibraryFile) : profile.agentLibraryFile != null)
+
+        if (agentLibraryFile != null
+            ? !agentLibraryFile.equals(profile.agentLibraryFile) : profile.agentLibraryFile != null)
         {
             return false;
         }
+
         if (listenAddress != null ? !listenAddress.equals(profile.listenAddress) : profile.listenAddress != null)
         {
             return false;
         }
-        if (configurationFile != null ? !configurationFile.equals(profile.configurationFile) : profile.configurationFile != null)
+
+        if (configurationFile != null
+            ? !configurationFile.equals(profile.configurationFile) : profile.configurationFile != null)
         {
             return false;
         }
+
         if (stack != null ? !stack.equals(profile.stack) : profile.stack != null)
         {
             return false;
         }
+
         return samplingStack != null ? samplingStack.equals(profile.samplingStack) : profile.samplingStack == null;
 
     }
@@ -614,16 +634,13 @@ public class JprofilerProfile implements Profile, Option
 
         if (enabled)
         {
-            str.append("agentLibraryFile=").append(agentLibraryFile)
-                    .append(", listenAddress=").append(listenAddress)
-                    .append(", offline=").append(offline)
-                    .append(", configurationFile=").append(configurationFile)
-                    .append(", sessionId=").append(sessionId)
-                    .append(", startSuspended=").append(startSuspended)
-                    .append(", verbose=").append(verbose)
-                    .append(", jniInterception=").append(jniInterception)
-                    .append(", stack=").append(stack == null ? "default" : stack)
-                    .append(", samplingStack=").append(samplingStack == null ? "default" : samplingStack);
+            str.append("agentLibraryFile=").append(agentLibraryFile).append(", listenAddress=").append(listenAddress)
+            .append(", offline=").append(offline).append(", configurationFile=").append(configurationFile)
+            .append(", sessionId=").append(sessionId).append(", startSuspended=").append(startSuspended)
+            .append(", verbose=").append(verbose).append(", jniInterception=").append(jniInterception)
+            .append(", stack=")
+            .append(stack == null ? "default" : stack).append(", samplingStack=")
+            .append(samplingStack == null ? "default" : samplingStack);
         }
         else
         {
@@ -635,10 +652,12 @@ public class JprofilerProfile implements Profile, Option
         return str.toString();
     }
 
+
     @Override
     public int hashCode()
     {
         int result = (enabled ? 1 : 0);
+
         result = 31 * result + (agentLibraryFile != null ? agentLibraryFile.hashCode() : 0);
         result = 31 * result + (listenAddress != null ? listenAddress.hashCode() : 0);
         result = 31 * result + (startSuspended ? 1 : 0);
@@ -649,6 +668,7 @@ public class JprofilerProfile implements Profile, Option
         result = 31 * result + (jniInterception ? 1 : 0);
         result = 31 * result + (stack != null ? stack.hashCode() : 0);
         result = 31 * result + (samplingStack != null ? samplingStack.hashCode() : 0);
+
         return result;
     }
 

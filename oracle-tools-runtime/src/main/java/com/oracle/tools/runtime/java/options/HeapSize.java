@@ -26,7 +26,6 @@
 package com.oracle.tools.runtime.java.options;
 
 import com.oracle.tools.ComposableOption;
-import com.oracle.tools.Option;
 import com.oracle.tools.Options;
 
 import java.util.ArrayList;
@@ -206,7 +205,7 @@ public class HeapSize implements ComposableOption<HeapSize>, JvmOption
 
 
     @Override
-    public Iterable<String> getValues(Option... options)
+    public Iterable<String> resolve(Options options)
     {
         ArrayList<String> values = new ArrayList<>(2);
 
@@ -302,7 +301,7 @@ public class HeapSize implements ComposableOption<HeapSize>, JvmOption
     {
         StringBuilder builder = new StringBuilder();
 
-        for (String value : getValues())
+        for (String value : resolve(new Options()))
         {
             if (builder.length() > 0)
             {

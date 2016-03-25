@@ -3,7 +3,7 @@
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * The contents of this file are subject to the terms and conditions of
+ * The contents of this file are subject to the terms and conditions of 
  * the Common Development and Distribution License 1.0 (the "License").
  *
  * You may not use this file except in compliance with the License.
@@ -26,24 +26,26 @@
 package com.oracle.tools.runtime.options;
 
 import com.oracle.tools.Options;
+
 import com.oracle.tools.options.Variable;
-import com.oracle.tools.runtime.ApplicationSchema;
+
+import com.oracle.tools.runtime.LocalPlatform;
 import com.oracle.tools.runtime.Platform;
+
 import org.junit.Test;
+
+import static com.oracle.tools.runtime.options.Argument.of;
+
+import static org.hamcrest.CoreMatchers.is;
+
+import static org.hamcrest.collection.IsEmptyIterable.emptyIterable;
+
+import static org.hamcrest.collection.IsIterableContainingInOrder.contains;
+
+import static org.junit.Assert.assertThat;
 
 import java.util.Arrays;
 import java.util.Collections;
-
-import static com.oracle.tools.runtime.options.Argument.of;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.collection.IsEmptyIterable.emptyIterable;
-import static org.hamcrest.collection.IsIterableContainingInOrder.contains;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.same;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 /**
  * Unit tests for the {@link Arguments} class.
@@ -60,7 +62,7 @@ public class ArgumentsTest
     {
         Arguments arguments = Arguments.empty();
 
-        assertThat(arguments.realize(null, null), is(emptyIterable()));
+        assertThat(arguments.resolve(null, null), is(emptyIterable()));
     }
 
 
@@ -69,7 +71,7 @@ public class ArgumentsTest
     {
         Arguments arguments = Arguments.of("foo", "bar");
 
-        assertThat(arguments.realize(null, null), contains("foo", "bar"));
+        assertThat(arguments.resolve(null, null), contains("foo", "bar"));
     }
 
 
@@ -78,7 +80,7 @@ public class ArgumentsTest
     {
         Arguments arguments = Arguments.of(Arrays.asList("foo", "bar"));
 
-        assertThat(arguments.realize(null, null), contains("foo", "bar"));
+        assertThat(arguments.resolve(null, null), contains("foo", "bar"));
     }
 
 
@@ -88,8 +90,8 @@ public class ArgumentsTest
         Arguments arguments1 = Arguments.of("1", "2");
         Arguments arguments2 = arguments1.with("3");
 
-        assertThat(arguments1.realize(null, null), contains("1", "2"));
-        assertThat(arguments2.realize(null, null), contains("1", "2", "3"));
+        assertThat(arguments1.resolve(null, null), contains("1", "2"));
+        assertThat(arguments2.resolve(null, null), contains("1", "2", "3"));
     }
 
 
@@ -98,7 +100,7 @@ public class ArgumentsTest
     {
         Arguments arguments = Arguments.empty().with(of("foo"));
 
-        assertThat(arguments.realize(null, null), contains("foo"));
+        assertThat(arguments.resolve(null, null), contains("foo"));
     }
 
 
@@ -107,7 +109,7 @@ public class ArgumentsTest
     {
         Arguments arguments = Arguments.empty().with("foo", "bar");
 
-        assertThat(arguments.realize(null, null), contains("foo", "bar"));
+        assertThat(arguments.resolve(null, null), contains("foo", "bar"));
     }
 
 
@@ -116,7 +118,7 @@ public class ArgumentsTest
     {
         Arguments arguments = Arguments.empty().with(Arrays.asList("foo", "bar"));
 
-        assertThat(arguments.realize(null, null), contains("foo", "bar"));
+        assertThat(arguments.resolve(null, null), contains("foo", "bar"));
     }
 
 
@@ -125,29 +127,25 @@ public class ArgumentsTest
     {
         Arguments arguments = Arguments.of("1", "2").with(Arguments.of("3", "4"));
 
-        assertThat(arguments.realize(null, null), contains("1", "2", "3", "4"));
+        assertThat(arguments.resolve(null, null), contains("1", "2", "3", "4"));
     }
 
 
     @Test
     public void shouldRemoveArgument() throws Exception
     {
-        Arguments arguments = Arguments.empty()
-                .with(Arrays.asList("1", "2", "3"))
-                .without(of("2"));
+        Arguments arguments = Arguments.empty().with(Arrays.asList("1", "2", "3")).without(of("2"));
 
-        assertThat(arguments.realize(null, null), contains("1", "3"));
+        assertThat(arguments.resolve(null, null), contains("1", "3"));
     }
 
 
     @Test
     public void shouldRemoveStringArgument() throws Exception
     {
-        Arguments arguments = Arguments.empty()
-                .with(Arrays.asList("1", "2", "3"))
-                .without("2");
+        Arguments arguments = Arguments.empty().with(Arrays.asList("1", "2", "3")).without("2");
 
-        assertThat(arguments.realize(null, null), contains("1", "3"));
+        assertThat(arguments.resolve(null, null), contains("1", "3"));
     }
 
 
@@ -156,15 +154,15 @@ public class ArgumentsTest
     {
         Options options = new Options();
 
-        assertThat(options.get(Arguments.class).realize(null, null), is(emptyIterable()));
+        assertThat(options.get(Arguments.class).resolve(null, null), is(emptyIterable()));
 
         options.add(of("1"));
 
-        assertThat(options.get(Arguments.class).realize(null, null), contains("1"));
+        assertThat(options.get(Arguments.class).resolve(null, null), contains("1"));
 
         options.add(of("2"));
 
-        assertThat(options.get(Arguments.class).realize(null, null), contains("1", "2"));
+        assertThat(options.get(Arguments.class).resolve(null, null), contains("1", "2"));
     }
 
 
@@ -179,7 +177,7 @@ public class ArgumentsTest
 
         options.remove(of("2"));
 
-        assertThat(options.get(Arguments.class).realize(null, null), contains("1", "3"));
+        assertThat(options.get(Arguments.class).resolve(null, null), contains("1", "3"));
     }
 
 
@@ -190,7 +188,7 @@ public class ArgumentsTest
 
         options.add(of(123));
 
-        assertThat(options.get(Arguments.class).realize(null, null), contains("123"));
+        assertThat(options.get(Arguments.class).resolve(null, null), contains("123"));
     }
 
 
@@ -201,27 +199,28 @@ public class ArgumentsTest
 
         options.add(of(Collections.singletonList(123).iterator()));
 
-        assertThat(options.get(Arguments.class).realize(null, null), contains("123"));
+        assertThat(options.get(Arguments.class).resolve(null, null), contains("123"));
     }
 
 
     @Test
-    public void shouldEvaluateContextSensetiveValue() throws Exception
+    public void shouldEvaluateContextSensitiveValue() throws Exception
     {
-        Platform                                  platform = mock(Platform.class);
-        ApplicationSchema                         schema   = mock(ApplicationSchema.class);
-        Argument.ContextSensitiveArgument value    = mock(Argument.ContextSensitiveArgument.class);
-
-        when(value.getValue(any(Platform.class), any(ApplicationSchema.class))).thenReturn("123");
-
+        Argument.ContextSensitiveArgument value = new Argument.ContextSensitiveArgument()
+        {
+            @Override
+            public Object resolve(Platform platform,
+                                  Options  options)
+            {
+                return "123";
+            }
+        };
 
         Options options = new Options();
 
         options.add(of(value));
 
-        assertThat(options.get(Arguments.class).realize(platform, schema), contains("123"));
-
-        verify(value).getValue(same(platform), same(schema));
+        assertThat(options.get(Arguments.class).resolve(LocalPlatform.get(), options), contains("123"));
     }
 
 
@@ -232,7 +231,8 @@ public class ArgumentsTest
 
         options.add(Argument.of("${foo}"));
 
-        assertThat(options.get(Arguments.class).realize(null, null, Variable.with("foo", "bar")), contains("bar"));
+        assertThat(options.get(Arguments.class).resolve(null, new Options(Variable.with("foo", "bar"))),
+                   contains("bar"));
     }
 
 
@@ -243,7 +243,7 @@ public class ArgumentsTest
 
         options.add(Argument.of("foo", "bar"));
 
-        assertThat(options.get(Arguments.class).realize(null, null), contains("foo", "bar"));
+        assertThat(options.get(Arguments.class).resolve(null, null), contains("foo", "bar"));
     }
 
 
@@ -254,7 +254,7 @@ public class ArgumentsTest
 
         options.add(Argument.of("foo", "bar").withSeparator('='));
 
-        assertThat(options.get(Arguments.class).realize(null, null), contains("foo=bar"));
+        assertThat(options.get(Arguments.class).resolve(null, null), contains("foo=bar"));
     }
 
 
@@ -272,12 +272,12 @@ public class ArgumentsTest
         options.add(Argument.of("C1"));
         options.add(Argument.of("C2"));
 
-        assertThat(options.get(Arguments.class).realize(null, null),
+        assertThat(options.get(Arguments.class).resolve(null, null),
                    contains("A", "A1", "A", "A2", "A", "A3", "B", "B1", "B", "B2", "B", "B3", "C1", "C2"));
 
         Arguments arguments = options.get(Arguments.class).withoutNamed("B");
 
-        assertThat(arguments.realize(null, null), contains("A", "A1", "A", "A2", "A", "A3", "C1", "C2"));
+        assertThat(arguments.resolve(null, null), contains("A", "A1", "A", "A2", "A", "A3", "C1", "C2"));
     }
 
 
@@ -295,12 +295,12 @@ public class ArgumentsTest
         options.add(Argument.of("C1"));
         options.add(Argument.of("C2"));
 
-        assertThat(options.get(Arguments.class).realize(null, null),
+        assertThat(options.get(Arguments.class).resolve(null, null),
                    contains("A", "A1", "A", "A2", "A", "A3", "B", "B1", "B", "B2", "B", "B3", "C1", "C2"));
 
         Arguments arguments = options.get(Arguments.class).withoutNamed(null);
 
-        assertThat(arguments.realize(null, null),
+        assertThat(arguments.resolve(null, null),
                    contains("A", "A1", "A", "A2", "A", "A3", "B", "B1", "B", "B2", "B", "B3"));
     }
 
@@ -317,7 +317,7 @@ public class ArgumentsTest
 
         Arguments arguments = options.get(Arguments.class).replace("A2", "changed");
 
-        assertThat(arguments.realize(null, null), contains("A1", "A1", "A2", "changed", "A2", "A22", "A3", "A3"));
+        assertThat(arguments.resolve(null, null), contains("A1", "A1", "A2", "changed", "A2", "A22", "A3", "A3"));
     }
 
 
@@ -333,6 +333,6 @@ public class ArgumentsTest
 
         Arguments arguments = options.get(Arguments.class).replace(null, "changed");
 
-        assertThat(arguments.realize(null, null), contains("A1", "A1", "changed", "A22", "A3", "A3"));
+        assertThat(arguments.resolve(null, null), contains("A1", "A1", "changed", "A22", "A3", "A3"));
     }
 }

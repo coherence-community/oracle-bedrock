@@ -1,9 +1,9 @@
 /*
- * File: DefaultCoherenceClusterOrchestrationTest.java
+ * File: CustomCoherenceClusterOrchestrationTest.java
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * The contents of this file are subject to the terms and conditions of 
+ * The contents of this file are subject to the terms and conditions of
  * the Common Development and Distribution License 1.0 (the "License").
  *
  * You may not use this file except in compliance with the License.
@@ -28,18 +28,21 @@ package com.oracle.tools.junit;
 import com.oracle.tools.runtime.coherence.CoherenceCluster;
 import com.oracle.tools.runtime.coherence.CoherenceClusterMember;
 
+import com.oracle.tools.runtime.java.options.SystemProperty;
+
 import org.junit.ClassRule;
 import org.junit.Test;
 
-import java.util.Set;
-import java.util.TreeSet;
-
-import static org.hamcrest.core.Is.is;
-import static org.hamcrest.core.IsNull.notNullValue;
-
 import static org.hamcrest.collection.IsIterableContainingInOrder.contains;
 
+import static org.hamcrest.core.Is.is;
+
+import static org.hamcrest.core.IsNull.notNullValue;
+
 import static org.junit.Assert.assertThat;
+
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * Functional Tests for the {@link CoherenceClusterOrchestration}.
@@ -55,10 +58,12 @@ public class CustomCoherenceClusterOrchestrationTest
      * A {@link CoherenceClusterOrchestration} for a default {@link CoherenceCluster}.
      */
     @ClassRule
-    public static CoherenceClusterOrchestration orchestration = new CoherenceClusterOrchestration()
-            .setStorageMemberCount(3)
-            .setStorageMemberSystemProperty("test.property", "storageMember")
-            .setProxyServerSystemProperty("test.property", "proxyServer");
+    public static CoherenceClusterOrchestration orchestration =
+        new CoherenceClusterOrchestration().setStorageMemberCount(3)
+        .withStorageMemberOptions(SystemProperty.of("test.property",
+                                                    "storageMember"))
+                                                    .withProxyMemberOptions(SystemProperty.of("test.property",
+                                                                                              "proxyServer"));
 
 
     /**
@@ -78,6 +83,7 @@ public class CustomCoherenceClusterOrchestrationTest
         assertThat(setNames, contains("proxy-1", "storage-1", "storage-2", "storage-3"));
     }
 
+
     @Test
     public void shouldHaveSetProxyServerProperty() throws Exception
     {
@@ -87,31 +93,33 @@ public class CustomCoherenceClusterOrchestrationTest
         }
     }
 
-    @Test
-     public void shouldHaveSetStorageMemberProperty() throws Exception
-     {
-         for (CoherenceClusterMember member : orchestration.getCluster().getAll("storage"))
-         {
-             assertThat(member.getSystemProperty("test.property"), is("storageMember"));
-         }
-     }
 
     @Test
-     public void shouldPerformRollingRestart() throws Exception
-     {
-         orchestration.restartStorageMembers();
+    public void shouldHaveSetStorageMemberProperty() throws Exception
+    {
+        for (CoherenceClusterMember member : orchestration.getCluster().getAll("storage"))
+        {
+            assertThat(member.getSystemProperty("test.property"), is("storageMember"));
+        }
+    }
 
-         CoherenceCluster       cluster = orchestration.getCluster();
-         CoherenceClusterMember member1 = cluster.get("storage-1");
-         CoherenceClusterMember member2 = cluster.get("storage-2");
-         CoherenceClusterMember member3 = cluster.get("storage-3");
 
-         assertThat(member1, is(notNullValue()));
-         assertThat(member2, is(notNullValue()));
-         assertThat(member3, is(notNullValue()));
+    @Test
+    public void shouldPerformRollingRestart() throws Exception
+    {
+        orchestration.restartStorageMembers();
 
-         assertThat(member1.getLocalMemberId(), is(5));
-         assertThat(member2.getLocalMemberId(), is(6));
-         assertThat(member3.getLocalMemberId(), is(7));
-     }
+        CoherenceCluster       cluster = orchestration.getCluster();
+        CoherenceClusterMember member1 = cluster.get("storage-1");
+        CoherenceClusterMember member2 = cluster.get("storage-2");
+        CoherenceClusterMember member3 = cluster.get("storage-3");
+
+        assertThat(member1, is(notNullValue()));
+        assertThat(member2, is(notNullValue()));
+        assertThat(member3, is(notNullValue()));
+
+        assertThat(member1.getLocalMemberId(), is(5));
+        assertThat(member2.getLocalMemberId(), is(6));
+        assertThat(member3.getLocalMemberId(), is(7));
+    }
 }

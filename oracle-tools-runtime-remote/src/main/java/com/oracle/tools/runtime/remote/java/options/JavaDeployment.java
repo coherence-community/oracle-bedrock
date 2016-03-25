@@ -34,7 +34,6 @@ import com.oracle.tools.runtime.Platform;
 
 import com.oracle.tools.runtime.java.ClassPath;
 import com.oracle.tools.runtime.java.JavaApplication;
-import com.oracle.tools.runtime.java.JavaApplicationSchema;
 
 import com.oracle.tools.runtime.remote.DeploymentArtifact;
 import com.oracle.tools.runtime.remote.options.Deployment;
@@ -56,11 +55,11 @@ import java.util.List;
  *
  * @author Brian Oliver
  */
-public class JavaDeployment implements Deployment<JavaApplication, JavaApplicationSchema<JavaApplication>>
+public class JavaDeployment implements Deployment
 {
     /**
      * Should the {@link Deployment} automatically detect the required {@link JavaApplication} artifacts?
-     * Ultimately this means using the {@link ClassPath} of the {@link JavaApplicationSchema} to determine
+     * Ultimately this means using the {@link ClassPath} of the {@link JavaApplication} to determine
      * the artifacts to deploy.
      */
     private boolean autoDeployEnabled;
@@ -76,9 +75,8 @@ public class JavaDeployment implements Deployment<JavaApplication, JavaApplicati
      * (when auto-deploy is enabled).
      */
     private HashSet<String> excludeFileNames;
+    private boolean         excludeJDK;
 
-
-    private boolean excludeJDK;
 
     /**
      * Privately constructs a {@link JavaDeployment}.
@@ -117,8 +115,7 @@ public class JavaDeployment implements Deployment<JavaApplication, JavaApplicati
 
 
     /**
-     * Determines if auto-deployment (based on the {@link JavaApplicationSchema} {@link ClassPath}
-     * should be performed.
+     * Determines if auto-deployment based on the {@link ClassPath} should be performed.
      *
      * @return  <code>true</code> if auto-deployment is configured, <code>false</code> otherwise
      */
@@ -160,9 +157,8 @@ public class JavaDeployment implements Deployment<JavaApplication, JavaApplicati
 
 
     @Override
-    public List<DeploymentArtifact> getDeploymentArtifacts(JavaApplicationSchema<JavaApplication> schema,
-                                                           Platform                               platform,
-                                                           Options                                options) throws FileNotFoundException, IOException
+    public List<DeploymentArtifact> getDeploymentArtifacts(Platform platform,
+                                                           Options  options) throws FileNotFoundException, IOException
     {
         ArrayList<DeploymentArtifact> deploymentArtifacts = new ArrayList<DeploymentArtifact>();
         File                          javaHomeFile        = new File(System.getProperty("java.home"));
@@ -176,7 +172,7 @@ public class JavaDeployment implements Deployment<JavaApplication, JavaApplicati
         if (autoDeployEnabled)
         {
             // we'll use the class-path of the schema to work out what to deploy
-            ClassPath classPath = schema.getClassPath();
+            ClassPath classPath = options.get(ClassPath.class);
 
             for (String path : classPath)
             {

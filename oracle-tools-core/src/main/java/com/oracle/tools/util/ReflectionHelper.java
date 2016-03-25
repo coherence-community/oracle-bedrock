@@ -32,6 +32,8 @@ import net.sf.cglib.proxy.MethodInterceptor;
 import org.objenesis.Objenesis;
 import org.objenesis.ObjenesisStd;
 
+import java.lang.annotation.Annotation;
+
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -55,8 +57,8 @@ public class ReflectionHelper
      *
      * @return a compatible constructor or null if none exists
      */
-    public static Constructor<?> getCompatibleConstructor(Class<?>   clazz,
-                                                          Class<?>[] argumentTypes)
+    public static <T> Constructor<T> getCompatibleConstructor(Class<T>    clazz,
+                                                              Class<?>... argumentTypes)
     {
         // first attempt to find a constructor with the exact types
         try
@@ -332,5 +334,60 @@ public class ReflectionHelper
         T         proxy     = (T) objenesis.newInstance(proxiedClass);
 
         return proxy;
+    }
+
+
+    /**
+     * Obtains the specified {@link Annotation} instance on the provided {@link Class},
+     * interfaces implemented by the {@link Class} and/or the super-class(es)/super-interface(s)
+     * of the {@link Class}.
+     * <p>
+     * Should the {@link Annotation} not be defined on the above, <code>null</code> is returned.
+     *
+     * @param onClass                 the {@link Class} on which seaching will take place
+     * @param desiredAnnotationClass  the desired {@link Annotation} {@link Class}
+     * @param <A>                     the type of the {@link Annotation}
+     *
+     * @return  the {@link Annotation} or <code>null</code> if not available
+     */
+    public static <A extends Annotation> A getAnnotation(Class<?> onClass,
+                                                         Class<A> desiredAnnotationClass)
+    {
+        if (onClass == null || desiredAnnotationClass == null)
+        {
+            // when no class or annotation has been provided, we can't locate the desired annotation
+            return null;
+        }
+        else if (onClass.getClass().equals(Object.class))
+        {
+            // we assume that the object class doesn't have the annotation we want
+            return null;
+        }
+        else
+        {
+            // first check if the annotation is defined directly on the class
+            A annotation = onClass.getAnnotation(desiredAnnotationClass);
+
+            if (annotation == null)
+            {
+                // look for the annotation on all of the interfaces
+                for (Class<?> onInterface : onClass.getInterfaces())
+                {
+                    annotation = getAnnotation(onInterface, desiredAnnotationClass);
+
+                    if (annotation != null)
+                    {
+                        return annotation;
+                    }
+                }
+
+                // finally look on the super class
+                return getAnnotation(onClass.getSuperclass(), desiredAnnotationClass);
+            }
+            else
+            {
+                return annotation;
+            }
+        }
     }
 }

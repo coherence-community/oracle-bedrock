@@ -26,6 +26,7 @@
 package com.oracle.tools.runtime.java.options;
 
 import com.oracle.tools.Option;
+import com.oracle.tools.Options;
 
 /**
  * Represents a Java Virtual Machine specific {@link Option}.
@@ -40,9 +41,9 @@ public interface JvmOption extends Option
     /**
      * Obtains the values for the {@link JvmOption}.
      *
-     * @param options  {@link Option}s to be used for resolving the values.
+     * @param options  {@link Options} to be used for resolving the values.
      *
      * @return the values for the {@link JvmOption}
      */
-    Iterable<String> getValues(Option... options);
+    Iterable<String> resolve(Options options);
 }

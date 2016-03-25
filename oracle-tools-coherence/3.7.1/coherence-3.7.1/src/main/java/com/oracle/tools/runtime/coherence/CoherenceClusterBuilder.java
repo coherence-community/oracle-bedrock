@@ -28,9 +28,6 @@ package com.oracle.tools.runtime.coherence;
 import com.oracle.tools.runtime.AbstractAssemblyBuilder;
 import com.oracle.tools.runtime.AssemblyBuilder;
 
-import com.oracle.tools.runtime.java.JavaApplication;
-import com.oracle.tools.runtime.java.JavaApplicationBuilder;
-
 import java.util.List;
 
 /**
@@ -45,7 +42,7 @@ import java.util.List;
 public class CoherenceClusterBuilder extends AbstractAssemblyBuilder<CoherenceClusterMember, CoherenceCluster>
 {
     @Override
-    protected CoherenceCluster createAssembly(List<? extends CoherenceClusterMember> members)
+    protected CoherenceCluster createAssembly(List<CoherenceClusterMember> members)
     {
         return new CoherenceCluster(members);
     }

@@ -25,7 +25,11 @@
 
 package com.oracle.tools.runtime.coherence;
 
-import com.oracle.tools.runtime.ApplicationListener;
+import com.oracle.tools.Options;
+
+import com.oracle.tools.runtime.Application;
+import com.oracle.tools.runtime.ApplicationProcess;
+import com.oracle.tools.runtime.Platform;
 
 import com.oracle.tools.runtime.coherence.callables.GetClusterMemberUIDs;
 import com.oracle.tools.runtime.coherence.callables.GetClusterName;
@@ -40,7 +44,7 @@ import com.oracle.tools.runtime.coherence.callables.IsServiceRunning;
 import com.oracle.tools.runtime.java.AbstractJavaApplication;
 import com.oracle.tools.runtime.java.JavaApplication;
 import com.oracle.tools.runtime.java.JavaApplicationProcess;
-import com.oracle.tools.runtime.java.JavaApplicationRuntime;
+import com.oracle.tools.runtime.java.features.JmxFeature;
 
 import com.tangosol.net.NamedCache;
 
@@ -59,8 +63,7 @@ import javax.management.ObjectName;
  *
  * @author Brian Oliver
  */
-public abstract class AbstractCoherenceClusterMember<A extends AbstractCoherenceClusterMember<A>>
-    extends AbstractJavaApplication<A, JavaApplicationProcess, JavaApplicationRuntime<JavaApplicationProcess>>
+public abstract class AbstractCoherenceClusterMember extends AbstractJavaApplication<JavaApplicationProcess>
     implements CoherenceClusterMember
 {
     /**
@@ -70,15 +73,17 @@ public abstract class AbstractCoherenceClusterMember<A extends AbstractCoherence
 
 
     /**
-     * Construct a {@link AbstractCoherenceClusterMember}.
+     * Constructs an {@link AbstractCoherenceClusterMember}.
      *
-     * @param runtime    the {@link JavaApplicationRuntime} for the {@link CoherenceClusterMember}
-     * @param listeners  the {@link ApplicationListener}s
+     * @param platform  the {@link Platform} on which the {@link Application} was launched
+     * @param process   the underlying {@link ApplicationProcess} representing the {@link Application}
+     * @param options   the {@link Options} used to launch the {@link Application}
      */
-    public AbstractCoherenceClusterMember(JavaApplicationRuntime<JavaApplicationProcess> runtime,
-                                          Iterable<ApplicationListener<? super A>>       listeners)
+    public AbstractCoherenceClusterMember(Platform               platform,
+                                          JavaApplicationProcess process,
+                                          Options                options)
     {
-        super(runtime, listeners);
+        super(platform, process, options);
     }
 
 
@@ -98,17 +103,26 @@ public abstract class AbstractCoherenceClusterMember<A extends AbstractCoherence
      */
     public MBeanInfo getClusterMBeanInfo()
     {
-        try
+        JmxFeature jmxFeature = get(JmxFeature.class);
+
+        if (jmxFeature == null)
         {
-            return getMBeanInfo(new ObjectName(MBEAN_NAME_CLUSTER));
+            throw new UnsupportedOperationException("The JmxFeature (Java Management Extensions) haven't been enabled for this application");
         }
-        catch (RuntimeException e)
+        else
         {
-            throw e;
-        }
-        catch (Exception e)
-        {
-            throw new UnsupportedOperationException("Could not retrieve the Coherence Cluster MBean", e);
+            try
+            {
+                return jmxFeature.getMBeanInfo(new ObjectName(MBEAN_NAME_CLUSTER));
+            }
+            catch (RuntimeException e)
+            {
+                throw e;
+            }
+            catch (Exception e)
+            {
+                throw new UnsupportedOperationException("Could not retrieve the Coherence Cluster MBean", e);
+            }
         }
     }
 
@@ -161,20 +175,30 @@ public abstract class AbstractCoherenceClusterMember<A extends AbstractCoherence
     public MBeanInfo getServiceMBeanInfo(String serviceName,
                                          int    nodeId)
     {
-        try
+        JmxFeature jmxFeature = get(JmxFeature.class);
+
+        if (jmxFeature == null)
         {
-            return getMBeanInfo(new ObjectName(String.format("Coherence:type=Service,name=%s,nodeId=%d", serviceName,
-                                                             nodeId)));
+            throw new UnsupportedOperationException("The JmxFeature (Java Management Extensions) haven't been enabled for this application");
         }
-        catch (RuntimeException e)
+        else
         {
-            throw e;
-        }
-        catch (Exception e)
-        {
-            throw new UnsupportedOperationException(String
-                .format("Could not retrieve the Coherence Service MBean [%s]", serviceName),
-                                                    e);
+            try
+            {
+                return jmxFeature.getMBeanInfo(new ObjectName(String.format("Coherence:type=Service,name=%s,nodeId=%d",
+                                                                            serviceName,
+                                                                            nodeId)));
+            }
+            catch (RuntimeException e)
+            {
+                throw e;
+            }
+            catch (Exception e)
+            {
+                throw new UnsupportedOperationException(String.format("Could not retrieve the Coherence Service MBean [%s]",
+                                                                      serviceName),
+                                                        e);
+            }
         }
     }
 

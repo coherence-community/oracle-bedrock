@@ -31,8 +31,10 @@ import com.oracle.tools.predicate.Predicates;
 
 import com.oracle.tools.runtime.LocalPlatform;
 
-import com.oracle.tools.runtime.java.SimpleJavaApplication;
-import com.oracle.tools.runtime.java.SimpleJavaApplicationSchema;
+import com.oracle.tools.runtime.java.JavaApplication;
+import com.oracle.tools.runtime.java.options.ClassName;
+
+import com.oracle.tools.runtime.options.Arguments;
 
 import org.junit.Test;
 
@@ -64,16 +66,12 @@ public class CapturingApplicationConsoleTest
     {
         CapturingApplicationConsole console = new CapturingApplicationConsole(5, false);
 
-        SimpleJavaApplicationSchema schema =
-            new SimpleJavaApplicationSchema(SimpleApp.class.getCanonicalName()).addArguments("1",
-                                                                                             "2",
-                                                                                             "3",
-                                                                                             "4",
-                                                                                             "5");
-
-        try (SimpleJavaApplication app = LocalPlatform.getInstance().realize("App", schema, console))
+        try (JavaApplication application = LocalPlatform.get().launch(JavaApplication.class,
+                                                                      ClassName.of(SimpleApp.class),
+                                                                      Arguments.of("1", "2", "3", "4", "5"),
+                                                                      Console.of(console)))
         {
-            app.waitFor();
+            application.waitFor();
         }
 
         console.close();
@@ -96,16 +94,12 @@ public class CapturingApplicationConsoleTest
     {
         CapturingApplicationConsole console = new CapturingApplicationConsole(5, false);
 
-        SimpleJavaApplicationSchema schema =
-            new SimpleJavaApplicationSchema(SimpleApp.class.getCanonicalName()).addArguments("1",
-                                                                                             "2",
-                                                                                             "3",
-                                                                                             "4",
-                                                                                             "5");
-
-        try (SimpleJavaApplication app = LocalPlatform.getInstance().realize("App", schema, console))
+        try (JavaApplication application = LocalPlatform.get().launch(JavaApplication.class,
+                                                                      ClassName.of(SimpleApp.class),
+                                                                      Arguments.of("1", "2", "3", "4", "5"),
+                                                                      Console.of(console)))
         {
-            app.waitFor();
+            application.waitFor();
         }
 
         console.close();
@@ -129,9 +123,9 @@ public class CapturingApplicationConsoleTest
         CapturingApplicationConsole console = new CapturingApplicationConsole(5, false);
         PrintWriter                 stdIn   = console.getInputWriter();
 
-        SimpleJavaApplicationSchema schema  = new SimpleJavaApplicationSchema(EchoApp.class.getCanonicalName());
-
-        try (SimpleJavaApplication app = LocalPlatform.getInstance().realize("App", schema, console))
+        try (JavaApplication application = LocalPlatform.get().launch(JavaApplication.class,
+                                                                      ClassName.of(EchoApp.class),
+                                                                      Console.of(console)))
         {
             Queue<String> lines = console.getCapturedOutputLines();
 

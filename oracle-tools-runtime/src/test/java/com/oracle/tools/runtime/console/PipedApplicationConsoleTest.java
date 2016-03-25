@@ -27,8 +27,10 @@ package com.oracle.tools.runtime.console;
 
 import com.oracle.tools.runtime.LocalPlatform;
 
-import com.oracle.tools.runtime.java.SimpleJavaApplication;
-import com.oracle.tools.runtime.java.SimpleJavaApplicationSchema;
+import com.oracle.tools.runtime.java.JavaApplication;
+import com.oracle.tools.runtime.java.options.ClassName;
+
+import com.oracle.tools.runtime.options.Arguments;
 
 import org.junit.Test;
 
@@ -79,15 +81,14 @@ public class PipedApplicationConsoleTest
     @Test
     public void shouldBeAbleToReadPipedStdOutAfterConsoleClosed() throws Exception
     {
-        SimpleJavaApplicationSchema schema =
-            new SimpleJavaApplicationSchema(SimpleApp.class.getCanonicalName()).addArguments("foo",
-                                                                                             "bar");
-
         PipedApplicationConsole console = new PipedApplicationConsole(1024, false);
 
-        try (SimpleJavaApplication app = LocalPlatform.getInstance().realize("App", schema, console))
+        try (JavaApplication application = LocalPlatform.get().launch(JavaApplication.class,
+                                                                      ClassName.of(SimpleApp.class),
+                                                                      Arguments.of("foo", "bar"),
+                                                                      Console.of(console)))
         {
-            app.waitFor();
+            application.waitFor();
         }
 
         BufferedReader reader = console.getOutputReader();
@@ -102,15 +103,14 @@ public class PipedApplicationConsoleTest
     @Test
     public void shouldBeAbleToReadPipedStdErrAfterConsoleClosed() throws Exception
     {
-        SimpleJavaApplicationSchema schema =
-            new SimpleJavaApplicationSchema(SimpleApp.class.getCanonicalName()).addArguments("foo",
-                                                                                             "bar");
-
         PipedApplicationConsole console = new PipedApplicationConsole(1024, false);
 
-        try (SimpleJavaApplication app = LocalPlatform.getInstance().realize("App", schema, console))
+        try (JavaApplication application = LocalPlatform.get().launch(JavaApplication.class,
+                                                                      ClassName.of(SimpleApp.class),
+                                                                      Arguments.of("foo", "bar"),
+                                                                      Console.of(console)))
         {
-            app.waitFor();
+            application.waitFor();
         }
 
         BufferedReader reader = console.getErrorReader();

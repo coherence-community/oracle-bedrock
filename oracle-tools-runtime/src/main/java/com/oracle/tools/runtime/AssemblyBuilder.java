@@ -27,8 +27,6 @@ package com.oracle.tools.runtime;
 
 import com.oracle.tools.Option;
 
-import java.io.IOException;
-
 /**
  * A builder of {@link Assembly}s.
  * <p>
@@ -37,109 +35,40 @@ import java.io.IOException;
  *
  * @author Brian Oliver
  *
- * @param <A>  the type of {@link Application}s that will be in a realized {@link Assembly}
- * @param <G>  the type of {@link Assembly}s that will be realized by the {@link AssemblyBuilder}
  */
 public interface AssemblyBuilder<A extends Application, G extends Assembly<A>>
 {
     /**
-     * Adds an {@link Application} to be realized by the {@link AssemblyBuilder}
-     * {@link Assembly} is realized.
+     * Includes the necessary information required for launching one or more {@link Application}s of a specified
+     * type as part of an {@link Assembly} on the specified {@link Platform} when {@link #build(Option...)}
+     * method is called.
      * <p>
-     * Multiple calls to this method are permitted, this allowing an {@link Assembly}
-     * to contain different types of {@link Application}s.
-     * <p>
-     * By default no {@link ApplicationConsole} will be used for the realized
-     * {@link Application}s, unless one is specified when realizing the {@link Assembly}.
+     * Multiple calls to this method are permitted, allowing an {@link Assembly} to be created containing
+     * multiple different types of {@link Application}s.
      *
-     * @param applicationNamePrefix  the {@link Application} name prefix for each
-     *                               of the realized {@link Application}
-     * @param applicationSchema      the {@link ApplicationSchema} from which to
-     *                               realize/configure the {@link Application}s
-     * @param count                  the number of instances of the {@link Application} that should be realized for
-     *                               the {@link Assembly} when {@link #realize(ApplicationConsole)} is called
-     * @param platform               the {@link Platform} on which to realize the {@link Application}s
-     * @param options                the {@link Option}s to use for realizing the {@link Application}s
+     * @param count             the number of instances of the {@link Application} that should be realized for
+     *                          the {@link Assembly}
+     * @param platform          the {@link Platform} on which to launch the {@link Application}s
+     * @param applicationClass  the class of {@link Application}
+     * @param options           the {@link Option}s to use for realizing the {@link Application}s
+     *
+     * @see Platform#launch(String, Option...)
      */
-    public <T extends A, S extends ApplicationSchema<T>> void addSchema(String    applicationNamePrefix,
-                                                                        S         applicationSchema,
-                                                                        int       count,
-                                                                        Platform  platform,
-                                                                        Option... options);
+    void include(int                count,
+                 Platform           platform,
+                 Class<? extends A> applicationClass,
+                 Option...          options);
 
 
     /**
-     * Adds an {@link Application} to be realized by the {@link AssemblyBuilder}
-     * {@link Assembly} is realized.
-     * <p>
-     * Multiple calls to this method is permitted, this allowing an {@link Assembly}
-     * to contain different types of {@link Application}s.
-     * <p>
-     * By default a new {@link ApplicationConsole} provided by the {@link ApplicationConsoleBuilder}
-     * will used for each {@link Application} realized when creating the {@link Assembly}.
+     * Builds an {@link Assembly}, using the specified {@link Option}s to override those
+     * defined by the {@link Platform}s and {@link Application}s.
      *
-     * @param applicationNamePrefix  the {@link Application} name prefix for each
-     *                               of the realized {@link Application}
-     * @param applicationSchema      the {@link ApplicationSchema} from which to
-     *                               realize/configure the {@link Application}s
-     * @param count                  the number of instances of the {@link Application} that should be realized for
-     *                               the {@link Assembly} when {@link #realize(ApplicationConsole)} is called
-     * @param consoleBuilder         the {@link ApplicationConsoleBuilder} to be used to provide
-     *                               {@link ApplicationConsole}s for realized {@link Application}s
-     * @param platform               the {@link Platform} on which to realize the {@link Application}s
-     * @param options                the {@link Option}s to use for realizing the {@link Application}s
-     */
-    public <T extends A, S extends ApplicationSchema<T>> void addSchema(String                    applicationNamePrefix,
-                                                                        S                         applicationSchema,
-                                                                        int                       count,
-                                                                        ApplicationConsoleBuilder consoleBuilder,
-                                                                        Platform                  platform,
-                                                                        Option...                 options);
-
-
-    /**
-     * Realizes an instance of an {@link Assembly}.
-     *
-     * @param overridingConsole  the {@link ApplicationConsole} that will be used for I/O by all of the
-     *                           {@link Application}s realized in the {@link Assembly}, including
-     *                           those that had a specific {@link ApplicationConsoleBuilder} specified for
-     *                           them using {@link #addSchema(String, ApplicationSchema, int, Platform, Option...)}
-     *                           When this is <code>null</code> the defined {@link ApplicationConsole}
-     *                           will be used for each {@link Application} in the {@link Assembly}
+     * @param options  the {@link Option}s to override those specified in {@link #include(int, Platform, Class, Option...)}
      *
      * @return an {@link Assembly} representing the collection of realized {@link Application}s.
      *
-     * @throws RuntimeException Thrown if a problem occurs while realizing the application
+     * @throws RuntimeException when a problem occurs building the {@link Assembly}
      */
-    public G realize(ApplicationConsole overridingConsole);
-
-
-    /**
-     * Realizes an instance of an {@link Assembly}.
-     *
-     * @param overridingConsoleBuilder  the {@link ApplicationConsoleBuilder} that will be used to create
-     *                                  {@link ApplicationConsole}s for each of the realized {@link Application}s
-     *                                  in the {@link Assembly}, overriding those that had a specific
-     *                                  {@link ApplicationConsoleBuilder} specified for them using
-     *                                  {@link #addSchema(String, ApplicationSchema, int, ApplicationConsoleBuilder, Platform, Option...)}
-     *                                  When this is <code>null</code> the defined {@link ApplicationConsole}
-     *                                  will be used for each {@link Application} in the {@link Assembly}
-     *
-     * @return an {@link Assembly} representing the collection of realized {@link Application}s.
-     *
-     * @throws RuntimeException Thrown if a problem occurs while realizing the application
-     */
-    public G realize(ApplicationConsoleBuilder overridingConsoleBuilder);
-
-
-    /**
-     * Realizes an instance of an {@link Assembly} consisting of the {@link Application}s
-     * defined by the {@link AssemblyBuilder}, using the {@link ApplicationConsole}s
-     * that were defined for them.
-     *
-     * @return an {@link Assembly} representing the collection of realized {@link Application}s.
-     *
-     * @throws IOException Thrown if a problem occurs while realizing the application
-     */
-    public G realize() throws IOException;
+    G build(Option... options);
 }

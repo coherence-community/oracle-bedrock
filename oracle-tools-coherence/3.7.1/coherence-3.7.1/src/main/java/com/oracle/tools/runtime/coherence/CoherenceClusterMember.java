@@ -25,13 +25,38 @@
 
 package com.oracle.tools.runtime.coherence;
 
+import com.oracle.tools.Options;
+
+import com.oracle.tools.runtime.Application;
+import com.oracle.tools.runtime.Platform;
+
+import com.oracle.tools.runtime.annotations.PreferredMetaClass;
+
+import com.oracle.tools.runtime.coherence.options.LocalHost;
+import com.oracle.tools.runtime.coherence.options.MachineName;
+
+import com.oracle.tools.runtime.concurrent.RemoteCallable;
+import com.oracle.tools.runtime.concurrent.callable.RemoteCallableStaticMethod;
+
+import com.oracle.tools.runtime.java.ContainerBasedJavaApplicationLauncher;
 import com.oracle.tools.runtime.java.JavaApplication;
+import com.oracle.tools.runtime.java.options.ClassName;
+import com.oracle.tools.runtime.java.options.Headless;
+import com.oracle.tools.runtime.java.options.IPv4Preferred;
+import com.oracle.tools.runtime.java.options.SystemProperties;
+import com.oracle.tools.runtime.java.options.SystemProperty;
+
+import com.oracle.tools.runtime.remote.RemotePlatform;
+
+import com.oracle.tools.util.CompletionListener;
 
 import com.tangosol.net.NamedCache;
 
 import com.tangosol.util.UID;
 
 import java.io.NotSerializableException;
+
+import java.net.InetAddress;
 
 import java.util.Set;
 
@@ -44,6 +69,7 @@ import java.util.Set;
  *
  * @author Brian Oliver
  */
+@PreferredMetaClass(CoherenceClusterMember.MetaClass.class)
 public interface CoherenceClusterMember extends JavaApplication
 {
     /**
@@ -52,7 +78,7 @@ public interface CoherenceClusterMember extends JavaApplication
      *
      * @return the number of members in the cluster
      */
-    public int getClusterSize();
+    int getClusterSize();
 
 
     /**
@@ -68,16 +94,16 @@ public interface CoherenceClusterMember extends JavaApplication
      *
      * @return the local member {@link UID}
      */
-    public UID getLocalMemberUID();
+    UID getLocalMemberUID();
 
 
     /**
      * Obtains the member {@link UID}s for the {@link CoherenceCluster} in which the
      * {@link CoherenceClusterMember} is operating.
      *
-     * @return  a {@link Set} of {@link UID}, one for each {@link CoherenceClusterMember}
+     * @return a {@link Set} of {@link UID}, one for each {@link CoherenceClusterMember}
      */
-    public Set<UID> getClusterMemberUIDs();
+    Set<UID> getClusterMemberUIDs();
 
 
     /**
@@ -85,7 +111,7 @@ public interface CoherenceClusterMember extends JavaApplication
      *
      * @return the role name
      */
-    public String getRoleName();
+    String getRoleName();
 
 
     /**
@@ -93,7 +119,7 @@ public interface CoherenceClusterMember extends JavaApplication
      *
      * @return the site name
      */
-    public String getSiteName();
+    String getSiteName();
 
 
     /**
@@ -101,7 +127,7 @@ public interface CoherenceClusterMember extends JavaApplication
      *
      * @return the site name
      */
-    public String getClusterName();
+    String getClusterName();
 
 
     /**
@@ -118,29 +144,165 @@ public interface CoherenceClusterMember extends JavaApplication
      * Additionally note that method invocations taking unserializable parameters
      * or returning unserializable values will throw {@link NotSerializableException}s.
      *
-     * @param cacheName  the name of the {@link NamedCache}
+     * @param cacheName the name of the {@link NamedCache}
      *
-     * @return  a proxy to the {@link NamedCache}
+     * @return a proxy to the {@link NamedCache}
      */
-    public NamedCache getCache(String cacheName);
+    NamedCache getCache(String cacheName);
 
 
     /**
      * Determines if a specified service is being run by the {@link CoherenceClusterMember}.
      *
-     * @param serviceName  the name of the service
+     * @param serviceName the name of the service
      *
      * @return <code>true</code> if the service is running, <code>false</code> otherwise
      */
-    public boolean isServiceRunning(String serviceName);
+    boolean isServiceRunning(String serviceName);
 
 
     /**
      * Determines the status of a service being run by the {@link CoherenceClusterMember}.
      *
-     * @param serviceName  the name of the service
+     * @param serviceName the name of the service
      *
      * @return the {@link ServiceStatus}
      */
-    public ServiceStatus getServiceStatus(String serviceName);
+    ServiceStatus getServiceStatus(String serviceName);
+
+
+    /**
+     * The {@link com.oracle.tools.runtime.options.MetaClass} for {@link CoherenceClusterMember}s.
+     */
+    class MetaClass implements com.oracle.tools.runtime.options.MetaClass<CoherenceClusterMember>,
+                               ContainerBasedJavaApplicationLauncher.ApplicationController
+    {
+        /**
+         * The com.tangosol.net.DefaultCacheServer classname.
+         */
+        public static final String DEFAULT_CACHE_SERVER_CLASSNAME = "com.tangosol.net.DefaultCacheServer";
+
+        /**
+         * The com.tangosol.net.CacheFactory classname.
+         */
+        public static final String CACHE_FACTORY_CLASSNAME = "com.tangosol.net.CacheFactory";
+
+
+        /**
+         * Constructs a {@link MetaClass} for a {@link CoherenceClusterMember}.
+         */
+        @Options.Default
+        public MetaClass()
+        {
+        }
+
+
+        @Override
+        public Class<? extends CoherenceClusterMember> getImplementationClass(Platform platform,
+                                                                              Options  options)
+        {
+            return CoherenceCacheServer.class;
+        }
+
+
+        @Override
+        public void onBeforeLaunch(Platform platform,
+                                   Options  options)
+        {
+            // automatically define the default cache server as the default class
+            options.addIfAbsent(ClassName.of(DEFAULT_CACHE_SERVER_CLASSNAME));
+
+            // automatically define IPv4
+            options.addIfAbsent(IPv4Preferred.yes());
+
+            // cache servers are always headless
+            options.add(Headless.enabled());
+
+            SystemProperties systemProperties = options.get(SystemProperties.class);
+
+            systemProperties = systemProperties.addIfAbsent(SystemProperty.of(LocalHost.PROPERTY,
+                                                                              new SystemProperty.ContextSensitiveValue()
+                                                                              {
+                                                                                  @Override
+                                                                                  public Object resolve(String   name,
+                                                                                                        Platform platform,
+                                                                                                        Options  options)
+                                                                                  {
+                                                                                      if (platform
+                                                                                          instanceof RemotePlatform)
+                                                                                      {
+                                                                                          InetAddress inetAddress =
+                                                                                              platform.getAddress();
+
+                                                                                          if (inetAddress == null)
+                                                                                          {
+                                                                                              return null;    // property doesn't exist
+                                                                                          }
+                                                                                          else
+                                                                                          {
+                                                                                              return inetAddress.getHostAddress();
+                                                                                          }
+                                                                                      }
+                                                                                      else
+                                                                                      {
+                                                                                          return null;    // property doesn't exist
+                                                                                      }
+
+                                                                                  }
+                                                                              }));
+
+            systemProperties = systemProperties.addIfAbsent(SystemProperty.of(MachineName.PROPERTY,
+                                                                              new SystemProperty.ContextSensitiveValue()
+                                                                              {
+                                                                                  @Override
+                                                                                  public Object resolve(String   name,
+                                                                                                        Platform platform,
+                                                                                                        Options  options)
+                                                                                  {
+                                                                                      if (platform
+                                                                                          instanceof RemotePlatform)
+                                                                                      {
+                                                                                          return platform.getName();
+                                                                                      }
+                                                                                      else
+                                                                                      {
+                                                                                          return null;
+                                                                                      }
+                                                                                  }
+                                                                              }));
+
+            // update the system properties as it may have been modified
+            options.add(systemProperties);
+        }
+
+
+        @Override
+        public void onAfterLaunch(Platform    platform,
+                                  Application application,
+                                  Options     options)
+        {
+            // nothing to do after launch
+        }
+
+
+        @Override
+        public void start(ContainerBasedJavaApplicationLauncher.ControllableApplication application,
+                          CompletionListener<Void>                                     listener)
+        {
+            RemoteCallable<Void> callable = new RemoteCallableStaticMethod<>(DEFAULT_CACHE_SERVER_CLASSNAME, "start");
+
+            application.submit(callable, listener);
+        }
+
+
+        @Override
+        public void destroy(ContainerBasedJavaApplicationLauncher.ControllableApplication application,
+                            CompletionListener<Void>                                     listener)
+        {
+            RemoteCallable<Void> callable = new RemoteCallableStaticMethod<>(DEFAULT_CACHE_SERVER_CLASSNAME,
+                                                                             "shutdown");
+
+            application.submit(callable, listener);
+        }
+    }
 }

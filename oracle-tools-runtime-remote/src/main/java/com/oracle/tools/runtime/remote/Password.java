@@ -27,7 +27,6 @@ package com.oracle.tools.runtime.remote;
 
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.Session;
-import com.oracle.tools.Option;
 import com.oracle.tools.Options;
 import com.oracle.tools.options.HttpProxy;
 import com.oracle.tools.runtime.remote.http.HttpAuthenticationType;
@@ -88,8 +87,8 @@ public class Password implements Authentication, JSchBasedAuthentication, HttpBa
     @Override
     public HttpURLConnection openConnection(URL url, String userName, Options options) throws IOException
         {
-            HttpAuthenticationType authType   = options.get(HttpAuthenticationType.class, HttpAuthenticationType.Basic);
-            HttpProxy              proxy      = options.get(HttpProxy.class, HttpProxy.none());
+            HttpAuthenticationType authType   = options.getOrDefault(HttpAuthenticationType.class, HttpAuthenticationType.Basic);
+            HttpProxy              proxy      = options.getOrDefault(HttpProxy.class, HttpProxy.none());
             HttpURLConnection      connection;
 
         switch(authType)

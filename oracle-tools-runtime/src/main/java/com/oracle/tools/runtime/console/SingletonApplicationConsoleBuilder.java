@@ -54,7 +54,7 @@ public class SingletonApplicationConsoleBuilder implements ApplicationConsoleBui
 
 
     @Override
-    public ApplicationConsole realize(String applicationName)
+    public ApplicationConsole build(String applicationName)
     {
         return console;
     }

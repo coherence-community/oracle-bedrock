@@ -177,7 +177,7 @@ public class FileWriterApplicationConsole implements ApplicationConsole
         return new ApplicationConsoleBuilder()
         {
             @Override
-            public ApplicationConsole realize(String applicationName)
+            public ApplicationConsole build(String applicationName)
             {
                 // normalize the directory
                 String normalizedDirectory = directory.trim();

@@ -26,12 +26,12 @@
 package com.oracle.tools.runtime.coherence;
 
 import com.oracle.tools.runtime.Platform;
-import com.oracle.tools.runtime.java.ContainerBasedJavaApplicationBuilder;
+import com.oracle.tools.runtime.java.ContainerBasedJavaApplicationLauncher;
 import com.oracle.tools.runtime.java.JavaVirtualMachine;
 import org.junit.Ignore;
 
 /**
- * Functional Tests for {@link CoherenceClusterBuilder}s using a {@link ContainerBasedJavaApplicationBuilder}.
+ * Functional Tests for {@link CoherenceClusterBuilder}s using a {@link ContainerBasedJavaApplicationLauncher}.
  * <p>
  * Copyright (c) 2014. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
@@ -43,7 +43,7 @@ public class ContainerBasedCoherenceClusterBuilderTest extends AbstractCoherence
     @Override
     public Platform getPlatform()
     {
-        return JavaVirtualMachine.getInstance();
+        return JavaVirtualMachine.get();
     }
 
     @Override

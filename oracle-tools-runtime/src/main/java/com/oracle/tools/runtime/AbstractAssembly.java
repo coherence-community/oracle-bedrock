@@ -27,6 +27,8 @@ package com.oracle.tools.runtime;
 
 import com.oracle.tools.Option;
 
+import com.oracle.tools.options.Decoration;
+
 import com.oracle.tools.predicate.Predicate;
 
 import java.util.Iterator;
@@ -70,10 +72,11 @@ public abstract class AbstractAssembly<A extends Application> implements Assembl
         this.applications = new CopyOnWriteArraySet<A>(applications);
         this.isClosed     = new AtomicBoolean(false);
 
-        // ensure the assembly is notified of application lifecycle changes
+        // add this assembly as a decoration of each application
+        // (so that the application can notify the assembly of independent lifecycle events)
         for (A application : this.applications)
         {
-            application.addApplicationListener(this);
+            application.getOptions().add(Decoration.of(this));
         }
     }
 
@@ -177,8 +180,8 @@ public abstract class AbstractAssembly<A extends Application> implements Assembl
         }
         else
         {
-            // ensure the assembly is notified of application lifecycle changes
-            application.addApplicationListener(this);
+            // ensure the assembly a decoration so that it can be called back for lifecycle events
+            application.getOptions().add(Decoration.of(this));
 
             // add the application to the assembly
             applications.add(application);
@@ -206,8 +209,8 @@ public abstract class AbstractAssembly<A extends Application> implements Assembl
         }
         else
         {
-            // ensure the assembly is no longer notified of application lifecycle changes
-            application.removeApplicationListener(this);
+            // ensure the assembly is no longer a decoration so that won't be called back for lifecycle events
+            application.getOptions().remove(Decoration.of(this));
 
             // remove the application from the assembly
             return applications.remove(application);
@@ -241,9 +244,8 @@ public abstract class AbstractAssembly<A extends Application> implements Assembl
             {
                 if (application != null)
                 {
-                    // ensure the assembly is no longer notified of application
-                    // lifecycle changes
-                    application.removeApplicationListener(this);
+                    // ensure the assembly is no longer a decoration so that won't be called back for lifecycle events
+                    application.getOptions().remove(Decoration.of(this));
 
                     try
                     {

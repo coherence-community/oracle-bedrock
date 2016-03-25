@@ -126,7 +126,7 @@ public class HttpDeployerTest extends AbstractHttpDeployerTest
             }
         };
 
-        http.deploy(artifactsToDeploy, tempDir.getCanonicalPath(), LocalPlatform.getInstance());
+        http.deploy(artifactsToDeploy, tempDir.getCanonicalPath(), LocalPlatform.get());
 
         assertThat(artifactsDeployed.size(), is(artifactsToDeploy.size()));
 

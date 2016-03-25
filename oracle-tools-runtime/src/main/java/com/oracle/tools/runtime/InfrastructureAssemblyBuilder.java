@@ -25,12 +25,18 @@
 
 package com.oracle.tools.runtime;
 
+import com.oracle.tools.Option;
+import com.oracle.tools.Options;
+
 import com.oracle.tools.predicate.Predicate;
 
 import com.oracle.tools.runtime.console.NullApplicationConsole;
 import com.oracle.tools.runtime.console.SingletonApplicationConsoleBuilder;
 
+import com.oracle.tools.runtime.options.Discriminator;
+
 import com.oracle.tools.util.Quadruple;
+import com.oracle.tools.util.Triple;
 
 import java.io.IOException;
 
@@ -53,193 +59,68 @@ import java.util.Map;
  */
 public class InfrastructureAssemblyBuilder<P extends Platform, A extends Application, G extends Assembly<A>>
 {
-    private Map<String, Quadruple<Predicate<P>, ApplicationSchema<A>, Integer, ApplicationConsoleBuilder>> apps;
+    private LinkedList<Quadruple<Predicate<P>, Class<? extends A>, Option[], Integer>> applications;
 
 
     /**
      * Constructs an {@link InfrastructureAssemblyBuilder}
-     *
      */
     public InfrastructureAssemblyBuilder()
     {
-        apps = new LinkedHashMap<String,
-                                 Quadruple<Predicate<P>, ApplicationSchema<A>, Integer, ApplicationConsoleBuilder>>();
+        applications = new LinkedList<>();
     }
 
 
     /**
-     * Add an application based on the specified {@link ApplicationSchema} that will
-     * be realized when the {@link Assembly} is realized.
+     * Includes necessary information for launching one or more {@link Application}s of a specified
+     * type as part of an {@link Assembly} when {@link #realize(Infrastructure, Option...)} is called.
+     * <p>
+     * Multiple calls to this method are permitted, allowing an {@link Assembly} to be created containing
+     * multiple different types of {@link Application}s.
      *
-     * @param applicationNamePrefix  the prefix for the application name
-     * @param applicationSchema      the {@link ApplicationSchema} that defines the application to be realized
-     * @param instancesPerPlatform   the number of instances of the application to realize per {@link Platform} in the
-     *                               {@link Infrastructure}
+     * @param predicate         the {@link Predicate} that will be used to select which {@link Platform}s in
+     *                          the {@link Infrastructure} will build the application
+     * @param count             the number of instances of the {@link Application} that should be realized for
+     *                          the {@link Assembly}
+     * @param applicationClass  the class of {@link Application}
+     * @param options           the {@link Option}s to use for realizing the {@link Application}s
      *
-     * @param <T>  the type of {@link Application} realized from the {@link ApplicationSchema}
-     * @param <S>  the type of {@link ApplicationSchema}
+     * @see Platform#launch(String, Option...)
      */
-    @SuppressWarnings("unchecked")
-    public <T extends A, S extends ApplicationSchema<T>> void addApplication(String applicationNamePrefix,
-                                                                             S      applicationSchema,
-                                                                             int    instancesPerPlatform)
+    public void include(Predicate<P>       predicate,
+                        int                count,
+                        Class<? extends A> applicationClass,
+                        Option...          options)
     {
-        addApplication(null,
-                       applicationNamePrefix,
-                       applicationSchema,
-                       instancesPerPlatform,
-                       (ApplicationConsoleBuilder) null);
+        applications.add(new Quadruple(predicate, applicationClass, options, count));
     }
 
 
     /**
-     * Add an application based on the specified {@link ApplicationSchema} that will
-     * be realized when the {@link Assembly} is realized.
+     * Realize the {@link Assembly} of {@link Application}s on the specified {@link Infrastructure}.
      *
-     * @param applicationNamePrefix  the prefix for the application name
-     * @param applicationSchema      the {@link ApplicationSchema} that defines the application to be realized
-     * @param instancesPerPlatform   the number of instances of the application to realize per {@link Platform} in the
-     *                               {@link Infrastructure}
-     *
-     * @param <T>  the type of {@link Application} realized from the {@link ApplicationSchema}
-     * @param <S>  the type of {@link ApplicationSchema}
-     */
-    @SuppressWarnings("unchecked")
-    public <T extends A, S extends ApplicationSchema<T>> void addApplication(Predicate<P> predicate,
-                                                                             String       applicationNamePrefix,
-                                                                             S            applicationSchema,
-                                                                             int          instancesPerPlatform)
-    {
-        addApplication(predicate,
-                       applicationNamePrefix,
-                       applicationSchema,
-                       instancesPerPlatform,
-                       (ApplicationConsoleBuilder) null);
-    }
-
-
-    /**
-     * Add an application based on the specified {@link ApplicationSchema} that will
-     * be realized when the {@link Assembly} is realized.
-     *
-     * @param applicationNamePrefix  the prefix for the application name
-     * @param applicationSchema      the {@link ApplicationSchema} that defines the application to be realized
-     * @param instancesPerPlatform   the number of instances of the application to realize per {@link Platform} in the
-     *                               {@link Infrastructure}
-     * @param consoleBuilder         the {@link ApplicationConsoleBuilder} to be used to provide
-     *                               {@link ApplicationConsole}s for realized {@link Application}s.
-     *
-     * @param <T>  the type of {@link Application} realized from the {@link ApplicationSchema}
-     * @param <S>  the type of {@link ApplicationSchema}
-     */
-    @SuppressWarnings("unchecked")
-    public <T extends A, S extends ApplicationSchema<T>> void addApplication(String                    applicationNamePrefix,
-                                                                             S                         applicationSchema,
-                                                                             int                       instancesPerPlatform,
-                                                                             ApplicationConsoleBuilder consoleBuilder)
-    {
-        apps.put(applicationNamePrefix, new Quadruple(null, applicationSchema, instancesPerPlatform, consoleBuilder));
-    }
-
-
-    /**
-     * Add an application based on the specified {@link ApplicationSchema} that will
-     * be realized when the {@link Assembly} is realized.
-     *
-     * @param predicate              the {@link Predicate} that will be used to select which {@link Platform}s in
-     *                               the {@link Infrastructure} will realize the application
-     * @param applicationNamePrefix  the prefix for the application name
-     * @param applicationSchema      the {@link ApplicationSchema} that defines the application to be realized
-     * @param instancesPerPlatform   the number of instances of the application to realize per {@link Platform} in the
-     *                               {@link Infrastructure}
-     * @param console                the {@link ApplicationConsole} to be used to provide
-     *                               {@link ApplicationConsole}s for realized {@link Application}s.
-     *
-     * @param <T>  the type of {@link Application} realized from the {@link ApplicationSchema}
-     * @param <S>  the type of {@link ApplicationSchema}
-     */
-    @SuppressWarnings("unchecked")
-    public <T extends A, S extends ApplicationSchema<T>> void addApplication(Predicate<P>       predicate,
-                                                                             String             applicationNamePrefix,
-                                                                             S                  applicationSchema,
-                                                                             int                instancesPerPlatform,
-                                                                             ApplicationConsole console)
-    {
-        apps.put(applicationNamePrefix,
-                 new Quadruple(predicate,
-                               applicationSchema,
-                               instancesPerPlatform,
-                               new SingletonApplicationConsoleBuilder(console)));
-    }
-
-
-    /**
-     * Add an application based on the specified {@link ApplicationSchema} that will
-     * be realized when the {@link Assembly} is realized.
-     *
-     * @param predicate              the {@link Predicate} that will be used to select which {@link Platform}s in
-     *                               the {@link Infrastructure} will realize the application
-     * @param applicationNamePrefix  the prefix for the application name
-     * @param applicationSchema      the {@link ApplicationSchema} that defines the application to be realized
-     * @param instancesPerPlatform   the number of instances of the application to realize per {@link Platform} in the
-     *                               {@link Infrastructure}
-     * @param consoleBuilder         the {@link ApplicationConsoleBuilder} to be used to provide
-     *                               {@link ApplicationConsole}s for realized {@link Application}s.
-     *
-     * @param <T>  the type of {@link Application} realized from the {@link ApplicationSchema}
-     * @param <S>  the type of {@link ApplicationSchema}
-     */
-    @SuppressWarnings("unchecked")
-    public <T extends A, S extends ApplicationSchema<T>> void addApplication(Predicate<P>              predicate,
-                                                                             String                    applicationNamePrefix,
-                                                                             S                         applicationSchema,
-                                                                             int                       instancesPerPlatform,
-                                                                             ApplicationConsoleBuilder consoleBuilder)
-    {
-        apps.put(applicationNamePrefix,
-                 new Quadruple(predicate, applicationSchema, instancesPerPlatform, consoleBuilder));
-    }
-
-
-    /**
-     * Realize the {@link Assembly} of {@link Application}s on the specified {@link Infrastructure}
-     *
-     * @param infrastructure            the {@link Infrastructure} to realize applications on
-     * @param overridingConsoleBuilder  the {@link ApplicationConsoleBuilder} that will be used to create
-     *                                  {@link ApplicationConsole}s for each of the realized {@link Application}s
-     *                                  in the {@link Assembly}, overriding those that had a specific
-     *                                  {@link ApplicationConsoleBuilder} specified for them using
-     *                                  {@link #addApplication(String, ApplicationSchema, int, ApplicationConsoleBuilder)}
-     *                                  When this is <code>null</code> the defined {@link ApplicationConsole}
-     *                                  will be used for each {@link Application} in the {@link Assembly}
+     * @param infrastructure   the {@link Infrastructure} to build applications on
+     * @param options          the {@link Option}s for overriding defined options
      *
      * @return an {@link Assembly} representing the collection of realized {@link Application}s.
      *
      * @throws RuntimeException Thrown if a problem occurs while realizing the application
      */
     @SuppressWarnings("unchecked")
-    public G realize(Infrastructure<P>         infrastructure,
-                     ApplicationConsoleBuilder overridingConsoleBuilder)
+    public G realize(Infrastructure<P> infrastructure,
+                     Option...         options)
     {
-        List<A> applications = new LinkedList<A>();
+        List<A> applications = new LinkedList<>();
 
-        for (Map.Entry<String,
-                       Quadruple<Predicate<P>, ApplicationSchema<A>, Integer, ApplicationConsoleBuilder>> entry :
-            apps.entrySet())
+        for (Quadruple<Predicate<P>, Class<? extends A>, Option[], Integer> entry : this.applications)
         {
-            Quadruple<Predicate<P>, ApplicationSchema<A>, Integer, ApplicationConsoleBuilder> quad = entry.getValue();
+            Predicate<P>       predicate        = entry.getA();
+            Class<? extends A> applicationClass = entry.getB();
+            Options            launchOptions    = new Options(entry.getC());
+            int                count            = entry.getD();
 
-            String                                                                            prefix    =
-                entry.getKey();
-            Predicate<P>                                                                      predicate = quad.getA();
-            ApplicationSchema<A>                                                              schema    = quad.getB();
-            int                                                                               count     = quad.getC();
-            ApplicationConsoleBuilder consoleBuilder                                                    = quad.getD();
-
-            if (overridingConsoleBuilder != null)
-            {
-                consoleBuilder = overridingConsoleBuilder;
-            }
+            // override the launch options with those specified
+            launchOptions.addAll(options);
 
             for (P platform : infrastructure)
             {
@@ -247,61 +128,19 @@ public class InfrastructureAssemblyBuilder<P extends Platform, A extends Applica
                 {
                     for (int i = 1; i <= count; i++)
                     {
-                        String             name    = String.format("%s-%d@%s", prefix, i, platform.getName());
+                        // add a discriminator for the application being launched
+                        launchOptions.add(Discriminator.of(String.format("%d@%s", i, platform.getName())));
 
-                        ApplicationConsole console = consoleBuilder == null ? null : consoleBuilder.realize(name);
+                        // launch the application
+                        A application = platform.launch(applicationClass, launchOptions.asArray());
 
-                        if (console == null)
-                        {
-                            console = new NullApplicationConsole();
-                        }
-
-                        A application = platform.realize(name, schema, console);
-
+                        // add the application to the assembly
                         applications.add(application);
                     }
                 }
             }
         }
 
-        return (G) new SimpleAssembly<A>(applications);
-    }
-
-
-    /**
-     * Realize the {@link Assembly} of {@link Application}s on the specified {@link Infrastructure}
-     *
-     * @param infrastructure     the {@link Infrastructure} to realize applications on
-     * @param overridingConsole  the {@link ApplicationConsole} that will be used for I/O by all of the
-     *                           {@link Application}s realized in the {@link Assembly}, including
-     *                           those that had a specific {@link ApplicationConsoleBuilder} specified for
-     *                           them using {@link #addApplication(String, ApplicationSchema, int, ApplicationConsoleBuilder)}
-     *                           When this is <code>null</code> the defined {@link ApplicationConsole}
-     *                           will be used for each {@link Application} in the {@link Assembly}
-     *
-     * @return an {@link Assembly} representing the collection of realized {@link Application}s.
-     *
-     * @throws RuntimeException Thrown if a problem occurs while realizing the application
-     */
-    public G realize(Infrastructure<P>  infrastructure,
-                     ApplicationConsole overridingConsole)
-    {
-        return realize(infrastructure,
-                       overridingConsole == null ? null : new SingletonApplicationConsoleBuilder(overridingConsole));
-    }
-
-
-    /**
-     * Realize the {@link Assembly} of {@link Application}s on the specified {@link Infrastructure}
-     *
-     * @param infrastructure  the {@link Infrastructure} to realize applications on
-     *
-     * @return an {@link Assembly} representing the collection of realized {@link Application}s.
-     *
-     * @throws IOException Thrown if a problem occurs while realizing the application
-     */
-    public G realize(Infrastructure<P> infrastructure) throws IOException
-    {
-        return realize(infrastructure, (ApplicationConsoleBuilder) null);
+        return (G) new SimpleAssembly<>(applications);
     }
 }

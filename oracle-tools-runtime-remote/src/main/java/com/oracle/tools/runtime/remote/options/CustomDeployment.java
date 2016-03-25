@@ -28,8 +28,6 @@ package com.oracle.tools.runtime.remote.options;
 import com.oracle.tools.Option;
 import com.oracle.tools.Options;
 
-import com.oracle.tools.runtime.Application;
-import com.oracle.tools.runtime.ApplicationSchema;
 import com.oracle.tools.runtime.Platform;
 
 import com.oracle.tools.runtime.remote.DeploymentArtifact;
@@ -66,9 +64,8 @@ public class CustomDeployment implements Deployment
 
 
     @Override
-    public List<DeploymentArtifact> getDeploymentArtifacts(ApplicationSchema schema,
-                                                           Platform          platform,
-                                                           Options           options) throws FileNotFoundException, IOException
+    public List<DeploymentArtifact> getDeploymentArtifacts(Platform platform,
+                                                           Options  options) throws FileNotFoundException, IOException
     {
         return artifactsToDeploy;
     }

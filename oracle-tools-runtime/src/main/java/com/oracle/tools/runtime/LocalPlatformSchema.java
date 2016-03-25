@@ -27,7 +27,7 @@ package com.oracle.tools.runtime;
 
 /**
  * A {@link PlatformSchema} encapsulating configuration and operational settings that a
- * {@link com.oracle.tools.runtime.PlatformBuilder} will use to realize a
+ * {@link com.oracle.tools.runtime.PlatformBuilder} will use to build a
  * {@link LocalPlatform} platform.
  * <p>
  * Copyright (c) 2014. All Rights Reserved. Oracle Corporation.<br>
@@ -55,7 +55,7 @@ public class LocalPlatformSchema implements PlatformSchema<LocalPlatform>
     @Override
     public String getName()
     {
-        return LocalPlatform.getInstance().getName();
+        return LocalPlatform.get().getName();
     }
 
     @Override

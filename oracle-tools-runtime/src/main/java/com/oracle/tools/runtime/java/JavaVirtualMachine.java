@@ -25,13 +25,17 @@
 
 package com.oracle.tools.runtime.java;
 
+import com.oracle.tools.Option;
+import com.oracle.tools.Options;
+
 import com.oracle.tools.io.NetworkHelper;
 
 import com.oracle.tools.runtime.AbstractPlatform;
 import com.oracle.tools.runtime.Application;
-import com.oracle.tools.runtime.ApplicationBuilder;
+import com.oracle.tools.runtime.ApplicationLauncher;
 import com.oracle.tools.runtime.Platform;
-import com.oracle.tools.runtime.options.ApplicationBuilders;
+
+import com.oracle.tools.runtime.options.MetaClass;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
@@ -97,9 +101,6 @@ public class JavaVirtualMachine extends AbstractPlatform<JavaVirtualMachine>
                 this.address = NetworkHelper.getFeasibleLocalHost();
             }
         }
-
-        // ----- set any default options ------
-        getOptions().add(ApplicationBuilders.container());
     }
 
 
@@ -115,7 +116,7 @@ public class JavaVirtualMachine extends AbstractPlatform<JavaVirtualMachine>
      * Typically this will be when running in debug mode inside a Java IDE.
      * If an exception is thrown while trying to determine if a debugger is
      *     attached then this method will return false.
-     *    
+     *
      *     @return true if running in debug mode, otherwise false
      */
     public boolean isRunningWithDebugger()
@@ -150,8 +151,8 @@ public class JavaVirtualMachine extends AbstractPlatform<JavaVirtualMachine>
      * inside a debugger.
      *
      * @param enabled true if remote debug mode for applications is based on the controlling
-     *                JVM or false if it is based only on the {@link JavaApplicationSchema}
-     *                that defines the {@link JavaApplication}
+     *                JVM or false if it is based only on the {@link Option}s
+     *                that define the {@link JavaApplication}
      */
     public void setAutoDebugEnabled(boolean enabled)
     {
@@ -165,8 +166,8 @@ public class JavaVirtualMachine extends AbstractPlatform<JavaVirtualMachine>
      * is also running inside a debugger.
      *
      * @return true if remote debug mode for applications is based on the controlling
-     *              JVM or false if it is based only on the {@link JavaApplicationSchema}
-     *              that defines the {@link JavaApplication}
+     *              JVM or false if it is based only on the {@link Option}s
+     *              that define the {@link JavaApplication}
      */
     public boolean getAutoDebugEnabled()
     {
@@ -189,11 +190,43 @@ public class JavaVirtualMachine extends AbstractPlatform<JavaVirtualMachine>
 
     /**
      * Obtain the singleton instance of the {@link JavaVirtualMachine}.
+     * <p>
+     * DEPRECATED: Use {@link #get()} instead.
      *
      * @return the singleton instance of the {@link JavaVirtualMachine}
      */
+    @Deprecated
     public static JavaVirtualMachine getInstance()
     {
+        return get();
+    }
+
+
+    /**
+     * Obtain the singleton instance of the {@link JavaVirtualMachine}.
+     *
+     * @return the singleton instance of the {@link JavaVirtualMachine}
+     */
+    public static JavaVirtualMachine get()
+    {
         return INSTANCE;
+    }
+
+
+    @Override
+    protected <A extends Application,
+               B extends ApplicationLauncher<A, JavaVirtualMachine>> B getApplicationBuilder(Class<A>     applicationClass,
+                                                                                             MetaClass<A> metaClass,
+                                                                                             Options      options) throws UnsupportedOperationException
+    {
+        if (JavaApplication.class.isAssignableFrom(applicationClass))
+        {
+            return (B) new ContainerBasedJavaApplicationLauncher(this);
+        }
+        else
+        {
+            throw new UnsupportedOperationException("The JavaVirtualMachine Platform only supports launching JavaApplications.  The provided "
+                                                    + applicationClass + " does not appear to be a JavaApplication");
+        }
     }
 }

@@ -26,11 +26,16 @@
 package com.oracle.tools.runtime.remote.http;
 
 import com.oracle.tools.Option;
+
+import com.oracle.tools.runtime.Application;
 import com.oracle.tools.runtime.Platform;
-import com.oracle.tools.runtime.SimpleApplication;
-import com.oracle.tools.runtime.SimpleApplicationSchema;
 
 import com.oracle.tools.runtime.console.CapturingApplicationConsole;
+import com.oracle.tools.runtime.console.Console;
+
+import com.oracle.tools.runtime.options.Argument;
+import com.oracle.tools.runtime.options.DisplayName;
+import com.oracle.tools.runtime.options.Executable;
 
 import java.net.URL;
 
@@ -49,8 +54,8 @@ import java.net.URL;
  */
 public class WGetHttpDeployer extends HttpDeployer
 {
-    /** 
-     *Field description 
+    /**
+     * Field description
      */
     public static final String DEFAULT_WGET = "wget";
 
@@ -77,7 +82,8 @@ public class WGetHttpDeployer extends HttpDeployer
      * @param wgetCommand the location of the wget command
      * @param options     the {@link Option}s controlling the deployer
      */
-    public WGetHttpDeployer(String wgetCommand, Option... options)
+    public WGetHttpDeployer(String    wgetCommand,
+                            Option... options)
     {
         super(options);
         this.wgetCommand = wgetCommand;
@@ -89,13 +95,15 @@ public class WGetHttpDeployer extends HttpDeployer
                                   String   targetFileName,
                                   Platform platform)
     {
-        SimpleApplicationSchema schema =
-            new SimpleApplicationSchema(wgetCommand).addArgument("-O").addArgument(targetFileName)
-                .addArgument(sourceURL.toExternalForm());
+        CapturingApplicationConsole console = new CapturingApplicationConsole();
 
-        CapturingApplicationConsole console     = new CapturingApplicationConsole();
-
-        try (SimpleApplication application = platform.realize("Deploy", schema, console))
+        try (Application application = platform.launch(Application.class,
+                                                       Executable.named(wgetCommand),
+                                                       Argument.of("-O"),
+                                                       Argument.of(targetFileName),
+                                                       Argument.of(sourceURL.toExternalForm()),
+                                                       DisplayName.of("Deploy"),
+                                                       Console.of(console)))
         {
             int exitCode = application.waitFor();
 
@@ -105,7 +113,7 @@ public class WGetHttpDeployer extends HttpDeployer
             {
                 StringBuilder message =
                     new StringBuilder("Error deploying ").append(targetFileName).append(" - wget returned ")
-                        .append(exitCode).append("\n").append("wget output:");
+                    .append(exitCode).append("\n").append("wget output:");
 
                 for (String line : console.getCapturedOutputLines())
                 {

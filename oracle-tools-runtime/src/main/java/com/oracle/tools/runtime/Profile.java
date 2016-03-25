@@ -40,20 +40,18 @@ import com.oracle.tools.Options;
 public interface Profile
 {
     /**
-     * Invoked by a {@link Platform} prior to an {@link ApplicationSchema} being realized, allowing
+     * Invoked by a {@link Platform} prior to an {@link Application} being launched, allowing
      * an implementation to override and customize the provided {@link Options}, arguments and properties.
      *
      * @param platform   the {@link Platform}
-     * @param schema     the {@link ApplicationSchema}
      * @param options    the {@link Options}
      */
-    void onBeforeRealize(Platform          platform,
-                         ApplicationSchema schema,
-                         Options           options);
+    void onBeforeLaunch(Platform platform,
+                        Options  options);
 
 
     /**
-     * Invoked by a {@link Platform} after an {@link Application} has been realized using the
+     * Invoked by a {@link Platform} after an {@link Application} has been launched using the
      * specified {@link Options}, but before the {@link Application} is returned to the
      * {@link Thread} that requested the {@link Application}.
      *
@@ -61,9 +59,9 @@ public interface Profile
      * @param application   the {@link Application}
      * @param options       the {@link Options}
      */
-    void onAfterRealize(Platform    platform,
-                        Application application,
-                        Options     options);
+    void onAfterLaunch(Platform    platform,
+                       Application application,
+                       Options     options);
 
 
     /**

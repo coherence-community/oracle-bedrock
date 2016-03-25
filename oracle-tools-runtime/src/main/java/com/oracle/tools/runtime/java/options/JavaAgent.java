@@ -27,8 +27,9 @@ package com.oracle.tools.runtime.java.options;
 
 import com.oracle.tools.Option;
 import com.oracle.tools.Options;
+
 import com.oracle.tools.lang.ExpressionEvaluator;
-import com.oracle.tools.options.Variables;
+
 import com.oracle.tools.runtime.java.ClassPath;
 
 import java.util.Collections;
@@ -122,7 +123,7 @@ public class JavaAgent implements JvmOption, Option.Collectable
 
 
     @Override
-    public Iterable<String> getValues(Option... options)
+    public Iterable<String> resolve(Options options)
     {
         String resolvedParameters;
 
@@ -132,7 +133,7 @@ public class JavaAgent implements JvmOption, Option.Collectable
         }
         else
         {
-            ExpressionEvaluator evaluator = new ExpressionEvaluator(new Options(options).get(Variables.class));
+            ExpressionEvaluator evaluator = new ExpressionEvaluator(options);
 
             resolvedParameters = "=" + evaluator.evaluate(parameters, String.class);
         }

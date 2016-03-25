@@ -28,13 +28,14 @@ package com.oracle.tools.runtime;
 import com.oracle.tools.Option;
 import com.oracle.tools.Options;
 
+import com.oracle.tools.extensible.Extensible;
 import com.oracle.tools.options.Timeout;
+
+import com.oracle.tools.runtime.annotations.PreferredMetaClass;
 
 import com.oracle.tools.runtime.options.ApplicationClosingBehavior;
 
 import java.io.Closeable;
-
-import java.util.Properties;
 
 /**
  * A platform and location independent mechanism to represent, access and
@@ -45,25 +46,15 @@ import java.util.Properties;
  *
  * @author Brian Oliver
  */
-public interface Application extends Closeable
+@PreferredMetaClass(Application.MetaClass.class)
+public interface Application extends Extensible, Closeable
 {
-    /**
-     * Obtains the environment variables that were supplied to the
-     * {@link Application} when it was realized.
-     *
-     * @return {@link Properties} of containing name value pairs, each one
-     *         representing an environment variable provided to the
-     *         {@link Application} when it was realized
-     */
-    public Properties getEnvironmentVariables();
-
-
     /**
      * Obtains the name of the {@link Application}.
      *
      * @return The name of the {@link Application}
      */
-    public String getName();
+    String getName();
 
 
     /**
@@ -73,7 +64,7 @@ public interface Application extends Closeable
      * @return the {@link Platform} that this {@link Application}
      *         is running on
      */
-    public Platform getPlatform();
+    Platform getPlatform();
 
 
     /**
@@ -86,7 +77,7 @@ public interface Application extends Closeable
      * To determine the exit value of the terminated application use {@link #exitValue()}.
      */
     @Override
-    public void close();
+    void close();
 
 
     /**
@@ -104,7 +95,7 @@ public interface Application extends Closeable
      *
      * @see ApplicationClosingBehavior
      */
-    public void close(Option... options);
+    void close(Option... options);
 
 
     /**
@@ -124,7 +115,7 @@ public interface Application extends Closeable
      * @throws RuntimeException  if it wasn't possible to wait for the
      *                           termination.
      */
-    public int waitFor(Option... options);
+    int waitFor(Option... options);
 
 
     /**
@@ -135,7 +126,7 @@ public interface Application extends Closeable
      * @throws IllegalThreadStateException if the {@link Application} has not
      *                                     yet terminated
      */
-    public int exitValue();
+    int exitValue();
 
 
     /**
@@ -146,7 +137,7 @@ public interface Application extends Closeable
      *
      * @return The unique identity or -1 if it can't be determined.
      */
-    public long getId();
+    long getId();
 
 
     /**
@@ -155,7 +146,7 @@ public interface Application extends Closeable
      *
      * @return a {@link Timeout}
      */
-    public Timeout getDefaultTimeout();
+    Timeout getDefaultTimeout();
 
 
     /**
@@ -166,21 +157,45 @@ public interface Application extends Closeable
      *
      * @return the {@link Options}
      */
-    public Options getOptions();
+    Options getOptions();
 
 
     /**
-     * Adds an {@link ApplicationListener} to the {@link Application}.
-     *
-     * @param listener  the {@link ApplicationListener}
+     * The {@link com.oracle.tools.runtime.options.MetaClass} for generic {@link Application}s.
      */
-    public void addApplicationListener(ApplicationListener listener);
+    class MetaClass implements com.oracle.tools.runtime.options.MetaClass<Application>
+    {
+        /**
+         * Constructs a {@link MetaClass} for a {@link Application}.
+         */
+        @Options.Default
+        public MetaClass()
+        {
+        }
 
 
-    /**
-     * Removes an {@link ApplicationListener} from the {@link Application}.
-     *
-     * @param listener  the {@link ApplicationListener}
-     */
-    public void removeApplicationListener(ApplicationListener listener);
+        @Override
+        public Class<? extends Application> getImplementationClass(Platform platform,
+                                                                   Options  options)
+        {
+            return SimpleApplication.class;
+        }
+
+
+        @Override
+        public void onBeforeLaunch(Platform platform,
+                                   Options  options)
+        {
+            // there's nothing to do before launching the application
+        }
+
+
+        @Override
+        public void onAfterLaunch(Platform    platform,
+                                  Application application,
+                                  Options     options)
+        {
+            // there's nothing to do after launching the application
+        }
+    }
 }

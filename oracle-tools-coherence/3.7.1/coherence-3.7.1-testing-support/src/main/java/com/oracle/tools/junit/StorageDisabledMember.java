@@ -25,9 +25,16 @@
 
 package com.oracle.tools.junit;
 
-import com.oracle.tools.runtime.LocalPlatform;
+import com.oracle.tools.Option;
+import com.oracle.tools.Options;
 
-import com.oracle.tools.runtime.coherence.CoherenceCacheServerSchema;
+import com.oracle.tools.runtime.LocalPlatform;
+import com.oracle.tools.runtime.Profile;
+
+import com.oracle.tools.runtime.coherence.options.CacheConfig;
+import com.oracle.tools.runtime.coherence.options.LocalHost;
+import com.oracle.tools.runtime.coherence.options.LocalStorage;
+import com.oracle.tools.runtime.coherence.options.RoleName;
 
 import com.oracle.tools.util.SystemProperties;
 
@@ -48,27 +55,35 @@ import java.util.Properties;
 public class StorageDisabledMember implements SessionBuilder
 {
     @Override
-    public ConfigurableCacheFactory realize(LocalPlatform                 platform,
-                                            CoherenceClusterOrchestration orchestration,
-                                            CoherenceCacheServerSchema    serverSchema)
+    public ConfigurableCacheFactory build(LocalPlatform                 platform,
+                                          CoherenceClusterOrchestration orchestration,
+                                          Option...                     options)
     {
-        // build a schema for a local storage-disabled member
-        CoherenceCacheServerSchema schema =
-            new CoherenceCacheServerSchema(serverSchema).setRoleName("client").setStorageEnabled(false);
+        // ----- establish the options for launching a local storage-disabled member -----
+        Options launchOptions = new Options(options);
 
-        // obtain the cache configuration to use for the storage-disabled member
-        String cacheConfigURI = serverSchema.getCacheConfigURI();
+        launchOptions.add(RoleName.of("client"));
+        launchOptions.add(LocalStorage.disabled());
+        launchOptions.add(LocalHost.only());
+        launchOptions.add(CacheConfig.of("coherence-cache-config.xml"));
 
-        if (cacheConfigURI == null || cacheConfigURI.trim().isEmpty())
+        // ----- notify the Profiles that we're about to launch an application -----
+
+        for (Profile profile : launchOptions.getInstancesOf(Profile.class))
         {
-            cacheConfigURI = "coherence-cache-config.xml";
+            profile.onBeforeLaunch(platform, launchOptions);
         }
 
+        // ----- create local system properties based on those defined by the launch options -----
+
         // take a snapshot of the system properties as we're about to mess with them
-        Properties systemProperties = SystemProperties.createSnapshot();
+        Properties systemPropertiesSnapshot = SystemProperties.createSnapshot();
 
         // modify the current system properties to include/override those in the schema
-        Properties properties = schema.getSystemProperties().realize(platform, schema);
+        com.oracle.tools.runtime.java.options.SystemProperties systemProperties =
+            launchOptions.get(com.oracle.tools.runtime.java.options.SystemProperties.class);
+
+        Properties properties = systemProperties.resolve(platform, launchOptions);
 
         for (String propertyName : properties.stringPropertyNames())
         {
@@ -77,13 +92,14 @@ public class StorageDisabledMember implements SessionBuilder
 
         // create the session
         ConfigurableCacheFactory session =
-                new ScopedCacheFactoryBuilder().getConfigurableCacheFactory(cacheConfigURI, getClass().getClassLoader());
+            new ScopedCacheFactoryBuilder().getConfigurableCacheFactory(launchOptions.get(CacheConfig.class).getUri(),
+                                                                        getClass().getClassLoader());
 
         // as this is a cluster member we have to join the cluster
         CacheFactory.ensureCluster();
 
         // replace the system properties
-        SystemProperties.replaceWith(systemProperties);
+        SystemProperties.replaceWith(systemPropertiesSnapshot);
 
         return session;
     }

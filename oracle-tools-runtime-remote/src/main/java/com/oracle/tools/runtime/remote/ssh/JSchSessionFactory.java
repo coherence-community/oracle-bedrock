@@ -104,7 +104,7 @@ public class JSchSessionFactory
         session.setDaemonThread(true);
 
         // determine the timeout
-        Timeout timeout   = options.get(Timeout.class, Timeout.autoDetect());
+        Timeout timeout   = options.getOrDefault(Timeout.class, Timeout.autoDetect());
         int     timeoutMS = (int) timeout.getDuration().to(TimeUnit.MILLISECONDS);
 
         // set the default session timeouts (in milliseconds)

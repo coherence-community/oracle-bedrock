@@ -129,7 +129,7 @@ public class DelegatingPropertiesTest
 
         ContainerScope scope = new ContainerScope("test",
                                                   platformScope.getProperties(),
-                                                  LocalPlatform.getInstance().getAvailablePorts(),
+                                                  LocalPlatform.get().getAvailablePorts(),
                                                   null,
                                                   false,
                                                   Container.PIPE_BUFFER_SIZE_BYTES);
@@ -169,7 +169,7 @@ public class DelegatingPropertiesTest
 
         ContainerScope scope = new ContainerScope("test",
                                                   platformScope.getProperties(),
-                                                  LocalPlatform.getInstance().getAvailablePorts(),
+                                                  LocalPlatform.get().getAvailablePorts(),
                                                   null,
                                                   false,
                                                   Container.PIPE_BUFFER_SIZE_BYTES);

@@ -28,6 +28,8 @@ package com.oracle.tools.runtime;
 import com.oracle.tools.Option;
 import com.oracle.tools.Options;
 
+import com.oracle.tools.extensible.AbstractExtensible;
+
 import com.oracle.tools.options.Diagnostics;
 import com.oracle.tools.options.Timeout;
 
@@ -36,6 +38,7 @@ import com.oracle.tools.runtime.console.SystemApplicationConsole;
 import com.oracle.tools.runtime.java.container.Container;
 
 import com.oracle.tools.runtime.options.ApplicationClosingBehavior;
+import com.oracle.tools.runtime.options.DisplayName;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
@@ -46,9 +49,6 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.Reader;
 
-import java.util.LinkedHashSet;
-import java.util.Properties;
-
 /**
  * A base implementation of an {@link Application}.
  * <p>
@@ -58,18 +58,38 @@ import java.util.Properties;
  * @author Brian Oliver
  * @author Harvey Raja
  *
- * @param <A>  the type of {@link AbstractApplication} to permit fluent method calls
  * @param <P>  the type of {@link ApplicationProcess} used to internally represent
  *             the underlying {@link Application} at runtime
- * @param <R>  the type of {@link ApplicationRuntime}
  */
-public abstract class AbstractApplication<A extends AbstractApplication<A, P, R>, P extends ApplicationProcess,
-                                          R extends ApplicationRuntime<P>> implements FluentApplication<A>
+public abstract class AbstractApplication<P extends ApplicationProcess> extends AbstractExtensible
+    implements Application
 {
     /**
-     * The {@link ApplicationRuntime} for the {@link Application}.
+     * The {@link Platform} on which the {@link Application} was launched.
      */
-    protected final R runtime;
+    protected final Platform platform;
+
+    /**
+     * The resolved display name for the  {@link Application}, based on the {@link Options} used
+     * to launch the {@link Application}.
+     */
+    protected final String displayName;
+
+    /**
+     * The underlying {@link ApplicationProcess} used to internally represent and
+     * manage the {@link Application}.
+     */
+    protected final P process;
+
+    /**
+     * The {@link Options} used to launch the {@link Application}.
+     */
+    protected final Options options;
+
+    /**
+     * The {@link ApplicationConsole} for interacting with the {@link Application}.
+     */
+    protected final ApplicationConsole console;
 
     /**
      * The {@link Thread} that is used to capture standard output from the underlying {@link Process}.
@@ -87,12 +107,6 @@ public abstract class AbstractApplication<A extends AbstractApplication<A, P, R>
     private final Thread stdinThread;
 
     /**
-     * The {@link ApplicationListener}s that must be notified based
-     * on lifecycle events occuring on the {@link Application}.
-     */
-    private LinkedHashSet<ApplicationListener<? super A>> listeners;
-
-    /**
      * The default {@link Timeout} to use for the {@link Application}.
      */
     private Timeout defaultTimeout;
@@ -101,33 +115,32 @@ public abstract class AbstractApplication<A extends AbstractApplication<A, P, R>
     /**
      * Construct an {@link AbstractApplication}.
      *
-     * @param runtime    the {@link ApplicationRuntime}
-     * @param listeners  the {@link ApplicationListener}s
+     * @param platform  the {@link Platform} on which the {@link Application} was launched
+     * @param process   the underlying {@link ApplicationProcess} representing the {@link Application}
+     * @param options   the {@link Options} used to launch the {@link Application}
      */
-    public AbstractApplication(R                                        runtime,
-                               Iterable<ApplicationListener<? super A>> listeners)
+    public AbstractApplication(Platform platform,
+                               P        process,
+                               Options  options)
     {
-        this.runtime = runtime;
+        this.platform = platform;
+        this.process  = process;
+        this.options  = options;
 
         // establish the default Timeout for the application
-        this.defaultTimeout = runtime.getOptions().get(Timeout.class);
+        this.defaultTimeout = options.get(Timeout.class);
 
-        // make a copy of the listeners
-        this.listeners = new LinkedHashSet<>();
+        // determine if diagnostics is enabled
+        boolean diagnosticsEnabled = options.get(Diagnostics.class).isEnabled();
 
-        if (listeners != null)
-        {
-            for (ApplicationListener<? super A> listener : listeners)
-            {
-                this.listeners.add(listener);
-            }
-        }
+        // resolve the application name, including the discriminator (if one is defined)
+        this.displayName = options.get(DisplayName.class).resolve(options);
 
-        // establish the standard input, output and error redirection threads
-        String             displayName        = runtime.getApplicationName();
-        P                  process            = runtime.getApplicationProcess();
-        ApplicationConsole console            = runtime.getApplicationConsole();
-        boolean            diagnosticsEnabled = runtime.getOptions().get(Diagnostics.class).isEnabled();
+        // establish the application console
+        console = options.getOrDefault(ApplicationConsoleBuilder.class,
+                                       SystemApplicationConsole.builder()).build(displayName);
+
+        // establish the standard input, output and error redirection threads for the application console
 
         // start a thread to redirect standard out to the console
         stdoutThread = new Thread(new OutputRedirector(displayName,
@@ -170,30 +183,23 @@ public abstract class AbstractApplication<A extends AbstractApplication<A, P, R>
 
 
     @Override
-    public Properties getEnvironmentVariables()
-    {
-        return runtime.getEnvironmentVariables();
-    }
-
-
-    @Override
     public String getName()
     {
-        return runtime.getApplicationName();
+        return displayName;
     }
 
 
     @Override
     public Platform getPlatform()
     {
-        return runtime.getPlatform();
+        return platform;
     }
 
 
     @Override
     public Options getOptions()
     {
-        return runtime.getOptions();
+        return options;
     }
 
 
@@ -210,28 +216,21 @@ public abstract class AbstractApplication<A extends AbstractApplication<A, P, R>
     @Override
     public void close(Option... options)
     {
+        // ----- remove all of the features -----
+
+        removeAllFeatures();
+
         // ----- notify the Profiles that the application is closing -----
 
         for (Profile profile : getOptions().getInstancesOf(Profile.class))
         {
-            profile.onBeforeClose(runtime.getPlatform(), this, getOptions());
+            profile.onBeforeClose(platform, this, getOptions());
         }
 
         // ------ notify ApplicationListeners (about closing) ------
 
         // notify the ApplicationListener-based Options that the application is about to close
-        Option[] applicationOptions = getOptions().asArray();
-
-        for (Option option : applicationOptions)
-        {
-            if (option instanceof ApplicationListener)
-            {
-                ((ApplicationListener) option).onClosing(this);
-            }
-        }
-
-        // notify the ApplicationListeners registered for the application that is about to close
-        for (ApplicationListener listener : listeners)
+        for (ApplicationListener listener : getOptions().getInstancesOf(ApplicationListener.class))
         {
             listener.onClosing(this);
         }
@@ -245,8 +244,8 @@ public abstract class AbstractApplication<A extends AbstractApplication<A, P, R>
         Options closingOptions = new Options(options);
 
         // determine the required closing behavior
-        ApplicationClosingBehavior closingBehavior = closingOptions.get(ApplicationClosingBehavior.class,
-                                                                        defaultClosingBehavior);
+        ApplicationClosingBehavior closingBehavior = closingOptions.getOrDefault(ApplicationClosingBehavior.class,
+                                                                                 defaultClosingBehavior);
 
         if (closingBehavior != null)
         {
@@ -265,7 +264,7 @@ public abstract class AbstractApplication<A extends AbstractApplication<A, P, R>
         // ------ close the process ------
 
         // close the process
-        runtime.getApplicationProcess().close();
+        process.close();
 
         // ------ clean up ------
 
@@ -319,7 +318,7 @@ public abstract class AbstractApplication<A extends AbstractApplication<A, P, R>
 
         try
         {
-            runtime.getApplicationConsole().close();
+            console.close();
         }
         catch (Exception e)
         {
@@ -339,16 +338,7 @@ public abstract class AbstractApplication<A extends AbstractApplication<A, P, R>
         // ------ notify ApplicationListeners (about being closed) ------
 
         // notify the ApplicationListener-based Options that the application has closed
-        for (Option option : applicationOptions)
-        {
-            if (option instanceof ApplicationListener)
-            {
-                ((ApplicationListener) option).onClosed(this);
-            }
-        }
-
-        // notify the ApplicationListeners registered for the application that is has closed
-        for (ApplicationListener listener : listeners)
+        for (ApplicationListener listener : getOptions().getInstancesOf(ApplicationListener.class))
         {
             listener.onClosed(this);
         }
@@ -358,28 +348,7 @@ public abstract class AbstractApplication<A extends AbstractApplication<A, P, R>
     @Override
     public long getId()
     {
-        return runtime.getApplicationProcess().getId();
-    }
-
-
-    @Override
-    public Iterable<ApplicationListener<? super A>> getApplicationListeners()
-    {
-        return listeners;
-    }
-
-
-    @Override
-    public void addApplicationListener(ApplicationListener listener)
-    {
-        listeners.add(listener);
-    }
-
-
-    @Override
-    public void removeApplicationListener(ApplicationListener listener)
-    {
-        listeners.remove(listener);
+        return process.getId();
     }
 
 
@@ -387,16 +356,16 @@ public abstract class AbstractApplication<A extends AbstractApplication<A, P, R>
     public int waitFor(Option... options)
     {
         // include the application specific options for waiting
-        Options optionsMap = new Options(getOptions().asArray()).addAll(options);
+        Options waitForOptions = new Options(getOptions().asArray()).addAll(options);
 
-        return runtime.getApplicationProcess().waitFor(optionsMap.asArray());
+        return process.waitFor(waitForOptions.asArray());
     }
 
 
     @Override
     public int exitValue()
     {
-        return runtime.getApplicationProcess().exitValue();
+        return process.exitValue();
     }
 
 

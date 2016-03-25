@@ -65,7 +65,7 @@ public class InfrastructureBuilder<P extends Platform>
     private final List<P> platforms;
 
     /**
-     * The {@link ExecutorService} to use to realize the {@link Platform}s in parallel
+     * The {@link ExecutorService} to use to build the {@link Platform}s in parallel
      */
     private ExecutorService executor;
 
@@ -265,7 +265,7 @@ public class InfrastructureBuilder<P extends Platform>
     }
 
     /**
-     * A {@link Callable} used to realize a specific {@link Platform}
+     * A {@link Callable} used to build a specific {@link Platform}
      */
     private class PlatformRealizer implements Callable<Pair<String, P>>
     {

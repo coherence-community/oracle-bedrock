@@ -26,16 +26,17 @@
 package com.oracle.tools.runtime.remote;
 
 import com.oracle.tools.Option;
+import com.oracle.tools.Options;
 
 import com.oracle.tools.runtime.AbstractPlatform;
 import com.oracle.tools.runtime.Application;
-import com.oracle.tools.runtime.ApplicationBuilder;
+import com.oracle.tools.runtime.ApplicationLauncher;
 
 import com.oracle.tools.runtime.java.JavaApplication;
 
-import com.oracle.tools.runtime.options.ApplicationBuilders;
-import com.oracle.tools.runtime.remote.java.RemoteJavaApplicationBuilder;
-import com.oracle.tools.runtime.remote.options.RemoteApplicationBuilders;
+import com.oracle.tools.runtime.options.MetaClass;
+
+import com.oracle.tools.runtime.remote.java.RemoteJavaApplicationLauncher;
 
 import java.net.InetAddress;
 
@@ -85,7 +86,7 @@ public class RemotePlatform extends AbstractPlatform<RemotePlatform>
                           Authentication authentication,
                           Option...      options)
     {
-        this(address.toString(), address, RemoteApplicationBuilder.DEFAULT_PORT, userName, authentication, options);
+        this(address.toString(), address, RemoteApplicationLauncher.DEFAULT_PORT, userName, authentication, options);
     }
 
 
@@ -105,7 +106,7 @@ public class RemotePlatform extends AbstractPlatform<RemotePlatform>
                           Authentication authentication,
                           Option...      options)
     {
-        this(name, address, RemoteApplicationBuilder.DEFAULT_PORT, userName, authentication, options);
+        this(name, address, RemoteApplicationLauncher.DEFAULT_PORT, userName, authentication, options);
     }
 
 
@@ -132,9 +133,6 @@ public class RemotePlatform extends AbstractPlatform<RemotePlatform>
         this.port           = port;
         this.userName       = userName;
         this.authentication = authentication;
-
-        // ----- set any default options ------
-        getOptions().addIfAbsent(RemoteApplicationBuilders.remote());
     }
 
 
@@ -142,6 +140,23 @@ public class RemotePlatform extends AbstractPlatform<RemotePlatform>
     public InetAddress getAddress()
     {
         return address;
+    }
+
+
+    @Override
+    protected <A extends Application,
+               B extends ApplicationLauncher<A, RemotePlatform>> B getApplicationBuilder(Class<A>     applicationClass,
+                                                                                         MetaClass<A> metaClass,
+                                                                                         Options      options) throws UnsupportedOperationException
+    {
+        if (JavaApplication.class.isAssignableFrom(applicationClass))
+        {
+            return (B) new RemoteJavaApplicationLauncher(this);
+        }
+        else
+        {
+            return (B) new SimpleRemoteApplicationLauncher(this);
+        }
     }
 
 

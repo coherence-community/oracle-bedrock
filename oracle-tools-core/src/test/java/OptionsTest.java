@@ -26,9 +26,9 @@
 import com.oracle.tools.Option;
 import com.oracle.tools.Options;
 
+import com.oracle.tools.options.Decoration;
 import com.oracle.tools.options.Timeout;
 
-import org.hamcrest.CoreMatchers;
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -40,9 +40,10 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Set;
+
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -56,6 +57,59 @@ import java.util.concurrent.TimeUnit;
 public class OptionsTest
 {
     /**
+     * A simple {@link Option} using a {@link Options.Default}
+     * annotation on a enum.
+     */
+    public enum Meal implements Option
+    {
+        TOAST,
+        SOUP,
+        STEAK,
+        @Options.Default
+        CHICKEN,
+        FISH
+    }
+
+
+    /**
+     * A simple {@link Option} using a {@link Options.Default}
+     * annotation on a static attribute.
+     */
+    public enum Device implements Option
+    {
+        CASSETTE,
+        FLOPPY,
+        TAPE,
+        HARD_DRIVE,
+        SOLID_STATE_DRIVE;
+
+        /**
+         * Field description
+         */
+        @Options.Default
+        public static Device DEFAULT = FLOPPY;
+    }
+
+
+    /**
+     * A simple {@link Option} using a {@link Options.Default}
+     * annotation on a static getter method.
+     */
+    public enum Duration implements Option
+    {
+        SECOND,
+        MINUTE,
+        HOUR;
+
+        @Options.Default
+        public static Duration getDefault()
+        {
+            return SECOND;
+        }
+    }
+
+
+    /**
      * Ensure that we can get an {@link Option} that has a default.
      */
     @Test
@@ -65,6 +119,8 @@ public class OptionsTest
 
         assertThat(options.get(Timeout.class), is(Timeout.autoDetect()));
     }
+
+
     /**
      * Ensure that the default instance returned is the same value.
      */
@@ -87,7 +143,7 @@ public class OptionsTest
     @Test
     public void shouldAddAndGetSpecificOption()
     {
-        Timeout option = Timeout.after(5, TimeUnit.MINUTES);
+        Timeout option  = Timeout.after(5, TimeUnit.MINUTES);
 
         Options options = new Options(option);
 
@@ -101,9 +157,9 @@ public class OptionsTest
     @Test
     public void shouldReplaceAndGetSpecificOption()
     {
-        Timeout option = Timeout.after(5, TimeUnit.MINUTES);
+        Timeout option      = Timeout.after(5, TimeUnit.MINUTES);
 
-        Options options = new Options(option);
+        Options options     = new Options(option);
 
         Timeout otherOption = Timeout.after(1, TimeUnit.SECONDS);
 
@@ -119,9 +175,9 @@ public class OptionsTest
     @Test
     public void shouldNotReplaceAndGetSpecificOption()
     {
-        Timeout option = Timeout.after(5, TimeUnit.MINUTES);
+        Timeout option      = Timeout.after(5, TimeUnit.MINUTES);
 
-        Options options = new Options(option);
+        Options options     = new Options(option);
 
         Timeout otherOption = Timeout.after(1, TimeUnit.SECONDS);
 
@@ -137,7 +193,7 @@ public class OptionsTest
     @Test
     public void shouldRemoveASpecificOption()
     {
-        Timeout option = Timeout.after(5, TimeUnit.MINUTES);
+        Timeout option  = Timeout.after(5, TimeUnit.MINUTES);
 
         Options options = new Options(option);
 
@@ -159,9 +215,9 @@ public class OptionsTest
     @Test
     public void shouldDetermineDirectlyImplementedOptionClass()
     {
-        Timeout option = Timeout.after(5, TimeUnit.MINUTES);
+        Timeout option      = Timeout.after(5, TimeUnit.MINUTES);
 
-        Class optionClass = Options.getClassOf(option);
+        Class   optionClass = Options.getClassOf(option);
 
         assertThat(optionClass.equals(Timeout.class), is(true));
     }
@@ -176,9 +232,9 @@ public class OptionsTest
     @Test
     public void shouldDetermineIndirectlyImplementedOptionClass()
     {
-        Enhanced option = new Enhanced();
+        Enhanced option      = new Enhanced();
 
-        Class optionClass = Options.getClassOf(option);
+        Class    optionClass = Options.getClassOf(option);
 
         assertThat(optionClass.equals(EnhancedOption.class), is(true));
     }
@@ -193,9 +249,9 @@ public class OptionsTest
     @Test
     public void shouldDetermineExtendedOptionClass()
     {
-        ExtendedEnhanced option = new ExtendedEnhanced();
+        ExtendedEnhanced option      = new ExtendedEnhanced();
 
-        Class optionClass = Options.getClassOf(option);
+        Class            optionClass = Options.getClassOf(option);
 
         assertThat(optionClass.equals(EnhancedOption.class), is(true));
         assertThat(optionClass.equals(ExtendedEnhanced.class), is(false));
@@ -237,9 +293,9 @@ public class OptionsTest
     public void shouldMaintainASetByConcreteType()
     {
         Timeout fiveMinutes = Timeout.after(5, TimeUnit.MINUTES);
-        Timeout oneSecond = Timeout.after(1, TimeUnit.SECONDS);
+        Timeout oneSecond   = Timeout.after(1, TimeUnit.SECONDS);
 
-        Options options = Options.from(fiveMinutes, oneSecond);
+        Options options     = Options.from(fiveMinutes, oneSecond);
 
         assertThat(options.get(Timeout.class), is(oneSecond));
     }
@@ -381,6 +437,7 @@ public class OptionsTest
         assertThat(options.get(Messages.class).get(), is("Hello, G'day"));
 
         HashSet<Message> messages = new HashSet<>();
+
         for (Message message : options.getInstancesOf(Message.class))
         {
             messages.add(message);
@@ -393,74 +450,35 @@ public class OptionsTest
 
 
     /**
-     * A simple {@link Option} using a {@link Options.Default}
-     * annotation on a static getter method.
+     * Ensure that we can add {@link Decoration}s to {@link Options}.
      */
-    public enum Duration implements Option
+    @Test
+    public void shouldAddAnRemoveDecorations()
     {
-        SECOND,
-        MINUTE,
-        HOUR;
+        Options         options     = new Options().add(Decoration.of("hello")).add(Decoration.of("world"));
 
+        HashSet<String> decorations = new HashSet<>();
 
-        @Options.Default
-        public static Duration getDefault()
+        for (String string : options.getInstancesOf(String.class))
         {
-            return SECOND;
-        }
-    }
-
-
-    /**
-     * A simple {@link Option} using a {@link Options.Default}
-     * annotation on a static attribute.
-     */
-    public enum Device implements Option
-    {
-        CASSETTE,
-        FLOPPY,
-        TAPE,
-        HARD_DRIVE,
-        SOLID_STATE_DRIVE;
-
-        @Options.Default
-        public static Device DEFAULT = FLOPPY;
-    }
-
-    /**
-     * A simple {@link Option} using a {@link Options.Default}
-     * annotation on a enum.
-     */
-    public enum Meal implements Option
-    {
-        TOAST,
-        SOUP,
-        STEAK,
-
-        @Options.Default
-        CHICKEN,
-
-        FISH
-    }
-
-    /**
-     * A simple {@link Option} using a {@link Options.Default}
-     * annotation on a public no-args constructor.
-     */
-    public static class Beverage implements Option
-    {
-        @Options.Default
-        public Beverage()
-        {
+            decorations.add(string);
         }
 
+        assertThat(decorations.size(), is(2));
 
-        @Override
-        public String toString()
+        options.remove(Decoration.of("hello"));
+        options.remove(Decoration.of("world"));
+
+        decorations = new HashSet<>();
+
+        for (String string : options.getInstancesOf(String.class))
         {
-            return "Beer";
+            decorations.add(string);
         }
+
+        assertThat(decorations.size(), is(0));
     }
+
 
     /**
      * An {@link EnhancedOption}.
@@ -475,6 +493,30 @@ public class OptionsTest
      */
     public abstract class AbstractEnhanced implements EnhancedOption
     {
+    }
+
+
+    /**
+     * A simple {@link Option} using a {@link Options.Default}
+     * annotation on a public no-args constructor.
+     */
+    public static class Beverage implements Option
+    {
+        /**
+         * Constructs ...
+         *
+         */
+        @Options.Default
+        public Beverage()
+        {
+        }
+
+
+        @Override
+        public String toString()
+        {
+            return "Beer";
+        }
     }
 
 
@@ -495,6 +537,67 @@ public class OptionsTest
 
 
     /**
+     * A {@link Collectable} for testing.
+     */
+    public static class Message implements Option.Collectable
+    {
+        private String value;
+
+
+        /**
+         * Constructs ...
+         *
+         *
+         * @param value
+         */
+        public Message(String value)
+        {
+            this.value = value;
+        }
+
+
+        public String get()
+        {
+            return value;
+        }
+
+
+        @Override
+        public Class<Messages> getCollectorClass()
+        {
+            return Messages.class;
+        }
+
+
+        @Override
+        public boolean equals(Object o)
+        {
+            if (this == o)
+            {
+                return true;
+            }
+
+            if (!(o instanceof Message))
+            {
+                return false;
+            }
+
+            Message message = (Message) o;
+
+            return value != null ? value.equals(message.value) : message.value == null;
+
+        }
+
+
+        @Override
+        public int hashCode()
+        {
+            return value != null ? value.hashCode() : 0;
+        }
+    }
+
+
+    /**
      * A {@link Collector} for testing.
      */
     public static class Messages implements Option.Collector<Message, Messages>
@@ -502,6 +605,10 @@ public class OptionsTest
         private ArrayList<Message> messageList;
 
 
+        /**
+         * Constructs ...
+         *
+         */
         @Options.Default
         public Messages()
         {
@@ -509,6 +616,12 @@ public class OptionsTest
         }
 
 
+        /**
+         * Constructs ...
+         *
+         *
+         * @param messages
+         */
         public Messages(Message... messages)
         {
             if (messages == null)
@@ -527,6 +640,12 @@ public class OptionsTest
         }
 
 
+        /**
+         * Constructs ...
+         *
+         *
+         * @param messages
+         */
         public Messages(Messages messages)
         {
             this.messageList = new ArrayList<>(messages.messageList.size());
@@ -560,6 +679,7 @@ public class OptionsTest
         public Messages with(Message message)
         {
             Messages messages = new Messages(this);
+
             messages.messageList.add(message);
 
             return messages;
@@ -570,6 +690,7 @@ public class OptionsTest
         public Messages without(Message message)
         {
             Messages messages = new Messages(this);
+
             messages.messageList.remove(message);
 
             return messages;
@@ -577,57 +698,23 @@ public class OptionsTest
 
 
         @Override
+        public <O> Iterable<O> getInstancesOf(Class<O> requiredClass)
+        {
+            if (requiredClass.isAssignableFrom(Message.class))
+            {
+                return (Iterable<O>) messageList;
+            }
+            else
+            {
+                return Collections.EMPTY_LIST;
+            }
+        }
+
+
+        @Override
         public Iterator<Message> iterator()
         {
             return messageList.iterator();
-        }
-    }
-
-
-    /**
-     * A {@link Collectable} for testing.
-     */
-    public static class Message implements Option.Collectable
-    {
-        private String value;
-
-
-        public Message(String value)
-        {
-            this.value = value;
-        }
-
-
-        public String get()
-        {
-            return value;
-        }
-
-
-        @Override
-        public Class<Messages> getCollectorClass()
-        {
-            return Messages.class;
-        }
-
-
-        @Override
-        public boolean equals(Object o)
-        {
-            if (this == o) return true;
-            if (!(o instanceof Message)) return false;
-
-            Message message = (Message) o;
-
-            return value != null ? value.equals(message.value) : message.value == null;
-
-        }
-
-
-        @Override
-        public int hashCode()
-        {
-            return value != null ? value.hashCode() : 0;
         }
     }
 }
