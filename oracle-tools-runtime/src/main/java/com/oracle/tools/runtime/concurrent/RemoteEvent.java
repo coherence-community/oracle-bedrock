@@ -1,9 +1,9 @@
 /*
- * File: JavaApplicationProcess.java
+ * File: RemoteEvent.java
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * The contents of this file are subject to the terms and conditions of 
+ * The contents of this file are subject to the terms and conditions of
  * the Common Development and Distribution License 1.0 (the "License").
  *
  * You may not use this file except in compliance with the License.
@@ -23,31 +23,19 @@
  * "Portions Copyright [year] [name of copyright owner]"
  */
 
-package com.oracle.tools.runtime.java;
+package com.oracle.tools.runtime.concurrent;
 
-import com.oracle.tools.runtime.ApplicationProcess;
-
-import com.oracle.tools.runtime.concurrent.RemoteEventChannel;
-import com.oracle.tools.runtime.concurrent.RemoteExecutor;
-
-import java.util.Properties;
+import java.io.Serializable;
 
 /**
- * A {@link ApplicationProcess} specifically for managing Java-based
- * Applications at runtime.
+ * Represents an arbitrary event that may fired by one process and received
+ * by a different process.
  * <p>
- * Copyright (c) 2013. All Rights Reserved. Oracle Corporation.<br>
+ * Copyright (c) 2016. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
- * @author Brian Oliver
+ * @author Jonathan Knight
  */
-public interface JavaApplicationProcess extends ApplicationProcess, RemoteExecutor, RemoteEventChannel.Consumer
+public interface RemoteEvent extends Serializable
 {
-    /**
-     * Obtains the resolved System {@link Properties} provided to the {@link JavaApplicationProcess}
-     * when it was launched.
-     *
-     * @return  the resolved System {@link Properties}
-     */
-    Properties getSystemProperties();
 }

@@ -44,6 +44,8 @@ import com.oracle.tools.runtime.Settings;
 
 import com.oracle.tools.runtime.concurrent.ControllableRemoteExecutor;
 import com.oracle.tools.runtime.concurrent.RemoteCallable;
+import com.oracle.tools.runtime.concurrent.RemoteEventChannel;
+import com.oracle.tools.runtime.concurrent.RemoteEventListener;
 import com.oracle.tools.runtime.concurrent.RemoteExecutor;
 import com.oracle.tools.runtime.concurrent.RemoteRunnable;
 import com.oracle.tools.runtime.concurrent.socket.RemoteExecutorServer;
@@ -216,6 +218,12 @@ public class RemoteJavaApplicationLauncher extends AbstractRemoteApplicationLaun
             // when a non-automatic deployment is specified we use the specified class path
             remoteClassPath = options.get(ClassPath.class);
         }
+
+        // Add any event listeners now so that they are listening before the application starts
+        for (RemoteEventListener listener : options.getInstancesOf(RemoteEventListener.class))
+        {
+            remoteExecutor.addEventListener(listener);
+        }
     }
 
 
@@ -267,7 +275,7 @@ public class RemoteJavaApplicationLauncher extends AbstractRemoteApplicationLaun
     @Override
     protected <P extends ApplicationProcess> P adapt(RemoteApplicationProcess process)
     {
-        return (P) new RemoteJavaApplicationProcess(process, remoteExecutor, systemProperties);
+        return (P) new RemoteJavaApplicationProcess(process, remoteExecutor, remoteExecutor, systemProperties);
     }
 
 
@@ -478,19 +486,31 @@ public class RemoteJavaApplicationLauncher extends AbstractRemoteApplicationLaun
          */
         private Properties systemProperties;
 
+        /**
+         * The {@link RemoteEventChannel.Consumer} that will receive
+         * {@link com.oracle.tools.runtime.concurrent.RemoteEvent}s from the
+         * remote process.
+         */
+        private RemoteEventChannel.Consumer eventConsumer;
 
         /**
          * Constructs a {@link RemoteJavaApplicationProcess}.
          *
-         * @param process         the underlying {@link RemoteApplicationProcess}
-         * @param remoteExecutor  the {@link RemoteExecutor} for executing remote requests
+         * @param process          the underlying {@link RemoteApplicationProcess}
+         * @param remoteExecutor   the {@link RemoteExecutor} for executing remote requests
+         * @param eventConsumer    the {@link RemoteEventChannel.Consumer} that will receive
+         *                         {@link com.oracle.tools.runtime.concurrent.RemoteEvent}s
+         *                         from the process.
+         * @param systemProperties the resolved System {@link Properties} provided to the {}
          */
-        public RemoteJavaApplicationProcess(RemoteApplicationProcess   process,
-                                            ControllableRemoteExecutor remoteExecutor,
-                                            Properties                 systemProperties)
+        public RemoteJavaApplicationProcess(RemoteApplicationProcess    process,
+                                            ControllableRemoteExecutor  remoteExecutor,
+                                            RemoteEventChannel.Consumer eventConsumer,
+                                            Properties                  systemProperties)
         {
             this.process          = process;
             this.remoteExecutor   = remoteExecutor;
+            this.eventConsumer    = eventConsumer;
             this.systemProperties = systemProperties;
         }
 
@@ -571,6 +591,19 @@ public class RemoteJavaApplicationLauncher extends AbstractRemoteApplicationLaun
         public void submit(RemoteRunnable runnable) throws IllegalStateException
         {
             remoteExecutor.submit(runnable);
+        }
+
+        @Override
+        public void addEventListener(RemoteEventListener listener)
+        {
+            eventConsumer.addEventListener(listener);
+        }
+
+
+        @Override
+        public void removeEventListener(RemoteEventListener listener)
+        {
+            eventConsumer.removeEventListener(listener);
         }
     }
 }

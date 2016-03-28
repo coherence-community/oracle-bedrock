@@ -49,6 +49,8 @@ import com.oracle.tools.runtime.Settings;
 
 import com.oracle.tools.runtime.concurrent.ControllableRemoteExecutor;
 import com.oracle.tools.runtime.concurrent.RemoteCallable;
+import com.oracle.tools.runtime.concurrent.RemoteEventChannel;
+import com.oracle.tools.runtime.concurrent.RemoteEventListener;
 import com.oracle.tools.runtime.concurrent.RemoteExecutor;
 import com.oracle.tools.runtime.concurrent.RemoteRunnable;
 import com.oracle.tools.runtime.concurrent.socket.RemoteExecutorServer;
@@ -349,6 +351,13 @@ public class LocalJavaApplicationLauncher<A extends JavaApplication>
             throw new RuntimeException("Failed to create remote execution server for the application", e);
         }
 
+        // Add any event listeners now so that they are listening before the application starts
+        for (RemoteEventListener listener : launchOptions.getInstancesOf(RemoteEventListener.class))
+        {
+            server.addEventListener(listener);
+        }
+
+
         // add Oracle Tools specific System Properties
 
         // NOTE: the Oracle Tools parent address for locally created applications is always "loopback" as
@@ -548,6 +557,7 @@ public class LocalJavaApplicationLauncher<A extends JavaApplication>
         // establish a LocalJavaProcess to represent the underlying Process
         LocalJavaApplicationProcess localJavaProcess = new LocalJavaApplicationProcess(process,
                                                                                        server,
+                                                                                       server,
                                                                                        systemProperties);
 
         // determine the application class that will represent the running application
@@ -645,6 +655,13 @@ public class LocalJavaApplicationLauncher<A extends JavaApplication>
          */
         private Properties systemProperties;
 
+        /**
+         * The {@link RemoteEventChannel.Consumer} that will receive
+         * {@link com.oracle.tools.runtime.concurrent.RemoteEvent}s from the
+         * process.
+         */
+        private RemoteEventChannel.Consumer eventConsumer;
+
 
         /**
          * Constructs a {@link LocalJavaApplicationProcess}.
@@ -652,15 +669,20 @@ public class LocalJavaApplicationLauncher<A extends JavaApplication>
          * @param process          the underlying operating system {@link Process}
          * @param remoteExecutor   the {@link ControllableRemoteExecutor} that may be used
          *                         to submit and control the process remotely
+         * @param eventConsumer    the {@link RemoteEventChannel.Consumer} that will receive
+         *                         {@link com.oracle.tools.runtime.concurrent.RemoteEvent}s
+         *                         from the process.
          * @param systemProperties the resolved System {@link Properties} provided to the {}
          */
-        public LocalJavaApplicationProcess(Process                    process,
-                                           ControllableRemoteExecutor remoteExecutor,
-                                           Properties                 systemProperties)
+        public LocalJavaApplicationProcess(Process                     process,
+                                           ControllableRemoteExecutor  remoteExecutor,
+                                           RemoteEventChannel.Consumer eventConsumer,
+                                           Properties                  systemProperties)
         {
             super(process);
 
             this.remoteExecutor   = remoteExecutor;
+            this.eventConsumer    = eventConsumer;
             this.systemProperties = systemProperties;
         }
 
@@ -693,6 +715,20 @@ public class LocalJavaApplicationLauncher<A extends JavaApplication>
             super.close();
 
             remoteExecutor.close();
+        }
+
+
+        @Override
+        public void addEventListener(RemoteEventListener listener)
+        {
+            eventConsumer.addEventListener(listener);
+        }
+
+
+        @Override
+        public void removeEventListener(RemoteEventListener listener)
+        {
+            eventConsumer.removeEventListener(listener);
         }
     }
 }

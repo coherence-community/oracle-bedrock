@@ -40,6 +40,7 @@ import com.oracle.tools.runtime.concurrent.callable.RemoteCallableStaticMethod;
 
 import com.oracle.tools.runtime.java.ContainerBasedJavaApplicationLauncher;
 import com.oracle.tools.runtime.java.JavaApplication;
+import com.oracle.tools.runtime.java.container.ContainerClassLoader;
 import com.oracle.tools.runtime.java.options.ClassName;
 import com.oracle.tools.runtime.java.options.Headless;
 import com.oracle.tools.runtime.java.options.IPv4Preferred;
@@ -58,6 +59,7 @@ import java.io.NotSerializableException;
 
 import java.net.InetAddress;
 
+import java.util.Queue;
 import java.util.Set;
 
 /**
@@ -303,6 +305,14 @@ public interface CoherenceClusterMember extends JavaApplication
                                                                              "shutdown");
 
             application.submit(callable, listener);
+        }
+
+        @Override
+        public void setEventPublisher(ContainerClassLoader classLoader, Queue<byte[]> eventQueue, Options options)
+        {
+            ClassName className = options.getOrDefault(ClassName.class, ClassName.of(DEFAULT_CACHE_SERVER_CLASSNAME));
+
+            ContainerBasedJavaApplicationLauncher.setEventPublisher(classLoader, eventQueue, className.getName());
         }
     }
 }

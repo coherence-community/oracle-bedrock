@@ -37,7 +37,11 @@ import com.oracle.tools.runtime.Profile;
 import com.oracle.tools.runtime.Profiles;
 import com.oracle.tools.runtime.PropertiesBuilder;
 
+import com.oracle.tools.runtime.concurrent.BlockingQueueEventChannel;
 import com.oracle.tools.runtime.concurrent.RemoteCallable;
+import com.oracle.tools.runtime.concurrent.RemoteEvent;
+import com.oracle.tools.runtime.concurrent.RemoteEventChannel;
+import com.oracle.tools.runtime.concurrent.RemoteEventListener;
 import com.oracle.tools.runtime.concurrent.RemoteExecutor;
 import com.oracle.tools.runtime.concurrent.RemoteRunnable;
 import com.oracle.tools.runtime.concurrent.callable.RemoteCallableStaticMethod;
@@ -69,19 +73,23 @@ import java.io.OutputStream;
 
 import java.lang.reflect.Constructor;
 
+import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Properties;
+import java.util.Queue;
 import java.util.UUID;
 
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -325,11 +333,18 @@ public class ContainerBasedJavaApplicationLauncher<A extends JavaApplication>
                                                                                                     controller,
                                                                                                     systemProperties);
 
+            // Add any event listeners now so that they are listening before the application starts
+            for (RemoteEventListener listener : launchOptions.getInstancesOf(RemoteEventListener.class))
+            {
+                process.addEventListener(listener);
+            }
+
+
             // notify the container of the scope to manage
             Container.manage(classLoader.getContainerScope());
 
             // start the process
-            process.start();
+            process.start(launchOptions);
 
             // the environment variables for the ContainerBasedJavaApplication
             // will be the environment variables for the Java Virtual Machine
@@ -394,6 +409,53 @@ public class ContainerBasedJavaApplicationLauncher<A extends JavaApplication>
     }
 
 
+    public static void setEventPublisher(ContainerClassLoader classLoader,
+                                         Queue<byte[]> eventQueue,
+                                         String targetClassName)
+    {
+        // remember the current context ClassLoader of the thread
+        // (so that we can return it back to normal when we're finished executing)
+        ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
+
+        try
+        {
+            // set the context ClassLoader of the Thread to be that of the
+            // ContainerClassLoader
+            Thread.currentThread().setContextClassLoader(classLoader);
+
+            // and associate the Thread with the Scope in the Container
+            Container.associateThreadWith(classLoader.getContainerScope());
+
+            Class<?> publisherClass = classLoader.loadClass(BlockingQueueEventChannel.Publisher.class.getName());
+            Constructor<?> constructor = publisherClass.getConstructor(Queue.class);
+            Object publisher = constructor.newInstance(eventQueue);
+
+            Class targetClass = classLoader.loadClass(targetClassName);
+
+            Class<?> injectorClass = classLoader.loadClass(RemoteEventChannel.Injector.class.getName());
+            Class<?> cls = classLoader.loadClass(RemoteEventChannel.Publisher.class.getName());
+            Method method = injectorClass.getMethod("injectPublisher", Class.class, cls);
+            method.invoke(null, targetClass, publisher);
+        }
+        catch (ClassNotFoundException e)
+        {
+            // skip publisher injection as required classes are not on the classpath
+        }
+        catch (Exception e)
+        {
+            throw new RuntimeException(e);
+        }
+        finally
+        {
+            // afterwards dissociate the Thread from the Scope in the Container
+            Container.dissociateThread();
+
+            // and return the current context ClassLoader back to normal
+            Thread.currentThread().setContextClassLoader(originalClassLoader);
+        }
+    }
+
+
     /**
      * Provides the ability to start and destroy a container-based
      * {@link ControllableApplication} application.
@@ -428,6 +490,17 @@ public class ContainerBasedJavaApplicationLauncher<A extends JavaApplication>
          */
         void destroy(ControllableApplication  application,
                      CompletionListener<Void> listener);
+
+        /**
+         * Configure the event publisher for the application.
+         * The publisher should publish serialized {@link RemoteEvent}s to the
+         * specified {@link Queue}.
+         *
+         * @param classLoader  the {@link ContainerClassLoader} used to isolate the application
+         * @param eventQueue   the {@link Queue} to use to publis serialized events to
+         * @param options      the {@link Options} being used to launch the application
+         */
+        void setEventPublisher(ContainerClassLoader classLoader, Queue<byte[]> eventQueue, Options options);
     }
 
 
@@ -451,7 +524,8 @@ public class ContainerBasedJavaApplicationLauncher<A extends JavaApplication>
      * Java application running with in a Java Virtual Machine, as part of a
      * container, much like a Java EE application.
      */
-    public static class ContainerBasedJavaApplicationProcess implements JavaApplicationProcess, ControllableApplication
+    public static class ContainerBasedJavaApplicationProcess
+            implements JavaApplicationProcess, ControllableApplication, RemoteEventChannel.Consumer, RemoteEventChannel.Publisher
     {
         /**
          * An {@link ExecutorService} to use for requesting asynchronous
@@ -489,6 +563,17 @@ public class ContainerBasedJavaApplicationLauncher<A extends JavaApplication>
          */
         private FutureCompletionListener<Void> m_destroyListener;
 
+        /**
+         * The {@link BlockingQueue} used as a pipe for sending events from the
+         * application process.
+         */
+        private BlockingQueue<byte[]> m_eventQueue;
+
+        /**
+         * The {@link BlockingQueueEventChannel.Consumer} used to comsume and forward
+         * events from the process.
+         */
+        private BlockingQueueEventChannel.Consumer m_eventConsumer;
 
         /**
          * Constructs an {@link ContainerBasedJavaApplicationProcess}.
@@ -512,6 +597,9 @@ public class ContainerBasedJavaApplicationLauncher<A extends JavaApplication>
 
             m_classLoader         = classLoader;
             m_controller          = controller;
+
+            m_eventQueue          = new LinkedBlockingQueue<>();
+            m_eventConsumer       = new BlockingQueueEventChannel.Consumer(m_eventQueue);
 
             this.systemProperties = systemProperties;
         }
@@ -598,15 +686,20 @@ public class ContainerBasedJavaApplicationLauncher<A extends JavaApplication>
 
         /**
          * Starts the application.
+         * @param launchOptions
          */
-        public void start()
+        public void start(Options options)
         {
+            m_executorService.submit(m_eventConsumer);
+
             if (m_controller == null)
             {
                 m_startListener = null;
             }
             else
             {
+                m_controller.setEventPublisher(m_classLoader, m_eventQueue, options);
+
                 m_startListener = new FutureCompletionListener<Void>();
                 m_controller.start(this, m_startListener);
             }
@@ -633,6 +726,8 @@ public class ContainerBasedJavaApplicationLauncher<A extends JavaApplication>
 
                 m_controller = null;
             }
+
+            m_eventConsumer.stop();
 
             ContainerScope scope = m_classLoader.getContainerScope();
 
@@ -808,6 +903,24 @@ public class ContainerBasedJavaApplicationLauncher<A extends JavaApplication>
                 }
             }
         }
+
+        public void fireEvent(RemoteEvent event)
+        {
+            throw new UnsupportedOperationException("NOT IMPLEMENTED!!!");
+        }
+
+        @Override
+        public void addEventListener(RemoteEventListener listener)
+        {
+            m_eventConsumer.addEventListener(listener);
+        }
+
+
+        @Override
+        public void removeEventListener(RemoteEventListener listener)
+        {
+            m_eventConsumer.removeEventListener(listener);
+        }
     }
 
 
@@ -891,6 +1004,11 @@ public class ContainerBasedJavaApplicationLauncher<A extends JavaApplication>
                 application.submit(m_callableDestroyStaticMethod, listener);
             }
         }
+
+        @Override
+        public void setEventPublisher(ContainerClassLoader classLoader, Queue<byte[]> eventQueue, Options options)
+        {
+        }
     }
 
 
@@ -925,6 +1043,14 @@ public class ContainerBasedJavaApplicationLauncher<A extends JavaApplication>
             {
                 listener.onCompletion(null);
             }
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public void setEventPublisher(ContainerClassLoader classLoader, Queue<byte[]> eventQueue, Options options)
+        {
         }
     }
 
@@ -1003,6 +1129,12 @@ public class ContainerBasedJavaApplicationLauncher<A extends JavaApplication>
             {
                 listener.onCompletion(null);
             }
+        }
+
+        @Override
+        public void setEventPublisher(ContainerClassLoader classLoader, Queue<byte[]> eventQueue, Options options)
+        {
+            ContainerBasedJavaApplicationLauncher.setEventPublisher(classLoader, eventQueue, applicationClassName);
         }
     }
 }

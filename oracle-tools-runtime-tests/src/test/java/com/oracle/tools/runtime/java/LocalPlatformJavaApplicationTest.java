@@ -25,6 +25,7 @@
 
 package com.oracle.tools.runtime.java;
 
+import classloader.applications.EventingApplication;
 import classloader.applications.ParentApplication;
 import classloader.applications.SleepingApplication;
 
@@ -34,11 +35,14 @@ import com.oracle.tools.deferred.listener.DeferredCompletionListener;
 
 import com.oracle.tools.io.NetworkHelper;
 
+import com.oracle.tools.options.Decoration;
 import com.oracle.tools.options.Timeout;
 
 import com.oracle.tools.runtime.Application;
 import com.oracle.tools.runtime.LocalPlatform;
 
+import com.oracle.tools.runtime.concurrent.RemoteEvent;
+import com.oracle.tools.runtime.concurrent.RemoteEventListener;
 import com.oracle.tools.runtime.concurrent.RemoteExecutor;
 import com.oracle.tools.runtime.concurrent.RemoteExecutorListener;
 import com.oracle.tools.runtime.concurrent.callable.GetSystemProperty;
@@ -95,9 +99,11 @@ import java.io.IOException;
 
 import java.net.InetSocketAddress;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -672,6 +678,62 @@ public class LocalPlatformJavaApplicationTest extends AbstractJavaApplicationTes
     }
 
 
+    @Test
+    public void shouldReceiveEventFromApplication() throws Exception
+    {
+        EventListener listener1 = new EventListener(1);
+        EventListener listener2 = new EventListener(1);
+        RemoteEvent   event     = new EventingApplication.Event(19);
+
+        try (JavaApplication application = getPlatform().launch(JavaApplication.class,
+                                                                ClassName.of(EventingApplication.class),
+                                                                IPv4Preferred.yes()))
+        {
+            application.addEventListener(listener1);
+            application.addEventListener(listener2);
+
+            EventingApplication.fireEvent(application, event);
+
+            assertThat(listener1.await(1, TimeUnit.MINUTES), is(true));
+            assertThat(listener2.await(1, TimeUnit.MINUTES), is(true));
+
+            assertThat(listener1.getEvents().size(), is(1));
+            assertThat(listener1.getEvents().get(0), is(event));
+
+            assertThat(listener2.getEvents().size(), is(1));
+            assertThat(listener2.getEvents().get(0), is(event));
+
+            application.close();
+        }
+    }
+
+
+    @Test
+    public void shouldReceiveEventsFromApplicationUsingListenerAsOption() throws Exception
+    {
+        int           count     = 10;
+        EventListener listener1 = new EventListener(count);
+        EventListener listener2 = new EventListener(count);
+
+        try (JavaApplication application = getPlatform().launch(JavaApplication.class,
+                                                                ClassName.of(EventingApplication.class),
+                                                                IPv4Preferred.yes(),
+                                                                Decoration.of(listener1),
+                                                                Decoration.of(listener2),
+                                                                Argument.of(count)))
+        {
+            assertThat(listener1.await(1, TimeUnit.MINUTES), is(true));
+            assertThat(listener2.await(1, TimeUnit.MINUTES), is(true));
+
+            application.close();
+
+            assertThat(listener1.getEvents().size(), is(count));
+            assertThat(listener2.getEvents().size(), is(count));
+
+        }
+    }
+
+
     /**
      * A {@link com.oracle.tools.runtime.concurrent.RemoteExecutorListener} to track when it's been opened and closed.
      */
@@ -749,6 +811,67 @@ public class LocalPlatformJavaApplicationTest extends AbstractJavaApplicationTes
         public RemoteExecutor getExecutor()
         {
             return executor;
+        }
+    }
+
+
+    /**
+     * An instance of a {@link RemoteEventListener} that captures events.
+     */
+    public static class EventListener implements RemoteEventListener
+    {
+        /**
+         * The counter to count the number of events received.
+         */
+        private final CountDownLatch latch;
+
+        /**
+         * The list of events received.
+         */
+        private final List<RemoteEvent> events;
+
+        /**
+         * Create an {@link EventListener} to receieve the expected number of events.
+         *
+         * @param expected  the expected number of events
+         */
+        public EventListener(int expected)
+        {
+            latch  = new CountDownLatch(expected);
+            events = new ArrayList<>();
+        }
+
+        /**
+         * Causes the current thread to wait until the expected number of events
+         * have been received, unless the thread is {@linkplain Thread#interrupt interrupted},
+         * or the specified waiting time elapses.
+         *
+         * @param timeout  the maximum time to wait
+         * @param unit     the time unit of the {@code timeout} argument
+         *
+         * @return {@code true} if the correct number of events is received and {@code false}
+         *         if the waiting time elapsed before the events were received
+         *
+         * @throws InterruptedException if the current thread is interrupted
+         *         while waiting
+         */
+        private boolean await(long timeout, TimeUnit unit) throws InterruptedException
+        {
+            return latch.await(timeout, unit);
+        }
+
+
+        public List<RemoteEvent> getEvents()
+        {
+            return events;
+        }
+
+
+        @Override
+        public void onEvent(RemoteEvent event)
+        {
+            events.add(event);
+            latch.countDown();
         }
     }
 }

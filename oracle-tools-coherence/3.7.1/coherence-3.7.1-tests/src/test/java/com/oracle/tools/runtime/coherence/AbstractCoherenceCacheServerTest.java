@@ -39,8 +39,11 @@ import com.oracle.tools.runtime.coherence.options.LocalHost;
 import com.oracle.tools.runtime.coherence.options.OperationalOverride;
 import com.oracle.tools.runtime.coherence.options.RoleName;
 import com.oracle.tools.runtime.coherence.options.SiteName;
+import com.oracle.tools.runtime.concurrent.RemoteEvent;
+import com.oracle.tools.runtime.concurrent.RemoteEventListener;
 import com.oracle.tools.runtime.console.SystemApplicationConsole;
 import com.oracle.tools.runtime.java.features.JmxFeature;
+import com.oracle.tools.runtime.java.options.ClassName;
 import com.oracle.tools.runtime.java.options.SystemProperty;
 import com.oracle.tools.runtime.network.AvailablePortIterator;
 import com.oracle.tools.runtime.options.Discriminator;
@@ -49,14 +52,19 @@ import com.tangosol.net.NamedCache;
 import com.tangosol.util.aggregator.LongSum;
 import com.tangosol.util.extractor.IdentityExtractor;
 import com.tangosol.util.filter.PresentFilter;
+import org.junit.Assert;
 import org.junit.Test;
 
 import javax.management.ObjectName;
 import java.util.AbstractMap;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import static com.oracle.tools.deferred.DeferredHelper.invoking;
 import static com.oracle.tools.deferred.Eventually.assertThat;
@@ -308,6 +316,92 @@ public abstract class AbstractCoherenceCacheServerTest extends AbstractTest
                                                               new LongSum(IdentityExtractor.INSTANCE));
 
             assertThat(anotherLongSum, is(sum));
+        }
+    }
+
+
+    @Test
+    public void shouldSendEventsFromCustomServer() throws Exception
+    {
+        Platform      platform = getPlatform();
+        EventListener listener = new EventListener(1);
+        RemoteEvent   event    = new CustomServer.Event(19);
+
+        try (CoherenceCacheServer server = platform.launch(CoherenceCacheServer.class,
+                                                           ClassName.of(CustomServer.class),
+                                                           ClusterPort.automatic(),
+                                                           LocalHost.only(),
+                                                           SystemApplicationConsole.builder()))
+        {
+            server.addEventListener(listener);
+
+            CustomServer.fireEvent(server, event);
+
+            assertThat(listener.await(1, TimeUnit.MINUTES), is(true));
+            assertThat(listener.getEvents().get(0), is(event));
+
+            server.close();
+        }
+
+    }
+
+    /**
+     * An instance of a {@link RemoteEventListener} that captures events.
+     */
+    public static class EventListener implements RemoteEventListener
+    {
+        /**
+         * The counter to count the number of events received.
+         */
+        private final CountDownLatch latch;
+
+        /**
+         * The list of events received.
+         */
+        private final List<RemoteEvent> events;
+
+        /**
+         * Create an {@link EventListener} to receieve the expected number of events.
+         *
+         * @param expected  the expected number of events
+         */
+        public EventListener(int expected)
+        {
+            latch  = new CountDownLatch(expected);
+            events = new ArrayList<>();
+        }
+
+        /**
+         * Causes the current thread to wait until the expected number of events
+         * have been received, unless the thread is {@linkplain Thread#interrupt interrupted},
+         * or the specified waiting time elapses.
+         *
+         * @param timeout  the maximum time to wait
+         * @param unit     the time unit of the {@code timeout} argument
+         *
+         * @return {@code true} if the correct number of events is received and {@code false}
+         *         if the waiting time elapsed before the events were received
+         *
+         * @throws InterruptedException if the current thread is interrupted
+         *         while waiting
+         */
+        private boolean await(long timeout, TimeUnit unit) throws InterruptedException
+        {
+            return latch.await(timeout, unit);
+        }
+
+
+        public List<RemoteEvent> getEvents()
+        {
+            return events;
+        }
+
+
+        @Override
+        public void onEvent(RemoteEvent event)
+        {
+            events.add(event);
+            latch.countDown();
         }
     }
 }

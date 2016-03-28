@@ -27,10 +27,13 @@ package com.oracle.tools.runtime.remote.java;
 
 import com.oracle.tools.deferred.Eventually;
 
+import com.oracle.tools.options.Decoration;
 import com.oracle.tools.runtime.Application;
 import com.oracle.tools.runtime.LocalPlatform;
 import com.oracle.tools.runtime.Platform;
 
+import com.oracle.tools.runtime.concurrent.RemoteEvent;
+import com.oracle.tools.runtime.concurrent.RemoteEventListener;
 import com.oracle.tools.runtime.concurrent.runnable.RuntimeExit;
 import com.oracle.tools.runtime.concurrent.runnable.RuntimeHalt;
 
@@ -52,6 +55,7 @@ import com.oracle.tools.runtime.options.WorkingDirectory;
 
 import com.oracle.tools.runtime.remote.AbstractRemoteTest;
 import com.oracle.tools.runtime.remote.RemotePlatform;
+import com.oracle.tools.runtime.remote.java.applications.EventingApplication;
 import com.oracle.tools.runtime.remote.java.applications.SleepingApplication;
 
 import com.oracle.tools.util.Capture;
@@ -82,7 +86,10 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Functional tests for {@link RemoteJavaApplicationLauncher}s.
@@ -473,6 +480,73 @@ public class RemoteJavaApplicationLauncherTest extends AbstractRemoteTest
     }
 
 
+    @Test
+    public void shouldReceiveEventFromApplication() throws Exception
+    {
+        Platform      platform  = getRemotePlatform();
+        EventListener listener1 = new EventListener(1);
+        EventListener listener2 = new EventListener(1);
+        RemoteEvent   event     = new EventingApplication.Event(19);
+
+        try (JavaApplication application = platform.launch(JavaApplication.class,
+                                                           ClassName.of(EventingApplication.class),
+                                                           IPv4Preferred.yes()))
+        {
+            application.addEventListener(listener1);
+            application.addEventListener(listener2);
+
+            EventingApplication.fireEvent(application, event);
+
+            Assert.assertThat(listener1.await(1, TimeUnit.MINUTES), is(true));
+            Assert.assertThat(listener2.await(1, TimeUnit.MINUTES), is(true));
+
+            Assert.assertThat(listener1.getEvents().size(), is(1));
+            Assert.assertThat(listener1.getEvents().get(0), is(event));
+
+            Assert.assertThat(listener2.getEvents().size(), is(1));
+            Assert.assertThat(listener2.getEvents().get(0), is(event));
+
+            application.close();
+        }
+    }
+
+
+    @Test
+    public void shouldReceiveEventsFromApplicationUsingListenerAsOption() throws Exception
+    {
+        Platform      platform  = getRemotePlatform();
+        int           count     = 10;
+        EventListener listener1 = new EventListener(count);
+        EventListener listener2 = new EventListener(count);
+
+        try (JavaApplication application = platform.launch(JavaApplication.class,
+                                                           ClassName.of(EventingApplication.class),
+                                                           IPv4Preferred.yes(),
+                                                           Decoration.of(listener1),
+                                                           Decoration.of(listener2),
+                                                           Argument.of(count)))
+        {
+            Assert.assertThat(listener1.await(1, TimeUnit.MINUTES), is(true));
+            Assert.assertThat(listener2.await(1, TimeUnit.MINUTES), is(true));
+
+            application.close();
+
+            List<RemoteEvent> events1 = listener1.getEvents();
+            List<RemoteEvent> events2 = listener2.getEvents();
+
+            Assert.assertThat(events1.size(), is(count));
+            Assert.assertThat(events2.size(), is(count));
+
+            for (int i=0; i<count; i++)
+            {
+                RemoteEvent event = new EventingApplication.Event(i);
+                Assert.assertThat(events1.get(i), is(event));
+                Assert.assertThat(events2.get(i), is(event));
+            }
+        }
+    }
+
+
     /**
      * Detect whether the Java Debugger application is present.
      *
@@ -518,5 +592,66 @@ public class RemoteJavaApplicationLauncherTest extends AbstractRemoteTest
         }
 
         return jdbFileName;
+    }
+
+
+    /**
+     * An instance of a {@link RemoteEventListener} that captures events.
+     */
+    public static class EventListener implements RemoteEventListener
+    {
+        /**
+         * The counter to count the number of events received.
+         */
+        private final CountDownLatch latch;
+
+        /**
+         * The list of events received.
+         */
+        private final List<RemoteEvent> events;
+
+        /**
+         * Create an {@link EventListener} to receieve the expected number of events.
+         *
+         * @param expected  the expected number of events
+         */
+        public EventListener(int expected)
+        {
+            latch  = new CountDownLatch(expected);
+            events = new ArrayList<>();
+        }
+
+        /**
+         * Causes the current thread to wait until the expected number of events
+         * have been received, unless the thread is {@linkplain Thread#interrupt interrupted},
+         * or the specified waiting time elapses.
+         *
+         * @param timeout  the maximum time to wait
+         * @param unit     the time unit of the {@code timeout} argument
+         *
+         * @return {@code true} if the correct number of events is received and {@code false}
+         *         if the waiting time elapsed before the events were received
+         *
+         * @throws InterruptedException if the current thread is interrupted
+         *         while waiting
+         */
+        private boolean await(long timeout, TimeUnit unit) throws InterruptedException
+        {
+            return latch.await(timeout, unit);
+        }
+
+
+        public List<RemoteEvent> getEvents()
+        {
+            return events;
+        }
+
+
+        @Override
+        public void onEvent(RemoteEvent event)
+        {
+            events.add(event);
+            latch.countDown();
+        }
     }
 }

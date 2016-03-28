@@ -27,6 +27,7 @@ package com.oracle.tools.runtime.java;
 
 import com.oracle.tools.runtime.Settings;
 
+import com.oracle.tools.runtime.concurrent.RemoteEventChannel;
 import com.oracle.tools.runtime.concurrent.RemoteExecutor;
 import com.oracle.tools.runtime.concurrent.RemoteExecutorListener;
 import com.oracle.tools.runtime.concurrent.socket.RemoteExecutorClient;
@@ -56,6 +57,150 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class JavaApplicationRunner
 {
+    private final String  parent;
+    private final boolean isOrphanable;
+
+    /**
+     * Create a JavaApplicationRunner
+     *
+     * @param parent        the uri of the parent
+     * @param isOrphanable  true if this process can live after the parent is closed
+     */
+    public JavaApplicationRunner(String parent, boolean isOrphanable)
+    {
+        this.parent       = parent;
+        this.isOrphanable = isOrphanable;
+    }
+
+
+    /**
+     * Run the specified {@link Class}'s main method with the specified
+     * arguments.
+     *
+     * @param applicationClassName  the {@link Class} to run
+     * @param arguments             the arguments to use
+     */
+    public void run(String applicationClassName, String[] arguments)
+    {
+        // a flag indicating if this application is in the process of
+        // shutting down naturally
+        // (System.exit(...) or main has finished and shutdown hooks have started)
+        final AtomicBoolean isShuttingDown = new AtomicBoolean(false);
+
+        // add a shutdown hook so we can tell when the application is
+        // terminating due to natural causes
+        // (like it's finished or a System.exit(...) was called)
+        Runtime.getRuntime().addShutdownHook(new Thread()
+        {
+            @Override
+            public void run()
+            {
+                isShuttingDown.set(true);
+            }
+        });
+
+
+        RemoteExecutorClient remoteExecutor = null;
+
+        // attempt to connect to the parent application
+        try
+        {
+            URI parentURI = new URI(parent);
+
+            // find the InetAddress of the host on which the parent is running
+            InetAddress inetAddress = InetAddress.getByName(parentURI.getHost());
+
+            // establish a RemoteExecutorClient to handle and send requests to the parent
+            remoteExecutor = new RemoteExecutorClient(inetAddress, parentURI.getPort());
+
+            remoteExecutor.addListener(new RemoteExecutorListener()
+            {
+                @Override
+                public void onOpened(RemoteExecutor executor)
+                {
+                    // connected to the parent!
+                }
+
+                @Override
+                public void onClosed(RemoteExecutor executor)
+                {
+                    // disconnected from the parent so terminate
+                    // (if we're not orphanable)
+                    if (!isOrphanable)
+                    {
+                        Runtime.getRuntime().halt(2);
+                    }
+                }
+            });
+
+            // connect to the parent
+            remoteExecutor.open();
+        }
+        catch (URISyntaxException e)
+        {
+            System.out.println("JavaApplicationLauncher: The specified parent URI [" + parent + "] is invalid");
+            e.printStackTrace(System.out);
+        }
+        catch (UnknownHostException e)
+        {
+            System.out.println("JavaApplicationLauncher: The specified parent address is unknown");
+            e.printStackTrace(System.out);
+        }
+        catch (IOException e)
+        {
+            System.out.println("JavaApplicationLauncher: Failed to open a connection to parent");
+            e.printStackTrace(System.out);
+
+            if (remoteExecutor != null)
+            {
+                remoteExecutor.close();
+                remoteExecutor = null;
+            }
+        }
+
+        if (remoteExecutor != null)
+        {
+            // start the application
+            try
+            {
+                // attempt to load the application class
+                Class<?> applicationClass = Class.forName(applicationClassName);
+
+
+                // Inject the RemoteEventChannel (if required by the main Class
+                RemoteEventChannel.Injector.injectPublisher(applicationClass, remoteExecutor);
+
+                // now launch the application
+                Method mainMethod = applicationClass.getMethod("main", String[].class);
+
+                mainMethod.invoke(null, new Object[] {arguments});
+            }
+            catch (ClassNotFoundException e)
+            {
+                System.out.println("JavaApplicationLauncher: Could not load the class " + applicationClassName);
+                e.printStackTrace(System.out);
+            }
+            catch (NoSuchMethodException e)
+            {
+                System.out.println("JavaApplicationLauncher: Could not locate a main method for "
+                                   + applicationClassName);
+                e.printStackTrace(System.out);
+            }
+            catch (IllegalAccessException e)
+            {
+                System.out.println("JavaApplicationLauncher: Could not access the main method for "
+                                   + applicationClassName);
+                e.printStackTrace(System.out);
+            }
+            catch (InvocationTargetException e)
+            {
+                System.out.println("JavaApplicationLauncher: Failed to invoke the main method for "
+                                   + applicationClassName);
+                e.printStackTrace(System.out);
+            }
+        }
+    }
+
     /**
      * {@link JavaApplicationRunner} entry point.
      * <p>
@@ -83,23 +228,6 @@ public class JavaApplicationRunner
             final String  parent       = System.getProperty(Settings.PARENT_URI, null);
             final boolean isOrphanable = Boolean.getBoolean(Settings.ORPHANABLE);
 
-            // a flag indicating if this application is in the process of
-            // shutting down naturally
-            // (System.exit(...) or main has finished and shutdown hooks have started)
-            final AtomicBoolean isShuttingDown = new AtomicBoolean(false);
-
-            // add a shutdown hook so we can tell when the application is
-            // terminating due to natural causes
-            // (like it's finished or a System.exit(...) was called)
-            Runtime.getRuntime().addShutdownHook(new Thread()
-            {
-                @Override
-                public void run()
-                {
-                    isShuttingDown.set(true);
-                }
-            });
-
             if (parent == null)
             {
                 System.out
@@ -107,113 +235,17 @@ public class JavaApplicationRunner
 
                 Runtime.getRuntime().halt(1);
             }
-            else if (arguments.length >= 1)
+
+            if (arguments.length >= 1)
             {
-                String               applicationClassName = arguments[0];
+                String applicationClassName = arguments[0];
 
-                RemoteExecutorClient remoteExecutor       = null;
+                // create the real arguments for the application
+                String[] realArguments = new String[arguments.length - 1];
 
-                // attempt to connect to the parent application
-                try
-                {
-                    URI parentURI = new URI(parent);
+                System.arraycopy(arguments, 1, realArguments, 0, arguments.length - 1);
 
-                    // find the InetAddress of the host on which the parent is running
-                    InetAddress inetAddress = InetAddress.getByName(parentURI.getHost());
-
-                    // establish a RemoteExecutorClient to handle and send requests to the parent
-                    remoteExecutor = new RemoteExecutorClient(inetAddress, parentURI.getPort());
-
-                    remoteExecutor.addListener(new RemoteExecutorListener()
-                    {
-                        @Override
-                        public void onOpened(RemoteExecutor executor)
-                        {
-                            // connected to the parent!
-                        }
-
-                        @Override
-                        public void onClosed(RemoteExecutor executor)
-                        {
-                            // disconnected from the parent so terminate
-                            // (if we're not orphanable)
-                            if (!isOrphanable)
-                            {
-                                Runtime.getRuntime().halt(2);
-                            }
-                        }
-                    });
-
-                    // connect to the parent
-                    remoteExecutor.open();
-                }
-                catch (URISyntaxException e)
-                {
-                    System.out.println("JavaApplicationLauncher: The specified parent URI [" + parent + "] is invalid");
-                    e.printStackTrace(System.out);
-                }
-                catch (UnknownHostException e)
-                {
-                    System.out.println("JavaApplicationLauncher: The specified parent address is unknown");
-                    e.printStackTrace(System.out);
-                }
-                catch (IOException e)
-                {
-                    System.out.println("JavaApplicationLauncher: Failed to open a connection to parent");
-                    e.printStackTrace(System.out);
-
-                    if (remoteExecutor != null)
-                    {
-                        remoteExecutor.close();
-                        remoteExecutor = null;
-                    }
-                }
-
-                if (remoteExecutor != null)
-                {
-                    // start the application
-                    try
-                    {
-                        // attempt to load the application class
-                        Class<?> applicationClass = Class.forName(applicationClassName);
-
-                        // create the real arguments for the application
-                        String[] realArguments = new String[arguments.length - 1];
-
-                        for (int i = 1; i < arguments.length; i++)
-                        {
-                            realArguments[i - 1] = arguments[i];
-                        }
-
-                        // now launch the application
-                        Method mainMethod = applicationClass.getMethod("main", String[].class);
-
-                        mainMethod.invoke(null, new Object[] {realArguments});
-                    }
-                    catch (ClassNotFoundException e)
-                    {
-                        System.out.println("JavaApplicationLauncher: Could not load the class " + applicationClassName);
-                        e.printStackTrace(System.out);
-                    }
-                    catch (NoSuchMethodException e)
-                    {
-                        System.out.println("JavaApplicationLauncher: Could not locate a main method for "
-                                           + applicationClassName);
-                        e.printStackTrace(System.out);
-                    }
-                    catch (IllegalAccessException e)
-                    {
-                        System.out.println("JavaApplicationLauncher: Could not access the main method for "
-                                           + applicationClassName);
-                        e.printStackTrace(System.out);
-                    }
-                    catch (InvocationTargetException e)
-                    {
-                        System.out.println("JavaApplicationLauncher: Failed to invoke the main method for "
-                                           + applicationClassName);
-                        e.printStackTrace(System.out);
-                    }
-                }
+                new JavaApplicationRunner(parent, isOrphanable).run(applicationClassName, realArguments);
             }
         }
     }

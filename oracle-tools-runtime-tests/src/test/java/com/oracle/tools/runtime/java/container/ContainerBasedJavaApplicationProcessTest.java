@@ -25,6 +25,7 @@
 
 package com.oracle.tools.runtime.java.container;
 
+import com.oracle.tools.Options;
 import com.oracle.tools.junit.AbstractTest;
 
 import com.oracle.tools.runtime.concurrent.callable.RemoteCallableStaticMethod;
@@ -94,7 +95,7 @@ public class ContainerBasedJavaApplicationProcessTest extends AbstractTest
                                                                                                              arguments),
                                                                                                      new Properties()))
         {
-            process.start();
+            process.start(new Options());
             process.waitFor();
 
             Iterator<MethodInvocation> iterator = InvocationTracingApplication.getMethodInvocations().iterator();
@@ -132,7 +133,7 @@ public class ContainerBasedJavaApplicationProcessTest extends AbstractTest
                                                                                               .CustomController(callable),
                                                                                           new Properties()))
         {
-            process.start();
+            process.start(new Options());
             process.waitFor();
 
             Iterator<MethodInvocation> iterator = InvocationTracingApplication.getMethodInvocations().iterator();
@@ -170,7 +171,7 @@ public class ContainerBasedJavaApplicationProcessTest extends AbstractTest
                                                                                               .CustomController(callable),
                                                                                           new Properties()))
         {
-            process.start();
+            process.start(new Options());
             process.waitFor();
 
             Iterator<MethodInvocation> iterator = InvocationTracingApplication.getMethodInvocations().iterator();
@@ -209,7 +210,7 @@ public class ContainerBasedJavaApplicationProcessTest extends AbstractTest
                                                                                                                 callable),
                                                                                           new Properties()))
         {
-            process.start();
+            process.start(new Options());
 
             assertFalse(InvocationTracingApplication.getMethodInvocations().iterator().hasNext());
 
@@ -248,7 +249,7 @@ public class ContainerBasedJavaApplicationProcessTest extends AbstractTest
                                                                                               .CustomController(callable),
                                                                                           new Properties()))
         {
-            process.start();
+            process.start(new Options());
             process.waitFor();
 
             fail("Should not have started the process");

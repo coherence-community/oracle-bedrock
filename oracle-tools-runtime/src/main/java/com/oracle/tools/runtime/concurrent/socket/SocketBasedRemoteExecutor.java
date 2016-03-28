@@ -29,6 +29,9 @@ import com.oracle.tools.lang.ThreadFactories;
 
 import com.oracle.tools.runtime.concurrent.AbstractControllableRemoteExecutor;
 import com.oracle.tools.runtime.concurrent.RemoteCallable;
+import com.oracle.tools.runtime.concurrent.RemoteEvent;
+import com.oracle.tools.runtime.concurrent.RemoteEventChannel;
+import com.oracle.tools.runtime.concurrent.RemoteEventListener;
 import com.oracle.tools.runtime.concurrent.RemoteExecutorListener;
 import com.oracle.tools.runtime.concurrent.RemoteRunnable;
 
@@ -49,6 +52,8 @@ import java.net.Socket;
 
 import java.util.HashMap;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
@@ -65,7 +70,9 @@ import java.util.concurrent.atomic.AtomicLong;
  *
  * @author Brian Oliver
  */
-public class SocketBasedRemoteExecutor extends AbstractControllableRemoteExecutor
+public class SocketBasedRemoteExecutor
+        extends AbstractControllableRemoteExecutor
+        implements RemoteEventChannel.Publisher, RemoteEventChannel.Consumer
 {
     /**
      * The unique identity of the {@link SocketBasedRemoteExecutor}.
@@ -139,6 +146,11 @@ public class SocketBasedRemoteExecutor extends AbstractControllableRemoteExecuto
      */
     private AtomicLong nextSequenceNumber;
 
+    /**
+     * The {@link Set} of {@link RemoteEventListener}s that will receive {@link RemoteEvent}s.
+     */
+    private Set<RemoteEventListener> listeners = new HashSet<RemoteEventListener>();
+
 
     /**
      * Constructs a {@link SocketBasedRemoteExecutor} to submit and accept {@link Callable}s.
@@ -172,6 +184,7 @@ public class SocketBasedRemoteExecutor extends AbstractControllableRemoteExecuto
         protocol.put("CALLABLE", CallableOperation.class);
         protocol.put("RESPONSE", ResponseOperation.class);
         protocol.put("RUNNABLE", RunnableOperation.class);
+        protocol.put("EVENT",    EventOperation.class);
     }
 
 
@@ -404,6 +417,41 @@ public class SocketBasedRemoteExecutor extends AbstractControllableRemoteExecuto
         else
         {
             throw new IllegalStateException("RemoteExecutor is closed");
+        }
+    }
+
+
+    @Override
+    public void fireEvent(RemoteEvent event)
+    {
+        if (isOpen())
+        {
+            long           sequence  = nextSequenceNumber.getAndIncrement();
+            EventOperation operation = new EventOperation(event);
+
+            sequentialExecutionService.submit(new Sender(sequence, operation));
+        }
+        else
+        {
+            throw new IllegalStateException("RemoteExecutor is closed");
+        }
+    }
+
+    @Override
+    public void addEventListener(RemoteEventListener listener)
+    {
+        if (listener != null)
+        {
+            listeners.add(listener);
+        }
+    }
+
+    @Override
+    public void removeEventListener(RemoteEventListener listener)
+    {
+        if (listener != null)
+        {
+            listeners.remove(listener);
         }
     }
 
@@ -842,6 +890,134 @@ public class SocketBasedRemoteExecutor extends AbstractControllableRemoteExecuto
             else
             {
                 output.writeObject(runnable.getClass().getName());
+            }
+        }
+    }
+
+
+    /**
+     * An {@link Operation} to send and fire a {@link RemoteEvent}.
+     */
+    class EventOperation implements Operation
+    {
+        /**
+         * The {@link RemoteEvent} to eventually execute.
+         */
+        private RemoteEvent event;
+
+
+        /**
+         * Constructs an {@link EventOperation}
+         * (required for serialization)
+         */
+        public EventOperation()
+        {
+        }
+
+
+        /**
+         * Constructs an {@link EventOperation}
+         *
+         * @param event  the {@link RemoteEvent} to fire remotely
+         *
+         * @throws NullPointerException      should the {@link RemoteEvent} be <code>null</code>
+         * @throws IllegalArgumentException  should the {@link RemoteEvent} be an anonymous inner class
+         */
+        public EventOperation(RemoteEvent event)
+        {
+            if (event == null)
+            {
+                throw new NullPointerException("RemoteEvent can't be null");
+            }
+            else if (event.getClass().isAnonymousClass())
+            {
+                throw new IllegalArgumentException("RemoteEvent can't be an anonymous inner-class");
+            }
+            else
+            {
+                this.event = event;
+            }
+        }
+
+
+        @Override
+        public String getType()
+        {
+            return "EVENT";
+        }
+
+
+        @Override
+        public Operation execute(long sequence)
+        {
+            try
+            {
+                for (RemoteEventListener listener : listeners)
+                {
+                    try
+                    {
+                        listener.onEvent(event);
+                    }
+                    catch (Exception e)
+                    {
+                        e.printStackTrace();
+                    }
+                }
+            }
+            catch (Throwable throwable)
+            {
+                // SKIP: do nothing if there is an exception
+            }
+
+            return null;
+        }
+
+
+        @Override
+        public void read(ObjectInputStream input) throws IOException
+        {
+            try
+            {
+                // read the callable or the name of the callable class
+                Object object = input.readObject();
+
+                if (object instanceof String)
+                {
+                    String className = (String) object;
+
+                    event = (RemoteEvent) Class.forName(className).newInstance();
+                }
+                else
+                {
+                    event = (RemoteEvent) object;
+                }
+            }
+            catch (ClassNotFoundException e)
+            {
+                throw new IOException(e);
+            }
+            catch (InstantiationException e)
+            {
+                throw new IOException(e);
+            }
+            catch (IllegalAccessException e)
+            {
+                throw new IOException(e);
+            }
+        }
+
+
+        @Override
+        public void write(ObjectOutputStream output) throws IOException
+        {
+            // serialize the Runnable (if it is!)
+            if (event instanceof Serializable)
+            {
+                output.writeObject(event);
+            }
+            else
+            {
+                output.writeObject(event.getClass().getName());
             }
         }
     }

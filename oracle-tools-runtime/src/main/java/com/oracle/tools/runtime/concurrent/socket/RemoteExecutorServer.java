@@ -31,6 +31,9 @@ import com.oracle.tools.predicate.Predicate;
 
 import com.oracle.tools.runtime.concurrent.AbstractControllableRemoteExecutor;
 import com.oracle.tools.runtime.concurrent.RemoteCallable;
+import com.oracle.tools.runtime.concurrent.RemoteEvent;
+import com.oracle.tools.runtime.concurrent.RemoteEventChannel;
+import com.oracle.tools.runtime.concurrent.RemoteEventListener;
 import com.oracle.tools.runtime.concurrent.RemoteExecutorListener;
 import com.oracle.tools.runtime.concurrent.RemoteRunnable;
 
@@ -45,6 +48,8 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -59,7 +64,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  *
  * @author Brian Oliver
  */
-public class RemoteExecutorServer extends AbstractControllableRemoteExecutor
+public class RemoteExecutorServer extends AbstractControllableRemoteExecutor implements RemoteEventChannel.Consumer
 {
     /**
      * The {@link ServerSocket} that will be used to accept {@link com.oracle.tools.runtime.concurrent.socket.RemoteExecutorClient}
@@ -87,6 +92,11 @@ public class RemoteExecutorServer extends AbstractControllableRemoteExecutor
      * Should the running {@link RemoteExecutorServer} terminate as soon as possible?
      */
     private AtomicBoolean isTerminating;
+
+    /**
+     * The {@link Set} of {@link RemoteEventListener}s that will receive {@link RemoteEvent}s.
+     */
+    private Set<RemoteEventListener> remoteEventListeners = new HashSet<RemoteEventListener>();
 
 
     /**
@@ -141,6 +151,27 @@ public class RemoteExecutorServer extends AbstractControllableRemoteExecutor
                                                       }
 
                                                       remoteExecutors.put(executor.getExecutorId(), executor);
+
+                                                      // Add a listener to pass any remote events on to our own listeners
+                                                      executor.addEventListener(new RemoteEventListener()
+                                                      {
+                                                          @Override
+                                                          public void onEvent(RemoteEvent event)
+                                                          {
+                                                              for (RemoteEventListener listener : remoteEventListeners)
+                                                              {
+                                                                  try
+                                                                  {
+                                                                      listener.onEvent(event);
+                                                                  }
+                                                                  catch (Exception e)
+                                                                  {
+                                                                      e.printStackTrace();
+                                                                  }
+                                                              }
+                                                          }
+                                                      });
+
 
                                                       executor.open();
                                                   }
@@ -318,5 +349,24 @@ public class RemoteExecutorServer extends AbstractControllableRemoteExecutor
     public Iterable<SocketBasedRemoteExecutor> getRemoteExecutors()
     {
         return remoteExecutors.values();
+    }
+
+
+    @Override
+    public void addEventListener(RemoteEventListener listener)
+    {
+        if (listener != null)
+        {
+            remoteEventListeners.add(listener);
+        }
+    }
+
+    @Override
+    public void removeEventListener(RemoteEventListener listener)
+    {
+        if (listener != null)
+        {
+            remoteEventListeners.remove(listener);
+        }
     }
 }

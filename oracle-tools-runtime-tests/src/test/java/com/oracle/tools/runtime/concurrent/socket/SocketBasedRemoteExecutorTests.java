@@ -30,20 +30,31 @@ import com.oracle.tools.deferred.Eventually;
 import com.oracle.tools.deferred.listener.DeferredCompletionListener;
 
 import com.oracle.tools.runtime.concurrent.RemoteCallable;
+import com.oracle.tools.runtime.concurrent.RemoteEvent;
+import com.oracle.tools.runtime.concurrent.RemoteEventListener;
 import com.oracle.tools.runtime.concurrent.RemoteRunnable;
 
 import org.junit.Assert;
 import org.junit.Test;
 
+import static com.oracle.tools.deferred.DeferredHelper.invoking;
 import static com.oracle.tools.deferred.DeferredHelper.valueOf;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
 
 import java.io.IOException;
 
 import java.net.InetAddress;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Functional Tests for {@link com.oracle.tools.runtime.concurrent.socket.SocketBasedRemoteExecutor}s.
@@ -209,6 +220,80 @@ public class SocketBasedRemoteExecutorTests
     }
 
 
+    @Test
+    public void shouldFireAndReceiveEvent() throws Exception
+    {
+        final CountDownLatch latch    = new CountDownLatch(1);
+        RemoteEventListener  listener = new RemoteEventListener()
+        {
+            @Override
+            public void onEvent(RemoteEvent event)
+            {
+                latch.countDown();
+            }
+        };
+
+        try (RemoteExecutorServer server = new RemoteExecutorServer())
+        {
+            InetAddress address = server.open();
+
+            server.addEventListener(listener);
+
+            try (RemoteExecutorClient client = new RemoteExecutorClient(address, server.getPort()))
+            {
+                client.open();
+
+                client.fireEvent(new Event(1));
+
+                assertThat(latch.await(1, TimeUnit.MINUTES), is(true));
+            }
+        }
+    }
+
+
+    @Test
+    public void shouldReceiveEventsInOrder() throws Exception
+    {
+        int                  count    = 100;
+        final CountDownLatch latch    = new CountDownLatch(count);
+        final List<Integer>  list     = new ArrayList<>();
+        RemoteEventListener  listener = new RemoteEventListener()
+        {
+            @Override
+            public void onEvent(RemoteEvent event)
+            {
+                list.add(((Event) event).getId());
+                latch.countDown();
+            }
+        };
+
+        try (RemoteExecutorServer server = new RemoteExecutorServer())
+        {
+            InetAddress address = server.open();
+
+            server.addEventListener(listener);
+
+            try (RemoteExecutorClient client = new RemoteExecutorClient(address, server.getPort()))
+            {
+                client.open();
+
+                for (int i=0; i<count; i++)
+                {
+                    client.fireEvent(new Event(i));
+                }
+
+                assertThat(latch.await(1, TimeUnit.MINUTES), is(true));
+                assertThat(list.size(), is(count));
+
+                for(int i=0; i<count; i++)
+                {
+                    assertThat(list.get(i), is(i));
+                }
+            }
+        }
+    }
+
+
     /**
      * A simple ping {@link RemoteRunnable}.
      */
@@ -231,6 +316,21 @@ public class SocketBasedRemoteExecutorTests
         public String call() throws Exception
         {
             return "PONG";
+        }
+    }
+
+    public static class Event implements RemoteEvent
+    {
+        private int id;
+
+        public Event(int id)
+        {
+            this.id = id;
+        }
+
+        public int getId()
+        {
+            return id;
         }
     }
 }

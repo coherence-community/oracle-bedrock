@@ -33,6 +33,7 @@ import com.oracle.tools.runtime.Platform;
 import com.oracle.tools.runtime.annotations.PreferredMetaClass;
 
 import com.oracle.tools.runtime.concurrent.RemoteCallable;
+import com.oracle.tools.runtime.concurrent.RemoteEventChannel;
 import com.oracle.tools.runtime.concurrent.RemoteExecutor;
 import com.oracle.tools.runtime.concurrent.callable.RemoteMethodInvocation;
 
@@ -52,7 +53,7 @@ import java.util.Properties;
  * @see JavaApplicationLauncher
  */
 @PreferredMetaClass(JavaApplication.MetaClass.class)
-public interface JavaApplication extends Application, RemoteExecutor
+public interface JavaApplication extends Application, RemoteExecutor, RemoteEventChannel.Consumer
 {
     /**
      * The java.home JVM property.

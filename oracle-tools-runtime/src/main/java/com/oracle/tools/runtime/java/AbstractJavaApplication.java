@@ -33,6 +33,7 @@ import com.oracle.tools.runtime.ApplicationProcess;
 import com.oracle.tools.runtime.Platform;
 
 import com.oracle.tools.runtime.concurrent.RemoteCallable;
+import com.oracle.tools.runtime.concurrent.RemoteEventListener;
 import com.oracle.tools.runtime.concurrent.RemoteRunnable;
 import com.oracle.tools.runtime.concurrent.callable.GetSystemProperty;
 import com.oracle.tools.runtime.concurrent.callable.RemoteMethodInvocation;
@@ -133,6 +134,20 @@ public abstract class AbstractJavaApplication<P extends JavaApplicationProcess> 
     public void submit(RemoteRunnable runnable) throws IllegalStateException
     {
         process.submit(runnable);
+    }
+
+
+    @Override
+    public void addEventListener(RemoteEventListener listener)
+    {
+        process.addEventListener(listener);
+    }
+
+
+    @Override
+    public void removeEventListener(RemoteEventListener listener)
+    {
+        process.removeEventListener(listener);
     }
 
 
