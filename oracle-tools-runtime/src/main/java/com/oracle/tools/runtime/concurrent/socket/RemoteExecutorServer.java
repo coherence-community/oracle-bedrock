@@ -118,41 +118,43 @@ public class RemoteExecutorServer extends AbstractControllableRemoteExecutor
             serverSocket.setReuseAddress(true);
 
             serverThread = new Thread(new Runnable()
-            {
-                @Override
-                public void run()
-                {
-                    int channelId = 0;
+                                      {
+                                          @Override
+                                          public void run()
+                                          {
+                                              int channelId = 0;
 
-                    while (!isTerminating.get())
-                    {
-                        try
-                        {
-                            Socket                    socket   = serverSocket.accept();
-                            SocketBasedRemoteExecutor executor = new SocketBasedRemoteExecutor(++channelId, socket);
+                                              while (!isTerminating.get())
+                                              {
+                                                  try
+                                                  {
+                                                      Socket socket = serverSocket.accept();
+                                                      SocketBasedRemoteExecutor executor =
+                                                          new SocketBasedRemoteExecutor(++channelId,
+                                                                                        socket);
 
-                            // add the current listeners of the RemoteExecutorServer
-                            // to the SocketBasedRemoteExecutor
-                            for (RemoteExecutorListener listener : getListeners())
-                            {
-                                executor.addListener(listener);
-                            }
+                                                      // add the current listeners of the RemoteExecutorServer
+                                                      // to the SocketBasedRemoteExecutor
+                                                      for (RemoteExecutorListener listener : getListeners())
+                                                      {
+                                                          executor.addListener(listener);
+                                                      }
 
-                            remoteExecutors.put(executor.getExecutorId(), executor);
+                                                      remoteExecutors.put(executor.getExecutorId(), executor);
 
-                            executor.open();
-                        }
-                        catch (NullPointerException e)
-                        {
-                            isTerminating.compareAndSet(false, true);
-                        }
-                        catch (IOException e)
-                        {
-                            isTerminating.compareAndSet(false, true);
-                        }
-                    }
-                }
-            });
+                                                      executor.open();
+                                                  }
+                                                  catch (NullPointerException e)
+                                                  {
+                                                      isTerminating.compareAndSet(false, true);
+                                                  }
+                                                  catch (IOException e)
+                                                  {
+                                                      isTerminating.compareAndSet(false, true);
+                                                  }
+                                              }
+                                          }
+                                      });
 
             serverThread.start();
             setOpen(true);
@@ -197,7 +199,10 @@ public class RemoteExecutorServer extends AbstractControllableRemoteExecutor
             {
                 predicate = predicate == null ? NetworkHelper.DEFAULT_ADDRESS : predicate;
 
-                return NetworkHelper.getInetAddress(predicate);
+                InetAddress inetAddress = NetworkHelper.getInetAddress(predicate);
+
+                // when the specific inetAddess is not available, use the server socket
+                return inetAddress == null ? serverSocket.getInetAddress() : inetAddress;
             }
             catch (SocketException e)
             {

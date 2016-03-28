@@ -52,8 +52,8 @@ import com.oracle.tools.runtime.console.PipedApplicationConsole;
 import com.oracle.tools.runtime.java.options.ClassName;
 import com.oracle.tools.runtime.java.options.IPv4Preferred;
 import com.oracle.tools.runtime.java.options.SystemProperty;
-
 import com.oracle.tools.runtime.java.profiles.RemoteDebugging;
+
 import com.oracle.tools.runtime.options.Arguments;
 import com.oracle.tools.runtime.options.DisplayName;
 
@@ -292,6 +292,26 @@ public abstract class AbstractJavaApplicationTest<P extends Platform> extends Ab
 
             // assert that the custom property is not defined in the test
             assertThat(System.getProperty(propertyName), is(nullValue()));
+        }
+    }
+
+
+    /**
+     * Ensure that we can create applications that can have {@link RemoteCallable}s
+     * represented as lambda submitted to them and executed.
+     */
+    @Test
+    public void shouldExecuteLambda() throws InterruptedException
+    {
+        // set a System-Property for the SleepingApplication (we'll request it back)
+        String uuid = UUID.randomUUID().toString();
+
+        try (JavaApplication application = getPlatform().launch(JavaApplication.class,
+                                                                ClassName.of(SleepingApplication.class),
+                                                                SystemProperty.of("uuid", uuid),
+                                                                IPv4Preferred.yes()))
+        {
+            Eventually.assertThat(application, () -> System.getProperty("uuid"), is(uuid));
         }
     }
 }

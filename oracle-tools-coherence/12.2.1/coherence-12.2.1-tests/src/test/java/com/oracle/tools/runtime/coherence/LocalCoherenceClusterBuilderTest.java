@@ -27,39 +27,28 @@ package com.oracle.tools.runtime.coherence;
 
 import com.oracle.tools.runtime.LocalPlatform;
 import com.oracle.tools.runtime.Platform;
-
 import com.oracle.tools.runtime.coherence.options.CacheConfig;
 import com.oracle.tools.runtime.coherence.options.ClusterName;
 import com.oracle.tools.runtime.coherence.options.ClusterPort;
 import com.oracle.tools.runtime.coherence.options.LocalHost;
 import com.oracle.tools.runtime.coherence.options.LocalStorage;
-
 import com.oracle.tools.runtime.concurrent.runnable.RuntimeExit;
-
 import com.oracle.tools.runtime.console.SystemApplicationConsole;
-
 import com.oracle.tools.runtime.java.ClassPath;
 import com.oracle.tools.runtime.java.LocalJavaApplicationLauncher;
 import com.oracle.tools.runtime.java.options.JavaAgent;
-
 import com.oracle.tools.runtime.network.AvailablePortIterator;
-
 import com.oracle.tools.runtime.options.DisplayName;
-
 import com.oracle.tools.util.Capture;
-
 import org.jacoco.agent.rt.RT;
-
 import org.junit.Assert;
 import org.junit.Test;
 
-import static com.oracle.tools.deferred.DeferredHelper.invoking;
-
-import static com.oracle.tools.deferred.Eventually.assertThat;
-
-import static org.hamcrest.CoreMatchers.is;
-
 import java.io.File;
+
+import static com.oracle.tools.deferred.DeferredHelper.invoking;
+import static com.oracle.tools.deferred.Eventually.assertThat;
+import static org.hamcrest.CoreMatchers.is;
 
 /**
  * Functional Tests for {@link CoherenceClusterBuilder}
@@ -80,7 +69,7 @@ public class LocalCoherenceClusterBuilderTest extends AbstractCoherenceClusterBu
 
 
     /**
-     * Ensure we can build and close a {@link com.oracle.tools.runtime.coherence.CoherenceCluster}
+     * Ensure we can build and close a {@link CoherenceCluster}
      * of storage enabled members with a proxy server when using code-coverage tools.
      */
     @Test

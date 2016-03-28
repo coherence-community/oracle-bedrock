@@ -25,6 +25,8 @@
 
 package com.oracle.tools.extensible;
 
+import java.util.Map;
+
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -139,9 +141,9 @@ public abstract class AbstractExtensible implements Extensible
      */
     protected void removeAllFeatures()
     {
-        for (Class<?> featureClass : features.keySet())
+        for (Map.Entry<Class, Object> entry : features.entrySet())
         {
-            remove(featureClass);
+            remove(entry.getKey());
         }
     }
 }
