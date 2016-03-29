@@ -64,7 +64,7 @@ public class StorageDisabledMember implements SessionBuilder
 
         launchOptions.add(RoleName.of("client"));
         launchOptions.add(LocalStorage.disabled());
-        launchOptions.add(CacheConfig.of("coherence-cache-config.xml"));
+        launchOptions.addIfAbsent(CacheConfig.of("coherence-cache-config.xml"));
 
         // ----- notify the Profiles that we're about to launch an application -----
 
