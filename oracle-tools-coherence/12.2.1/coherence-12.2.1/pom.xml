@@ -36,6 +36,18 @@
         </dependency>
 
         <dependency>
+            <groupId>com.oracle.tools.coherence</groupId>
+            <artifactId>coherence-3.7.1</artifactId>
+            <version>${project.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.oracle.coherence</groupId>
+                    <artifactId>coherence</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
             <groupId>com.oracle.tools</groupId>
             <artifactId>oracle-tools-testing-support</artifactId>
             <version>${project.version}</version>
@@ -63,4 +75,66 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>${maven.shade.plugin.version}</version>
+                <configuration>
+                    <!-- only include the previous version of coherence -->
+                    <artifactSet>
+                        <includes>
+                            <include>com.oracle.tools.coherence:coherence-3.7.1</include>
+                        </includes>
+                    </artifactSet>
+
+                    <!-- exclude meta-inf and certain classes -->
+                    <filters>
+                        <filter>
+                            <artifact>com.oracle.tools.coherence:coherence-3.7.1</artifact>
+                            <excludes>
+                                <exclude>META-INF/**</exclude>
+                            </excludes>
+                        </filter>
+                    </filters>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>flatten-maven-plugin</artifactId>
+                <version>${maven.flatten.plugin.version}</version>
+                <configuration>
+                </configuration>
+                <executions>
+                    <!-- enable flattening -->
+                    <execution>
+                        <id>flatten</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>flatten</goal>
+                        </goals>
+                    </execution>
+                    <!-- ensure proper cleanup -->
+                    <execution>
+                        <id>flatten.clean</id>
+                        <phase>clean</phase>
+                        <goals>
+                            <goal>clean</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 </project>

@@ -27,7 +27,7 @@ reverse chronological order.
     Maven Install Plugin:           Version 2.4 -> 2.5.1
     Maven Javadoc Plugin:           Version 2.8.1 -> 2.9.1
     Maven Release Plugin:           Version 2.4.2 -> 2.5
-    Maven Shade Plugin:             Version 2.1 -> 2.3
+    Maven Shade Plugin:             Version 2.1 -> 2.4.3
     Maven Source Plugin:            Version 2.1.2 -> 2.2.1
     Maven Surefire Plugin:          Version 2.13 -> 2.17
 
