@@ -1,5 +1,5 @@
 /*
- * File: ControllableRemoteExecutor.java
+ * File: ControllableRemoteChannel.java
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
@@ -28,31 +28,31 @@ package com.oracle.tools.runtime.concurrent;
 import java.io.Closeable;
 
 /**
- * A {@link RemoteExecutor} that may have its lifecycle controlled and observed.
+ * A {@link RemoteChannel} that may have its lifecycle controlled and observed.
  * <p>
  * Copyright (c) 2013. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Brian Oliver
  *
- * @see RemoteExecutor
+ * @see RemoteChannel
  */
-public interface ControllableRemoteExecutor extends RemoteExecutor, Closeable
+public interface ControllableRemoteChannel extends RemoteChannel, Closeable
 {
     /**
-     * Closes the {@link ControllableRemoteExecutor}.
+     * Closes the {@link ControllableRemoteChannel}.
      * <p>
-     * After being closed attempts to make submissions to the {@link ControllableRemoteExecutor}
-     * will throw an {@link IllegalStateException}.  Should the {@link ControllableRemoteExecutor}
+     * After being closed attempts to make submissions to the {@link ControllableRemoteChannel}
+     * will throw an {@link IllegalStateException}.  Should the {@link ControllableRemoteChannel}
      * already be closed, nothing happens.
      */
     public void close();
 
 
     /**
-     * Registers the specified {@link RemoteExecutorListener} on the {@link ControllableRemoteExecutor}.
+     * Registers the specified {@link RemoteChannelListener} on the {@link ControllableRemoteChannel}.
      *
-     * @param listener  the {@link RemoteExecutorListener}
+     * @param listener  the {@link RemoteChannelListener}
      */
-    public void addListener(RemoteExecutorListener listener);
+    public void addListener(RemoteChannelListener listener);
 }

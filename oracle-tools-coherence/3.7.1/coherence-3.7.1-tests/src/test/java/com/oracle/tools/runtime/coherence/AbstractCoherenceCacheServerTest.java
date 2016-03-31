@@ -52,7 +52,6 @@ import com.tangosol.net.NamedCache;
 import com.tangosol.util.aggregator.LongSum;
 import com.tangosol.util.extractor.IdentityExtractor;
 import com.tangosol.util.filter.PresentFilter;
-import org.junit.Assert;
 import org.junit.Test;
 
 import javax.management.ObjectName;
@@ -325,6 +324,7 @@ public abstract class AbstractCoherenceCacheServerTest extends AbstractTest
     {
         Platform      platform = getPlatform();
         EventListener listener = new EventListener(1);
+        String        name     = "Foo";
         RemoteEvent   event    = new CustomServer.Event(19);
 
         try (CoherenceCacheServer server = platform.launch(CoherenceCacheServer.class,
@@ -333,9 +333,9 @@ public abstract class AbstractCoherenceCacheServerTest extends AbstractTest
                                                            LocalHost.only(),
                                                            SystemApplicationConsole.builder()))
         {
-            server.addEventListener(listener);
+            server.ensureEventStream(name).addEventListener(listener);
 
-            CustomServer.fireEvent(server, event);
+            CustomServer.fireEvent(server, name, event);
 
             assertThat(listener.await(1, TimeUnit.MINUTES), is(true));
             assertThat(listener.getEvents().get(0), is(event));

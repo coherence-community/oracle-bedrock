@@ -33,8 +33,7 @@ import com.oracle.tools.runtime.Platform;
 import com.oracle.tools.runtime.annotations.PreferredMetaClass;
 
 import com.oracle.tools.runtime.concurrent.RemoteCallable;
-import com.oracle.tools.runtime.concurrent.RemoteEventChannel;
-import com.oracle.tools.runtime.concurrent.RemoteExecutor;
+import com.oracle.tools.runtime.concurrent.RemoteChannel;
 import com.oracle.tools.runtime.concurrent.callable.RemoteMethodInvocation;
 
 import java.io.NotSerializableException;
@@ -53,7 +52,7 @@ import java.util.Properties;
  * @see JavaApplicationLauncher
  */
 @PreferredMetaClass(JavaApplication.MetaClass.class)
-public interface JavaApplication extends Application, RemoteExecutor, RemoteEventChannel.Consumer
+public interface JavaApplication extends Application, RemoteChannel
 {
     /**
      * The java.home JVM property.

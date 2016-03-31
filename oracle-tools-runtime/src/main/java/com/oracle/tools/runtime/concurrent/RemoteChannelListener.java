@@ -1,5 +1,5 @@
 /*
- * File: RemoteExecutorListener.java
+ * File: RemoteChannelListener.java
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
@@ -27,27 +27,27 @@ package com.oracle.tools.runtime.concurrent;
 
 /**
  * Provides the ability to receive callbacks when certain events
- * occur on a {@link com.oracle.tools.runtime.concurrent.RemoteExecutor}.
+ * occur on a {@link RemoteChannel}.
  * <p>
  * Copyright (c) 2013. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Brian Oliver
  */
-public interface RemoteExecutorListener
+public interface RemoteChannelListener
 {
     /**
-     * Called when a {@link com.oracle.tools.runtime.concurrent.RemoteExecutor} is opened.
+     * Called when a {@link RemoteChannel} is opened.
      *
-     * @param executor  the {@link com.oracle.tools.runtime.concurrent.RemoteExecutor}
+     * @param channel  the {@link RemoteChannel}
      */
-    public void onOpened(RemoteExecutor executor);
+    public void onOpened(RemoteChannel channel);
 
 
     /**
-     * Called when a {@link RemoteExecutor} is closed.
+     * Called when a {@link RemoteChannel} is closed.
      *
-     * @param executor  the {@link RemoteExecutor}
+     * @param channel  the {@link RemoteChannel}
      */
-    public void onClosed(RemoteExecutor executor);
+    public void onClosed(RemoteChannel channel);
 }

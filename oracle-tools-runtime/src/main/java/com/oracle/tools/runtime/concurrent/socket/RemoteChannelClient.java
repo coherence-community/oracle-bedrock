@@ -1,5 +1,5 @@
 /*
- * File: RemoteExecutorClient.java
+ * File: RemoteChannelClient.java
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
@@ -25,32 +25,34 @@
 
 package com.oracle.tools.runtime.concurrent.socket;
 
+import com.oracle.tools.runtime.concurrent.RemoteChannel;
+
 import java.io.IOException;
 
 import java.net.InetAddress;
 import java.net.Socket;
 
 /**
- * A {@link com.oracle.tools.runtime.concurrent.RemoteExecutor} that sends requests to
- * {@link RemoteExecutorServer}s for processing.
+ * A {@link RemoteChannel} that sends requests to
+ * {@link RemoteChannelServer}s for processing.
  * <p>
  * Copyright (c) 2013. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Brian Oliver
  */
-public class RemoteExecutorClient extends SocketBasedRemoteExecutor
+public class RemoteChannelClient extends SocketBasedRemoteChannel
 {
     /**
-     * Constructs a {@link RemoteExecutorClient}.
+     * Constructs a {@link RemoteChannelClient}.
      *
      * @param address
      * @param port
      *
      * @throws IOException
      */
-    public RemoteExecutorClient(InetAddress address,
-                                int         port) throws IOException
+    public RemoteChannelClient(InetAddress address,
+                               int         port) throws IOException
     {
         super(-1, new Socket(address, port));
     }

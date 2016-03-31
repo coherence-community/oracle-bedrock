@@ -35,7 +35,6 @@ import com.oracle.tools.deferred.listener.DeferredCompletionListener;
 
 import com.oracle.tools.io.NetworkHelper;
 
-import com.oracle.tools.options.Decoration;
 import com.oracle.tools.options.Timeout;
 
 import com.oracle.tools.runtime.Application;
@@ -43,14 +42,15 @@ import com.oracle.tools.runtime.LocalPlatform;
 
 import com.oracle.tools.runtime.concurrent.RemoteEvent;
 import com.oracle.tools.runtime.concurrent.RemoteEventListener;
-import com.oracle.tools.runtime.concurrent.RemoteExecutor;
-import com.oracle.tools.runtime.concurrent.RemoteExecutorListener;
+import com.oracle.tools.runtime.concurrent.RemoteChannel;
+import com.oracle.tools.runtime.concurrent.RemoteEventStream;
+import com.oracle.tools.runtime.concurrent.RemoteChannelListener;
 import com.oracle.tools.runtime.concurrent.callable.GetSystemProperty;
 import com.oracle.tools.runtime.concurrent.runnable.RuntimeExit;
 import com.oracle.tools.runtime.concurrent.runnable.RuntimeHalt;
 import com.oracle.tools.runtime.concurrent.runnable.SystemExit;
-import com.oracle.tools.runtime.concurrent.socket.RemoteExecutorServer;
-import com.oracle.tools.runtime.concurrent.socket.SocketBasedRemoteExecutorTests;
+import com.oracle.tools.runtime.concurrent.socket.RemoteChannelServer;
+import com.oracle.tools.runtime.concurrent.socket.SocketBasedRemoteChannelTests;
 
 import com.oracle.tools.runtime.console.CapturingApplicationConsole;
 import com.oracle.tools.runtime.console.Console;
@@ -60,6 +60,7 @@ import com.oracle.tools.runtime.java.options.HeapSize;
 import com.oracle.tools.runtime.java.options.HotSpot;
 import com.oracle.tools.runtime.java.options.IPv4Preferred;
 import com.oracle.tools.runtime.java.options.JavaHome;
+import com.oracle.tools.runtime.java.options.RemoteEvents;
 import com.oracle.tools.runtime.java.options.SystemProperty;
 import com.oracle.tools.runtime.java.profiles.CommercialFeatures;
 import com.oracle.tools.runtime.java.profiles.RemoteDebugging;
@@ -73,6 +74,7 @@ import com.oracle.tools.runtime.options.WorkingDirectory;
 
 import com.oracle.tools.util.Capture;
 
+import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.ClassRule;
 import org.junit.Ignore;
@@ -368,7 +370,7 @@ public class LocalPlatformJavaApplicationTest extends AbstractJavaApplicationTes
     @Test
     public void shouldCreateOrphans()
     {
-        try (RemoteExecutorServer server = new RemoteExecutorServer())
+        try (RemoteChannelServer server = new RemoteChannelServer())
         {
             // start a server that the child can connect too.
             server.open();
@@ -396,10 +398,10 @@ public class LocalPlatformJavaApplicationTest extends AbstractJavaApplicationTes
             }
 
             // submit the child a request to prove that it's orphaned
-            RemoteExecutor                     child            = listener.getExecutor();
+            RemoteChannel child            = listener.getExecutor();
             DeferredCompletionListener<String> deferredResponse = new DeferredCompletionListener<>(String.class);
 
-            child.submit(new SocketBasedRemoteExecutorTests.PingPong(), deferredResponse);
+            child.submit(new SocketBasedRemoteChannelTests.PingPong(), deferredResponse);
 
             Eventually.assertThat(valueOf(deferredResponse), is("PONG"));
 
@@ -422,7 +424,7 @@ public class LocalPlatformJavaApplicationTest extends AbstractJavaApplicationTes
     @Test
     public void shouldNotCreateOrphans()
     {
-        try (RemoteExecutorServer server = new RemoteExecutorServer())
+        try (RemoteChannelServer server = new RemoteChannelServer())
         {
             // start a server that the child can connect too.
             server.open();
@@ -683,16 +685,19 @@ public class LocalPlatformJavaApplicationTest extends AbstractJavaApplicationTes
     {
         EventListener listener1 = new EventListener(1);
         EventListener listener2 = new EventListener(1);
+        String        name      = "Foo";
         RemoteEvent   event     = new EventingApplication.Event(19);
 
         try (JavaApplication application = getPlatform().launch(JavaApplication.class,
                                                                 ClassName.of(EventingApplication.class),
                                                                 IPv4Preferred.yes()))
         {
-            application.addEventListener(listener1);
-            application.addEventListener(listener2);
+            RemoteEventStream eventStream = application.ensureEventStream(name);
 
-            EventingApplication.fireEvent(application, event);
+            eventStream.addEventListener(listener1);
+            eventStream.addEventListener(listener2);
+
+            EventingApplication.fireEvent(application, name, event);
 
             assertThat(listener1.await(1, TimeUnit.MINUTES), is(true));
             assertThat(listener2.await(1, TimeUnit.MINUTES), is(true));
@@ -711,6 +716,7 @@ public class LocalPlatformJavaApplicationTest extends AbstractJavaApplicationTes
     @Test
     public void shouldReceiveEventsFromApplicationUsingListenerAsOption() throws Exception
     {
+        String        name      = "Foo";
         int           count     = 10;
         EventListener listener1 = new EventListener(count);
         EventListener listener2 = new EventListener(count);
@@ -718,8 +724,9 @@ public class LocalPlatformJavaApplicationTest extends AbstractJavaApplicationTes
         try (JavaApplication application = getPlatform().launch(JavaApplication.class,
                                                                 ClassName.of(EventingApplication.class),
                                                                 IPv4Preferred.yes(),
-                                                                Decoration.of(listener1),
-                                                                Decoration.of(listener2),
+                                                                RemoteEvents.from(name, listener1),
+                                                                RemoteEvents.from(name, listener2),
+                                                                Argument.of(name),
                                                                 Argument.of(count)))
         {
             assertThat(listener1.await(1, TimeUnit.MINUTES), is(true));
@@ -729,28 +736,88 @@ public class LocalPlatformJavaApplicationTest extends AbstractJavaApplicationTes
 
             assertThat(listener1.getEvents().size(), is(count));
             assertThat(listener2.getEvents().size(), is(count));
+        }
+    }
 
+
+    @Test
+    public void shouldFireEventsToApplication() throws Exception
+    {
+        EventListener listener = new EventListener(1);
+        RemoteEvent   event    = new EventingApplication.Event(19);
+
+        try (JavaApplication application = getPlatform().launch(JavaApplication.class,
+                                                                ClassName.of(EventingApplication.class),
+                                                                IPv4Preferred.yes()))
+        {
+            RemoteEventStream eventStreamOut  = application.ensureEventStream("Out");
+            RemoteEventStream eventStreamBack = application.ensureEventStream("Back");
+
+            eventStreamBack.addEventListener(listener);
+
+            EventingApplication.listen(application, "Out", "Back");
+
+            eventStreamOut.fireEvent(event);
+
+            Assert.assertThat(listener.await(1, TimeUnit.MINUTES), is(true));
+
+            Assert.assertThat(listener.getEvents().size(), is(1));
+            Assert.assertThat(listener.getEvents().get(0), is(event));
+
+            application.close();
+        }
+    }
+
+
+    @Test
+    public void shouldSubmitRunnableBack() throws Exception
+    {
+        try (JavaApplication application = getPlatform().launch(JavaApplication.class,
+                                                                ClassName.of(EventingApplication.class),
+                                                                IPv4Preferred.yes()))
+        {
+            EventingApplication.CountDownRunnable.latch = new CountDownLatch(1);
+
+            application.submit(new EventingApplication.RoundTripRunnable());
+
+            assertThat(EventingApplication.CountDownRunnable.latch.await(1, TimeUnit.MINUTES), is(true));
+        }
+    }
+
+
+    @Test
+    public void shouldSubmitCallableBack() throws Exception
+    {
+        try (JavaApplication application = getPlatform().launch(JavaApplication.class,
+                                                                ClassName.of(EventingApplication.class),
+                                                                IPv4Preferred.yes()))
+        {
+            EventingApplication.GetIntCallable.value = 1234;
+
+            int result = application.submit(new EventingApplication.RoundTripCallable());
+
+            assertThat(result, is(1234));
         }
     }
 
 
     /**
-     * A {@link com.oracle.tools.runtime.concurrent.RemoteExecutorListener} to track when it's been opened and closed.
+     * A {@link RemoteChannelListener} to track when it's been opened and closed.
      */
-    public static class ClientApplicationListener implements RemoteExecutorListener
+    public static class ClientApplicationListener implements RemoteChannelListener
     {
         /**
-         * The {@link com.oracle.tools.runtime.concurrent.RemoteExecutor} that was opened / closed.
+         * The {@link RemoteChannel} that was opened / closed.
          */
-        private RemoteExecutor executor;
+        private RemoteChannel executor;
 
         /**
-         * Was the {@link com.oracle.tools.runtime.concurrent.RemoteExecutor} open?
+         * Was the {@link RemoteChannel} open?
          */
         private AtomicBoolean isOpened;
 
         /**
-         * Was the {@link com.oracle.tools.runtime.concurrent.RemoteExecutor} closed?
+         * Was the {@link RemoteChannel} closed?
          */
         private AtomicBoolean isClosed;
 
@@ -767,10 +834,10 @@ public class LocalPlatformJavaApplicationTest extends AbstractJavaApplicationTes
 
 
         @Override
-        public void onOpened(RemoteExecutor executor)
+        public void onOpened(RemoteChannel channel)
         {
             isOpened.compareAndSet(false, true);
-            this.executor = executor;
+            this.executor = channel;
         }
 
 
@@ -786,7 +853,7 @@ public class LocalPlatformJavaApplicationTest extends AbstractJavaApplicationTes
 
 
         @Override
-        public void onClosed(RemoteExecutor executor)
+        public void onClosed(RemoteChannel channel)
         {
             isClosed.compareAndSet(false, true);
         }
@@ -804,11 +871,11 @@ public class LocalPlatformJavaApplicationTest extends AbstractJavaApplicationTes
 
 
         /**
-         * Obtains the {@link com.oracle.tools.runtime.concurrent.RemoteExecutor} provided to the {@link com.oracle.tools.runtime.concurrent.RemoteExecutorListener}.
+         * Obtains the {@link RemoteChannel} provided to the {@link RemoteChannelListener}.
          *
-         * @return a {@link com.oracle.tools.runtime.concurrent.RemoteExecutor}
+         * @return a {@link RemoteChannel}
          */
-        public RemoteExecutor getExecutor()
+        public RemoteChannel getExecutor()
         {
             return executor;
         }

@@ -1,5 +1,5 @@
 /*
- * File: SocketBasedRemoteExecutorTests.java
+ * File: SocketBasedRemoteChannelTests.java
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
@@ -32,18 +32,16 @@ import com.oracle.tools.deferred.listener.DeferredCompletionListener;
 import com.oracle.tools.runtime.concurrent.RemoteCallable;
 import com.oracle.tools.runtime.concurrent.RemoteEvent;
 import com.oracle.tools.runtime.concurrent.RemoteEventListener;
+import com.oracle.tools.runtime.concurrent.RemoteEventStream;
 import com.oracle.tools.runtime.concurrent.RemoteRunnable;
 
 import org.junit.Assert;
 import org.junit.Test;
 
-import static com.oracle.tools.deferred.DeferredHelper.invoking;
 import static com.oracle.tools.deferred.DeferredHelper.valueOf;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
 
 import java.io.IOException;
 
@@ -54,30 +52,29 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * Functional Tests for {@link com.oracle.tools.runtime.concurrent.socket.SocketBasedRemoteExecutor}s.
+ * Functional Tests for {@link SocketBasedRemoteChannel}s.
  */
-public class SocketBasedRemoteExecutorTests
+public class SocketBasedRemoteChannelTests
 {
     /**
-     * Ensure a {@link com.oracle.tools.runtime.concurrent.socket.RemoteExecutorServer} can submit and receive a
+     * Ensure a {@link RemoteChannelServer} can submit and receive a
      * {@link Callable}.
      */
     @Test
     public void shouldSubmitStaticPingPongRequest() throws InterruptedException
     {
-        RemoteExecutorServer server = null;
-        RemoteExecutorClient client = null;
+        RemoteChannelServer server = null;
+        RemoteChannelClient client = null;
 
         try
         {
-            server = new RemoteExecutorServer();
+            server = new RemoteChannelServer();
 
             InetAddress address = server.open();
 
-            client = new RemoteExecutorClient(address, server.getPort());
+            client = new RemoteChannelClient(address, server.getPort());
 
             client.open();
 
@@ -113,22 +110,22 @@ public class SocketBasedRemoteExecutorTests
 
 
     /**
-     * Ensure a {@link com.oracle.tools.runtime.concurrent.socket.RemoteExecutorServer} won't accept
+     * Ensure a {@link RemoteChannelServer} won't accept
      * inner class submissions.
      */
     @Test
     public void shouldNotPermitInnerClassSubmissions() throws InterruptedException
     {
-        RemoteExecutorServer server = null;
-        RemoteExecutorClient client = null;
+        RemoteChannelServer server = null;
+        RemoteChannelClient client = null;
 
         try
         {
-            server = new RemoteExecutorServer();
+            server = new RemoteChannelServer();
 
             InetAddress address = server.open();
 
-            client = new RemoteExecutorClient(address, server.getPort());
+            client = new RemoteChannelClient(address, server.getPort());
 
             client.open();
 
@@ -169,17 +166,17 @@ public class SocketBasedRemoteExecutorTests
 
 
     /**
-     * Ensure a {@link RemoteExecutorServer} won't accept submissions without connected clients.
+     * Ensure a {@link RemoteChannelServer} won't accept submissions without connected clients.
      */
     @Test
     public void shouldNotSubmitWithoutClients() throws InterruptedException
     {
-        RemoteExecutorServer server = null;
-        RemoteExecutorClient client = null;
+        RemoteChannelServer server = null;
+        RemoteChannelClient client = null;
 
         try
         {
-            server = new RemoteExecutorServer();
+            server = new RemoteChannelServer();
 
             DeferredCompletionListener<String> clientResponse = new DeferredCompletionListener<String>(String.class);
 
@@ -233,17 +230,17 @@ public class SocketBasedRemoteExecutorTests
             }
         };
 
-        try (RemoteExecutorServer server = new RemoteExecutorServer())
+        try (RemoteChannelServer server = new RemoteChannelServer())
         {
             InetAddress address = server.open();
 
-            server.addEventListener(listener);
+            server.addRemoteEventStreamListener("Foo", listener);
 
-            try (RemoteExecutorClient client = new RemoteExecutorClient(address, server.getPort()))
+            try (RemoteChannelClient client = new RemoteChannelClient(address, server.getPort()))
             {
                 client.open();
 
-                client.fireEvent(new Event(1));
+                client.ensureEventStream("Foo").fireEvent(new Event(1));
 
                 assertThat(latch.await(1, TimeUnit.MINUTES), is(true));
             }
@@ -267,19 +264,21 @@ public class SocketBasedRemoteExecutorTests
             }
         };
 
-        try (RemoteExecutorServer server = new RemoteExecutorServer())
+        try (RemoteChannelServer server = new RemoteChannelServer())
         {
             InetAddress address = server.open();
 
-            server.addEventListener(listener);
+            server.addRemoteEventStreamListener("Foo", listener);
 
-            try (RemoteExecutorClient client = new RemoteExecutorClient(address, server.getPort()))
+            try (RemoteChannelClient client = new RemoteChannelClient(address, server.getPort()))
             {
                 client.open();
 
+                RemoteEventStream eventStream = client.ensureEventStream("Foo");
+
                 for (int i=0; i<count; i++)
                 {
-                    client.fireEvent(new Event(i));
+                    eventStream.fireEvent(new Event(i));
                 }
 
                 assertThat(latch.await(1, TimeUnit.MINUTES), is(true));

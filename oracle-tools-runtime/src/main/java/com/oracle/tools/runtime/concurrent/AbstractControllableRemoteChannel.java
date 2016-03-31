@@ -1,5 +1,5 @@
 /*
- * File: AbstractControllableRemoteExecutor.java
+ * File: AbstractControllableRemoteChannel.java
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
@@ -28,38 +28,38 @@ package com.oracle.tools.runtime.concurrent;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 /**
- * An abstract implementation of a {@link ControllableRemoteExecutor}.
+ * An abstract implementation of a {@link ControllableRemoteChannel}.
  * <p>
  * Copyright (c) 2013. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Brian Oliver
  */
-public abstract class AbstractControllableRemoteExecutor implements ControllableRemoteExecutor
+public abstract class AbstractControllableRemoteChannel implements ControllableRemoteChannel
 {
     /**
-     * A flag indicating the open state of the {@link ControllableRemoteExecutor}.
+     * A flag indicating the open state of the {@link ControllableRemoteChannel}.
      */
     private volatile boolean isOpen;
 
     /**
-     * The {@link RemoteExecutorListener}s for the {@link ControllableRemoteExecutor}.
+     * The {@link RemoteChannelListener}s for the {@link ControllableRemoteChannel}.
      */
-    private CopyOnWriteArraySet<RemoteExecutorListener> listeners;
+    private CopyOnWriteArraySet<RemoteChannelListener> listeners;
 
 
     /**
-     * Constructs an {@link AbstractControllableRemoteExecutor}.
+     * Constructs an {@link AbstractControllableRemoteChannel}.
      */
-    public AbstractControllableRemoteExecutor()
+    public AbstractControllableRemoteChannel()
     {
         isOpen    = false;
-        listeners = new CopyOnWriteArraySet<RemoteExecutorListener>();
+        listeners = new CopyOnWriteArraySet<RemoteChannelListener>();
     }
 
 
     /**
-     * Sets if the {@link ControllableRemoteExecutor} is open.
+     * Sets if the {@link ControllableRemoteChannel} is open.
      *
      * @param isOpen
      */
@@ -78,7 +78,7 @@ public abstract class AbstractControllableRemoteExecutor implements Controllable
 
             onClose();
 
-            for (RemoteExecutorListener listener : listeners)
+            for (RemoteChannelListener listener : listeners)
             {
                 try
                 {
@@ -94,9 +94,9 @@ public abstract class AbstractControllableRemoteExecutor implements Controllable
 
 
     /**
-     * Determines if the {@link ControllableRemoteExecutor} is open.
+     * Determines if the {@link ControllableRemoteChannel} is open.
      *
-     * @return <code>true</code> if the {@link RemoteExecutor} is open
+     * @return <code>true</code> if the {@link RemoteChannel} is open
      */
     public synchronized boolean isOpen()
     {
@@ -105,26 +105,26 @@ public abstract class AbstractControllableRemoteExecutor implements Controllable
 
 
     @Override
-    public synchronized void addListener(RemoteExecutorListener listener)
+    public synchronized void addListener(RemoteChannelListener listener)
     {
         listeners.add(listener);
     }
 
 
     /**
-     * Obtain an {@link Iterable} over the currently known {@link RemoteExecutorListener}s
-     * on the {@link ControllableRemoteExecutor}.
+     * Obtain an {@link Iterable} over the currently known {@link RemoteChannelListener}s
+     * on the {@link ControllableRemoteChannel}.
      *
-     * @return  an {@link Iterable} over {@link RemoteExecutorListener}s
+     * @return  an {@link Iterable} over {@link RemoteChannelListener}s
      */
-    protected Iterable<RemoteExecutorListener> getListeners()
+    protected Iterable<RemoteChannelListener> getListeners()
     {
         return listeners;
     }
 
 
     /**
-     * Handle when the {@link ControllableRemoteExecutor} is closed.
+     * Handle when the {@link ControllableRemoteChannel} is closed.
      */
     protected abstract void onClose();
 }

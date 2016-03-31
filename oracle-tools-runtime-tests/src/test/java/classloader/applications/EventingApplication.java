@@ -25,15 +25,20 @@
 
 package classloader.applications;
 
+import com.oracle.tools.runtime.concurrent.RemoteCallable;
+import com.oracle.tools.runtime.concurrent.RemoteChannel;
 import com.oracle.tools.runtime.concurrent.RemoteEvent;
-import com.oracle.tools.runtime.concurrent.RemoteEventChannel;
+import com.oracle.tools.runtime.concurrent.RemoteEventListener;
+import com.oracle.tools.runtime.concurrent.RemoteEventStream;
 import com.oracle.tools.runtime.concurrent.RemoteRunnable;
 import com.oracle.tools.runtime.java.JavaApplication;
+import com.oracle.tools.util.FutureCompletionListener;
 
 import java.util.Random;
+import java.util.concurrent.CountDownLatch;
 
 /**
- * An application with access to an {@link RemoteEventChannel.Publisher}
+ * An application with access to a {@link RemoteChannel}
  * <p>
  * Copyright (c) 2016. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
@@ -42,8 +47,8 @@ import java.util.Random;
  */
 public class EventingApplication
 {
-    @RemoteEventChannel.InjectPublisher
-    public static RemoteEventChannel.Publisher eventPublisher;
+    @RemoteChannel.Inject
+    public static RemoteChannel channel;
 
     public static final Object WAITER = new Object();
 
@@ -51,13 +56,15 @@ public class EventingApplication
 
     public static void main(String[] args) throws Exception
     {
-        if (args.length > 0)
+        if (args.length >= 2)
         {
-            int count = Integer.parseInt(args[0]);
+            String            streamName = args[0];
+            int               count      = Integer.parseInt(args[1]);
+            RemoteEventStream stream     = channel.ensureEventStream(streamName);
 
             for (int i=0; i<count; i++)
             {
-                eventPublisher.fireEvent(new Event(i));
+                stream.fireEvent(new Event(i));
                 Thread.sleep(random.nextInt(100) + 10);
             }
         }
@@ -75,9 +82,23 @@ public class EventingApplication
      * @param application  the application to fire the event from
      * @param event        the event to fire
      */
-    public static void fireEvent(JavaApplication application, RemoteEvent event)
+    public static void fireEvent(JavaApplication application, String streamName, RemoteEvent event)
     {
-        application.submit(new FireEvent(event));
+        application.submit(new FireEvent(streamName, event));
+    }
+
+
+    /**
+     * Make the application listen to events on the incoming stream
+     * and return the same event on the outgoing stream
+     *
+     * @param application         the application to listen for events
+     * @param incomingStreamName  the name of the stream to listen to
+     * @param outgoingStreamName  the name of the stream to fire the event back on
+     */
+    public static void listen(JavaApplication application, String incomingStreamName, String outgoingStreamName)
+    {
+        application.submit(new Listen(incomingStreamName, outgoingStreamName));
     }
 
 
@@ -155,17 +176,136 @@ public class EventingApplication
      */
     public static class FireEvent implements RemoteRunnable
     {
+        private String streamName;
+
         private RemoteEvent event;
 
-        public FireEvent(RemoteEvent event)
+        public FireEvent(String streamName, RemoteEvent event)
         {
-            this.event = event;
+            this.streamName = streamName;
+            this.event      = event;
         }
 
         @Override
         public void run()
         {
-            EventingApplication.eventPublisher.fireEvent(event);
+            EventingApplication.channel
+                    .ensureEventStream(streamName)
+                    .fireEvent(event);
+        }
+    }
+
+
+    /**
+     * A {@link RemoteRunnable} that can be used to
+     * register a {@link RemoteEventListener} on a
+     * stream.
+     */
+    public static class Listen implements RemoteCallable<Object>
+    {
+        private String incomingStreamName;
+
+        private String outgoingStreamName;
+
+        public Listen(String incomingStreamName, String outgoingStreamName)
+        {
+            this.incomingStreamName = incomingStreamName;
+            this.outgoingStreamName = outgoingStreamName;
+        }
+
+        @Override
+        public Object call()
+        {
+            // Add a listener that listens to the
+            // incoming event stream and fires the
+            // event back on the outgoing stream
+
+            System.err.println("*** Listening to " + incomingStreamName + " firing back on " + outgoingStreamName);
+
+            System.err.println("Channel=" + EventingApplication.channel);
+
+            RemoteEventStream stream = EventingApplication.channel.ensureEventStream(incomingStreamName);
+            System.err.println("InStream=" + stream);
+
+            stream.addEventListener(new RemoteEventListener()
+                    {
+                        @Override
+                        public void onEvent(RemoteEvent event)
+                        {
+                            System.err.println("*** Recieved event " + event + " sending back on " + outgoingStreamName);
+                            EventingApplication.channel
+                                    .ensureEventStream(outgoingStreamName)
+                                    .fireEvent(event);
+                        }
+                    });
+
+            return null;
+        }
+    }
+
+
+
+    /**
+     * A {@link RemoteCallable} that submits another {@link RemoteChannel}
+     */
+    public static class RoundTripCallable implements RemoteCallable<Integer>
+    {
+        @Override
+        public Integer call() throws Exception
+        {
+            GetIntCallable.value = -1;
+
+            FutureCompletionListener<Integer> future = new FutureCompletionListener<>();
+
+            EventingApplication.channel.submit(new GetIntCallable(), future);
+
+            return future.get();
+        }
+    }
+
+    /**
+     * A simple {@link RemoteCallable}.
+     */
+    public static class GetIntCallable implements RemoteCallable<Integer>
+    {
+        public static int value = -1;
+
+        @Override
+        public Integer call() throws Exception
+        {
+            return value;
+        }
+    }
+
+
+    /**
+     * A {@link RemoteRunnable} that submits another {@link RemoteRunnable}.
+     */
+    public static class RoundTripRunnable implements RemoteRunnable
+    {
+        @Override
+        public void run()
+        {
+            EventingApplication.channel.submit(new CountDownRunnable());
+        }
+    }
+
+
+    /**
+     * A {@link RemoteRunnable} that counts down a {@link CountDownLatch}.
+     */
+    public static class CountDownRunnable implements RemoteRunnable
+    {
+        public static CountDownLatch latch;
+
+        public CountDownRunnable()
+        {
+        }
+
+        @Override
+        public void run()
+        {
+            latch.countDown();
         }
     }
 }

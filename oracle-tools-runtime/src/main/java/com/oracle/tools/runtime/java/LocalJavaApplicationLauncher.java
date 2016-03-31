@@ -47,19 +47,19 @@ import com.oracle.tools.runtime.Profile;
 import com.oracle.tools.runtime.Profiles;
 import com.oracle.tools.runtime.Settings;
 
-import com.oracle.tools.runtime.concurrent.ControllableRemoteExecutor;
+import com.oracle.tools.runtime.concurrent.ControllableRemoteChannel;
 import com.oracle.tools.runtime.concurrent.RemoteCallable;
-import com.oracle.tools.runtime.concurrent.RemoteEventChannel;
-import com.oracle.tools.runtime.concurrent.RemoteEventListener;
-import com.oracle.tools.runtime.concurrent.RemoteExecutor;
+import com.oracle.tools.runtime.concurrent.RemoteEventStream;
+import com.oracle.tools.runtime.concurrent.RemoteChannel;
 import com.oracle.tools.runtime.concurrent.RemoteRunnable;
-import com.oracle.tools.runtime.concurrent.socket.RemoteExecutorServer;
+import com.oracle.tools.runtime.concurrent.socket.RemoteChannelServer;
 
 import com.oracle.tools.runtime.java.features.JmxFeature;
 import com.oracle.tools.runtime.java.options.ClassName;
 import com.oracle.tools.runtime.java.options.IPv4Preferred;
 import com.oracle.tools.runtime.java.options.JavaHome;
 import com.oracle.tools.runtime.java.options.JvmOption;
+import com.oracle.tools.runtime.java.options.RemoteEvents;
 import com.oracle.tools.runtime.java.options.SystemProperties;
 import com.oracle.tools.runtime.java.options.WaitToStart;
 import com.oracle.tools.runtime.java.profiles.CommercialFeatures;
@@ -339,7 +339,7 @@ public class LocalJavaApplicationLauncher<A extends JavaApplication>
         // ----- establish Oracle Tools specific system properties -----
 
         // configure a server channel to communicate with the native process
-        final RemoteExecutorServer server = new RemoteExecutorServer();
+        final RemoteChannelServer server = new RemoteChannelServer();
 
         try
         {
@@ -352,9 +352,9 @@ public class LocalJavaApplicationLauncher<A extends JavaApplication>
         }
 
         // Add any event listeners now so that they are listening before the application starts
-        for (RemoteEventListener listener : launchOptions.getInstancesOf(RemoteEventListener.class))
+        for (RemoteEvents.RemoteEventListenerOption option : launchOptions.getInstancesOf(RemoteEvents.RemoteEventListenerOption.class))
         {
-            server.addEventListener(listener);
+            server.addRemoteEventStreamListener(option.getName(), option.getListener());
         }
 
 
@@ -557,7 +557,6 @@ public class LocalJavaApplicationLauncher<A extends JavaApplication>
         // establish a LocalJavaProcess to represent the underlying Process
         LocalJavaApplicationProcess localJavaProcess = new LocalJavaApplicationProcess(process,
                                                                                        server,
-                                                                                       server,
                                                                                        systemProperties);
 
         // determine the application class that will represent the running application
@@ -646,43 +645,31 @@ public class LocalJavaApplicationLauncher<A extends JavaApplication>
     public static class LocalJavaApplicationProcess extends LocalApplicationProcess implements JavaApplicationProcess
     {
         /**
-         * The {@link RemoteExecutor} for the {@link LocalJavaApplicationProcess}.
+         * The {@link RemoteChannel} for the {@link LocalJavaApplicationProcess}.
          */
-        private ControllableRemoteExecutor remoteExecutor;
+        private ControllableRemoteChannel remoteExecutor;
 
         /**
          * The resolved System {@link Properties} provided to the {@link JavaApplicationProcess} when it was launched.
          */
         private Properties systemProperties;
 
-        /**
-         * The {@link RemoteEventChannel.Consumer} that will receive
-         * {@link com.oracle.tools.runtime.concurrent.RemoteEvent}s from the
-         * process.
-         */
-        private RemoteEventChannel.Consumer eventConsumer;
-
 
         /**
          * Constructs a {@link LocalJavaApplicationProcess}.
          *
          * @param process          the underlying operating system {@link Process}
-         * @param remoteExecutor   the {@link ControllableRemoteExecutor} that may be used
+         * @param remoteExecutor   the {@link ControllableRemoteChannel} that may be used
          *                         to submit and control the process remotely
-         * @param eventConsumer    the {@link RemoteEventChannel.Consumer} that will receive
-         *                         {@link com.oracle.tools.runtime.concurrent.RemoteEvent}s
-         *                         from the process.
          * @param systemProperties the resolved System {@link Properties} provided to the {}
          */
-        public LocalJavaApplicationProcess(Process                     process,
-                                           ControllableRemoteExecutor  remoteExecutor,
-                                           RemoteEventChannel.Consumer eventConsumer,
-                                           Properties                  systemProperties)
+        public LocalJavaApplicationProcess(Process                   process,
+                                           ControllableRemoteChannel remoteExecutor,
+                                           Properties                systemProperties)
         {
             super(process);
 
             this.remoteExecutor   = remoteExecutor;
-            this.eventConsumer    = eventConsumer;
             this.systemProperties = systemProperties;
         }
 
@@ -710,25 +697,18 @@ public class LocalJavaApplicationLauncher<A extends JavaApplication>
 
 
         @Override
+        public RemoteEventStream ensureEventStream(String name)
+        {
+            return remoteExecutor.ensureEventStream(name);
+        }
+
+
+        @Override
         public void close()
         {
             super.close();
 
             remoteExecutor.close();
-        }
-
-
-        @Override
-        public void addEventListener(RemoteEventListener listener)
-        {
-            eventConsumer.addEventListener(listener);
-        }
-
-
-        @Override
-        public void removeEventListener(RemoteEventListener listener)
-        {
-            eventConsumer.removeEventListener(listener);
         }
     }
 }

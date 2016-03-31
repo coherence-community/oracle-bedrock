@@ -59,8 +59,10 @@ import java.io.NotSerializableException;
 
 import java.net.InetAddress;
 
-import java.util.Queue;
 import java.util.Set;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutorService;
 
 /**
  * A specialized {@link JavaApplication} that represents an Oracle Coherence Cluster Member
@@ -333,11 +335,19 @@ public interface CoherenceClusterMember extends JavaApplication
         }
 
         @Override
-        public void setEventPublisher(ContainerClassLoader classLoader, Queue<byte[]> eventQueue, Options options)
+        public void setEventPublisher(ContainerClassLoader classLoader,
+                                      ExecutorService executorService,
+                                      ConcurrentMap<String, BlockingQueue<byte[]>> eventQueuesIn,
+                                      ConcurrentMap<String, BlockingQueue<byte[]>> eventQueuesOut,
+                                      Options options)
         {
             ClassName className = options.getOrDefault(ClassName.class, ClassName.of(DEFAULT_CACHE_SERVER_CLASSNAME));
 
-            ContainerBasedJavaApplicationLauncher.setEventPublisher(classLoader, eventQueue, className.getName());
+            ContainerBasedJavaApplicationLauncher.setEventPublisher(classLoader,
+                                                                    executorService,
+                                                                    eventQueuesIn,
+                                                                    eventQueuesOut,
+                                                                    className.getName());
         }
     }
 }

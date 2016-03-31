@@ -27,13 +27,13 @@ package com.oracle.tools.runtime.remote.java;
 
 import com.oracle.tools.deferred.Eventually;
 
-import com.oracle.tools.options.Decoration;
 import com.oracle.tools.runtime.Application;
 import com.oracle.tools.runtime.LocalPlatform;
 import com.oracle.tools.runtime.Platform;
 
 import com.oracle.tools.runtime.concurrent.RemoteEvent;
 import com.oracle.tools.runtime.concurrent.RemoteEventListener;
+import com.oracle.tools.runtime.concurrent.RemoteEventStream;
 import com.oracle.tools.runtime.concurrent.runnable.RuntimeExit;
 import com.oracle.tools.runtime.concurrent.runnable.RuntimeHalt;
 
@@ -45,6 +45,7 @@ import com.oracle.tools.runtime.java.JavaApplication;
 import com.oracle.tools.runtime.java.options.ClassName;
 import com.oracle.tools.runtime.java.options.IPv4Preferred;
 import com.oracle.tools.runtime.java.options.JavaHome;
+import com.oracle.tools.runtime.java.options.RemoteEvents;
 import com.oracle.tools.runtime.java.profiles.RemoteDebugging;
 
 import com.oracle.tools.runtime.options.Argument;
@@ -487,15 +488,18 @@ public class RemoteJavaApplicationLauncherTest extends AbstractRemoteTest
         EventListener listener1 = new EventListener(1);
         EventListener listener2 = new EventListener(1);
         RemoteEvent   event     = new EventingApplication.Event(19);
+        String        name      = "Foo";
 
         try (JavaApplication application = platform.launch(JavaApplication.class,
                                                            ClassName.of(EventingApplication.class),
                                                            IPv4Preferred.yes()))
         {
-            application.addEventListener(listener1);
-            application.addEventListener(listener2);
+            RemoteEventStream eventStream = application.ensureEventStream(name);
 
-            EventingApplication.fireEvent(application, event);
+            eventStream.addEventListener(listener1);
+            eventStream.addEventListener(listener2);
+
+            EventingApplication.fireEvent(application, name, event);
 
             Assert.assertThat(listener1.await(1, TimeUnit.MINUTES), is(true));
             Assert.assertThat(listener2.await(1, TimeUnit.MINUTES), is(true));
@@ -512,9 +516,40 @@ public class RemoteJavaApplicationLauncherTest extends AbstractRemoteTest
 
 
     @Test
+    public void shouldFireEventsToApplication() throws Exception
+    {
+        Platform      platform = getRemotePlatform();
+        EventListener listener = new EventListener(1);
+        RemoteEvent   event    = new EventingApplication.Event(19);
+
+        try (JavaApplication application = platform.launch(JavaApplication.class,
+                                                           ClassName.of(EventingApplication.class),
+                                                           IPv4Preferred.yes()))
+        {
+            RemoteEventStream eventStreamOut  = application.ensureEventStream("Out");
+            RemoteEventStream eventStreamBack = application.ensureEventStream("Back");
+
+            eventStreamBack.addEventListener(listener);
+
+            EventingApplication.listen(application, "Out", "Back");
+
+            eventStreamOut.fireEvent(event);
+
+            Assert.assertThat(listener.await(1, TimeUnit.MINUTES), is(true));
+
+            Assert.assertThat(listener.getEvents().size(), is(1));
+            Assert.assertThat(listener.getEvents().get(0), is(event));
+
+            application.close();
+        }
+    }
+
+
+    @Test
     public void shouldReceiveEventsFromApplicationUsingListenerAsOption() throws Exception
     {
         Platform      platform  = getRemotePlatform();
+        String        name      = "Foo";
         int           count     = 10;
         EventListener listener1 = new EventListener(count);
         EventListener listener2 = new EventListener(count);
@@ -522,8 +557,9 @@ public class RemoteJavaApplicationLauncherTest extends AbstractRemoteTest
         try (JavaApplication application = platform.launch(JavaApplication.class,
                                                            ClassName.of(EventingApplication.class),
                                                            IPv4Preferred.yes(),
-                                                           Decoration.of(listener1),
-                                                           Decoration.of(listener2),
+                                                           RemoteEvents.from(name, listener1),
+                                                           RemoteEvents.from(name, listener2),
+                                                           Argument.of(name),
                                                            Argument.of(count)))
         {
             Assert.assertThat(listener1.await(1, TimeUnit.MINUTES), is(true));
@@ -543,6 +579,42 @@ public class RemoteJavaApplicationLauncherTest extends AbstractRemoteTest
                 Assert.assertThat(events1.get(i), is(event));
                 Assert.assertThat(events2.get(i), is(event));
             }
+        }
+    }
+
+
+    @Test
+    public void shouldSubmitRunnableBack() throws Exception
+    {
+        Platform platform = getRemotePlatform();
+
+        try (JavaApplication application = platform.launch(JavaApplication.class,
+                                                                ClassName.of(EventingApplication.class),
+                                                                IPv4Preferred.yes()))
+        {
+            EventingApplication.CountDownRunnable.latch = new CountDownLatch(1);
+
+            application.submit(new EventingApplication.RoundTripRunnable());
+
+            Assert.assertThat(EventingApplication.CountDownRunnable.latch.await(1, TimeUnit.MINUTES), is(true));
+        }
+    }
+
+
+    @Test
+    public void shouldSubmitCallableBack() throws Exception
+    {
+        Platform platform = getRemotePlatform();
+
+        try (JavaApplication application = platform.launch(JavaApplication.class,
+                                                                ClassName.of(EventingApplication.class),
+                                                                IPv4Preferred.yes()))
+        {
+            EventingApplication.GetIntCallable.value = 1234;
+
+            int result = application.submit(new EventingApplication.RoundTripCallable());
+
+            Assert.assertThat(result, is(1234));
         }
     }
 

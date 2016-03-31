@@ -25,8 +25,8 @@
 
 package com.oracle.tools.runtime.coherence;
 
+import com.oracle.tools.runtime.concurrent.RemoteChannel;
 import com.oracle.tools.runtime.concurrent.RemoteEvent;
-import com.oracle.tools.runtime.concurrent.RemoteEventChannel;
 import com.oracle.tools.runtime.concurrent.RemoteRunnable;
 import com.oracle.tools.runtime.java.JavaApplication;
 import com.tangosol.net.DefaultCacheServer;
@@ -43,8 +43,8 @@ import com.tangosol.net.DefaultCacheServer;
 public class CustomServer
 {
 
-    @RemoteEventChannel.InjectPublisher
-    public static RemoteEventChannel.Publisher eventPublisher;
+    @RemoteChannel.Inject
+    public static RemoteChannel channel;
 
 
     public static void main(String[] args)
@@ -59,9 +59,9 @@ public class CustomServer
      * @param application  the application to fire the event from
      * @param event        the event to fire
      */
-    public static void fireEvent(JavaApplication application, RemoteEvent event)
+    public static void fireEvent(JavaApplication application, String streamName, RemoteEvent event)
     {
-        application.submit(new FireEvent(event));
+        application.submit(new FireEvent(streamName, event));
     }
 
 
@@ -139,17 +139,22 @@ public class CustomServer
      */
     public static class FireEvent implements RemoteRunnable
     {
+        private String streamName;
+
         private RemoteEvent event;
 
-        public FireEvent(RemoteEvent event)
+        public FireEvent(String streamName, RemoteEvent event)
         {
-            this.event = event;
+            this.streamName = streamName;
+            this.event      = event;
         }
 
         @Override
         public void run()
         {
-            CustomServer.eventPublisher.fireEvent(event);
+            CustomServer.channel
+                    .ensureEventStream(streamName)
+                    .fireEvent(event);
         }
     }
 }

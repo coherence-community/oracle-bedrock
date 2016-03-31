@@ -393,9 +393,9 @@ public abstract class AbstractCoherenceCacheServerTest extends AbstractTest
                                                            LocalHost.only(),
                                                            SystemApplicationConsole.builder()))
         {
-            server.addEventListener(listener);
+            server.ensureEventStream("Foo").addEventListener(listener);
 
-            CustomServer.fireEvent(server, event);
+            CustomServer.fireEvent(server, "Foo", event);
 
             assertThat(listener.await(1, TimeUnit.MINUTES), is(true));
             assertThat(listener.getEvents().get(0), is(event));

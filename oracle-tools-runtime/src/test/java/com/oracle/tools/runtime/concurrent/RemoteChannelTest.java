@@ -1,5 +1,5 @@
 /*
- * File: RemoteEventChannelTest.java
+ * File: RemoteChannelTest.java
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
@@ -34,23 +34,23 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 
 /**
- * Tests for {@link RemoteEventChannel}.
+ * Tests for {@link RemoteChannel}.
  * <p>
  * Copyright (c) 2016. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Jonathan Knight
  */
-public class RemoteEventChannelTest
+public class RemoteChannelTest
 {
     @Test
     public void shouldInjectIntoPublicStaticField() throws Exception
     {
-        RemoteEventChannel.Publisher channel = mock(RemoteEventChannel.Publisher.class);
+        RemoteChannel channel = mock(RemoteChannel.class);
 
         TestTypeOne.channel = null;
 
-        RemoteEventChannel.Injector.injectPublisher(TestTypeOne.class, channel);
+        RemoteChannel.Injector.injectChannel(TestTypeOne.class, channel);
 
         assertThat(TestTypeOne.channel, is(sameInstance(channel)));
     }
@@ -59,11 +59,11 @@ public class RemoteEventChannelTest
     @Test
     public void shouldNotInjectIntoPrivateStaticField() throws Exception
     {
-        RemoteEventChannel.Publisher channel = mock(RemoteEventChannel.Publisher.class);
+        RemoteChannel channel = mock(RemoteChannel.class);
 
         TestTypeTwo.channel = null;
 
-        RemoteEventChannel.Injector.injectPublisher(TestTypeTwo.class, channel);
+        RemoteChannel.Injector.injectChannel(TestTypeTwo.class, channel);
 
         assertThat(TestTypeTwo.channel, is(nullValue()));
     }
@@ -72,10 +72,10 @@ public class RemoteEventChannelTest
     @Test
     public void shouldNotInjectIntoNonStaticField() throws Exception
     {
-        RemoteEventChannel.Publisher channel = mock(RemoteEventChannel.Publisher.class);
+        RemoteChannel channel = mock(RemoteChannel.class);
         TestTypeThree      type    = new TestTypeThree();
 
-        RemoteEventChannel.Injector.injectPublisher(type.getClass(), channel);
+        RemoteChannel.Injector.injectChannel(type.getClass(), channel);
 
         assertThat(type.channel, is(nullValue()));
     }
@@ -84,11 +84,11 @@ public class RemoteEventChannelTest
     @Test
     public void shouldNotInjectIntoWrongFieldType() throws Exception
     {
-        RemoteEventChannel.Publisher channel = mock(RemoteEventChannel.Publisher.class);
+        RemoteChannel channel = mock(RemoteChannel.class);
 
         TestTypeFour.channel = null;
 
-        RemoteEventChannel.Injector.injectPublisher(TestTypeFour.class, channel);
+        RemoteChannel.Injector.injectChannel(TestTypeFour.class, channel);
 
         assertThat(TestTypeFour.channel, is(nullValue()));
     }
@@ -97,11 +97,11 @@ public class RemoteEventChannelTest
     @Test
     public void shouldInjectIntoPublicStaticMethod() throws Exception
     {
-        RemoteEventChannel.Publisher channel = mock(RemoteEventChannel.Publisher.class);
+        RemoteChannel channel = mock(RemoteChannel.class);
 
         TestTypeFive.channel = null;
 
-        RemoteEventChannel.Injector.injectPublisher(TestTypeFive.class, channel);
+        RemoteChannel.Injector.injectChannel(TestTypeFive.class, channel);
 
         assertThat(TestTypeFive.channel, is(sameInstance(channel)));
     }
@@ -110,11 +110,11 @@ public class RemoteEventChannelTest
     @Test
     public void shouldNotInjectIntoNonPublicMethod() throws Exception
     {
-        RemoteEventChannel.Publisher channel = mock(RemoteEventChannel.Publisher.class);
+        RemoteChannel channel = mock(RemoteChannel.class);
 
         TestTypeSix.channel = null;
 
-        RemoteEventChannel.Injector.injectPublisher(TestTypeSix.class, channel);
+        RemoteChannel.Injector.injectChannel(TestTypeSix.class, channel);
 
         assertThat(TestTypeSix.channel, is(nullValue()));
     }
@@ -123,11 +123,11 @@ public class RemoteEventChannelTest
     @Test
     public void shouldNotInjectIntoNonStaticMethod() throws Exception
     {
-        RemoteEventChannel.Publisher channel = mock(RemoteEventChannel.Publisher.class);
+        RemoteChannel channel = mock(RemoteChannel.class);
 
         TestTypeSeven.channel = null;
 
-        RemoteEventChannel.Injector.injectPublisher(TestTypeSeven.class, channel);
+        RemoteChannel.Injector.injectChannel(TestTypeSeven.class, channel);
 
         assertThat(TestTypeSeven.channel, is(nullValue()));
     }
@@ -136,11 +136,11 @@ public class RemoteEventChannelTest
     @Test
     public void shouldNotInjectIntoMethodWithWrongParameterType() throws Exception
     {
-        RemoteEventChannel.Publisher channel = mock(RemoteEventChannel.Publisher.class);
+        RemoteChannel channel = mock(RemoteChannel.class);
 
         TestTypeEight.channel = null;
 
-        RemoteEventChannel.Injector.injectPublisher(TestTypeEight.class, channel);
+        RemoteChannel.Injector.injectChannel(TestTypeEight.class, channel);
 
         assertThat(TestTypeEight.channel, is(nullValue()));
     }
@@ -149,11 +149,11 @@ public class RemoteEventChannelTest
     @Test
     public void shouldNotInjectIntoMethodWithTooManyParameters() throws Exception
     {
-        RemoteEventChannel.Publisher channel = mock(RemoteEventChannel.Publisher.class);
+        RemoteChannel channel = mock(RemoteChannel.class);
 
         TestTypeNine.channel = null;
 
-        RemoteEventChannel.Injector.injectPublisher(TestTypeNine.class, channel);
+        RemoteChannel.Injector.injectChannel(TestTypeNine.class, channel);
 
         assertThat(TestTypeNine.channel, is(nullValue()));
     }
@@ -162,11 +162,11 @@ public class RemoteEventChannelTest
     @Test
     public void shouldInjectIntoMethodWithSuperTypeParameter() throws Exception
     {
-        RemoteEventChannel.Publisher channel = mock(RemoteEventChannel.Publisher.class);
+        RemoteChannel channel = mock(RemoteChannel.class);
 
         TestTypeTen.channel = null;
 
-        RemoteEventChannel.Injector.injectPublisher(TestTypeTen.class, channel);
+        RemoteChannel.Injector.injectChannel(TestTypeTen.class, channel);
 
         assertThat(TestTypeTen.channel, is((Object) channel));
     }
@@ -175,11 +175,11 @@ public class RemoteEventChannelTest
     @Test
     public void shouldInjectIntoFieldOfSuperType() throws Exception
     {
-        RemoteEventChannel.Publisher channel = mock(RemoteEventChannel.Publisher.class);
+        RemoteChannel channel = mock(RemoteChannel.class);
 
         TestTypeEleven.channel = null;
 
-        RemoteEventChannel.Injector.injectPublisher(TestTypeEleven.class, channel);
+        RemoteChannel.Injector.injectChannel(TestTypeEleven.class, channel);
 
         assertThat(TestTypeEleven.channel, is((Object) channel));
     }
@@ -188,38 +188,38 @@ public class RemoteEventChannelTest
     public static class TestTypeOne
     {
         /** Valid annotation use */
-        @RemoteEventChannel.InjectPublisher
-        public static RemoteEventChannel.Publisher channel;
+        @RemoteChannel.Inject
+        public static RemoteChannel channel;
     }
 
     public static class TestTypeTwo
     {
         /** Invalid annotation use - field is not public */
-        @RemoteEventChannel.InjectPublisher
-        private static RemoteEventChannel.Publisher channel;
+        @RemoteChannel.Inject
+        private static RemoteChannel channel;
     }
 
     public static class TestTypeThree
     {
         /** Invalid annotation use - field is not static */
-        @RemoteEventChannel.InjectPublisher
-        public RemoteEventChannel.Publisher channel;
+        @RemoteChannel.Inject
+        public RemoteChannel channel;
     }
 
     public static class TestTypeFour
     {
         /** Valid annotation use - field is wrong type */
-        @RemoteEventChannel.InjectPublisher
-        public static RemoteExecutor channel;
+        @RemoteChannel.Inject
+        public static String channel;
     }
 
     public static class TestTypeFive
     {
-        private static RemoteEventChannel.Publisher channel;
+        private static RemoteChannel channel;
 
         /** Valid annotation use */
-        @RemoteEventChannel.InjectPublisher
-        public static void setEventChannel(RemoteEventChannel.Publisher eventChannel)
+        @RemoteChannel.Inject
+        public static void setEventChannel(RemoteChannel eventChannel)
         {
             channel = eventChannel;
         }
@@ -227,11 +227,11 @@ public class RemoteEventChannelTest
 
     public static class TestTypeSix
     {
-        private static RemoteEventChannel.Publisher channel;
+        private static RemoteChannel channel;
 
         /** Invalid annotation use - method is not public */
-        @RemoteEventChannel.InjectPublisher
-        private static void setEventChannel(RemoteEventChannel.Publisher eventChannel)
+        @RemoteChannel.Inject
+        private static void setEventChannel(RemoteChannel eventChannel)
         {
             channel = eventChannel;
         }
@@ -239,11 +239,11 @@ public class RemoteEventChannelTest
 
     public static class TestTypeSeven
     {
-        private static RemoteEventChannel.Publisher channel;
+        private static RemoteChannel channel;
 
         /** Invalid annotation use - method is not static */
-        @RemoteEventChannel.InjectPublisher
-        public void setEventChannel(RemoteEventChannel.Publisher eventChannel)
+        @RemoteChannel.Inject
+        public void setEventChannel(RemoteChannel eventChannel)
         {
             channel = eventChannel;
         }
@@ -251,11 +251,11 @@ public class RemoteEventChannelTest
 
     public static class TestTypeEight
     {
-        private static Object channel;
+        private static String channel;
 
         /** Invalid annotation use - method has wrong parameter type */
-        @RemoteEventChannel.InjectPublisher
-        public static void setEventChannel(RemoteExecutor eventChannel)
+        @RemoteChannel.Inject
+        public static void setEventChannel(String eventChannel)
         {
             channel = eventChannel;
         }
@@ -266,8 +266,8 @@ public class RemoteEventChannelTest
         private static Object channel;
 
         /** Invalid annotation use - method has too many parameters */
-        @RemoteEventChannel.InjectPublisher
-        public static void setEventChannel(RemoteEventChannel.Publisher eventChannel, String foo)
+        @RemoteChannel.Inject
+        public static void setEventChannel(RemoteChannel eventChannel, String foo)
         {
             channel = eventChannel;
         }
@@ -278,7 +278,7 @@ public class RemoteEventChannelTest
         private static Object channel;
 
         /** Valid annotation use - method parameter is super class of RemoteEventChannel */
-        @RemoteEventChannel.InjectPublisher
+        @RemoteChannel.Inject
         public static void setEventChannel(Object eventChannel)
         {
             channel = eventChannel;
@@ -288,7 +288,7 @@ public class RemoteEventChannelTest
     public static class TestTypeEleven
     {
         /** Valid annotation use - field type is superclass of RemoteEventChannel.Publisher */
-        @RemoteEventChannel.InjectPublisher
+        @RemoteChannel.Inject
         public static Object channel;
     }
 

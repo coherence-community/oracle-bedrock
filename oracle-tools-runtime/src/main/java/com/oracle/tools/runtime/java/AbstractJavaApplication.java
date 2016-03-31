@@ -33,12 +33,11 @@ import com.oracle.tools.runtime.ApplicationProcess;
 import com.oracle.tools.runtime.Platform;
 
 import com.oracle.tools.runtime.concurrent.RemoteCallable;
-import com.oracle.tools.runtime.concurrent.RemoteEventListener;
+import com.oracle.tools.runtime.concurrent.RemoteEventStream;
 import com.oracle.tools.runtime.concurrent.RemoteRunnable;
 import com.oracle.tools.runtime.concurrent.callable.GetSystemProperty;
 import com.oracle.tools.runtime.concurrent.callable.RemoteMethodInvocation;
 
-import com.oracle.tools.runtime.java.options.SystemProperties;
 import com.oracle.tools.util.CompletionListener;
 import com.oracle.tools.util.FutureCompletionListener;
 import com.oracle.tools.util.ReflectionHelper;
@@ -138,16 +137,9 @@ public abstract class AbstractJavaApplication<P extends JavaApplicationProcess> 
 
 
     @Override
-    public void addEventListener(RemoteEventListener listener)
+    public RemoteEventStream ensureEventStream(String name)
     {
-        process.addEventListener(listener);
-    }
-
-
-    @Override
-    public void removeEventListener(RemoteEventListener listener)
-    {
-        process.removeEventListener(listener);
+        return process.ensureEventStream(name);
     }
 
 

@@ -42,13 +42,12 @@ import com.oracle.tools.runtime.ApplicationProcess;
 import com.oracle.tools.runtime.Platform;
 import com.oracle.tools.runtime.Settings;
 
-import com.oracle.tools.runtime.concurrent.ControllableRemoteExecutor;
+import com.oracle.tools.runtime.concurrent.ControllableRemoteChannel;
 import com.oracle.tools.runtime.concurrent.RemoteCallable;
-import com.oracle.tools.runtime.concurrent.RemoteEventChannel;
-import com.oracle.tools.runtime.concurrent.RemoteEventListener;
-import com.oracle.tools.runtime.concurrent.RemoteExecutor;
+import com.oracle.tools.runtime.concurrent.RemoteChannel;
+import com.oracle.tools.runtime.concurrent.RemoteEventStream;
 import com.oracle.tools.runtime.concurrent.RemoteRunnable;
-import com.oracle.tools.runtime.concurrent.socket.RemoteExecutorServer;
+import com.oracle.tools.runtime.concurrent.socket.RemoteChannelServer;
 
 import com.oracle.tools.runtime.java.ClassPath;
 import com.oracle.tools.runtime.java.ClassPathModifier;
@@ -60,6 +59,7 @@ import com.oracle.tools.runtime.java.features.JmxFeature;
 import com.oracle.tools.runtime.java.options.ClassName;
 import com.oracle.tools.runtime.java.options.JavaHome;
 import com.oracle.tools.runtime.java.options.JvmOption;
+import com.oracle.tools.runtime.java.options.RemoteEvents;
 import com.oracle.tools.runtime.java.options.SystemProperties;
 import com.oracle.tools.runtime.java.options.WaitToStart;
 import com.oracle.tools.runtime.java.profiles.CommercialFeatures;
@@ -102,10 +102,10 @@ public class RemoteJavaApplicationLauncher extends AbstractRemoteApplicationLaun
     implements JavaApplicationLauncher<JavaApplication, RemotePlatform>
 {
     /**
-     * The {@link ControllableRemoteExecutor} that can be used to communicate with
+     * The {@link ControllableRemoteChannel} that can be used to communicate with
      * the remote {@link JavaApplication}.
      */
-    private RemoteExecutorServer remoteExecutor;
+    private RemoteChannelServer remoteExecutor;
 
     /**
      * The {@link ClassPath} for the remote {@link JavaApplication}.
@@ -128,7 +128,7 @@ public class RemoteJavaApplicationLauncher extends AbstractRemoteApplicationLaun
         super(platform);
 
         // configure a server that the remote process can communicate with
-        remoteExecutor = new RemoteExecutorServer();
+        remoteExecutor = new RemoteChannelServer();
 
         // assume no resolved system properties at first
         systemProperties = new Properties();
@@ -220,9 +220,9 @@ public class RemoteJavaApplicationLauncher extends AbstractRemoteApplicationLaun
         }
 
         // Add any event listeners now so that they are listening before the application starts
-        for (RemoteEventListener listener : options.getInstancesOf(RemoteEventListener.class))
+        for (RemoteEvents.RemoteEventListenerOption option : options.getInstancesOf(RemoteEvents.RemoteEventListenerOption.class))
         {
-            remoteExecutor.addEventListener(listener);
+            remoteExecutor.addRemoteEventStreamListener(option.getName(), option.getListener());
         }
     }
 
@@ -250,7 +250,7 @@ public class RemoteJavaApplicationLauncher extends AbstractRemoteApplicationLaun
         {
             Timeout                    timeout = options.get(Timeout.class);
 
-            final RemoteExecutorServer server  = remoteExecutor;
+            final RemoteChannelServer server  = remoteExecutor;
 
             ensure(new AbstractDeferred<Boolean>()
                    {
@@ -275,7 +275,7 @@ public class RemoteJavaApplicationLauncher extends AbstractRemoteApplicationLaun
     @Override
     protected <P extends ApplicationProcess> P adapt(RemoteApplicationProcess process)
     {
-        return (P) new RemoteJavaApplicationProcess(process, remoteExecutor, remoteExecutor, systemProperties);
+        return (P) new RemoteJavaApplicationProcess(process, remoteExecutor, systemProperties);
     }
 
 
@@ -477,9 +477,9 @@ public class RemoteJavaApplicationLauncher extends AbstractRemoteApplicationLaun
         private RemoteApplicationProcess process;
 
         /**
-         * The {@link RemoteExecutor} for the {@link RemoteJavaApplicationProcess}.
+         * The {@link RemoteChannel} for the {@link RemoteJavaApplicationProcess}.
          */
-        private ControllableRemoteExecutor remoteExecutor;
+        private ControllableRemoteChannel remoteExecutor;
 
         /**
          * The resolved System {@link Properties} provided to the {@link JavaApplicationProcess} when it was launched.
@@ -487,30 +487,18 @@ public class RemoteJavaApplicationLauncher extends AbstractRemoteApplicationLaun
         private Properties systemProperties;
 
         /**
-         * The {@link RemoteEventChannel.Consumer} that will receive
-         * {@link com.oracle.tools.runtime.concurrent.RemoteEvent}s from the
-         * remote process.
-         */
-        private RemoteEventChannel.Consumer eventConsumer;
-
-        /**
          * Constructs a {@link RemoteJavaApplicationProcess}.
          *
          * @param process          the underlying {@link RemoteApplicationProcess}
-         * @param remoteExecutor   the {@link RemoteExecutor} for executing remote requests
-         * @param eventConsumer    the {@link RemoteEventChannel.Consumer} that will receive
-         *                         {@link com.oracle.tools.runtime.concurrent.RemoteEvent}s
-         *                         from the process.
+         * @param remoteExecutor   the {@link RemoteChannel} for executing remote requests
          * @param systemProperties the resolved System {@link Properties} provided to the {}
          */
-        public RemoteJavaApplicationProcess(RemoteApplicationProcess    process,
-                                            ControllableRemoteExecutor  remoteExecutor,
-                                            RemoteEventChannel.Consumer eventConsumer,
-                                            Properties                  systemProperties)
+        public RemoteJavaApplicationProcess(RemoteApplicationProcess process,
+                                            ControllableRemoteChannel remoteExecutor,
+                                            Properties systemProperties)
         {
             this.process          = process;
             this.remoteExecutor   = remoteExecutor;
-            this.eventConsumer    = eventConsumer;
             this.systemProperties = systemProperties;
         }
 
@@ -593,17 +581,11 @@ public class RemoteJavaApplicationLauncher extends AbstractRemoteApplicationLaun
             remoteExecutor.submit(runnable);
         }
 
-        @Override
-        public void addEventListener(RemoteEventListener listener)
-        {
-            eventConsumer.addEventListener(listener);
-        }
-
 
         @Override
-        public void removeEventListener(RemoteEventListener listener)
+        public RemoteEventStream ensureEventStream(String name)
         {
-            eventConsumer.removeEventListener(listener);
+            return remoteExecutor.ensureEventStream(name);
         }
     }
 }

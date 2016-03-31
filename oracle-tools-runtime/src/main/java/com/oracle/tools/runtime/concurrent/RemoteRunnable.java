@@ -35,7 +35,7 @@ import java.io.Serializable;
  *
  * @author Brian Oliver
  *
- * @see RemoteExecutor
+ * @see RemoteChannel
  */
 public interface RemoteRunnable extends Runnable, Serializable
 {

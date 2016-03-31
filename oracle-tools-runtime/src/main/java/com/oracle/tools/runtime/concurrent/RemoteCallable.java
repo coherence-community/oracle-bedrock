@@ -37,7 +37,7 @@ import java.util.concurrent.Callable;
  *
  * @author Brian Oliver
  *
- * @see RemoteExecutor
+ * @see RemoteChannel
  */
 public interface RemoteCallable<T> extends Callable<T>, Serializable
 {

@@ -26,7 +26,7 @@
 package com.oracle.tools.deferred;
 
 import com.oracle.tools.runtime.concurrent.RemoteCallable;
-import com.oracle.tools.runtime.concurrent.RemoteExecutor;
+import com.oracle.tools.runtime.concurrent.RemoteChannel;
 
 import com.oracle.tools.util.CompletionListener;
 
@@ -37,7 +37,7 @@ import java.util.concurrent.Callable;
 
 /**
  * A {@link Deferred} representing the result of a {@link Callable}
- * submitted to a {@link RemoteExecutor}
+ * submitted to a {@link RemoteChannel}
  * <p>
  * Copyright (c) 2013. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
@@ -47,10 +47,10 @@ import java.util.concurrent.Callable;
 public class DeferredRemoteExecution<T> implements Deferred<T>, CompletionListener<T>
 {
     /**
-     * The {@link RemoteExecutor} to which the {@link Callable}
+     * The {@link RemoteChannel} to which the {@link Callable}
      * will be submitted.
      */
-    private RemoteExecutor remoteExecutor;
+    private RemoteChannel remoteChannel;
 
     /**
      * The {@link RemoteCallable} to submit for execution.
@@ -81,13 +81,13 @@ public class DeferredRemoteExecution<T> implements Deferred<T>, CompletionListen
     /**
      * Constructs a {@link DeferredRemoteExecution}
      *
-     * @param remoteExecutor  the {@link RemoteExecutor} to be used for execution
+     * @param remoteChannel  the {@link RemoteChannel} to be used for execution
      * @param callable        the {@link RemoteCallable} to execute
      */
-    public DeferredRemoteExecution(RemoteExecutor    remoteExecutor,
+    public DeferredRemoteExecution(RemoteChannel remoteChannel,
                                    RemoteCallable<T> callable)
     {
-        this.remoteExecutor       = remoteExecutor;
+        this.remoteChannel = remoteChannel;
         this.callable             = callable;
         this.hasSubmittedCallable = false;
         this.hasResult            = false;
@@ -171,7 +171,7 @@ public class DeferredRemoteExecution<T> implements Deferred<T>, CompletionListen
 
                     try
                     {
-                        remoteExecutor.submit(callable, this);
+                        remoteChannel.submit(callable, this);
                     }
                     catch (Exception e)
                     {

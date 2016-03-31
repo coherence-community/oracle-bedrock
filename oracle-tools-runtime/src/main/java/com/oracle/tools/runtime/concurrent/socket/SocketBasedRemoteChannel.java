@@ -1,5 +1,5 @@
 /*
- * File: SocketBasedRemoteExecutor.java
+ * File: SocketBasedRemoteChannel.java
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
@@ -27,12 +27,13 @@ package com.oracle.tools.runtime.concurrent.socket;
 
 import com.oracle.tools.lang.ThreadFactories;
 
-import com.oracle.tools.runtime.concurrent.AbstractControllableRemoteExecutor;
+import com.oracle.tools.runtime.concurrent.AbstractControllableRemoteChannel;
 import com.oracle.tools.runtime.concurrent.RemoteCallable;
+import com.oracle.tools.runtime.concurrent.RemoteChannel;
 import com.oracle.tools.runtime.concurrent.RemoteEvent;
-import com.oracle.tools.runtime.concurrent.RemoteEventChannel;
+import com.oracle.tools.runtime.concurrent.RemoteEventStream;
 import com.oracle.tools.runtime.concurrent.RemoteEventListener;
-import com.oracle.tools.runtime.concurrent.RemoteExecutorListener;
+import com.oracle.tools.runtime.concurrent.RemoteChannelListener;
 import com.oracle.tools.runtime.concurrent.RemoteRunnable;
 
 import com.oracle.tools.util.CompletionListener;
@@ -53,6 +54,7 @@ import java.net.Socket;
 import java.util.HashMap;
 
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
@@ -63,19 +65,18 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * A {@link Socket}-based implementation of a {@link com.oracle.tools.runtime.concurrent.RemoteExecutor}.
+ * A {@link Socket}-based implementation of a {@link RemoteChannel}.
  * <p>
  * Copyright (c) 2013. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Brian Oliver
  */
-public class SocketBasedRemoteExecutor
-        extends AbstractControllableRemoteExecutor
-        implements RemoteEventChannel.Publisher, RemoteEventChannel.Consumer
+public class SocketBasedRemoteChannel
+        extends AbstractControllableRemoteChannel
 {
     /**
-     * The unique identity of the {@link SocketBasedRemoteExecutor}.
+     * The unique identity of the {@link SocketBasedRemoteChannel}.
      */
     private int executorId;
 
@@ -87,14 +88,14 @@ public class SocketBasedRemoteExecutor
     /**
      * The {@link java.io.ObjectOutputStream} to the {@link Socket}.
      * <p/>
-     * When this is <code>null</code> the {@link SocketBasedRemoteExecutor} is not connected.
+     * When this is <code>null</code> the {@link SocketBasedRemoteChannel} is not connected.
      */
     private ObjectOutputStream output;
 
     /**
      * The {@link java.io.ObjectInputStream} from the {@link Socket}.
      * <p/>
-     * When this is <code>null</code> the {@link SocketBasedRemoteExecutor} is not connected.
+     * When this is <code>null</code> the {@link SocketBasedRemoteChannel} is not connected.
      */
     private ObjectInputStream input;
 
@@ -113,25 +114,25 @@ public class SocketBasedRemoteExecutor
     /**
      * The {@link Thread} to read {@link Callable}s from the {@link Socket}.
      * <p/>
-     * When this is <code>null</code> the {@link SocketBasedRemoteExecutor} is not connected.
+     * When this is <code>null</code> the {@link SocketBasedRemoteChannel} is not connected.
      */
     private Thread requestAcceptorThread;
 
     /**
-     * A flag to indicate if the {@link SocketBasedRemoteExecutor} {@link ObjectInputStream}
+     * A flag to indicate if the {@link SocketBasedRemoteChannel} {@link ObjectInputStream}
      * is readable.
      */
     private AtomicBoolean isReadable;
 
     /**
-     * A flag to indicate if the {@link SocketBasedRemoteExecutor} {@link ObjectOutputStream}
+     * A flag to indicate if the {@link SocketBasedRemoteChannel} {@link ObjectOutputStream}
      * is writable.
      */
     private AtomicBoolean isWritable;
 
     /**
      * The defined protocol (of {@link Operation} types) that the
-     * {@link SocketBasedRemoteExecutor} can process.
+     * {@link SocketBasedRemoteChannel} can process.
      */
     private HashMap<String, Class<? extends Operation>> protocol;
 
@@ -142,27 +143,24 @@ public class SocketBasedRemoteExecutor
 
     /**
      * The next available sequence number for a callable sent from
-     * this {@link SocketBasedRemoteExecutor}.
+     * this {@link SocketBasedRemoteChannel}.
      */
     private AtomicLong nextSequenceNumber;
 
-    /**
-     * The {@link Set} of {@link RemoteEventListener}s that will receive {@link RemoteEvent}s.
-     */
-    private Set<RemoteEventListener> listeners = new HashSet<RemoteEventListener>();
 
+    private Map<String,RemoteEventStream> eventStreams;
 
     /**
-     * Constructs a {@link SocketBasedRemoteExecutor} to submit and accept {@link Callable}s.
+     * Constructs a {@link SocketBasedRemoteChannel} to submit and accept {@link Callable}s.
      *
      * @param socket  the {@link Socket} over which {@link Callable}s
      *                will be submit and accepted
      *
-     * @throws IOException when the {@link SocketBasedRemoteExecutor} can't connect
+     * @throws IOException when the {@link SocketBasedRemoteChannel} can't connect
      *                     using the {@link Socket}
      */
-    public SocketBasedRemoteExecutor(int    executorId,
-                                     Socket socket) throws IOException
+    public SocketBasedRemoteChannel(int    executorId,
+                                    Socket socket) throws IOException
     {
         this.executorId                 = executorId;
         this.socket                     = socket;
@@ -176,6 +174,7 @@ public class SocketBasedRemoteExecutor
         this.protocol                   = new HashMap<String, Class<? extends Operation>>();
         this.pendingListeners           = new ConcurrentHashMap<Long, CompletionListener<?>>();
         this.nextSequenceNumber         = new AtomicLong(0);
+        this.eventStreams               = new HashMap<>();
 
         // we'll always attempt to reuse addresses
         this.socket.setReuseAddress(true);
@@ -189,9 +188,9 @@ public class SocketBasedRemoteExecutor
 
 
     /**
-     * Obtains the identity of the {@link SocketBasedRemoteExecutor}.
+     * Obtains the identity of the {@link SocketBasedRemoteChannel}.
      *
-     * @return the identity of the {@link SocketBasedRemoteExecutor}
+     * @return the identity of the {@link SocketBasedRemoteChannel}
      */
     public int getExecutorId()
     {
@@ -223,7 +222,7 @@ public class SocketBasedRemoteExecutor
 
 
     /**
-     * Opens the {@link SocketBasedRemoteExecutor} to accept and submit {@link Callable}s.
+     * Opens the {@link SocketBasedRemoteChannel} to accept and submit {@link Callable}s.
      */
     public synchronized void open()
     {
@@ -261,10 +260,10 @@ public class SocketBasedRemoteExecutor
                                 // instantiate the operation and initialize its state
                                 Class<? extends Operation> operationClass = protocol.get(operationType);
 
-                                Constructor<? extends SocketBasedRemoteExecutor.Operation> constructor =
-                                    operationClass.getConstructor(SocketBasedRemoteExecutor.class);
+                                Constructor<? extends SocketBasedRemoteChannel.Operation> constructor =
+                                    operationClass.getConstructor(SocketBasedRemoteChannel.class);
 
-                                Operation operation = constructor.newInstance(SocketBasedRemoteExecutor.this);
+                                Operation operation = constructor.newInstance(SocketBasedRemoteChannel.this);
 
                                 operation.read(stream);
 
@@ -293,7 +292,7 @@ public class SocketBasedRemoteExecutor
             requestAcceptorThread.setDaemon(true);
             requestAcceptorThread.start();
 
-            for (RemoteExecutorListener listener : getListeners())
+            for (RemoteChannelListener listener : getListeners())
             {
                 try
                 {
@@ -311,6 +310,13 @@ public class SocketBasedRemoteExecutor
     @Override
     protected void onClose()
     {
+        for (RemoteEventStream eventStream : eventStreams.values())
+        {
+            eventStream.close();
+        }
+
+        eventStreams.clear();
+
         // no longer accept any more requests
         isReadable.set(false);
 
@@ -422,42 +428,124 @@ public class SocketBasedRemoteExecutor
 
 
     @Override
-    public void fireEvent(RemoteEvent event)
+    public RemoteEventStream ensureEventStream(String name)
     {
-        if (isOpen())
+        if (name == null)
         {
-            long           sequence  = nextSequenceNumber.getAndIncrement();
-            EventOperation operation = new EventOperation(event);
+            throw new NullPointerException("The name parameter cannot be null");
+        }
 
-            sequentialExecutionService.submit(new Sender(sequence, operation));
-        }
-        else
+        RemoteEventStream eventStream = eventStreams.get(name);
+
+        if (eventStream == null)
         {
-            throw new IllegalStateException("RemoteExecutor is closed");
+            eventStreams.putIfAbsent(name, new EventStream(name));
+
+            eventStream = eventStreams.get(name);
         }
+
+        return eventStream;
     }
 
-    @Override
-    public void addEventListener(RemoteEventListener listener)
-    {
-        if (listener != null)
-        {
-            listeners.add(listener);
-        }
-    }
 
-    @Override
-    public void removeEventListener(RemoteEventListener listener)
+    private class EventStream implements RemoteEventStream
     {
-        if (listener != null)
+        /**
+         * The unique name of this {@link EventStream}.
+         */
+        private final String name;
+
+        /**
+         * The {@link Set} of {@link RemoteEventListener}s that will receive {@link RemoteEvent}s.
+         */
+        private final Set<RemoteEventListener> listeners = new HashSet<>();
+
+        /**
+         * Create a new {@link EventStream} with the specified name.
+         *
+         * @param name  the unique name of this {@link EventStream}
+         */
+        public EventStream(String name)
         {
-            listeners.remove(listener);
+            this.name = name;
         }
+
+
+        @Override
+        public String getName()
+        {
+            return name;
+        }
+
+
+        @Override
+        public void close()
+        {
+            listeners.clear();
+        }
+
+
+        @Override
+        public void fireEvent(RemoteEvent event)
+        {
+            if (isOpen())
+            {
+                long           sequence  = nextSequenceNumber.getAndIncrement();
+                EventOperation operation = new EventOperation(name, event);
+
+                sequentialExecutionService.submit(new Sender(sequence, operation));
+
+                // We send the same event to all of the local listeners too
+                onEvent(event);
+            }
+            else
+            {
+                throw new IllegalStateException("RemoteExecutor is closed");
+            }
+        }
+
+
+        @Override
+        public void onEvent(RemoteEvent event)
+        {
+            for (RemoteEventListener listener : listeners)
+            {
+                try
+                {
+                    listener.onEvent(event);
+                }
+                catch (Exception e)
+                {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+
+        @Override
+        public void addEventListener(RemoteEventListener listener)
+        {
+            if (listener != null)
+            {
+                listeners.add(listener);
+            }
+        }
+
+
+        @Override
+        public void removeEventListener(RemoteEventListener listener)
+        {
+            if (listener != null)
+            {
+                listeners.remove(listener);
+            }
+        }
+
     }
 
 
     /**
-     * An {@link Operation} to be executed in-order by a {@link SocketBasedRemoteExecutor}.
+     * An {@link Operation} to be executed in-order by a {@link SocketBasedRemoteChannel}.
      */
     interface Operation
     {
@@ -519,7 +607,7 @@ public class SocketBasedRemoteExecutor
 
 
         /**
-         * Constructs a {@link com.oracle.tools.runtime.concurrent.socket.SocketBasedRemoteExecutor.CallableOperation}
+         * Constructs a {@link SocketBasedRemoteChannel.CallableOperation}
          * (required for construction)
          */
         public CallableOperation()
@@ -528,7 +616,7 @@ public class SocketBasedRemoteExecutor
 
 
         /**
-         * Constructs a {@link com.oracle.tools.runtime.concurrent.socket.SocketBasedRemoteExecutor.CallableOperation}
+         * Constructs a {@link SocketBasedRemoteChannel.CallableOperation}
          *
          * @param isResponseRequired
          * @param callable
@@ -646,7 +734,7 @@ public class SocketBasedRemoteExecutor
 
     /**
      * Asynchronously executes an {@link Operation} that was
-     * received by the {@link SocketBasedRemoteExecutor}.
+     * received by the {@link SocketBasedRemoteChannel}.
      */
     class Executor implements Runnable
     {
@@ -694,7 +782,7 @@ public class SocketBasedRemoteExecutor
 
 
         /**
-         * Constructs a {@link com.oracle.tools.runtime.concurrent.socket.SocketBasedRemoteExecutor.ResponseOperation}
+         * Constructs a {@link SocketBasedRemoteChannel.ResponseOperation}
          * (required for construction)
          */
         public ResponseOperation()
@@ -703,7 +791,7 @@ public class SocketBasedRemoteExecutor
 
 
         /**
-         * Constructs a {@link com.oracle.tools.runtime.concurrent.socket.SocketBasedRemoteExecutor.ResponseOperation}
+         * Constructs a {@link SocketBasedRemoteChannel.ResponseOperation}
          *
          * @param response  the response
          */
@@ -901,6 +989,12 @@ public class SocketBasedRemoteExecutor
     class EventOperation implements Operation
     {
         /**
+         * The name of the {@link RemoteEventStream} that this
+         * event is for.
+         */
+        private String streamName;
+
+        /**
          * The {@link RemoteEvent} to eventually execute.
          */
         private RemoteEvent event;
@@ -914,7 +1008,6 @@ public class SocketBasedRemoteExecutor
         {
         }
 
-
         /**
          * Constructs an {@link EventOperation}
          *
@@ -923,8 +1016,15 @@ public class SocketBasedRemoteExecutor
          * @throws NullPointerException      should the {@link RemoteEvent} be <code>null</code>
          * @throws IllegalArgumentException  should the {@link RemoteEvent} be an anonymous inner class
          */
-        public EventOperation(RemoteEvent event)
+        public EventOperation(String streamName, RemoteEvent event)
         {
+            if (streamName == null)
+            {
+                throw new NullPointerException("The streamName can't be null");
+            }
+
+            this.streamName = streamName;
+
             if (event == null)
             {
                 throw new NullPointerException("RemoteEvent can't be null");
@@ -950,23 +1050,11 @@ public class SocketBasedRemoteExecutor
         @Override
         public Operation execute(long sequence)
         {
-            try
+            RemoteEventStream stream = ensureEventStream(streamName);
+
+            if (stream != null)
             {
-                for (RemoteEventListener listener : listeners)
-                {
-                    try
-                    {
-                        listener.onEvent(event);
-                    }
-                    catch (Exception e)
-                    {
-                        e.printStackTrace();
-                    }
-                }
-            }
-            catch (Throwable throwable)
-            {
-                // SKIP: do nothing if there is an exception
+                stream.onEvent(event);
             }
 
             return null;
@@ -978,6 +1066,9 @@ public class SocketBasedRemoteExecutor
         {
             try
             {
+                // read the streamName
+                streamName = input.readUTF();
+
                 // read the callable or the name of the callable class
                 Object object = input.readObject();
 
@@ -1010,6 +1101,9 @@ public class SocketBasedRemoteExecutor
         @Override
         public void write(ObjectOutputStream output) throws IOException
         {
+            // serialize the stream name
+            output.writeUTF(streamName);
+
             // serialize the Runnable (if it is!)
             if (event instanceof Serializable)
             {
@@ -1025,7 +1119,7 @@ public class SocketBasedRemoteExecutor
 
     /**
      * Asynchronously sends an {@link Operation} over the
-     * {@link ObjectOutputStream} for the {@link SocketBasedRemoteExecutor}.
+     * {@link ObjectOutputStream} for the {@link SocketBasedRemoteChannel}.
      */
     class Sender implements Runnable
     {
@@ -1132,7 +1226,6 @@ public class SocketBasedRemoteExecutor
             }
             catch (IOException e)
             {
-                System.err.println("Failed to send Operation [" + operation + "], Sequence #" + sequence);
                 e.printStackTrace();
             }
         }

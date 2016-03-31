@@ -27,10 +27,9 @@ package com.oracle.tools.runtime.java;
 
 import com.oracle.tools.runtime.Settings;
 
-import com.oracle.tools.runtime.concurrent.RemoteEventChannel;
-import com.oracle.tools.runtime.concurrent.RemoteExecutor;
-import com.oracle.tools.runtime.concurrent.RemoteExecutorListener;
-import com.oracle.tools.runtime.concurrent.socket.RemoteExecutorClient;
+import com.oracle.tools.runtime.concurrent.RemoteChannel;
+import com.oracle.tools.runtime.concurrent.RemoteChannelListener;
+import com.oracle.tools.runtime.concurrent.socket.RemoteChannelClient;
 
 import java.io.IOException;
 
@@ -100,7 +99,7 @@ public class JavaApplicationRunner
         });
 
 
-        RemoteExecutorClient remoteExecutor = null;
+        RemoteChannelClient channel = null;
 
         // attempt to connect to the parent application
         try
@@ -111,18 +110,18 @@ public class JavaApplicationRunner
             InetAddress inetAddress = InetAddress.getByName(parentURI.getHost());
 
             // establish a RemoteExecutorClient to handle and send requests to the parent
-            remoteExecutor = new RemoteExecutorClient(inetAddress, parentURI.getPort());
+            channel = new RemoteChannelClient(inetAddress, parentURI.getPort());
 
-            remoteExecutor.addListener(new RemoteExecutorListener()
+            channel.addListener(new RemoteChannelListener()
             {
                 @Override
-                public void onOpened(RemoteExecutor executor)
+                public void onOpened(RemoteChannel channel)
                 {
                     // connected to the parent!
                 }
 
                 @Override
-                public void onClosed(RemoteExecutor executor)
+                public void onClosed(RemoteChannel channel)
                 {
                     // disconnected from the parent so terminate
                     // (if we're not orphanable)
@@ -134,7 +133,7 @@ public class JavaApplicationRunner
             });
 
             // connect to the parent
-            remoteExecutor.open();
+            channel.open();
         }
         catch (URISyntaxException e)
         {
@@ -151,14 +150,14 @@ public class JavaApplicationRunner
             System.out.println("JavaApplicationLauncher: Failed to open a connection to parent");
             e.printStackTrace(System.out);
 
-            if (remoteExecutor != null)
+            if (channel != null)
             {
-                remoteExecutor.close();
-                remoteExecutor = null;
+                channel.close();
+                channel = null;
             }
         }
 
-        if (remoteExecutor != null)
+        if (channel != null)
         {
             // start the application
             try
@@ -168,7 +167,7 @@ public class JavaApplicationRunner
 
 
                 // Inject the RemoteEventChannel (if required by the main Class
-                RemoteEventChannel.Injector.injectPublisher(applicationClass, remoteExecutor);
+                RemoteChannel.Injector.injectChannel(applicationClass, channel);
 
                 // now launch the application
                 Method mainMethod = applicationClass.getMethod("main", String[].class);

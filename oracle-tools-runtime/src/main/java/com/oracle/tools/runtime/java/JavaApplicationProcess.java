@@ -27,8 +27,7 @@ package com.oracle.tools.runtime.java;
 
 import com.oracle.tools.runtime.ApplicationProcess;
 
-import com.oracle.tools.runtime.concurrent.RemoteEventChannel;
-import com.oracle.tools.runtime.concurrent.RemoteExecutor;
+import com.oracle.tools.runtime.concurrent.RemoteChannel;
 
 import java.util.Properties;
 
@@ -41,7 +40,7 @@ import java.util.Properties;
  *
  * @author Brian Oliver
  */
-public interface JavaApplicationProcess extends ApplicationProcess, RemoteExecutor, RemoteEventChannel.Consumer
+public interface JavaApplicationProcess extends ApplicationProcess, RemoteChannel
 {
     /**
      * Obtains the resolved System {@link Properties} provided to the {@link JavaApplicationProcess}
