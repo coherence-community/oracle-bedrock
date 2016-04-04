@@ -1,5 +1,5 @@
 /*
- * File: RemoteChannelServer.java
+ * File: SocketBasedRemoteChannelServer.java
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
@@ -25,6 +25,8 @@
 
 package com.oracle.tools.runtime.concurrent.socket;
 
+import com.oracle.tools.Option;
+
 import com.oracle.tools.io.NetworkHelper;
 
 import com.oracle.tools.predicate.Predicate;
@@ -32,10 +34,8 @@ import com.oracle.tools.predicate.Predicate;
 import com.oracle.tools.runtime.concurrent.AbstractControllableRemoteChannel;
 import com.oracle.tools.runtime.concurrent.ControllableRemoteChannel;
 import com.oracle.tools.runtime.concurrent.RemoteCallable;
-import com.oracle.tools.runtime.concurrent.RemoteChannel;
-import com.oracle.tools.runtime.concurrent.RemoteEventStream;
+import com.oracle.tools.runtime.concurrent.RemoteEvent;
 import com.oracle.tools.runtime.concurrent.RemoteEventListener;
-import com.oracle.tools.runtime.concurrent.RemoteChannelListener;
 import com.oracle.tools.runtime.concurrent.RemoteRunnable;
 
 import com.oracle.tools.util.CompletionListener;
@@ -49,74 +49,72 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 
-import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * A {@link ControllableRemoteChannel} that accepts and processes requests
- * from {@link RemoteChannelClient}s.
+ * from {@link SocketBasedRemoteChannelClient}s.
  * <p>
  * Copyright (c) 2013. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Brian Oliver
  */
-public class RemoteChannelServer extends AbstractControllableRemoteChannel
+public class SocketBasedRemoteChannelServer extends AbstractControllableRemoteChannel
 {
     /**
-     * The {@link ServerSocket} that will be used to accept {@link RemoteChannelClient}
+     * The {@link ServerSocket} that will be used to accept {@link SocketBasedRemoteChannelClient}
      * connections and requests.
      * <p/>
-     * When this is <code>null</code> the {@link RemoteChannelServer} is not open.
+     * When this is <code>null</code> the {@link SocketBasedRemoteChannelServer} is not open.
      */
     private ServerSocket serverSocket;
 
     /**
-     * The {@link Thread} that will manage accepting {@link RemoteChannelClient}
+     * The {@link Thread} that will manage accepting {@link SocketBasedRemoteChannelClient}
      * connections.
      * <p/>
-     * When this is <code>null</code> the {@link RemoteChannelServer} is not running.
+     * When this is <code>null</code> the {@link SocketBasedRemoteChannelServer} is not running.
      */
     private ServerThread serverThread;
 
     /**
-     * The current {@link SocketBasedRemoteChannel}s managed by the {@link RemoteChannelServer}
+     * The current {@link SocketBasedRemoteChannel}s managed by the {@link SocketBasedRemoteChannelServer}
      * (indexed by a executor id).
      */
-    private ConcurrentHashMap<Integer, SocketBasedRemoteChannel> remoteExecutors;
+    private ConcurrentHashMap<Integer, SocketBasedRemoteChannel> remoteChannels;
 
     /**
-     * Should the running {@link RemoteChannelServer} terminate as soon as possible?
+     * Should the running {@link SocketBasedRemoteChannelServer} terminate as soon as possible?
      */
     private AtomicBoolean isTerminating;
 
 
     /**
-     * Constructs a {@link RemoteChannelServer} that will accept
-     * and process {@link Callable}s from {@link RemoteChannelClient}s.
+     * Constructs a {@link SocketBasedRemoteChannelServer} that will accept
+     * and process {@link Callable}s from {@link SocketBasedRemoteChannelClient}s.
      */
-    public RemoteChannelServer()
+    public SocketBasedRemoteChannelServer()
     {
-        this.serverSocket    = null;
-        this.serverThread    = null;
-        this.remoteExecutors = new ConcurrentHashMap<Integer, SocketBasedRemoteChannel>();
-        this.isTerminating   = new AtomicBoolean(false);
+        super();
+
+        this.serverSocket   = null;
+        this.serverThread   = null;
+        this.remoteChannels = new ConcurrentHashMap<>();
+        this.isTerminating  = new AtomicBoolean(false);
     }
 
 
     /**
-     * Opens and starts the {@link RemoteChannelServer}.
+     * Opens and starts the {@link SocketBasedRemoteChannelServer}.
      * <p/>
-     * Does nothing if the {@link RemoteChannelServer} is already open.
+     * Does nothing if the {@link SocketBasedRemoteChannelServer} is already open.
      *
-     * @return the {@link java.net.InetAddress} on which the {@link RemoteChannelServer}
-     *         is accepting requests from {@link RemoteChannelClient}s.
+     * @return the {@link java.net.InetAddress} on which the {@link SocketBasedRemoteChannelServer}
+     *         is accepting requests from {@link SocketBasedRemoteChannelClient}s.
      */
     public synchronized InetAddress open() throws IOException
     {
@@ -136,7 +134,7 @@ public class RemoteChannelServer extends AbstractControllableRemoteChannel
 
 
     /**
-     * Obtains the port on which the {@link RemoteChannelServer} is listening.
+     * Obtains the port on which the {@link SocketBasedRemoteChannelServer} is listening.
      *
      * @return the port
      */
@@ -154,7 +152,7 @@ public class RemoteChannelServer extends AbstractControllableRemoteChannel
 
 
     /**
-     * Obtains the {@link InetAddress} on which the {@link RemoteChannelServer}
+     * Obtains the {@link InetAddress} on which the {@link SocketBasedRemoteChannelServer}
      * will accept connections (based on a specific {@link Predicate})
      *
      * @param predicate  the {@link Predicate} to filter {@link InetAddress}es
@@ -193,7 +191,7 @@ public class RemoteChannelServer extends AbstractControllableRemoteChannel
         // we're now terminating
         isTerminating.set(true);
 
-        for (SocketBasedRemoteChannel executor : remoteExecutors.values())
+        for (SocketBasedRemoteChannel executor : remoteChannels.values())
         {
             try
             {
@@ -230,7 +228,7 @@ public class RemoteChannelServer extends AbstractControllableRemoteChannel
             {
                 int submissionCount = 0;
 
-                for (SocketBasedRemoteChannel executor : remoteExecutors.values())
+                for (SocketBasedRemoteChannel executor : remoteChannels.values())
                 {
                     executor.submit(callable, listener);
                     submissionCount++;
@@ -239,13 +237,13 @@ public class RemoteChannelServer extends AbstractControllableRemoteChannel
                 if (submissionCount == 0)
                 {
                     throw new IllegalStateException("Failed to submit the request [" + callable
-                                                    + "].  There are no RemoteExecutors connected");
+                                                    + "].  There are no RemoteChannels connected");
                 }
             }
             else
             {
                 throw new IllegalStateException("Can't submit the request [" + callable
-                                                + " as the RemoteExecutor is closing or is closed");
+                                                + " as the RemoteChannel is closing or is closed");
             }
         }
     }
@@ -260,7 +258,7 @@ public class RemoteChannelServer extends AbstractControllableRemoteChannel
             {
                 int submissionCount = 0;
 
-                for (SocketBasedRemoteChannel executor : remoteExecutors.values())
+                for (SocketBasedRemoteChannel executor : remoteChannels.values())
                 {
                     executor.submit(runnable);
                     submissionCount++;
@@ -269,61 +267,57 @@ public class RemoteChannelServer extends AbstractControllableRemoteChannel
                 if (submissionCount == 0)
                 {
                     throw new IllegalStateException("Failed to submit the request [" + runnable
-                                                    + "].  There are no RemoteExecutors connected");
+                                                    + "].  There are no RemoteChannels connected");
                 }
             }
             else
             {
                 throw new IllegalStateException("Can't submit the request [" + runnable
-                                                + "] as the RemoteExecutor is closing or is closed");
+                                                + "] as the RemoteChannel is closing or is closed");
             }
         }
     }
 
 
     @Override
-    public RemoteEventStream ensureEventStream(String name)
+    public void addListener(RemoteEventListener listener,
+                            Option...           options)
     {
-        synchronized (this)
-        {
-            if (isOpen() && !isTerminating.get())
-            {
-                RemoteChannel channel = serverThread.getRemoteChannel();
+        super.addListener(listener, options);
 
-                return channel.ensureEventStream(name);
-            }
-            else
-            {
-                throw new IllegalStateException("Can't ensure event stream [" + name
-                                                + "] as the RemoteExecutor is closing or is closed");
-            }
-        }
+        // now add the listener to all of the RemoteChannels
+        remoteChannels.forEach((id, remoteChannel) -> remoteChannel.addListener(listener, options));
     }
 
 
-    public void addRemoteEventStreamListener(String streamName, RemoteEventListener listener)
+    @Override
+    public void removeListener(RemoteEventListener listener,
+                               Option...           options)
     {
-        if (streamName == null)
-        {
-            throw new NullPointerException("The stream name cannot be null");
-        }
+        super.removeListener(listener, options);
 
-        if (listener == null)
-        {
-            return;
-        }
+        // now remove the listener from all of the RemoteChannels
+        remoteChannels.forEach((id, remoteChannel) -> remoteChannel.removeListener(listener, options));
+    }
 
-        synchronized (this)
+
+    @Override
+    public void raise(RemoteEvent event,
+                      Option...   options)
+    {
+        if (isOpen())
         {
-            if (isOpen() && !isTerminating.get())
-            {
-                serverThread.addRemoteEventStreamListener(streamName, listener);
-            }
-            else
-            {
-                throw new IllegalStateException("Can't add event stream listener to stream [" + streamName
-                                                + "] as the RemoteExecutor is closing or is closed");
-            }
+            remoteChannels.forEach(
+                (id, remoteChannel) -> {
+                    try
+                    {
+                        remoteChannel.raise(event, options);
+                    }
+                    catch (Throwable e)
+                    {
+                        // we ignore exceptions when a RemoteChannel fails to raise (probably because it is closing)
+                    }
+                });
         }
     }
 
@@ -333,14 +327,14 @@ public class RemoteChannelServer extends AbstractControllableRemoteChannel
      *
      * @return an {@link Iterable} over the currently connected {@link SocketBasedRemoteChannel}s
      */
-    public Iterable<SocketBasedRemoteChannel> getRemoteExecutors()
+    public Iterable<SocketBasedRemoteChannel> getRemoteChannels()
     {
-        return remoteExecutors.values();
+        return remoteChannels.values();
     }
 
 
     /**
-     * The {@link Thread} used to execute remote chennel communication.
+     * The {@link Thread} used to manage communication with a single {@link com.oracle.tools.runtime.concurrent.RemoteChannel}.
      */
     private class ServerThread extends Thread
     {
@@ -349,57 +343,14 @@ public class RemoteChannelServer extends AbstractControllableRemoteChannel
          */
         private SocketBasedRemoteChannel remoteChannel;
 
-        private final ConcurrentMap<String,List<RemoteEventListener>> preStartListeners;
-
-        public final Object MONITOR = new Object();
 
         /**
          * Create a {@link ServerThread}
          */
         private ServerThread()
         {
-            preStartListeners = new ConcurrentHashMap<>();
         }
 
-
-        public void addRemoteEventStreamListener(String streamName, RemoteEventListener listener)
-        {
-            if (remoteChannel == null)
-            {
-                synchronized (MONITOR)
-                {
-                    if (!isTerminating.get())
-                    {
-                        if (remoteChannel != null)
-                        {
-                            remoteChannel.ensureEventStream(streamName).addEventListener(listener);
-                        }
-                        else
-                        {
-                            List<RemoteEventListener> list = preStartListeners.get(streamName);
-                            if (list == null)
-                            {
-                                list = new ArrayList<>();
-
-                                preStartListeners.put(streamName, list);
-                            }
-
-                            list.add(listener);
-                        }
-                    }
-                }
-            }
-        }
-
-        /**
-         * Obtain the {@link RemoteChannel} being used for communication.
-         *
-         * @return  the {@link RemoteChannel} being used for communication
-         */
-        RemoteChannel getRemoteChannel()
-        {
-            return remoteChannel;
-        }
 
         @Override
         public void run()
@@ -408,44 +359,33 @@ public class RemoteChannelServer extends AbstractControllableRemoteChannel
 
             while (!isTerminating.get())
             {
+                // determine the next channel id
+                int remoteChannelId = ++channelId;
+
                 try
                 {
                     Socket socket = serverSocket.accept();
 
-                    synchronized (MONITOR)
-                    {
-                        remoteChannel = new SocketBasedRemoteChannel(++channelId, socket);
+                    remoteChannel = new SocketBasedRemoteChannel(socket);
 
-                        for (Map.Entry<String,List<RemoteEventListener>> entry : preStartListeners.entrySet())
-                        {
-                            String            streamName = entry.getKey();
-                            RemoteEventStream stream     = remoteChannel.ensureEventStream(streamName);
+                    // add all of the RemoteChannelServer RemoteEventListeners to the RemoteChannel
+                    eventListenersByStreamName.forEach((streamName,
+                        listeners) -> listeners.forEach(listener -> remoteChannel.addListener(listener,
+                                                                                              streamName)));
 
-                            for(RemoteEventListener listener : entry.getValue())
-                            {
-                                stream.addEventListener(listener);
-                            }
-                        }
-                    }
+                    // add all of the RemoteChannelServer ChannelListeners to the RemoteChannel
+                    channelListeners.forEach(listener -> remoteChannel.addListener(listener));
 
-                    // add the current listeners of the RemoteExecutorServer
-                    // to the SocketBasedRemoteExecutor
-                    for (RemoteChannelListener listener : getListeners())
-                    {
-                        remoteChannel.addListener(listener);
-                    }
+                    // remember our the RemoteChannel
+                    remoteChannels.put(remoteChannelId, remoteChannel);
 
-                    remoteExecutors.put(remoteChannel.getExecutorId(), remoteChannel);
-
+                    // open the channel to for communication
                     remoteChannel.open();
                 }
-                catch (NullPointerException e)
+                catch (Throwable e)
                 {
                     isTerminating.compareAndSet(false, true);
-                }
-                catch (IOException e)
-                {
-                    isTerminating.compareAndSet(false, true);
+                    remoteChannels.remove(remoteChannelId);
                 }
             }
         }

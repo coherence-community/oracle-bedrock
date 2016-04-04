@@ -29,7 +29,7 @@ import com.oracle.tools.runtime.Settings;
 
 import com.oracle.tools.runtime.concurrent.RemoteChannel;
 import com.oracle.tools.runtime.concurrent.RemoteChannelListener;
-import com.oracle.tools.runtime.concurrent.socket.RemoteChannelClient;
+import com.oracle.tools.runtime.concurrent.socket.SocketBasedRemoteChannelClient;
 
 import java.io.IOException;
 
@@ -99,7 +99,7 @@ public class JavaApplicationRunner
         });
 
 
-        RemoteChannelClient channel = null;
+        SocketBasedRemoteChannelClient channel = null;
 
         // attempt to connect to the parent application
         try
@@ -110,7 +110,7 @@ public class JavaApplicationRunner
             InetAddress inetAddress = InetAddress.getByName(parentURI.getHost());
 
             // establish a RemoteExecutorClient to handle and send requests to the parent
-            channel = new RemoteChannelClient(inetAddress, parentURI.getPort());
+            channel = new SocketBasedRemoteChannelClient(inetAddress, parentURI.getPort());
 
             channel.addListener(new RemoteChannelListener()
             {

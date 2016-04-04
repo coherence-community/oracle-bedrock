@@ -1,9 +1,9 @@
 /*
- * File: RemoteChannelClient.java
+ * File: PipeBasedRemoteChannel.java
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * The contents of this file are subject to the terms and conditions of 
+ * The contents of this file are subject to the terms and conditions of
  * the Common Development and Distribution License 1.0 (the "License").
  *
  * You may not use this file except in compliance with the License.
@@ -23,37 +23,31 @@
  * "Portions Copyright [year] [name of copyright owner]"
  */
 
-package com.oracle.tools.runtime.concurrent.socket;
-
-import com.oracle.tools.runtime.concurrent.RemoteChannel;
+package com.oracle.tools.runtime.concurrent;
 
 import java.io.IOException;
-
-import java.net.InetAddress;
-import java.net.Socket;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
 
 /**
- * A {@link RemoteChannel} that sends requests to
- * {@link RemoteChannelServer}s for processing.
+ * A pipe-based implementation of a {@link RemoteChannel}.
  * <p>
- * Copyright (c) 2013. All Rights Reserved. Oracle Corporation.<br>
+ * Copyright (c) 2016. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Brian Oliver
  */
-public class RemoteChannelClient extends SocketBasedRemoteChannel
+public class PipeBasedRemoteChannel extends AbstractRemoteChannel
 {
     /**
-     * Constructs a {@link RemoteChannelClient}.
+     * Create a {@link PipeBasedRemoteChannel} using the specified
+     * {@link PipedInputStream} and {@link PipedOutputStream}s.
      *
-     * @param address
-     * @param port
-     *
-     * @throws IOException
+     * @throws IOException  when it's not possible to use the respective pipes
      */
-    public RemoteChannelClient(InetAddress address,
-                               int         port) throws IOException
+    public PipeBasedRemoteChannel(PipedOutputStream outputStream,
+                                  PipedInputStream  inputStream) throws IOException
     {
-        super(-1, new Socket(address, port));
+        super(outputStream, inputStream);
     }
 }

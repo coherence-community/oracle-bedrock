@@ -25,6 +25,8 @@
 
 package com.oracle.tools.runtime.concurrent;
 
+import com.oracle.tools.Option;
+import com.oracle.tools.runtime.concurrent.options.StreamName;
 import com.oracle.tools.util.CompletionListener;
 
 import java.io.Closeable;
@@ -37,24 +39,23 @@ import java.lang.annotation.Target;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.concurrent.Callable;
 
 /**
- * Provides a means of submitting {@link RemoteCallable}s and/or
- * {@link RemoteRunnable}s for asynchronous remote execution and for
- * creating {@link RemoteEventStream}s.
+ * Provides a means of submitting {@link RemoteCallable}s and {@link RemoteRunnable}s for
+ * asynchronous remote execution, and asynchronously sending and processing
+ * {@link RemoteEvent}s.
  * <p>
- * The submitted {@link Callable}s/{@link Runnable}s are not required to be
- * {@link java.io.Serializable}.
- * If they are, they will be serialized/deserialized.  If they are not, their
- * class-names will be serialized (and then later deserialized for execution).
+ * The submitted {@link RemoteCallable}s, {@link RemoteRunnable} and {@link RemoteEvent}s do not
+ * necessarily need to be {@link java.io.Serializable}.
+ * <p>
+ * If they are, they will be serialized/deserialized using Java Serialization.  If they are not,
+ * their class-names will be serialized (and then later deserialized when required).
  * <p>
  * Copyright (c) 2013. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Brian Oliver
- *
- * @see ControllableRemoteChannel
+ * @author Jonathan Knight
  */
 public interface RemoteChannel extends Closeable
 {
@@ -87,17 +88,46 @@ public interface RemoteChannel extends Closeable
 
 
     /**
-     * Obtain the {@link RemoteEventStream} with the specified name,
-     * creating a new instance of a {@link RemoteEventStream} if one
-     * does not already exist.
+     * Adds a {@link RemoteEventListener} to the {@link RemoteChannel} so that it
+     * can handle and process {@link RemoteEvent}s.
+     * <p>
+     * The specified {@link Option}s allow customized {@link RemoteEventListener}
+     * processing.  For example; processing only {@link RemoteEvent}s on
+     * particular "streams" is permitted by specifying the {@link StreamName} option.
+     * <p>
+     * Note: {@link RemoteEventListener}s may be added before a {@link RemoteChannel}
+     * has been started.
      *
-     * @param name  the name of the {@link RemoteEventStream} to obtain
-     *
-     * @return  the {@link RemoteEventStream} identified by the specified name
-     *
-     * @throws NullPointerException if the name is null
+     * @param listener  the {@link RemoteEventListener}
+     * @param options   the {@link Option}s
      */
-    public RemoteEventStream ensureEventStream(String name);
+    public void addListener(RemoteEventListener listener, Option... options);
+
+
+    /**
+     * Removes a previously added {@link RemoteEventListener}.
+     * <p>
+     * Note: {@link RemoteEventListener}s may be removed after a {@link RemoteChannel}
+     * has been stopped.
+     *
+     * @param listener  the {@link RemoteEventListener} to remove
+     * @param options   the {@link Option}s used to add the {@link RemoteEventListener}
+     */
+    public void removeListener(RemoteEventListener listener, Option... options);
+
+
+    /**
+     * Raise an {@link RemoteEvent} on the opposite end of the {@link RemoteChannel}
+     * for registered {@link RemoteEventListener}s using the provided {@link Option}s.
+     * <p>
+     * The specified {@link Option}s allow customized {@link RemoteEvent} deliver.
+     * For example; delivering {@link RemoteEvent}s for particular "streams" is
+     * permitted by specifying the {@link StreamName} option.
+     *
+     * @param event    the {@link RemoteEvent}
+     * @param options  the {@link Option}s
+     */
+    public void raise(RemoteEvent event, Option... options);
 
 
     /**

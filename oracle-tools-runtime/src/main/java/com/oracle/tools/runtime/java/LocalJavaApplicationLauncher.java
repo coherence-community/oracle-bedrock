@@ -25,6 +25,7 @@
 
 package com.oracle.tools.runtime.java;
 
+import com.oracle.tools.Option;
 import com.oracle.tools.Options;
 
 import com.oracle.tools.deferred.AbstractDeferred;
@@ -49,10 +50,11 @@ import com.oracle.tools.runtime.Settings;
 
 import com.oracle.tools.runtime.concurrent.ControllableRemoteChannel;
 import com.oracle.tools.runtime.concurrent.RemoteCallable;
-import com.oracle.tools.runtime.concurrent.RemoteEventStream;
 import com.oracle.tools.runtime.concurrent.RemoteChannel;
+import com.oracle.tools.runtime.concurrent.RemoteEvent;
+import com.oracle.tools.runtime.concurrent.RemoteEventListener;
 import com.oracle.tools.runtime.concurrent.RemoteRunnable;
-import com.oracle.tools.runtime.concurrent.socket.RemoteChannelServer;
+import com.oracle.tools.runtime.concurrent.socket.SocketBasedRemoteChannelServer;
 
 import com.oracle.tools.runtime.java.features.JmxFeature;
 import com.oracle.tools.runtime.java.options.ClassName;
@@ -339,7 +341,14 @@ public class LocalJavaApplicationLauncher<A extends JavaApplication>
         // ----- establish Oracle Tools specific system properties -----
 
         // configure a server channel to communicate with the native process
-        final RemoteChannelServer server = new RemoteChannelServer();
+        final SocketBasedRemoteChannelServer server = new SocketBasedRemoteChannelServer();
+
+        // register the defined RemoteEventListeners with the server so that when the application starts
+        // the listeners can immediately start receiving RemoteEvents
+        RemoteEvents remoteEvents = launchOptions.get(RemoteEvents.class);
+
+        remoteEvents.forEach((remoteEventListener, listenerOptions) -> server.addListener(remoteEventListener,
+                listenerOptions));
 
         try
         {
@@ -350,13 +359,6 @@ public class LocalJavaApplicationLauncher<A extends JavaApplication>
         {
             throw new RuntimeException("Failed to create remote execution server for the application", e);
         }
-
-        // Add any event listeners now so that they are listening before the application starts
-        for (RemoteEvents.RemoteEventListenerOption option : launchOptions.getInstancesOf(RemoteEvents.RemoteEventListenerOption.class))
-        {
-            server.addRemoteEventStreamListener(option.getName(), option.getListener());
-        }
-
 
         // add Oracle Tools specific System Properties
 
@@ -604,7 +606,7 @@ public class LocalJavaApplicationLauncher<A extends JavaApplication>
                        @Override
                        public Boolean get() throws TemporarilyUnavailableException, PermanentlyUnavailableException
                        {
-                           if (!server.getRemoteExecutors().iterator().hasNext())
+                           if (!server.getRemoteChannels().iterator().hasNext())
                            {
                                throw new TemporarilyUnavailableException(this);
                            }
@@ -697,9 +699,26 @@ public class LocalJavaApplicationLauncher<A extends JavaApplication>
 
 
         @Override
-        public RemoteEventStream ensureEventStream(String name)
+        public void addListener(RemoteEventListener listener,
+                                Option...           options)
         {
-            return remoteExecutor.ensureEventStream(name);
+            remoteExecutor.addListener(listener, options);
+        }
+
+
+        @Override
+        public void removeListener(RemoteEventListener listener,
+                                   Option...           options)
+        {
+            remoteExecutor.removeListener(listener, options);
+        }
+
+
+        @Override
+        public void raise(RemoteEvent event,
+                          Option...   options)
+        {
+            remoteExecutor.raise(event, options);
         }
 
 

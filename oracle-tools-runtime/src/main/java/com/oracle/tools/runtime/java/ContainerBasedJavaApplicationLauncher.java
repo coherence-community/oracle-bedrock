@@ -37,11 +37,11 @@ import com.oracle.tools.runtime.Profile;
 import com.oracle.tools.runtime.Profiles;
 import com.oracle.tools.runtime.PropertiesBuilder;
 
-import com.oracle.tools.runtime.concurrent.BlockingQueueRemoteChannel;
+import com.oracle.tools.runtime.concurrent.PipeBasedRemoteChannel;
 import com.oracle.tools.runtime.concurrent.RemoteCallable;
-import com.oracle.tools.runtime.concurrent.RemoteEvent;
-import com.oracle.tools.runtime.concurrent.RemoteEventStream;
 import com.oracle.tools.runtime.concurrent.RemoteChannel;
+import com.oracle.tools.runtime.concurrent.RemoteEvent;
+import com.oracle.tools.runtime.concurrent.RemoteEventListener;
 import com.oracle.tools.runtime.concurrent.RemoteRunnable;
 import com.oracle.tools.runtime.concurrent.callable.RemoteCallableStaticMethod;
 
@@ -49,7 +49,6 @@ import com.oracle.tools.runtime.java.container.Container;
 import com.oracle.tools.runtime.java.container.ContainerClassLoader;
 import com.oracle.tools.runtime.java.container.ContainerScope;
 import com.oracle.tools.runtime.java.features.JmxFeature;
-import com.oracle.tools.runtime.java.io.Serialization;
 import com.oracle.tools.runtime.java.options.ClassName;
 import com.oracle.tools.runtime.java.options.RemoteEvents;
 import com.oracle.tools.runtime.java.options.SystemProperties;
@@ -70,26 +69,21 @@ import com.oracle.tools.util.ReflectionHelper;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
 
 import java.lang.reflect.Constructor;
-
 import java.lang.reflect.Method;
+
 import java.text.SimpleDateFormat;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Properties;
-import java.util.Queue;
 import java.util.UUID;
 
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -334,12 +328,12 @@ public class ContainerBasedJavaApplicationLauncher<A extends JavaApplication>
                                                                                                     controller,
                                                                                                     systemProperties);
 
-            // Add any event listeners now so that they are listening before the application starts
-            for (RemoteEvents.RemoteEventListenerOption option : launchOptions.getInstancesOf(RemoteEvents.RemoteEventListenerOption.class))
-            {
-                process.ensureEventStream(option.getName()).addEventListener(option.getListener());
-            }
+            // register the defined RemoteEventListeners before the application starts so they can
+            // immediately start receiving RemoteEvents
+            RemoteEvents remoteEvents = launchOptions.get(RemoteEvents.class);
 
+            remoteEvents.forEach((remoteEventListener, listenerOptions) -> process.addListener(remoteEventListener,
+                                                                                               listenerOptions));
 
             // notify the container of the scope to manage
             Container.manage(classLoader.getContainerScope());
@@ -410,11 +404,18 @@ public class ContainerBasedJavaApplicationLauncher<A extends JavaApplication>
     }
 
 
-    public static void setEventPublisher(ContainerClassLoader classLoader,
-                                         ExecutorService executorService,
-                                         ConcurrentMap<String, BlockingQueue<byte[]>> eventQueuesIn,
-                                         ConcurrentMap<String, BlockingQueue<byte[]>> eventQueuesOut,
-                                         String targetClassName)
+    /**
+     * Configures the internal application container {@link RemoteChannel}.
+     *
+     * @param containerClassLoader  the {@link ContainerClassLoader}
+     * @param pipedOutputStream     the {@link PipedOutputStream}
+     * @param pipedInputStream      the {@link PipedInputStream}
+     * @param targetClassName       the optional target (main) class name
+     */
+    public static void configureRemoteChannel(ContainerClassLoader containerClassLoader,
+                                              PipedOutputStream    pipedOutputStream,
+                                              PipedInputStream     pipedInputStream,
+                                              String               targetClassName)
     {
         // remember the current context ClassLoader of the thread
         // (so that we can return it back to normal when we're finished executing)
@@ -424,29 +425,37 @@ public class ContainerBasedJavaApplicationLauncher<A extends JavaApplication>
         {
             // set the context ClassLoader of the Thread to be that of the
             // ContainerClassLoader
-            Thread.currentThread().setContextClassLoader(classLoader);
+            Thread.currentThread().setContextClassLoader(containerClassLoader);
 
             // and associate the Thread with the Scope in the Container
-            Container.associateThreadWith(classLoader.getContainerScope());
+            Container.associateThreadWith(containerClassLoader.getContainerScope());
 
-            Class<?>       publisherClass = classLoader.loadClass(BlockingQueueRemoteChannel.class.getName());
+            // create the Remote Channel
+            Class<?> remoteChannelClass = containerClassLoader.loadClass(PipeBasedRemoteChannel.class.getName());
 
-            Constructor<?> constructor    = publisherClass.getConstructor(ExecutorService.class,
-                                                                          ConcurrentMap.class,
-                                                                          ConcurrentMap.class);
+            Constructor<?> constructor = remoteChannelClass.getConstructor(PipedOutputStream.class,
+                                                                           PipedInputStream.class);
 
-            Object         publisher      = constructor.newInstance(executorService, eventQueuesIn, eventQueuesOut);
+            Object remoteChannel = constructor.newInstance(pipedOutputStream, pipedInputStream);
 
-            Class<?>       targetClass    = classLoader.loadClass(targetClassName);
-            Class<?>       injectorClass  = classLoader.loadClass(RemoteChannel.Injector.class.getName());
-            Class<?>       channelClass   = classLoader.loadClass(RemoteChannel.class.getName());
-            Method         method         = injectorClass.getMethod("injectChannel", Class.class, channelClass);
+            // open the RemoteChannel
+            remoteChannelClass.getMethod("open").invoke(remoteChannel);
 
-            method.invoke(null, targetClass, publisher);
+            // inject the RemoteChannel (if we have a target class)
+            if (targetClassName != null)
+            {
+                Class<?> targetClass   = containerClassLoader.loadClass(targetClassName);
+                Class<?> injectorClass = containerClassLoader.loadClass(RemoteChannel.Injector.class.getName());
+                Class<?> channelClass  = containerClassLoader.loadClass(RemoteChannel.class.getName());
+                Method   method        = injectorClass.getMethod("injectChannel", Class.class, channelClass);
+
+                method.invoke(null, targetClass, remoteChannel);
+            }
         }
         catch (ClassNotFoundException e)
         {
             // skip publisher injection as required classes are not on the classpath
+            e.printStackTrace();
         }
         catch (Exception e)
         {
@@ -498,21 +507,19 @@ public class ContainerBasedJavaApplicationLauncher<A extends JavaApplication>
         void destroy(ControllableApplication  application,
                      CompletionListener<Void> listener);
 
+
         /**
-         * Configure the event publisher for the application.
-         * The publisher should publish serialized {@link RemoteEvent}s to the
-         * specified {@link Queue}.
-         *  @param classLoader    the {@link ContainerClassLoader} used to isolate the application
-         * @param executorService
-         * @param eventQueuesIn  the {@link BlockingQueue}s to use to receive serialized events from
-         * @param eventQueueOut  the {@link BlockingQueue}s to use to publish serialized events to
-         * @param options        the {@link Options} being used to launch the application
+         * Configures the {@link JavaApplication} prior to starting.
+         *
+         * @param containerClassLoader  the {@link ContainerClassLoader} used to isolate the application
+         * @param pipedOutputStream     the {@link PipedOutputStream} for sending request to the application
+         * @param pipedInputStream      the {@link PipedInputStream} for recieving requests from the application
+         * @param options               the {@link Options} being used to launch the application
          */
-        void setEventPublisher(ContainerClassLoader classLoader,
-                               ExecutorService executorService,
-                               ConcurrentMap<String, BlockingQueue<byte[]>> eventQueuesIn,
-                               ConcurrentMap<String, BlockingQueue<byte[]>> eventQueueOut,
-                               Options options);
+        void configure(ContainerClassLoader containerClassLoader,
+                       PipedOutputStream    pipedOutputStream,
+                       PipedInputStream     pipedInputStream,
+                       Options              options);
     }
 
 
@@ -536,16 +543,8 @@ public class ContainerBasedJavaApplicationLauncher<A extends JavaApplication>
      * Java application running with in a Java Virtual Machine, as part of a
      * container, much like a Java EE application.
      */
-    public static class ContainerBasedJavaApplicationProcess
-            implements JavaApplicationProcess, ControllableApplication
+    public static class ContainerBasedJavaApplicationProcess implements JavaApplicationProcess, ControllableApplication
     {
-        /**
-         * An {@link ExecutorService} to use for requesting asynchronous
-         * execution of tasks in the contained application.   Typically this
-         * is used for executing start and destroy functionality.
-         */
-        private ExecutorService m_executorService;
-
         /**
          * The resolved System {@link Properties} provided to the {@link JavaApplicationProcess} when it was launched.
          */
@@ -555,34 +554,44 @@ public class ContainerBasedJavaApplicationLauncher<A extends JavaApplication>
          * The {@link ClassLoader} that will be used to contain, scope and isolate
          * the executing application.
          */
-        private ContainerClassLoader m_classLoader;
+        private ContainerClassLoader containerClassLoader;
 
         /**
          * The {@link ApplicationController} that will be used to start/destroy
          * the application.
          */
-        private ApplicationController m_controller;
+        private ApplicationController applicationController;
 
         /**
          * The {@link CompletionListener} to be called back when an application
          * is being started.
          */
-        private FutureCompletionListener<Void> m_startListener;
+        private FutureCompletionListener<Void> startListener;
 
         /**
          * The {@link CompletionListener} to be called back when an application
          * is being destroyed.
          */
-        private FutureCompletionListener<Void> m_destroyListener;
+        private FutureCompletionListener<Void> destroyListener;
 
         /**
-         * The {@link BlockingQueue} used as a pipe for sending events from the
-         * application process.
+         * The {@link RemoteChannel} over which communication to and from the {@link JavaApplication}
+         * will occur.
          */
-        private ConcurrentMap<String,BlockingQueue<byte[]>> m_eventQueuesToContainer;
-        private ConcurrentMap<String,BlockingQueue<byte[]>> m_eventQueuesFromContainer;
+        private PipeBasedRemoteChannel channel;
 
-        private BlockingQueueRemoteChannel m_channel;
+        /**
+         * The streams for in-bound communication to this channel (not the other side of the channel)
+         */
+        private PipedInputStream  inboundChannelInputStream;
+        private PipedOutputStream inboundChannelOutputStream;
+
+        /**
+         * The streams for out-bound communication from this channel (not the other side of the channel)
+         */
+        private PipedInputStream  outboundChannelInputStream;
+        private PipedOutputStream outboundChannelOutputStream;
+
 
         /**
          * Constructs an {@link ContainerBasedJavaApplicationProcess}.
@@ -590,29 +599,32 @@ public class ContainerBasedJavaApplicationLauncher<A extends JavaApplication>
          * @param classLoader       the {@link ClassLoader} in which to run the application
          * @param controller        the {@link ApplicationController}
          * @param systemProperties  the resolved System {@link Properties}
+         *
+         * @throws IOException  when it was not possible to establish the {@link JavaApplication} due to
+         *                      an internal IO failure
          */
         public ContainerBasedJavaApplicationProcess(ContainerClassLoader  classLoader,
                                                     ApplicationController controller,
-                                                    Properties            systemProperties)
+                                                    Properties            systemProperties) throws IOException
         {
             if (controller == null)
             {
                 throw new NullPointerException("ApplicationController must not be null");
             }
 
-            // establish an ExecutorService that we can use to asynchronously submit
-            // requests against the ContainerBasedJavaProcess
-            m_executorService          = Executors.newCachedThreadPool();
+            this.containerClassLoader  = classLoader;
+            this.applicationController = controller;
 
-            m_classLoader              = classLoader;
-            m_controller               = controller;
+            int bufferSizeInBytes = 64 * 1024;
 
-            m_eventQueuesToContainer   = new ConcurrentHashMap<>();
-            m_eventQueuesFromContainer = new ConcurrentHashMap<>();
+            this.inboundChannelInputStream   = new PipedInputStream(bufferSizeInBytes);
+            this.inboundChannelOutputStream  = new PipedOutputStream(inboundChannelInputStream);
 
-            m_channel                  = new BlockingQueueRemoteChannel(m_executorService,
-                                                                        m_eventQueuesFromContainer,
-                                                                        m_eventQueuesToContainer);
+            this.outboundChannelInputStream  = new PipedInputStream(bufferSizeInBytes);
+            this.outboundChannelOutputStream = new PipedOutputStream(outboundChannelInputStream);
+
+            // establish the RemoteChannel for asynchronously communicating with the application
+            this.channel          = new PipeBasedRemoteChannel(outboundChannelOutputStream, inboundChannelInputStream);
 
             this.systemProperties = systemProperties;
         }
@@ -628,7 +640,7 @@ public class ContainerBasedJavaApplicationLauncher<A extends JavaApplication>
         @Override
         public ClassLoader getClassLoader()
         {
-            return m_classLoader;
+            return containerClassLoader;
         }
 
 
@@ -642,21 +654,21 @@ public class ContainerBasedJavaApplicationLauncher<A extends JavaApplication>
         @Override
         public OutputStream getOutputStream()
         {
-            return m_classLoader.getContainerScope().getStandardInputOutputStream();
+            return containerClassLoader.getContainerScope().getStandardInputOutputStream();
         }
 
 
         @Override
         public InputStream getInputStream()
         {
-            return m_classLoader.getContainerScope().getStandardOutputInputStream();
+            return containerClassLoader.getContainerScope().getStandardOutputInputStream();
         }
 
 
         @Override
         public InputStream getErrorStream()
         {
-            return m_classLoader.getContainerScope().getStandardErrorInputStream();
+            return containerClassLoader.getContainerScope().getStandardErrorInputStream();
         }
 
 
@@ -665,15 +677,15 @@ public class ContainerBasedJavaApplicationLauncher<A extends JavaApplication>
         {
             // when there's no application controller we don't have to wait to terminate
             // (as we've already been terminated)
-            if (m_controller != null)
+            if (applicationController != null)
             {
                 // here we simply try to wait for the application's start future
                 // to complete executing.
                 try
                 {
-                    if (m_startListener != null)
+                    if (startListener != null)
                     {
-                        m_startListener.get();
+                        startListener.get();
                     }
                 }
                 catch (InterruptedException e)
@@ -704,20 +716,21 @@ public class ContainerBasedJavaApplicationLauncher<A extends JavaApplication>
          */
         public void start(Options options)
         {
-            if (m_controller == null)
+            if (applicationController == null)
             {
-                m_startListener = null;
+                startListener = null;
             }
             else
             {
-                m_controller.setEventPublisher(m_classLoader,
-                                               m_executorService,
-                                               m_eventQueuesToContainer,
-                                               m_eventQueuesFromContainer,
-                                               options);
+                applicationController.configure(containerClassLoader,
+                                                inboundChannelOutputStream,
+                                                outboundChannelInputStream,
+                                                options);
 
-                m_startListener = new FutureCompletionListener<Void>();
-                m_controller.start(this, m_startListener);
+                channel.open();
+
+                startListener = new FutureCompletionListener<Void>();
+                applicationController.start(this, startListener);
             }
         }
 
@@ -725,27 +738,27 @@ public class ContainerBasedJavaApplicationLauncher<A extends JavaApplication>
         @Override
         public void close()
         {
-            if (m_controller != null)
+            if (applicationController != null)
             {
                 // now try to stop
                 try
                 {
-                    m_destroyListener = new FutureCompletionListener<Void>();
-                    m_controller.destroy(this, m_destroyListener);
+                    destroyListener = new FutureCompletionListener<Void>();
+                    applicationController.destroy(this, destroyListener);
 
-                    m_destroyListener.get();
+                    destroyListener.get();
                 }
                 catch (Exception e)
                 {
                     LOGGER.log(Level.WARNING, "An exception occurred while closing the application", e);
                 }
 
-                m_controller = null;
+                applicationController = null;
             }
 
-            m_channel.close();
+            channel.close();
 
-            ContainerScope scope = m_classLoader.getContainerScope();
+            ContainerScope scope = containerClassLoader.getContainerScope();
 
             // close the scope
             scope.close();
@@ -767,7 +780,7 @@ public class ContainerBasedJavaApplicationLauncher<A extends JavaApplication>
         public <T> void submit(RemoteCallable<T>           callable,
                                final CompletionListener<T> listener)
         {
-            if (m_controller == null)
+            if (applicationController == null)
             {
                 IllegalStateException e =
                     new IllegalStateException("Attempting to submit to a ContainerBasedJavaProcess that has been destroyed");
@@ -781,76 +794,7 @@ public class ContainerBasedJavaApplicationLauncher<A extends JavaApplication>
             }
             else
             {
-                try
-                {
-                    // serialize the Callable so that we can deserialize it in the container
-                    // to use the correct ClassLoader
-                    final byte[] serializedCallable = Serialization.toByteArray(callable);
-
-                    Runnable     scopedRunnable     = new Runnable()
-                    {
-                        @Override
-                        public void run()
-                        {
-                            // remember the current context ClassLoader of the thread
-                            // (so that we can return it back to normal when we're finished executing)
-                            ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
-
-                            try
-                            {
-                                // set the context ClassLoader of the Thread to be that of the
-                                // ContainerClassLoader
-                                Thread.currentThread().setContextClassLoader(m_classLoader);
-
-                                // and associate the Thread with the Scope in the Container
-                                Container.associateThreadWith(m_classLoader.getContainerScope());
-
-                                // deserialize the callable (so that we can use the container-based class loader)
-                                Callable<T> callable = Serialization.fromByteArray(serializedCallable,
-                                                                                   Callable.class,
-                                                                                   m_classLoader);
-
-                                // then call the Callable as usual
-                                T result = callable.call();
-
-                                // serialize the result (so that we can use the application class loader)
-                                byte[] serializedResult = Serialization.toByteArray(result);
-
-                                // notify the listener (if there is one) of the result
-                                if (listener != null)
-                                {
-                                    listener.onCompletion((T) Serialization.fromByteArray(serializedResult,
-                                                                                          Object.class,
-                                                                                          originalClassLoader));
-                                }
-                            }
-                            catch (Throwable throwable)
-                            {
-                                // TODO: write the exception to the platform (if diagnostics are on?)
-
-                                // notify the listener (if there is one) of the exception
-                                if (listener != null)
-                                {
-                                    listener.onException(throwable);
-                                }
-                            }
-                            finally
-                            {
-                                // afterwards dissociate the Thread from the Scope in the Container
-                                Container.dissociateThread();
-
-                                // and return the current context ClassLoader back to normal
-                                Thread.currentThread().setContextClassLoader(originalClassLoader);
-                            }
-                        }
-                    };
-
-                    m_executorService.submit(scopedRunnable);
-                }
-                catch (IOException e)
-                {
-                    throw new RuntimeException("Failed to serialize the Callable: " + callable, e);
-                }
+                channel.submit(callable, listener);
             }
         }
 
@@ -858,72 +802,62 @@ public class ContainerBasedJavaApplicationLauncher<A extends JavaApplication>
         @Override
         public void submit(RemoteRunnable runnable) throws IllegalStateException
         {
-            if (m_controller == null)
+            if (applicationController == null)
             {
                 throw new IllegalStateException("Attempting to submit to a ContainerBasedJavaProcess that has been destroyed");
             }
             else
             {
-                try
-                {
-                    // serialize the Runnable so that we can deserialize it in the container
-                    // to use the correct ClassLoader
-                    final byte[] serializedRunnable = Serialization.toByteArray(runnable);
-
-                    Runnable     scopedRunnable     = new Runnable()
-                    {
-                        @Override
-                        public void run()
-                        {
-                            // remember the current context ClassLoader of the thread
-                            // (so that we can return it back to normal when we're finished executing)
-                            ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
-
-                            try
-                            {
-                                // set the context ClassLoader of the Thread to be that of the
-                                // ContainerClassLoader
-                                Thread.currentThread().setContextClassLoader(m_classLoader);
-
-                                // and associate the Thread with the Scope in the Container
-                                Container.associateThreadWith(m_classLoader.getContainerScope());
-
-                                // deserialize the runnable (so that we can use the container-based class loader)
-                                Runnable runnable = Serialization.fromByteArray(serializedRunnable,
-                                                                                Runnable.class,
-                                                                                m_classLoader);
-
-                                // then call the Callable as usual
-                                runnable.run();
-                            }
-                            catch (IOException e)
-                            {
-                                // TODO: write the exception to the platform (if diagnostics are on?)
-                            }
-                            finally
-                            {
-                                // afterwards dissociate the Thread from the Scope in the Container
-                                Container.dissociateThread();
-
-                                // and return the current context ClassLoader back to normal
-                                Thread.currentThread().setContextClassLoader(originalClassLoader);
-                            }
-                        }
-                    };
-
-                    m_executorService.submit(scopedRunnable);
-                }
-                catch (IOException e)
-                {
-                    throw new RuntimeException("Failed to serialize the Runnable: " + runnable, e);
-                }
+                channel.submit(runnable);
             }
         }
 
+
         @Override
-        public RemoteEventStream ensureEventStream(String name)
+        public void addListener(RemoteEventListener listener,
+                                Option...           options)
         {
-            return m_channel.ensureEventStream(name);
+            if (applicationController == null)
+            {
+                throw new IllegalStateException("Attempting to add a listener to a ContainerBasedJavaProcess that has been destroyed");
+            }
+            else
+            {
+                channel.addListener(listener, options);
+            }
+
+        }
+
+
+        @Override
+        public void removeListener(RemoteEventListener listener,
+                                   Option...           options)
+        {
+            if (applicationController == null)
+            {
+                throw new IllegalStateException("Attempting to remove a listener from a ContainerBasedJavaProcess that has been destroyed");
+            }
+            else
+            {
+                channel.removeListener(listener, options);
+            }
+
+        }
+
+
+        @Override
+        public void raise(RemoteEvent event,
+                          Option...   options)
+        {
+            if (applicationController == null)
+            {
+                throw new IllegalStateException("Attempting to raise to a ContainerBasedJavaProcess that has been destroyed");
+            }
+            else
+            {
+                channel.raise(event, options);
+            }
+
         }
     }
 
@@ -1009,12 +943,17 @@ public class ContainerBasedJavaApplicationLauncher<A extends JavaApplication>
             }
         }
 
+
         @Override
-        public void setEventPublisher(ContainerClassLoader classLoader,
-                                      ExecutorService executorService, ConcurrentMap<String, BlockingQueue<byte[]>> eventQueuesIn,
-                                      ConcurrentMap<String, BlockingQueue<byte[]>> eventQueuesOut,
-                                      Options options)
+        public void configure(ContainerClassLoader containerClassLoader,
+                              PipedOutputStream    pipedOutputStream,
+                              PipedInputStream     pipedInputStream,
+                              Options              options)
         {
+            ContainerBasedJavaApplicationLauncher.configureRemoteChannel(containerClassLoader,
+                                                                         pipedOutputStream,
+                                                                         pipedInputStream,
+                                                                         null);
         }
     }
 
@@ -1025,9 +964,6 @@ public class ContainerBasedJavaApplicationLauncher<A extends JavaApplication>
      */
     public static class NullController implements ApplicationController
     {
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public void start(ControllableApplication  application,
                           CompletionListener<Void> listener)
@@ -1039,9 +975,6 @@ public class ContainerBasedJavaApplicationLauncher<A extends JavaApplication>
         }
 
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public void destroy(ControllableApplication  application,
                             CompletionListener<Void> listener)
@@ -1052,16 +985,17 @@ public class ContainerBasedJavaApplicationLauncher<A extends JavaApplication>
             }
         }
 
-        /**
-         * {@inheritDoc}
-         */
+
         @Override
-        public void setEventPublisher(ContainerClassLoader classLoader,
-                                      ExecutorService executorService,
-                                      ConcurrentMap<String, BlockingQueue<byte[]>> eventQueuesIn,
-                                      ConcurrentMap<String, BlockingQueue<byte[]>> eventQueuesOut,
-                                      Options options)
+        public void configure(ContainerClassLoader containerClassLoader,
+                              PipedOutputStream    pipedOutputStream,
+                              PipedInputStream     pipedInputStream,
+                              Options              options)
         {
+            ContainerBasedJavaApplicationLauncher.configureRemoteChannel(containerClassLoader,
+                                                                         pipedOutputStream,
+                                                                         pipedInputStream,
+                                                                         null);
         }
     }
 
@@ -1142,18 +1076,17 @@ public class ContainerBasedJavaApplicationLauncher<A extends JavaApplication>
             }
         }
 
+
         @Override
-        public void setEventPublisher(ContainerClassLoader classLoader,
-                                      ExecutorService executorService,
-                                      ConcurrentMap<String, BlockingQueue<byte[]>> eventQueuesIn,
-                                      ConcurrentMap<String, BlockingQueue<byte[]>> eventQueuesOut,
-                                      Options options)
+        public void configure(ContainerClassLoader containerClassLoader,
+                              PipedOutputStream    pipedOutputStream,
+                              PipedInputStream     pipedInputStream,
+                              Options              options)
         {
-            ContainerBasedJavaApplicationLauncher.setEventPublisher(classLoader,
-                                                                    executorService,
-                                                                    eventQueuesIn,
-                                                                    eventQueuesOut,
-                                                                    applicationClassName);
+            ContainerBasedJavaApplicationLauncher.configureRemoteChannel(containerClassLoader,
+                                                                         pipedOutputStream,
+                                                                         pipedInputStream,
+                                                                         applicationClassName);
         }
     }
 }

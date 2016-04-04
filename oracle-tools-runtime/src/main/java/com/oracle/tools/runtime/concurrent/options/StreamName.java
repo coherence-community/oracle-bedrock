@@ -1,5 +1,5 @@
 /*
- * File: DisplayName.java
+ * File: StreamName.java
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
@@ -23,41 +23,39 @@
  * "Portions Copyright [year] [name of copyright owner]"
  */
 
-package com.oracle.tools.runtime.options;
+package com.oracle.tools.runtime.concurrent.options;
 
 import com.oracle.tools.Option;
 import com.oracle.tools.Options;
 
-import com.oracle.tools.runtime.Application;
-
-import java.util.UUID;
+import com.oracle.tools.runtime.concurrent.RemoteEvent;
 
 /**
- * An {@link Option} to specify the display name of an {@link Application}.
+ * A name used to identify a stream of related {@link RemoteEvent}s.
  * <p>
  * Copyright (c) 2016. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Brian Oliver
  */
-public class DisplayName implements Option
+public class StreamName implements Option
 {
     /**
-     * The display name of an {@link Application}.
+     * The stream name for a {@link RemoteEvent}.
      */
     private String name;
 
 
     /**
-     * Constructs a {@link DisplayName} for the specified name.
+     * Constructs a {@link StreamName} for the specified name.
      *
      * @param name  the name
      */
-    private DisplayName(String name)
+    private StreamName(String name)
     {
         if (name == null)
         {
-            this.name = UUID.randomUUID().toString();
+            this.name = "default";
         }
         else
         {
@@ -67,50 +65,38 @@ public class DisplayName implements Option
 
 
     /**
-     * Resolves the {@link DisplayName} using the provided {@link Options}
+     * Obtains the {@link StreamName} as a {@link String}.
      *
-     * @param options  the {@link Options}
-     *
-     * @return  the name of the {@link DisplayName}
+     * @return  the {@link String} representation of a {@link StreamName}
      */
-    public String resolve(Options options)
+    public String get()
     {
-        if (options == null)
-        {
-            return name;
-        }
-        else
-        {
-            // include the discriminator in the name
-            Discriminator discriminator = options.get(Discriminator.class);
-
-            return discriminator == null ? name : name + "-" + discriminator.getValue();
-        }
+        return name;
     }
 
 
     /**
-     * Obtains a {@link DisplayName} for a specified name.
+     * Obtains a {@link StreamName} for a specified name.
      *
-     * @param name  the name of the {@link DisplayName}
+     * @param name  the name of the {@link StreamName}
      *
-     * @return a {@link DisplayName} for the specified name
+     * @return a {@link StreamName} for the specified name
      */
-    public static DisplayName of(String name)
+    public static StreamName of(String name)
     {
-        return new DisplayName(name);
+        return new StreamName(name);
     }
 
 
     /**
-     * Auto-generates a unique {@link DisplayName}.
+     * Automatically creates a default {@link StreamName}.
      *
-     * @return a unique {@link DisplayName}
+     * @return a default {@link StreamName}
      */
     @Options.Default
-    public static DisplayName autoGenerate()
+    public static StreamName automatic()
     {
-        return new DisplayName(null);
+        return new StreamName(null);
     }
 
 
@@ -122,14 +108,14 @@ public class DisplayName implements Option
             return true;
         }
 
-        if (!(o instanceof DisplayName))
+        if (!(o instanceof StreamName))
         {
             return false;
         }
 
-        DisplayName displayName = (DisplayName) o;
+        StreamName streamName = (StreamName) o;
 
-        return name.equals(displayName.name);
+        return name.equals(streamName.name);
 
     }
 

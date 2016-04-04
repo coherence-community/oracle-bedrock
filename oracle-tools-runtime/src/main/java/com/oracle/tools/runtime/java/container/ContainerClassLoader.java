@@ -265,13 +265,13 @@ public class ContainerClassLoader extends ContainerScopeClassLoader
             }
         }
 
-        // we won't isolate the com.oracle.tools.runtime.java.* package
-        loader.addPackageToLoadFromParent("com.oracle.tools.runtime.java.container");
+        // the following packages must not be isolated (ie: loaded by the parent)
         loader.addPackageToLoadFromParent("com.oracle.tools.runtime.java");
+        loader.addPackageToLoadFromParent("com.oracle.tools.runtime.java.container");
+        //loader.addPackageToLoadFromParent("com.oracle.tools.runtime.concurrent");
 
-        // certain classes must be loaded by the container
-        loader.addPackageToLoadInContainer("com.oracle.tools.runtime.java.concurrent");
-        loader.addPackageToLoadInContainer("com.oracle.tools.runtime.java.util");
+        // the following packages must be loaded by the container (ie: not loaded/shared with the parent)
+        // eg: loader.addPackageToLoadInContainer("com.oracle.tools.runtime.java.concurrent");
 
         return loader;
     }

@@ -50,6 +50,8 @@ import com.oracle.tools.runtime.coherence.options.SiteName;
 
 import com.oracle.tools.runtime.concurrent.RemoteEvent;
 import com.oracle.tools.runtime.concurrent.RemoteEventListener;
+import com.oracle.tools.runtime.concurrent.options.StreamName;
+
 import com.oracle.tools.runtime.console.SystemApplicationConsole;
 
 import com.oracle.tools.runtime.java.features.JmxFeature;
@@ -86,6 +88,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -368,12 +371,12 @@ public abstract class AbstractCoherenceCacheServerTest extends AbstractTest
 
             // ----- use NamedCache.aggregate -----
             long longSum = (Long) otherNamedCache.aggregate(PresentFilter.INSTANCE,
-                    new LongSum(IdentityExtractor.INSTANCE));
+                                                            new LongSum(IdentityExtractor.INSTANCE));
 
             assertThat(longSum, is(sum));
 
             long anotherLongSum = (Long) otherNamedCache.aggregate(putAllMap.keySet(),
-                    new LongSum(IdentityExtractor.INSTANCE));
+                                                                   new LongSum(IdentityExtractor.INSTANCE));
 
             assertThat(anotherLongSum, is(sum));
         }
@@ -385,7 +388,7 @@ public abstract class AbstractCoherenceCacheServerTest extends AbstractTest
     {
         Platform      platform = getPlatform();
         EventListener listener = new EventListener(1);
-        RemoteEvent event    = new CustomServer.Event(19);
+        RemoteEvent   event    = new CustomServer.Event(19);
 
         try (CoherenceCacheServer server = platform.launch(CoherenceCacheServer.class,
                                                            ClassName.of(CustomServer.class),
@@ -393,7 +396,7 @@ public abstract class AbstractCoherenceCacheServerTest extends AbstractTest
                                                            LocalHost.only(),
                                                            SystemApplicationConsole.builder()))
         {
-            server.ensureEventStream("Foo").addEventListener(listener);
+            server.addListener(listener, StreamName.of("Foo"));
 
             CustomServer.fireEvent(server, "Foo", event);
 
@@ -404,6 +407,7 @@ public abstract class AbstractCoherenceCacheServerTest extends AbstractTest
         }
 
     }
+
 
     /**
      * An instance of a {@link RemoteEventListener} that captures events.
@@ -420,6 +424,7 @@ public abstract class AbstractCoherenceCacheServerTest extends AbstractTest
          */
         private final List<RemoteEvent> events;
 
+
         /**
          * Create an {@link EventListener} to receieve the expected number of events.
          *
@@ -430,6 +435,7 @@ public abstract class AbstractCoherenceCacheServerTest extends AbstractTest
             latch  = new CountDownLatch(expected);
             events = new ArrayList<>();
         }
+
 
         /**
          * Causes the current thread to wait until the expected number of events
@@ -445,7 +451,8 @@ public abstract class AbstractCoherenceCacheServerTest extends AbstractTest
          * @throws InterruptedException if the current thread is interrupted
          *         while waiting
          */
-        private boolean await(long timeout, TimeUnit unit) throws InterruptedException
+        private boolean await(long     timeout,
+                              TimeUnit unit) throws InterruptedException
         {
             return latch.await(timeout, unit);
         }

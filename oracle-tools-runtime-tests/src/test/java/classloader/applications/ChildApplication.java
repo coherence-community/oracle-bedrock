@@ -25,7 +25,7 @@
 
 package classloader.applications;
 
-import com.oracle.tools.runtime.concurrent.socket.RemoteChannelClient;
+import com.oracle.tools.runtime.concurrent.socket.SocketBasedRemoteChannelClient;
 
 import java.io.IOException;
 
@@ -58,8 +58,8 @@ public class ChildApplication
 
         System.out.printf("Connecting to the specified server");
 
-        RemoteChannelClient channel =
-            new RemoteChannelClient(InetAddress.getByName(System.getProperty("server.address")),
+        SocketBasedRemoteChannelClient channel =
+            new SocketBasedRemoteChannelClient(InetAddress.getByName(System.getProperty("server.address")),
                                     Integer.getInteger("server.port"));
 
         channel.open();

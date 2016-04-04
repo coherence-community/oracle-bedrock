@@ -26,7 +26,7 @@
 package com.oracle.tools.runtime.java;
 
 import com.oracle.tools.runtime.concurrent.RemoteChannel;
-import com.oracle.tools.runtime.concurrent.socket.RemoteChannelServer;
+import com.oracle.tools.runtime.concurrent.socket.SocketBasedRemoteChannelServer;
 import org.junit.Test;
 
 import java.net.InetAddress;
@@ -48,7 +48,7 @@ public class JavaApplicationRunnerTest
     @Test
     public void shouldInjectEventChannel() throws Exception
     {
-        try (RemoteChannelServer server = new RemoteChannelServer())
+        try (SocketBasedRemoteChannelServer server = new SocketBasedRemoteChannelServer())
         {
             server.open();
 

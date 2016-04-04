@@ -25,15 +25,17 @@
 
 package com.oracle.tools.runtime.concurrent;
 
+import java.util.EventListener;
+
 /**
- * A listener that receives {@link RemoteEvent}s.
+ * A {@link EventListener} that receives {@link RemoteEvent}s.
  * <p>
  * Copyright (c) 2016. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Jonathan Knight
  */
-public interface RemoteEventListener
+public interface RemoteEventListener extends EventListener
 {
     /**
      * Process the specified {@link RemoteEvent}.

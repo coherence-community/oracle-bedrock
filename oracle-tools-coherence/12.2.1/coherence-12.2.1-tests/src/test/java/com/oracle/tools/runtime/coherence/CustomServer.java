@@ -28,7 +28,10 @@ package com.oracle.tools.runtime.coherence;
 import com.oracle.tools.runtime.concurrent.RemoteChannel;
 import com.oracle.tools.runtime.concurrent.RemoteEvent;
 import com.oracle.tools.runtime.concurrent.RemoteRunnable;
+import com.oracle.tools.runtime.concurrent.options.StreamName;
+
 import com.oracle.tools.runtime.java.JavaApplication;
+
 import com.tangosol.net.DefaultCacheServer;
 
 /**
@@ -42,7 +45,9 @@ import com.tangosol.net.DefaultCacheServer;
  */
 public class CustomServer
 {
-
+    /**
+     * Field description
+     */
     @RemoteChannel.Inject
     public static RemoteChannel channel;
 
@@ -59,7 +64,9 @@ public class CustomServer
      * @param application  the application to fire the event from
      * @param event        the event to fire
      */
-    public static void fireEvent(JavaApplication application, String streamName, RemoteEvent event)
+    public static void fireEvent(JavaApplication application,
+                                 String          streamName,
+                                 RemoteEvent     event)
     {
         application.submit(new FireEvent(streamName, event));
     }
@@ -74,6 +81,7 @@ public class CustomServer
          * The identifier of this event.
          */
         private int id;
+
 
         /**
          * Create an {@link Event} with the specified identifier.
@@ -104,6 +112,7 @@ public class CustomServer
             {
                 return true;
             }
+
             if (o == null || getClass() != o.getClass())
             {
                 return false;
@@ -126,9 +135,7 @@ public class CustomServer
         @Override
         public String toString()
         {
-            return "Event(" +
-                   "id=" + id +
-                   ')';
+            return "Event(" + "id=" + id + ')';
         }
     }
 
@@ -139,22 +146,29 @@ public class CustomServer
      */
     public static class FireEvent implements RemoteRunnable
     {
-        private String streamName;
-
+        private String      streamName;
         private RemoteEvent event;
 
-        public FireEvent(String streamName, RemoteEvent event)
+
+        /**
+         * Constructs ...
+         *
+         *
+         * @param streamName
+         * @param event
+         */
+        public FireEvent(String      streamName,
+                         RemoteEvent event)
         {
             this.streamName = streamName;
             this.event      = event;
         }
 
+
         @Override
         public void run()
         {
-            CustomServer.channel
-                    .ensureEventStream(streamName)
-                    .fireEvent(event);
+            CustomServer.channel.raise(event, StreamName.of(streamName));
         }
     }
 }

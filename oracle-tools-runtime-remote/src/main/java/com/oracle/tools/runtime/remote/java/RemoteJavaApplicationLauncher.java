@@ -45,9 +45,10 @@ import com.oracle.tools.runtime.Settings;
 import com.oracle.tools.runtime.concurrent.ControllableRemoteChannel;
 import com.oracle.tools.runtime.concurrent.RemoteCallable;
 import com.oracle.tools.runtime.concurrent.RemoteChannel;
-import com.oracle.tools.runtime.concurrent.RemoteEventStream;
+import com.oracle.tools.runtime.concurrent.RemoteEvent;
+import com.oracle.tools.runtime.concurrent.RemoteEventListener;
 import com.oracle.tools.runtime.concurrent.RemoteRunnable;
-import com.oracle.tools.runtime.concurrent.socket.RemoteChannelServer;
+import com.oracle.tools.runtime.concurrent.socket.SocketBasedRemoteChannelServer;
 
 import com.oracle.tools.runtime.java.ClassPath;
 import com.oracle.tools.runtime.java.ClassPathModifier;
@@ -105,7 +106,7 @@ public class RemoteJavaApplicationLauncher extends AbstractRemoteApplicationLaun
      * The {@link ControllableRemoteChannel} that can be used to communicate with
      * the remote {@link JavaApplication}.
      */
-    private RemoteChannelServer remoteExecutor;
+    private SocketBasedRemoteChannelServer remoteChannel;
 
     /**
      * The {@link ClassPath} for the remote {@link JavaApplication}.
@@ -128,7 +129,7 @@ public class RemoteJavaApplicationLauncher extends AbstractRemoteApplicationLaun
         super(platform);
 
         // configure a server that the remote process can communicate with
-        remoteExecutor = new RemoteChannelServer();
+        remoteChannel = new SocketBasedRemoteChannelServer();
 
         // assume no resolved system properties at first
         systemProperties = new Properties();
@@ -136,7 +137,7 @@ public class RemoteJavaApplicationLauncher extends AbstractRemoteApplicationLaun
         // open the server
         try
         {
-            remoteExecutor.open();
+            remoteChannel.open();
         }
         catch (IOException e)
         {
@@ -219,11 +220,12 @@ public class RemoteJavaApplicationLauncher extends AbstractRemoteApplicationLaun
             remoteClassPath = options.get(ClassPath.class);
         }
 
-        // Add any event listeners now so that they are listening before the application starts
-        for (RemoteEvents.RemoteEventListenerOption option : options.getInstancesOf(RemoteEvents.RemoteEventListenerOption.class))
-        {
-            remoteExecutor.addRemoteEventStreamListener(option.getName(), option.getListener());
-        }
+        // register the defined RemoteEventListeners before the application starts so they can
+        // immediately start receiving RemoteEvents
+        RemoteEvents remoteEvents = options.get(RemoteEvents.class);
+
+        remoteEvents.forEach((remoteEventListener, listenerOptions) -> remoteChannel.addListener(remoteEventListener,
+                                                                                                 listenerOptions));
     }
 
 
@@ -248,16 +250,16 @@ public class RemoteJavaApplicationLauncher extends AbstractRemoteApplicationLaun
 
         if (waitToStart.isEnabled())
         {
-            Timeout                    timeout = options.get(Timeout.class);
+            Timeout                              timeout = options.get(Timeout.class);
 
-            final RemoteChannelServer server  = remoteExecutor;
+            final SocketBasedRemoteChannelServer server  = remoteChannel;
 
             ensure(new AbstractDeferred<Boolean>()
                    {
                        @Override
                        public Boolean get() throws TemporarilyUnavailableException, PermanentlyUnavailableException
                        {
-                           if (!server.getRemoteExecutors().iterator().hasNext())
+                           if (!server.getRemoteChannels().iterator().hasNext())
                            {
                                throw new TemporarilyUnavailableException(this);
                            }
@@ -275,7 +277,7 @@ public class RemoteJavaApplicationLauncher extends AbstractRemoteApplicationLaun
     @Override
     protected <P extends ApplicationProcess> P adapt(RemoteApplicationProcess process)
     {
-        return (P) new RemoteJavaApplicationProcess(process, remoteExecutor, systemProperties);
+        return (P) new RemoteJavaApplicationProcess(process, remoteChannel, systemProperties);
     }
 
 
@@ -352,7 +354,7 @@ public class RemoteJavaApplicationLauncher extends AbstractRemoteApplicationLaun
         // ----- establish Oracle Tools specific system properties -----
 
         // establish the URI for this (the parent) process
-        String              parentURI = "//${local.address}:" + remoteExecutor.getPort();
+        String              parentURI = "//${local.address}:" + remoteChannel.getPort();
 
         ExpressionEvaluator evaluator = new ExpressionEvaluator(options);
 
@@ -479,26 +481,27 @@ public class RemoteJavaApplicationLauncher extends AbstractRemoteApplicationLaun
         /**
          * The {@link RemoteChannel} for the {@link RemoteJavaApplicationProcess}.
          */
-        private ControllableRemoteChannel remoteExecutor;
+        private ControllableRemoteChannel remoteChannel;
 
         /**
          * The resolved System {@link Properties} provided to the {@link JavaApplicationProcess} when it was launched.
          */
         private Properties systemProperties;
 
+
         /**
          * Constructs a {@link RemoteJavaApplicationProcess}.
          *
-         * @param process          the underlying {@link RemoteApplicationProcess}
-         * @param remoteExecutor   the {@link RemoteChannel} for executing remote requests
-         * @param systemProperties the resolved System {@link Properties} provided to the {}
+         * @param process           the underlying {@link RemoteApplicationProcess}
+         * @param remoteChannel     the {@link RemoteChannel} for executing remote requests
+         * @param systemProperties  the resolved System {@link Properties} provided to the {}
          */
-        public RemoteJavaApplicationProcess(RemoteApplicationProcess process,
-                                            ControllableRemoteChannel remoteExecutor,
-                                            Properties systemProperties)
+        public RemoteJavaApplicationProcess(RemoteApplicationProcess  process,
+                                            ControllableRemoteChannel remoteChannel,
+                                            Properties                systemProperties)
         {
             this.process          = process;
-            this.remoteExecutor   = remoteExecutor;
+            this.remoteChannel    = remoteChannel;
             this.systemProperties = systemProperties;
         }
 
@@ -528,7 +531,7 @@ public class RemoteJavaApplicationLauncher extends AbstractRemoteApplicationLaun
         public void close()
         {
             process.close();
-            remoteExecutor.close();
+            remoteChannel.close();
         }
 
 
@@ -571,21 +574,38 @@ public class RemoteJavaApplicationLauncher extends AbstractRemoteApplicationLaun
         public <T> void submit(RemoteCallable<T>     callable,
                                CompletionListener<T> listener) throws IllegalStateException
         {
-            remoteExecutor.submit(callable, listener);
+            remoteChannel.submit(callable, listener);
         }
 
 
         @Override
         public void submit(RemoteRunnable runnable) throws IllegalStateException
         {
-            remoteExecutor.submit(runnable);
+            remoteChannel.submit(runnable);
         }
 
 
         @Override
-        public RemoteEventStream ensureEventStream(String name)
+        public void addListener(RemoteEventListener listener,
+                                Option...           options)
         {
-            return remoteExecutor.ensureEventStream(name);
+            remoteChannel.addListener(listener, options);
+        }
+
+
+        @Override
+        public void removeListener(RemoteEventListener listener,
+                                   Option...           options)
+        {
+            remoteChannel.removeListener(listener, options);
+        }
+
+
+        @Override
+        public void raise(RemoteEvent event,
+                          Option...   options)
+        {
+            remoteChannel.raise(event, options);
         }
     }
 }

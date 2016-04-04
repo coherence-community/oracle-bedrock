@@ -56,13 +56,12 @@ import com.tangosol.net.NamedCache;
 import com.tangosol.util.UID;
 
 import java.io.NotSerializableException;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
 
 import java.net.InetAddress;
 
 import java.util.Set;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.ExecutorService;
 
 /**
  * A specialized {@link JavaApplication} that represents an Oracle Coherence Cluster Member
@@ -291,7 +290,7 @@ public interface CoherenceClusterMember extends JavaApplication
 
         @Override
         public void start(ContainerBasedJavaApplicationLauncher.ControllableApplication application,
-                          CompletionListener<Void>                                     listener)
+                          CompletionListener<Void>                                      listener)
         {
             RemoteCallable<Void> callable = new RemoteCallableStaticMethod<>(DEFAULT_CACHE_SERVER_CLASSNAME, "start");
 
@@ -301,7 +300,7 @@ public interface CoherenceClusterMember extends JavaApplication
 
         @Override
         public void destroy(ContainerBasedJavaApplicationLauncher.ControllableApplication application,
-                            CompletionListener<Void>                                     listener)
+                            CompletionListener<Void>                                      listener)
         {
             RemoteCallable<Void> callable = new RemoteCallableStaticMethod<>(DEFAULT_CACHE_SERVER_CLASSNAME,
                                                                              "shutdown");
@@ -309,20 +308,19 @@ public interface CoherenceClusterMember extends JavaApplication
             application.submit(callable, listener);
         }
 
+
         @Override
-        public void setEventPublisher(ContainerClassLoader classLoader,
-                                      ExecutorService executorService,
-                                      ConcurrentMap<String, BlockingQueue<byte[]>> eventQueuesIn,
-                                      ConcurrentMap<String, BlockingQueue<byte[]>> eventQueuesOut,
-                                      Options options)
+        public void configure(ContainerClassLoader containerClassLoader,
+                              PipedOutputStream    pipedOutputStream,
+                              PipedInputStream     pipedInputStream,
+                              Options              options)
         {
             ClassName className = options.getOrDefault(ClassName.class, ClassName.of(DEFAULT_CACHE_SERVER_CLASSNAME));
 
-            ContainerBasedJavaApplicationLauncher.setEventPublisher(classLoader,
-                                                                    executorService,
-                                                                    eventQueuesIn,
-                                                                    eventQueuesOut,
-                                                                    className.getName());
+            ContainerBasedJavaApplicationLauncher.configureRemoteChannel(containerClassLoader,
+                                                                         pipedOutputStream,
+                                                                         pipedInputStream,
+                                                                         className.getName());
         }
     }
 }

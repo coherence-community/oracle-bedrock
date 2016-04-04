@@ -40,16 +40,13 @@ import com.oracle.tools.options.Timeout;
 import com.oracle.tools.runtime.Application;
 import com.oracle.tools.runtime.LocalPlatform;
 
-import com.oracle.tools.runtime.concurrent.RemoteEvent;
-import com.oracle.tools.runtime.concurrent.RemoteEventListener;
 import com.oracle.tools.runtime.concurrent.RemoteChannel;
-import com.oracle.tools.runtime.concurrent.RemoteEventStream;
 import com.oracle.tools.runtime.concurrent.RemoteChannelListener;
 import com.oracle.tools.runtime.concurrent.callable.GetSystemProperty;
 import com.oracle.tools.runtime.concurrent.runnable.RuntimeExit;
 import com.oracle.tools.runtime.concurrent.runnable.RuntimeHalt;
 import com.oracle.tools.runtime.concurrent.runnable.SystemExit;
-import com.oracle.tools.runtime.concurrent.socket.RemoteChannelServer;
+import com.oracle.tools.runtime.concurrent.socket.SocketBasedRemoteChannelServer;
 import com.oracle.tools.runtime.concurrent.socket.SocketBasedRemoteChannelTests;
 
 import com.oracle.tools.runtime.console.CapturingApplicationConsole;
@@ -60,7 +57,6 @@ import com.oracle.tools.runtime.java.options.HeapSize;
 import com.oracle.tools.runtime.java.options.HotSpot;
 import com.oracle.tools.runtime.java.options.IPv4Preferred;
 import com.oracle.tools.runtime.java.options.JavaHome;
-import com.oracle.tools.runtime.java.options.RemoteEvents;
 import com.oracle.tools.runtime.java.options.SystemProperty;
 import com.oracle.tools.runtime.java.profiles.CommercialFeatures;
 import com.oracle.tools.runtime.java.profiles.RemoteDebugging;
@@ -74,7 +70,6 @@ import com.oracle.tools.runtime.options.WorkingDirectory;
 
 import com.oracle.tools.util.Capture;
 
-import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.ClassRule;
 import org.junit.Ignore;
@@ -101,7 +96,6 @@ import java.io.IOException;
 
 import java.net.InetSocketAddress;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -370,7 +364,7 @@ public class LocalPlatformJavaApplicationTest extends AbstractJavaApplicationTes
     @Test
     public void shouldCreateOrphans()
     {
-        try (RemoteChannelServer server = new RemoteChannelServer())
+        try (SocketBasedRemoteChannelServer server = new SocketBasedRemoteChannelServer())
         {
             // start a server that the child can connect too.
             server.open();
@@ -398,7 +392,7 @@ public class LocalPlatformJavaApplicationTest extends AbstractJavaApplicationTes
             }
 
             // submit the child a request to prove that it's orphaned
-            RemoteChannel child            = listener.getExecutor();
+            RemoteChannel                      child            = listener.getExecutor();
             DeferredCompletionListener<String> deferredResponse = new DeferredCompletionListener<>(String.class);
 
             child.submit(new SocketBasedRemoteChannelTests.PingPong(), deferredResponse);
@@ -424,7 +418,7 @@ public class LocalPlatformJavaApplicationTest extends AbstractJavaApplicationTes
     @Test
     public void shouldNotCreateOrphans()
     {
-        try (RemoteChannelServer server = new RemoteChannelServer())
+        try (SocketBasedRemoteChannelServer server = new SocketBasedRemoteChannelServer())
         {
             // start a server that the child can connect too.
             server.open();
@@ -681,95 +675,6 @@ public class LocalPlatformJavaApplicationTest extends AbstractJavaApplicationTes
 
 
     @Test
-    public void shouldReceiveEventFromApplication() throws Exception
-    {
-        EventListener listener1 = new EventListener(1);
-        EventListener listener2 = new EventListener(1);
-        String        name      = "Foo";
-        RemoteEvent   event     = new EventingApplication.Event(19);
-
-        try (JavaApplication application = getPlatform().launch(JavaApplication.class,
-                                                                ClassName.of(EventingApplication.class),
-                                                                IPv4Preferred.yes()))
-        {
-            RemoteEventStream eventStream = application.ensureEventStream(name);
-
-            eventStream.addEventListener(listener1);
-            eventStream.addEventListener(listener2);
-
-            EventingApplication.fireEvent(application, name, event);
-
-            assertThat(listener1.await(1, TimeUnit.MINUTES), is(true));
-            assertThat(listener2.await(1, TimeUnit.MINUTES), is(true));
-
-            assertThat(listener1.getEvents().size(), is(1));
-            assertThat(listener1.getEvents().get(0), is(event));
-
-            assertThat(listener2.getEvents().size(), is(1));
-            assertThat(listener2.getEvents().get(0), is(event));
-
-            application.close();
-        }
-    }
-
-
-    @Test
-    public void shouldReceiveEventsFromApplicationUsingListenerAsOption() throws Exception
-    {
-        String        name      = "Foo";
-        int           count     = 10;
-        EventListener listener1 = new EventListener(count);
-        EventListener listener2 = new EventListener(count);
-
-        try (JavaApplication application = getPlatform().launch(JavaApplication.class,
-                                                                ClassName.of(EventingApplication.class),
-                                                                IPv4Preferred.yes(),
-                                                                RemoteEvents.from(name, listener1),
-                                                                RemoteEvents.from(name, listener2),
-                                                                Argument.of(name),
-                                                                Argument.of(count)))
-        {
-            assertThat(listener1.await(1, TimeUnit.MINUTES), is(true));
-            assertThat(listener2.await(1, TimeUnit.MINUTES), is(true));
-
-            application.close();
-
-            assertThat(listener1.getEvents().size(), is(count));
-            assertThat(listener2.getEvents().size(), is(count));
-        }
-    }
-
-
-    @Test
-    public void shouldFireEventsToApplication() throws Exception
-    {
-        EventListener listener = new EventListener(1);
-        RemoteEvent   event    = new EventingApplication.Event(19);
-
-        try (JavaApplication application = getPlatform().launch(JavaApplication.class,
-                                                                ClassName.of(EventingApplication.class),
-                                                                IPv4Preferred.yes()))
-        {
-            RemoteEventStream eventStreamOut  = application.ensureEventStream("Out");
-            RemoteEventStream eventStreamBack = application.ensureEventStream("Back");
-
-            eventStreamBack.addEventListener(listener);
-
-            EventingApplication.listen(application, "Out", "Back");
-
-            eventStreamOut.fireEvent(event);
-
-            Assert.assertThat(listener.await(1, TimeUnit.MINUTES), is(true));
-
-            Assert.assertThat(listener.getEvents().size(), is(1));
-            Assert.assertThat(listener.getEvents().get(0), is(event));
-
-            application.close();
-        }
-    }
-
-
-    @Test
     public void shouldSubmitRunnableBack() throws Exception
     {
         try (JavaApplication application = getPlatform().launch(JavaApplication.class,
@@ -878,67 +783,6 @@ public class LocalPlatformJavaApplicationTest extends AbstractJavaApplicationTes
         public RemoteChannel getExecutor()
         {
             return executor;
-        }
-    }
-
-
-    /**
-     * An instance of a {@link RemoteEventListener} that captures events.
-     */
-    public static class EventListener implements RemoteEventListener
-    {
-        /**
-         * The counter to count the number of events received.
-         */
-        private final CountDownLatch latch;
-
-        /**
-         * The list of events received.
-         */
-        private final List<RemoteEvent> events;
-
-        /**
-         * Create an {@link EventListener} to receieve the expected number of events.
-         *
-         * @param expected  the expected number of events
-         */
-        public EventListener(int expected)
-        {
-            latch  = new CountDownLatch(expected);
-            events = new ArrayList<>();
-        }
-
-        /**
-         * Causes the current thread to wait until the expected number of events
-         * have been received, unless the thread is {@linkplain Thread#interrupt interrupted},
-         * or the specified waiting time elapses.
-         *
-         * @param timeout  the maximum time to wait
-         * @param unit     the time unit of the {@code timeout} argument
-         *
-         * @return {@code true} if the correct number of events is received and {@code false}
-         *         if the waiting time elapsed before the events were received
-         *
-         * @throws InterruptedException if the current thread is interrupted
-         *         while waiting
-         */
-        private boolean await(long timeout, TimeUnit unit) throws InterruptedException
-        {
-            return latch.await(timeout, unit);
-        }
-
-
-        public List<RemoteEvent> getEvents()
-        {
-            return events;
-        }
-
-
-        @Override
-        public void onEvent(RemoteEvent event)
-        {
-            events.add(event);
-            latch.countDown();
         }
     }
 }

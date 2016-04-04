@@ -25,220 +25,127 @@
 
 package com.oracle.tools.runtime.java.options;
 
+import com.oracle.tools.ComposableOption;
 import com.oracle.tools.Option;
 import com.oracle.tools.Options;
-import com.oracle.tools.runtime.concurrent.RemoteEventListener;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
+import com.oracle.tools.runtime.concurrent.RemoteEventListener;
+import com.oracle.tools.runtime.concurrent.options.StreamName;
+
+import java.util.EventListener;
+import java.util.HashMap;
+
+import java.util.function.BiConsumer;
 
 /**
- * An {@link Option.Collector} that collects together {@link RemoteEventListener}s.
+ * An {@link ComposableOption} for managing zero or more {@link RemoteEventListener} registrations.
  * <p>
  * Copyright (c) 2016. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Jonathan Knight
+ * @author Brian Oliver
  */
-public class RemoteEvents
-        implements Option.Collector<RemoteEvents.RemoteEventListenerOption, RemoteEvents>
+public class RemoteEvents implements ComposableOption<RemoteEvents>
 {
     /**
-     * The {@link List} of {@link RemoteEventListenerOption}s
+     * The {@link HashMap} of {@link EventListener}s and {@link Option}s, organized by {@link StreamName}.
      */
-    private final List<RemoteEventListenerOption> listeners;
+    private HashMap<StreamName, HashMap<RemoteEventListener, Options>> eventListeners;
+
 
     /**
-     * Create a {@link RemoteEvents} option with the specified
-     * list of {@link RemoteEventListenerOption}s
-     *
-     * @param listeners  the list of {@link RemoteEventListenerOption}
+     * Constructs an empty {@link RemoteEvents}
      */
-    public RemoteEvents(List<RemoteEventListenerOption> listeners)
+    private RemoteEvents()
     {
-        this.listeners = listeners;
-    }
-
-
-    @Override
-    public <O> Iterable<O> getInstancesOf(Class<O> requiredClass)
-    {
-        if (requiredClass.isAssignableFrom(RemoteEventListenerOption.class))
-        {
-            return (Iterable<O>) Collections.unmodifiableCollection(listeners);
-        }
-        else
-        {
-            return Collections.emptyList();
-        }
-    }
-
-
-    @Override
-    public RemoteEvents with(RemoteEventListenerOption option)
-    {
-        if (option == null)
-        {
-            return this;
-        }
-
-        List<RemoteEventListenerOption> list = new ArrayList<>(this.listeners);
-
-        list.add(option);
-
-        return new RemoteEvents(list);
-    }
-
-
-    @Override
-    public RemoteEvents without(RemoteEventListenerOption option)
-    {
-        if (option == null || this.listeners.isEmpty())
-        {
-            return this;
-        }
-
-        List<RemoteEventListenerOption> list = new ArrayList<>(this.listeners);
-
-        list.remove(option);
-
-        return new RemoteEvents(list);
-    }
-
-
-    @Override
-    public Iterator<RemoteEventListenerOption> iterator()
-    {
-        return listeners.iterator();
+        eventListeners = new HashMap<>();
     }
 
 
     /**
-     * Create an {@link Option} that will add the specified
-     * {@link RemoteEventListener} to the event stream with
-     * the specified name.
+     * Internally adds a {@link RemoteEventListener} to this {@link RemoteEvents} option
      *
-     * @param streamName  the name of the event stream to add the listener to
-     * @param listener    the {@link RemoteEventListener} to be added to the stream
-     *
-     * @return  an {@link Option} that will add the specified
-     *          {@link RemoteEventListener} to the event stream with
-     *          the specified name
+     * @param listener  the {@link RemoteEventListener} to add
+     * @param options   the {@link Options} for the {@link RemoteEventListener}
      */
-    public static Option from(String streamName, RemoteEventListener listener)
+    private void add(RemoteEventListener listener,
+                     Options             options)
     {
-        return new RemoteEventListenerOption(streamName, listener);
+        StreamName streamName = options.get(StreamName.class);
+
+        HashMap<RemoteEventListener, Options> streamEventListeners = eventListeners.computeIfAbsent(streamName,
+                                                                                                    name -> new HashMap<>());
+
+        streamEventListeners.put(listener, options);
     }
 
 
     /**
-     * Create the default option of an empty set of {@link RemoteEventListener}s.
+     * Iterate over the registered {@link RemoteEventListener}s together with the registration {@link Option}s.
      *
-     * @return  the default option of an empty set of {@link RemoteEventListener}s
+     * @param consumer  the {@link BiConsumer}
+     */
+    public void forEach(BiConsumer<RemoteEventListener, Option[]> consumer)
+    {
+        eventListeners.forEach(
+            (streamName, remoteEventListenerMap) -> {
+                remoteEventListenerMap.forEach(
+                    (remoteEventListener, options) -> {
+                        consumer.accept(remoteEventListener, options.asArray());
+                    });
+            });
+    }
+
+
+    @Override
+    public RemoteEvents compose(RemoteEvents other)
+    {
+        // construct a new RemoteEvents
+        RemoteEvents remoteEvents = new RemoteEvents();
+
+        // include all of this RemoteEvents listeners
+        remoteEvents.eventListeners.putAll(eventListeners);
+
+        // add all of the other RemoteEvent listeners (these will overrider individual event listeners)
+        other.eventListeners.forEach(((streamName, remoteEventListenerMap) -> {
+                                          remoteEventListenerMap.forEach(
+                                              (remoteEventListener, options) -> {
+                                                  remoteEvents.add(remoteEventListener, options);
+                                              });
+                                      }));
+
+        return remoteEvents;
+    }
+
+
+    /**
+     * Defines a {@link RemoteEventListener} with the specified {@link Option}s in the {@link RemoteEvents}.
+     *
+     * @param remoteEventListener  the {@link RemoteEventListener}
+     * @param options              the {@link Option}s
+     *
+     * @return  a new {@link RemoteEvents}
+     */
+    public static RemoteEvents listener(RemoteEventListener remoteEventListener,
+                                        Option...           options)
+    {
+        RemoteEvents remoteEvents = new RemoteEvents();
+
+        remoteEvents.add(remoteEventListener, Options.from(options));
+
+        return remoteEvents;
+    }
+
+
+    /**
+     * Defines an {@link RemoteEvents} that is empty.
+     *
+     * @return an empty {@link RemoteEvents}
      */
     @Options.Default
     public static RemoteEvents none()
     {
-        return new RemoteEvents(Collections.emptyList());
-    }
-
-
-    /**
-     * An {@link Option} implementation that holds a {@link RemoteEventListener}
-     * and the name of the event stream that the listener should listen to.
-     */
-    public static class RemoteEventListenerOption implements Option.Collectable
-    {
-        /**
-         * The name of the event stream.
-         */
-        private final String name;
-
-        /**
-         * The {@link RemoteEventListener} to add to the stream.
-         */
-        private final RemoteEventListener listener;
-
-
-        /**
-         * Create a {@link RemoteEventListenerOption} with the specified
-         * listener and stream name.
-         *
-         * @param name      the name of the event stream to listen to
-         * @param listener  the {@link RemoteEventListener} to add to the stream
-         */
-        RemoteEventListenerOption(String name, RemoteEventListener listener)
-        {
-            if (name == null)
-            {
-                throw new NullPointerException("The event stream name cannot be null");
-            }
-
-            if (listener == null)
-            {
-                throw new NullPointerException("The event listener cannot be null");
-            }
-
-            this.name     = name;
-            this.listener = listener;
-        }
-
-        /**
-         * Obtain the name of the event stream to listen to.
-         *
-         * @return  the name of the event stream to listen to
-         */
-        public String getName()
-        {
-            return name;
-        }
-
-
-        /**
-         * Obtain the {@link RemoteEventListener} to add to the event stream.
-         *
-         * @return  the {@link RemoteEventListener} to add to the event stream
-         */
-        public RemoteEventListener getListener()
-        {
-            return listener;
-        }
-
-
-        @Override
-        public Class<? extends Collector> getCollectorClass()
-        {
-            return RemoteEvents.class;
-        }
-
-
-        @Override
-        public boolean equals(Object o)
-        {
-            if (this == o)
-            {
-                return true;
-            }
-
-            if (o == null || getClass() != o.getClass())
-            {
-                return false;
-            }
-
-            RemoteEventListenerOption that = (RemoteEventListenerOption) o;
-
-            return name.equals(that.name) && listener.equals(that.listener);
-
-        }
-
-        @Override
-        public int hashCode()
-        {
-            int result = name.hashCode();
-            result = 31 * result + listener.hashCode();
-            return result;
-        }
+        return new RemoteEvents();
     }
 }

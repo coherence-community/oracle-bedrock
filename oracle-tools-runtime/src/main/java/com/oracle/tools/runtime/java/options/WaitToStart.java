@@ -28,10 +28,11 @@ package com.oracle.tools.runtime.java.options;
 import com.oracle.tools.Option;
 import com.oracle.tools.Options;
 
+import com.oracle.tools.runtime.Platform;
 import com.oracle.tools.runtime.java.JavaApplication;
 
 /**
- * Defines an {@link Option} defining if Oracle Tools should wait for a
+ * Defines an {@link Option} defining if a {@link Platform} should wait for a
  * {@link JavaApplication} to start before returning control to a caller.
  * <p>
  * Copyright (c) 2016. All Rights Reserved. Oracle Corporation.<br>

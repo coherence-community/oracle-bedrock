@@ -32,8 +32,8 @@ import com.oracle.tools.deferred.listener.DeferredCompletionListener;
 import com.oracle.tools.runtime.concurrent.RemoteCallable;
 import com.oracle.tools.runtime.concurrent.RemoteEvent;
 import com.oracle.tools.runtime.concurrent.RemoteEventListener;
-import com.oracle.tools.runtime.concurrent.RemoteEventStream;
 import com.oracle.tools.runtime.concurrent.RemoteRunnable;
+import com.oracle.tools.runtime.concurrent.options.StreamName;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -41,6 +41,7 @@ import org.junit.Test;
 import static com.oracle.tools.deferred.DeferredHelper.valueOf;
 
 import static org.hamcrest.CoreMatchers.is;
+
 import static org.junit.Assert.assertThat;
 
 import java.io.IOException;
@@ -49,6 +50,7 @@ import java.net.InetAddress;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -59,22 +61,22 @@ import java.util.concurrent.TimeUnit;
 public class SocketBasedRemoteChannelTests
 {
     /**
-     * Ensure a {@link RemoteChannelServer} can submit and receive a
+     * Ensure a {@link SocketBasedRemoteChannelServer} can submit and receive a
      * {@link Callable}.
      */
     @Test
     public void shouldSubmitStaticPingPongRequest() throws InterruptedException
     {
-        RemoteChannelServer server = null;
-        RemoteChannelClient client = null;
+        SocketBasedRemoteChannelServer server = null;
+        SocketBasedRemoteChannelClient client = null;
 
         try
         {
-            server = new RemoteChannelServer();
+            server = new SocketBasedRemoteChannelServer();
 
             InetAddress address = server.open();
 
-            client = new RemoteChannelClient(address, server.getPort());
+            client = new SocketBasedRemoteChannelClient(address, server.getPort());
 
             client.open();
 
@@ -110,35 +112,36 @@ public class SocketBasedRemoteChannelTests
 
 
     /**
-     * Ensure a {@link RemoteChannelServer} won't accept
+     * Ensure a {@link SocketBasedRemoteChannelServer} won't accept
      * inner class submissions.
      */
     @Test
     public void shouldNotPermitInnerClassSubmissions() throws InterruptedException
     {
-        RemoteChannelServer server = null;
-        RemoteChannelClient client = null;
+        SocketBasedRemoteChannelServer server = null;
+        SocketBasedRemoteChannelClient client = null;
 
         try
         {
-            server = new RemoteChannelServer();
+            server = new SocketBasedRemoteChannelServer();
 
             InetAddress address = server.open();
 
-            client = new RemoteChannelClient(address, server.getPort());
+            client = new SocketBasedRemoteChannelClient(address, server.getPort());
 
             client.open();
 
             DeferredCompletionListener<String> serverResponse = new DeferredCompletionListener<String>(String.class);
 
             client.submit(new RemoteCallable<String>()
-            {
-                @Override
-                public String call() throws Exception
-                {
-                    return "PONG";
-                }
-            }, serverResponse);
+                          {
+                              @Override
+                              public String call() throws Exception
+                              {
+                                  return "PONG";
+                              }
+                          },
+                          serverResponse);
 
             Assert.fail("Anonymous Inner-Classes Can't be used");
         }
@@ -166,17 +169,17 @@ public class SocketBasedRemoteChannelTests
 
 
     /**
-     * Ensure a {@link RemoteChannelServer} won't accept submissions without connected clients.
+     * Ensure a {@link SocketBasedRemoteChannelServer} won't accept submissions without connected clients.
      */
     @Test
     public void shouldNotSubmitWithoutClients() throws InterruptedException
     {
-        RemoteChannelServer server = null;
-        RemoteChannelClient client = null;
+        SocketBasedRemoteChannelServer server = null;
+        SocketBasedRemoteChannelClient client = null;
 
         try
         {
-            server = new RemoteChannelServer();
+            server = new SocketBasedRemoteChannelServer();
 
             DeferredCompletionListener<String> clientResponse = new DeferredCompletionListener<String>(String.class);
 
@@ -218,7 +221,7 @@ public class SocketBasedRemoteChannelTests
 
 
     @Test
-    public void shouldFireAndReceiveEvent() throws Exception
+    public void shouldRaiseAndProcessEvents() throws Exception
     {
         final CountDownLatch latch    = new CountDownLatch(1);
         RemoteEventListener  listener = new RemoteEventListener()
@@ -230,17 +233,19 @@ public class SocketBasedRemoteChannelTests
             }
         };
 
-        try (RemoteChannelServer server = new RemoteChannelServer())
+        try (SocketBasedRemoteChannelServer server = new SocketBasedRemoteChannelServer())
         {
-            InetAddress address = server.open();
+            StreamName  streamName = StreamName.of("Foo");
 
-            server.addRemoteEventStreamListener("Foo", listener);
+            InetAddress address    = server.open();
 
-            try (RemoteChannelClient client = new RemoteChannelClient(address, server.getPort()))
+            server.addListener(listener, streamName);
+
+            try (SocketBasedRemoteChannelClient client = new SocketBasedRemoteChannelClient(address, server.getPort()))
             {
                 client.open();
 
-                client.ensureEventStream("Foo").fireEvent(new Event(1));
+                client.raise(new Event(1), streamName);
 
                 assertThat(latch.await(1, TimeUnit.MINUTES), is(true));
             }
@@ -264,31 +269,60 @@ public class SocketBasedRemoteChannelTests
             }
         };
 
-        try (RemoteChannelServer server = new RemoteChannelServer())
+        try (SocketBasedRemoteChannelServer server = new SocketBasedRemoteChannelServer())
         {
-            InetAddress address = server.open();
+            StreamName  streamName = StreamName.of("Foo");
 
-            server.addRemoteEventStreamListener("Foo", listener);
+            InetAddress address    = server.open();
 
-            try (RemoteChannelClient client = new RemoteChannelClient(address, server.getPort()))
+            server.addListener(listener, streamName);
+
+            try (SocketBasedRemoteChannelClient client = new SocketBasedRemoteChannelClient(address, server.getPort()))
             {
                 client.open();
 
-                RemoteEventStream eventStream = client.ensureEventStream("Foo");
-
-                for (int i=0; i<count; i++)
+                for (int i = 0; i < count; i++)
                 {
-                    eventStream.fireEvent(new Event(i));
+                    client.raise(new Event(i), streamName);
                 }
 
                 assertThat(latch.await(1, TimeUnit.MINUTES), is(true));
                 assertThat(list.size(), is(count));
 
-                for(int i=0; i<count; i++)
+                for (int i = 0; i < count; i++)
                 {
                     assertThat(list.get(i), is(i));
                 }
             }
+        }
+    }
+
+
+    /**
+     * A simple {@link RemoteEvent} for testing.
+     */
+    public static class Event implements RemoteEvent
+    {
+        /**
+         * The identity of the {@link Event}.
+         */
+        private int id;
+
+
+        /**
+         * Constructs the {@link Event}.
+         *
+         * @param id  the {@link Event} identity
+         */
+        public Event(int id)
+        {
+            this.id = id;
+        }
+
+
+        public int getId()
+        {
+            return id;
         }
     }
 
@@ -315,21 +349,6 @@ public class SocketBasedRemoteChannelTests
         public String call() throws Exception
         {
             return "PONG";
-        }
-    }
-
-    public static class Event implements RemoteEvent
-    {
-        private int id;
-
-        public Event(int id)
-        {
-            this.id = id;
-        }
-
-        public int getId()
-        {
-            return id;
         }
     }
 }

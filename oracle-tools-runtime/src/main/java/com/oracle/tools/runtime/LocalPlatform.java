@@ -30,10 +30,9 @@ import com.oracle.tools.Options;
 import com.oracle.tools.io.NetworkHelper;
 
 import com.oracle.tools.runtime.concurrent.RemoteCallable;
-import com.oracle.tools.runtime.concurrent.RemoteChannel;
 import com.oracle.tools.runtime.concurrent.RemoteChannelListener;
-import com.oracle.tools.runtime.concurrent.socket.RemoteChannelClient;
-import com.oracle.tools.runtime.concurrent.socket.RemoteChannelServer;
+import com.oracle.tools.runtime.concurrent.socket.SocketBasedRemoteChannelClient;
+import com.oracle.tools.runtime.concurrent.socket.SocketBasedRemoteChannelServer;
 import com.oracle.tools.runtime.concurrent.socket.SocketBasedRemoteChannel;
 
 import com.oracle.tools.runtime.java.JavaApplication;
@@ -281,7 +280,7 @@ public class LocalPlatform extends AbstractPlatform<LocalPlatform>
 
         // establish a remote executor server locally to test connectivity
 
-        try (RemoteChannelServer server = new RemoteChannelServer();)
+        try (SocketBasedRemoteChannelServer server = new SocketBasedRemoteChannelServer();)
         {
             System.out.println("Network Connectivity Tests:");
             System.out.println("---------------------------");
@@ -289,28 +288,20 @@ public class LocalPlatform extends AbstractPlatform<LocalPlatform>
             server.addListener(new RemoteChannelListener()
                                {
                                    @Override
-                                   public void onOpened(RemoteChannel channel)
+                                   public void onOpened(com.oracle.tools.runtime.concurrent.RemoteChannel channel)
                                    {
                                        if (channel instanceof SocketBasedRemoteChannel)
                                        {
-                                           SocketBasedRemoteChannel socketBasedExecutor =
-                                               (SocketBasedRemoteChannel) channel;
-
-                                           System.out.println("[Server]: Connection Opened (for client channel #"
-                                                              + socketBasedExecutor.getExecutorId() + ")");
+                                           System.out.println("[Server]: Connection Opened");
                                        }
                                    }
 
                                    @Override
-                                   public void onClosed(RemoteChannel channel)
+                                   public void onClosed(com.oracle.tools.runtime.concurrent.RemoteChannel channel)
                                    {
                                        if (channel instanceof SocketBasedRemoteChannel)
                                        {
-                                           SocketBasedRemoteChannel socketBasedExecutor =
-                                               (SocketBasedRemoteChannel) channel;
-
-                                           System.out.println("[Server]: Connection Closed (for client channel #"
-                                                              + socketBasedExecutor.getExecutorId() + ")\n");
+                                           System.out.println("[Server]: Connection Closed\n");
                                        }
                                    }
                                });
@@ -336,7 +327,7 @@ public class LocalPlatform extends AbstractPlatform<LocalPlatform>
                                     int         port,
                                     String      description)
     {
-        try (RemoteChannelClient client = new RemoteChannelClient(inetAddress, port))
+        try (SocketBasedRemoteChannelClient client = new SocketBasedRemoteChannelClient(inetAddress, port))
         {
             System.out.println("Connection Validation For : " + description);
             System.out.println("---------------------------");

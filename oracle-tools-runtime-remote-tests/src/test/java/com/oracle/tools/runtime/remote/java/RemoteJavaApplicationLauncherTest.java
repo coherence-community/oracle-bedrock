@@ -33,7 +33,7 @@ import com.oracle.tools.runtime.Platform;
 
 import com.oracle.tools.runtime.concurrent.RemoteEvent;
 import com.oracle.tools.runtime.concurrent.RemoteEventListener;
-import com.oracle.tools.runtime.concurrent.RemoteEventStream;
+import com.oracle.tools.runtime.concurrent.options.StreamName;
 import com.oracle.tools.runtime.concurrent.runnable.RuntimeExit;
 import com.oracle.tools.runtime.concurrent.runnable.RuntimeHalt;
 
@@ -89,6 +89,7 @@ import java.net.Socket;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -485,19 +486,18 @@ public class RemoteJavaApplicationLauncherTest extends AbstractRemoteTest
     public void shouldReceiveEventFromApplication() throws Exception
     {
         Platform      platform  = getRemotePlatform();
+
         EventListener listener1 = new EventListener(1);
         EventListener listener2 = new EventListener(1);
-        RemoteEvent   event     = new EventingApplication.Event(19);
         String        name      = "Foo";
+        RemoteEvent   event     = new EventingApplication.Event(19);
 
         try (JavaApplication application = platform.launch(JavaApplication.class,
                                                            ClassName.of(EventingApplication.class),
                                                            IPv4Preferred.yes()))
         {
-            RemoteEventStream eventStream = application.ensureEventStream(name);
-
-            eventStream.addEventListener(listener1);
-            eventStream.addEventListener(listener2);
+            application.addListener(listener1, StreamName.of(name));
+            application.addListener(listener2, StreamName.of(name));
 
             EventingApplication.fireEvent(application, name, event);
 
@@ -509,16 +509,44 @@ public class RemoteJavaApplicationLauncherTest extends AbstractRemoteTest
 
             Assert.assertThat(listener2.getEvents().size(), is(1));
             Assert.assertThat(listener2.getEvents().get(0), is(event));
-
-            application.close();
         }
     }
 
 
     @Test
-    public void shouldFireEventsToApplication() throws Exception
+    public void shouldReceiveEventsFromApplicationUsingListenerAsOption() throws Exception
+    {
+        Platform      platform  = getRemotePlatform();
+
+        String        name      = "Foo";
+        int           count     = 10;
+        EventListener listener1 = new EventListener(count);
+        EventListener listener2 = new EventListener(count);
+
+        try (JavaApplication application = platform.launch(JavaApplication.class,
+                                                           ClassName.of(EventingApplication.class),
+                                                           IPv4Preferred.yes(),
+                                                           RemoteEvents.listener(listener1, StreamName.of(name)),
+                                                           RemoteEvents.listener(listener2, StreamName.of(name)),
+                                                           Argument.of(name),
+                                                           Argument.of(count)))
+        {
+            Assert.assertThat(listener1.await(1, TimeUnit.MINUTES), is(true));
+            Assert.assertThat(listener2.await(1, TimeUnit.MINUTES), is(true));
+
+            application.close();
+
+            Assert.assertThat(listener1.getEvents().size(), is(count));
+            Assert.assertThat(listener2.getEvents().size(), is(count));
+        }
+    }
+
+
+    @Test
+    public void shouldSendEventsToApplication() throws Exception
     {
         Platform      platform = getRemotePlatform();
+
         EventListener listener = new EventListener(1);
         RemoteEvent   event    = new EventingApplication.Event(19);
 
@@ -526,14 +554,11 @@ public class RemoteJavaApplicationLauncherTest extends AbstractRemoteTest
                                                            ClassName.of(EventingApplication.class),
                                                            IPv4Preferred.yes()))
         {
-            RemoteEventStream eventStreamOut  = application.ensureEventStream("Out");
-            RemoteEventStream eventStreamBack = application.ensureEventStream("Back");
-
-            eventStreamBack.addEventListener(listener);
+            application.addListener(listener, StreamName.of("Back"));
 
             EventingApplication.listen(application, "Out", "Back");
 
-            eventStreamOut.fireEvent(event);
+            application.raise(event, StreamName.of("Out"));
 
             Assert.assertThat(listener.await(1, TimeUnit.MINUTES), is(true));
 
@@ -546,51 +571,13 @@ public class RemoteJavaApplicationLauncherTest extends AbstractRemoteTest
 
 
     @Test
-    public void shouldReceiveEventsFromApplicationUsingListenerAsOption() throws Exception
-    {
-        Platform      platform  = getRemotePlatform();
-        String        name      = "Foo";
-        int           count     = 10;
-        EventListener listener1 = new EventListener(count);
-        EventListener listener2 = new EventListener(count);
-
-        try (JavaApplication application = platform.launch(JavaApplication.class,
-                                                           ClassName.of(EventingApplication.class),
-                                                           IPv4Preferred.yes(),
-                                                           RemoteEvents.from(name, listener1),
-                                                           RemoteEvents.from(name, listener2),
-                                                           Argument.of(name),
-                                                           Argument.of(count)))
-        {
-            Assert.assertThat(listener1.await(1, TimeUnit.MINUTES), is(true));
-            Assert.assertThat(listener2.await(1, TimeUnit.MINUTES), is(true));
-
-            application.close();
-
-            List<RemoteEvent> events1 = listener1.getEvents();
-            List<RemoteEvent> events2 = listener2.getEvents();
-
-            Assert.assertThat(events1.size(), is(count));
-            Assert.assertThat(events2.size(), is(count));
-
-            for (int i=0; i<count; i++)
-            {
-                RemoteEvent event = new EventingApplication.Event(i);
-                Assert.assertThat(events1.get(i), is(event));
-                Assert.assertThat(events2.get(i), is(event));
-            }
-        }
-    }
-
-
-    @Test
     public void shouldSubmitRunnableBack() throws Exception
     {
         Platform platform = getRemotePlatform();
 
         try (JavaApplication application = platform.launch(JavaApplication.class,
-                                                                ClassName.of(EventingApplication.class),
-                                                                IPv4Preferred.yes()))
+                                                           ClassName.of(EventingApplication.class),
+                                                           IPv4Preferred.yes()))
         {
             EventingApplication.CountDownRunnable.latch = new CountDownLatch(1);
 
@@ -607,8 +594,8 @@ public class RemoteJavaApplicationLauncherTest extends AbstractRemoteTest
         Platform platform = getRemotePlatform();
 
         try (JavaApplication application = platform.launch(JavaApplication.class,
-                                                                ClassName.of(EventingApplication.class),
-                                                                IPv4Preferred.yes()))
+                                                           ClassName.of(EventingApplication.class),
+                                                           IPv4Preferred.yes()))
         {
             EventingApplication.GetIntCallable.value = 1234;
 
@@ -682,6 +669,7 @@ public class RemoteJavaApplicationLauncherTest extends AbstractRemoteTest
          */
         private final List<RemoteEvent> events;
 
+
         /**
          * Create an {@link EventListener} to receieve the expected number of events.
          *
@@ -692,6 +680,7 @@ public class RemoteJavaApplicationLauncherTest extends AbstractRemoteTest
             latch  = new CountDownLatch(expected);
             events = new ArrayList<>();
         }
+
 
         /**
          * Causes the current thread to wait until the expected number of events
@@ -707,7 +696,8 @@ public class RemoteJavaApplicationLauncherTest extends AbstractRemoteTest
          * @throws InterruptedException if the current thread is interrupted
          *         while waiting
          */
-        private boolean await(long timeout, TimeUnit unit) throws InterruptedException
+        private boolean await(long     timeout,
+                              TimeUnit unit) throws InterruptedException
         {
             return latch.await(timeout, unit);
         }

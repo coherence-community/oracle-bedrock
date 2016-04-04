@@ -28,6 +28,7 @@ package com.oracle.tools.runtime.coherence;
 import com.oracle.tools.runtime.concurrent.RemoteChannel;
 import com.oracle.tools.runtime.concurrent.RemoteEvent;
 import com.oracle.tools.runtime.concurrent.RemoteRunnable;
+import com.oracle.tools.runtime.concurrent.options.StreamName;
 import com.oracle.tools.runtime.java.JavaApplication;
 import com.tangosol.net.DefaultCacheServer;
 
@@ -152,7 +153,7 @@ public class CustomServer
         @Override
         public void run()
         {
-            CustomServer.channel.ensureEventStream(streamName).fireEvent(event);
+            CustomServer.channel.raise(event, StreamName.of(streamName));
         }
     }
 }

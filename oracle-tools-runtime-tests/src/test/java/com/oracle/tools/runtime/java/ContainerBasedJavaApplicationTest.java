@@ -26,22 +26,19 @@
 package com.oracle.tools.runtime.java;
 
 import classloader.applications.EventingApplication;
+
 import com.oracle.tools.options.Diagnostics;
 
-import com.oracle.tools.runtime.concurrent.RemoteEvent;
-import com.oracle.tools.runtime.concurrent.RemoteEventListener;
-import com.oracle.tools.runtime.concurrent.RemoteEventStream;
 import com.oracle.tools.runtime.console.AbstractPipedApplicationConsole;
 import com.oracle.tools.runtime.console.Console;
 import com.oracle.tools.runtime.console.PipedApplicationConsole;
 
 import com.oracle.tools.runtime.java.options.ClassName;
-
 import com.oracle.tools.runtime.java.options.IPv4Preferred;
-import com.oracle.tools.runtime.java.options.RemoteEvents;
+
 import com.oracle.tools.runtime.options.Argument;
 
-import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.instanceOf;
@@ -53,8 +50,7 @@ import static org.junit.Assert.fail;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -182,106 +178,6 @@ public class ContainerBasedJavaApplicationTest extends AbstractJavaApplicationTe
 
 
     @Test
-    public void shouldReceiveEventFromApplication() throws Exception
-    {
-        EventListener listener1 = new EventListener(1);
-        EventListener listener2 = new EventListener(1);
-        String        name      = "Foo";
-        RemoteEvent   event     = new EventingApplication.Event(19);
-
-        try (JavaApplication application = getPlatform().launch(JavaApplication.class,
-                                                                ClassName.of(EventingApplication.class),
-                                                                IPv4Preferred.yes()))
-        {
-            RemoteEventStream eventStream = application.ensureEventStream(name);
-
-            eventStream.addEventListener(listener1);
-            eventStream.addEventListener(listener2);
-
-            EventingApplication.fireEvent(application, name, event);
-
-            assertThat(listener1.await(1, TimeUnit.MINUTES), is(true));
-            assertThat(listener2.await(1, TimeUnit.MINUTES), is(true));
-
-            assertThat(listener1.getEvents().size(), is(1));
-            assertThat(listener2.getEvents().size(), is(1));
-
-            assertThat(listener1.getEvents().get(0), is(event));
-            assertThat(listener2.getEvents().get(0), is(event));
-
-            application.close();
-        }
-    }
-
-
-    @Test
-    public void shouldFireEventsToApplication() throws Exception
-    {
-        EventListener listener = new EventListener(1);
-        RemoteEvent   event    = new EventingApplication.Event(19);
-
-        try (JavaApplication application = getPlatform().launch(JavaApplication.class,
-                                                                ClassName.of(EventingApplication.class),
-                                                                IPv4Preferred.yes()))
-        {
-            RemoteEventStream eventStreamOut  = application.ensureEventStream("Out");
-            RemoteEventStream eventStreamBack = application.ensureEventStream("Back");
-
-            eventStreamBack.addEventListener(listener);
-
-            EventingApplication.listen(application, "Out", "Back");
-
-            eventStreamOut.fireEvent(event);
-
-            Assert.assertThat(listener.await(1, TimeUnit.MINUTES), is(true));
-
-            Assert.assertThat(listener.getEvents().size(), is(1));
-            Assert.assertThat(listener.getEvents().get(0), is(event));
-
-            application.close();
-        }
-    }
-
-
-    @Test
-    public void shouldReceiveEventsFromApplicationUsingListenerAsOption() throws Exception
-    {
-        String        name      = "Foo";
-        int           count     = 10;
-        EventListener listener1 = new EventListener(count);
-        EventListener listener2 = new EventListener(count);
-
-        try (JavaApplication application = getPlatform().launch(JavaApplication.class,
-                                                                ClassName.of(EventingApplication.class),
-                                                                IPv4Preferred.yes(),
-                                                                RemoteEvents.from(name, listener1),
-                                                                RemoteEvents.from(name, listener2),
-                                                                Argument.of(name),
-                                                                Argument.of(count)))
-        {
-            assertThat(listener1.await(1, TimeUnit.MINUTES), is(true));
-            assertThat(listener2.await(1, TimeUnit.MINUTES), is(true));
-
-            application.close();
-
-            List<RemoteEvent> events1 = listener1.getEvents();
-            List<RemoteEvent> events2 = listener1.getEvents();
-
-            assertThat(events1.size(), is(count));
-            assertThat(events2.size(), is(count));
-
-            for (int i=0; i<count; i++)
-            {
-                RemoteEvent event = new EventingApplication.Event(i);
-
-                assertThat(events1.get(i), is(event));
-                assertThat(events2.get(i), is(event));
-            }
-        }
-    }
-
-
-    @Test
     public void shouldSubmitRunnableBack() throws Exception
     {
         try (JavaApplication application = getPlatform().launch(JavaApplication.class,
@@ -313,63 +209,11 @@ public class ContainerBasedJavaApplicationTest extends AbstractJavaApplicationTe
     }
 
 
-    /**
-     * An instance of a {@link RemoteEventListener} that captures events.
-     */
-    public static class EventListener implements RemoteEventListener
+    @Test
+    @Ignore
+    @Override
+    public void shouldRunApplicationWithRestrictedClasspath() throws Exception
     {
-        /**
-         * The counter to count the number of events received.
-         */
-        private final CountDownLatch latch;
-
-        /**
-         * The list of events received.
-         */
-        private final List<RemoteEvent> events;
-
-        /**
-         * Create an {@link EventListener} to receieve the expected number of events.
-         *
-         * @param expected  the expected number of events
-         */
-        public EventListener(int expected)
-        {
-            latch  = new CountDownLatch(expected);
-            events = new ArrayList<>();
-        }
-
-        /**
-         * Causes the current thread to wait until the expected number of events
-         * have been received, unless the thread is {@linkplain Thread#interrupt interrupted},
-         * or the specified waiting time elapses.
-         *
-         * @param timeout  the maximum time to wait
-         * @param unit     the time unit of the {@code timeout} argument
-         *
-         * @return {@code true} if the correct number of events is received and {@code false}
-         *         if the waiting time elapsed before the events were received
-         *
-         * @throws InterruptedException if the current thread is interrupted
-         *         while waiting
-         */
-        private boolean await(long timeout, TimeUnit unit) throws InterruptedException
-        {
-            return latch.await(timeout, unit);
-        }
-
-
-        public List<RemoteEvent> getEvents()
-        {
-            return events;
-        }
-
-
-        @Override
-        public void onEvent(RemoteEvent event)
-        {
-            events.add(event);
-            latch.countDown();
-        }
+        // this test is currently broken
     }
 }

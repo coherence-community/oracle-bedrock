@@ -29,12 +29,15 @@ import com.oracle.tools.runtime.concurrent.RemoteCallable;
 import com.oracle.tools.runtime.concurrent.RemoteChannel;
 import com.oracle.tools.runtime.concurrent.RemoteEvent;
 import com.oracle.tools.runtime.concurrent.RemoteEventListener;
-import com.oracle.tools.runtime.concurrent.RemoteEventStream;
 import com.oracle.tools.runtime.concurrent.RemoteRunnable;
+import com.oracle.tools.runtime.concurrent.options.StreamName;
+
 import com.oracle.tools.runtime.java.JavaApplication;
+
 import com.oracle.tools.util.FutureCompletionListener;
 
 import java.util.Random;
+
 import java.util.concurrent.CountDownLatch;
 
 /**
@@ -47,24 +50,29 @@ import java.util.concurrent.CountDownLatch;
  */
 public class EventingApplication
 {
+    /**
+     * Field description
+     */
+    public static final Object WAITER = new Object();
+    private static Random      random = new Random(System.currentTimeMillis());
+
+    /**
+     * Field description
+     */
     @RemoteChannel.Inject
     public static RemoteChannel channel;
 
-    public static final Object WAITER = new Object();
-
-    private static Random random = new Random(System.currentTimeMillis());
 
     public static void main(String[] args) throws Exception
     {
         if (args.length >= 2)
         {
-            String            streamName = args[0];
-            int               count      = Integer.parseInt(args[1]);
-            RemoteEventStream stream     = channel.ensureEventStream(streamName);
+            String streamName = args[0];
+            int    count      = Integer.parseInt(args[1]);
 
-            for (int i=0; i<count; i++)
+            for (int i = 0; i < count; i++)
             {
-                stream.fireEvent(new Event(i));
+                channel.raise(new Event(i), StreamName.of(streamName));
                 Thread.sleep(random.nextInt(100) + 10);
             }
         }
@@ -82,7 +90,9 @@ public class EventingApplication
      * @param application  the application to fire the event from
      * @param event        the event to fire
      */
-    public static void fireEvent(JavaApplication application, String streamName, RemoteEvent event)
+    public static void fireEvent(JavaApplication application,
+                                 String          streamName,
+                                 RemoteEvent     event)
     {
         application.submit(new FireEvent(streamName, event));
     }
@@ -96,9 +106,39 @@ public class EventingApplication
      * @param incomingStreamName  the name of the stream to listen to
      * @param outgoingStreamName  the name of the stream to fire the event back on
      */
-    public static void listen(JavaApplication application, String incomingStreamName, String outgoingStreamName)
+    public static void listen(JavaApplication application,
+                              String          incomingStreamName,
+                              String          outgoingStreamName)
     {
         application.submit(new Listen(incomingStreamName, outgoingStreamName));
+    }
+
+
+    /**
+     * A {@link RemoteRunnable} that counts down a {@link CountDownLatch}.
+     */
+    public static class CountDownRunnable implements RemoteRunnable
+    {
+        /**
+         * Field description
+         */
+        public static CountDownLatch latch;
+
+
+        /**
+         * Constructs ...
+         *
+         */
+        public CountDownRunnable()
+        {
+        }
+
+
+        @Override
+        public void run()
+        {
+            latch.countDown();
+        }
     }
 
 
@@ -111,6 +151,7 @@ public class EventingApplication
          * The identifier of this event.
          */
         private int id;
+
 
         /**
          * Create an {@link Event} with the specified identifier.
@@ -141,6 +182,7 @@ public class EventingApplication
             {
                 return true;
             }
+
             if (o == null || getClass() != o.getClass())
             {
                 return false;
@@ -163,9 +205,7 @@ public class EventingApplication
         @Override
         public String toString()
         {
-            return "Event(" +
-                   "id=" + id +
-                   ')';
+            return "Event(" + "id=" + id + ')';
         }
     }
 
@@ -176,22 +216,48 @@ public class EventingApplication
      */
     public static class FireEvent implements RemoteRunnable
     {
-        private String streamName;
-
+        private String      streamName;
         private RemoteEvent event;
 
-        public FireEvent(String streamName, RemoteEvent event)
+
+        /**
+         * Constructs ...
+         *
+         *
+         * @param streamName
+         * @param event
+         */
+        public FireEvent(String      streamName,
+                         RemoteEvent event)
         {
             this.streamName = streamName;
             this.event      = event;
         }
 
+
         @Override
         public void run()
         {
-            EventingApplication.channel
-                    .ensureEventStream(streamName)
-                    .fireEvent(event);
+            EventingApplication.channel.raise(event, StreamName.of(streamName));
+        }
+    }
+
+
+    /**
+     * A simple {@link RemoteCallable}.
+     */
+    public static class GetIntCallable implements RemoteCallable<Integer>
+    {
+        /**
+         * Field description
+         */
+        public static int value = -1;
+
+
+        @Override
+        public Integer call() throws Exception
+        {
+            return value;
         }
     }
 
@@ -204,14 +270,23 @@ public class EventingApplication
     public static class Listen implements RemoteCallable<Object>
     {
         private String incomingStreamName;
-
         private String outgoingStreamName;
 
-        public Listen(String incomingStreamName, String outgoingStreamName)
+
+        /**
+         * Constructs ...
+         *
+         *
+         * @param incomingStreamName
+         * @param outgoingStreamName
+         */
+        public Listen(String incomingStreamName,
+                      String outgoingStreamName)
         {
             this.incomingStreamName = incomingStreamName;
             this.outgoingStreamName = outgoingStreamName;
         }
+
 
         @Override
         public Object call()
@@ -222,22 +297,20 @@ public class EventingApplication
 
             System.err.println("*** Listening to " + incomingStreamName + " firing back on " + outgoingStreamName);
 
-            System.err.println("Channel=" + EventingApplication.channel);
+            RemoteChannel channel = EventingApplication.channel;
 
-            RemoteEventStream stream = EventingApplication.channel.ensureEventStream(incomingStreamName);
-            System.err.println("InStream=" + stream);
+            System.err.println("Channel=" + channel);
 
-            stream.addEventListener(new RemoteEventListener()
-                    {
-                        @Override
-                        public void onEvent(RemoteEvent event)
-                        {
-                            System.err.println("*** Recieved event " + event + " sending back on " + outgoingStreamName);
-                            EventingApplication.channel
-                                    .ensureEventStream(outgoingStreamName)
-                                    .fireEvent(event);
-                        }
-                    });
+            channel.addListener(new RemoteEventListener()
+                                {
+                                    @Override
+                                    public void onEvent(RemoteEvent event)
+                                    {
+                                        System.err.println("*** Received event " + event + " sending back on "
+                                                           + outgoingStreamName);
+                                        EventingApplication.channel.raise(event, StreamName.of(outgoingStreamName));
+                                    }
+                                },StreamName.of(incomingStreamName));
 
             return null;
         }
@@ -262,20 +335,6 @@ public class EventingApplication
         }
     }
 
-    /**
-     * A simple {@link RemoteCallable}.
-     */
-    public static class GetIntCallable implements RemoteCallable<Integer>
-    {
-        public static int value = -1;
-
-        @Override
-        public Integer call() throws Exception
-        {
-            return value;
-        }
-    }
-
 
     /**
      * A {@link RemoteRunnable} that submits another {@link RemoteRunnable}.
@@ -286,25 +345,6 @@ public class EventingApplication
         public void run()
         {
             EventingApplication.channel.submit(new CountDownRunnable());
-        }
-    }
-
-
-    /**
-     * A {@link RemoteRunnable} that counts down a {@link CountDownLatch}.
-     */
-    public static class CountDownRunnable implements RemoteRunnable
-    {
-        public static CountDownLatch latch;
-
-        public CountDownRunnable()
-        {
-        }
-
-        @Override
-        public void run()
-        {
-            latch.countDown();
         }
     }
 }

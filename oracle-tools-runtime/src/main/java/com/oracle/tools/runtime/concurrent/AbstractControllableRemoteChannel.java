@@ -25,6 +25,12 @@
 
 package com.oracle.tools.runtime.concurrent;
 
+import com.oracle.tools.Option;
+import com.oracle.tools.Options;
+
+import com.oracle.tools.runtime.concurrent.options.StreamName;
+
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 /**
@@ -45,7 +51,12 @@ public abstract class AbstractControllableRemoteChannel implements ControllableR
     /**
      * The {@link RemoteChannelListener}s for the {@link ControllableRemoteChannel}.
      */
-    private CopyOnWriteArraySet<RemoteChannelListener> listeners;
+    protected CopyOnWriteArraySet<RemoteChannelListener> channelListeners;
+
+    /**
+     * The {@link RemoteEventListener}s for the {@link RemoteChannel} according to their {@link StreamName}.
+     */
+    protected ConcurrentHashMap<StreamName, CopyOnWriteArraySet<RemoteEventListener>> eventListenersByStreamName;
 
 
     /**
@@ -53,8 +64,9 @@ public abstract class AbstractControllableRemoteChannel implements ControllableR
      */
     public AbstractControllableRemoteChannel()
     {
-        isOpen    = false;
-        listeners = new CopyOnWriteArraySet<RemoteChannelListener>();
+        isOpen                     = false;
+        channelListeners           = new CopyOnWriteArraySet<>();
+        eventListenersByStreamName = new ConcurrentHashMap<>();
     }
 
 
@@ -78,7 +90,7 @@ public abstract class AbstractControllableRemoteChannel implements ControllableR
 
             onClose();
 
-            for (RemoteChannelListener listener : listeners)
+            for (RemoteChannelListener listener : channelListeners)
             {
                 try
                 {
@@ -107,19 +119,46 @@ public abstract class AbstractControllableRemoteChannel implements ControllableR
     @Override
     public synchronized void addListener(RemoteChannelListener listener)
     {
-        listeners.add(listener);
+        channelListeners.add(listener);
     }
 
 
-    /**
-     * Obtain an {@link Iterable} over the currently known {@link RemoteChannelListener}s
-     * on the {@link ControllableRemoteChannel}.
-     *
-     * @return  an {@link Iterable} over {@link RemoteChannelListener}s
-     */
-    protected Iterable<RemoteChannelListener> getListeners()
+    @Override
+    public void addListener(RemoteEventListener listener,
+                            Option...           options)
     {
-        return listeners;
+        Options    listenerOptions = Options.from(options);
+
+        StreamName streamName      = listenerOptions.get(StreamName.class);
+
+        eventListenersByStreamName.compute(streamName,
+            (name, eventListeners) -> {
+                if (eventListeners == null)
+                {
+                    eventListeners = new CopyOnWriteArraySet<>();
+                }
+
+                eventListeners.add(listener);
+
+                return eventListeners;
+            });
+    }
+
+
+    @Override
+    public void removeListener(RemoteEventListener listener,
+                               Option...           options)
+    {
+        Options    listenerOptions = Options.from(options);
+
+        StreamName streamName      = listenerOptions.get(StreamName.class);
+
+        eventListenersByStreamName.computeIfPresent(streamName,
+            (name, eventListeners) -> {
+                eventListeners.remove(listener);
+
+                return eventListeners.size() == 0 ? null : eventListeners;
+            });
     }
 
 

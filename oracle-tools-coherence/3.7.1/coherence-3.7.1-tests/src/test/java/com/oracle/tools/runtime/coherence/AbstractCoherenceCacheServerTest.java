@@ -26,10 +26,14 @@
 package com.oracle.tools.runtime.coherence;
 
 import com.oracle.tools.junit.AbstractTest;
+
 import com.oracle.tools.matchers.MapMatcher;
+
 import com.oracle.tools.options.Diagnostics;
+
 import com.oracle.tools.runtime.LocalPlatform;
 import com.oracle.tools.runtime.Platform;
+
 import com.oracle.tools.runtime.coherence.callables.GetClusterName;
 import com.oracle.tools.runtime.coherence.callables.GetClusterSize;
 import com.oracle.tools.runtime.coherence.callables.GetLocalMemberId;
@@ -39,22 +43,40 @@ import com.oracle.tools.runtime.coherence.options.LocalHost;
 import com.oracle.tools.runtime.coherence.options.OperationalOverride;
 import com.oracle.tools.runtime.coherence.options.RoleName;
 import com.oracle.tools.runtime.coherence.options.SiteName;
+
 import com.oracle.tools.runtime.concurrent.RemoteEvent;
 import com.oracle.tools.runtime.concurrent.RemoteEventListener;
+import com.oracle.tools.runtime.concurrent.options.StreamName;
+
 import com.oracle.tools.runtime.console.SystemApplicationConsole;
+
 import com.oracle.tools.runtime.java.features.JmxFeature;
 import com.oracle.tools.runtime.java.options.ClassName;
 import com.oracle.tools.runtime.java.options.SystemProperty;
+
 import com.oracle.tools.runtime.network.AvailablePortIterator;
+
 import com.oracle.tools.runtime.options.Discriminator;
+
 import com.oracle.tools.util.Capture;
+
 import com.tangosol.net.NamedCache;
+
 import com.tangosol.util.aggregator.LongSum;
+
 import com.tangosol.util.extractor.IdentityExtractor;
+
 import com.tangosol.util.filter.PresentFilter;
+
 import org.junit.Test;
 
-import javax.management.ObjectName;
+import static com.oracle.tools.deferred.DeferredHelper.invoking;
+
+import static com.oracle.tools.deferred.Eventually.assertThat;
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
+
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -62,13 +84,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-import static com.oracle.tools.deferred.DeferredHelper.invoking;
-import static com.oracle.tools.deferred.Eventually.assertThat;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.notNullValue;
+import javax.management.ObjectName;
 
 /**
  * Functional Tests for {@link CoherenceCacheServer}s.
@@ -333,7 +353,7 @@ public abstract class AbstractCoherenceCacheServerTest extends AbstractTest
                                                            LocalHost.only(),
                                                            SystemApplicationConsole.builder()))
         {
-            server.ensureEventStream(name).addEventListener(listener);
+            server.addListener(listener, StreamName.of(name));
 
             CustomServer.fireEvent(server, name, event);
 
@@ -344,6 +364,7 @@ public abstract class AbstractCoherenceCacheServerTest extends AbstractTest
         }
 
     }
+
 
     /**
      * An instance of a {@link RemoteEventListener} that captures events.
@@ -360,6 +381,7 @@ public abstract class AbstractCoherenceCacheServerTest extends AbstractTest
          */
         private final List<RemoteEvent> events;
 
+
         /**
          * Create an {@link EventListener} to receieve the expected number of events.
          *
@@ -370,6 +392,7 @@ public abstract class AbstractCoherenceCacheServerTest extends AbstractTest
             latch  = new CountDownLatch(expected);
             events = new ArrayList<>();
         }
+
 
         /**
          * Causes the current thread to wait until the expected number of events
@@ -385,7 +408,8 @@ public abstract class AbstractCoherenceCacheServerTest extends AbstractTest
          * @throws InterruptedException if the current thread is interrupted
          *         while waiting
          */
-        private boolean await(long timeout, TimeUnit unit) throws InterruptedException
+        private boolean await(long     timeout,
+                              TimeUnit unit) throws InterruptedException
         {
             return latch.await(timeout, unit);
         }

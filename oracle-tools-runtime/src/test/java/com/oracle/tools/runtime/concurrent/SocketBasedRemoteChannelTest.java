@@ -41,7 +41,7 @@ import static org.mockito.Mockito.mock;
  *
  * @author Jonathan Knight
  */
-public class RemoteChannelTest
+public class SocketBasedRemoteChannelTest
 {
     @Test
     public void shouldInjectIntoPublicStaticField() throws Exception
