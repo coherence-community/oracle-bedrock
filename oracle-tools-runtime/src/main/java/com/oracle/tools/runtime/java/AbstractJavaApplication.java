@@ -42,7 +42,7 @@ import com.oracle.tools.runtime.concurrent.callable.RemoteMethodInvocation;
 
 import com.oracle.tools.util.CompletionListener;
 import com.oracle.tools.util.FutureCompletionListener;
-import com.oracle.tools.util.ReflectionHelper;
+import com.oracle.tools.util.ProxyHelper;
 
 import net.sf.cglib.proxy.MethodInterceptor;
 import net.sf.cglib.proxy.MethodProxy;
@@ -167,7 +167,7 @@ public abstract class AbstractJavaApplication<P extends JavaApplicationProcess> 
                              RemoteCallable<T>                  instanceProducer,
                              RemoteMethodInvocation.Interceptor interceptor)
     {
-        return ReflectionHelper.createProxyOf(classToProxy, new ProxyMethodInterceptor(instanceProducer, interceptor));
+        return ProxyHelper.createProxyOf(classToProxy, new ProxyMethodInterceptor(instanceProducer, interceptor));
     }
 
 

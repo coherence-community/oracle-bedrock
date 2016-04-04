@@ -38,6 +38,7 @@ import com.oracle.tools.util.ExponentialIterator;
 import com.oracle.tools.util.FibonacciIterator;
 import com.oracle.tools.util.MappingIterator;
 import com.oracle.tools.util.PerpetualIterator;
+import com.oracle.tools.util.ProxyHelper;
 import com.oracle.tools.util.RandomIterator;
 import com.oracle.tools.util.ReflectionHelper;
 
@@ -465,7 +466,7 @@ public class DeferredHelper
             // FUTURE: we should raise a soft exception here if the deferred
             // class is final or perhaps native as we can't proxy them.
 
-            T proxy = ReflectionHelper.createProxyOf(deferred.getDeferredClass(), new DeferredMethodInteceptor());
+            T proxy = ProxyHelper.createProxyOf(deferred.getDeferredClass(), new DeferredMethodInteceptor());
 
             // set the current deferred as a thread local so that
             // we can "eventually" evaluate and return it.
@@ -1106,7 +1107,7 @@ public class DeferredHelper
             {
                 // as the return type is an object type, create a proxy of it
                 // so we can continue to capture and defer method calls
-                return ReflectionHelper.createProxyOf(resultType, new DeferredMethodInteceptor());
+                return ProxyHelper.createProxyOf(resultType, new DeferredMethodInteceptor());
             }
         }
     }
