@@ -207,13 +207,4 @@ public class ContainerBasedJavaApplicationTest extends AbstractJavaApplicationTe
             assertThat(result, is(1234));
         }
     }
-
-
-    @Test
-    @Ignore
-    @Override
-    public void shouldRunApplicationWithRestrictedClasspath() throws Exception
-    {
-        // this test is currently broken
-    }
 }

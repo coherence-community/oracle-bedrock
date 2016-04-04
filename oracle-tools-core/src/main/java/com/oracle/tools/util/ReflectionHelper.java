@@ -25,13 +25,6 @@
 
 package com.oracle.tools.util;
 
-import net.sf.cglib.proxy.Callback;
-import net.sf.cglib.proxy.Enhancer;
-import net.sf.cglib.proxy.MethodInterceptor;
-
-import org.objenesis.Objenesis;
-import org.objenesis.ObjenesisStd;
-
 import java.lang.annotation.Annotation;
 
 import java.lang.reflect.Constructor;
@@ -286,54 +279,6 @@ public class ReflectionHelper
         }
 
         return parameterTypes;
-    }
-
-
-    /**
-     * Creates a dynamic proxy of the specified {@link Object} routing all
-     * method calls to the specified {@link MethodInterceptor}.
-     *
-     * @param object       the {@link Object} to proxy
-     * @param interceptor  the {@link MethodInterceptor}
-     *
-     * @return a dynamic proxy of the specified {@link Object}
-     */
-    @SuppressWarnings("unchecked")
-    public static <T> T createProxyOf(T                 object,
-                                      MethodInterceptor interceptor)
-    {
-        return (T) createProxyOf(object.getClass(), interceptor);
-    }
-
-
-    /**
-     * Creates a dynamic proxy of the specified {@link Class} routing all
-     * method calls to the specified {@link MethodInterceptor}.
-     *
-     * @param clazz        the {@link Class} to proxy
-     * @param interceptor  the {@link MethodInterceptor}
-     *
-     * @return a dynamic proxy of the specified {@link Class}
-     */
-    @SuppressWarnings("unchecked")
-    public static <T> T createProxyOf(Class<T>          clazz,
-                                      MethodInterceptor interceptor)
-    {
-        // use a cglib enhancer to create the proxy
-        Enhancer enhancer = new Enhancer();
-
-        enhancer.setSuperclass(clazz);
-        enhancer.setCallbackType(interceptor.getClass());
-
-        Class<T> proxiedClass = (Class<T>) enhancer.createClass();
-
-        Enhancer.registerCallbacks(proxiedClass, new Callback[] {interceptor});
-
-        Objenesis objenesis = new ObjenesisStd();
-
-        T         proxy     = (T) objenesis.newInstance(proxiedClass);
-
-        return proxy;
     }
 
 
