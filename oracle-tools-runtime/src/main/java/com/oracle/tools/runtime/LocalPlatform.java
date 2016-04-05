@@ -184,9 +184,9 @@ public class LocalPlatform extends AbstractPlatform<LocalPlatform>
 
     @Override
     protected <A extends Application,
-               B extends ApplicationLauncher<A, LocalPlatform>> B getApplicationBuilder(Class<A>     applicationClass,
-                                                                                        MetaClass<A> metaClass,
-                                                                                        Options      options) throws UnsupportedOperationException
+               B extends ApplicationLauncher<A, LocalPlatform>> B getApplicationLauncher(Class<A>     applicationClass,
+                                                                                         MetaClass<A> metaClass,
+                                                                                         Options      options) throws UnsupportedOperationException
     {
         if (JavaApplication.class.isAssignableFrom(applicationClass))
         {

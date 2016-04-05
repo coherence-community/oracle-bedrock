@@ -28,6 +28,8 @@ package com.oracle.tools.runtime;
 import com.oracle.tools.Option;
 import com.oracle.tools.Options;
 
+import com.oracle.tools.extensible.AbstractExtensible;
+
 import com.oracle.tools.runtime.annotations.PreferredMetaClass;
 
 import com.oracle.tools.runtime.options.Executable;
@@ -45,7 +47,7 @@ import com.oracle.tools.util.ReflectionHelper;
  *
  * @param <P>  the type of {@link Platform} used by {@link ApplicationLauncher}s
  */
-public abstract class AbstractPlatform<P extends Platform> implements Platform
+public abstract class AbstractPlatform<P extends Platform> extends AbstractExtensible implements Platform
 {
     /**
      * The name of this {@link Platform}.
@@ -67,6 +69,8 @@ public abstract class AbstractPlatform<P extends Platform> implements Platform
     public AbstractPlatform(String    name,
                             Option... options)
     {
+        super();
+
         this.name    = name;
         this.options = new Options(options);
     }
@@ -141,23 +145,23 @@ public abstract class AbstractPlatform<P extends Platform> implements Platform
         }
 
         // obtain the application launcher for the class of application
-        ApplicationLauncher<A, P> builder = getApplicationBuilder(applicationClass, metaClass, launchOptions);
+        ApplicationLauncher<A, P> launcher = getApplicationLauncher(applicationClass, metaClass, launchOptions);
 
-        if (builder == null)
+        if (launcher == null)
         {
-            throw new IllegalArgumentException("Can't determine ApplicationBuilder for " + applicationClass + " using "
-                                               + launchOptions);
+            throw new IllegalArgumentException("Can't determine ApplicationLauncher for " + applicationClass
+                                               + " using " + launchOptions);
         }
         else
         {
-            // add the meta-class and application builder as options
+            // add the meta-class and application launcher as options
             Options builderOptions = new Options(options);
 
             // add the meta-class as a launcher option (if and only if it's not already defined)
             builderOptions.addIfAbsent(metaClass);
 
             // now launch the application
-            return builder.launch(builderOptions);
+            return launcher.launch(builderOptions);
         }
     }
 
@@ -179,8 +183,8 @@ public abstract class AbstractPlatform<P extends Platform> implements Platform
      * @return  an {@link ApplicationLauncher} capable of launching the {@link Class} of {@link Application}
      */
     abstract protected <A extends Application,
-                        B extends ApplicationLauncher<A, P>> B getApplicationBuilder(Class<A>     applicationClass,
-                                                                                     MetaClass<A> metaClass,
-                                                                                     Options      options)
-                                                                                    throws UnsupportedOperationException;
+                        B extends ApplicationLauncher<A, P>> B getApplicationLauncher(Class<A>     applicationClass,
+                                                                                      MetaClass<A> metaClass,
+                                                                                      Options      options)
+                                                                                      throws UnsupportedOperationException;
 }

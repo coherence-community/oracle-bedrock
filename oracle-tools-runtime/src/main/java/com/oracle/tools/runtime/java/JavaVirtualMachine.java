@@ -215,9 +215,9 @@ public class JavaVirtualMachine extends AbstractPlatform<JavaVirtualMachine>
 
     @Override
     protected <A extends Application,
-               B extends ApplicationLauncher<A, JavaVirtualMachine>> B getApplicationBuilder(Class<A>     applicationClass,
-                                                                                             MetaClass<A> metaClass,
-                                                                                             Options      options) throws UnsupportedOperationException
+               B extends ApplicationLauncher<A, JavaVirtualMachine>> B getApplicationLauncher(Class<A>     applicationClass,
+                                                                                              MetaClass<A> metaClass,
+                                                                                              Options      options) throws UnsupportedOperationException
     {
         if (JavaApplication.class.isAssignableFrom(applicationClass))
         {

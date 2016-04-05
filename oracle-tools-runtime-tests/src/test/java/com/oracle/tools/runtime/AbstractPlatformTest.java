@@ -99,7 +99,7 @@ public class AbstractPlatformTest
 //
 //        stub.getOptions().add(supplier);
 //
-//        when(supplier.getApplicationBuilder(same(platform), eq(Application.class))).thenReturn(null);
+//        when(supplier.getApplicationLauncher(same(platform), eq(Application.class))).thenReturn(null);
 //
 //        Application result = platform.launch(Application.class);
 //

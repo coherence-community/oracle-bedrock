@@ -145,9 +145,9 @@ public class RemotePlatform extends AbstractPlatform<RemotePlatform>
 
     @Override
     protected <A extends Application,
-               B extends ApplicationLauncher<A, RemotePlatform>> B getApplicationBuilder(Class<A>     applicationClass,
-                                                                                         MetaClass<A> metaClass,
-                                                                                         Options      options) throws UnsupportedOperationException
+               B extends ApplicationLauncher<A, RemotePlatform>> B getApplicationLauncher(Class<A>     applicationClass,
+                                                                                          MetaClass<A> metaClass,
+                                                                                          Options      options) throws UnsupportedOperationException
     {
         if (JavaApplication.class.isAssignableFrom(applicationClass))
         {
