@@ -80,18 +80,13 @@ public abstract class AbstractJavaApplication<P extends JavaApplicationProcess> 
     }
 
 
-    /**
-     * Submits a {@link Callable} for remote execution by the
-     * {@link Application} and blocks waiting for the result.
-     *
-     * @param callable  the {@link Callable} to execute
-     * @param <T>       the type of the result
-     */
-    public <T> T submit(RemoteCallable<T> callable)
+    @Override
+    public <T> T submit(RemoteCallable<T> callable,
+                        Option...         options)
     {
         FutureCompletionListener<T> future = new FutureCompletionListener<>();
 
-        submit(callable, future);
+        submit(callable, future, options);
 
         try
         {

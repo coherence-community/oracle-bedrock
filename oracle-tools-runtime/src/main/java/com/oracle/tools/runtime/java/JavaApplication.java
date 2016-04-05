@@ -25,6 +25,7 @@
 
 package com.oracle.tools.runtime.java;
 
+import com.oracle.tools.Option;
 import com.oracle.tools.Options;
 
 import com.oracle.tools.runtime.Application;
@@ -126,9 +127,12 @@ public interface JavaApplication extends Application, RemoteChannel
      * {@link JavaApplication}, waiting for the result to be returned.
      *
      * @param callable  the {@link RemoteCallable} to be executed
+     * @param options   the {@link Option}s for the {@link RemoteCallable}
+     *
      * @param <T>       the type of the result
      */
-    public <T> T submit(RemoteCallable<T> callable);
+    public <T> T submit(RemoteCallable<T> callable,
+                        Option...         options);
 
 
     /**
