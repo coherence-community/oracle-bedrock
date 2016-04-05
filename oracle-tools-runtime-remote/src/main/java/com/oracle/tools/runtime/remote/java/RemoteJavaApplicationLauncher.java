@@ -572,16 +572,18 @@ public class RemoteJavaApplicationLauncher extends AbstractRemoteApplicationLaun
 
         @Override
         public <T> void submit(RemoteCallable<T>     callable,
-                               CompletionListener<T> listener) throws IllegalStateException
+                               CompletionListener<T> listener,
+                               Option...             options) throws IllegalStateException
         {
-            remoteChannel.submit(callable, listener);
+            remoteChannel.submit(callable, listener, options);
         }
 
 
         @Override
-        public void submit(RemoteRunnable runnable) throws IllegalStateException
+        public void submit(RemoteRunnable runnable,
+                           Option...      options) throws IllegalStateException
         {
-            remoteChannel.submit(runnable);
+            remoteChannel.submit(runnable, options);
         }
 
 

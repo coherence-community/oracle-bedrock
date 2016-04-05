@@ -371,7 +371,8 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
 
     @Override
     public <T> void submit(RemoteCallable<T>     callable,
-                           CompletionListener<T> listener) throws IllegalStateException
+                           CompletionListener<T> listener,
+                           Option...             options) throws IllegalStateException
     {
         if (isOpen())
         {
@@ -395,7 +396,8 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
 
 
     @Override
-    public void submit(RemoteRunnable runnable) throws IllegalStateException
+    public void submit(RemoteRunnable runnable,
+                       Option...      options) throws IllegalStateException
     {
         if (isOpen())
         {

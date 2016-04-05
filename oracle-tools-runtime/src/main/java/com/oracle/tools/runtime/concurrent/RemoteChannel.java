@@ -66,13 +66,15 @@ public interface RemoteChannel extends Closeable
      * @param callable  the {@link RemoteCallable} to be executed
      * @param listener  a {@link CompletionListener} to be notified upon
      *                  completed execution of the {@link RemoteCallable}
+     * @param options   the {@link Option}s for the {@link RemoteCallable}
      * @param <T>       the return type of the {@link RemoteCallable}
      *
      * @throws IllegalStateException  if the {@link RemoteChannel} is closed or
      *                                is unable to accept the submission
      */
     public <T> void submit(RemoteCallable<T>     callable,
-                           CompletionListener<T> listener) throws IllegalStateException;
+                           CompletionListener<T> listener,
+                           Option... options) throws IllegalStateException;
 
 
     /**
@@ -80,11 +82,12 @@ public interface RemoteChannel extends Closeable
      * {@link RemoteChannel}.
      *
      * @param runnable  the {@link RemoteRunnable} to be executed
+     * @param options   the {@link Option}s for the {@link RemoteRunnable}
      *
      * @throws IllegalStateException  if the {@link RemoteChannel} is closed or
      *                                is unable to accept the submission
      */
-    public void submit(RemoteRunnable runnable) throws IllegalStateException;
+    public void submit(RemoteRunnable runnable, Option... options) throws IllegalStateException;
 
 
     /**

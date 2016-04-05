@@ -669,6 +669,9 @@ reverse chronological order.
     the WorkingDirectory option to allow more flexible ways to specify the
     value to use to determine the working directory when realizing an application.
 
+*   [ORACLETOOLS-304](https://java.net/jira/browse/ORACLETOOLS-304): Introduced
+    Options... parameters for RemoteChannel.submit(...) methods.
+
 <h4>oracle-tools-runtime-jacoco</h4>
 
 *   [ORACLETOOLS-290](https://java.net/jira/browse/ORACLETOOLS-290): Introduced

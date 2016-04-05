@@ -778,7 +778,8 @@ public class ContainerBasedJavaApplicationLauncher<A extends JavaApplication>
 
         @Override
         public <T> void submit(RemoteCallable<T>           callable,
-                               final CompletionListener<T> listener)
+                               final CompletionListener<T> listener,
+                               Option...                   options)
         {
             if (applicationController == null)
             {
@@ -800,7 +801,8 @@ public class ContainerBasedJavaApplicationLauncher<A extends JavaApplication>
 
 
         @Override
-        public void submit(RemoteRunnable runnable) throws IllegalStateException
+        public void submit(RemoteRunnable runnable,
+                           Option...      options) throws IllegalStateException
         {
             if (applicationController == null)
             {

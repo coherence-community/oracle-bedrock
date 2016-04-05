@@ -3,7 +3,7 @@
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * The contents of this file are subject to the terms and conditions of 
+ * The contents of this file are subject to the terms and conditions of
  * the Common Development and Distribution License 1.0 (the "License").
  *
  * You may not use this file except in compliance with the License.
@@ -125,16 +125,18 @@ public abstract class AbstractJavaApplication<P extends JavaApplicationProcess> 
 
     @Override
     public <T> void submit(RemoteCallable<T>     callable,
-                           CompletionListener<T> listener)
+                           CompletionListener<T> listener,
+                           Option...             options)
     {
-        process.submit(callable, listener);
+        process.submit(callable, listener, options);
     }
 
 
     @Override
-    public void submit(RemoteRunnable runnable) throws IllegalStateException
+    public void submit(RemoteRunnable runnable,
+                       Option...      options) throws IllegalStateException
     {
-        process.submit(runnable);
+        process.submit(runnable, options);
     }
 
 
