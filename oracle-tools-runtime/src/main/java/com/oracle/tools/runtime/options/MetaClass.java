@@ -56,6 +56,7 @@ public interface MetaClass<A extends Application> extends Option
     Class<? extends A> getImplementationClass(Platform platform,
                                               Options  options);
 
+
     /**
      * Invoked by a {@link Platform} prior to an {@link Application} being launched, allowing
      * an implementation to override and customize the provided {@link Options}, arguments and properties.
@@ -63,8 +64,8 @@ public interface MetaClass<A extends Application> extends Option
      * @param platform   the {@link Platform}
      * @param options    the {@link Options}
      */
-    void onBeforeLaunch(Platform platform,
-                        Options  options);
+    void onLaunching(Platform platform,
+                     Options  options);
 
 
     /**
@@ -76,7 +77,7 @@ public interface MetaClass<A extends Application> extends Option
      * @param application   the {@link Application}
      * @param options       the {@link Options}
      */
-    void onAfterLaunch(Platform    platform,
-                       Application application,
-                       Options     options);
+    void onLaunched(Platform    platform,
+                    Application application,
+                    Options     options);
 }

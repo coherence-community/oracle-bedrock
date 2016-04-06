@@ -69,8 +69,8 @@ public class JacocoProfile implements Profile, Option
 
 
     @Override
-    public void onBeforeLaunch(Platform platform,
-                               Options  options)
+    public void onLaunching(Platform platform,
+                            Options  options)
     {
         MetaClass metaClass = options.get(MetaClass.class);
 
@@ -95,18 +95,18 @@ public class JacocoProfile implements Profile, Option
 
 
     @Override
-    public void onAfterLaunch(Platform    platform,
-                              Application application,
-                              Options     options)
+    public void onLaunched(Platform    platform,
+                           Application application,
+                           Options     options)
     {
         // there's nothing to after an application has been realized
     }
 
 
     @Override
-    public void onBeforeClose(Platform    platform,
-                              Application application,
-                              Options     options)
+    public void onClosing(Platform    platform,
+                          Application application,
+                          Options     options)
     {
         // prior to closing a JavaApplication we request the JaCoCo telemetry to be dumped
         if (application instanceof JavaApplication)

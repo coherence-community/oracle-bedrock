@@ -216,7 +216,6 @@ public abstract class AbstractApplication<P extends ApplicationProcess> extends 
     @Override
     public void close(Option... options)
     {
-
         // ------ notify any ApplicationListener-based Features (about closing) ------
 
         for (ApplicationListener listener : getInstancesOf(ApplicationListener.class))
@@ -228,7 +227,7 @@ public abstract class AbstractApplication<P extends ApplicationProcess> extends 
 
         for (Profile profile : getOptions().getInstancesOf(Profile.class))
         {
-            profile.onBeforeClose(platform, this, getOptions());
+            profile.onClosing(platform, this, getOptions());
         }
 
         // ------ notify ApplicationListeners-based Options (about closing) ------

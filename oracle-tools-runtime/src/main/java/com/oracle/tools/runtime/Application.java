@@ -29,6 +29,7 @@ import com.oracle.tools.Option;
 import com.oracle.tools.Options;
 
 import com.oracle.tools.extensible.Extensible;
+
 import com.oracle.tools.options.Timeout;
 
 import com.oracle.tools.runtime.annotations.PreferredMetaClass;
@@ -183,17 +184,17 @@ public interface Application extends Extensible, Closeable
 
 
         @Override
-        public void onBeforeLaunch(Platform platform,
-                                   Options  options)
+        public void onLaunching(Platform platform,
+                                Options  options)
         {
             // there's nothing to do before launching the application
         }
 
 
         @Override
-        public void onAfterLaunch(Platform    platform,
-                                  Application application,
-                                  Options     options)
+        public void onLaunched(Platform    platform,
+                               Application application,
+                               Options     options)
         {
             // there's nothing to do after launching the application
         }

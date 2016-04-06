@@ -158,17 +158,17 @@ public interface JavaApplication extends Application, RemoteChannel
 
 
         @Override
-        public void onBeforeLaunch(Platform platform,
-                                   Options  options)
+        public void onLaunching(Platform platform,
+                                Options  options)
         {
             // there's nothing to do before launching the application
         }
 
 
         @Override
-        public void onAfterLaunch(Platform    platform,
-                                  Application application,
-                                  Options     options)
+        public void onLaunched(Platform    platform,
+                               Application application,
+                               Options     options)
         {
             // there's nothing to do after launching the application
         }

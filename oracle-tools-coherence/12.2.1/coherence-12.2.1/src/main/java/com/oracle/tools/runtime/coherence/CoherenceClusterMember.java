@@ -234,8 +234,8 @@ public interface CoherenceClusterMember extends JavaApplication
 
 
         @Override
-        public void onBeforeLaunch(Platform platform,
-                                   Options  options)
+        public void onLaunching(Platform platform,
+                                Options  options)
         {
             // automatically define the default cache server as the default class
             options.addIfAbsent(ClassName.of(DEFAULT_CACHE_SERVER_CLASSNAME));
@@ -305,9 +305,9 @@ public interface CoherenceClusterMember extends JavaApplication
 
 
         @Override
-        public void onAfterLaunch(Platform    platform,
-                                  Application application,
-                                  Options     options)
+        public void onLaunched(Platform    platform,
+                               Application application,
+                               Options     options)
         {
             // nothing to do after launch
         }

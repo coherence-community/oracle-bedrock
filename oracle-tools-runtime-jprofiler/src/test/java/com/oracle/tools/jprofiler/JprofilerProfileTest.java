@@ -26,33 +26,45 @@
 package com.oracle.tools.jprofiler;
 
 import applications.WaitingApplication;
+
 import com.oracle.tools.Option;
 import com.oracle.tools.Options;
+
 import com.oracle.tools.deferred.Eventually;
+
 import com.oracle.tools.runtime.LocalPlatform;
+
 import com.oracle.tools.runtime.concurrent.RemoteCallable;
+
 import com.oracle.tools.runtime.console.CapturingApplicationConsole;
 import com.oracle.tools.runtime.console.Console;
+
 import com.oracle.tools.runtime.java.JavaApplication;
 import com.oracle.tools.runtime.java.options.ClassName;
 import com.oracle.tools.runtime.java.options.Freeform;
 import com.oracle.tools.runtime.java.options.Freeforms;
+
 import org.junit.After;
 import org.junit.Assume;
 import org.junit.ClassRule;
 import org.junit.Test;
+
 import org.junit.rules.TemporaryFolder;
 
-import java.io.File;
-import java.net.InetAddress;
-import java.util.Iterator;
-
 import static com.oracle.tools.deferred.DeferredHelper.invoking;
+
 import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
+
 import static org.junit.Assert.assertThat;
+
+import java.io.File;
+
+import java.net.InetAddress;
+
+import java.util.Iterator;
 
 /**
  * @author Jonathan Knight
@@ -90,7 +102,7 @@ public class JprofilerProfileTest
 
         assertThat(profile.isEnabled(), is(true));
 
-        profile.onBeforeLaunch(null, options);
+        profile.onLaunching(null, options);
 
         assertAgentString(options, "-agentpath:mylib=", "port=8849");
 
@@ -109,7 +121,7 @@ public class JprofilerProfileTest
 
         assertThat(profile.isEnabled(), is(true));
 
-        profile.onBeforeLaunch(null, options);
+        profile.onLaunching(null, options);
 
         assertAgentString(options, "-agentpath:mylib=", "port=8849", "nowait");
     }
@@ -121,7 +133,7 @@ public class JprofilerProfileTest
         Options          options = new Options();
         JprofilerProfile profile = JprofilerProfile.enabled("mylib").noWait();
 
-        profile.onBeforeLaunch(null, options);
+        profile.onLaunching(null, options);
 
         assertAgentString(options, "-agentpath:mylib=", "port=8849", "nowait");
     }
@@ -133,7 +145,7 @@ public class JprofilerProfileTest
         Options          options = new Options();
         JprofilerProfile profile = JprofilerProfile.enabled("mylib").verbose(true);
 
-        profile.onBeforeLaunch(null, options);
+        profile.onLaunching(null, options);
 
         assertAgentString(options, "-agentpath:mylib=", "port=8849", "verbose-instr");
     }
@@ -145,7 +157,7 @@ public class JprofilerProfileTest
         Options          options = new Options();
         JprofilerProfile profile = JprofilerProfile.enabled("mylib").samplingStack(1234);
 
-        profile.onBeforeLaunch(null, options);
+        profile.onLaunching(null, options);
 
         assertAgentString(options, "-agentpath:mylib=", "port=8849", "samplingstack=1234");
     }
@@ -157,7 +169,7 @@ public class JprofilerProfileTest
         Options          options = new Options();
         JprofilerProfile profile = JprofilerProfile.enabled("mylib").samplingStack(1234).defaultSamplingStack();
 
-        profile.onBeforeLaunch(null, options);
+        profile.onLaunching(null, options);
 
         assertAgentString(options, "-agentpath:mylib=", "port=8849");
     }
@@ -169,7 +181,7 @@ public class JprofilerProfileTest
         Options          options = new Options();
         JprofilerProfile profile = JprofilerProfile.enabled("mylib").stack(1234);
 
-        profile.onBeforeLaunch(null, options);
+        profile.onLaunching(null, options);
 
         assertAgentString(options, "-agentpath:mylib=", "port=8849", "stack=1234");
     }
@@ -181,7 +193,7 @@ public class JprofilerProfileTest
         Options          options = new Options();
         JprofilerProfile profile = JprofilerProfile.enabled("mylib").stack(1234).defaultStack();
 
-        profile.onBeforeLaunch(null, options);
+        profile.onLaunching(null, options);
 
         assertAgentString(options, "-agentpath:mylib=", "port=8849");
     }
@@ -195,7 +207,7 @@ public class JprofilerProfileTest
 
         assertThat(profile.isEnabled(), is(false));
 
-        profile.onBeforeLaunch(null, options);
+        profile.onLaunching(null, options);
 
         Freeforms freeforms = options.get(Freeforms.class);
 
@@ -210,7 +222,7 @@ public class JprofilerProfileTest
         Options          options = new Options();
         JprofilerProfile profile = JprofilerProfile.enabled("mylib").jniInterception(true);
 
-        profile.onBeforeLaunch(null, options);
+        profile.onLaunching(null, options);
 
         assertAgentString(options, "-agentpath:mylib=", "port=8849", "jniInterception");
     }
@@ -222,7 +234,7 @@ public class JprofilerProfileTest
         Options          options = new Options();
         JprofilerProfile profile = JprofilerProfile.enabled("mylib").listenMode();
 
-        profile.onBeforeLaunch(null, options);
+        profile.onLaunching(null, options);
 
         assertAgentString(options, "-agentpath:mylib=", "port=8849");
     }
@@ -238,7 +250,7 @@ public class JprofilerProfileTest
 
         JprofilerProfile               profile     = JprofilerProfile.enabled("mylib").listenMode(address);
 
-        profile.onBeforeLaunch(null, options);
+        profile.onLaunching(null, options);
 
         assertAgentString(options, "-agentpath:mylib=", "address=" + inetAddress.getHostName(), "port=" + port);
 
@@ -256,7 +268,7 @@ public class JprofilerProfileTest
         Options          options = new Options();
         JprofilerProfile profile = JprofilerProfile.enabled("mylib").offlineMode(file, session);
 
-        profile.onBeforeLaunch(null, options);
+        profile.onLaunching(null, options);
 
         assertAgentString(options, "-agentpath:mylib=offline", "id=1234", "nowait", "config=config.xml");
     }
@@ -269,7 +281,7 @@ public class JprofilerProfileTest
         Options          options = new Options();
         JprofilerProfile profile = JprofilerProfile.enabled("mylib").offlineMode(session);
 
-        profile.onBeforeLaunch(null, options);
+        profile.onLaunching(null, options);
 
         assertAgentString(options, "-agentpath:mylib=offline", "id=1234", "nowait");
     }

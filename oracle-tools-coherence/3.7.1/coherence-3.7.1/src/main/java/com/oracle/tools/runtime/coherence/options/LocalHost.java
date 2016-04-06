@@ -206,10 +206,10 @@ public class LocalHost implements Profile, Option
 
 
     @Override
-    public void onBeforeLaunch(Platform platform,
-                               Options  options)
+    public void onLaunching(Platform platform,
+                            Options  options)
     {
-        if (ports != null && !ports.hasNext())
+        if (ports != null &&!ports.hasNext())
         {
             throw new IllegalStateException("Exhausted the available ports for the LocalHost");
         }
@@ -245,17 +245,17 @@ public class LocalHost implements Profile, Option
 
 
     @Override
-    public void onAfterLaunch(Platform    platform,
-                              Application application,
-                              Options     options)
+    public void onLaunched(Platform    platform,
+                           Application application,
+                           Options     options)
     {
     }
 
 
     @Override
-    public void onBeforeClose(Platform    platform,
-                              Application application,
-                              Options     options)
+    public void onClosing(Platform    platform,
+                          Application application,
+                          Options     options)
     {
     }
 

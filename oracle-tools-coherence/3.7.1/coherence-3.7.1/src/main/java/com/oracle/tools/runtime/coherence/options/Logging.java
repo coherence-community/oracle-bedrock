@@ -132,8 +132,8 @@ public class Logging implements Profile, ComposableOption<Logging>
 
 
     @Override
-    public void onBeforeLaunch(Platform platform,
-                               Options  options)
+    public void onLaunching(Platform platform,
+                            Options  options)
     {
         SystemProperties systemProperties = options.get(SystemProperties.class);
 
@@ -150,17 +150,17 @@ public class Logging implements Profile, ComposableOption<Logging>
 
 
     @Override
-    public void onAfterLaunch(Platform    platform,
-                              Application application,
-                              Options     options)
+    public void onLaunched(Platform    platform,
+                           Application application,
+                           Options     options)
     {
     }
 
 
     @Override
-    public void onBeforeClose(Platform    platform,
-                              Application application,
-                              Options     options)
+    public void onClosing(Platform    platform,
+                          Application application,
+                          Options     options)
     {
     }
 

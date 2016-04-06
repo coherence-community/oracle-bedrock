@@ -156,8 +156,8 @@ public class RemoteDebugging implements Profile, Option
 
 
     @Override
-    public void onBeforeLaunch(Platform platform,
-                               Options  options)
+    public void onLaunching(Platform platform,
+                            Options  options)
     {
         if (enabled)
         {
@@ -220,17 +220,17 @@ public class RemoteDebugging implements Profile, Option
 
 
     @Override
-    public void onAfterLaunch(Platform    platform,
-                              Application application,
-                              Options     options)
+    public void onLaunched(Platform    platform,
+                           Application application,
+                           Options     options)
     {
     }
 
 
     @Override
-    public void onBeforeClose(Platform    platform,
-                              Application application,
-                              Options     options)
+    public void onClosing(Platform    platform,
+                          Application application,
+                          Options     options)
     {
     }
 

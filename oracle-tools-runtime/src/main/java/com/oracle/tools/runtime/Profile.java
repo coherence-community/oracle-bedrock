@@ -46,8 +46,8 @@ public interface Profile
      * @param platform   the {@link Platform}
      * @param options    the {@link Options}
      */
-    void onBeforeLaunch(Platform platform,
-                        Options  options);
+    void onLaunching(Platform platform,
+                     Options  options);
 
 
     /**
@@ -59,9 +59,9 @@ public interface Profile
      * @param application   the {@link Application}
      * @param options       the {@link Options}
      */
-    void onAfterLaunch(Platform    platform,
-                       Application application,
-                       Options     options);
+    void onLaunched(Platform    platform,
+                    Application application,
+                    Options     options);
 
 
     /**
@@ -72,7 +72,7 @@ public interface Profile
      * @param application  the {@link Application}
      * @param options      the {@link Options}
      */
-    void onBeforeClose(Platform    platform,
-                       Application application,
-                       Options     options);
+    void onClosing(Platform    platform,
+                   Application application,
+                   Options     options);
 }

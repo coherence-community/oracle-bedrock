@@ -90,7 +90,7 @@ public class ExtendClient implements SessionBuilder
 
         for (Profile profile : launchOptions.getInstancesOf(Profile.class))
         {
-            profile.onBeforeLaunch(platform, launchOptions);
+            profile.onLaunching(platform, launchOptions);
         }
 
         // ----- create local system properties based on those defined by the launch options -----

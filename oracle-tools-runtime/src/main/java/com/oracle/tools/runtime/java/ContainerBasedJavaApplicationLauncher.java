@@ -200,7 +200,7 @@ public class ContainerBasedJavaApplicationLauncher<A extends JavaApplication>
         Options launchOptions = new Options(platform.getOptions().asArray());
 
         // add the meta-class options
-        metaClass.onBeforeLaunch(platform, launchOptions);
+        metaClass.onLaunching(platform, launchOptions);
 
         // add the launch specific options
         launchOptions.addAll(options);
@@ -223,7 +223,7 @@ public class ContainerBasedJavaApplicationLauncher<A extends JavaApplication>
 
         for (Profile profile : launchOptions.getInstancesOf(Profile.class))
         {
-            profile.onBeforeLaunch(platform, launchOptions);
+            profile.onLaunching(platform, launchOptions);
         }
 
         // ----- determine the display name for the application -----
@@ -378,13 +378,13 @@ public class ContainerBasedJavaApplicationLauncher<A extends JavaApplication>
 
             // ----- notify the MetaClass that the application has been launched -----
 
-            metaClass.onAfterLaunch(platform, application, launchOptions);
+            metaClass.onLaunched(platform, application, launchOptions);
 
             // ----- notify the Profiles that the application has been launched -----
 
             for (Profile profile : launchOptions.getInstancesOf(Profile.class))
             {
-                profile.onAfterLaunch(platform, application, launchOptions);
+                profile.onLaunched(platform, application, launchOptions);
             }
 
             // ----- notify all of the application listeners -----

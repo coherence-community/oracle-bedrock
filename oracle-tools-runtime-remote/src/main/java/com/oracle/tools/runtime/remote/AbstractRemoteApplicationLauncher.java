@@ -107,7 +107,7 @@ public abstract class AbstractRemoteApplicationLauncher<A extends Application>
         Options launchOptions = new Options(platform == null ? null : platform.getOptions().asArray());
 
         // add the schema options
-        metaClass.onBeforeLaunch(platform, launchOptions);
+        metaClass.onLaunching(platform, launchOptions);
 
         // add the custom application options
         launchOptions.addAll(options);
@@ -137,7 +137,7 @@ public abstract class AbstractRemoteApplicationLauncher<A extends Application>
 
         for (Profile profile : launchOptions.getInstancesOf(Profile.class))
         {
-            profile.onBeforeLaunch(platform, launchOptions);
+            profile.onLaunching(platform, launchOptions);
         }
 
         // ----- prior to launching the application, let the implementation enhance the launch options -----
@@ -246,13 +246,13 @@ public abstract class AbstractRemoteApplicationLauncher<A extends Application>
 
         // ----- notify the MetaClass that the application has been launched -----
 
-        metaClass.onAfterLaunch(platform, application, launchOptions);
+        metaClass.onLaunched(platform, application, launchOptions);
 
         // ----- notify the Profiles that the application has been launched -----
 
         for (Profile profile : launchOptions.getInstancesOf(Profile.class))
         {
-            profile.onAfterLaunch(platform, application, launchOptions);
+            profile.onLaunched(platform, application, launchOptions);
         }
 
         // ----- notify all of the lifecycle listeners -----
