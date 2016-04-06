@@ -130,7 +130,7 @@ public class LocalPlatformApplicationTest extends AbstractTest
                                                                   Decoration.of(listener),
                                                                   DisplayName.of("java")))
         {
-            Mockito.verify(listener, Mockito.times(1)).onRealized(Mockito.same(application));
+            Mockito.verify(listener, Mockito.times(1)).onLaunched(Mockito.same(application));
 
             String stdout = console.getOutputReader().readLine();
 

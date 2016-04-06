@@ -634,7 +634,7 @@ public class LocalJavaApplicationLauncher<A extends JavaApplication>
         // notify the ApplicationListener-based Options that the application has been launched
         for (ApplicationListener listener : launchOptions.getInstancesOf(ApplicationListener.class))
         {
-            listener.onRealized(application);
+            listener.onLaunched(application);
         }
 
         return application;

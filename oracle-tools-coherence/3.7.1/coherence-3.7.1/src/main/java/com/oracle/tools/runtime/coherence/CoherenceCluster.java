@@ -27,7 +27,9 @@ package com.oracle.tools.runtime.coherence;
 
 import com.oracle.tools.runtime.AbstractAssembly;
 import com.oracle.tools.runtime.Assembly;
+
 import com.tangosol.net.NamedCache;
+
 import com.tangosol.util.UID;
 
 import java.util.Iterator;
@@ -57,7 +59,8 @@ public class CoherenceCluster extends AbstractAssembly<CoherenceClusterMember>
 
 
     /**
-     * Obtains the current number of {@link CoherenceClusterMember}s in the {@link CoherenceCluster}.
+     * Obtains the current number of {@link CoherenceClusterMember}s in the underlying
+     * {@link CoherenceCluster} by asking a {@link CoherenceClusterMember}.
      *
      * @return the current number of {@link CoherenceClusterMember}s
      */

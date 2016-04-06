@@ -27,8 +27,6 @@ package com.oracle.tools.runtime;
 
 import com.oracle.tools.Option;
 
-import com.oracle.tools.options.Decoration;
-
 import com.oracle.tools.predicate.Predicate;
 
 import java.util.Iterator;
@@ -72,11 +70,11 @@ public abstract class AbstractAssembly<A extends Application> implements Assembl
         this.applications = new CopyOnWriteArraySet<A>(applications);
         this.isClosed     = new AtomicBoolean(false);
 
-        // add this assembly as a decoration of each application
+        // add this assembly as a feature of each application
         // (so that the application can notify the assembly of independent lifecycle events)
         for (A application : this.applications)
         {
-            application.getOptions().add(Decoration.of(this));
+            application.add(Assembly.class, this);
         }
     }
 
@@ -96,7 +94,7 @@ public abstract class AbstractAssembly<A extends Application> implements Assembl
      * Obtains an {@link Application} in this {@link Assembly} with the given name.
      * If no such {@link Application} exists in the {@link Assembly}, <code>null</code>
      * will be returned.  If multiple {@link Application}s in the {@link Assembly}
-     * have the given name, an arbitary {@link Application} of the name will be returned
+     * have the given name, an arbitrary {@link Application} of the name will be returned
      *
      * @param name  the name of the application to get
      * @return the application in this {@link Assembly} with the given name or null
@@ -180,8 +178,8 @@ public abstract class AbstractAssembly<A extends Application> implements Assembl
         }
         else
         {
-            // ensure the assembly a decoration so that it can be called back for lifecycle events
-            application.getOptions().add(Decoration.of(this));
+            // ensure the assembly is a feature of the application so that it can be called back for lifecycle events
+            application.add(Assembly.class, this);
 
             // add the application to the assembly
             applications.add(application);
@@ -209,8 +207,8 @@ public abstract class AbstractAssembly<A extends Application> implements Assembl
         }
         else
         {
-            // ensure the assembly is no longer a decoration so that won't be called back for lifecycle events
-            application.getOptions().remove(Decoration.of(this));
+            // ensure the assembly is no longer a feature so that won't be called back for lifecycle events
+            application.remove(Assembly.class);
 
             // remove the application from the assembly
             return applications.remove(application);
@@ -244,8 +242,8 @@ public abstract class AbstractAssembly<A extends Application> implements Assembl
             {
                 if (application != null)
                 {
-                    // ensure the assembly is no longer a decoration so that won't be called back for lifecycle events
-                    application.getOptions().remove(Decoration.of(this));
+                    // ensure the assembly is no longer a feature so that won't be called back for lifecycle events
+                    application.remove(Assembly.class);
 
                     try
                     {
@@ -284,22 +282,8 @@ public abstract class AbstractAssembly<A extends Application> implements Assembl
 
 
     @Override
-    public void onRealized(A application)
+    public void onLaunched(A application)
     {
-        // SKIP: nothing to do when an application is realized
-    }
-
-
-    @Override
-    public int size()
-    {
-        return applications.size();
-    }
-
-
-    @Deprecated
-    public void destroy()
-    {
-        close();
+        // SKIP: nothing to do when an application is launched
     }
 }

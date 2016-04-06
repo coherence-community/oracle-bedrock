@@ -51,9 +51,9 @@ public interface ApplicationListener<A extends Application>
 
 
     /**
-     * Called after an {@link Application} has been realized.
+     * Called after an {@link Application} has been launched.
      *
-     * @param application  the {@link Application} the was realized
+     * @param application  the {@link Application} the was launched
      */
-    public void onRealized(A application);
+    public void onLaunched(A application);
 }

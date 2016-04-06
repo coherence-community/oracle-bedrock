@@ -260,7 +260,7 @@ public abstract class AbstractRemoteApplicationLauncher<A extends Application>
         // notify the ApplicationListener-based Options that the application has been launched
         for (ApplicationListener listener : launchOptions.getInstancesOf(ApplicationListener.class))
         {
-            listener.onRealized(application);
+            listener.onLaunched(application);
         }
 
         return application;

@@ -25,7 +25,6 @@
 
 package com.oracle.tools.runtime;
 
-import com.oracle.tools.Option;
 import com.oracle.tools.Options;
 
 import com.oracle.tools.lang.StringHelper;
@@ -211,7 +210,7 @@ public class SimpleApplicationLauncher extends AbstractApplicationLauncher<Simpl
         // notify the ApplicationListener-based Options that the application has been realized
         for (ApplicationListener listener : launchOptions.getInstancesOf(ApplicationListener.class))
         {
-            listener.onRealized(application);
+            listener.onLaunched(application);
         }
 
         return application;

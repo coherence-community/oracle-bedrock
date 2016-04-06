@@ -54,7 +54,7 @@ public interface Assembly<A extends Application> extends Iterable<A>, Closeable
      * </p>
      */
     @Override
-    public void close();
+    void close();
 
 
     /**
@@ -69,13 +69,5 @@ public interface Assembly<A extends Application> extends Iterable<A>, Closeable
      *
      * @see ApplicationClosingBehavior
      */
-    public void close(Option... options);
-
-
-    /**
-     * Obtains the number of {@link Application} instances in the {@link Assembly}.
-     *
-     * @return  the number of {@link Application}s in the {@link Assembly}
-     */
-    public int size();
+    void close(Option... options);
 }

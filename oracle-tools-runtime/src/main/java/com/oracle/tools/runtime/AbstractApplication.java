@@ -216,9 +216,13 @@ public abstract class AbstractApplication<P extends ApplicationProcess> extends 
     @Override
     public void close(Option... options)
     {
-        // ----- remove all of the features -----
 
-        removeAllFeatures();
+        // ------ notify any ApplicationListener-based Features (about closing) ------
+
+        for (ApplicationListener listener : getInstancesOf(ApplicationListener.class))
+        {
+            listener.onClosing(this);
+        }
 
         // ----- notify the Profiles that the application is closing -----
 
@@ -227,9 +231,8 @@ public abstract class AbstractApplication<P extends ApplicationProcess> extends 
             profile.onBeforeClose(platform, this, getOptions());
         }
 
-        // ------ notify ApplicationListeners (about closing) ------
+        // ------ notify ApplicationListeners-based Options (about closing) ------
 
-        // notify the ApplicationListener-based Options that the application is about to close
         for (ApplicationListener listener : getOptions().getInstancesOf(ApplicationListener.class))
         {
             listener.onClosing(this);
@@ -335,13 +338,23 @@ public abstract class AbstractApplication<P extends ApplicationProcess> extends 
             // nothing to do here as we don't care
         }
 
-        // ------ notify ApplicationListeners (about being closed) ------
+        // ------ notify ApplicationListeners-based Options (about being closed) ------
 
-        // notify the ApplicationListener-based Options that the application has closed
         for (ApplicationListener listener : getOptions().getInstancesOf(ApplicationListener.class))
         {
             listener.onClosed(this);
         }
+
+        // ------ notify ApplicationListener-based Features (about being closed) ------
+
+        for (ApplicationListener listener : getInstancesOf(ApplicationListener.class))
+        {
+            listener.onClosed(this);
+        }
+
+        // ----- remove all of the features -----
+
+        removeAllFeatures();
     }
 
 

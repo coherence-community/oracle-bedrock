@@ -25,6 +25,8 @@
 
 package com.oracle.tools.extensible;
 
+import java.util.Collections;
+import java.util.LinkedList;
 import java.util.Map;
 
 import java.util.concurrent.ConcurrentHashMap;
@@ -132,6 +134,38 @@ public abstract class AbstractExtensible implements Extensible
 
                 return feature;
             }
+        }
+    }
+
+
+    /**
+     * Obtains an {@link Iterable} over the Features implementing a specific class/interface.
+     *
+     * @param requiredClass  the required {@link Class} a feature must implement
+     *
+     * @param <T>  the type of the required {@link Class}
+     *
+     * @return  an {@link Iterable} over features implementing the required class/interface
+     */
+    protected <T> Iterable<T> getInstancesOf(Class<T> requiredClass)
+    {
+        if (requiredClass == null)
+        {
+            return Collections.EMPTY_LIST;
+        }
+        else
+        {
+            LinkedList<T> result = new LinkedList<>();
+
+            features.values().forEach(
+                feature -> {
+                    if (requiredClass.isInstance(feature))
+                    {
+                        result.add((T) feature);
+                    }
+                });
+
+            return result;
         }
     }
 
