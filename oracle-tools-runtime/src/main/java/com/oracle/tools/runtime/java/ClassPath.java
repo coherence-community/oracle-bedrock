@@ -607,6 +607,12 @@ public class ClassPath implements Iterable<String>, Tabular, Option
         }
         else
         {
+            // locate the declaring class
+            while (clazz.getEnclosingClass() != null)
+            {
+                clazz = clazz.getEnclosingClass();
+            }
+
             // create a resource name for the class (must use a / here)
             String resourceName = clazz.getCanonicalName().replace(".", "/") + ".class";
 
@@ -669,6 +675,46 @@ public class ClassPath implements Iterable<String>, Tabular, Option
                 classPaths.add(new ClassPath(path));
             }
 
+            return new ClassPath(classPaths);
+        }
+    }
+
+
+    /**
+     * Obtains a {@link ClassPath} representing the specified {@link ClassPath}s.
+     *
+     * @param classPaths  the {@link ClassPath}s
+     *
+     * @return a {@link ClassPath} representing the {@link ClassPath}s
+     */
+    public static ClassPath of(ClassPath... classPaths)
+    {
+        if (classPaths == null)
+        {
+            return new ClassPath();
+        }
+        else
+        {
+            return new ClassPath(classPaths);
+        }
+    }
+
+
+    /**
+     * Obtains a {@link ClassPath} representing the specified class path {@link String}s.
+     *
+     * @param classPaths  the class path {@link String}s
+     *
+     * @return a {@link ClassPath} representing the {@link ClassPath}s
+     */
+    public static ClassPath of(String... classPaths)
+    {
+        if (classPaths == null)
+        {
+            return new ClassPath();
+        }
+        else
+        {
             return new ClassPath(classPaths);
         }
     }

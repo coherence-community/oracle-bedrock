@@ -171,7 +171,7 @@ public class JavaDeployment implements Deployment
 
         if (autoDeployEnabled)
         {
-            // we'll use the class-path of the schema to work out what to deploy
+            // we'll use the class-path option to work out what to deploy
             ClassPath classPath = options.get(ClassPath.class);
 
             for (String path : classPath)

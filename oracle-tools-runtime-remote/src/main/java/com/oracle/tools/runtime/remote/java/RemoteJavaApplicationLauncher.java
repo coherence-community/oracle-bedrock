@@ -178,10 +178,8 @@ public class RemoteJavaApplicationLauncher extends AbstractRemoteApplicationLaun
 
 
     @Override
-    protected void onBeforeLaunch(Options options)
+    protected void onLaunching(Options options)
     {
-        super.onBeforeLaunch(options);
-
         // ----- establish default Profiles for this Platform (and Builder) -----
 
         // java applications can automatically detect the following profiles
@@ -230,11 +228,9 @@ public class RemoteJavaApplicationLauncher extends AbstractRemoteApplicationLaun
 
 
     @Override
-    protected void onAfterLaunch(JavaApplication application,
-                                 Options         options)
+    protected void onLaunched(JavaApplication application,
+                              Options         options)
     {
-        super.onAfterLaunch(application, options);
-
         // ----- enhance the application with java-specific features -----
 
         if (JmxFeature.isSupportedBy(application))

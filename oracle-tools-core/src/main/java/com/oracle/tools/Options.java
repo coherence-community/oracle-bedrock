@@ -191,7 +191,7 @@ public class Options
         {
             T option = (T) options.get(classOfOption);
 
-            if (option == null)
+            if (option == null && defaultOption != null)
             {
                 option = defaultOption;
 

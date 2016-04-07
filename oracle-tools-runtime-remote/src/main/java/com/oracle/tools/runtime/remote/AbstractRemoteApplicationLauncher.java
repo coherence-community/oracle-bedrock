@@ -142,7 +142,7 @@ public abstract class AbstractRemoteApplicationLauncher<A extends Application>
 
         // ----- prior to launching the application, let the implementation enhance the launch options -----
 
-        onBeforeLaunch(launchOptions);
+        onLaunching(launchOptions);
 
         // ----- establish the display name for the application -----
 
@@ -242,7 +242,7 @@ public abstract class AbstractRemoteApplicationLauncher<A extends Application>
 
         // ----- after launching the application, let the implementation interact with the application -----
 
-        onAfterLaunch(application, launchOptions);
+        onLaunched(application, launchOptions);
 
         // ----- notify the MetaClass that the application has been launched -----
 
@@ -272,10 +272,7 @@ public abstract class AbstractRemoteApplicationLauncher<A extends Application>
      *
      * @param options  the launch {@link Options}
      */
-    protected void onBeforeLaunch(Options options)
-    {
-        // be default we don't change the launch options
-    }
+    abstract protected void onLaunching(Options options);
 
 
     /**
@@ -284,11 +281,8 @@ public abstract class AbstractRemoteApplicationLauncher<A extends Application>
      * @param application  the launched {@link Application}
      * @param options      the launch {@link Options}
      */
-    protected void onAfterLaunch(A       application,
-                                 Options options)
-    {
-        // be default we don't change the application after it was created
-    }
+    abstract protected void onLaunched(A       application,
+                                       Options options);
 
 
     /**

@@ -319,7 +319,16 @@ public class LocalJavaApplicationLauncher<A extends JavaApplication>
 
         try
         {
-            // include the JavaApplicationLauncher at the end of the class path
+            // include the ClassPath of the Platform
+            classPath = new ClassPath(classPath, ClassPath.ofClass(platform.getClass()));
+
+            // include the ClassPath of each of the Options
+            for (Option option : launchOptions.getInstancesOf(Option.class))
+            {
+                classPath = new ClassPath(classPath, ClassPath.ofClass(option.getClass()));
+            }
+
+            // include the JavaApplicationLauncher
             classPath = new ClassPath(classPath, ClassPath.ofClass(JavaApplicationRunner.class));
 
             // add the updated ClassPath back into the launch options

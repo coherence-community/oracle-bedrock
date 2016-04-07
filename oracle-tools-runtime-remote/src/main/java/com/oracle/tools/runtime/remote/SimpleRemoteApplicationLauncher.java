@@ -1,9 +1,9 @@
 /*
- * File: SimpleRemoteApplicationBuilder.java
+ * File: SimpleRemoteApplicationLauncher.java
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * The contents of this file are subject to the terms and conditions of 
+ * The contents of this file are subject to the terms and conditions of
  * the Common Development and Distribution License 1.0 (the "License").
  *
  * You may not use this file except in compliance with the License.
@@ -24,6 +24,8 @@
  */
 
 package com.oracle.tools.runtime.remote;
+
+import com.oracle.tools.Options;
 
 import com.oracle.tools.runtime.Application;
 import com.oracle.tools.runtime.Platform;
@@ -47,5 +49,20 @@ public class SimpleRemoteApplicationLauncher extends AbstractRemoteApplicationLa
     public SimpleRemoteApplicationLauncher(RemotePlatform platform)
     {
         super(platform);
+    }
+
+
+    @Override
+    protected void onLaunching(Options options)
+    {
+        // by default there's nothing to do on launching
+    }
+
+
+    @Override
+    protected void onLaunched(SimpleApplication application,
+                              Options           options)
+    {
+        // by default there's nothing to do once launched
     }
 }

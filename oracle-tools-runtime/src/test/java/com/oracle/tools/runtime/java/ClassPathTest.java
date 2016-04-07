@@ -25,15 +25,21 @@
 
 package com.oracle.tools.runtime.java;
 
+import com.oracle.tools.Option;
+
 import com.oracle.tools.io.FileHelper;
 
 import com.oracle.tools.runtime.options.PlatformSeparators;
+
 import org.junit.Assert;
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.is;
+
 import static org.junit.Assert.assertThat;
+
 import static org.mockito.Matchers.anyString;
+
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -207,8 +213,7 @@ public class ClassPathTest
         String    path2     = "three" + File.separator + "four";
         ClassPath classPath = new ClassPath(path1 + File.pathSeparator + path2);
 
-        assertThat(classPath.toString(),
-                   is(path1 + File.separator + File.pathSeparator + path2 + File.separator));
+        assertThat(classPath.toString(), is(path1 + File.separator + File.pathSeparator + path2 + File.separator));
         Assert.assertTrue(classPath.contains(path1));
         Assert.assertTrue(classPath.contains(path2));
         Assert.assertFalse(classPath.isEmpty());
@@ -287,6 +292,12 @@ public class ClassPathTest
         }
     }
 
+
+    /**
+     * Ensure that {@link ClassPath#toString(Option...)} uses the {@link PlatformSeparators}.
+     *
+     * @throws Exception
+     */
     @Test
     public void shouldUseSpecifiedSeparator() throws Exception
     {
@@ -298,15 +309,27 @@ public class ClassPathTest
         assertThat(path.toString(separators), is("foo.jar" + separators.getPathSeparator() + "bar.jar"));
     }
 
+
+    /**
+     * Ensure that {@link ClassPath#toString(Option...)} uses default {@link PlatformSeparators}.
+     *
+     * @throws Exception
+     */
     @Test
     public void shouldUseDefaultSeparators() throws Exception
     {
         PlatformSeparators separators = PlatformSeparators.autoDetect();
-        ClassPath          path = new ClassPath("foo.jar", "bar.jar");
+        ClassPath          path       = new ClassPath("foo.jar", "bar.jar");
 
         assertThat(path.toString(separators), is("foo.jar" + separators.getPathSeparator() + "bar.jar"));
     }
 
+
+    /**
+     * Ensure that {@link ClassPath#toString(Option...)} uses the {@link ClassPathModifier}s.
+     *
+     * @throws Exception
+     */
     @Test
     public void shouldApplyModifier() throws Exception
     {
@@ -323,4 +346,15 @@ public class ClassPathTest
         verify(modifier).modify("foo.jar$bar.jar");
     }
 
+
+    /**
+     * Ensure that the {@link ClassPath} of an inner class/type can be resolved.
+     *
+     * @throws Exception
+     */
+    @Test
+    public void shouldResolveClassPathOfInnerClass() throws Exception
+    {
+        ClassPath classPath = ClassPath.ofClass(JavaApplication.MetaClass.class);
+    }
 }
