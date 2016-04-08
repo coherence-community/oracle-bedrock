@@ -253,7 +253,7 @@ public abstract class AbstractCoherenceCacheServerTest extends AbstractTest
             assertThat(server, new GetLocalMemberId(), is(1));
             assertThat(server, new GetClusterSize(), is(1));
 
-            Set<String> serviceNames = server.submit(new GetAutoStartServiceNames());
+            Set<String> serviceNames = server.submitAndGet(new GetAutoStartServiceNames());
 
             for (String serviceName : serviceNames)
             {

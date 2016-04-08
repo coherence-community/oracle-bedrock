@@ -26,6 +26,7 @@
 package com.oracle.tools.runtime.concurrent;
 
 import com.oracle.tools.Option;
+import com.oracle.tools.Options;
 import com.oracle.tools.runtime.concurrent.options.StreamName;
 import com.oracle.tools.util.CompletionListener;
 
@@ -39,6 +40,8 @@ import java.lang.annotation.Target;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 /**
  * Provides a means of submitting {@link RemoteCallable}s and {@link RemoteRunnable}s for
@@ -64,17 +67,67 @@ public interface RemoteChannel extends Closeable
      * {@link RemoteChannel}.
      *
      * @param callable  the {@link RemoteCallable} to be executed
+     * @param options   the {@link Option}s for the {@link RemoteCallable}
+     * @param <T>       the return type of the {@link RemoteCallable}
+     *
+     * @return  a {@link CompletableFuture} that will be completed with the result
+     *                                      of the {@link RemoteCallable} execution.
+     *
+     * @throws IllegalStateException  if the {@link RemoteChannel} is closed or
+     *                                is unable to accept the submission
+     */
+    public <T> CompletableFuture<T> submit(RemoteCallable<T> callable, Option... options) throws IllegalStateException;
+
+
+    /**
+     * Submits a {@link RemoteCallable} for asynchronous execution by the
+     * {@link RemoteChannel}.
+     *
+     * @param callable  the {@link RemoteCallable} to be executed
      * @param listener  a {@link CompletionListener} to be notified upon
      *                  completed execution of the {@link RemoteCallable}
      * @param options   the {@link Option}s for the {@link RemoteCallable}
      * @param <T>       the return type of the {@link RemoteCallable}
      *
+     * @return  a {@link CompletableFuture} that will be completed with the result
+     *                                      of the {@link RemoteCallable} execution.
+     *
      * @throws IllegalStateException  if the {@link RemoteChannel} is closed or
      *                                is unable to accept the submission
      */
-    public <T> void submit(RemoteCallable<T>     callable,
-                           CompletionListener<T> listener,
-                           Option... options) throws IllegalStateException;
+    public default <T> void submit(RemoteCallable<T>     callable,
+                                   CompletionListener<T> listener,
+                                   Option...             options) throws IllegalStateException
+    {
+        submit(callable, options).handle(listener::handle);
+    }
+
+
+    /**
+     * Submits a {@link RemoteCallable} for asynchronous execution by the
+     * {@link RemoteChannel}.
+     *
+     * @param callable  the {@link RemoteCallable} to be executed
+     * @param options   the {@link Option}s for the {@link RemoteCallable}
+     * @param <T>       the return type of the {@link RemoteCallable}
+     *
+     * @return  a {@link CompletableFuture} that will be completed with the result
+     *                                      of the {@link RemoteCallable} execution.
+     *
+     * @throws IllegalStateException  if the {@link RemoteChannel} is closed or
+     *                                is unable to accept the submission
+     */
+    public default  <T> T submitAndGet(RemoteCallable<T> callable, Option... options) throws IllegalStateException
+    {
+        try
+        {
+            return submit(callable, options).get();
+        }
+        catch (InterruptedException | ExecutionException e)
+        {
+            throw new RuntimeException(e);
+        }
+    }
 
 
     /**
@@ -84,10 +137,13 @@ public interface RemoteChannel extends Closeable
      * @param runnable  the {@link RemoteRunnable} to be executed
      * @param options   the {@link Option}s for the {@link RemoteRunnable}
      *
+     * @return  a {@link CompletableFuture} that will be completed when the
+     *                                      {@link RemoteRunnable} is executed.
+     *
      * @throws IllegalStateException  if the {@link RemoteChannel} is closed or
      *                                is unable to accept the submission
      */
-    public void submit(RemoteRunnable runnable, Option... options) throws IllegalStateException;
+    public CompletableFuture<Void> submit(RemoteRunnable runnable, Option... options) throws IllegalStateException;
 
 
     /**
@@ -130,7 +186,7 @@ public interface RemoteChannel extends Closeable
      * @param event    the {@link RemoteEvent}
      * @param options  the {@link Option}s
      */
-    public void raise(RemoteEvent event, Option... options);
+    public CompletableFuture<Void> raise(RemoteEvent event, Option... options);
 
 
     /**
@@ -178,6 +234,29 @@ public interface RemoteChannel extends Closeable
     {
     }
 
+
+    /**
+     * An {@link Option} signifying what type of notification is
+     * required when raising events.
+     */
+    enum AcknowledgeWhen implements Option
+    {
+        /**
+         * The {@link CompletableFuture} returned by
+         * the {@link RemoteChannel#raise(RemoteEvent, Option...)}
+         * will be completed when the event has been raised.
+         */
+        @Options.Default
+        SENT,
+
+        /**
+         * The {@link CompletableFuture} returned by
+         * the {@link RemoteChannel#raise(RemoteEvent, Option...)}
+         * will be completed when the event has been processed by
+         * the remote listeners.
+         */
+        PROCESSED
+    }
 
     /**
      * An abstract class with a single method to inject a {@link RemoteChannel}

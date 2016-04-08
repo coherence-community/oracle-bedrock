@@ -38,8 +38,6 @@ import com.oracle.tools.runtime.concurrent.RemoteEvent;
 import com.oracle.tools.runtime.concurrent.RemoteEventListener;
 import com.oracle.tools.runtime.concurrent.RemoteRunnable;
 
-import com.oracle.tools.util.CompletionListener;
-
 import static com.oracle.tools.predicate.Predicates.allOf;
 
 import java.io.IOException;
@@ -49,10 +47,13 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
 
+import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
 
 /**
  * A {@link ControllableRemoteChannel} that accepts and processes requests
@@ -219,27 +220,25 @@ public class SocketBasedRemoteChannelServer extends AbstractControllableRemoteCh
 
 
     @Override
-    public <T> void submit(RemoteCallable<T>     callable,
-                           CompletionListener<T> listener,
-                           Option...             options) throws IllegalStateException
+    @SuppressWarnings("unchecked")
+    public <T> CompletableFuture<T> submit(RemoteCallable<T>     callable,
+                                           Option...             options) throws IllegalStateException
     {
         synchronized (this)
         {
             if (isOpen() &&!isTerminating.get())
             {
-                int submissionCount = 0;
+                List<CompletableFuture<T>> futures = remoteChannels.values().stream()
+                        .map((channel) -> channel.submit(callable))
+                        .collect(Collectors.toList());
 
-                for (SocketBasedRemoteChannel executor : remoteChannels.values())
-                {
-                    executor.submit(callable, listener);
-                    submissionCount++;
-                }
-
-                if (submissionCount == 0)
+                if (futures.isEmpty())
                 {
                     throw new IllegalStateException("Failed to submit the request [" + callable
                                                     + "].  There are no RemoteChannels connected");
                 }
+
+                return (CompletableFuture<T>) CompletableFuture.anyOf(futures.toArray(new CompletableFuture[futures.size()]));
             }
             else
             {
@@ -251,26 +250,24 @@ public class SocketBasedRemoteChannelServer extends AbstractControllableRemoteCh
 
 
     @Override
-    public void submit(RemoteRunnable runnable,
-                       Option...      options) throws IllegalStateException
+    public CompletableFuture<Void> submit(RemoteRunnable runnable,
+                                          Option...      options) throws IllegalStateException
     {
         synchronized (this)
         {
             if (isOpen() &&!isTerminating.get())
             {
-                int submissionCount = 0;
+                List<CompletableFuture<?>> futures = remoteChannels.values().stream()
+                        .map((channel) -> channel.submit(runnable))
+                        .collect(Collectors.toList());
 
-                for (SocketBasedRemoteChannel executor : remoteChannels.values())
-                {
-                    executor.submit(runnable);
-                    submissionCount++;
-                }
-
-                if (submissionCount == 0)
+                if (futures.isEmpty())
                 {
                     throw new IllegalStateException("Failed to submit the request [" + runnable
                                                     + "].  There are no RemoteChannels connected");
                 }
+
+                return CompletableFuture.allOf(futures.toArray(new CompletableFuture[futures.size()]));
             }
             else
             {
@@ -304,23 +301,28 @@ public class SocketBasedRemoteChannelServer extends AbstractControllableRemoteCh
 
 
     @Override
-    public void raise(RemoteEvent event,
-                      Option...   options)
+    public CompletableFuture<Void> raise(RemoteEvent event,
+                                         Option...   options)
     {
         if (isOpen())
         {
-            remoteChannels.forEach(
-                (id, remoteChannel) -> {
-                    try
-                    {
-                        remoteChannel.raise(event, options);
-                    }
-                    catch (Throwable e)
-                    {
-                        // we ignore exceptions when a RemoteChannel fails to raise (probably because it is closing)
-                    }
-                });
+            List<CompletableFuture<?>> futures = remoteChannels.values().stream()
+                    .map((channel) -> {
+                        try
+                        {
+                            return channel.raise(event, options);
+                        }
+                        catch (Throwable e)
+                        {
+                            // we ignore exceptions when a RemoteChannel fails to raise (probably because it is closing)
+                            return CompletableFuture.completedFuture(null);
+                        }
+                    }).collect(Collectors.toList());
+
+            return CompletableFuture.allOf(futures.toArray(new CompletableFuture[futures.size()]));
         }
+
+        return CompletableFuture.completedFuture(null);
     }
 
 

@@ -28,7 +28,6 @@ package com.oracle.tools.runtime.coherence;
 import com.oracle.tools.runtime.concurrent.callable.RemoteCallableStaticMethod;
 import com.oracle.tools.runtime.concurrent.callable.RemoteMethodInvocation;
 
-import com.oracle.tools.util.FutureCompletionListener;
 import com.oracle.tools.util.ReflectionHelper;
 
 import com.tangosol.net.CacheService;
@@ -51,6 +50,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * A {@link NamedCache} implementation that provides a local representation and
@@ -117,21 +117,18 @@ class CoherenceNamedCache implements NamedCache
     protected void remotelyInvoke(String    methodName,
                                   Object... arguments)
     {
-        // the listener for the remote invocation
-        FutureCompletionListener listener = new FutureCompletionListener();
-
         // notify the interceptor that we're about make a remote invocation
         Method method = ReflectionHelper.getCompatibleMethod(NamedCache.class, methodName, arguments);
 
         interceptor.onBeforeRemoteInvocation(method, arguments);
 
         // submit the remote method invocation
-        member.submit(new RemoteMethodInvocation(producer, methodName, arguments, interceptor), listener);
+        CompletableFuture future = member.submit(new RemoteMethodInvocation(producer, methodName, arguments, interceptor));
 
         try
         {
             // intercept the result after the remote invocation
-            interceptor.onAfterRemoteInvocation(method, arguments, listener.get());
+            interceptor.onAfterRemoteInvocation(method, arguments, future.get());
         }
         catch (RuntimeException e)
         {
@@ -161,21 +158,18 @@ class CoherenceNamedCache implements NamedCache
                                    Class<T>  returnType,
                                    Object... arguments)
     {
-        // the listener for the remote invocation
-        FutureCompletionListener<T> listener = new FutureCompletionListener<T>();
-
         // notify the interceptor that we're about make a remote invocation
         Method method = ReflectionHelper.getCompatibleMethod(NamedCache.class, methodName, arguments);
 
         interceptor.onBeforeRemoteInvocation(method, arguments);
 
         // submit the remote method invocation
-        member.submit(new RemoteMethodInvocation(producer, methodName, arguments, interceptor), listener);
+        CompletableFuture future = member.submit(new RemoteMethodInvocation(producer, methodName, arguments, interceptor));
 
         try
         {
             // intercept the result after the remote invocation
-            return (T) interceptor.onAfterRemoteInvocation(method, arguments, listener.get());
+            return (T) interceptor.onAfterRemoteInvocation(method, arguments, future.get());
         }
         catch (RuntimeException e)
         {

@@ -131,8 +131,6 @@ public class SocketBasedRemoteChannelTests
 
             client.open();
 
-            DeferredCompletionListener<String> serverResponse = new DeferredCompletionListener<String>(String.class);
-
             client.submit(new RemoteCallable<String>()
                           {
                               @Override
@@ -140,8 +138,7 @@ public class SocketBasedRemoteChannelTests
                               {
                                   return "PONG";
                               }
-                          },
-                          serverResponse);
+                          });
 
             Assert.fail("Anonymous Inner-Classes Can't be used");
         }
@@ -181,11 +178,9 @@ public class SocketBasedRemoteChannelTests
         {
             server = new SocketBasedRemoteChannelServer();
 
-            DeferredCompletionListener<String> clientResponse = new DeferredCompletionListener<String>(String.class);
-
             try
             {
-                server.submit(new PingPong(), clientResponse);
+                server.submit(new PingPong());
 
                 Assert.fail("Should not be able to submit a RemoteCallable without a connected client");
             }

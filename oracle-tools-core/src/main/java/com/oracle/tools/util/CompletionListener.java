@@ -41,4 +41,19 @@ public interface CompletionListener<T> extends ExceptionListener
      * @param result  result of the processing
      */
     public void onCompletion(T result);
+
+
+    public default <U> U handle(T result, Throwable throwable)
+    {
+        if (throwable == null)
+        {
+            onCompletion(result);
+        }
+        else
+        {
+            onException(throwable);
+        }
+
+        return null;
+    }
 }

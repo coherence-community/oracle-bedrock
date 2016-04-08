@@ -34,10 +34,9 @@ import com.oracle.tools.runtime.concurrent.options.StreamName;
 
 import com.oracle.tools.runtime.java.JavaApplication;
 
-import com.oracle.tools.util.FutureCompletionListener;
-
 import java.util.Random;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 
 /**
@@ -110,7 +109,7 @@ public class EventingApplication
                               String          incomingStreamName,
                               String          outgoingStreamName)
     {
-        application.submit(new Listen(incomingStreamName, outgoingStreamName));
+        application.submit(new Listen(incomingStreamName, outgoingStreamName)).join();
     }
 
 
@@ -327,9 +326,7 @@ public class EventingApplication
         {
             GetIntCallable.value = -1;
 
-            FutureCompletionListener<Integer> future = new FutureCompletionListener<>();
-
-            EventingApplication.channel.submit(new GetIntCallable(), future);
+            CompletableFuture<Integer> future = EventingApplication.channel.submit(new GetIntCallable());
 
             return future.get();
         }

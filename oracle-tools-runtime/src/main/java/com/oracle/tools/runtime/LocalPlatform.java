@@ -42,8 +42,6 @@ import com.oracle.tools.runtime.network.AvailablePortIterator;
 
 import com.oracle.tools.runtime.options.MetaClass;
 
-import com.oracle.tools.util.FutureCompletionListener;
-
 import java.io.IOException;
 
 import java.net.InetAddress;
@@ -54,6 +52,7 @@ import java.net.UnknownHostException;
 import java.util.Enumeration;
 import java.util.List;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -334,11 +333,9 @@ public class LocalPlatform extends AbstractPlatform<LocalPlatform>
             System.out.println("[Client]: Establishing Client Socket on : " + inetAddress + ":" + port);
             client.open();
 
-            FutureCompletionListener<String> future = new FutureCompletionListener<>();
-
             System.out.println("[Client]: Sending Client Request to Server...");
 
-            client.submit(new PingPong(description), future);
+            CompletableFuture<String> future = client.submit(new PingPong(description));
 
             System.out.println("[Client]: Waiting for Server Response...");
 

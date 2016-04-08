@@ -90,6 +90,7 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -174,7 +175,7 @@ public class RemoteJavaApplicationLauncherTest extends AbstractRemoteTest
         {
             Eventually.assertThat(invoking(console).getCapturedOutputLines(), hasItem(startsWith("Now sleeping")));
 
-            List<String> args     = application.submit(new GetProgramArgs());
+            List<String> args     = application.submitAndGet(new GetProgramArgs());
 
             String       debugArg = null;
 
@@ -221,7 +222,7 @@ public class RemoteJavaApplicationLauncherTest extends AbstractRemoteTest
 
             Eventually.assertThat(invoking(console).getCapturedOutputLines(), hasItem(startsWith("Now sleeping")));
 
-            List<String> args     = application.submit(new GetProgramArgs());
+            List<String> args     = application.submitAndGet(new GetProgramArgs());
             String       debugArg = null;
 
             for (String arg : args)
@@ -358,7 +359,7 @@ public class RemoteJavaApplicationLauncherTest extends AbstractRemoteTest
         {
             Eventually.assertThat(invoking(console).getCapturedOutputLines(), hasItem(startsWith("Now sleeping")));
 
-            List<String> args     = application.submit(new GetProgramArgs());
+            List<String> args     = application.submitAndGet(new GetProgramArgs());
 
             String       debugArg = null;
 
@@ -470,7 +471,7 @@ public class RemoteJavaApplicationLauncherTest extends AbstractRemoteTest
                                                            DisplayName.of(appName),
                                                            WorkingDirectory.subDirectoryOf(folder)))
         {
-            String dir = application.submit(new GetWorkingDirectory());
+            String dir = application.submitAndGet(new GetWorkingDirectory());
 
             Assert.assertThat(dir, is(expectedDirectory.getCanonicalPath()));
 
@@ -599,9 +600,9 @@ public class RemoteJavaApplicationLauncherTest extends AbstractRemoteTest
         {
             EventingApplication.GetIntCallable.value = 1234;
 
-            int result = application.submit(new EventingApplication.RoundTripCallable());
+            CompletableFuture<Integer> result = application.submit(new EventingApplication.RoundTripCallable());
 
-            Assert.assertThat(result, is(1234));
+            Assert.assertThat(result.get(), is(1234));
         }
     }
 

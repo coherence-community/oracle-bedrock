@@ -44,7 +44,7 @@ import java.lang.reflect.Method;
  *
  * @param <T>  the type of the instance on which the method will be invoked
  */
-public class RemoteMethodInvocation<T> implements RemoteCallable
+public class RemoteMethodInvocation<T> implements RemoteCallable<Object>
 {
     /**
      * The {@link RemoteCallable} that will produce the instance on which

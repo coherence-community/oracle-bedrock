@@ -62,8 +62,6 @@ import com.oracle.tools.runtime.options.MetaClass;
 import com.oracle.tools.table.Cell;
 import com.oracle.tools.table.Table;
 
-import com.oracle.tools.util.CompletionListener;
-import com.oracle.tools.util.FutureCompletionListener;
 import com.oracle.tools.util.ReflectionHelper;
 
 import java.io.IOException;
@@ -83,6 +81,7 @@ import java.util.List;
 import java.util.Properties;
 import java.util.UUID;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
 import java.util.logging.Level;
@@ -486,11 +485,11 @@ public class ContainerBasedJavaApplicationLauncher<A extends JavaApplication>
          * that of being destroyed.
          *
          * @param application  the {@link ControllableApplication} to start
-         * @param listener     the {@link CompletionListener} to notify when the
-         *                     application is started (or an exception occurs)
+         *
+         * @return  a {@link CompletableFuture} that will be completed when
+         *          the application is started, or an error occurs
          */
-        void start(ControllableApplication  application,
-                   CompletionListener<Void> listener);
+        CompletableFuture<Void> start(ControllableApplication  application);
 
 
         /**
@@ -501,11 +500,11 @@ public class ContainerBasedJavaApplicationLauncher<A extends JavaApplication>
          * that of being destroyed.
          *
          * @param application  the {@link ControllableApplication} to destroy
-         * @param listener     the {@link CompletionListener} to notify when the
-         *                     application has been destroyed (or an exception occurs)
+         *
+         * @return  a {@link CompletableFuture} that will be completed when
+         *          the application is started, or an error occurs
          */
-        void destroy(ControllableApplication  application,
-                     CompletionListener<Void> listener);
+        CompletableFuture<Void> destroy(ControllableApplication  application);
 
 
         /**
@@ -563,16 +562,16 @@ public class ContainerBasedJavaApplicationLauncher<A extends JavaApplication>
         private ApplicationController applicationController;
 
         /**
-         * The {@link CompletionListener} to be called back when an application
+         * The {@link CompletableFuture} to be completed when an application
          * is being started.
          */
-        private FutureCompletionListener<Void> startListener;
+        private CompletableFuture<Void> startListener;
 
         /**
-         * The {@link CompletionListener} to be called back when an application
+         * The {@link CompletableFuture} to be completed when an application
          * is being destroyed.
          */
-        private FutureCompletionListener<Void> destroyListener;
+        private CompletableFuture<Void> destroyListener;
 
         /**
          * The {@link RemoteChannel} over which communication to and from the {@link JavaApplication}
@@ -729,8 +728,7 @@ public class ContainerBasedJavaApplicationLauncher<A extends JavaApplication>
 
                 channel.open();
 
-                startListener = new FutureCompletionListener<Void>();
-                applicationController.start(this, startListener);
+                startListener = applicationController.start(this);
             }
         }
 
@@ -743,8 +741,7 @@ public class ContainerBasedJavaApplicationLauncher<A extends JavaApplication>
                 // now try to stop
                 try
                 {
-                    destroyListener = new FutureCompletionListener<Void>();
-                    applicationController.destroy(this, destroyListener);
+                    destroyListener = applicationController.destroy(this);
 
                     destroyListener.get();
                 }
@@ -777,32 +774,29 @@ public class ContainerBasedJavaApplicationLauncher<A extends JavaApplication>
 
 
         @Override
-        public <T> void submit(RemoteCallable<T>           callable,
-                               final CompletionListener<T> listener,
-                               Option...                   options)
+        public <T> CompletableFuture<T> submit(RemoteCallable<T> callable,
+                                               Option...         options)
         {
             if (applicationController == null)
             {
                 IllegalStateException e =
                     new IllegalStateException("Attempting to submit to a ContainerBasedJavaProcess that has been destroyed");
 
-                if (listener != null)
-                {
-                    listener.onException(e);
-                }
+                CompletableFuture<T> future = new CompletableFuture<>();
+                future.completeExceptionally(e);
 
-                throw e;
+                return future;
             }
             else
             {
-                channel.submit(callable, listener);
+                return channel.submit(callable);
             }
         }
 
 
         @Override
-        public void submit(RemoteRunnable runnable,
-                           Option...      options) throws IllegalStateException
+        public CompletableFuture<Void> submit(RemoteRunnable runnable,
+                                              Option...      options) throws IllegalStateException
         {
             if (applicationController == null)
             {
@@ -810,7 +804,7 @@ public class ContainerBasedJavaApplicationLauncher<A extends JavaApplication>
             }
             else
             {
-                channel.submit(runnable);
+                return channel.submit(runnable);
             }
         }
 
@@ -848,8 +842,8 @@ public class ContainerBasedJavaApplicationLauncher<A extends JavaApplication>
 
 
         @Override
-        public void raise(RemoteEvent event,
-                          Option...   options)
+        public CompletableFuture<Void> raise(RemoteEvent event,
+                                             Option...   options)
         {
             if (applicationController == null)
             {
@@ -857,7 +851,7 @@ public class ContainerBasedJavaApplicationLauncher<A extends JavaApplication>
             }
             else
             {
-                channel.raise(event, options);
+                return channel.raise(event, options);
             }
 
         }
@@ -911,37 +905,29 @@ public class ContainerBasedJavaApplicationLauncher<A extends JavaApplication>
 
 
         @Override
-        public void start(ControllableApplication  application,
-                          CompletionListener<Void> listener)
+        public CompletableFuture<Void> start(ControllableApplication  application)
         {
             if (m_callableStartStaticMethod == null)
             {
-                if (listener != null)
-                {
-                    listener.onCompletion(null);
-                }
+                return CompletableFuture.completedFuture(null);
             }
             else
             {
-                application.submit(m_callableStartStaticMethod, listener);
+                return application.submit(m_callableStartStaticMethod);
             }
         }
 
 
         @Override
-        public void destroy(ControllableApplication  application,
-                            CompletionListener<Void> listener)
+        public CompletableFuture<Void> destroy(ControllableApplication  application)
         {
             if (m_callableDestroyStaticMethod == null)
             {
-                if (listener != null)
-                {
-                    listener.onCompletion(null);
-                }
+                return CompletableFuture.completedFuture(null);
             }
             else
             {
-                application.submit(m_callableDestroyStaticMethod, listener);
+                return application.submit(m_callableDestroyStaticMethod);
             }
         }
 
@@ -967,24 +953,16 @@ public class ContainerBasedJavaApplicationLauncher<A extends JavaApplication>
     public static class NullController implements ApplicationController
     {
         @Override
-        public void start(ControllableApplication  application,
-                          CompletionListener<Void> listener)
+        public CompletableFuture<Void> start(ControllableApplication  application)
         {
-            if (listener != null)
-            {
-                listener.onCompletion(null);
-            }
+            return CompletableFuture.completedFuture(null);
         }
 
 
         @Override
-        public void destroy(ControllableApplication  application,
-                            CompletionListener<Void> listener)
+        public CompletableFuture<Void> destroy(ControllableApplication  application)
         {
-            if (listener != null)
-            {
-                listener.onCompletion(null);
-            }
+            return CompletableFuture.completedFuture(null);
         }
 
 
@@ -1055,27 +1033,22 @@ public class ContainerBasedJavaApplicationLauncher<A extends JavaApplication>
 
 
         @Override
-        public void start(ControllableApplication  application,
-                          CompletionListener<Void> listener)
+        public CompletableFuture<Void> start(ControllableApplication  application)
         {
             RemoteCallable<Void> callable = new RemoteCallableStaticMethod<Void>(applicationClassName,
                                                                                  "main",
                                                                                  arguments);
 
-            application.submit(callable, listener);
+            return application.submit(callable);
         }
 
 
         @Override
-        public void destroy(ControllableApplication  application,
-                            CompletionListener<Void> listener)
+        public CompletableFuture<Void> destroy(ControllableApplication  application)
         {
             // SKIP: there's no standard method to stop and destroy a
             // regular Java console application running in a container
-            if (listener != null)
-            {
-                listener.onCompletion(null);
-            }
+            return CompletableFuture.completedFuture(null);
         }
 
 

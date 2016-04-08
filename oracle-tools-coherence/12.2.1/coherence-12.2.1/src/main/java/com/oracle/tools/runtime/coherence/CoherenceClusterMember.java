@@ -49,8 +49,6 @@ import com.oracle.tools.runtime.java.options.SystemProperty;
 
 import com.oracle.tools.runtime.remote.RemotePlatform;
 
-import com.oracle.tools.util.CompletionListener;
-
 import com.tangosol.net.NamedCache;
 
 import com.tangosol.util.UID;
@@ -62,6 +60,7 @@ import java.io.PipedOutputStream;
 import java.net.InetAddress;
 
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * A specialized {@link JavaApplication} that represents an Oracle Coherence Cluster Member
@@ -314,23 +313,21 @@ public interface CoherenceClusterMember extends JavaApplication
 
 
         @Override
-        public void start(ContainerBasedJavaApplicationLauncher.ControllableApplication application,
-                          CompletionListener<Void>                                      listener)
+        public CompletableFuture<Void> start(ContainerBasedJavaApplicationLauncher.ControllableApplication application)
         {
             RemoteCallable<Void> callable = new RemoteCallableStaticMethod<>(DEFAULT_CACHE_SERVER_CLASSNAME, "start");
 
-            application.submit(callable, listener);
+            return application.submit(callable);
         }
 
 
         @Override
-        public void destroy(ContainerBasedJavaApplicationLauncher.ControllableApplication application,
-                            CompletionListener<Void>                                      listener)
+        public CompletableFuture<Void> destroy(ContainerBasedJavaApplicationLauncher.ControllableApplication application)
         {
             RemoteCallable<Void> callable = new RemoteCallableStaticMethod<>(DEFAULT_CACHE_SERVER_CLASSNAME,
                                                                              "shutdown");
 
-            application.submit(callable, listener);
+            return application.submit(callable);
         }
 
 

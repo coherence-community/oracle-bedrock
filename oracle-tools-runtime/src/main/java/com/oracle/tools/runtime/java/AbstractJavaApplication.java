@@ -40,8 +40,6 @@ import com.oracle.tools.runtime.concurrent.RemoteRunnable;
 import com.oracle.tools.runtime.concurrent.callable.GetSystemProperty;
 import com.oracle.tools.runtime.concurrent.callable.RemoteMethodInvocation;
 
-import com.oracle.tools.util.CompletionListener;
-import com.oracle.tools.util.FutureCompletionListener;
 import com.oracle.tools.util.ProxyHelper;
 
 import net.sf.cglib.proxy.MethodInterceptor;
@@ -51,7 +49,8 @@ import java.lang.reflect.Method;
 
 import java.util.Properties;
 
-import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 /**
  * A {@link AbstractJavaApplication} is a base implementation of a {@link JavaApplication} that has
@@ -81,30 +80,6 @@ public abstract class AbstractJavaApplication<P extends JavaApplicationProcess> 
 
 
     @Override
-    public <T> T submit(RemoteCallable<T> callable,
-                        Option...         options)
-    {
-        FutureCompletionListener<T> future = new FutureCompletionListener<>();
-
-        submit(callable, future, options);
-
-        try
-        {
-            return future.get();
-        }
-        catch (RuntimeException e)
-        {
-            throw e;
-        }
-        catch (Exception e)
-        {
-            throw new RuntimeException("Failed to execute the Callable: " + callable, e);
-        }
-
-    }
-
-
-    @Override
     public Properties getSystemProperties()
     {
         return process.getSystemProperties();
@@ -114,24 +89,30 @@ public abstract class AbstractJavaApplication<P extends JavaApplicationProcess> 
     @Override
     public String getSystemProperty(String name)
     {
-        return submit(new GetSystemProperty(name));
+        try
+        {
+            return submit(new GetSystemProperty(name)).get();
+        }
+        catch (InterruptedException | ExecutionException e)
+        {
+            throw new RuntimeException("Error getting System property " + name, e);
+        }
     }
 
 
     @Override
-    public <T> void submit(RemoteCallable<T>     callable,
-                           CompletionListener<T> listener,
-                           Option...             options)
+    public <T> CompletableFuture<T> submit(RemoteCallable<T>     callable,
+                                           Option...             options)
     {
-        process.submit(callable, listener, options);
+        return process.submit(callable, options);
     }
 
 
     @Override
-    public void submit(RemoteRunnable runnable,
-                       Option...      options) throws IllegalStateException
+    public CompletableFuture<Void> submit(RemoteRunnable runnable,
+                                          Option...      options) throws IllegalStateException
     {
-        process.submit(runnable, options);
+        return process.submit(runnable, options);
     }
 
 
@@ -152,10 +133,10 @@ public abstract class AbstractJavaApplication<P extends JavaApplicationProcess> 
 
 
     @Override
-    public void raise(RemoteEvent event,
-                      Option...   options)
+    public CompletableFuture<Void> raise(RemoteEvent event,
+                                         Option...   options)
     {
-        process.raise(event, options);
+        return process.raise(event, options);
     }
 
 
@@ -216,17 +197,16 @@ public abstract class AbstractJavaApplication<P extends JavaApplicationProcess> 
                 interceptor.onBeforeRemoteInvocation(method, args);
             }
 
-            FutureCompletionListener listener = new FutureCompletionListener();
+            RemoteMethodInvocation<T> invocation = new RemoteMethodInvocation<>(instanceProducer,
+                                                                                 method.getName(),
+                                                                                 args,
+                                                                                 interceptor);
 
-            AbstractJavaApplication.this.submit(new RemoteMethodInvocation<T>(instanceProducer,
-                                                                              method.getName(),
-                                                                              args,
-                                                                              interceptor),
-                                                listener);
+            CompletableFuture<Object> future     = AbstractJavaApplication.this.submit(invocation);
 
             try
             {
-                Object result = listener.get();
+                Object result = future.get();
 
                 if (interceptor != null)
                 {

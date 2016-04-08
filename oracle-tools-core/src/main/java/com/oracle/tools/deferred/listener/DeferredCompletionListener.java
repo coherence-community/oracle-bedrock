@@ -154,7 +154,7 @@ public class DeferredCompletionListener<T> implements Deferred<T>, CompletionLis
         StringBuilder builder = new StringBuilder();
 
         builder.append("DeferredCompletionListener<" + deferredClass + ">{");
-        builder.append(hasResult ? (throwable == null ? result : throwable) : "(no result)");
+        builder.append(hasResult ? (throwable == null ? String.valueOf(result) : String.valueOf(throwable)) : "(no result)");
         builder.append("}");
 
         return builder.toString();

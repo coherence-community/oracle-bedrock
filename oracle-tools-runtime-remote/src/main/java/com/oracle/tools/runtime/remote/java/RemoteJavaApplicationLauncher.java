@@ -78,8 +78,6 @@ import com.oracle.tools.runtime.remote.RemotePlatform;
 import com.oracle.tools.runtime.remote.java.options.JavaDeployment;
 import com.oracle.tools.runtime.remote.options.Deployment;
 
-import com.oracle.tools.util.CompletionListener;
-
 import static com.oracle.tools.deferred.DeferredHelper.ensure;
 import static com.oracle.tools.deferred.DeferredHelper.within;
 
@@ -90,6 +88,7 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * A {@link JavaApplicationLauncher} that launches a {@link JavaApplication} on a {@link RemotePlatform}.
@@ -567,19 +566,18 @@ public class RemoteJavaApplicationLauncher extends AbstractRemoteApplicationLaun
 
 
         @Override
-        public <T> void submit(RemoteCallable<T>     callable,
-                               CompletionListener<T> listener,
-                               Option...             options) throws IllegalStateException
+        public <T> CompletableFuture<T> submit(RemoteCallable<T>     callable,
+                                               Option...             options) throws IllegalStateException
         {
-            remoteChannel.submit(callable, listener, options);
+            return remoteChannel.submit(callable, options);
         }
 
 
         @Override
-        public void submit(RemoteRunnable runnable,
+        public CompletableFuture<Void> submit(RemoteRunnable runnable,
                            Option...      options) throws IllegalStateException
         {
-            remoteChannel.submit(runnable, options);
+            return remoteChannel.submit(runnable, options);
         }
 
 
@@ -600,10 +598,10 @@ public class RemoteJavaApplicationLauncher extends AbstractRemoteApplicationLaun
 
 
         @Override
-        public void raise(RemoteEvent event,
-                          Option...   options)
+        public CompletableFuture<Void> raise(RemoteEvent event,
+                                             Option...   options)
         {
-            remoteChannel.raise(event, options);
+            return remoteChannel.raise(event, options);
         }
     }
 }

@@ -130,28 +130,28 @@ public abstract class AbstractCoherenceClusterMember extends AbstractJavaApplica
     @Override
     public int getClusterSize()
     {
-        return submit(new GetClusterSize());
+        return submitAndGet(new GetClusterSize());
     }
 
 
     @Override
     public int getLocalMemberId()
     {
-        return submit(new GetLocalMemberId());
+        return submitAndGet(new GetLocalMemberId());
     }
 
 
     @Override
     public UID getLocalMemberUID()
     {
-        return submit(new GetLocalMemberUID());
+        return submitAndGet(new GetLocalMemberUID());
     }
 
 
     @Override
     public Set<UID> getClusterMemberUIDs()
     {
-        return submit(new GetClusterMemberUIDs());
+        return submitAndGet(new GetClusterMemberUIDs());
     }
 
 
@@ -206,21 +206,21 @@ public abstract class AbstractCoherenceClusterMember extends AbstractJavaApplica
     @Override
     public String getRoleName()
     {
-        return submit(new GetLocalMemberRoleName());
+        return submitAndGet(new GetLocalMemberRoleName());
     }
 
 
     @Override
     public String getSiteName()
     {
-        return submit(new GetLocalMemberSiteName());
+        return submitAndGet(new GetLocalMemberSiteName());
     }
 
 
     @Override
     public String getClusterName()
     {
-        return submit(new GetClusterName());
+        return submitAndGet(new GetClusterName());
     }
 
 
@@ -234,13 +234,13 @@ public abstract class AbstractCoherenceClusterMember extends AbstractJavaApplica
     @Override
     public boolean isServiceRunning(String serviceName)
     {
-        return submit(new IsServiceRunning(serviceName));
+        return submitAndGet(new IsServiceRunning(serviceName));
     }
 
 
     @Override
     public ServiceStatus getServiceStatus(String serviceName)
     {
-        return submit(new GetServiceStatus(serviceName));
+        return submitAndGet(new GetServiceStatus(serviceName));
     }
 }

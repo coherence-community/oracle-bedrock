@@ -80,7 +80,6 @@ import com.oracle.tools.table.Cell;
 import com.oracle.tools.table.Table;
 import com.oracle.tools.table.Tabularize;
 
-import com.oracle.tools.util.CompletionListener;
 import com.oracle.tools.util.ReflectionHelper;
 
 import static com.oracle.tools.deferred.DeferredHelper.ensure;
@@ -102,6 +101,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.UUID;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -693,19 +693,18 @@ public class LocalJavaApplicationLauncher<A extends JavaApplication>
 
 
         @Override
-        public <T> void submit(RemoteCallable<T>     callable,
-                               CompletionListener<T> listener,
-                               Option...             options)
+        public <T> CompletableFuture<T> submit(RemoteCallable<T> callable,
+                                               Option...         options)
         {
-            remoteExecutor.submit(callable, listener, options);
+            return remoteExecutor.submit(callable, options);
         }
 
 
         @Override
-        public void submit(RemoteRunnable runnable,
-                           Option...      options) throws IllegalStateException
+        public CompletableFuture<Void> submit(RemoteRunnable runnable,
+                                              Option...      options) throws IllegalStateException
         {
-            remoteExecutor.submit(runnable, options);
+            return remoteExecutor.submit(runnable, options);
         }
 
 
@@ -726,10 +725,10 @@ public class LocalJavaApplicationLauncher<A extends JavaApplication>
 
 
         @Override
-        public void raise(RemoteEvent event,
-                          Option...   options)
+        public CompletableFuture<Void> raise(RemoteEvent event,
+                                             Option...   options)
         {
-            remoteExecutor.raise(event, options);
+            return remoteExecutor.raise(event, options);
         }
 
 

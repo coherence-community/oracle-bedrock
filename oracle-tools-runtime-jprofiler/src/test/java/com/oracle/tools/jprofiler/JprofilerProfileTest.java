@@ -365,7 +365,7 @@ public class JprofilerProfileTest
             File                 snapshot = new File(folder, "test.jps");
             RemoteCallable<Void> callable = JProfiler.saveSnapshot(snapshot);
 
-            application.submit(callable);
+            application.submit(callable).join();
 
             assertThat(snapshot.exists(), is(true));
 

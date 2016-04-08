@@ -38,7 +38,6 @@ import com.oracle.tools.runtime.java.options.IPv4Preferred;
 
 import com.oracle.tools.runtime.options.Argument;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.instanceOf;
@@ -202,7 +201,7 @@ public class ContainerBasedJavaApplicationTest extends AbstractJavaApplicationTe
         {
             EventingApplication.GetIntCallable.value = 1234;
 
-            int result = application.submit(new EventingApplication.RoundTripCallable());
+            int result = application.submit(new EventingApplication.RoundTripCallable()).get();
 
             assertThat(result, is(1234));
         }

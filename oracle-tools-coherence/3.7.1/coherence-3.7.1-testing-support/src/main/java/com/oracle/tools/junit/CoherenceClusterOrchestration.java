@@ -252,7 +252,7 @@ public class CoherenceClusterOrchestration extends ExternalResource
         // ensure that all services marked as autostart on the proxy have started
         CoherenceClusterMember proxyServer     = cluster.get("proxy-1");
 
-        Set<String>            setServiceNames = proxyServer.submit(new GetAutoStartServiceNames());
+        Set<String>            setServiceNames = proxyServer.submitAndGet(new GetAutoStartServiceNames());
 
         for (String sServiceName : setServiceNames)
         {
@@ -492,11 +492,11 @@ public class CoherenceClusterOrchestration extends ExternalResource
             @Override
             public boolean evaluate(CoherenceClusterMember member)
             {
-                Set<String> setServiceNames = member.submit(new GetAutoStartServiceNames());
+                Set<String> setServiceNames = member.submitAndGet(new GetAutoStartServiceNames());
 
                 for (String sServiceName : setServiceNames)
                 {
-                    ServiceStatus status = member.submit(new GetServiceStatus(sServiceName));
+                    ServiceStatus status = member.submitAndGet(new GetServiceStatus(sServiceName));
 
                     if (status == ServiceStatus.ENDANGERED
                         || status == ServiceStatus.ORPHANED

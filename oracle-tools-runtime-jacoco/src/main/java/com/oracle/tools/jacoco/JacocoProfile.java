@@ -40,6 +40,8 @@ import com.oracle.tools.runtime.options.MetaClass;
 
 import org.jacoco.agent.rt.RT;
 
+import java.util.concurrent.CompletableFuture;
+
 /**
  * The Java Code Coverage (JaCoCo) {@link Profile}.
  * <p>
@@ -113,7 +115,10 @@ public class JacocoProfile implements Profile, Option
         {
             JavaApplication javaApplication = (JavaApplication) application;
 
-            javaApplication.submit(new Dump());
+            CompletableFuture<Void> future = javaApplication.submit(new Dump());
+
+            // Wait for the Dump to complete
+            future.join();
         }
     }
 }

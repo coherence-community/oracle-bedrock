@@ -62,8 +62,6 @@ import com.oracle.tools.runtime.options.Argument;
 import com.oracle.tools.runtime.options.Arguments;
 import com.oracle.tools.runtime.options.DisplayName;
 
-import com.oracle.tools.util.FutureCompletionListener;
-
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -83,6 +81,8 @@ import java.util.List;
 import java.util.UUID;
 
 import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -208,13 +208,15 @@ public abstract class AbstractJavaApplicationTest<P extends Platform> extends Ab
         try (JavaApplication application = getPlatform().launch(JavaApplication.class,
                                                                 ClassName.of(SleepingApplication.class)))
         {
-            application.submit(new ErrorThrowingCallable("Submission Failed"));
+            CompletableFuture<Void> future = application.submit(new ErrorThrowingCallable("Submission Failed"));
+
+            future.join();
 
             fail();
         }
-        catch (RuntimeException e)
+        catch (CompletionException e)
         {
-            Assert.assertThat(e.getCause().getCause().getMessage(), is("Submission Failed"));
+            Assert.assertThat(e.getCause().getMessage(), is("Submission Failed"));
         }
     }
 
@@ -229,12 +231,10 @@ public abstract class AbstractJavaApplicationTest<P extends Platform> extends Ab
                                                                 ClassName.of(TesterApplication.class),
                                                                 IPv4Preferred.yes()))
         {
-            RemoteCallable<Integer> callable = new RemoteCallableStaticMethod<>(TesterApplication.class.getName(),
-                                                                                "getMeaningOfLife");
+            RemoteCallable<Integer>    callable = new RemoteCallableStaticMethod<>(TesterApplication.class.getName(),
+                                                                                   "getMeaningOfLife");
 
-            FutureCompletionListener<Integer> future = new FutureCompletionListener<>();
-
-            application.submit(callable, future);
+            CompletableFuture<Integer> future   = application.submit(callable);
 
             assertThat(future.get(), is(42));
 

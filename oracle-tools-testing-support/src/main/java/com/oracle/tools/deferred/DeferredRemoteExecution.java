@@ -171,7 +171,7 @@ public class DeferredRemoteExecution<T> implements Deferred<T>, CompletionListen
 
                     try
                     {
-                        remoteChannel.submit(callable, this);
+                        remoteChannel.submit(callable).handle(this::handle);
                     }
                     catch (Exception e)
                     {

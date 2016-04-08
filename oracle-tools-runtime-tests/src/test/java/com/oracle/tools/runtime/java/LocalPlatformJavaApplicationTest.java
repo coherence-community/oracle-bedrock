@@ -140,7 +140,7 @@ public class LocalPlatformJavaApplicationTest extends AbstractJavaApplicationTes
                                                         IPv4Preferred.yes(),
                                                         RemoteDebugging.enabled().startSuspended(false)))
         {
-            List<String> args     = app.submit(new GetProgramArgs());
+            List<String> args     = app.submitAndGet(new GetProgramArgs());
             String       debugArg = null;
 
             for (String arg : args)
@@ -182,7 +182,7 @@ public class LocalPlatformJavaApplicationTest extends AbstractJavaApplicationTes
 
             Eventually.assertThat(invoking(console).getCapturedOutputLines(), hasItem(startsWith("Now sleeping")));
 
-            List<String> args     = application.submit(new GetProgramArgs());
+            List<String> args     = application.submitAndGet(new GetProgramArgs());
             String       debugArg = null;
 
             for (String arg : args)
@@ -340,7 +340,7 @@ public class LocalPlatformJavaApplicationTest extends AbstractJavaApplicationTes
                                                         DisplayName.of("TestApp"),
                                                         RemoteDebugging.disabled()))
         {
-            List<String> args     = app.submit(new GetProgramArgs());
+            List<String> args     = app.submitAndGet(new GetProgramArgs());
 
             String       debugArg = null;
 
@@ -549,7 +549,7 @@ public class LocalPlatformJavaApplicationTest extends AbstractJavaApplicationTes
                                                                 ClassName.of(SleepingApplication.class),
                                                                 IPv4Preferred.yes()))
         {
-            String message = application.submit(new GetSystemProperty("message"));
+            String message = application.submitAndGet(new GetSystemProperty("message"));
 
             assertThat(message, is("hello"));
         }
@@ -627,7 +627,7 @@ public class LocalPlatformJavaApplicationTest extends AbstractJavaApplicationTes
                                                         IPv4Preferred.yes(),
                                                         CommercialFeatures.enabled()))
         {
-            List<String> args                       = app.submit(new GetProgramArgs());
+            List<String> args                       = app.submitAndGet(new GetProgramArgs());
 
             String       commercialFeaturesArgument = null;
 
@@ -662,7 +662,7 @@ public class LocalPlatformJavaApplicationTest extends AbstractJavaApplicationTes
                                                                 IPv4Preferred.yes(),
                                                                 WorkingDirectory.subDirectoryOf(folder)))
         {
-            String dir = application.submit(new GetWorkingDirectory());
+            String dir = application.submitAndGet(new GetWorkingDirectory());
 
             assertThat(dir, is(expectedDirectory.getCanonicalPath()));
 
@@ -699,7 +699,7 @@ public class LocalPlatformJavaApplicationTest extends AbstractJavaApplicationTes
         {
             EventingApplication.GetIntCallable.value = 1234;
 
-            int result = application.submit(new EventingApplication.RoundTripCallable());
+            int result = application.submitAndGet(new EventingApplication.RoundTripCallable());
 
             assertThat(result, is(1234));
         }

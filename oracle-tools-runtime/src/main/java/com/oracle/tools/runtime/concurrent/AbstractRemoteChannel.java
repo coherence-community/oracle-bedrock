@@ -34,8 +34,6 @@ import com.oracle.tools.runtime.concurrent.options.StreamName;
 
 import com.oracle.tools.runtime.java.io.ClassLoaderAwareObjectInputStream;
 
-import com.oracle.tools.util.CompletionListener;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -54,6 +52,7 @@ import java.util.HashMap;
 import java.util.Set;
 
 import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -135,9 +134,9 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
     private HashMap<String, Class<? extends Operation>> protocol;
 
     /**
-     * The pending {@link CompletionListener}s to be notified of responses.
+     * The pending {@link CompletableFuture}s to be notified of responses.
      */
-    private ConcurrentHashMap<Long, CompletionListener<?>> pendingListeners;
+    private ConcurrentHashMap<Long, CompletableFuture<?>> pendingListeners;
 
     /**
      * The next available sequence number for a callable sent from
@@ -315,12 +314,12 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
         // no longer accept any more requests
         isReadable.set(false);
 
-        // clear all of the event listeners
-        eventListenersByStreamName.clear();
-
         // gracefully shutdown the executor services
         concurrentExecutionService.shutdown();
         sequentialExecutionService.shutdown();
+
+        // clear all of the event listeners
+        eventListenersByStreamName.clear();
 
         // no longer write any more responses
         isWritable.set(false);
@@ -353,11 +352,11 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
         }
 
         // raise IllegalStateExceptions for any remaining listeners
-        for (CompletionListener listener : pendingListeners.values())
+        for (CompletableFuture listener : pendingListeners.values())
         {
             try
             {
-                listener.onException(new IllegalStateException("RemoteChannel is closed"));
+                listener.completeExceptionally(new IllegalStateException("RemoteChannel is closed"));
             }
             catch (Exception e)
             {
@@ -370,23 +369,17 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
 
 
     @Override
-    public <T> void submit(RemoteCallable<T>     callable,
-                           CompletionListener<T> listener,
-                           Option...             options) throws IllegalStateException
+    public <T> CompletableFuture<T> submit(RemoteCallable<T>     callable,
+                                           Option...             options) throws IllegalStateException
     {
         if (isOpen())
         {
-            long    sequence           = nextSequenceNumber.getAndIncrement();
-            boolean isResponseRequired = listener != null;
+            Options                       submitOptions = Options.from(options);
+            RemoteChannel.AcknowledgeWhen acknowledge   = submitOptions.getOrDefault(AcknowledgeWhen.class,
+                                                                                     AcknowledgeWhen.PROCESSED);
+            CallableOperation             operation     = new CallableOperation(callable, acknowledge);
 
-            if (isResponseRequired)
-            {
-                pendingListeners.put(sequence, listener);
-            }
-
-            CallableOperation operation = new CallableOperation(isResponseRequired, callable);
-
-            sequentialExecutionService.submit(new Sender(sequence, operation));
+            return sendOperation(operation, acknowledge);
         }
         else
         {
@@ -396,15 +389,16 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
 
 
     @Override
-    public void submit(RemoteRunnable runnable,
-                       Option...      options) throws IllegalStateException
+    public CompletableFuture<Void> submit(RemoteRunnable runnable,
+                                          Option...      options) throws IllegalStateException
     {
         if (isOpen())
         {
-            long              sequence  = nextSequenceNumber.getAndIncrement();
-            RunnableOperation operation = new RunnableOperation(runnable);
+            Options                       submitOptions   = Options.from(options);
+            RemoteChannel.AcknowledgeWhen acknowledge     = submitOptions.get(AcknowledgeWhen.class);
+            RunnableOperation             operation       = new RunnableOperation(runnable, acknowledge);
 
-            sequentialExecutionService.submit(new Sender(sequence, operation));
+            return sendOperation(operation, acknowledge);
         }
         else
         {
@@ -414,19 +408,17 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
 
 
     @Override
-    public void raise(RemoteEvent event,
-                      Option...   options)
+    public CompletableFuture<Void> raise(RemoteEvent event,
+                                         Option...   options)
     {
         if (isOpen())
         {
-            Options        listenerOptions = Options.from(options);
+            Options                       raiseOptions = Options.from(options);
+            RemoteChannel.AcknowledgeWhen acknowledge  = raiseOptions.get(AcknowledgeWhen.class);
+            StreamName                    streamName   = raiseOptions.get(StreamName.class);
+            EventOperation                operation    = new EventOperation(streamName, event, acknowledge);
 
-            StreamName     streamName      = listenerOptions.get(StreamName.class);
-
-            long           sequence        = nextSequenceNumber.getAndIncrement();
-            EventOperation operation       = new EventOperation(streamName, event);
-
-            sequentialExecutionService.submit(new Sender(sequence, operation));
+            return sendOperation(operation, acknowledge);
         }
         else
         {
@@ -434,6 +426,27 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
         }
     }
 
+
+    private <T> CompletableFuture<T> sendOperation(Operation operation, AcknowledgeWhen acknowledge)
+    {
+        long   sequence = nextSequenceNumber.getAndIncrement();
+        Sender sender   = new Sender(sequence, operation);
+
+        if (acknowledge == AcknowledgeWhen.SENT)
+        {
+            return CompletableFuture.runAsync(sender, sequentialExecutionService).thenApply((_void) -> null);
+        }
+        else
+        {
+            CompletableFuture<T> future = new CompletableFuture<>();
+
+            pendingListeners.put(sequence, future);
+
+            sequentialExecutionService.submit(sender);
+
+            return future;
+        }
+    }
 
     /**
      * An {@link Operation} to be executed in-order by a {@link AbstractRemoteChannel}.
@@ -519,14 +532,14 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
         /**
          * Constructs a {@link AbstractRemoteChannel.CallableOperation}
          *
-         * @param isResponseRequired
-         * @param callable
+         * @param callable         the {@link Callable} to execute remotely
+         * @param acknowledgeWhen  the type of acknowledgement required
          *
          * @throws NullPointerException      should the {@link Callable} be <code>null</code>
          * @throws IllegalArgumentException  should the {@link Callable} be an anonymous inner class
          */
-        public CallableOperation(boolean     isResponseRequired,
-                                 Callable<?> callable)
+        public CallableOperation(Callable<?>     callable,
+                                 AcknowledgeWhen acknowledgeWhen)
         {
             if (callable == null)
             {
@@ -538,7 +551,7 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
             }
             else
             {
-                this.isResponseRequired = isResponseRequired;
+                this.isResponseRequired = acknowledgeWhen == AcknowledgeWhen.PROCESSED;
                 this.callable           = callable;
             }
         }
@@ -655,6 +668,7 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
          */
         private RemoteEvent event;
 
+        private boolean isAckRequired;
 
         /**
          * Constructs an {@link EventOperation}
@@ -668,21 +682,24 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
         /**
          * Constructs an {@link EventOperation}
          *
-         * @param streamName  the {@link StreamName} for the {@link RemoteEvent}
-         * @param event       the {@link RemoteEvent} to fire remotely
+         * @param streamName       the {@link StreamName} for the {@link RemoteEvent}
+         * @param event            the {@link RemoteEvent} to fire remotely
+         * @param acknowledgeWhen  the type of acknowledgement required
          *
          * @throws NullPointerException      should the {@link RemoteEvent} be <code>null</code>
          * @throws IllegalArgumentException  should the {@link RemoteEvent} be an anonymous inner class
          */
-        public EventOperation(StreamName  streamName,
-                              RemoteEvent event)
+        public EventOperation(StreamName      streamName,
+                              RemoteEvent     event,
+                              AcknowledgeWhen acknowledgeWhen)
         {
             if (streamName == null)
             {
                 throw new NullPointerException("The streamName can't be null");
             }
 
-            this.streamName = streamName;
+            this.streamName    = streamName;
+            this.isAckRequired = acknowledgeWhen == AcknowledgeWhen.PROCESSED;
 
             if (event == null)
             {
@@ -726,7 +743,7 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
                     });
             }
 
-            return null;
+            return isAckRequired ? new ResponseOperation(null) : null;
         }
 
 
@@ -737,6 +754,9 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
             {
                 // read the streamName
                 streamName = StreamName.of(input.readUTF());
+
+                // read notification flag
+                isAckRequired = input.readBoolean();
 
                 // read the callable or the name of the callable class
                 Object object = input.readObject();
@@ -772,6 +792,9 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
         {
             // serialize the stream name
             output.writeUTF(streamName.get());
+
+            // serialize the notification flag
+            output.writeBoolean(isAckRequired);
 
             // serialize the Runnable (if it is!)
             if (event instanceof Serializable)
@@ -872,7 +895,7 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
         @Override
         public Operation execute(long sequence)
         {
-            CompletionListener listener = pendingListeners.remove(sequence);
+            CompletableFuture listener = pendingListeners.remove(sequence);
 
             if (listener != null)
             {
@@ -880,11 +903,11 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
                 {
                     if (response instanceof Throwable)
                     {
-                        listener.onException((Throwable) response);
+                        listener.completeExceptionally((Throwable) response);
                     }
                     else
                     {
-                        listener.onCompletion(response);
+                        listener.complete(response);
                     }
                 }
                 catch (Throwable throwable)
@@ -943,6 +966,11 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
          */
         private Runnable runnable;
 
+        /**
+         * Is a response required for the {@link Runnable}?
+         */
+        private boolean isResponseRequired;
+
 
         /**
          * Constructs a {@link RunnableOperation}
@@ -956,12 +984,13 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
         /**
          * Constructs a {@link RunnableOperation}
          *
-         * @param runnable  the {@link Runnable} to run remotely
+         * @param runnable         the {@link Runnable} to run remotely
+         * @param acknowledgeWhen  the type of acknowledgement required
          *
          * @throws NullPointerException      should the {@link Runnable} be <code>null</code>
          * @throws IllegalArgumentException  should the {@link Runnable} be an anonymous inner class
          */
-        public RunnableOperation(Runnable runnable)
+        public RunnableOperation(Runnable runnable, AcknowledgeWhen acknowledgeWhen)
         {
             if (runnable == null)
             {
@@ -975,6 +1004,8 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
             {
                 this.runnable = runnable;
             }
+
+            this.isResponseRequired = acknowledgeWhen == AcknowledgeWhen.PROCESSED;
         }
 
 
@@ -988,22 +1019,34 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
         @Override
         public Operation execute(long sequence)
         {
+            Operation response = null;
+
             try
             {
                 runnable.run();
+
+                if (isResponseRequired)
+                {
+                    response = new ResponseOperation(null);
+                }
             }
             catch (Throwable throwable)
             {
-                // SKIP: do nothing if there is an exception
+                if (isResponseRequired)
+                {
+                    response = new ResponseOperation(throwable);
+                }
             }
 
-            return null;
+            return response;
         }
 
 
         @Override
         public void read(ObjectInputStream input) throws IOException
         {
+            isResponseRequired = input.readBoolean();
+
             try
             {
                 // read the callable or the name of the callable class
@@ -1038,6 +1081,8 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
         @Override
         public void write(ObjectOutputStream output) throws IOException
         {
+            output.writeBoolean(isResponseRequired);
+
             // serialize the Runnable (if it is!)
             if (runnable instanceof Serializable)
             {
@@ -1115,12 +1160,12 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
                 }
                 catch (NotSerializableException e)
                 {
-                    // determine if a "local" listener was provided with the operation
-                    CompletionListener<?> listener = pendingListeners.remove(sequence);
+                    // determine if a "local" future was provided with the operation
+                    CompletableFuture<?> future = pendingListeners.remove(sequence);
 
-                    if (listener == null)
+                    if (future == null)
                     {
-                        // when there's no "local" listener, we assume we must send a response
+                        // when there's no "local" future, we assume we must send a response
                         sendTemporaryStream = true;
 
                         // while we failed to serialize the operation, that doesn't mean
@@ -1134,12 +1179,12 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
                     }
                     else
                     {
-                        // when there's a "local" listener, we assume we don't need to
+                        // when there's a "local" future, we assume we don't need to
                         // send a response to the original caller
                         sendTemporaryStream = false;
 
-                        // notify the "local" listener of the exception
-                        listener.onException(e);
+                        // notify the "local" future of the exception
+                        future.completeExceptionally(e);
                     }
                 }
 
