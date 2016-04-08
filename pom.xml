@@ -67,6 +67,7 @@
         <module>oracle-tools-runtime-jprofiler</module>
 
         <module>oracle-tools-testing-support</module>
+        <module>oracle-tools-testing-support-tests</module>
 
         <module>oracle-tools-runtime-remote</module>
         <module>oracle-tools-runtime-remote-tests</module>
