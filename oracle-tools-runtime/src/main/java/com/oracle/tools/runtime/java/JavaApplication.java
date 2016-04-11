@@ -25,20 +25,20 @@
 
 package com.oracle.tools.runtime.java;
 
+import com.oracle.tools.Option;
 import com.oracle.tools.Options;
-
+import com.oracle.tools.options.Timeout;
 import com.oracle.tools.runtime.Application;
 import com.oracle.tools.runtime.Platform;
-
 import com.oracle.tools.runtime.annotations.PreferredMetaClass;
-
 import com.oracle.tools.runtime.concurrent.RemoteCallable;
 import com.oracle.tools.runtime.concurrent.RemoteChannel;
 import com.oracle.tools.runtime.concurrent.callable.RemoteMethodInvocation;
 
 import java.io.NotSerializableException;
-
 import java.util.Properties;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 /**
  * An {@link Application} specifically representing Java-based applications.
@@ -98,6 +98,36 @@ public interface JavaApplication extends Application, RemoteChannel
 
 
     /**
+     * Invokes the {@link RemoteCallable} in the {@link JavaApplication},
+     * waiting the default or provided {@link Timeout} for the result.
+     *
+     * @param callable  the {@link RemoteCallable}
+     * @param options   the {@link Option}s
+     *
+     * @param <T>       the type of the result
+     * @return          the value from the {@link RemoteCallable}
+     */
+    public default <T> T invoke(RemoteCallable<T> callable,
+                                Option...         options)
+    {
+        // determine the timeout
+        Options              invokeOptions = new Options(options);
+        Timeout              timeout       = invokeOptions.getOrDefault(Timeout.class, getOptions().get(Timeout.class));
+
+        CompletableFuture<T> future        = submit(callable, options);
+
+        try
+        {
+            return future.get(timeout.to(TimeUnit.MILLISECONDS), TimeUnit.MILLISECONDS);
+        }
+        catch (Exception e)
+        {
+            throw new RuntimeException(e);
+        }
+    }
+
+
+    /**
      * Creates a local proxy of an application owned instance, afterwards the proxy may
      * be used to interact with the application owned instance.
      * <p>
@@ -119,6 +149,7 @@ public interface JavaApplication extends Application, RemoteChannel
     public <T> T getProxyFor(Class<T>                           classToProxy,
                              RemoteCallable<T>                  instanceProducer,
                              RemoteMethodInvocation.Interceptor interceptor);
+
 
     /**
      * The {@link com.oracle.tools.runtime.options.MetaClass} for {@link JavaApplication}s.

@@ -145,23 +145,23 @@ public class DeferredAssert extends Eventually
         {
             ensure(deferredMatch, totalRetryDuration, totalRetryDurationUnits);
         }
-        catch (UnresolvableInstanceException e)
+        catch (PermanentlyUnavailableException e)
         {
             AssertionError error;
 
             if (deferredMatch.getLastUsedMatchValue() == null)
             {
                 error = new AssertionError((message == null ? "" : message + ": ") + "Failed to resolve a value for ["
-                                           + deferredMatch.getDeferred() + "] to evaluate with matcher ["
-                                           + deferredMatch.getMatcher() + "]");
+                                                                                   + deferredMatch.getDeferred()
+                                                                                   + "] to evaluate with matcher ["
+                                                                                   + deferredMatch.getMatcher() + "]");
                 error.initCause(e);
             }
             else
             {
                 error = new AssertionError((message == null ? "" : message + ": ") + "Matcher [" + matcher
-                                           + "] failed to match last resolved value ["
-                                           + deferredMatch.getLastUsedMatchValue() + "] for ["
-                                           + deferredMatch.getDeferred() + "]");
+                    + "] failed to match last resolved value [" + deferredMatch.getLastUsedMatchValue() + "] for ["
+                    + deferredMatch.getDeferred() + "]");
                 error.initCause(e);
             }
 
@@ -169,8 +169,10 @@ public class DeferredAssert extends Eventually
         }
         catch (Exception e)
         {
-            AssertionError error = new AssertionError((message == null ? "" : message + ": ")
-                                                      + "Unexpected exception when attempting to resolve a value for ["
+            AssertionError error =
+                new AssertionError((message == null
+                                    ? ""
+                                    : message + ": ") + "Unexpected exception when attempting to resolve a value for ["
                                                       + deferredMatch.getDeferred() + "] to evaluate with matcher ["
                                                       + deferredMatch.getMatcher() + "]");
 

@@ -25,6 +25,7 @@
 
 package com.oracle.tools.deferred;
 
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -71,6 +72,10 @@ public class Future<T> implements Deferred<T>
         {
             return future.get(0, TimeUnit.SECONDS);
         }
+        catch (CancellationException e)
+        {
+            throw new PermanentlyUnavailableException(this, e);
+        }
         catch (InterruptedException e)
         {
             throw new PermanentlyUnavailableException(this, e);
@@ -81,7 +86,7 @@ public class Future<T> implements Deferred<T>
         }
         catch (TimeoutException e)
         {
-            throw new PermanentlyUnavailableException(this, e);
+            throw new TemporarilyUnavailableException(this, e);
         }
     }
 

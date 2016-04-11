@@ -28,11 +28,8 @@ package com.oracle.tools.deferred;
 import com.oracle.tools.runtime.concurrent.RemoteCallable;
 import com.oracle.tools.runtime.concurrent.RemoteChannel;
 
-import com.oracle.tools.util.CompletionListener;
-
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-
 import java.util.concurrent.Callable;
 
 /**
@@ -44,7 +41,7 @@ import java.util.concurrent.Callable;
  *
  * @author Brian Oliver
  */
-public class DeferredRemoteExecution<T> implements Deferred<T>, CompletionListener<T>
+public class DeferredRemoteExecution<T> implements Deferred<T>
 {
     /**
      * The {@link RemoteChannel} to which the {@link Callable}
@@ -84,56 +81,15 @@ public class DeferredRemoteExecution<T> implements Deferred<T>, CompletionListen
      * @param remoteChannel  the {@link RemoteChannel} to be used for execution
      * @param callable        the {@link RemoteCallable} to execute
      */
-    public DeferredRemoteExecution(RemoteChannel remoteChannel,
+    public DeferredRemoteExecution(RemoteChannel     remoteChannel,
                                    RemoteCallable<T> callable)
     {
-        this.remoteChannel = remoteChannel;
+        this.remoteChannel        = remoteChannel;
         this.callable             = callable;
         this.hasSubmittedCallable = false;
         this.hasResult            = false;
         this.result               = null;
         this.throwable            = null;
-    }
-
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void onCompletion(T result)
-    {
-        synchronized (this)
-        {
-            if (hasResult)
-            {
-                // TODO: serious issue if we've already got a result
-            }
-            else
-            {
-                this.hasResult = true;
-                this.result    = result;
-                this.throwable = null;
-            }
-        }
-    }
-
-
-    @Override
-    public void onException(Throwable throwable)
-    {
-        synchronized (this)
-        {
-            if (hasResult)
-            {
-                // TODO: serious issue if we've already got a result
-            }
-            else
-            {
-                this.hasResult = true;
-                this.result    = null;
-                this.throwable = throwable;
-            }
-        }
     }
 
 
@@ -171,7 +127,29 @@ public class DeferredRemoteExecution<T> implements Deferred<T>, CompletionListen
 
                     try
                     {
-                        remoteChannel.submit(callable).handle(this::handle);
+                        remoteChannel.submit(callable).handle((result, exception) -> {
+                                synchronized (this)
+                                {
+                                    if (hasResult)
+                                    {
+                                        // TODO: serious issue if we've already got a result
+                                    }
+                                    else if (exception == null)
+                                    {
+                                        this.hasResult = true;
+                                        this.result    = result;
+                                        this.throwable = null;
+                                    }
+                                    else
+                                    {
+                                        this.hasResult = true;
+                                        this.result    = null;
+                                        this.throwable = exception;
+                                    }
+                                }
+
+                                return null;
+                            });
                     }
                     catch (Exception e)
                     {

@@ -26,73 +26,58 @@
 package com.oracle.tools.runtime.remote.java;
 
 import com.oracle.tools.deferred.Eventually;
-
 import com.oracle.tools.runtime.Application;
 import com.oracle.tools.runtime.LocalPlatform;
 import com.oracle.tools.runtime.Platform;
-
 import com.oracle.tools.runtime.concurrent.RemoteEvent;
 import com.oracle.tools.runtime.concurrent.RemoteEventListener;
 import com.oracle.tools.runtime.concurrent.options.StreamName;
 import com.oracle.tools.runtime.concurrent.runnable.RuntimeExit;
 import com.oracle.tools.runtime.concurrent.runnable.RuntimeHalt;
-
 import com.oracle.tools.runtime.console.CapturingApplicationConsole;
 import com.oracle.tools.runtime.console.Console;
 import com.oracle.tools.runtime.console.SystemApplicationConsole;
-
 import com.oracle.tools.runtime.java.JavaApplication;
 import com.oracle.tools.runtime.java.options.ClassName;
 import com.oracle.tools.runtime.java.options.IPv4Preferred;
 import com.oracle.tools.runtime.java.options.JavaHome;
 import com.oracle.tools.runtime.java.options.RemoteEvents;
 import com.oracle.tools.runtime.java.profiles.RemoteDebugging;
-
 import com.oracle.tools.runtime.options.Argument;
 import com.oracle.tools.runtime.options.DisplayName;
 import com.oracle.tools.runtime.options.Executable;
 import com.oracle.tools.runtime.options.PlatformSeparators;
 import com.oracle.tools.runtime.options.WorkingDirectory;
-
 import com.oracle.tools.runtime.remote.AbstractRemoteTest;
 import com.oracle.tools.runtime.remote.RemotePlatform;
 import com.oracle.tools.runtime.remote.java.applications.EventingApplication;
 import com.oracle.tools.runtime.remote.java.applications.SleepingApplication;
-
 import com.oracle.tools.util.Capture;
-
 import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.ClassRule;
 import org.junit.Test;
-
 import org.junit.rules.TemporaryFolder;
 
-import static com.oracle.tools.deferred.DeferredHelper.invoking;
+import java.io.File;
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
+import static com.oracle.tools.deferred.DeferredHelper.invoking;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.startsWith;
-
 import static org.hamcrest.MatcherAssert.assertThat;
-
 import static org.hamcrest.Matchers.nullValue;
-
-import java.io.File;
-import java.io.IOException;
-
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.Socket;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Functional tests for {@link RemoteJavaApplicationLauncher}s.
@@ -175,7 +160,7 @@ public class RemoteJavaApplicationLauncherTest extends AbstractRemoteTest
         {
             Eventually.assertThat(invoking(console).getCapturedOutputLines(), hasItem(startsWith("Now sleeping")));
 
-            List<String> args     = application.submitAndGet(new GetProgramArgs());
+            List<String> args     = application.invoke(new GetProgramArgs());
 
             String       debugArg = null;
 
@@ -222,7 +207,7 @@ public class RemoteJavaApplicationLauncherTest extends AbstractRemoteTest
 
             Eventually.assertThat(invoking(console).getCapturedOutputLines(), hasItem(startsWith("Now sleeping")));
 
-            List<String> args     = application.submitAndGet(new GetProgramArgs());
+            List<String> args     = application.invoke(new GetProgramArgs());
             String       debugArg = null;
 
             for (String arg : args)
@@ -359,7 +344,7 @@ public class RemoteJavaApplicationLauncherTest extends AbstractRemoteTest
         {
             Eventually.assertThat(invoking(console).getCapturedOutputLines(), hasItem(startsWith("Now sleeping")));
 
-            List<String> args     = application.submitAndGet(new GetProgramArgs());
+            List<String> args     = application.invoke(new GetProgramArgs());
 
             String       debugArg = null;
 
@@ -471,7 +456,7 @@ public class RemoteJavaApplicationLauncherTest extends AbstractRemoteTest
                                                            DisplayName.of(appName),
                                                            WorkingDirectory.subDirectoryOf(folder)))
         {
-            String dir = application.submitAndGet(new GetWorkingDirectory());
+            String dir = application.invoke(new GetWorkingDirectory());
 
             Assert.assertThat(dir, is(expectedDirectory.getCanonicalPath()));
 

@@ -28,7 +28,6 @@ package com.oracle.tools.runtime.concurrent;
 import com.oracle.tools.Option;
 import com.oracle.tools.Options;
 import com.oracle.tools.runtime.concurrent.options.StreamName;
-import com.oracle.tools.util.CompletionListener;
 
 import java.io.Closeable;
 import java.lang.annotation.Annotation;
@@ -41,7 +40,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 
 /**
  * Provides a means of submitting {@link RemoteCallable}s and {@link RemoteRunnable}s for
@@ -63,43 +61,23 @@ import java.util.concurrent.ExecutionException;
 public interface RemoteChannel extends Closeable
 {
     /**
-     * Submits a {@link RemoteCallable} for asynchronous execution by the
-     * {@link RemoteChannel}.
-     *
-     * @param callable  the {@link RemoteCallable} to be executed
-     * @param options   the {@link Option}s for the {@link RemoteCallable}
-     * @param <T>       the return type of the {@link RemoteCallable}
-     *
-     * @return  a {@link CompletableFuture} that will be completed with the result
-     *                                      of the {@link RemoteCallable} execution.
-     *
-     * @throws IllegalStateException  if the {@link RemoteChannel} is closed or
-     *                                is unable to accept the submission
+     * An {@link Option} signifying what type of notification is
+     * required when raising events.
      */
-    public <T> CompletableFuture<T> submit(RemoteCallable<T> callable, Option... options) throws IllegalStateException;
-
-
-    /**
-     * Submits a {@link RemoteCallable} for asynchronous execution by the
-     * {@link RemoteChannel}.
-     *
-     * @param callable  the {@link RemoteCallable} to be executed
-     * @param listener  a {@link CompletionListener} to be notified upon
-     *                  completed execution of the {@link RemoteCallable}
-     * @param options   the {@link Option}s for the {@link RemoteCallable}
-     * @param <T>       the return type of the {@link RemoteCallable}
-     *
-     * @return  a {@link CompletableFuture} that will be completed with the result
-     *                                      of the {@link RemoteCallable} execution.
-     *
-     * @throws IllegalStateException  if the {@link RemoteChannel} is closed or
-     *                                is unable to accept the submission
-     */
-    public default <T> void submit(RemoteCallable<T>     callable,
-                                   CompletionListener<T> listener,
-                                   Option...             options) throws IllegalStateException
+    enum AcknowledgeWhen implements Option
     {
-        submit(callable, options).handle(listener::handle);
+        /**
+         * The {@link CompletableFuture} returned by the {@link RemoteChannel#raise(RemoteEvent, Option...)}
+         * will be completed when the event has been raised.
+         */
+        @Options.Default
+        SENT,
+
+        /**
+         * The {@link CompletableFuture} returned by the {@link RemoteChannel#raise(RemoteEvent, Option...)}
+         * will be completed when the event has been processed by the remote listeners.
+         */
+        PROCESSED
     }
 
 
@@ -117,17 +95,8 @@ public interface RemoteChannel extends Closeable
      * @throws IllegalStateException  if the {@link RemoteChannel} is closed or
      *                                is unable to accept the submission
      */
-    public default  <T> T submitAndGet(RemoteCallable<T> callable, Option... options) throws IllegalStateException
-    {
-        try
-        {
-            return submit(callable, options).get();
-        }
-        catch (InterruptedException | ExecutionException e)
-        {
-            throw new RuntimeException(e);
-        }
-    }
+    public <T> CompletableFuture<T> submit(RemoteCallable<T> callable,
+                                           Option...         options) throws IllegalStateException;
 
 
     /**
@@ -143,7 +112,8 @@ public interface RemoteChannel extends Closeable
      * @throws IllegalStateException  if the {@link RemoteChannel} is closed or
      *                                is unable to accept the submission
      */
-    public CompletableFuture<Void> submit(RemoteRunnable runnable, Option... options) throws IllegalStateException;
+    public CompletableFuture<Void> submit(RemoteRunnable runnable,
+                                          Option...      options) throws IllegalStateException;
 
 
     /**
@@ -160,7 +130,8 @@ public interface RemoteChannel extends Closeable
      * @param listener  the {@link RemoteEventListener}
      * @param options   the {@link Option}s
      */
-    public void addListener(RemoteEventListener listener, Option... options);
+    public void addListener(RemoteEventListener listener,
+                            Option...           options);
 
 
     /**
@@ -172,7 +143,8 @@ public interface RemoteChannel extends Closeable
      * @param listener  the {@link RemoteEventListener} to remove
      * @param options   the {@link Option}s used to add the {@link RemoteEventListener}
      */
-    public void removeListener(RemoteEventListener listener, Option... options);
+    public void removeListener(RemoteEventListener listener,
+                               Option...           options);
 
 
     /**
@@ -186,7 +158,85 @@ public interface RemoteChannel extends Closeable
      * @param event    the {@link RemoteEvent}
      * @param options  the {@link Option}s
      */
-    public CompletableFuture<Void> raise(RemoteEvent event, Option... options);
+    public CompletableFuture<Void> raise(RemoteEvent event,
+                                         Option...   options);
+
+
+    /**
+     * An abstract class with a single method to inject a {@link RemoteChannel}
+     * into static fields or static methods of other classes.
+     */
+    abstract class Injector
+    {
+        /**
+         * Inject the specified {@link RemoteChannel} into static fields or static methods of
+         * the specified {@link Class}.
+         *
+         * @param targetClass  the {@link Class} to have the {@link RemoteChannel} injected
+         * @param channel      the {@link RemoteChannel} to inject
+         */
+        public static void injectChannel(Class<?>      targetClass,
+                                         RemoteChannel channel)
+        {
+            if (channel == null)
+            {
+                return;
+            }
+
+            try
+            {
+                ClassLoader loader = targetClass.getClassLoader();
+                Class<Annotation> annotation =
+                    (Class<Annotation>) loader.loadClass(RemoteChannel.Inject.class.getName());
+                Class<?> channelClass = channel.getClass();
+
+                for (Method method : targetClass.getMethods())
+                {
+                    int modifiers = method.getModifiers();
+
+                    if (method.getAnnotation(annotation) != null
+                        && method.getParameterTypes().length == 1
+                        && method.getParameterTypes()[0].isAssignableFrom(channelClass)
+                        && Modifier.isStatic(modifiers)
+                        && Modifier.isPublic(modifiers))
+                    {
+                        try
+                        {
+                            method.invoke(null, channel);
+                        }
+                        catch (Exception e)
+                        {
+                            // carry on... perhaps we can use another approach?
+                        }
+                    }
+                }
+
+                for (Field field : targetClass.getFields())
+                {
+                    int modifiers = field.getModifiers();
+
+                    if (field.getAnnotation(annotation) != null
+                        && Modifier.isStatic(modifiers)
+                        && Modifier.isPublic(modifiers)
+                        && field.getType().isAssignableFrom(channelClass))
+                    {
+                        try
+                        {
+                            field.set(null, channel);
+                        }
+                        catch (Exception e)
+                        {
+                            // carry on... perhaps we can use another approach?
+                        }
+                    }
+                }
+            }
+            catch (ClassNotFoundException e)
+            {
+                e.printStackTrace();
+            }
+        }
+    }
 
 
     /**
@@ -233,104 +283,4 @@ public interface RemoteChannel extends Closeable
     @interface Inject
     {
     }
-
-
-    /**
-     * An {@link Option} signifying what type of notification is
-     * required when raising events.
-     */
-    enum AcknowledgeWhen implements Option
-    {
-        /**
-         * The {@link CompletableFuture} returned by
-         * the {@link RemoteChannel#raise(RemoteEvent, Option...)}
-         * will be completed when the event has been raised.
-         */
-        @Options.Default
-        SENT,
-
-        /**
-         * The {@link CompletableFuture} returned by
-         * the {@link RemoteChannel#raise(RemoteEvent, Option...)}
-         * will be completed when the event has been processed by
-         * the remote listeners.
-         */
-        PROCESSED
-    }
-
-    /**
-     * An abstract class with a single method to inject a {@link RemoteChannel}
-     * into static fields or static methods of other classes.
-     */
-    abstract class Injector
-    {
-        /**
-         * Inject the specified {@link RemoteChannel} into static fields or static methods of
-         * the specified {@link Class}.
-         *
-         * @param targetClass  the {@link Class} to have the {@link RemoteChannel} injected
-         * @param channel      the {@link RemoteChannel} to inject
-         */
-        public static void injectChannel(Class<?> targetClass, RemoteChannel channel)
-        {
-            if (channel == null)
-            {
-                return;
-            }
-
-            try
-            {
-                ClassLoader       loader       = targetClass.getClassLoader();
-                Class<Annotation> annotation   = (Class<Annotation>) loader.loadClass(RemoteChannel.Inject.class.getName());
-                Class<?>          channelClass = channel.getClass();
-
-                for (Method method : targetClass.getMethods())
-                {
-                    int modifiers = method.getModifiers();
-
-                    if (method.getAnnotation(annotation) != null
-                        && method.getParameterTypes().length == 1
-                        && method.getParameterTypes()[0].isAssignableFrom(channelClass)
-                        && Modifier.isStatic(modifiers)
-                        && Modifier.isPublic(modifiers))
-                    {
-                        try
-                        {
-                            method.invoke(null, channel);
-                        }
-                        catch (Exception e)
-                        {
-                            // carry on... perhaps we can use another approach?
-                        }
-                    }
-                }
-
-
-                for (Field field : targetClass.getFields())
-                {
-                    int modifiers = field.getModifiers();
-
-                    if (field.getAnnotation(annotation) != null
-                        && Modifier.isStatic(modifiers)
-                        && Modifier.isPublic(modifiers)
-                        && field.getType().isAssignableFrom(channelClass))
-                    {
-                        try
-                        {
-                            field.set(null, channel);
-                        }
-                        catch (Exception e)
-                        {
-                            // carry on... perhaps we can use another approach?
-                        }
-                    }
-                }
-            }
-            catch (ClassNotFoundException e)
-            {
-                e.printStackTrace();
-            }
-        }
-    }
-
 }

@@ -26,11 +26,9 @@
 package com.oracle.tools.runtime.coherence;
 
 import com.oracle.tools.Options;
-
 import com.oracle.tools.runtime.Application;
 import com.oracle.tools.runtime.ApplicationProcess;
 import com.oracle.tools.runtime.Platform;
-
 import com.oracle.tools.runtime.coherence.callables.GetClusterMemberUIDs;
 import com.oracle.tools.runtime.coherence.callables.GetClusterName;
 import com.oracle.tools.runtime.coherence.callables.GetClusterSize;
@@ -40,20 +38,16 @@ import com.oracle.tools.runtime.coherence.callables.GetLocalMemberSiteName;
 import com.oracle.tools.runtime.coherence.callables.GetLocalMemberUID;
 import com.oracle.tools.runtime.coherence.callables.GetServiceStatus;
 import com.oracle.tools.runtime.coherence.callables.IsServiceRunning;
-
 import com.oracle.tools.runtime.java.AbstractJavaApplication;
 import com.oracle.tools.runtime.java.JavaApplication;
 import com.oracle.tools.runtime.java.JavaApplicationProcess;
 import com.oracle.tools.runtime.java.features.JmxFeature;
-
 import com.tangosol.net.NamedCache;
-
 import com.tangosol.util.UID;
-
-import java.util.Set;
 
 import javax.management.MBeanInfo;
 import javax.management.ObjectName;
+import java.util.Set;
 
 /**
  * An abstract implementation of a {@link CoherenceClusterMember}.
@@ -96,7 +90,7 @@ public abstract class AbstractCoherenceClusterMember extends AbstractJavaApplica
      *
      * @return a {@link MBeanInfo}
      *
-     * @throws com.oracle.tools.deferred.UnresolvableInstanceException
+     * @throws com.oracle.tools.deferred.PermanentlyUnavailableException
      *                                        when the resource is not available
      * @throws UnsupportedOperationException  when JMX is not enabled for the
      *                                        {@link JavaApplication}
@@ -130,28 +124,28 @@ public abstract class AbstractCoherenceClusterMember extends AbstractJavaApplica
     @Override
     public int getClusterSize()
     {
-        return submitAndGet(new GetClusterSize());
+        return invoke(new GetClusterSize());
     }
 
 
     @Override
     public int getLocalMemberId()
     {
-        return submitAndGet(new GetLocalMemberId());
+        return invoke(new GetLocalMemberId());
     }
 
 
     @Override
     public UID getLocalMemberUID()
     {
-        return submitAndGet(new GetLocalMemberUID());
+        return invoke(new GetLocalMemberUID());
     }
 
 
     @Override
     public Set<UID> getClusterMemberUIDs()
     {
-        return submitAndGet(new GetClusterMemberUIDs());
+        return invoke(new GetClusterMemberUIDs());
     }
 
 
@@ -167,7 +161,7 @@ public abstract class AbstractCoherenceClusterMember extends AbstractJavaApplica
      *
      * @return a {@link MBeanInfo}
      *
-     * @throws com.oracle.tools.deferred.UnresolvableInstanceException
+     * @throws com.oracle.tools.deferred.PermanentlyUnavailableException
      *                                        when the resource is not available
      * @throws UnsupportedOperationException  when JMX is not enabled for the
      *                                        {@link JavaApplication}
@@ -206,21 +200,21 @@ public abstract class AbstractCoherenceClusterMember extends AbstractJavaApplica
     @Override
     public String getRoleName()
     {
-        return submitAndGet(new GetLocalMemberRoleName());
+        return invoke(new GetLocalMemberRoleName());
     }
 
 
     @Override
     public String getSiteName()
     {
-        return submitAndGet(new GetLocalMemberSiteName());
+        return invoke(new GetLocalMemberSiteName());
     }
 
 
     @Override
     public String getClusterName()
     {
-        return submitAndGet(new GetClusterName());
+        return invoke(new GetClusterName());
     }
 
 
@@ -234,13 +228,13 @@ public abstract class AbstractCoherenceClusterMember extends AbstractJavaApplica
     @Override
     public boolean isServiceRunning(String serviceName)
     {
-        return submitAndGet(new IsServiceRunning(serviceName));
+        return invoke(new IsServiceRunning(serviceName));
     }
 
 
     @Override
     public ServiceStatus getServiceStatus(String serviceName)
     {
-        return submitAndGet(new GetServiceStatus(serviceName));
+        return invoke(new GetServiceStatus(serviceName));
     }
 }

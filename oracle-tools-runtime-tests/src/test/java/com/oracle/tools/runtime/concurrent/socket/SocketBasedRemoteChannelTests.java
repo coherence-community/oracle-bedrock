@@ -26,34 +26,26 @@
 package com.oracle.tools.runtime.concurrent.socket;
 
 import com.oracle.tools.deferred.Eventually;
-
-import com.oracle.tools.deferred.listener.DeferredCompletionListener;
-
 import com.oracle.tools.runtime.concurrent.RemoteCallable;
 import com.oracle.tools.runtime.concurrent.RemoteEvent;
 import com.oracle.tools.runtime.concurrent.RemoteEventListener;
 import com.oracle.tools.runtime.concurrent.RemoteRunnable;
 import com.oracle.tools.runtime.concurrent.options.StreamName;
-
 import org.junit.Assert;
 import org.junit.Test;
 
-import static com.oracle.tools.deferred.DeferredHelper.valueOf;
-
-import static org.hamcrest.CoreMatchers.is;
-
-import static org.junit.Assert.assertThat;
-
 import java.io.IOException;
-
 import java.net.InetAddress;
-
 import java.util.ArrayList;
 import java.util.List;
-
 import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+
+import static com.oracle.tools.deferred.DeferredHelper.future;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
 
 /**
  * Functional Tests for {@link SocketBasedRemoteChannel}s.
@@ -80,17 +72,13 @@ public class SocketBasedRemoteChannelTests
 
             client.open();
 
-            DeferredCompletionListener<String> serverResponse = new DeferredCompletionListener<String>(String.class);
+            CompletableFuture<String> serverResponse = client.submit(new PingPong());
 
-            client.submit(new PingPong(), serverResponse);
+            Eventually.assertThat(future(String.class, serverResponse), is("PONG"));
 
-            Eventually.assertThat(valueOf(serverResponse), is("PONG"));
+            CompletableFuture<String> clientResponse = server.submit(new PingPong());
 
-            DeferredCompletionListener<String> clientResponse = new DeferredCompletionListener<String>(String.class);
-
-            server.submit(new PingPong(), clientResponse);
-
-            Eventually.assertThat(valueOf(clientResponse), is("PONG"));
+            Eventually.assertThat(future(String.class, clientResponse), is("PONG"));
         }
         catch (IOException e)
         {

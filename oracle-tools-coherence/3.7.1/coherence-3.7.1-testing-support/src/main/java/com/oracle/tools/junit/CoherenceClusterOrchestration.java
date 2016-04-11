@@ -27,17 +27,12 @@ package com.oracle.tools.junit;
 
 import com.oracle.tools.Option;
 import com.oracle.tools.Options;
-
 import com.oracle.tools.deferred.Eventually;
-
 import com.oracle.tools.predicate.Predicate;
-
 import com.oracle.tools.runtime.LocalPlatform;
 import com.oracle.tools.runtime.Platform;
-
 import com.oracle.tools.runtime.actions.Block;
 import com.oracle.tools.runtime.actions.InteractiveActionExecutor;
-
 import com.oracle.tools.runtime.coherence.CoherenceCluster;
 import com.oracle.tools.runtime.coherence.CoherenceClusterBuilder;
 import com.oracle.tools.runtime.coherence.CoherenceClusterMember;
@@ -51,34 +46,25 @@ import com.oracle.tools.runtime.coherence.options.LocalHost;
 import com.oracle.tools.runtime.coherence.options.LocalStorage;
 import com.oracle.tools.runtime.coherence.options.Multicast;
 import com.oracle.tools.runtime.coherence.options.RoleName;
-
 import com.oracle.tools.runtime.console.SystemApplicationConsole;
-
 import com.oracle.tools.runtime.java.options.Headless;
 import com.oracle.tools.runtime.java.options.HeapSize;
 import com.oracle.tools.runtime.java.options.HotSpot;
 import com.oracle.tools.runtime.java.options.SystemProperty;
-
 import com.oracle.tools.runtime.options.ApplicationClosingBehavior;
 import com.oracle.tools.runtime.options.DisplayName;
-
 import com.oracle.tools.util.Capture;
-
 import com.tangosol.net.CacheFactory;
 import com.tangosol.net.ConfigurableCacheFactory;
-
 import org.junit.rules.ExternalResource;
-
 import org.junit.runner.Description;
-
 import org.junit.runners.model.Statement;
-
-import static com.oracle.tools.deferred.DeferredHelper.invoking;
-
-import static org.hamcrest.core.Is.is;
 
 import java.util.HashMap;
 import java.util.Set;
+
+import static com.oracle.tools.deferred.DeferredHelper.invoking;
+import static org.hamcrest.core.Is.is;
 
 /**
  * A JUnit {@link ExternalResource} to represent and orchestrate configuring,
@@ -252,7 +238,7 @@ public class CoherenceClusterOrchestration extends ExternalResource
         // ensure that all services marked as autostart on the proxy have started
         CoherenceClusterMember proxyServer     = cluster.get("proxy-1");
 
-        Set<String>            setServiceNames = proxyServer.submitAndGet(new GetAutoStartServiceNames());
+        Set<String>            setServiceNames = proxyServer.invoke(new GetAutoStartServiceNames());
 
         for (String sServiceName : setServiceNames)
         {
@@ -492,11 +478,11 @@ public class CoherenceClusterOrchestration extends ExternalResource
             @Override
             public boolean evaluate(CoherenceClusterMember member)
             {
-                Set<String> setServiceNames = member.submitAndGet(new GetAutoStartServiceNames());
+                Set<String> setServiceNames = member.invoke(new GetAutoStartServiceNames());
 
                 for (String sServiceName : setServiceNames)
                 {
-                    ServiceStatus status = member.submitAndGet(new GetServiceStatus(sServiceName));
+                    ServiceStatus status = member.invoke(new GetServiceStatus(sServiceName));
 
                     if (status == ServiceStatus.ENDANGERED
                         || status == ServiceStatus.ORPHANED

@@ -154,8 +154,8 @@ public class CoherenceClusterOrchestration extends ExternalResource
         // establish the common server schema address and port details
         String hostAddress = platform.getLoopbackAddress().getHostAddress();
 
-        //TODO: remove when NameService respects localhost system property
-        //this.commonMemberOptions.add(LocalHost.of(hostAddress));
+        // TODO: remove when NameService respects localhost system property
+        // this.commonMemberOptions.add(LocalHost.of(hostAddress));
         this.commonMemberOptions.add(ClusterPort.of(clusterPort));
         this.commonMemberOptions.add(Multicast.ttl(0));
 
@@ -238,7 +238,7 @@ public class CoherenceClusterOrchestration extends ExternalResource
         // ensure that all services marked as autostart on the proxy have started
         CoherenceClusterMember proxyServer     = cluster.get("proxy-1");
 
-        Set<String>            setServiceNames = proxyServer.submitAndGet(new GetAutoStartServiceNames());
+        Set<String>            setServiceNames = proxyServer.invoke(new GetAutoStartServiceNames());
 
         for (String sServiceName : setServiceNames)
         {
@@ -490,11 +490,11 @@ public class CoherenceClusterOrchestration extends ExternalResource
             @Override
             public boolean evaluate(CoherenceClusterMember member)
             {
-                Set<String> setServiceNames = member.submitAndGet(new GetAutoStartServiceNames());
+                Set<String> setServiceNames = member.invoke(new GetAutoStartServiceNames());
 
                 for (String sServiceName : setServiceNames)
                 {
-                    ServiceStatus status = member.submitAndGet(new GetServiceStatus(sServiceName));
+                    ServiceStatus status = member.invoke(new GetServiceStatus(sServiceName));
 
                     if (status == ServiceStatus.ENDANGERED
                         || status == ServiceStatus.ORPHANED

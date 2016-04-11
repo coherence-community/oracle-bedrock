@@ -26,18 +26,15 @@
 package com.oracle.tools.deferred;
 
 import com.oracle.tools.runtime.concurrent.RemoteCallable;
-
 import com.oracle.tools.runtime.java.JavaApplication;
-
 import com.oracle.tools.util.Duration;
-
 import org.hamcrest.Matcher;
+
+import java.util.concurrent.TimeUnit;
 
 import static com.oracle.tools.deferred.DeferredHelper.ensure;
 import static com.oracle.tools.deferred.DeferredHelper.eventually;
 import static com.oracle.tools.deferred.DeferredHelper.valueOf;
-
-import java.util.concurrent.TimeUnit;
 
 /**
  * A helper class that defines commonly used "assertThat" methods for the
@@ -180,16 +177,16 @@ public class Eventually
             if (deferredMatch.getLastUsedMatchValue() == null)
             {
                 error = new AssertionError((message == null ? "" : message + ": ") + "Failed to resolve a value for ["
-                                           + deferredMatch.getDeferred() + "] to evaluate with matcher ["
-                                           + deferredMatch.getMatcher() + "]");
+                                                                                   + deferredMatch.getDeferred()
+                                                                                   + "] to evaluate with matcher ["
+                                                                                   + deferredMatch.getMatcher() + "]");
                 error.initCause(e);
             }
             else
             {
                 error = new AssertionError((message == null ? "" : message + ": ") + "Matcher [" + matcher
-                                           + "] failed to match last resolved value ["
-                                           + deferredMatch.getLastUsedMatchValue() + "] for ["
-                                           + deferredMatch.getDeferred() + "]");
+                    + "] failed to match last resolved value [" + deferredMatch.getLastUsedMatchValue() + "] for ["
+                    + deferredMatch.getDeferred() + "]");
                 error.initCause(e);
             }
 
@@ -197,8 +194,10 @@ public class Eventually
         }
         catch (Exception e)
         {
-            AssertionError error = new AssertionError((message == null ? "" : message + ": ")
-                                                      + "Unexpected exception when attempting to resolve a value for ["
+            AssertionError error =
+                new AssertionError((message == null
+                                    ? ""
+                                    : message + ": ") + "Unexpected exception when attempting to resolve a value for ["
                                                       + deferredMatch.getDeferred() + "] to evaluate with matcher ["
                                                       + deferredMatch.getMatcher() + "]");
 
@@ -313,12 +312,10 @@ public class Eventually
                                       TimeUnit           totalRetryDurationUnits) throws AssertionError
     {
         TimeoutConstraint constraint = new SimpleTimeoutConstraint(Duration.ZERO,
-                                                                   DeferredHelper
-                                                                       .getDefaultEnsuredMaximumPollingDuration(),
+                                                                   DeferredHelper.getDefaultEnsuredMaximumPollingDuration(),
                                                                    Duration.of(totalRetryDuration,
                                                                                totalRetryDurationUnits),
-                                                                   DeferredHelper
-                                                                       .getDefaultEnsuredRetryDurationsIterable());
+                                                                   DeferredHelper.getDefaultEnsuredRetryDurationsIterable());
 
         assertThat(null, eventually(value), matcher, constraint);
     }
@@ -350,12 +347,10 @@ public class Eventually
                                       TimeUnit           totalRetryDurationUnits) throws AssertionError
     {
         TimeoutConstraint constraint = new SimpleTimeoutConstraint(Duration.ZERO,
-                                                                   DeferredHelper
-                                                                       .getDefaultEnsuredMaximumPollingDuration(),
+                                                                   DeferredHelper.getDefaultEnsuredMaximumPollingDuration(),
                                                                    Duration.of(totalRetryDuration,
                                                                                totalRetryDurationUnits),
-                                                                   DeferredHelper
-                                                                       .getDefaultEnsuredRetryDurationsIterable());
+                                                                   DeferredHelper.getDefaultEnsuredRetryDurationsIterable());
 
         assertThat(message, eventually(value), matcher, constraint);
     }
@@ -384,12 +379,10 @@ public class Eventually
                                       TimeUnit           totalRetryDurationUnits) throws AssertionError
     {
         TimeoutConstraint constraint = new SimpleTimeoutConstraint(Duration.ZERO,
-                                                                   DeferredHelper
-                                                                       .getDefaultEnsuredMaximumPollingDuration(),
+                                                                   DeferredHelper.getDefaultEnsuredMaximumPollingDuration(),
                                                                    Duration.of(totalRetryDuration,
                                                                                totalRetryDurationUnits),
-                                                                   DeferredHelper
-                                                                       .getDefaultEnsuredRetryDurationsIterable());
+                                                                   DeferredHelper.getDefaultEnsuredRetryDurationsIterable());
 
         assertThat(null, deferred, matcher, constraint);
     }
@@ -420,12 +413,10 @@ public class Eventually
                                       TimeUnit           totalRetryDurationUnits) throws AssertionError
     {
         TimeoutConstraint constraint = new SimpleTimeoutConstraint(Duration.ZERO,
-                                                                   DeferredHelper
-                                                                       .getDefaultEnsuredMaximumPollingDuration(),
+                                                                   DeferredHelper.getDefaultEnsuredMaximumPollingDuration(),
                                                                    Duration.of(totalRetryDuration,
                                                                                totalRetryDurationUnits),
-                                                                   DeferredHelper
-                                                                       .getDefaultEnsuredRetryDurationsIterable());
+                                                                   DeferredHelper.getDefaultEnsuredRetryDurationsIterable());
 
         assertThat(message, deferred, matcher, constraint);
     }
@@ -455,17 +446,11 @@ public class Eventually
                                       TimeUnit           totalRetryDurationUnits) throws AssertionError
     {
         TimeoutConstraint constraint = new SimpleTimeoutConstraint(Duration.ZERO,
-                                                                   DeferredHelper
-                                                                       .getDefaultEnsuredMaximumPollingDuration(),
+                                                                   DeferredHelper.getDefaultEnsuredMaximumPollingDuration(),
                                                                    Duration.of(totalRetryDuration,
                                                                                totalRetryDurationUnits),
-                                                                   DeferredHelper
-                                                                       .getDefaultEnsuredRetryDurationsIterable());
+                                                                   DeferredHelper.getDefaultEnsuredRetryDurationsIterable());
 
         assertThat(valueOf(new DeferredRemoteExecution<T>(application, callable)), matcher, constraint);
     }
-
-    // ------------------------------------------------------------------------
-    // </deferred-methods> (will be removed in a later release)
-    // ------------------------------------------------------------------------
 }

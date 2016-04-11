@@ -28,18 +28,11 @@ package com.oracle.tools.runtime.java;
 import classloader.applications.EventingApplication;
 import classloader.applications.ParentApplication;
 import classloader.applications.SleepingApplication;
-
 import com.oracle.tools.deferred.Eventually;
-
-import com.oracle.tools.deferred.listener.DeferredCompletionListener;
-
 import com.oracle.tools.io.NetworkHelper;
-
 import com.oracle.tools.options.Timeout;
-
 import com.oracle.tools.runtime.Application;
 import com.oracle.tools.runtime.LocalPlatform;
-
 import com.oracle.tools.runtime.concurrent.RemoteChannel;
 import com.oracle.tools.runtime.concurrent.RemoteChannelListener;
 import com.oracle.tools.runtime.concurrent.callable.GetSystemProperty;
@@ -48,10 +41,8 @@ import com.oracle.tools.runtime.concurrent.runnable.RuntimeHalt;
 import com.oracle.tools.runtime.concurrent.runnable.SystemExit;
 import com.oracle.tools.runtime.concurrent.socket.SocketBasedRemoteChannelServer;
 import com.oracle.tools.runtime.concurrent.socket.SocketBasedRemoteChannelTests;
-
 import com.oracle.tools.runtime.console.CapturingApplicationConsole;
 import com.oracle.tools.runtime.console.Console;
-
 import com.oracle.tools.runtime.java.options.ClassName;
 import com.oracle.tools.runtime.java.options.HeapSize;
 import com.oracle.tools.runtime.java.options.HotSpot;
@@ -60,27 +51,32 @@ import com.oracle.tools.runtime.java.options.JavaHome;
 import com.oracle.tools.runtime.java.options.SystemProperty;
 import com.oracle.tools.runtime.java.profiles.CommercialFeatures;
 import com.oracle.tools.runtime.java.profiles.RemoteDebugging;
-
 import com.oracle.tools.runtime.options.Argument;
 import com.oracle.tools.runtime.options.DisplayName;
 import com.oracle.tools.runtime.options.Executable;
 import com.oracle.tools.runtime.options.Orphanable;
 import com.oracle.tools.runtime.options.PlatformSeparators;
 import com.oracle.tools.runtime.options.WorkingDirectory;
-
 import com.oracle.tools.util.Capture;
-
 import org.junit.Assume;
 import org.junit.ClassRule;
 import org.junit.Ignore;
 import org.junit.Test;
-
 import org.junit.rules.TemporaryFolder;
 
-import static com.oracle.tools.deferred.DeferredHelper.delayedBy;
-import static com.oracle.tools.deferred.DeferredHelper.invoking;
-import static com.oracle.tools.deferred.DeferredHelper.valueOf;
+import java.io.File;
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
+import static com.oracle.tools.deferred.DeferredHelper.delayedBy;
+import static com.oracle.tools.deferred.DeferredHelper.future;
+import static com.oracle.tools.deferred.DeferredHelper.invoking;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.CoreMatchers.is;
@@ -88,21 +84,7 @@ import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.CoreMatchers.startsWith;
-
 import static org.junit.Assert.assertThat;
-
-import java.io.File;
-import java.io.IOException;
-
-import java.net.InetSocketAddress;
-
-import java.util.List;
-import java.util.UUID;
-
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Functional Tests for {@link LocalJavaApplicationLauncher}s.
@@ -140,7 +122,7 @@ public class LocalPlatformJavaApplicationTest extends AbstractJavaApplicationTes
                                                         IPv4Preferred.yes(),
                                                         RemoteDebugging.enabled().startSuspended(false)))
         {
-            List<String> args     = app.submitAndGet(new GetProgramArgs());
+            List<String> args     = app.invoke(new GetProgramArgs());
             String       debugArg = null;
 
             for (String arg : args)
@@ -182,7 +164,7 @@ public class LocalPlatformJavaApplicationTest extends AbstractJavaApplicationTes
 
             Eventually.assertThat(invoking(console).getCapturedOutputLines(), hasItem(startsWith("Now sleeping")));
 
-            List<String> args     = application.submitAndGet(new GetProgramArgs());
+            List<String> args     = application.invoke(new GetProgramArgs());
             String       debugArg = null;
 
             for (String arg : args)
@@ -340,7 +322,7 @@ public class LocalPlatformJavaApplicationTest extends AbstractJavaApplicationTes
                                                         DisplayName.of("TestApp"),
                                                         RemoteDebugging.disabled()))
         {
-            List<String> args     = app.submitAndGet(new GetProgramArgs());
+            List<String> args     = app.invoke(new GetProgramArgs());
 
             String       debugArg = null;
 
@@ -392,12 +374,11 @@ public class LocalPlatformJavaApplicationTest extends AbstractJavaApplicationTes
             }
 
             // submit the child a request to prove that it's orphaned
-            RemoteChannel                      child            = listener.getExecutor();
-            DeferredCompletionListener<String> deferredResponse = new DeferredCompletionListener<>(String.class);
+            RemoteChannel             child    = listener.getExecutor();
 
-            child.submit(new SocketBasedRemoteChannelTests.PingPong(), deferredResponse);
+            CompletableFuture<String> response = child.submit(new SocketBasedRemoteChannelTests.PingPong());
 
-            Eventually.assertThat(valueOf(deferredResponse), is("PONG"));
+            Eventually.assertThat(future(String.class, response), is("PONG"));
 
             // shutdown the client (by invoking a System.exit internally)
             child.submit(new SystemExit());
@@ -470,11 +451,9 @@ public class LocalPlatformJavaApplicationTest extends AbstractJavaApplicationTes
                                                                 IPv4Preferred.yes()))
         {
             // request the system property from the SleepingApplication
-            DeferredCompletionListener<String> deferredResponse = new DeferredCompletionListener<String>(String.class);
+            CompletableFuture<String> future = application.submit(new GetSystemProperty("uuid"));
 
-            application.submit(new GetSystemProperty("uuid"), deferredResponse);
-
-            Eventually.assertThat(valueOf(deferredResponse), is(uuid));
+            Eventually.assertThat(future(String.class, future), is(uuid));
         }
     }
 
@@ -549,7 +528,7 @@ public class LocalPlatformJavaApplicationTest extends AbstractJavaApplicationTes
                                                                 ClassName.of(SleepingApplication.class),
                                                                 IPv4Preferred.yes()))
         {
-            String message = application.submitAndGet(new GetSystemProperty("message"));
+            String message = application.invoke(new GetSystemProperty("message"));
 
             assertThat(message, is("hello"));
         }
@@ -627,7 +606,7 @@ public class LocalPlatformJavaApplicationTest extends AbstractJavaApplicationTes
                                                         IPv4Preferred.yes(),
                                                         CommercialFeatures.enabled()))
         {
-            List<String> args                       = app.submitAndGet(new GetProgramArgs());
+            List<String> args                       = app.invoke(new GetProgramArgs());
 
             String       commercialFeaturesArgument = null;
 
@@ -662,7 +641,7 @@ public class LocalPlatformJavaApplicationTest extends AbstractJavaApplicationTes
                                                                 IPv4Preferred.yes(),
                                                                 WorkingDirectory.subDirectoryOf(folder)))
         {
-            String dir = application.submitAndGet(new GetWorkingDirectory());
+            String dir = application.invoke(new GetWorkingDirectory());
 
             assertThat(dir, is(expectedDirectory.getCanonicalPath()));
 
@@ -699,7 +678,7 @@ public class LocalPlatformJavaApplicationTest extends AbstractJavaApplicationTes
         {
             EventingApplication.GetIntCallable.value = 1234;
 
-            int result = application.submitAndGet(new EventingApplication.RoundTripCallable());
+            int result = application.invoke(new EventingApplication.RoundTripCallable());
 
             assertThat(result, is(1234));
         }
