@@ -26,15 +26,12 @@
 package com.oracle.tools.runtime;
 
 import com.oracle.tools.Option;
-
 import com.oracle.tools.predicate.Predicate;
 
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-
 import java.util.concurrent.CopyOnWriteArraySet;
-
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -91,20 +88,24 @@ public abstract class AbstractAssembly<A extends Application> implements Assembl
 
 
     /**
-     * Obtains an {@link Application} in this {@link Assembly} with the given name.
+     * Obtains an {@link Application} in this {@link Assembly} matching the given name
+     * (as a regular expression).
+     *
      * If no such {@link Application} exists in the {@link Assembly}, <code>null</code>
      * will be returned.  If multiple {@link Application}s in the {@link Assembly}
-     * have the given name, an arbitrary {@link Application} of the name will be returned
+     * matching the given name, an arbitrary {@link Application} matching the specified
+     * name will be returned
      *
-     * @param name  the name of the application to get
-     * @return the application in this {@link Assembly} with the given name or null
-     *         if no application has been realized with the given name
+     * @param pattern  a regular expression for the name of the application
+     *
+     * @return the application in this {@link Assembly} matching the given name or null
+     *         if no application has matched with the given name
      */
-    public A get(String name)
+    public A get(String pattern)
     {
         for (A application : applications)
         {
-            if (application.getName().equals(name))
+            if (application.getName().matches(pattern))
             {
                 return application;
             }
@@ -116,19 +117,22 @@ public abstract class AbstractAssembly<A extends Application> implements Assembl
 
     /**
      * Obtains the {@link Application}s in this {@link Assembly} where by their
-     * {@link Application#getName()} starts with the specified prefix.
+     * {@link Application#getName()} matches the specified pattern (as a regex)
+     * or starts with the specified pattern.
      *
-     * @param prefix  the prefix of application names to return
-     * @return an {@link Iterable} over the {@link Application}s starting
-     *         with the specified prefix
+     * @param pattern  the pattern to match with {@link Application#getName()}s
+     * @return an {@link Iterable} over the {@link Application}s matching or
+     *         starting with the specified pattern
      */
-    public Iterable<A> getAll(String prefix)
+    public Iterable<A> getAll(String pattern)
     {
         LinkedList<A> list = new LinkedList<A>();
 
         for (A application : applications)
         {
-            if (application.getName().startsWith(prefix))
+            String name = application.getName();
+
+            if (name.startsWith(pattern) || name.matches(pattern))
             {
                 list.add(application);
             }

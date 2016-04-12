@@ -672,6 +672,10 @@ reverse chronological order.
 *   [ORACLETOOLS-304](https://java.net/jira/browse/ORACLETOOLS-304): Introduced
     Options... parameters for RemoteChannel.submit(...) methods.
 
+*   [ORACLETOOLS-310](https://java.net/jira/browse/ORACLETOOLS-310): Allowed
+    Assembly.get(String) and Assembly.getAll(String) methods to use the provided
+    parameters as regular expressions.
+
 <h4>oracle-tools-runtime-jacoco</h4>
 
 *   [ORACLETOOLS-290](https://java.net/jira/browse/ORACLETOOLS-290): Introduced
