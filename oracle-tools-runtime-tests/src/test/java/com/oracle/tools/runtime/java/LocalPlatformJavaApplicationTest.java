@@ -459,6 +459,29 @@ public class LocalPlatformJavaApplicationTest extends AbstractJavaApplicationTes
 
 
     /**
+     * Ensure that {@link JavaApplication}s can is launched with a system-property
+     * that contains spaces.
+     */
+    @Test
+    public void shouldLaunchJavaApplicationUsingSystemPropertyWithSpaces()
+    {
+        // set a System-Property for the SleepingApplication (we'll request it back)
+        String message = "Hello World";
+
+        try (JavaApplication application = getPlatform().launch(JavaApplication.class,
+                                                                ClassName.of(SleepingApplication.class),
+                                                                SystemProperty.of("message", message),
+                                                                IPv4Preferred.yes()))
+        {
+            // request the system property from the SleepingApplication
+            String propertyValue = application.invoke(new GetSystemProperty("message"));
+
+            assertThat(propertyValue, is(message));
+        }
+    }
+
+
+    /**
      * Ensure that {@link JavaApplication}s use the set the JAVA_HOME environment variable.
      */
     @Test

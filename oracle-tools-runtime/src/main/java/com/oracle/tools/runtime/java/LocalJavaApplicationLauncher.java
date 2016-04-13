@@ -432,7 +432,7 @@ public class LocalJavaApplicationLauncher<A extends JavaApplication>
             {
                 processBuilder.command().add("-D" + propertyName
                                              + (propertyValue.isEmpty()
-                                                ? "" : "=" + StringHelper.doubleQuoteIfNecessary(propertyValue)));
+                                                ? "" : "=" + propertyValue));
 
                 systemPropertiesTable.addRow(propertyName, propertyValue);
             }
@@ -556,6 +556,8 @@ public class LocalJavaApplicationLauncher<A extends JavaApplication>
 
         try
         {
+            System.out.println("Starting with: " + processBuilder.command());
+
             process = processBuilder.start();
         }
         catch (IOException e)

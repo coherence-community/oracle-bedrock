@@ -31,6 +31,7 @@ import com.oracle.tools.runtime.LocalPlatform;
 import com.oracle.tools.runtime.Platform;
 import com.oracle.tools.runtime.concurrent.RemoteEvent;
 import com.oracle.tools.runtime.concurrent.RemoteEventListener;
+import com.oracle.tools.runtime.concurrent.callable.GetSystemProperty;
 import com.oracle.tools.runtime.concurrent.options.StreamName;
 import com.oracle.tools.runtime.concurrent.runnable.RuntimeExit;
 import com.oracle.tools.runtime.concurrent.runnable.RuntimeHalt;
@@ -42,6 +43,7 @@ import com.oracle.tools.runtime.java.options.ClassName;
 import com.oracle.tools.runtime.java.options.IPv4Preferred;
 import com.oracle.tools.runtime.java.options.JavaHome;
 import com.oracle.tools.runtime.java.options.RemoteEvents;
+import com.oracle.tools.runtime.java.options.SystemProperty;
 import com.oracle.tools.runtime.java.profiles.RemoteDebugging;
 import com.oracle.tools.runtime.options.Argument;
 import com.oracle.tools.runtime.options.DisplayName;
@@ -137,6 +139,31 @@ public class RemoteJavaApplicationLauncherTest extends AbstractRemoteTest
             application.close();
 
             assertThat(application.exitValue(), is(0));
+        }
+    }
+
+
+    /**
+     * Ensure that {@link JavaApplication}s can is launched with a system-property
+     * that contains spaces.
+     */
+    @Test
+    public void shouldLaunchJavaApplicationUsingSystemPropertyWithSpaces() throws Exception
+    {
+        RemotePlatform platform = getRemotePlatform();
+
+        // set a System-Property for the SleepingApplication (we'll request it back)
+        String message = "Hello World";
+
+        try (JavaApplication application = platform.launch(JavaApplication.class,
+                                                           ClassName.of(SleepingApplication.class),
+                                                           SystemProperty.of("message", message),
+                                                           IPv4Preferred.yes()))
+        {
+            // request the system property from the SleepingApplication
+            String propertyValue = application.invoke(new GetSystemProperty("message"));
+
+            Assert.assertThat(propertyValue, is(message));
         }
     }
 
