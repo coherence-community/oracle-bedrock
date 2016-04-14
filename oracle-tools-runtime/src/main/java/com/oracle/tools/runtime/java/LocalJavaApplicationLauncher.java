@@ -556,8 +556,6 @@ public class LocalJavaApplicationLauncher<A extends JavaApplication>
 
         try
         {
-            System.out.println("Starting with: " + processBuilder.command());
-
             process = processBuilder.start();
         }
         catch (IOException e)
