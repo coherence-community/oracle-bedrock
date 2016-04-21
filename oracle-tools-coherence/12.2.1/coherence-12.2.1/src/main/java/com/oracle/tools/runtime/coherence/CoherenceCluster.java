@@ -25,17 +25,19 @@
 
 package com.oracle.tools.runtime.coherence;
 
+import com.oracle.tools.Options;
 import com.oracle.tools.runtime.AbstractAssembly;
 import com.oracle.tools.runtime.Assembly;
-
+import com.oracle.tools.runtime.coherence.callables.GetAutoStartServiceNames;
+import com.oracle.tools.runtime.coherence.callables.GetServiceStatus;
 import com.tangosol.net.NamedCache;
-
 import com.tangosol.util.UID;
 
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.function.Predicate;
 
 /**
  * An {@link Assembly} that represents a collection of {@link CoherenceClusterMember}s.
@@ -51,10 +53,12 @@ public class CoherenceCluster extends AbstractAssembly<CoherenceClusterMember>
      * Constructs a {@link CoherenceCluster} given a list of {@link CoherenceClusterMember}s.
      *
      * @param members  the {@link CoherenceClusterMember}s
+     * @param options  the shared / common {@link Options} used to launch the {@link CoherenceClusterMember}s
      */
-    public CoherenceCluster(List<? extends CoherenceClusterMember> members)
+    public CoherenceCluster(List<? extends CoherenceClusterMember> members,
+                            Options                                options)
     {
-        super(members);
+        super(members, options);
     }
 
 
@@ -117,5 +121,43 @@ public class CoherenceCluster extends AbstractAssembly<CoherenceClusterMember>
         Iterator<CoherenceClusterMember> members = iterator();
 
         return members.hasNext() ? members.next().getCache(cacheName, keyClass, valueClass) : null;
+    }
+
+
+    /**
+     * Useful {@link Predicate}s for a {@link CoherenceCluster}.
+     */
+    public interface Predicates
+    {
+        /**
+         * A {@link Predicate} to determine if all of the services of
+         * {@link CoherenceClusterMember}s are safe.
+         *
+         * @return  a {@link Predicate}
+         */
+        static Predicate<CoherenceCluster> autoStartServicesSafe()
+        {
+            return (cluster) -> {
+                       for (CoherenceClusterMember member : cluster)
+                       {
+                           Set<String> setServiceNames = member.invoke(new GetAutoStartServiceNames());
+
+                           for (String sServiceName : setServiceNames)
+                           {
+                               ServiceStatus status = member.invoke(new GetServiceStatus(sServiceName));
+
+                               if (status == ServiceStatus.ENDANGERED
+                                   || status == ServiceStatus.ORPHANED
+                                   || status == ServiceStatus.STOPPED
+                                   || status == ServiceStatus.UNKNOWN)
+                               {
+                                   return false;
+                               }
+                           }
+                       }
+
+                       return true;
+                   };
+        }
     }
 }

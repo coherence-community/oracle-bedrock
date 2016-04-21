@@ -25,6 +25,8 @@
 
 package com.oracle.tools.runtime;
 
+import com.oracle.tools.Options;
+
 import java.util.List;
 
 /**
@@ -43,9 +45,11 @@ public class SimpleAssembly<A extends Application> extends AbstractAssembly<A>
      * Constructs a {@link SimpleAssembly}
      *
      * @param applications  the {@link Application}s for the {@link Assembly}
+     * @param options       the shared / common {@link Options} used to launch the {@link Application}s
      */
-    public SimpleAssembly(List<? extends A> applications)
+    public SimpleAssembly(List<? extends A> applications,
+                          Options           options)
     {
-        super(applications);
+        super(applications, options);
     }
 }

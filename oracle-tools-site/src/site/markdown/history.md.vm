@@ -676,6 +676,23 @@ reverse chronological order.
     Assembly.get(String) and Assembly.getAll(String) methods to use the provided
     parameters as regular expressions.
 
+*   [ORACLETOOLS-314](https://java.net/jira/browse/ORACLETOOLS-314): Introduced
+    ApplicationStream support interface and implementation for AbstractAssembly
+    allowing the use of Stream-like interfaces for Applications, including
+    the ability to filter, map, reduce, collect, close and relaunch them.  This
+    replaces the need for the concept of Actions and the entire
+    com.oracle.tools.runtime.actions package (now removed)
+
+    *BREAKING CHANGE:*  All uses of the actions are now removed.  Applications
+     should migrate to using ApplicationStreams which offer broader functionality.
+
+*   [ORACLETOOLS-315](https://java.net/jira/browse/ORACLETOOLS-315): Replaced
+    and remove Oracle Tools-based Predicate interface with the standard
+    Java 8 Predicate interface.
+
+    *BREAKING CHANGE:*  All uses of the previous Predicate interface must be
+    refactored to use the Java 8 Predicate interface.
+
 <h4>oracle-tools-runtime-jacoco</h4>
 
 *   [ORACLETOOLS-290](https://java.net/jira/browse/ORACLETOOLS-290): Introduced
@@ -883,6 +900,10 @@ reverse chronological order.
 *   [ORACLETOOLS-206](https://java.net/jira/browse/ORACLETOOLS-206): Moved
     CoherenceClusterSchema.isStorageEnabled() method to the
     CoherenceClusterMemberSchema interface.
+
+*   [ORACLETOOLS-312](https://java.net/jira/browse/ORACLETOOLS-312): Resolved
+    issue where CoherenceClusterBuilder did not ensure the cluster had reached
+    the desired size before returning.
 
 <h4>oracle-tools-coherence-testing-support</h4>
 

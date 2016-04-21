@@ -25,7 +25,7 @@
 
 package com.oracle.tools.deferred;
 
-import com.oracle.tools.predicate.Predicate;
+import java.util.function.Predicate;
 
 /**
  * A {@link DeferredPredicate} is a {@link Deferred} that represents an attempt to
@@ -145,7 +145,7 @@ public class DeferredPredicate<T> implements Deferred<Boolean>
         {
             lastMatchedValue = deferred.get();
 
-            if (predicate.evaluate(lastMatchedValue))
+            if (predicate.test(lastMatchedValue))
             {
                 return true;
             }

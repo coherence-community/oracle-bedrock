@@ -25,7 +25,6 @@
 
 package com.oracle.tools.junit;
 
-import com.oracle.tools.predicate.Predicate;
 import org.junit.experimental.runners.Enclosed;
 import org.junit.runner.RunWith;
 
@@ -33,6 +32,7 @@ import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.function.Predicate;
 
 /**
  * A {@link Predicate} that can be used to determine whether a
@@ -46,7 +46,7 @@ import java.lang.reflect.Modifier;
 public class TestClassPredicate implements Predicate<Class<?>>, Serializable
 {
     @Override
-    public boolean evaluate(Class<?> testClass)
+    public boolean test(Class<?> testClass)
     {
         if (testClass == null
             || testClass.isAnnotation()
@@ -96,8 +96,7 @@ public class TestClassPredicate implements Predicate<Class<?>>, Serializable
      */
     protected boolean isJUnit4(Class<?> testClass)
     {
-        return !isAbstract(testClass)
-               && (isAnnotatedWithRunWith(testClass) || hasMethodsAnnotatedWithTest(testClass));
+        return !isAbstract(testClass) && (isAnnotatedWithRunWith(testClass) || hasMethodsAnnotatedWithTest(testClass));
     }
 
 
@@ -195,9 +194,9 @@ public class TestClassPredicate implements Predicate<Class<?>>, Serializable
      */
     protected boolean hasMethodsAnnotatedWithTest(Class<?> testClass)
     {
-        for ( Method method : testClass.getDeclaredMethods() )
+        for (Method method : testClass.getDeclaredMethods())
         {
-            for ( Annotation annotation : method.getAnnotations() )
+            for (Annotation annotation : method.getAnnotations())
             {
                 if (org.junit.Test.class.isAssignableFrom(annotation.annotationType()))
                 {

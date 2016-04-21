@@ -28,18 +28,12 @@ package com.oracle.tools.junit;
 import com.oracle.tools.Option;
 import com.oracle.tools.Options;
 import com.oracle.tools.deferred.Eventually;
-import com.oracle.tools.predicate.Predicate;
 import com.oracle.tools.runtime.LocalPlatform;
 import com.oracle.tools.runtime.Platform;
-import com.oracle.tools.runtime.actions.Block;
-import com.oracle.tools.runtime.actions.InteractiveActionExecutor;
 import com.oracle.tools.runtime.coherence.CoherenceCluster;
 import com.oracle.tools.runtime.coherence.CoherenceClusterBuilder;
 import com.oracle.tools.runtime.coherence.CoherenceClusterMember;
-import com.oracle.tools.runtime.coherence.ServiceStatus;
-import com.oracle.tools.runtime.coherence.actions.RestartCoherenceClusterMemberAction;
 import com.oracle.tools.runtime.coherence.callables.GetAutoStartServiceNames;
-import com.oracle.tools.runtime.coherence.callables.GetServiceStatus;
 import com.oracle.tools.runtime.coherence.options.ClusterName;
 import com.oracle.tools.runtime.coherence.options.ClusterPort;
 import com.oracle.tools.runtime.coherence.options.LocalStorage;
@@ -467,88 +461,5 @@ public class CoherenceClusterOrchestration extends ExternalResource
         storageMemberCount = count;
 
         return this;
-    }
-
-
-    /**
-     * Perform a rolling restart of all of the storage members of the cluster.
-     * <p>
-     * This method performs a safe rolling restart, ensuring that the distributed
-     * cache services are in a "safe" state before restarting the next member.
-     * <p>
-     * Rolling restart is not supported on a cluster with only a single storage
-     * enabled member.
-     *
-     * @param options the {@link Option}s to use when realizing each new {@link CoherenceClusterMember}
-     *
-     * @throws IllegalStateException if the cluster has only a single storage member.
-     */
-    public void restartStorageMembers(Option... options)
-    {
-        Predicate<CoherenceClusterMember> predicate = new Predicate<CoherenceClusterMember>()
-        {
-            @Override
-            public boolean evaluate(CoherenceClusterMember member)
-            {
-                Set<String> setServiceNames = member.invoke(new GetAutoStartServiceNames());
-
-                for (String sServiceName : setServiceNames)
-                {
-                    ServiceStatus status = member.invoke(new GetServiceStatus(sServiceName));
-
-                    if (status == ServiceStatus.ENDANGERED
-                        || status == ServiceStatus.ORPHANED
-                        || status == ServiceStatus.STOPPED
-                        || status == ServiceStatus.UNKNOWN)
-                    {
-                        return false;
-                    }
-                }
-
-                return true;
-            }
-        };
-
-        restartStorageMembers(predicate, options);
-    }
-
-
-    /**
-     * Perform a rolling restart of all of the storage members of the cluster.
-     * <p>
-     * Rolling restart is not supported on a cluster with only a single storage
-     * enabled member.
-     *
-     * @param predicate the {@link Predicate} that must evaluate to true before
-     *                  each member of the cluster is restarted.
-     * @param options   the {@link Option}s to use when realizing each new {@link CoherenceClusterMember}
-     *
-     * @throws IllegalStateException if the cluster has only a single storage member.
-     */
-    public void restartStorageMembers(Predicate<CoherenceClusterMember> predicate,
-                                      Option...                         options)
-    {
-        if (storageMemberCount < 2)
-        {
-            throw new IllegalStateException("Cannot perform a rolling restart in a cluster with less than two "
-                                            + "storage enabled members");
-        }
-
-        Block block = new Block();
-
-        for (int i = 1; i <= storageMemberCount; i++)
-        {
-            Options launchOptions = createStorageEnabledMemberOptions();
-
-            launchOptions.addAll(options);
-
-            block.add(new RestartCoherenceClusterMemberAction("storage", predicate, platform, launchOptions.asArray()));
-        }
-
-        InteractiveActionExecutor<CoherenceClusterMember, CoherenceCluster> executor =
-            new InteractiveActionExecutor<>(cluster,
-                                            block);
-
-        executor.executeAll();
     }
 }

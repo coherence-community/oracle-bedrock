@@ -25,6 +25,8 @@
 
 package com.oracle.tools.predicate;
 
+import java.util.function.Predicate;
+
 /**
  * A {@link Predicate} to determine if a {@link Comparable} value is greater
  * than another.
@@ -56,7 +58,7 @@ public class GreaterThan<T extends Comparable<T>> extends AbstractPredicate<T>
 
 
     @Override
-    public boolean evaluate(T value)
+    public boolean test(T value)
     {
         return value == null ? false : value.compareTo(this.value) > 0;
     }

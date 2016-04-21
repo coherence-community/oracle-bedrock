@@ -51,6 +51,6 @@ public class ContainerBasedCoherenceClusterBuilderTest extends AbstractCoherence
     public void shouldPerformRollingRestartOfCluster()
     {
         // we skip this test as performing a rolling restart in single JVM
-        // container is not supported for Coherence 3.7.1.x
+        // container is not supported for Coherence
     }
 }

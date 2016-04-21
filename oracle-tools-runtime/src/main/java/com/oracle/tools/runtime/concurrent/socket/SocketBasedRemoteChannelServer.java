@@ -26,11 +26,7 @@
 package com.oracle.tools.runtime.concurrent.socket;
 
 import com.oracle.tools.Option;
-
 import com.oracle.tools.io.NetworkHelper;
-
-import com.oracle.tools.predicate.Predicate;
-
 import com.oracle.tools.runtime.concurrent.AbstractControllableRemoteChannel;
 import com.oracle.tools.runtime.concurrent.ControllableRemoteChannel;
 import com.oracle.tools.runtime.concurrent.RemoteCallable;
@@ -38,22 +34,20 @@ import com.oracle.tools.runtime.concurrent.RemoteEvent;
 import com.oracle.tools.runtime.concurrent.RemoteEventListener;
 import com.oracle.tools.runtime.concurrent.RemoteRunnable;
 
-import static com.oracle.tools.predicate.Predicates.allOf;
-
 import java.io.IOException;
-
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
-
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
-
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
+
+import static com.oracle.tools.predicate.Predicates.allOf;
 
 /**
  * A {@link ControllableRemoteChannel} that accepts and processes requests
@@ -221,16 +215,16 @@ public class SocketBasedRemoteChannelServer extends AbstractControllableRemoteCh
 
     @Override
     @SuppressWarnings("unchecked")
-    public <T> CompletableFuture<T> submit(RemoteCallable<T>     callable,
-                                           Option...             options) throws IllegalStateException
+    public <T> CompletableFuture<T> submit(RemoteCallable<T> callable,
+                                           Option...         options) throws IllegalStateException
     {
         synchronized (this)
         {
             if (isOpen() &&!isTerminating.get())
             {
-                List<CompletableFuture<T>> futures = remoteChannels.values().stream()
-                        .map((channel) -> channel.submit(callable))
-                        .collect(Collectors.toList());
+                List<CompletableFuture<T>> futures =
+                    remoteChannels.values().stream().map((channel) -> channel.submit(callable))
+                    .collect(Collectors.toList());
 
                 if (futures.isEmpty())
                 {
@@ -257,9 +251,9 @@ public class SocketBasedRemoteChannelServer extends AbstractControllableRemoteCh
         {
             if (isOpen() &&!isTerminating.get())
             {
-                List<CompletableFuture<?>> futures = remoteChannels.values().stream()
-                        .map((channel) -> channel.submit(runnable))
-                        .collect(Collectors.toList());
+                List<CompletableFuture<?>> futures =
+                    remoteChannels.values().stream().map((channel) -> channel.submit(runnable))
+                    .collect(Collectors.toList());
 
                 if (futures.isEmpty())
                 {
@@ -306,18 +300,17 @@ public class SocketBasedRemoteChannelServer extends AbstractControllableRemoteCh
     {
         if (isOpen())
         {
-            List<CompletableFuture<?>> futures = remoteChannels.values().stream()
-                    .map((channel) -> {
-                        try
-                        {
-                            return channel.raise(event, options);
-                        }
-                        catch (Throwable e)
-                        {
-                            // we ignore exceptions when a RemoteChannel fails to raise (probably because it is closing)
-                            return CompletableFuture.completedFuture(null);
-                        }
-                    }).collect(Collectors.toList());
+            List<CompletableFuture<?>> futures = remoteChannels.values().stream().map((channel) -> {
+                                                         try
+                                                         {
+                                                             return channel.raise(event, options);
+                                                         }
+                                                         catch (Throwable e)
+                                                         {
+                                                             // we ignore exceptions when a RemoteChannel fails to raise (probably because it is closing)
+                                                             return CompletableFuture.completedFuture(null);
+                                                         }
+                                                     }).collect(Collectors.toList());
 
             return CompletableFuture.allOf(futures.toArray(new CompletableFuture[futures.size()]));
         }

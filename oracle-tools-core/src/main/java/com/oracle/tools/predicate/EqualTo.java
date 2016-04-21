@@ -25,6 +25,8 @@
 
 package com.oracle.tools.predicate;
 
+import java.util.function.Predicate;
+
 /**
  * A {@link Predicate} that determines if a value is equal to another.
  * <p>
@@ -55,7 +57,7 @@ public class EqualTo<T> implements Predicate<T>
 
 
     @Override
-    public boolean evaluate(T value)
+    public boolean test(T value)
     {
         return value == null && this.value == null || value != null && value.equals(this.value);
     }

@@ -1,9 +1,9 @@
 /*
- * File: AbstractCoherenceClusterLauncherTest.java
+ * File: AbstractCoherenceClusterBuilderTest.java
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * The contents of this file are subject to the terms and conditions of 
+ * The contents of this file are subject to the terms and conditions of
  * the Common Development and Distribution License 1.0 (the "License").
  *
  * You may not use this file except in compliance with the License.
@@ -26,48 +26,32 @@
 package com.oracle.tools.runtime.coherence;
 
 import com.oracle.tools.junit.AbstractTest;
-
-import com.oracle.tools.predicate.Predicate;
-
 import com.oracle.tools.runtime.LocalPlatform;
 import com.oracle.tools.runtime.Platform;
-
-import com.oracle.tools.runtime.actions.InteractiveActionExecutor;
-import com.oracle.tools.runtime.actions.PerpetualAction;
-
-import com.oracle.tools.runtime.coherence.actions.RestartCoherenceClusterMemberAction;
 import com.oracle.tools.runtime.coherence.options.CacheConfig;
 import com.oracle.tools.runtime.coherence.options.ClusterName;
 import com.oracle.tools.runtime.coherence.options.ClusterPort;
 import com.oracle.tools.runtime.coherence.options.LocalHost;
 import com.oracle.tools.runtime.coherence.options.LocalStorage;
 import com.oracle.tools.runtime.coherence.options.WellKnownAddress;
-
 import com.oracle.tools.runtime.console.SystemApplicationConsole;
-
 import com.oracle.tools.runtime.java.JavaApplicationLauncher;
 import com.oracle.tools.runtime.java.options.SystemProperty;
-
 import com.oracle.tools.runtime.network.AvailablePortIterator;
 import com.oracle.tools.runtime.network.Constants;
-
 import com.oracle.tools.runtime.options.DisplayName;
-
+import com.oracle.tools.runtime.options.StabilityPredicate;
 import com.oracle.tools.util.Capture;
-
 import com.tangosol.net.NamedCache;
-
 import org.junit.Assert;
 import org.junit.Test;
 
-import static com.oracle.tools.deferred.DeferredHelper.invoking;
-
-import static com.oracle.tools.deferred.Eventually.assertThat;
-
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.not;
-
 import java.util.HashSet;
+
+import static com.oracle.tools.deferred.DeferredHelper.invoking;
+import static com.oracle.tools.deferred.Eventually.assertThat;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.Matchers.greaterThan;
 
 /**
  * Functional Tests for the {@link CoherenceClusterBuilder} class.
@@ -164,7 +148,7 @@ public abstract class AbstractCoherenceClusterBuilderTest extends AbstractTest
             for (CoherenceClusterMember member : cluster)
             {
                 // ensure the member id is not -1 (it may not have a member id yet)
-                assertThat(invoking(member).getLocalMemberId(), is(not(-1)));
+                assertThat(invoking(member).getLocalMemberId(), is(greaterThan(0)));
 
                 memberIds.add(member.getLocalMemberId());
             }
@@ -255,42 +239,22 @@ public abstract class AbstractCoherenceClusterBuilderTest extends AbstractTest
         {
             assertThat(invoking(cluster).getClusterSize(), is(CLUSTER_SIZE));
 
-            // construct the action to restart a cluster member (iff the DistributedCache is NODE_SAFE)
-            RestartCoherenceClusterMemberAction restartAction = new RestartCoherenceClusterMemberAction("DCS",
-                                                                                                        new Predicate<CoherenceClusterMember>()
-                                                                                                        {
-                                                                                                            @Override
-                                                                                                            public boolean evaluate(CoherenceClusterMember member)
-                                                                                                            {
-                                                                                                                ServiceStatus status =
-                                                                                                                    member.getServiceStatus("DistributedCache");
+            StabilityPredicate<CoherenceCluster> predicate =
+                StabilityPredicate.of(c -> c.findAny().get().getServiceStatus("DistributedCache")
+                                           == ServiceStatus.NODE_SAFE);
 
-                                                                                                                return status
-                                                                                                                == ServiceStatus
-                                                                                                                    .NODE_SAFE;
-                                                                                                            }
-                                                                                                        },
-                                                                                                        platform,
-                                                                                                        clusterPort,
-                                                                                                        ClusterName.of(clusterName),
-                                                                                                        LocalHost.only(),
-                                                                                                        SystemApplicationConsole.builder());
+            cluster.filter(member -> member.isServiceRunning("ProxyService")).relaunch();
 
-            // let's perpetually restart a cluster member
-            PerpetualAction<CoherenceClusterMember, CoherenceCluster> perpetualAction =
-                new PerpetualAction<>(restartAction);
+            cluster.unordered().limit(2).relaunch(predicate);
 
-            InteractiveActionExecutor<CoherenceClusterMember, CoherenceCluster> executor =
-                new InteractiveActionExecutor<>(cluster,
-                                                perpetualAction);
-
-            executor.executeNext();
             assertThat(invoking(cluster).getClusterSize(), is(CLUSTER_SIZE));
 
-            executor.executeNext();
+            cluster.unordered().limit(2).relaunch(predicate);
+
             assertThat(invoking(cluster).getClusterSize(), is(CLUSTER_SIZE));
 
-            executor.executeNext();
+            cluster.unordered().limit(2).relaunch(predicate);
+
             assertThat(invoking(cluster).getClusterSize(), is(CLUSTER_SIZE));
         }
         catch (Exception e)

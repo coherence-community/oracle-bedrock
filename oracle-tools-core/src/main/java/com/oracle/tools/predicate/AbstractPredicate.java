@@ -25,6 +25,8 @@
 
 package com.oracle.tools.predicate;
 
+import java.util.function.Predicate;
+
 /**
  * An abstract implementation of a {@link Predicate}.
  * <p>

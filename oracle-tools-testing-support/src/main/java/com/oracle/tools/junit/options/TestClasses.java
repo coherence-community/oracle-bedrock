@@ -28,7 +28,6 @@ package com.oracle.tools.junit.options;
 import com.oracle.tools.Option;
 import com.oracle.tools.Options;
 import com.oracle.tools.junit.TestClassPredicate;
-import com.oracle.tools.predicate.Predicate;
 import com.oracle.tools.runtime.java.ClassPath;
 import org.junit.runner.Description;
 import org.junit.runner.manipulation.Filter;
@@ -50,6 +49,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Predicate;
 
 /**
  * An option representing a set of test {@link Class}es.
@@ -183,7 +183,7 @@ public abstract class TestClasses implements Option.Collectable, Option, Seriali
     {
         if (includePatterns.isEmpty() && excludePatterns.isEmpty())
         {
-            return  testClassPredicate;
+            return testClassPredicate;
         }
 
         return new IncludeExcludePredicate(testClassPredicate, includePatterns, excludePatterns);
@@ -198,113 +198,86 @@ public abstract class TestClasses implements Option.Collectable, Option, Seriali
 
 
     /**
-     * A {@link TestClasses} instance that uses a fixed set of {@link Class}es
-     * as the set of tests to execute.
+     * Create a {@link TestClasses} option that will resolve test classes
+     * from the specified {@link Class} instances
+     *
+     * @param classes  the {@link Class}es to use to resolve test classes
+     *
+     * @return  a {@link TestClasses} option that will resolve test classes
+     *          from the specified {@link Class}es
      */
-    public static class SpecificClasses extends TestClasses implements Serializable
+    public static TestClasses of(Class<?>... classes)
+    {
+        if (classes.length == 0)
+        {
+            return empty();
+        }
+
+        return new SpecificClasses(classes);
+    }
+
+
+    /**
+     * Create a {@link TestClasses} option that will resolve test classes
+     * from the specified {@link ClassPath}.
+     *
+     * @param classPath  the {@link ClassPath} to use to resolve test classes
+     *
+     * @return  a {@link TestClasses} option that will resolve test classes
+     *          from the specified {@link ClassPath}
+     */
+    public static TestClasses from(ClassPath classPath)
+    {
+        if (classPath == null || classPath.isEmpty())
+        {
+            return empty();
+        }
+
+        return new ClassPathClasses(classPath);
+    }
+
+
+    /**
+     * Create an empty set of test classes.
+     *
+     * @return  an empty set of test classes
+     */
+    @Options.Default
+    public static TestClasses empty()
+    {
+        return new TestClasses()
+        {
+            @Override
+            public Set<Class<?>> resolveTestClasses()
+            {
+                return Collections.emptySet();
+            }
+        };
+    }
+
+
+    /**
+     * A JUnit test {@link Filter} that always matches everything.
+     */
+    public static class AlwaysRunFilter extends Filter
     {
         /**
-         * The {@link Set} of names of test classes.
+         * Field description
          */
-        private Set<String> classNames;
-
-        /**
-         * The {@link Set} resolved of test {@link Class}es.
-         */
-        private transient Set<Class<?>> classes;
+        public static final AlwaysRunFilter INSTANCE = new AlwaysRunFilter();
 
 
-        /**
-         * Create a {@link SpecificClasses} instance with the specified
-         * test {@link Class}es.
-         *
-         * @param classes  the test {@link Class}es
-         */
-        private SpecificClasses(Class<?>... classes)
+        @Override
+        public String describe()
         {
-            this.classNames = new HashSet<>(classes.length);
-
-            for (Class<?> cls : classes)
-            {
-                this.classNames.add(cls.getCanonicalName());
-            }
+            return "AlwaysRunFilter";
         }
 
 
         @Override
-        public Set<Class<?>> resolveTestClasses()
+        public boolean shouldRun(Description description)
         {
-            // have we already resolved the list of classes
-            if (this.classes == null)
-            {
-                synchronized (this)
-                {
-                    // No, then synchronize and check again
-                    if (this.classes == null)
-                    {
-                        Set<Class<?>>       classes   = new HashSet<>();
-                        Predicate<Class<?>> predicate = getTestClassPredicate();
-
-                        // Add each class from the list that matches the predicate
-                        for (String className : classNames)
-                        {
-                            try
-                            {
-                                Class<?> testClass = Class.forName(className);
-
-                                if (predicate.evaluate(testClass))
-                                {
-                                    classes.add(testClass);
-                                }
-                            }
-                            catch (ClassNotFoundException e)
-                            {
-                                // cannot load the class so it will be skipped
-                            }
-                        }
-
-                        this.classes = classes;
-                    }
-                }
-            }
-
-            return Collections.unmodifiableSet(classes);
-        }
-
-
-
-        @Override
-        public boolean equals(Object o)
-        {
-            if (this == o)
-            {
-                return true;
-            }
-            if (o == null || getClass() != o.getClass())
-            {
-                return false;
-            }
-
-            SpecificClasses that = (SpecificClasses) o;
-
-            return classNames.equals(that.classNames);
-
-        }
-
-
-        @Override
-        public int hashCode()
-        {
-            return classNames.hashCode();
-        }
-
-
-        @Override
-        public String toString()
-        {
-            return "TestClasses(" +
-                   "classNames=" + classNames +
-                   ')';
+            return true;
         }
     }
 
@@ -344,7 +317,6 @@ public abstract class TestClasses implements Option.Collectable, Option, Seriali
             }
 
         }
-
 
 
         @Override
@@ -412,7 +384,8 @@ public abstract class TestClasses implements Option.Collectable, Option, Seriali
          *
          * @throws IOException if there is an error walking the {@link FileSystem}
          */
-        private Set<Class<?>> walkFileSystem(FileSystem fileSystem, Predicate<Class<?>> predicate) throws IOException
+        private Set<Class<?>> walkFileSystem(FileSystem          fileSystem,
+                                             Predicate<Class<?>> predicate) throws IOException
         {
             Set<Class<?>> testClasses = new HashSet<>();
 
@@ -436,54 +409,252 @@ public abstract class TestClasses implements Option.Collectable, Option, Seriali
          *
          * @throws IOException if there is an error walking the {@link Path}
          */
-        private List<Class<?>> walkPath(Path path, Predicate<Class<?>> predicate) throws IOException
+        private List<Class<?>> walkPath(Path                path,
+                                        Predicate<Class<?>> predicate) throws IOException
         {
             List<Class<?>> testClasses = new ArrayList<>();
 
-            Files.walkFileTree(path, new SimpleFileVisitor<Path>()
-            {
-                @Override
-                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException
-                {
-                    if (file.getFileName().toString().endsWith(".class"))
-                    {
-                        StringBuilder className = new StringBuilder();
-                        Iterator<Path> iterator = path.relativize(file).iterator();
+            Files.walkFileTree(path,
+                               new SimpleFileVisitor<Path>()
+                               {
+                                   @Override
+                                   public FileVisitResult visitFile(Path                file,
+                                                                    BasicFileAttributes attrs) throws IOException
+                                   {
+                                       if (file.getFileName().toString().endsWith(".class"))
+                                       {
+                                           StringBuilder  className = new StringBuilder();
+                                           Iterator<Path> iterator  = path.relativize(file).iterator();
 
-                        while (iterator.hasNext())
-                        {
-                            String name = iterator.next().toString();
+                                           while (iterator.hasNext())
+                                           {
+                                               String name = iterator.next().toString();
 
-                            if (iterator.hasNext())
-                            {
-                                className.append(name).append('.');
-                            }
-                            else
-                            {
-                                className.append(name.substring(0, name.length() - 6));
-                            }
-                        }
+                                               if (iterator.hasNext())
+                                               {
+                                                   className.append(name).append('.');
+                                               }
+                                               else
+                                               {
+                                                   className.append(name.substring(0, name.length() - 6));
+                                               }
+                                           }
 
-                        try
-                        {
-                            Class<?> testClass = Class.forName(className.toString());
+                                           try
+                                           {
+                                               Class<?> testClass = Class.forName(className.toString());
 
-                            if (predicate.evaluate(testClass))
-                            {
-                                testClasses.add(testClass);
-                            }
-                        }
-                        catch (ClassNotFoundException e)
-                        {
-                            // ignored - can't load class so do not add it to tests
-                        }
-                    }
+                                               if (predicate.test(testClass))
+                                               {
+                                                   testClasses.add(testClass);
+                                               }
+                                           }
+                                           catch (ClassNotFoundException e)
+                                           {
+                                               // ignored - can't load class so do not add it to tests
+                                           }
+                                       }
 
-                    return FileVisitResult.CONTINUE;
-                }
-            });
+                                       return FileVisitResult.CONTINUE;
+                                   }
+                               });
 
             return testClasses;
+        }
+    }
+
+
+    /**
+     * A {@link Predicate} that uses an inner predicate as well as this {@link TestClasses}
+     * include and exclude patterns to filter {@link Class} files.
+     */
+    public static class IncludeExcludePredicate implements Predicate<Class<?>>
+    {
+        /**
+         * The included {@link Set} of {@link TestMatcher}s to evaluate a class.
+         */
+        private Set<TestMatcher> includePatterns = new HashSet<>();
+
+        /**
+         * The excluded {@link Set} of {@link TestMatcher}s to evaluate a class.
+         */
+        private Set<TestMatcher> excludePatterns = new HashSet<>();
+
+        /**
+         * The inner {@link Predicate} to use to verify classes.
+         */
+        private final Predicate<Class<?>> predicate;
+
+
+        /**
+         * Create a {@link IncludeExcludePredicate} that will use the specified
+         * {@link Predicate} and include and exclude patters to evaluate classes.
+         *
+         * @param predicate        the {@link Predicate} to use to evaluate classes
+         * @param includePatterns  the included {@link Set} of {@link TestMatcher}s
+         *                         to evaluate a class
+         * @param excludePatterns  the excluded {@link Set} of {@link TestMatcher}s
+         *                         to evaluate a class
+         */
+        protected IncludeExcludePredicate(Predicate<Class<?>> predicate,
+                                          Set<TestMatcher>    includePatterns,
+                                          Set<TestMatcher>    excludePatterns)
+        {
+            this.predicate       = predicate;
+            this.includePatterns = includePatterns;
+            this.excludePatterns = excludePatterns;
+        }
+
+
+        @Override
+        public boolean test(Class<?> testClass)
+        {
+            if (testClass == null)
+            {
+                return false;
+            }
+
+            if (!predicate.test(testClass))
+            {
+                return false;
+            }
+
+            String  className = testClass.getCanonicalName();
+            boolean include   = includePatterns.isEmpty();
+
+            for (TestMatcher matcher : includePatterns)
+            {
+                if (!matcher.hasClassPattern() || matcher.matches(className))
+                {
+                    include = true;
+                    break;
+                }
+            }
+
+            if (include)
+            {
+                for (TestMatcher matcher : excludePatterns)
+                {
+                    if (!matcher.hasMethodPattern() && matcher.matches(className))
+                    {
+                        return false;
+                    }
+                }
+
+                return true;
+            }
+
+            return false;
+        }
+    }
+
+
+    /**
+     * A {@link TestClasses} instance that uses a fixed set of {@link Class}es
+     * as the set of tests to execute.
+     */
+    public static class SpecificClasses extends TestClasses implements Serializable
+    {
+        /**
+         * The {@link Set} of names of test classes.
+         */
+        private Set<String> classNames;
+
+        /**
+         * The {@link Set} resolved of test {@link Class}es.
+         */
+        private transient Set<Class<?>> classes;
+
+
+        /**
+         * Create a {@link SpecificClasses} instance with the specified
+         * test {@link Class}es.
+         *
+         * @param classes  the test {@link Class}es
+         */
+        private SpecificClasses(Class<?>... classes)
+        {
+            this.classNames = new HashSet<>(classes.length);
+
+            for (Class<?> cls : classes)
+            {
+                this.classNames.add(cls.getCanonicalName());
+            }
+        }
+
+
+        @Override
+        public Set<Class<?>> resolveTestClasses()
+        {
+            // have we already resolved the list of classes
+            if (this.classes == null)
+            {
+                synchronized (this)
+                {
+                    // No, then synchronize and check again
+                    if (this.classes == null)
+                    {
+                        Set<Class<?>>       classes   = new HashSet<>();
+                        Predicate<Class<?>> predicate = getTestClassPredicate();
+
+                        // Add each class from the list that matches the predicate
+                        for (String className : classNames)
+                        {
+                            try
+                            {
+                                Class<?> testClass = Class.forName(className);
+
+                                if (predicate.test(testClass))
+                                {
+                                    classes.add(testClass);
+                                }
+                            }
+                            catch (ClassNotFoundException e)
+                            {
+                                // cannot load the class so it will be skipped
+                            }
+                        }
+
+                        this.classes = classes;
+                    }
+                }
+            }
+
+            return Collections.unmodifiableSet(classes);
+        }
+
+
+        @Override
+        public boolean equals(Object o)
+        {
+            if (this == o)
+            {
+                return true;
+            }
+
+            if (o == null || getClass() != o.getClass())
+            {
+                return false;
+            }
+
+            SpecificClasses that = (SpecificClasses) o;
+
+            return classNames.equals(that.classNames);
+
+        }
+
+
+        @Override
+        public int hashCode()
+        {
+            return classNames.hashCode();
+        }
+
+
+        @Override
+        public String toString()
+        {
+            return "TestClasses(" + "classNames=" + classNames + ')';
         }
     }
 
@@ -515,7 +686,8 @@ public abstract class TestClasses implements Option.Collectable, Option, Seriali
          * @param includePatterns  the include patters to use
          * @param excludePatterns  the exclude patters to use
          */
-        public TestFilter(Set<TestMatcher> includePatterns, Set<TestMatcher> excludePatterns)
+        public TestFilter(Set<TestMatcher> includePatterns,
+                          Set<TestMatcher> excludePatterns)
         {
             this.includePatterns = includePatterns;
             this.excludePatterns = excludePatterns;
@@ -527,6 +699,7 @@ public abstract class TestClasses implements Option.Collectable, Option, Seriali
         {
             return "TestClasses Filter";
         }
+
 
         @Override
         public boolean shouldRun(Description description)
@@ -548,9 +721,10 @@ public abstract class TestClasses implements Option.Collectable, Option, Seriali
             if (name != null)
             {
                 name = name.trim();
-                if (name.endsWith( ")"))
+
+                if (name.endsWith(")"))
                 {
-                    int index = name.lastIndexOf( '(' );
+                    int index = name.lastIndexOf('(');
 
                     if (index != -1)
                     {
@@ -593,27 +767,6 @@ public abstract class TestClasses implements Option.Collectable, Option, Seriali
                 }
             }
 
-            return true;
-        }
-    }
-
-
-    /**
-     * A JUnit test {@link Filter} that always matches everything.
-     */
-    public static class AlwaysRunFilter extends Filter
-    {
-        public static final AlwaysRunFilter INSTANCE = new AlwaysRunFilter();
-
-        @Override
-        public String describe()
-        {
-            return "AlwaysRunFilter";
-        }
-
-        @Override
-        public boolean shouldRun(Description description)
-        {
             return true;
         }
     }
@@ -717,12 +870,14 @@ public abstract class TestClasses implements Option.Collectable, Option, Seriali
          * @return  true if the specified class name and method name matches this {@link TestMatcher}'s
          *          patterns, otherwise false
          */
-        public boolean matches(String className, String methodName)
+        public boolean matches(String className,
+                               String methodName)
         {
             if (classPattern == null || className.matches(classPattern))
             {
                 return methodPattern == null || methodName.matches(methodPattern);
             }
+
             return false;
         }
 
@@ -734,7 +889,7 @@ public abstract class TestClasses implements Option.Collectable, Option, Seriali
          */
         public boolean hasClassPattern()
         {
-            return classPattern != null && !classPattern.isEmpty();
+            return classPattern != null &&!classPattern.isEmpty();
         }
 
 
@@ -745,7 +900,7 @@ public abstract class TestClasses implements Option.Collectable, Option, Seriali
          */
         public boolean hasMethodPattern()
         {
-            return methodPattern != null && !methodPattern.isEmpty();
+            return methodPattern != null &&!methodPattern.isEmpty();
         }
 
 
@@ -756,6 +911,7 @@ public abstract class TestClasses implements Option.Collectable, Option, Seriali
             {
                 return true;
             }
+
             if (o == null || getClass() != o.getClass())
             {
                 return false;
@@ -767,6 +923,7 @@ public abstract class TestClasses implements Option.Collectable, Option, Seriali
             {
                 return false;
             }
+
             return methodPattern != null ? methodPattern.equals(that.methodPattern) : that.methodPattern == null;
         }
 
@@ -775,163 +932,18 @@ public abstract class TestClasses implements Option.Collectable, Option, Seriali
         public int hashCode()
         {
             int result = classPattern != null ? classPattern.hashCode() : 0;
+
             result = 31 * result + (methodPattern != null ? methodPattern.hashCode() : 0);
+
             return result;
         }
+
 
         @Override
         public String toString()
         {
-            return "TestMatcher(" +
-                   "classPattern='" + classPattern + '\'' +
-                   ", methodPattern='" + methodPattern + '\'' +
-                   ')';
+            return "TestMatcher(" + "classPattern='" + classPattern + '\'' + ", methodPattern='" + methodPattern + '\''
+                   + ')';
         }
-    }
-
-
-    /**
-     * A {@link Predicate} that uses an inner predicate as well as this {@link TestClasses}
-     * include and exclude patterns to filter {@link Class} files.
-     */
-    public static class IncludeExcludePredicate implements Predicate<Class<?>>
-    {
-        /**
-         * The inner {@link Predicate} to use to verify classes.
-         */
-        private final Predicate<Class<?>> predicate;
-
-        /**
-         * The included {@link Set} of {@link TestMatcher}s to evaluate a class.
-         */
-        private Set<TestMatcher> includePatterns = new HashSet<>();
-
-        /**
-         * The excluded {@link Set} of {@link TestMatcher}s to evaluate a class.
-         */
-        private Set<TestMatcher> excludePatterns = new HashSet<>();
-
-
-
-        /**
-         * Create a {@link IncludeExcludePredicate} that will use the specified
-         * {@link Predicate} and include and exclude patters to evaluate classes.
-         *
-         * @param predicate        the {@link Predicate} to use to evaluate classes
-         * @param includePatterns  the included {@link Set} of {@link TestMatcher}s
-         *                         to evaluate a class
-         * @param excludePatterns  the excluded {@link Set} of {@link TestMatcher}s
-         *                         to evaluate a class
-         */
-        protected IncludeExcludePredicate(Predicate<Class<?>> predicate,
-                                          Set<TestMatcher> includePatterns,
-                                          Set<TestMatcher> excludePatterns)
-        {
-            this.predicate       = predicate;
-            this.includePatterns = includePatterns;
-            this.excludePatterns = excludePatterns;
-        }
-
-
-        @Override
-        public boolean evaluate(Class<?> testClass)
-        {
-            if (testClass == null)
-            {
-                return false;
-            }
-
-            if (!predicate.evaluate(testClass))
-            {
-                return false;
-            }
-
-            String  className = testClass.getCanonicalName();
-            boolean include   = includePatterns.isEmpty();
-
-            for (TestMatcher matcher : includePatterns)
-            {
-                if (!matcher.hasClassPattern() || matcher.matches(className))
-                {
-                    include = true;
-                    break;
-                }
-            }
-
-
-            if (include)
-            {
-                for (TestMatcher matcher : excludePatterns)
-                {
-                    if (!matcher.hasMethodPattern() && matcher.matches(className))
-                    {
-                        return false;
-                    }
-                }
-
-                return true;
-            }
-
-            return false;
-        }
-    }
-
-
-    /**
-     * Create a {@link TestClasses} option that will resolve test classes
-     * from the specified {@link Class} instances
-     *
-     * @param classes  the {@link Class}es to use to resolve test classes
-     *
-     * @return  a {@link TestClasses} option that will resolve test classes
-     *          from the specified {@link Class}es
-     */
-    public static TestClasses of(Class<?>... classes)
-    {
-        if (classes.length == 0)
-        {
-            return empty();
-        }
-
-        return new SpecificClasses(classes);
-    }
-
-
-    /**
-     * Create a {@link TestClasses} option that will resolve test classes
-     * from the specified {@link ClassPath}.
-     *
-     * @param classPath  the {@link ClassPath} to use to resolve test classes
-     *
-     * @return  a {@link TestClasses} option that will resolve test classes
-     *          from the specified {@link ClassPath}
-     */
-    public static TestClasses from(ClassPath classPath)
-    {
-        if (classPath == null || classPath.isEmpty())
-        {
-            return empty();
-        }
-
-        return new ClassPathClasses(classPath);
-    }
-
-
-    /**
-     * Create an empty set of test classes.
-     *
-     * @return  an empty set of test classes
-     */
-    @Options.Default
-    public static TestClasses empty()
-    {
-        return new TestClasses()
-        {
-            @Override
-            public Set<Class<?>> resolveTestClasses()
-            {
-                return Collections.emptySet();
-            }
-        };
     }
 }

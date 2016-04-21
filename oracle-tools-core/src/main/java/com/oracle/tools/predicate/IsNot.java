@@ -25,6 +25,8 @@
 
 package com.oracle.tools.predicate;
 
+import java.util.function.Predicate;
+
 /**
  * A {@link Predicate} to negate another {@link Predicate}.
  * <p>
@@ -55,9 +57,9 @@ public class IsNot<T> implements Predicate<T>
 
 
     @Override
-    public boolean evaluate(T value)
+    public boolean test(T value)
     {
-        return !predicate.evaluate(value);
+        return !predicate.test(value);
     }
 
 

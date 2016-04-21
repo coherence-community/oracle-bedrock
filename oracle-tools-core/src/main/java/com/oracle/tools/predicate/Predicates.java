@@ -26,6 +26,7 @@
 package com.oracle.tools.predicate;
 
 import java.util.Collection;
+import java.util.function.Predicate;
 
 /**
  * A set of helper methods for creating {@link Predicate}s.

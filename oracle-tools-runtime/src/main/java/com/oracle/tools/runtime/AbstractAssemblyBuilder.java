@@ -27,9 +27,8 @@ package com.oracle.tools.runtime;
 
 import com.oracle.tools.Option;
 import com.oracle.tools.Options;
-
 import com.oracle.tools.runtime.console.NullApplicationConsole;
-
+import com.oracle.tools.runtime.console.SystemApplicationConsole;
 import com.oracle.tools.runtime.options.Discriminator;
 
 import java.util.LinkedList;
@@ -43,7 +42,9 @@ import java.util.List;
  *
  * @author Brian Oliver
  *
- * @param <A>  the type of {@link Assembly}s that will be realized by the {@link AssemblyBuilder}
+ * @param <A>  the type of {@link Application}s that will be part of the {@link Assembly} when
+ *             built by the {@link AssemblyBuilder}
+ * @param <G>  the type of the {@link Assembly} built by the {@link AssemblyBuilder}
  */
 public abstract class AbstractAssemblyBuilder<A extends Application, G extends Assembly<A>>
     implements AssemblyBuilder<A, G>
@@ -83,7 +84,7 @@ public abstract class AbstractAssemblyBuilder<A extends Application, G extends A
         launchApplications(applications, options);
 
         // establish the assembly based on the applications
-        G assembly = createAssembly(applications);
+        G assembly = createAssembly(applications, Options.from(options));
 
         return assembly;
     }
@@ -112,8 +113,8 @@ public abstract class AbstractAssemblyBuilder<A extends Application, G extends A
                 // include a discriminator for the application being launched
                 launchOptions.add(Discriminator.of(i));
 
-                // ensure there's at least a null console
-                launchOptions.getOrDefault(ApplicationConsoleBuilder.class, NullApplicationConsole.builder());
+                // ensure there's at least a system console
+                launchOptions.addIfAbsent(SystemApplicationConsole.builder());
 
                 // launch the application
                 A application = platform.launch(applicationClass, launchOptions.asArray());
@@ -128,11 +129,13 @@ public abstract class AbstractAssemblyBuilder<A extends Application, G extends A
     /**
      * Create an {@link Assembly} based on the specified collection of {@link Application}s.
      *
-     * @param applications  The collection of {@link Application}s.
+     * @param applications  the collection of {@link Application}s.
+     * @param options       the shared / common {@link Options} used to launch the {@link Application}s
      *
      * @return An {@link Assembly} implementation.
      */
-    abstract protected G createAssembly(List<A> applications);
+    abstract protected G createAssembly(List<A> applications,
+                                        Options options);
 
 
     /**

@@ -27,22 +27,18 @@ package com.oracle.tools.junit;
 
 import com.oracle.tools.runtime.coherence.CoherenceCluster;
 import com.oracle.tools.runtime.coherence.CoherenceClusterMember;
-
 import com.oracle.tools.runtime.java.options.SystemProperty;
-
+import com.oracle.tools.runtime.options.StabilityPredicate;
 import org.junit.ClassRule;
 import org.junit.Test;
 
-import static org.hamcrest.collection.IsIterableContainingInOrder.contains;
-
-import static org.hamcrest.core.Is.is;
-
-import static org.hamcrest.core.IsNull.notNullValue;
-
-import static org.junit.Assert.assertThat;
-
 import java.util.Set;
 import java.util.TreeSet;
+
+import static org.hamcrest.collection.IsIterableContainingInOrder.contains;
+import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsNull.notNullValue;
+import static org.junit.Assert.assertThat;
 
 /**
  * Functional Tests for the {@link CoherenceClusterOrchestration}.
@@ -107,9 +103,15 @@ public class CustomCoherenceClusterOrchestrationTest
     @Test
     public void shouldPerformRollingRestart() throws Exception
     {
-        orchestration.restartStorageMembers();
+        CoherenceCluster cluster = orchestration.getCluster();
 
-        CoherenceCluster       cluster = orchestration.getCluster();
+        // we must ensure all auto-start services are safe
+        StabilityPredicate stabilityPredicate =
+            StabilityPredicate.of(CoherenceCluster.Predicates.autoStartServicesSafe());
+
+        // only restart storage enabled members
+        cluster.filter(member -> member.getName().startsWith("storage")).relaunch(stabilityPredicate);
+
         CoherenceClusterMember member1 = cluster.get("storage-1");
         CoherenceClusterMember member2 = cluster.get("storage-2");
         CoherenceClusterMember member3 = cluster.get("storage-3");

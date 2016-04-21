@@ -26,6 +26,7 @@
 package com.oracle.tools.predicate;
 
 import java.util.Collection;
+import java.util.function.Predicate;
 
 /**
  * A {@link Predicate} to determine if a value is in a {@link Collection}.
@@ -57,7 +58,7 @@ public class Contains<T> extends AbstractPredicate<Collection<T>>
 
 
     @Override
-    public boolean evaluate(Collection<T> set)
+    public boolean test(Collection<T> set)
     {
         return set == null ? false : set.contains(value);
     }

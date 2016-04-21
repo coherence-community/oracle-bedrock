@@ -25,13 +25,9 @@
 
 package com.oracle.tools.io;
 
-import com.oracle.tools.predicate.Predicate;
 import com.oracle.tools.predicate.Predicates;
 
-import static com.oracle.tools.predicate.Predicates.always;
-
 import java.io.IOException;
-
 import java.net.DatagramSocket;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
@@ -40,13 +36,15 @@ import java.net.InetSocketAddress;
 import java.net.NetworkInterface;
 import java.net.ServerSocket;
 import java.net.SocketException;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.Predicate;
+
+import static com.oracle.tools.predicate.Predicates.always;
 
 /**
  * Common Network utilities.
@@ -64,7 +62,7 @@ public class NetworkHelper
     public static final Predicate<InetAddress> LOOPBACK_ADDRESS = new Predicate<InetAddress>()
     {
         @Override
-        public boolean evaluate(InetAddress address)
+        public boolean test(InetAddress address)
         {
             return address != null && address.isLoopbackAddress();
         }
@@ -82,7 +80,7 @@ public class NetworkHelper
     public static final Predicate<InetAddress> NON_LOOPBACK_ADDRESS = new Predicate<InetAddress>()
     {
         @Override
-        public boolean evaluate(InetAddress address)
+        public boolean test(InetAddress address)
         {
             return address != null &&!address.isLoopbackAddress();
         }
@@ -100,7 +98,7 @@ public class NetworkHelper
     public static final Predicate<InetAddress> IPv4_ADDRESS = new Predicate<InetAddress>()
     {
         @Override
-        public boolean evaluate(InetAddress address)
+        public boolean test(InetAddress address)
         {
             return address instanceof Inet4Address;
         }
@@ -118,7 +116,7 @@ public class NetworkHelper
     public static final Predicate<InetAddress> IPv6_ADDRESS = new Predicate<InetAddress>()
     {
         @Override
-        public boolean evaluate(InetAddress address)
+        public boolean test(InetAddress address)
         {
             return address instanceof Inet6Address;
         }
@@ -136,7 +134,7 @@ public class NetworkHelper
     public static final Predicate<InetAddress> LINK_LOCAL_ADDRESS = new Predicate<InetAddress>()
     {
         @Override
-        public boolean evaluate(InetAddress address)
+        public boolean test(InetAddress address)
         {
             return address != null && address.isLinkLocalAddress();
         }
@@ -154,7 +152,7 @@ public class NetworkHelper
     public static final Predicate<InetAddress> ANY_LOCAL_ADDRESS = new Predicate<InetAddress>()
     {
         @Override
-        public boolean evaluate(InetAddress address)
+        public boolean test(InetAddress address)
         {
             return address != null && address.isAnyLocalAddress();
         }
@@ -173,7 +171,7 @@ public class NetworkHelper
     public static final Predicate<InetAddress> DEFAULT_ADDRESS = new Predicate<InetAddress>()
     {
         @Override
-        public boolean evaluate(InetAddress address)
+        public boolean test(InetAddress address)
         {
             Predicate<InetAddress> predicate;
 
@@ -190,7 +188,7 @@ public class NetworkHelper
                 predicate = always();
             }
 
-            return predicate.evaluate(address);
+            return predicate.test(address);
         }
     };
 
@@ -200,7 +198,7 @@ public class NetworkHelper
     public static final Predicate<InetAddress> BINDABLE_ADDRESS = new Predicate<InetAddress>()
     {
         @Override
-        public boolean evaluate(InetAddress address)
+        public boolean test(InetAddress address)
         {
             try (ServerSocket serverSocket = new ServerSocket(0, 1, address);
                 DatagramSocket datagramSocket = new DatagramSocket(0, address))
@@ -237,7 +235,7 @@ public class NetworkHelper
             {
                 InetAddress address = (InetAddress) addresses.nextElement();
 
-                if (predicate.evaluate(address))
+                if (predicate.test(address))
                 {
                     return address;
                 }
@@ -267,7 +265,7 @@ public class NetworkHelper
 
                 try
                 {
-                    if (predicate.evaluate(address))
+                    if (predicate.test(address))
                     {
                         addressList.add(address);
                     }
@@ -302,22 +300,23 @@ public class NetworkHelper
             {
                 NetworkInterface networkInterface = enumeration.nextElement();
 
-                if (predicate.evaluate(networkInterface))
+                if (predicate.test(networkInterface))
                 {
                     networkInterfaces.add(networkInterface);
                 }
             }
 
             // sort the network interfaces by index
-            Collections.sort(networkInterfaces, new Comparator<NetworkInterface>()
-            {
-                @Override
-                public int compare(NetworkInterface networkInterface1,
-                                   NetworkInterface networkInterface2)
-                {
-                    return networkInterface1.getIndex() - networkInterface2.getIndex();
-                }
-            });
+            Collections.sort(networkInterfaces,
+                             new Comparator<NetworkInterface>()
+                             {
+                                 @Override
+                                 public int compare(NetworkInterface networkInterface1,
+                                                    NetworkInterface networkInterface2)
+                                 {
+                                     return networkInterface1.getIndex() - networkInterface2.getIndex();
+                                 }
+                             });
         }
         catch (SocketException e)
         {
@@ -356,7 +355,7 @@ public class NetworkHelper
                     InetAddress inetAddress = inetAddresses.nextElement();
 
                     // ensure that we can bind to the address
-                    if (BINDABLE_ADDRESS.evaluate(inetAddress))
+                    if (BINDABLE_ADDRESS.test(inetAddress))
                     {
                         // prefer non-loopback addresses
                         if (!inetAddress.isLoopbackAddress())

@@ -25,17 +25,26 @@
 
 package com.oracle.tools.runtime.coherence;
 
+import com.oracle.tools.Options;
 import com.oracle.tools.runtime.AbstractAssembly;
 import com.oracle.tools.runtime.Assembly;
-
+import com.oracle.tools.runtime.coherence.callables.GetAutoStartServiceNames;
+import com.oracle.tools.runtime.coherence.callables.GetServiceStatus;
 import com.tangosol.net.NamedCache;
-
 import com.tangosol.util.UID;
 
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.function.Predicate;
+
+import static com.oracle.tools.deferred.DeferredHelper.ensure;
+import static com.oracle.tools.deferred.DeferredHelper.eventually;
+import static com.oracle.tools.deferred.DeferredHelper.invoking;
+import static com.oracle.tools.predicate.Predicates.contains;
+import static com.oracle.tools.predicate.Predicates.greaterThan;
+import static com.oracle.tools.predicate.Predicates.is;
 
 /**
  * An {@link Assembly} that represents a collection of {@link CoherenceClusterMember}s.
@@ -51,10 +60,12 @@ public class CoherenceCluster extends AbstractAssembly<CoherenceClusterMember>
      * Constructs a {@link CoherenceCluster} given a list of {@link CoherenceClusterMember}s.
      *
      * @param members  the {@link CoherenceClusterMember}s
+     * @param options  the shared / common {@link Options} used to launch the {@link CoherenceClusterMember}s
      */
-    public CoherenceCluster(List<? extends CoherenceClusterMember> members)
+    public CoherenceCluster(List<? extends CoherenceClusterMember> members,
+                            Options                                options)
     {
-        super(members);
+        super(members, options);
     }
 
 
@@ -98,5 +109,79 @@ public class CoherenceCluster extends AbstractAssembly<CoherenceClusterMember>
         Iterator<CoherenceClusterMember> members = iterator();
 
         return members.hasNext() ? members.next().getCache(cacheName) : null;
+    }
+
+
+    @Override
+    protected void onExpanded(List<? extends CoherenceClusterMember> applications)
+    {
+        // for sanity, ensure the cluster size is the same as the size of the assembly
+        ensure(eventually(invoking(this).getClusterSize()), is(this.applications.size()));
+    }
+
+
+    @Override
+    protected void onRelaunching(CoherenceClusterMember application,
+                                 Options                options)
+    {
+        // TODO: get the current MemberUID and record it (or make the application remember it)
+    }
+
+
+    @Override
+    protected void onRelaunched(CoherenceClusterMember original,
+                                CoherenceClusterMember restarted,
+                                Options                options)
+    {
+        // TODO: assert that the original member UID is no longer in the cluster
+
+        // ensure the restarted member has joined the cluster
+        // (without doing this the local member id returned below may be different from
+        // the one when the member joins the cluster)
+        ensure(eventually(invoking(restarted).getClusterSize()), greaterThan(1));
+
+        // determine the UID of the restarted member
+        UID memberUID = restarted.getLocalMemberUID();
+
+        // ensure that the restarted member is in the member set of the cluster
+        ensure(eventually(invoking(this).getClusterMemberUIDs()), contains(memberUID));
+    }
+
+
+    /**
+     * Useful {@link Predicate}s for a {@link CoherenceCluster}.
+     */
+    public interface Predicates
+    {
+        /**
+         * A {@link Predicate} to determine if all of the services of
+         * {@link CoherenceClusterMember}s are safe.
+         *
+         * @return  a {@link Predicate}
+         */
+        static Predicate<CoherenceCluster> autoStartServicesSafe()
+        {
+            return (cluster) -> {
+                       for (CoherenceClusterMember member : cluster)
+                       {
+                           Set<String> setServiceNames = member.invoke(new GetAutoStartServiceNames());
+
+                           for (String sServiceName : setServiceNames)
+                           {
+                               ServiceStatus status = member.invoke(new GetServiceStatus(sServiceName));
+
+                               if (status == ServiceStatus.ENDANGERED
+                                   || status == ServiceStatus.ORPHANED
+                                   || status == ServiceStatus.STOPPED
+                                   || status == ServiceStatus.UNKNOWN)
+                               {
+                                   return false;
+                               }
+                           }
+                       }
+
+                       return true;
+                   };
+        }
     }
 }

@@ -27,36 +27,27 @@ package com.oracle.tools.runtime.virtual.vagrant;
 
 import com.oracle.tools.Option;
 import com.oracle.tools.Options;
-
 import com.oracle.tools.options.Timeout;
-
 import com.oracle.tools.runtime.Application;
 import com.oracle.tools.runtime.LocalPlatform;
-
 import com.oracle.tools.runtime.console.Console;
 import com.oracle.tools.runtime.console.PipedApplicationConsole;
-
 import com.oracle.tools.runtime.options.Argument;
 import com.oracle.tools.runtime.options.Arguments;
 import com.oracle.tools.runtime.options.DisplayName;
 import com.oracle.tools.runtime.options.Executable;
 import com.oracle.tools.runtime.options.WorkingDirectory;
-
 import com.oracle.tools.runtime.remote.SecureKeys;
 import com.oracle.tools.runtime.remote.options.StrictHostChecking;
-
 import com.oracle.tools.runtime.virtual.CloseAction;
 import com.oracle.tools.runtime.virtual.VirtualPlatform;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-
 import java.util.Properties;
-
 import java.util.concurrent.TimeUnit;
 
 /**

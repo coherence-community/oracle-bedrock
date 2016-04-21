@@ -28,11 +28,7 @@ package com.oracle.tools.deferred;
 import com.oracle.tools.deferred.atomic.DeferredAtomicBoolean;
 import com.oracle.tools.deferred.atomic.DeferredAtomicInteger;
 import com.oracle.tools.deferred.atomic.DeferredAtomicLong;
-
 import com.oracle.tools.options.Timeout;
-
-import com.oracle.tools.predicate.Predicate;
-
 import com.oracle.tools.util.Duration;
 import com.oracle.tools.util.ExponentialIterator;
 import com.oracle.tools.util.FibonacciIterator;
@@ -40,22 +36,18 @@ import com.oracle.tools.util.MappingIterator;
 import com.oracle.tools.util.PerpetualIterator;
 import com.oracle.tools.util.ProxyHelper;
 import com.oracle.tools.util.RandomIterator;
-import com.oracle.tools.util.ReflectionHelper;
-
 import net.sf.cglib.proxy.MethodInterceptor;
 import net.sf.cglib.proxy.MethodProxy;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
-
 import java.util.Iterator;
-
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
-
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Predicate;
 
 /**
  * The {@link DeferredHelper} defines a collection of static helper methods
@@ -107,12 +99,6 @@ public class DeferredHelper
     public static final long ORACLETOOLS_DEFERRED_RETRY_TIMEOUT_SECS = 60;
 
     /**
-     * The total maximum {@link Duration} that can be used attempting to
-     * ensure a {@link Deferred}.
-     */
-    private static final Duration ENSURED_MAXIMUM_RETRY_DURATION;
-
-    /**
      * The system property defining the maximum time permitted to wait between
      * attempts to ensure a {@link Deferred}.
      * <p/>
@@ -130,12 +116,6 @@ public class DeferredHelper
     public static final long ORACLETOOLS_DEFERRED_MAXIMUM_POLLING_TIME_MS = 1000;
 
     /**
-     * The maximum {@link Duration} permitted to wait between attempts
-     * to ensure a {@link Deferred}.
-     */
-    private static final Duration ENSURED_MAXIMUM_POLLING_DURATION;
-
-    /**
      * A {@link ThreadLocal} to capture the most recent {@link Deferred}
      * method call on a proxy created by {@link #invoking(Deferred)}.
      * <p>
@@ -145,10 +125,117 @@ public class DeferredHelper
     private static final ThreadLocal<Deferred<?>> DEFERRED = new ThreadLocal<Deferred<?>>();
 
     /**
+     * The total maximum {@link Duration} that can be used attempting to
+     * ensure a {@link Deferred}.
+     */
+    private static final Duration ENSURED_MAXIMUM_RETRY_DURATION;
+
+    /**
+     * The maximum {@link Duration} permitted to wait between attempts
+     * to ensure a {@link Deferred}.
+     */
+    private static final Duration ENSURED_MAXIMUM_POLLING_DURATION;
+
+    /**
      * An {@link Iterable} that produces {@link Iterator}s to use for retry
      * {@link Duration}.
      */
     private static final Iterable<Duration> ENSURED_RETRY_DURATIONS;
+
+
+    static
+    {
+        // ----------------
+        // establish the ensured maximum retry duration
+        String maximumRetryDuration = System.getProperty(ORACLETOOLS_DEFERRED_RETRY_TIMEOUT,
+                                                         Long.toString(ORACLETOOLS_DEFERRED_RETRY_TIMEOUT_SECS) + "s");
+
+        ENSURED_MAXIMUM_RETRY_DURATION = Duration.of(maximumRetryDuration);
+
+        // ----------------
+        // establish the ensured maximum polling time
+        String maximumPollingDuration = System.getProperty(ORACLETOOLS_DEFERRED_MAXIMUM_POLLING_TIME,
+                                                           Long.toString(ORACLETOOLS_DEFERRED_MAXIMUM_POLLING_TIME_MS));
+
+        ENSURED_MAXIMUM_POLLING_DURATION = Duration.of(maximumPollingDuration);
+
+        // ----------------
+        // establish the ensured retry durations iterable
+        String strategy = System.getProperty(ORACLETOOLS_DEFERRED_RETRY_STRATEGY, "random.fibonacci");
+
+        strategy = strategy.trim().toLowerCase();
+
+        // the mapping function from Longs (milliseconds) to Durations
+        final MappingIterator.Function<Long, Duration> MILLISECONDS_TO_DURATION = new MappingIterator.Function<Long,
+                                                                                      Duration>()
+        {
+            @Override
+            public Duration map(Long milliseconds)
+            {
+                return Duration.of(milliseconds, TimeUnit.MILLISECONDS);
+            }
+        };
+
+        if (strategy.equals("random.fibonacci"))
+        {
+            ENSURED_RETRY_DURATIONS = new Iterable<Duration>()
+            {
+                @Override
+                public Iterator<Duration> iterator()
+                {
+                    return new MappingIterator<Long, Duration>(new RandomIterator(new FibonacciIterator()),
+                                                               MILLISECONDS_TO_DURATION);
+                }
+            };
+        }
+        else if (strategy.equals("random.exponential"))
+        {
+            ENSURED_RETRY_DURATIONS = new Iterable<Duration>()
+            {
+                @Override
+                public Iterator<Duration> iterator()
+                {
+                    return new MappingIterator<Long, Duration>(new RandomIterator(new ExponentialIterator(0, 50)),
+                                                               MILLISECONDS_TO_DURATION);
+                }
+            };
+        }
+        else if (strategy.equals("fibonacci"))
+        {
+            ENSURED_RETRY_DURATIONS = new Iterable<Duration>()
+            {
+                @Override
+                public Iterator<Duration> iterator()
+                {
+                    return new MappingIterator<Long, Duration>(new FibonacciIterator(), MILLISECONDS_TO_DURATION);
+                }
+            };
+        }
+        else if (strategy.equals("exponential"))
+        {
+            ENSURED_RETRY_DURATIONS = new Iterable<Duration>()
+            {
+                @Override
+                public Iterator<Duration> iterator()
+                {
+                    return new MappingIterator<Long, Duration>(new ExponentialIterator(0, 50),
+                                                               MILLISECONDS_TO_DURATION);
+                }
+            };
+        }
+        else
+        {
+            // default to perpetual polling
+            ENSURED_RETRY_DURATIONS = new Iterable<Duration>()
+            {
+                @Override
+                public Iterator<Duration> iterator()
+                {
+                    return new PerpetualIterator<Duration>(Duration.of(250, TimeUnit.MILLISECONDS));
+                }
+            };
+        }
+    }
 
 
     /**
@@ -833,14 +920,13 @@ public class DeferredHelper
                                           long        totalRetryDuration,
                                           TimeUnit    totalRetryDurationUnits)
     {
-        Iterator<Duration> retryDurations =
-            new PerpetualIterator<Duration>(Duration.of(retryDelayDuration < 0 ? 0 : retryDelayDuration,
-                                                        retryDelayDurationUnits));
+        Iterator<Duration> retryDurations = new PerpetualIterator<Duration>(Duration.of(retryDelayDuration < 0
+                                                                                        ? 0 : retryDelayDuration,
+                                                                                        retryDelayDurationUnits));
 
         return deferred instanceof Ensured ? deferred : new Ensured<T>(deferred,
                                                                        retryDurations,
-                                                                       totalRetryDurationUnits
-                                                                           .toMillis(totalRetryDuration));
+                                                                       totalRetryDurationUnits.toMillis(totalRetryDuration));
     }
 
 
@@ -1109,102 +1195,6 @@ public class DeferredHelper
                 // so we can continue to capture and defer method calls
                 return ProxyHelper.createProxyOf(resultType, new DeferredMethodInteceptor());
             }
-        }
-    }
-
-
-    static
-    {
-        // ----------------
-        // establish the ensured maximum retry duration
-        String maximumRetryDuration = System.getProperty(ORACLETOOLS_DEFERRED_RETRY_TIMEOUT,
-                                                         Long.toString(ORACLETOOLS_DEFERRED_RETRY_TIMEOUT_SECS) + "s");
-
-        ENSURED_MAXIMUM_RETRY_DURATION = Duration.of(maximumRetryDuration);
-
-        // ----------------
-        // establish the ensured maximum polling time
-        String maximumPollingDuration = System.getProperty(ORACLETOOLS_DEFERRED_MAXIMUM_POLLING_TIME,
-                                                           Long.toString(ORACLETOOLS_DEFERRED_MAXIMUM_POLLING_TIME_MS));
-
-        ENSURED_MAXIMUM_POLLING_DURATION = Duration.of(maximumPollingDuration);
-
-        // ----------------
-        // establish the ensured retry durations iterable
-        String strategy = System.getProperty(ORACLETOOLS_DEFERRED_RETRY_STRATEGY, "random.fibonacci");
-
-        strategy = strategy.trim().toLowerCase();
-
-        // the mapping function from Longs (milliseconds) to Durations
-        final MappingIterator.Function<Long, Duration> MILLISECONDS_TO_DURATION = new MappingIterator.Function<Long,
-                                                                                      Duration>()
-        {
-            @Override
-            public Duration map(Long milliseconds)
-            {
-                return Duration.of(milliseconds, TimeUnit.MILLISECONDS);
-            }
-        };
-
-        if (strategy.equals("random.fibonacci"))
-        {
-            ENSURED_RETRY_DURATIONS = new Iterable<Duration>()
-            {
-                @Override
-                public Iterator<Duration> iterator()
-                {
-                    return new MappingIterator<Long, Duration>(new RandomIterator(new FibonacciIterator()),
-                                                               MILLISECONDS_TO_DURATION);
-                }
-            };
-        }
-        else if (strategy.equals("random.exponential"))
-        {
-            ENSURED_RETRY_DURATIONS = new Iterable<Duration>()
-            {
-                @Override
-                public Iterator<Duration> iterator()
-                {
-                    return new MappingIterator<Long, Duration>(new RandomIterator(new ExponentialIterator(0,
-                                                                                                          50)),
-                                                               MILLISECONDS_TO_DURATION);
-                }
-            };
-        }
-        else if (strategy.equals("fibonacci"))
-        {
-            ENSURED_RETRY_DURATIONS = new Iterable<Duration>()
-            {
-                @Override
-                public Iterator<Duration> iterator()
-                {
-                    return new MappingIterator<Long, Duration>(new FibonacciIterator(), MILLISECONDS_TO_DURATION);
-                }
-            };
-        }
-        else if (strategy.equals("exponential"))
-        {
-            ENSURED_RETRY_DURATIONS = new Iterable<Duration>()
-            {
-                @Override
-                public Iterator<Duration> iterator()
-                {
-                    return new MappingIterator<Long, Duration>(new ExponentialIterator(0,
-                                                                                       50), MILLISECONDS_TO_DURATION);
-                }
-            };
-        }
-        else
-        {
-            // default to perpetual polling
-            ENSURED_RETRY_DURATIONS = new Iterable<Duration>()
-            {
-                @Override
-                public Iterator<Duration> iterator()
-                {
-                    return new PerpetualIterator<Duration>(Duration.of(250, TimeUnit.MILLISECONDS));
-                }
-            };
         }
     }
 }

@@ -27,23 +27,12 @@ package com.oracle.tools.runtime;
 
 import com.oracle.tools.Option;
 import com.oracle.tools.Options;
-
-import com.oracle.tools.predicate.Predicate;
-
-import com.oracle.tools.runtime.console.NullApplicationConsole;
-import com.oracle.tools.runtime.console.SingletonApplicationConsoleBuilder;
-
 import com.oracle.tools.runtime.options.Discriminator;
-
 import com.oracle.tools.util.Quadruple;
-import com.oracle.tools.util.Triple;
 
-import java.io.IOException;
-
-import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
+import java.util.function.Predicate;
 
 /**
  * A builder of {@link Assembly}s for a given {@link Infrastructure}.
@@ -124,7 +113,7 @@ public class InfrastructureAssemblyBuilder<P extends Platform, A extends Applica
 
             for (P platform : infrastructure)
             {
-                if (predicate == null || predicate.evaluate(platform))
+                if (predicate == null || predicate.test(platform))
                 {
                     for (int i = 1; i <= count; i++)
                     {
@@ -141,6 +130,6 @@ public class InfrastructureAssemblyBuilder<P extends Platform, A extends Applica
             }
         }
 
-        return (G) new SimpleAssembly<>(applications);
+        return (G) new SimpleAssembly<>(applications, Options.from(options));
     }
 }

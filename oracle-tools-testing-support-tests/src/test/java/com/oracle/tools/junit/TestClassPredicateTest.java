@@ -41,12 +41,19 @@ import static org.junit.Assert.assertThat;
  */
 public class TestClassPredicateTest
 {
+    /**
+     * Enum description
+     */
+    public enum DummyEnum {One,
+                           Two}
+
+
     @Test
     public void shouldEvaluateFalseIfClassIsNull() throws Exception
     {
         TestClassPredicate predicate = new TestClassPredicate();
 
-        assertThat(predicate.evaluate(null), is(false));
+        assertThat(predicate.test(null), is(false));
     }
 
 
@@ -55,7 +62,7 @@ public class TestClassPredicateTest
     {
         TestClassPredicate predicate = new TestClassPredicate();
 
-        assertThat(predicate.evaluate(Ignore.class), is(false));
+        assertThat(predicate.test(Ignore.class), is(false));
     }
 
 
@@ -72,9 +79,8 @@ public class TestClassPredicateTest
 
         TestClassPredicate predicate = new TestClassPredicate();
 
-        assertThat(predicate.evaluate(runnable.getClass()), is(false));
+        assertThat(predicate.test(runnable.getClass()), is(false));
     }
-
 
 
     @Test
@@ -82,7 +88,7 @@ public class TestClassPredicateTest
     {
         TestClassPredicate predicate = new TestClassPredicate();
 
-        assertThat(predicate.evaluate(DummyEnum.class), is(false));
+        assertThat(predicate.test(DummyEnum.class), is(false));
     }
 
 
@@ -91,7 +97,7 @@ public class TestClassPredicateTest
     {
         TestClassPredicate predicate = new TestClassPredicate();
 
-        assertThat(predicate.evaluate(Runnable.class), is(false));
+        assertThat(predicate.test(Runnable.class), is(false));
     }
 
 
@@ -100,7 +106,7 @@ public class TestClassPredicateTest
     {
         TestClassPredicate predicate = new TestClassPredicate();
 
-        assertThat(predicate.evaluate(AbstractJUnit3Test.class), is(false));
+        assertThat(predicate.test(AbstractJUnit3Test.class), is(false));
     }
 
 
@@ -109,7 +115,7 @@ public class TestClassPredicateTest
     {
         TestClassPredicate predicate = new TestClassPredicate();
 
-        assertThat(predicate.evaluate(AbstractJUnit3Suite.class), is(false));
+        assertThat(predicate.test(AbstractJUnit3Suite.class), is(false));
     }
 
 
@@ -118,7 +124,7 @@ public class TestClassPredicateTest
     {
         TestClassPredicate predicate = new TestClassPredicate();
 
-        assertThat(predicate.evaluate(JUnit3Suite.class), is(true));
+        assertThat(predicate.test(JUnit3Suite.class), is(true));
     }
 
 
@@ -127,7 +133,7 @@ public class TestClassPredicateTest
     {
         TestClassPredicate predicate = new TestClassPredicate();
 
-        assertThat(predicate.evaluate(JUnit3Test.class), is(true));
+        assertThat(predicate.test(JUnit3Test.class), is(true));
     }
 
 
@@ -136,7 +142,7 @@ public class TestClassPredicateTest
     {
         TestClassPredicate predicate = new TestClassPredicate();
 
-        assertThat(predicate.evaluate(AbstractJUnit4Test.class), is(false));
+        assertThat(predicate.test(AbstractJUnit4Test.class), is(false));
     }
 
 
@@ -145,7 +151,7 @@ public class TestClassPredicateTest
     {
         TestClassPredicate predicate = new TestClassPredicate();
 
-        assertThat(predicate.evaluate(AbstractRunWithAnnotatedTest.class), is(false));
+        assertThat(predicate.test(AbstractRunWithAnnotatedTest.class), is(false));
     }
 
 
@@ -154,7 +160,7 @@ public class TestClassPredicateTest
     {
         TestClassPredicate predicate = new TestClassPredicate();
 
-        assertThat(predicate.evaluate(JUnit4Test.class), is(true));
+        assertThat(predicate.test(JUnit4Test.class), is(true));
     }
 
 
@@ -163,7 +169,7 @@ public class TestClassPredicateTest
     {
         TestClassPredicate predicate = new TestClassPredicate();
 
-        assertThat(predicate.evaluate(RunWithAnnotatedTest.class), is(true));
+        assertThat(predicate.test(RunWithAnnotatedTest.class), is(true));
     }
 
 
@@ -172,9 +178,9 @@ public class TestClassPredicateTest
     {
         TestClassPredicate predicate = new TestClassPredicate();
 
-        assertThat(predicate.evaluate(AbstractRunWithEnclosedTest.class), is(true));
+        assertThat(predicate.test(AbstractRunWithEnclosedTest.class), is(true));
     }
 
 
-    public enum DummyEnum {One, Two};
+    ;
 }

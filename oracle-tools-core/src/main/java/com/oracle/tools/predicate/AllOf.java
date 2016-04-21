@@ -26,6 +26,7 @@
 package com.oracle.tools.predicate;
 
 import java.util.Arrays;
+import java.util.function.Predicate;
 
 /**
  * A {@link Predicate} representing the lazy conjunction of
@@ -58,7 +59,7 @@ public class AllOf<T> implements Predicate<T>
 
 
     @Override
-    public boolean evaluate(T value)
+    public boolean test(T value)
     {
         if (predicates == null)
         {
@@ -68,7 +69,7 @@ public class AllOf<T> implements Predicate<T>
         {
             for (Predicate<? super T> predicate : predicates)
             {
-                if (!predicate.evaluate(value))
+                if (!predicate.test(value))
                 {
                     return false;
                 }

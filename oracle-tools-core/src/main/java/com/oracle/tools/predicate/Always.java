@@ -25,6 +25,8 @@
 
 package com.oracle.tools.predicate;
 
+import java.util.function.Predicate;
+
 /**
  * A {@link Predicate} that always succeeds.
  * <p>
@@ -33,10 +35,10 @@ package com.oracle.tools.predicate;
  *
  * @author Brian Oliver
  */
-public class Always implements Predicate
+public class Always implements java.util.function.Predicate
 {
     @Override
-    public boolean evaluate(Object value)
+    public boolean test(Object value)
     {
         return true;
     }

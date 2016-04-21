@@ -46,11 +46,11 @@ public interface AssemblyBuilder<A extends Application, G extends Assembly<A>>
      * Multiple calls to this method are permitted, allowing an {@link Assembly} to be created containing
      * multiple different types of {@link Application}s.
      *
-     * @param count             the number of instances of the {@link Application} that should be realized for
+     * @param count             the number of instances of the {@link Application} that should be launched for
      *                          the {@link Assembly}
      * @param platform          the {@link Platform} on which to launch the {@link Application}s
      * @param applicationClass  the class of {@link Application}
-     * @param options           the {@link Option}s to use for realizing the {@link Application}s
+     * @param options           the {@link Option}s to use for launching the {@link Application}s
      *
      * @see Platform#launch(String, Option...)
      */
@@ -66,7 +66,7 @@ public interface AssemblyBuilder<A extends Application, G extends Assembly<A>>
      *
      * @param options  the {@link Option}s to override those specified in {@link #include(int, Platform, Class, Option...)}
      *
-     * @return an {@link Assembly} representing the collection of realized {@link Application}s.
+     * @return an {@link Assembly} representing the collection of launched {@link Application}s.
      *
      * @throws RuntimeException when a problem occurs building the {@link Assembly}
      */

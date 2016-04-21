@@ -25,6 +25,8 @@
 
 package com.oracle.tools.predicate;
 
+import java.util.function.Predicate;
+
 /**
  * A {@link Predicate} that always fails (never succeeds).
  * <p>
@@ -36,7 +38,7 @@ package com.oracle.tools.predicate;
 public class Never implements Predicate
 {
     @Override
-    public boolean evaluate(Object value)
+    public boolean test(Object value)
     {
         return false;
     }
