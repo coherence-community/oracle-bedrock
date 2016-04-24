@@ -41,12 +41,12 @@ public class RandomIterator implements Iterator<Long>
     /**
      * The range for the next random number to generate.
      */
-    private Iterator<Long> m_ranges;
+    private Iterator<Long> ranges;
 
     /**
      * The {@link Random} number generator.
      */
-    private Random m_random;
+    private Random random;
 
 
     /**
@@ -61,8 +61,8 @@ public class RandomIterator implements Iterator<Long>
      */
     public RandomIterator(Iterator<Long> ranges)
     {
-        m_ranges = ranges;
-        m_random = new Random(System.nanoTime());
+        this.ranges = ranges;
+        this.random = new Random(System.nanoTime());
     }
 
 
@@ -78,32 +78,23 @@ public class RandomIterator implements Iterator<Long>
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public boolean hasNext()
     {
-        return m_ranges.hasNext();
+        return ranges.hasNext();
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Long next()
     {
-        long range  = m_ranges.next();
-        long random = Math.abs(m_random.nextLong());
+        long range  = ranges.next();
+        long random = Math.abs(this.random.nextLong());
 
         return range == 0 ? 0 : random % range;
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void remove()
     {

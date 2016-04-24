@@ -41,17 +41,17 @@ public class ExponentialIterator implements Iterator<Long>
     /**
      * The initial value;
      */
-    private double m_initial;
+    private double initial;
 
     /**
      * The rate a which growth should occur.
      */
-    private double m_rate;
+    private double rate;
 
     /**
      * The iteration.
      */
-    private long m_iteration;
+    private long iteration;
 
 
     /**
@@ -63,15 +63,12 @@ public class ExponentialIterator implements Iterator<Long>
     public ExponentialIterator(double initial,
                                double percentage)
     {
-        m_initial   = initial;
-        m_rate      = 1 + (percentage / 100.0);
-        m_iteration = 0;
+        this.initial = initial;
+        rate         = 1 + (percentage / 100.0);
+        iteration    = 0;
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public boolean hasNext()
     {
@@ -79,32 +76,26 @@ public class ExponentialIterator implements Iterator<Long>
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Long next()
     {
         long result;
 
-        if (m_iteration == 0)
+        if (iteration == 0)
         {
-            result = Math.round(m_initial);
+            result = Math.round(initial);
         }
         else
         {
-            result = Math.round(m_initial + Math.pow(m_rate, m_iteration - 1));
+            result = Math.round(initial + Math.pow(rate, iteration - 1));
         }
 
-        m_iteration++;
+        iteration++;
 
         return result;
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void remove()
     {

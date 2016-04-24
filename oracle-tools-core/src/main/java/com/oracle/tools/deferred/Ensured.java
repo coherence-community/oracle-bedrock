@@ -25,10 +25,15 @@
 
 package com.oracle.tools.deferred;
 
+import com.oracle.tools.Option;
+import com.oracle.tools.Options;
+import com.oracle.tools.deferred.options.InitialDelay;
+import com.oracle.tools.deferred.options.MaximumRetryDelay;
+import com.oracle.tools.deferred.options.RetryFrequency;
+import com.oracle.tools.options.Timeout;
 import com.oracle.tools.util.Duration;
 
 import java.util.Iterator;
-
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -38,11 +43,16 @@ import java.util.concurrent.TimeUnit;
  * <p>
  * An {@link Ensured} will repetitively attempt to acquire a object reference,
  * including <code>null</code> from an underlying {@link Deferred},
- * giving up only after the conditions defined by a {@link TimeoutConstraint} is
- * met, an unexpected exception or {@link PermanentlyUnavailableException} occurs.
+ * giving up only after the timeout conditions are met, an unexpected exception
+ * or {@link PermanentlyUnavailableException} occurs.
+ * <p>
+ * The timeout constraints are defined through the use of the following {@link Option}s,
+ * Maximum Retry {@link Timeout}, Initially {@link InitialDelay} By, {@link MaximumRetryDelay}
+ * and the {@link RetryFrequency}.  When none are specified, default are auto-detected
+ * from the current environment and configuration.
  * <p>
  * If an object reference or <code>null</code> can not be acquired with in the
- * specified constraints, an {@link PermanentlyUnavailableException} will be thrown.
+ * specified constraints, a {@link PermanentlyUnavailableException} will be thrown.
  * <p>
  * If the underlying {@link Deferred} throws an {@link PermanentlyUnavailableException},
  * while attempting to acquire the object reference, the said exception will be
@@ -50,14 +60,23 @@ import java.util.concurrent.TimeUnit;
  * <p>
  * The default behavior of {@link #get()} is to attempt to acquire the
  * underlying resource from the specified {@link Deferred}, retrying a number
- * of times, waiting for at most the configured duration.   The delay
+ * of times, waiting for at most the maximum {@link Timeout} duration.   The delay
  * between subsequent failures and corresponding retries is specified by an
- * {@link Iterator}, defined by the {@link TimeoutConstraint}.
+ * {@link Iterator}, defined by the {@link RetryFrequency}.   An initial delay
+ * defined by the {@link InitialDelay} {@link Option} will be applied if specified, and
+ * subsequent delays between retries will not be any larger than the specified
+ * {@link MaximumRetryDelay}.
+ * </p>
  * <p>
  * Copyright (c) 2013. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Brian Oliver
+ *
+ * @see Timeout
+ * @see InitialDelay
+ * @see MaximumRetryDelay
+ * @see RetryFrequency
  */
 public class Ensured<T> implements Deferred<T>
 {
@@ -89,75 +108,35 @@ public class Ensured<T> implements Deferred<T>
 
 
     /**
-     * Constructs an {@link Ensured} using default {@link TimeoutConstraint}.
-     *
-     * @param deferred           the {@link Deferred} to ensure
-     */
-    public Ensured(Deferred<T> deferred)
-    {
-        this(deferred, null);
-    }
-
-
-    /**
      * Constructs an {@link Ensured}.
      *
-     * @param deferred    the {@link Deferred} to ensure
-     * @param constraint  the {@link TimeoutConstraint} for the {@link Ensured}
-     *                    (<code>null</code> means use the default)
+     * @param deferred  the {@link Deferred} to ensure
+     * @param options   the {@link Option} for the {@link Ensured}
      */
-    public Ensured(Deferred<T>       deferred,
-                   TimeoutConstraint constraint)
+    public Ensured(Deferred<T> deferred,
+                   Option...   options)
     {
         // when we're ensuring an ensured, use the adapted deferred
         // (this is to ensure that we don't attempt to ensure another ensured)
         this.deferred = deferred instanceof Ensured ? ((Ensured<T>) deferred).getDeferred() : deferred;
 
-        if (constraint == null)
-        {
-            this.initialDelayDurationMS = 0;
-            this.maximumPollingDurationMS =
-                DeferredHelper.getDefaultEnsuredMaximumPollingDuration().to(TimeUnit.MILLISECONDS);
-            this.maximumRetryDurationMS =
-                DeferredHelper.getDefaultEnsuredMaximumRetryDuration().to(TimeUnit.MILLISECONDS);
-            this.retryDurations = DeferredHelper.getDefaultEnsuredRetryDurationsIterable().iterator();
-        }
-        else
-        {
-            this.initialDelayDurationMS   = constraint.getInitialDelay().to(TimeUnit.MILLISECONDS);
-            this.maximumPollingDurationMS = constraint.getMaximumPollingDelay().to(TimeUnit.MILLISECONDS);
-            this.maximumRetryDurationMS   = constraint.getMaximumRetryDuration().to(TimeUnit.MILLISECONDS);
-            this.retryDurations           = constraint.getRetryDelayDurations().iterator();
-        }
-    }
+        // determine the timeout constraints based on the provided options
+        Options ensuredOptions = Options.from(options);
 
+        this.initialDelayDurationMS = ensuredOptions.getOrDefault(InitialDelay.class,
+                                                                  InitialDelay.none()).to(TimeUnit.MILLISECONDS);
 
-    /**
-     * Construct an {@link Ensured} adapting the specified {@link Deferred}.
-     *
-     * @param deferred                  the {@link Deferred} to ensure
-     * @param retryDurations  an {@link Iterator} providing individual retry
-     *                                  durations (in milliseconds) for each time the
-     *                                  {@link Ensured} needs to wait
-     * @param maximumRetryDurationMS    the maximum duration (in milliseconds) to wait
-     *                                  for the {@link Deferred} to become available
-     *
-     * @deprecated  Use {@link #Ensured(Deferred, TimeoutConstraint)} instead
-     */
-    @Deprecated
-    public Ensured(Deferred<T>        deferred,
-                   Iterator<Duration> retryDurations,
-                   long               maximumRetryDurationMS)
-    {
-        // when we're ensuring an ensured, use the adapted deferred
-        // (this is to ensure that we don't attempt to ensure another ensured)
-        this.deferred               = deferred instanceof Ensured ? ((Ensured<T>) deferred).getDeferred() : deferred;
+        this.maximumRetryDurationMS = ensuredOptions.getOrDefault(Timeout.class,
+                                                                  Timeout.after(DeferredHelper.getDefaultEnsuredMaximumRetryDuration()))
+                                                                  .to(TimeUnit.MILLISECONDS);
 
-        this.initialDelayDurationMS = 0;
-        this.maximumPollingDurationMS =
-            DeferredHelper.getDefaultEnsuredMaximumPollingDuration().to(TimeUnit.MILLISECONDS);
-        this.maximumRetryDurationMS = maximumRetryDurationMS;
-        this.retryDurations         = retryDurations;
+        this.maximumPollingDurationMS = ensuredOptions.getOrDefault(MaximumRetryDelay.class,
+                                                                    MaximumRetryDelay.of(DeferredHelper.getDefaultEnsuredMaximumPollingDuration()))
+                                                                    .to(TimeUnit.MILLISECONDS);
+
+        this.retryDurations = ensuredOptions.getOrDefault(RetryFrequency.class,
+                                                          RetryFrequency.of(DeferredHelper.getDefaultEnsuredRetryDurationsIterable()))
+                                                          .get().iterator();
     }
 
 

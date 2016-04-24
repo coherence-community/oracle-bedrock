@@ -25,9 +25,11 @@
 
 package com.oracle.tools.deferred;
 
+import com.oracle.tools.Option;
 import com.oracle.tools.deferred.atomic.DeferredAtomicBoolean;
 import com.oracle.tools.deferred.atomic.DeferredAtomicInteger;
 import com.oracle.tools.deferred.atomic.DeferredAtomicLong;
+import com.oracle.tools.deferred.options.InitialDelay;
 import com.oracle.tools.options.Timeout;
 import com.oracle.tools.util.Duration;
 import com.oracle.tools.util.ExponentialIterator;
@@ -367,8 +369,7 @@ public class DeferredHelper
 
 
     /**
-     * Obtains an ensured of the specified {@link Deferred}
-     * configured using default {@link TimeoutConstraint}.
+     * Obtains an ensured of the specified {@link Deferred}.
      *
      * @param deferred  the {@link Deferred} to ensure
      *
@@ -381,18 +382,17 @@ public class DeferredHelper
 
 
     /**
-     * Obtains an ensured of the specified {@link Deferred}
-     * using the provided {@link TimeoutConstraint}.
+     * Obtains an ensured of the specified {@link Deferred} using the specified {@link Option}s.
      *
-     * @param deferred    the {@link Deferred} to ensure
-     * @param constraint  the {@link TimeoutConstraint}
+     * @param deferred  the {@link Deferred} to ensure
+     * @param options   the {@link Option}s for ensuring the {@link Deferred}
      *
      * @return an {@link Ensured} of the {@link Deferred}
      */
-    public static <T> Deferred<T> ensured(Deferred<T>       deferred,
-                                          TimeoutConstraint constraint)
+    public static <T> Deferred<T> ensured(Deferred<T> deferred,
+                                          Option...   options)
     {
-        return deferred instanceof Ensured ? deferred : new Ensured<T>(deferred, constraint);
+        return deferred instanceof Ensured ? deferred : new Ensured<T>(deferred, options);
     }
 
 
@@ -431,17 +431,17 @@ public class DeferredHelper
      * Obtains the value of a {@link Deferred}.
      * <p>
      * This is functionally equivalent to calling {@link Deferred#get()} on
-     * {@link #ensured(Deferred, TimeoutConstraint)}.
+     * {@link #ensured(Deferred, Option...)}.
      *
-     * @param deferred    the {@link Deferred} to ensure
-     * @param constraint  the {@link TimeoutConstraint}
+     * @param deferred  the {@link Deferred} to ensure
+     * @param options   the {@link Option}s
      *
      * @return the value of the {@link Deferred}
      */
-    public static <T> T ensure(Deferred<T>       deferred,
-                               TimeoutConstraint constraint)
+    public static <T> T ensure(Deferred<T> deferred,
+                               Option...   options)
     {
-        return ensured(deferred, constraint).get();
+        return ensured(deferred, options).get();
     }
 
 
@@ -757,14 +757,14 @@ public class DeferredHelper
      * dynamic proxy created with either {@link #invoking(Object)} or
      * {@link #invoking(Deferred)}.
      *
-     * @param t           the value returned from an call to 'invoking'
-     * @param constraint  the {@link TimeoutConstraint}
+     * @param t        the value returned from an call to 'invoking'
+     * @param options  the {@link Option}s
      *
      * @return a {@link Deferred} representation of a previous call
      * {@link #invoking(Object)}
      */
-    public static <T> Deferred<T> eventually(T                 t,
-                                             TimeoutConstraint constraint)
+    public static <T> Deferred<T> eventually(T         t,
+                                             Option... options)
     {
         // get the last deferred value from invoking
         Deferred<T> deferred = (Deferred<T>) DEFERRED.get();
@@ -779,7 +779,7 @@ public class DeferredHelper
             DEFERRED.set(null);
         }
 
-        return ensured(deferred, constraint);
+        return ensured(deferred, options);
     }
 
 
@@ -789,14 +789,14 @@ public class DeferredHelper
      * {@link #invoking(Deferred)}.   If there was no call to create a
      * dynamic proxy, the provided deferred is ensured and returned.
      *
-     * @param t           the deferred value (usually returned from 'invoking')
-     * @param constraint  the {@link TimeoutConstraint}
+     * @param t        the deferred value (usually returned from 'invoking')
+     * @param options  the {@link Option}s
      *
      * @return a {@link Deferred} representation of a previous call
      * {@link #invoking(Object)}
      */
-    public static <T> Deferred<T> eventually(Deferred<T>       t,
-                                             TimeoutConstraint constraint)
+    public static <T> Deferred<T> eventually(Deferred<T> t,
+                                             Option...   options)
     {
         // get the last deferred value from invoking
         Deferred<T> deferred = (Deferred<T>) DEFERRED.get();
@@ -811,299 +811,52 @@ public class DeferredHelper
             DEFERRED.set(null);
         }
 
-        return ensured(deferred, constraint);
+        return ensured(deferred, options);
     }
 
 
     /**
-     * Obtains a {@link TimeoutConstraint} with the specified maximum
-     * duration, no initial duration and using the default ensured strategy.
+     * Obtains a {@link Timeout} for the specified duration.
      *
-     * @param duration  the maximum duration
-     * @param units     the maximum duration units
+     * @param duration  the duration
+     * @param units     the duration units
      *
-     * @return  a {@link TimeoutConstraint}
+     * @return  a {@link Timeout}
      */
-    public static SimpleTimeoutConstraint within(long     duration,
-                                                 TimeUnit units)
+    public static Timeout within(long     duration,
+                                 TimeUnit units)
     {
-        return new SimpleTimeoutConstraint(Duration.ZERO,
-                                           ENSURED_MAXIMUM_POLLING_DURATION,
-                                           Duration.of(duration, units),
-                                           ENSURED_RETRY_DURATIONS);
+        return Timeout.after(duration, units);
     }
 
 
     /**
-     * Obtains a {@link TimeoutConstraint} based on the specified
-     * {@link Timeout}, no initial duration and using the default ensured strategy.
+     * Returns the specified {@link Timeout}.
      *
      * @param timeout  the {@link Timeout}
      *
-     * @return  a {@link TimeoutConstraint}
+     * @return  the specified {@link Timeout}
      */
-    public static SimpleTimeoutConstraint within(Timeout timeout)
+    public static Timeout within(Timeout timeout)
     {
-        return new SimpleTimeoutConstraint(Duration.ZERO,
-                                           ENSURED_MAXIMUM_POLLING_DURATION,
-                                           timeout.getDuration(),
-                                           ENSURED_RETRY_DURATIONS);
+        return timeout;
     }
 
 
     /**
-     * Obtains a {@link TimeoutConstraint} with the specified initial delay,
-     * using the default maximum retry and ensured strategy.
+     * Obtains a {@link InitialDelay} for the specified duration
      *
-     * @param duration  the initial delay duration
-     * @param units     the initial delay duration units
+     * @param duration  the delay duration
+     * @param units     the delay duration units
      *
-     * @return  a {@link TimeoutConstraint}
+     * @return  a {@link InitialDelay}
      */
-    public static SimpleTimeoutConstraint delayedBy(long     duration,
-                                                    TimeUnit units)
+    public static InitialDelay delayedBy(long     duration,
+                                         TimeUnit units)
     {
-        return new SimpleTimeoutConstraint(Duration.of(duration, units),
-                                           ENSURED_MAXIMUM_POLLING_DURATION,
-                                           ENSURED_MAXIMUM_RETRY_DURATION,
-                                           ENSURED_RETRY_DURATIONS);
+        return InitialDelay.of(duration, units);
     }
 
-
-    // ------------------------------------------------------------------------
-    // <deferred-methods> (will be removed in a later release)
-    // ------------------------------------------------------------------------
-
-    /**
-     * Obtains an ensured of the specified {@link Deferred}.
-     *
-     * @param deferred                   the {@link Deferred} to ensure
-     * @param maximumRetryDuration       the maximum duration for retrying
-     * @param maximumRetryDurationUnits  the {@link TimeUnit}s for the duration
-     *
-     * @return an {@link Ensured} of the {@link Deferred}
-     *
-     * @deprecated use {@link #ensured(Deferred, TimeoutConstraint)} instead
-     */
-    @Deprecated
-    public static <T> Deferred<T> ensured(Deferred<T> deferred,
-                                          long        maximumRetryDuration,
-                                          TimeUnit    maximumRetryDurationUnits)
-    {
-        long maximumRetryDurationMS = maximumRetryDurationUnits.toMillis(maximumRetryDuration);
-
-        return deferred instanceof Ensured ? deferred : new Ensured<T>(deferred,
-                                                                       new SimpleTimeoutConstraint(Duration.ZERO,
-                                                                                                   ENSURED_MAXIMUM_POLLING_DURATION,
-                                                                                                   ENSURED_MAXIMUM_RETRY_DURATION,
-                                                                                                   ENSURED_RETRY_DURATIONS));
-    }
-
-
-    /**
-     * Obtains an ensured of the specified {@link Deferred}.
-     *
-     * @param deferred                 the {@link Deferred} to ensure
-     * @param retryDelayDuration       the time to wait between retrying
-     * @param retryDelayDurationUnits  the {@link TimeUnit}s for the retry delay duration
-     * @param totalRetryDuration       the maximum duration for retrying
-     * @param totalRetryDurationUnits  the {@link TimeUnit}s for the duration
-     *
-     * @return an {@link Ensured} of the {@link Deferred}
-     *
-     * @deprecated use {@link #ensured(Deferred, TimeoutConstraint)} instead
-     */
-    @Deprecated
-    public static <T> Deferred<T> ensured(Deferred<T> deferred,
-                                          long        retryDelayDuration,
-                                          TimeUnit    retryDelayDurationUnits,
-                                          long        totalRetryDuration,
-                                          TimeUnit    totalRetryDurationUnits)
-    {
-        Iterator<Duration> retryDurations = new PerpetualIterator<Duration>(Duration.of(retryDelayDuration < 0
-                                                                                        ? 0 : retryDelayDuration,
-                                                                                        retryDelayDurationUnits));
-
-        return deferred instanceof Ensured ? deferred : new Ensured<T>(deferred,
-                                                                       retryDurations,
-                                                                       totalRetryDurationUnits.toMillis(totalRetryDuration));
-    }
-
-
-    /**
-     * Obtains an {@link Ensured} of the specified {@link Deferred}.
-     *
-     * @param deferred              the {@link Deferred} to ensure
-     * @param totalRetryDurationMS  the maximum duration (in milliseconds) to retry
-     *
-     * @return an {@link Ensured} of the {@link Deferred}
-     *
-     * @deprecated use {@link #ensured(Deferred, TimeoutConstraint)} instead
-     */
-    @Deprecated
-    public static <T> Deferred<T> ensured(Deferred<T> deferred,
-                                          long        totalRetryDurationMS)
-    {
-        TimeoutConstraint constraint = new SimpleTimeoutConstraint(Duration.ZERO,
-                                                                   ENSURED_MAXIMUM_POLLING_DURATION,
-                                                                   Duration.of(totalRetryDurationMS,
-                                                                               TimeUnit.MILLISECONDS),
-                                                                   ENSURED_RETRY_DURATIONS);
-
-        return deferred instanceof Ensured ? (Ensured<T>) deferred : new Ensured<T>(deferred, constraint);
-    }
-
-
-    /**
-     * Obtains the value of a {@link Deferred}.
-     * <p>
-     * This is functionally equivalent to calling {@link Deferred#get()} on
-     * {@link #ensure(Deferred, long, TimeUnit)}.
-     *
-     * @param deferred                 the {@link Deferred} to ensure
-     * @param totalRetryDuration       the maximum duration for retrying
-     * @param totalRetryDurationUnits  the {@link TimeUnit}s for the duration
-     *
-     * @return the value of the {@link Deferred}
-     *
-     * @deprecated use {@link #ensure(Deferred, TimeoutConstraint)} instead
-     */
-    @Deprecated
-    public static <T> T ensure(Deferred<T> deferred,
-                               long        totalRetryDuration,
-                               TimeUnit    totalRetryDurationUnits)
-    {
-        TimeoutConstraint constraint = new SimpleTimeoutConstraint(Duration.ZERO,
-                                                                   ENSURED_MAXIMUM_POLLING_DURATION,
-                                                                   Duration.of(totalRetryDuration,
-                                                                               totalRetryDurationUnits),
-                                                                   ENSURED_RETRY_DURATIONS);
-
-        return ensured(deferred, constraint).get();
-    }
-
-
-    /**
-     * Obtains the value of a {@link Deferred}.
-     * <p>
-     * This is functionally equivalent to calling {@link Deferred#get()} on
-     * {@link #ensure(Deferred, long, TimeUnit)}.
-     *
-     * @param deferred                 the {@link Deferred} to ensure
-     * @param retryDelayDuration       the time to wait between retrying
-     * @param retryDelayDurationUnits  the {@link TimeUnit}s for the retry delay duration
-     * @param totalRetryDuration       the maximum duration for retrying
-     * @param totalRetryDurationUnits  the {@link TimeUnit}s for the duration
-     *
-     * @return the value of the {@link Deferred}
-     *
-     * @deprecated use {@link #ensure(Deferred, TimeoutConstraint)} instead
-     */
-    @Deprecated
-    public static <T> T ensure(Deferred<T> deferred,
-                               long        retryDelayDuration,
-                               TimeUnit    retryDelayDurationUnits,
-                               long        totalRetryDuration,
-                               TimeUnit    totalRetryDurationUnits)
-    {
-        return ensured(deferred,
-                       retryDelayDuration,
-                       retryDelayDurationUnits,
-                       totalRetryDuration,
-                       totalRetryDurationUnits).get();
-    }
-
-
-    /**
-     * Obtains the value of a {@link Deferred}.
-     * <p>
-     * This is functionally equivalent to calling {@link Deferred#get()} on
-     * {@link #ensure(Deferred, long)}.
-     *
-     * @param deferred              the {@link Deferred} to ensure
-     * @param totalRetryDurationMS  the maximum duration (in milliseconds) to retry
-     *
-     * @return an {@link Ensured} of the {@link Deferred}
-     *
-     * @deprecated use {@link #ensure(Deferred, TimeoutConstraint)} instead
-     */
-    @Deprecated
-    public static <T> T ensure(Deferred<T> deferred,
-                               long        totalRetryDurationMS)
-    {
-        TimeoutConstraint constraint = new SimpleTimeoutConstraint(Duration.ZERO,
-                                                                   ENSURED_MAXIMUM_POLLING_DURATION,
-                                                                   Duration.of(totalRetryDurationMS,
-                                                                               TimeUnit.MILLISECONDS),
-                                                                   ENSURED_RETRY_DURATIONS);
-
-        return ensured(deferred, constraint).get();
-    }
-
-
-    /**
-     * Obtains a {@link Deferred} representation of the last call to a
-     * dynamic proxy created with either {@link #invoking(Object)} or
-     * {@link #invoking(Deferred)}.   If there was no call to create a
-     * dynamic proxy, the provided deferred is ensured and returned.
-     *
-     * @param t                        the deferred value (usually returned
-     *                                 from 'invoking'
-     * @param totalRetryDuration       the maximum duration for retrying
-     * @param totalRetryDurationUnits  the {@link TimeUnit}s for the duration
-     *
-     * @return a {@link Deferred} representation of a previous call
-     * {@link #invoking(Object)}
-     *
-     * @deprecated use {@link #eventually(Deferred, TimeoutConstraint)} instead
-     */
-    @Deprecated
-    public static <T> Deferred<T> eventually(Deferred<T> t,
-                                             long        totalRetryDuration,
-                                             TimeUnit    totalRetryDurationUnits)
-    {
-        TimeoutConstraint constraint = new SimpleTimeoutConstraint(Duration.ZERO,
-                                                                   ENSURED_MAXIMUM_POLLING_DURATION,
-                                                                   Duration.of(totalRetryDuration,
-                                                                               totalRetryDurationUnits),
-                                                                   ENSURED_RETRY_DURATIONS);
-
-        return eventually(t, constraint);
-    }
-
-
-    /**
-     * Obtains a {@link Deferred} representation of the last call to a
-     * dynamic proxy created with either {@link #invoking(Object)} or
-     * {@link #invoking(Deferred)}.
-     *
-     * @param t                        the value returned from an call to 'invoking'
-     * @param totalRetryDuration       the maximum duration for retrying
-     * @param totalRetryDurationUnits  the {@link TimeUnit}s for the duration
-     *
-     * @return a {@link Deferred} representation of a previous call
-     * {@link #invoking(Object)}
-     *
-     * @deprecated use {@link #eventually(Object, TimeoutConstraint)} instead
-     */
-    @Deprecated
-    public static <T> Deferred<T> eventually(T        t,
-                                             long     totalRetryDuration,
-                                             TimeUnit totalRetryDurationUnits)
-    {
-        TimeoutConstraint constraint = new SimpleTimeoutConstraint(Duration.ZERO,
-                                                                   ENSURED_MAXIMUM_POLLING_DURATION,
-                                                                   Duration.of(totalRetryDuration,
-                                                                               totalRetryDurationUnits),
-                                                                   ENSURED_RETRY_DURATIONS);
-
-        return eventually(t, constraint);
-    }
-
-
-    // ------------------------------------------------------------------------
-    // </deferred-methods> (will be removed in a later release)
-    // ------------------------------------------------------------------------
 
     /**
      * A {@link MethodInterceptor} that records invocations against a
@@ -1111,9 +864,6 @@ public class DeferredHelper
      */
     private static class DeferredMethodInteceptor implements MethodInterceptor
     {
-        /**
-         * {@inheritDoc}
-         */
         @SuppressWarnings({"rawtypes", "unchecked"})
         @Override
         public Object intercept(Object      self,

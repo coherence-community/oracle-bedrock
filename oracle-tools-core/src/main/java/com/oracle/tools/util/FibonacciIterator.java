@@ -42,12 +42,12 @@ public class FibonacciIterator implements Iterator<Long>
      * The iteration (digit) of the Fibonacci sequence the
      * {@link Iterator} is currently up to.
      */
-    private long m_iteration;
+    private long iteration;
 
     /**
      * The last two generated Fibonacci numbers
      */
-    private long[] m_previousValues;
+    private long[] previousValues;
 
 
     /**
@@ -55,14 +55,11 @@ public class FibonacciIterator implements Iterator<Long>
      */
     public FibonacciIterator()
     {
-        m_iteration      = 0;
-        m_previousValues = new long[2];
+        iteration      = 0;
+        previousValues = new long[2];
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public boolean hasNext()
     {
@@ -70,40 +67,34 @@ public class FibonacciIterator implements Iterator<Long>
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Long next()
     {
-        if (m_iteration == 0)
+        if (iteration == 0)
         {
-            m_previousValues[0] = 0;
-            m_previousValues[1] = 0;
+            previousValues[0] = 0;
+            previousValues[1] = 0;
         }
-        else if (m_iteration == 1)
+        else if (iteration == 1)
         {
-            m_previousValues[0] = 0;
-            m_previousValues[1] = 1;
-        }
-
-        long result = m_previousValues[0] + m_previousValues[1];
-
-        if (m_iteration > 1)
-        {
-            m_previousValues[0] = m_previousValues[1];
-            m_previousValues[1] = result;
+            previousValues[0] = 0;
+            previousValues[1] = 1;
         }
 
-        m_iteration++;
+        long result = previousValues[0] + previousValues[1];
+
+        if (iteration > 1)
+        {
+            previousValues[0] = previousValues[1];
+            previousValues[1] = result;
+        }
+
+        iteration++;
 
         return result;
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void remove()
     {

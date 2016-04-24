@@ -1,9 +1,9 @@
 /*
- * File: Timeout.java
+ * File: InitialDelay.java
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * The contents of this file are subject to the terms and conditions of 
+ * The contents of this file are subject to the terms and conditions of
  * the Common Development and Distribution License 1.0 (the "License").
  *
  * You may not use this file except in compliance with the License.
@@ -23,45 +23,46 @@
  * "Portions Copyright [year] [name of copyright owner]"
  */
 
-package com.oracle.tools.options;
+package com.oracle.tools.deferred.options;
 
 import com.oracle.tools.Option;
 import com.oracle.tools.Options;
+import com.oracle.tools.deferred.Ensured;
 import com.oracle.tools.util.Duration;
 
 import java.util.concurrent.TimeUnit;
 
 /**
- * An {@link Option} to define a {@link Timeout}.
+ * An {@link Option} to define the initial delay when attempting to resolve an {@link Ensured}.
  * <p>
- * Copyright (c) 2014. All Rights Reserved. Oracle Corporation.<br>
+ * Copyright (c) 2016. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Brian Oliver
  */
-public class Timeout implements Option
+public class InitialDelay implements Option
 {
     /**
-     * The {@link Duration} of the {@link Timeout}.
+     * The {@link Duration} of the {@link InitialDelay}.
      */
     private Duration duration;
 
 
     /**
-     * Privately constructs a {@link Timeout} {@link Option}.
+     * Privately constructs a {@link InitialDelay} {@link Option}.
      *
-     * @param duration  the {@link Duration} for the {@link Timeout}
+     * @param duration  the {@link Duration} for the {@link InitialDelay}
      */
-    private Timeout(Duration duration)
+    private InitialDelay(Duration duration)
     {
         this.duration = duration;
     }
 
 
     /**
-     * Obtains the {@link Duration} of the {@link Timeout}.
+     * Obtains the {@link Duration} of the {@link InitialDelay}.
      *
-     * @return  the {@link Duration} of the {@link Timeout}
+     * @return  the {@link Duration} of the {@link InitialDelay}
      */
     public Duration getDuration()
     {
@@ -70,7 +71,7 @@ public class Timeout implements Option
 
 
     /**
-     * Obtains the {@link Timeout} {@link Duration} in the specified {@link TimeUnit}.
+     * Obtains the {@link InitialDelay} {@link Duration} in the specified {@link TimeUnit}.
      *
      * @param units  the desired {@link TimeUnit}
      *
@@ -90,12 +91,12 @@ public class Timeout implements Option
             return true;
         }
 
-        if (!(other instanceof Timeout))
+        if (!(other instanceof InitialDelay))
         {
             return false;
         }
 
-        Timeout timeout = (Timeout) other;
+        InitialDelay timeout = (InitialDelay) other;
 
         if (!duration.equals(timeout.duration))
         {
@@ -116,62 +117,48 @@ public class Timeout implements Option
     @Override
     public String toString()
     {
-        return "Timeout{" + getDuration() + "}";
+        return "InitialDelay{" + getDuration() + "}";
     }
 
 
     /**
-     * Obtains the {@link Timeout} by auto-detecting it from the configuration
-     * and environment.
+     * Obtains a {@link InitialDelay} that represents no delay.
      *
-     * @return  the default {@link Timeout}
+     * @return  a {@link InitialDelay}
      */
     @Options.Default
-    public static Timeout autoDetect()
+    public static InitialDelay none()
     {
-        return new Timeout(Duration.of(1, TimeUnit.MINUTES));
+        return new InitialDelay(Duration.ZERO);
     }
 
 
     /**
-     * Obtains a {@link Timeout} for a specific time.
+     * Obtains a {@link InitialDelay} for a specific time.
      *
-     * @param duration  the duration for the {@link Timeout}
-     * @param units     the {@link TimeUnit}s for the duration of the {@link Timeout}
+     * @param duration  the duration for the {@link InitialDelay}
+     * @param units     the {@link TimeUnit}s for the duration of the {@link InitialDelay}
      *
-     * @return  the {@link Timeout}
+     * @return  the {@link InitialDelay}
      */
-    public static Timeout after(long     duration,
-                                TimeUnit units)
+    public static InitialDelay of(long     duration,
+                                  TimeUnit units)
     {
-        return new Timeout(Duration.of(duration, units));
+        return new InitialDelay(Duration.of(duration, units));
     }
 
 
     /**
-     * Obtains a {@link Timeout} for a specific time.
-     *
-     * @param duration  the duration for the {@link Timeout}
-     *
-     * @return  the {@link Timeout}
-     */
-    public static Timeout after(Duration duration)
-    {
-        return new Timeout(duration);
-    }
-
-
-    /**
-     * Obtains a {@link Timeout} for a specified time represented as a {@link String}
+     * Obtains a {@link InitialDelay} for a specified time represented as a {@link String}
      * formatted as (0-9)+['ms'|'s'|'m'|'h'].  If no units are specified, the unit
      * of 'ms' is assumed.
      *
      * @param duration  the timeout string
      *
-     * @return  a {@link Timeout}
+     * @return  a {@link InitialDelay}
      */
-    public static Timeout after(String duration)
+    public static InitialDelay of(String duration)
     {
-        return new Timeout(Duration.of(duration));
+        return new InitialDelay(Duration.of(duration));
     }
 }

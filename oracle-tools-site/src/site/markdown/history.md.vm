@@ -177,6 +177,11 @@ reverse chronological order.
     the ability to pass parameters to Options.get(Class, ...) to allow them to
     be used when calling @Options.Default
 
+*   [ORACLETOOLS-316](https://java.net/jira/browse/ORACLETOOLS-316): Replaced
+    (and removed) the TimeoutConstraint interface and SimpleTimeoutConstraint
+    class with Option classes, Timeout, InitialDelay, MaximumRetryDelay and
+    RetryFrequency.
+
 <h4>oracle-tools-runtime</h4>
 
 *   [ORACLETOOLS-61](https://java.net/jira/browse/ORACLETOOLS-61): Introduced
