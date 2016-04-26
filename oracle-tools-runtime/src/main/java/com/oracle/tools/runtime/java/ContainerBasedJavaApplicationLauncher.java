@@ -30,7 +30,6 @@ import com.oracle.tools.Options;
 
 import com.oracle.tools.options.Variable;
 
-import com.oracle.tools.runtime.Application;
 import com.oracle.tools.runtime.ApplicationListener;
 import com.oracle.tools.runtime.Platform;
 import com.oracle.tools.runtime.Profile;
@@ -108,7 +107,7 @@ import java.util.logging.Logger;
  * @author Jonathan Knight
  */
 public class ContainerBasedJavaApplicationLauncher<A extends JavaApplication>
-    extends AbstractJavaApplicationLauncher<A, JavaVirtualMachine>
+    implements JavaApplicationLauncher<A>
 {
     /**
      * The {@link Logger} for this class.
@@ -119,11 +118,9 @@ public class ContainerBasedJavaApplicationLauncher<A extends JavaApplication>
     /**
      * Constructs a {@link ContainerBasedJavaApplicationLauncher}.
      *
-     * @param platform  the {@link Platform} on which an {@link Application} will be launched
      */
-    public ContainerBasedJavaApplicationLauncher(JavaVirtualMachine platform)
+    public ContainerBasedJavaApplicationLauncher()
     {
-        super(platform);
     }
 
 
@@ -173,7 +170,7 @@ public class ContainerBasedJavaApplicationLauncher<A extends JavaApplication>
 //     }
 
     @Override
-    public A launch(Options options)
+    public A launch(Platform platform, Options options)
     {
         // establish the diagnostics output table
         Table diagnosticsTable = new Table();
@@ -224,6 +221,10 @@ public class ContainerBasedJavaApplicationLauncher<A extends JavaApplication>
         {
             profile.onLaunching(platform, launchOptions);
         }
+
+        // ----- give the MetaClass a last chance to manipulate any options -----
+
+        metaClass.onFinalize(platform, launchOptions);
 
         // ----- determine the display name for the application -----
 

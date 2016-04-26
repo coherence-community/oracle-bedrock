@@ -30,7 +30,10 @@ import com.oracle.tools.Options;
 
 import com.oracle.tools.runtime.Platform;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 
 /**
  * A {@link Collectable} {@link Option} representing a System Property, consisting
@@ -53,87 +56,75 @@ public class SystemProperty implements Option.Collectable
     /**
      * The name of the {@link SystemProperty}.
      */
-    private String name;
+    private final String name;
 
     /**
      * The value of the {@link SystemProperty}.
      */
-    private Object value;
-
-
-    /**
-     * Constructs a {@link SystemProperty} with no value.
-     *
-     * @param name the name of the {@link SystemProperty}
-     */
-    private SystemProperty(String name)
-    {
-        this.name  = name;
-        this.value = "";
-    }
-
+    private final Object value;
 
     /**
-     * Constructs a {@link SystemProperty} based on another {@link SystemProperty}.
-     *
-     * @param property the {@link SystemProperty} from which to construct
-     *                 (copy) the new {@link SystemProperty}
+     * The {@link Option}s for this {@link SystemProperty}.
      */
-    private SystemProperty(SystemProperty property)
-    {
-        this.name  = property.getName();
-        this.value = property.getValue();
-    }
+    private final Option[] options;
 
 
     /**
      * Constructs a {@link SystemProperty}.
      *
-     * @param name  the name of the {@link SystemProperty}
-     * @param value the value of the {@link SystemProperty}
+     * @param name     the name of the {@link SystemProperty}
+     * @param value    the value of the {@link SystemProperty}
+     * @param options  then {@link Options} for this {@link SystemProperty}
      */
-    private SystemProperty(String name,
-                           Object value)
+    private SystemProperty(String    name,
+                           Object    value,
+                           Option... options)
     {
-        this.name  = name;
-        this.value = value;
+        this.name    = name;
+        this.value   = value;
+        this.options = options;
     }
 
 
     /**
      * Constructs a {@link SystemProperty} with no value.
      *
-     * @param name the name of the {@link SystemProperty}
+     * @param name     the name of the {@link SystemProperty}
+     * @param options  then {@link Options} for this {@link SystemProperty}
      */
-    public static SystemProperty of(String name)
+    public static SystemProperty of(String name, Option... options)
     {
-        return new SystemProperty(name, "");
+        return new SystemProperty(name, "", options);
     }
 
 
     /**
      * Constructs a {@link SystemProperty}.
      *
-     * @param name  the name of the {@link SystemProperty}
-     * @param value the value of the {@link SystemProperty}
+     * @param name     the name of the {@link SystemProperty}
+     * @param value    the value of the {@link SystemProperty}
+     * @param options  then {@link Options} for this {@link SystemProperty}
      */
-    public static SystemProperty of(String name,
-                                    String value)
+    public static SystemProperty of(String    name,
+                                    String    value,
+                                    Option... options)
     {
-        return new SystemProperty(name, value);
+        return new SystemProperty(name, value, options);
     }
 
 
     /**
      * Constructs a {@link SystemProperty}.
      *
-     * @param name  the name of the {@link SystemProperty}
-     * @param value the value of the {@link SystemProperty}
+     * @param name     the name of the {@link SystemProperty}
+     * @param value    the value of the {@link SystemProperty}
+     * @param options  then {@link Options} for this {@link SystemProperty}
      */
     public static SystemProperty of(String                name,
-                                    ContextSensitiveValue value)
+                                    ContextSensitiveValue value,
+                                    Option...             options)
     {
-        return new SystemProperty(name, value);
+        return new SystemProperty(name, value, options);
     }
 
 
@@ -142,11 +133,13 @@ public class SystemProperty implements Option.Collectable
      *
      * @param name     the name of the {@link SystemProperty}
      * @param iterator the iterator that can provide values for the {@link SystemProperty}
+     * @param options  then {@link Options} for this {@link SystemProperty}
      */
-    public static SystemProperty of(String   name,
-                                    Iterator iterator)
+    public static SystemProperty of(String    name,
+                                    Iterator  iterator,
+                                    Option... options)
     {
-        return new SystemProperty(name, iterator);
+        return new SystemProperty(name, iterator, options);
     }
 
 
@@ -155,11 +148,13 @@ public class SystemProperty implements Option.Collectable
      *
      * @param name   the name of the {@link SystemProperty}
      * @param object the values for the {@link SystemProperty}
+     * @param options  then {@link Options} for this {@link SystemProperty}
      */
-    public static SystemProperty of(String name,
-                                    Object object)
+    public static SystemProperty of(String    name,
+                                    Object    object,
+                                    Option... options)
     {
-        return new SystemProperty(name, object);
+        return new SystemProperty(name, object, options);
     }
 
 
@@ -182,6 +177,17 @@ public class SystemProperty implements Option.Collectable
     public Object getValue()
     {
         return value;
+    }
+
+
+    /**
+     * Obtain the {@link Option}s for this {@link SystemProperty}.
+     *
+     * @return  the {@link Option}s for this {@link SystemProperty}
+     */
+    public Options getOptions()
+    {
+        return new Options(options);
     }
 
 
@@ -218,5 +224,23 @@ public class SystemProperty implements Option.Collectable
         Object resolve(String   name,
                        Platform platform,
                        Options  options);
+    }
+
+
+    /**
+     * A handler that is called whenever an {@link SystemProperty}'s value(s) are
+     * resolved.
+     */
+    @FunctionalInterface
+    public interface ResolveHandler
+    {
+        /**
+         * Called by a {@link SystemProperty} instance for whenever its value(s) are resolved.
+         *
+         * @param name     the name of the argument (may be null if no name was specified)
+         * @param value    the resolved value of the system property
+         * @param options  the {@link Options} used to resolve the values
+         */
+        void onResolve(String name, String value, Options options);
     }
 }

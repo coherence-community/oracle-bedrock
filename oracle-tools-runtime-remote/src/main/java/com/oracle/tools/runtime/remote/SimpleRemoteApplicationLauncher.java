@@ -27,12 +27,10 @@ package com.oracle.tools.runtime.remote;
 
 import com.oracle.tools.Options;
 
-import com.oracle.tools.runtime.Application;
-import com.oracle.tools.runtime.Platform;
 import com.oracle.tools.runtime.SimpleApplication;
 
 /**
- * A simple implementation of a {@link RemoteApplicationLauncher}.
+ * A simple implementation of a {@link ApplicationLauncher}.
  * <p>
  * Copyright (c) 2014. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
@@ -44,11 +42,9 @@ public class SimpleRemoteApplicationLauncher extends AbstractRemoteApplicationLa
     /**
      * Constructs a {@link SimpleRemoteApplicationLauncher}.
      *
-     * @param platform  the {@link Platform} on which an {@link Application} will be launched
      */
-    public SimpleRemoteApplicationLauncher(RemotePlatform platform)
+    public SimpleRemoteApplicationLauncher()
     {
-        super(platform);
     }
 
 

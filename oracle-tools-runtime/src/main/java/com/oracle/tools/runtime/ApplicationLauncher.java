@@ -27,6 +27,7 @@ package com.oracle.tools.runtime;
 
 import com.oracle.tools.Option;
 import com.oracle.tools.Options;
+import com.oracle.tools.runtime.options.DisplayName;
 
 /**
  * An internal mechanism to launch {@link Application}s for a specific type of
@@ -46,18 +47,33 @@ import com.oracle.tools.Options;
  * @author Brian Oliver
  *
  * @param <A>  the type of {@link Application}s the {@link ApplicationLauncher} will launch
- * @param <P>  the type of {@link Platform} the {@link ApplicationLauncher} will use to launch {@link Application}s
  */
-public interface ApplicationLauncher<A extends Application, P extends Platform>
+public interface ApplicationLauncher<A extends Application>
 {
     /**
      * Launches an {@link Application} on the {@link Platform} using the provided {@link Option}s.
      *
-     * @param options  the {@link Options} for launching the {@link Application}
+     * @param platform  the {@link Platform} the {@link Application} is being launched on
+     * @param options   the {@link Options} for launching the {@link Application}
      *
      * @return an {@link Application} representing the application launched by the {@link ApplicationLauncher}
      *
      * @throws RuntimeException when a problem occurs while launching the application
      */
-    A launch(Options options);
+    A launch(Platform platform, Options options);
+
+
+    /**
+     * Obtain the {@link DisplayName} for the {@link Application}, defaulting to something sensible
+     * based on the provided {@link Options} if not defined.
+     *
+     * @param options  the {@link Options}
+     *
+     * @return a {@link DisplayName}
+     */
+    default DisplayName getDisplayName(Options options)
+    {
+        return options.get(DisplayName.class);
+    }
 }
+

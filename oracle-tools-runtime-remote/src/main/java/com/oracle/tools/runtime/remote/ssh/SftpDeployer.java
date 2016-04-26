@@ -42,6 +42,7 @@ import com.oracle.tools.runtime.remote.DeploymentArtifact;
 import com.oracle.tools.runtime.remote.RemotePlatform;
 
 import com.oracle.tools.runtime.remote.options.Deployer;
+import com.oracle.tools.table.Table;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -96,6 +97,7 @@ public class SftpDeployer implements Deployer
             throw new IllegalArgumentException("The platform parameter must be an instance of RemotePlatform");
         }
 
+        Table             deploymentTable = new Table();
         JSchSocketFactory socketFactory   = new JSchSocketFactory();
         RemotePlatform    remotePlatform  = (RemotePlatform) platform;
         String            userName        = remotePlatform.getUserName();
@@ -180,7 +182,17 @@ public class SftpDeployer implements Deployer
                         }
 
                         // copy the source artifact to the destination file
+                        double start = System.currentTimeMillis();
                         sftpChannel.put(new FileInputStream(sourceFile), destinationFileName);
+                        double time = (System.currentTimeMillis() - start) / 1000.0d;
+
+                        deploymentTable.addRow(sourceFile.toString(), String.valueOf(destinationFile), String.format("%.3f s", time));
+                    }
+
+                    Table diagnosticsTable = options.get(Table.class);
+                    if (diagnosticsTable != null)
+                    {
+                        diagnosticsTable.addRow("Application Deployments ", deploymentTable.toString());
                     }
                 }
                 catch (IOException | SftpException e)

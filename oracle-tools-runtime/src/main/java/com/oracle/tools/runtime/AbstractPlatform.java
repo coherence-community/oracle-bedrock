@@ -28,10 +28,8 @@ package com.oracle.tools.runtime;
 import com.oracle.tools.Option;
 import com.oracle.tools.Options;
 import com.oracle.tools.extensible.AbstractExtensible;
-import com.oracle.tools.runtime.annotations.PreferredMetaClass;
-import com.oracle.tools.runtime.options.Executable;
+import com.oracle.tools.runtime.options.ApplicationType;
 import com.oracle.tools.runtime.options.MetaClass;
-import com.oracle.tools.util.ReflectionHelper;
 
 /**
  * An abstract implementation of a {@link Platform}.
@@ -87,20 +85,7 @@ public abstract class AbstractPlatform<P extends Platform> extends AbstractExten
 
 
     @Override
-    public Application launch(String    executable,
-                              Option... options)
-    {
-        // add the program as a launch option
-        Options launchOptions = new Options(options).add(Executable.named(executable));
-
-        // launch as a regular Application.class
-        return launch(Application.class, launchOptions.asArray());
-    }
-
-
-    @Override
-    public <A extends Application> A launch(Class<A>  applicationClass,
-                                            Option... options)
+    public <A extends Application> A launch(Option... options)
     {
         // establish the initial launch options based on those defined by the platform
         Options launchOptions = new Options(getOptions().asArray());
@@ -108,56 +93,35 @@ public abstract class AbstractPlatform<P extends Platform> extends AbstractExten
         // include the options specified when this method was called
         launchOptions.addAll(options);
 
+        // obtain the application type
+        ApplicationType<A> applicationType = launchOptions.get(ApplicationType.class);
+
         // attempt to locate the meta-class using the launchOptions
-        MetaClass<A> metaClass = launchOptions.get(MetaClass.class);
-
-        if (metaClass == null)
-        {
-            // attempt to find the meta-class for the application based on the @PreferredMetaClass annotation
-            PreferredMetaClass preferredMetaClass = ReflectionHelper.getAnnotation(applicationClass,
-                                                                                   PreferredMetaClass.class);
-
-            if (preferredMetaClass == null)
-            {
-                throw new UnsupportedOperationException("Failed to locate the MetaClass option and PreferredMetaClass annotation for "
-                                                        + applicationClass);
-            }
-            else
-            {
-                // establish a new instance of the MetaClass
-                Class<? extends MetaClass> metaClassClass = preferredMetaClass.value();
-
-                try
-                {
-                    metaClass = metaClassClass.newInstance();
-                }
-                catch (Exception e)
-                {
-                    throw new UnsupportedOperationException("Failed to create MetaClass instance for "
-                                                            + applicationClass,
-                                                            e);
-                }
-            }
-        }
+        MetaClass metaClass = applicationType.getMetaClass(launchOptions);
 
         // obtain the application launcher for the class of application
-        ApplicationLauncher<A, P> launcher = getApplicationLauncher(applicationClass, metaClass, launchOptions);
+        ApplicationLauncher<A> launcher = getApplicationLauncher(applicationType.getType(),
+                                                                 metaClass,
+                                                                 launchOptions);
 
         if (launcher == null)
         {
-            throw new IllegalArgumentException("Can't determine ApplicationLauncher for " + applicationClass
+            throw new IllegalArgumentException("Can't determine ApplicationLauncher for " + applicationType
                                                + " using " + launchOptions);
         }
         else
         {
-            // add the meta-class and application launcher as options
+            // add the meta-class and application class as options
             Options builderOptions = new Options(options);
+
+            // add the application class as a launcher option (if and only if it's not already defined)
+            builderOptions.addIfAbsent(applicationType);
 
             // add the meta-class as a launcher option (if and only if it's not already defined)
             builderOptions.addIfAbsent(metaClass);
 
             // now launch the application
-            return launcher.launch(builderOptions);
+            return launcher.launch(this, builderOptions);
         }
     }
 
@@ -179,8 +143,8 @@ public abstract class AbstractPlatform<P extends Platform> extends AbstractExten
      * @return  an {@link ApplicationLauncher} capable of launching the {@link Class} of {@link Application}
      */
     abstract protected <A extends Application,
-                        B extends ApplicationLauncher<A, P>> B getApplicationLauncher(Class<A>     applicationClass,
-                                                                                      MetaClass<A> metaClass,
-                                                                                      Options      options)
-                                                                                      throws UnsupportedOperationException;
+                        B extends ApplicationLauncher<A>> B getApplicationLauncher(Class<A>     applicationClass,
+                                                                                   MetaClass<A> metaClass,
+                                                                                   Options      options)
+                                                                                   throws UnsupportedOperationException;
 }

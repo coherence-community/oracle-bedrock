@@ -85,6 +85,14 @@ public interface JUnitTestRun extends JavaApplication
             options.addIfAbsent(DisplayName.of("JUnit"));
         }
 
+
+        @Override
+        public void onFinalize(Platform platform, Options options)
+        {
+            // there's nothing to do before launching the application
+        }
+
+
         @Override
         public void onLaunched(Platform platform, Application application, Options options)
         {

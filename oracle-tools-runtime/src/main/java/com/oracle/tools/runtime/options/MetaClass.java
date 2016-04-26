@@ -69,6 +69,20 @@ public interface MetaClass<A extends Application> extends Option
 
 
     /**
+     * Invoked by a {@link Platform} prior to an {@link Application} being launched after
+     * all other manipulation of the {@link Options} has taken place.
+     * <p>
+     * This is a final chance for the {@link MetaClass} to do an last-minute manipulation
+     * of the {@link Options}.
+     *
+     * @param platform   the {@link Platform}
+     * @param options    the final set of {@link Options} that will be used to launch
+     *                   the {@link Application}.
+     */
+    void onFinalize(Platform platform, Options options);
+
+
+    /**
      * Invoked by a {@link Platform} after an {@link Application} has been launched using the
      * specified {@link Options}, but before the {@link Application} is returned to the
      * {@link Thread} that requested the {@link Application}.

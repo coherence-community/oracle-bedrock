@@ -37,7 +37,6 @@ import com.oracle.tools.lang.StringHelper;
 
 import com.oracle.tools.options.Timeout;
 
-import com.oracle.tools.runtime.Application;
 import com.oracle.tools.runtime.ApplicationProcess;
 import com.oracle.tools.runtime.Platform;
 import com.oracle.tools.runtime.Settings;
@@ -74,9 +73,10 @@ import com.oracle.tools.runtime.options.PlatformSeparators;
 
 import com.oracle.tools.runtime.remote.AbstractRemoteApplicationLauncher;
 import com.oracle.tools.runtime.remote.RemoteApplicationProcess;
-import com.oracle.tools.runtime.remote.RemotePlatform;
 import com.oracle.tools.runtime.remote.java.options.JavaDeployment;
 import com.oracle.tools.runtime.remote.options.Deployment;
+import com.oracle.tools.table.Cell;
+import com.oracle.tools.table.Table;
 
 import static com.oracle.tools.deferred.DeferredHelper.ensure;
 import static com.oracle.tools.deferred.DeferredHelper.within;
@@ -91,7 +91,7 @@ import java.util.Properties;
 import java.util.concurrent.CompletableFuture;
 
 /**
- * A {@link JavaApplicationLauncher} that launches a {@link JavaApplication} on a {@link RemotePlatform}.
+ * A {@link JavaApplicationLauncher} that launches a {@link JavaApplication} on a {@link Platform}.
  * <p>
  * Copyright (c) 2014. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
@@ -99,7 +99,7 @@ import java.util.concurrent.CompletableFuture;
  * @author Brian Oliver
  */
 public class RemoteJavaApplicationLauncher extends AbstractRemoteApplicationLauncher<JavaApplication>
-    implements JavaApplicationLauncher<JavaApplication, RemotePlatform>
+    implements JavaApplicationLauncher<JavaApplication>
 {
     /**
      * The {@link ControllableRemoteChannel} that can be used to communicate with
@@ -121,12 +121,9 @@ public class RemoteJavaApplicationLauncher extends AbstractRemoteApplicationLaun
     /**
      * Constructs a {@link RemoteJavaApplicationLauncher}.
      *
-     * @param platform  the {@link Platform} on which an {@link Application} will be launched
      */
-    public RemoteJavaApplicationLauncher(RemotePlatform platform) throws UnsupportedOperationException
+    public RemoteJavaApplicationLauncher() throws UnsupportedOperationException
     {
-        super(platform);
-
         // configure a server that the remote process can communicate with
         remoteChannel = new SocketBasedRemoteChannelServer();
 
@@ -143,35 +140,6 @@ public class RemoteJavaApplicationLauncher extends AbstractRemoteApplicationLaun
             throw new UnsupportedOperationException("Failed to create a " + this.getClass().getName()
                 + " to launch the application remotely due to a communication problem",
                                                     e);
-        }
-    }
-
-
-    @Override
-    protected DisplayName getDisplayName(Options options)
-    {
-        ClassName className = options.get(ClassName.class);
-
-        if (className == null)
-        {
-            return options.get(DisplayName.class);
-        }
-        else
-        {
-            // determine the short class name of the class we're launching (as a possible default)
-            String shortClassName = className.getName();
-            int    lastDot        = shortClassName.lastIndexOf(".");
-
-            shortClassName = lastDot <= 0 ? shortClassName : shortClassName.substring(lastDot + 1);
-
-            if (shortClassName.isEmpty())
-            {
-                return options.get(DisplayName.class);
-            }
-            else
-            {
-                return options.getOrDefault(DisplayName.class, DisplayName.of(shortClassName));
-            }
         }
     }
 
@@ -334,6 +302,13 @@ public class RemoteJavaApplicationLauncher extends AbstractRemoteApplicationLaun
             javaExecutable += executable.getName();
 
             commandBuilder.append(StringHelper.doubleQuoteIfNecessary(javaExecutable));
+
+            Table diagnosticsTable = options.get(Table.class);
+            if (diagnosticsTable != null)
+            {
+                diagnosticsTable.addRow("Java Home", javaHomePath);
+                diagnosticsTable.addRow("Java Executable", javaExecutable);
+            }
         }
 
         return commandBuilder.toString();
@@ -348,17 +323,26 @@ public class RemoteJavaApplicationLauncher extends AbstractRemoteApplicationLaun
 
         // ----- establish Oracle Tools specific system properties -----
 
+        Table systemPropertiesTable = new Table();
+
+        systemPropertiesTable.getOptions().add(Table.orderByColumn(0));
+        systemPropertiesTable.getOptions().add(Cell.Separator.of(""));
+
         // establish the URI for this (the parent) process
-        String              parentURI = "//${local.address}:" + remoteChannel.getPort();
+        String parentURI = "//${local.address}:" + remoteChannel.getPort();
 
-        ExpressionEvaluator evaluator = new ExpressionEvaluator(options);
+        ExpressionEvaluator evaluator       = new ExpressionEvaluator(options);
+        String              parentUriString = evaluator.evaluate(parentURI, String.class);
 
-        arguments.add("-D" + Settings.PARENT_URI + "=" + evaluator.evaluate(parentURI, String.class));
+        arguments.add("-D" + Settings.PARENT_URI + "=" + parentUriString);
+
+        systemPropertiesTable.addRow(Settings.PARENT_URI, parentUriString);
 
         // add Orphanable configuration
         Orphanable orphanable = options.get(Orphanable.class);
 
         arguments.add("-D" + Settings.ORPHANABLE + "=" + orphanable.isOrphanable());
+        systemPropertiesTable.addRow(Settings.ORPHANABLE, Boolean.toString(orphanable.isOrphanable()));
 
         // ----- establish the remote application class path -----
 
@@ -369,6 +353,16 @@ public class RemoteJavaApplicationLauncher extends AbstractRemoteApplicationLaun
         String            classPath = modifier.applyQuotes(remoteClassPath.toString(options.asArray()));
 
         arguments.add(classPath);
+
+        Table diagnosticsTable = options.get(Table.class);
+        if (diagnosticsTable != null)
+        {
+            Table classPathTable = remoteClassPath.getTable();
+
+            classPathTable.getOptions().add(Cell.Separator.of(""));
+
+            diagnosticsTable.addRow("Class Path", classPathTable.toString());
+        }
 
         // ----- establish Java Virtual Machine options -----
 
@@ -403,11 +397,16 @@ public class RemoteJavaApplicationLauncher extends AbstractRemoteApplicationLaun
 
                 if (!propertyValue.isEmpty())
                 {
+                    propertyValue = StringHelper.doubleQuoteIfNecessary(propertyValue);
+
                     propertyBuilder.append("=");
-                    propertyBuilder.append(StringHelper.doubleQuoteIfNecessary(propertyValue));
+                    propertyBuilder.append(propertyValue);
+
+                    systemPropertiesTable.addRow(propertyName, propertyValue);
                 }
 
                 arguments.add(propertyBuilder.toString());
+
             }
         }
 
@@ -424,6 +423,11 @@ public class RemoteJavaApplicationLauncher extends AbstractRemoteApplicationLaun
 
                 arguments.add(propertyValue);
             }
+        }
+
+        if (diagnosticsTable != null)
+        {
+            diagnosticsTable.addRow("System Properties", systemPropertiesTable.toString());
         }
 
         // ----- establish the application command line to execute -----
@@ -445,6 +449,12 @@ public class RemoteJavaApplicationLauncher extends AbstractRemoteApplicationLaun
         String applicationClassName = className.getName();
 
         arguments.add(applicationClassName);
+
+        if (diagnosticsTable != null)
+        {
+            diagnosticsTable.addRow("Application Launcher", applicationLauncherClassName);
+            diagnosticsTable.addRow("Application Class", applicationClassName);
+        }
 
         // ----- included the java arguments to the command -----
 

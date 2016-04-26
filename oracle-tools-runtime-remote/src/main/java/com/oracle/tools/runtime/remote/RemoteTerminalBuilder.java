@@ -26,6 +26,7 @@
 package com.oracle.tools.runtime.remote;
 
 import com.oracle.tools.Option;
+import com.oracle.tools.runtime.Platform;
 
 /**
  * A internal mechanism to build {@link RemoteTerminal}s for {@link RemotePlatform}s.
@@ -38,9 +39,9 @@ import com.oracle.tools.Option;
 public interface RemoteTerminalBuilder extends Option
 {
     /**
-     * Realizes a {@link RemoteTerminal} that will connect to a {@link RemotePlatform}.
+     * Realizes a {@link RemoteTerminal} that will connect to a {@link Platform}.
      *
-     * @param platform  the {@link RemotePlatform}
+     * @param platform  the {@link Platform}
      */
-    RemoteTerminal realize(RemotePlatform platform);
+    RemoteTerminal realize(Platform platform);
 }

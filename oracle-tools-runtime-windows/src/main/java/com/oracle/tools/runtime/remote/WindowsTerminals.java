@@ -25,6 +25,7 @@
 
 package com.oracle.tools.runtime.remote;
 
+import com.oracle.tools.runtime.Platform;
 import com.oracle.tools.runtime.remote.winrm.WindowsRemoteTerminal;
 
 /**
@@ -50,9 +51,14 @@ public class WindowsTerminals
         return new RemoteTerminalBuilder()
         {
             @Override
-            public RemoteTerminal realize(RemotePlatform platform)
+            public RemoteTerminal realize(Platform platform)
             {
-                return new WindowsRemoteTerminal(platform);
+                if (platform instanceof RemotePlatform)
+                {
+                    return new WindowsRemoteTerminal((RemotePlatform) platform);
+                }
+
+                throw new IllegalArgumentException("The Platform must be a RemotePlatform " + platform);
             }
         };
     }

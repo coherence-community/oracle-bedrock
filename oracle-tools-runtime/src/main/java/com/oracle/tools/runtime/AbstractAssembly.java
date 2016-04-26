@@ -50,7 +50,6 @@ import java.util.stream.Stream;
 
 import static com.oracle.tools.deferred.DeferredHelper.ensure;
 import static com.oracle.tools.deferred.DeferredHelper.eventually;
-import static com.oracle.tools.deferred.DeferredHelper.invoking;
 import static com.oracle.tools.predicate.Predicates.is;
 
 /**
@@ -498,7 +497,7 @@ public abstract class AbstractAssembly<A extends Application> implements Assembl
 
 
     @Override
-    public void onClosing(A application)
+    public void onClosing(A application, Options options)
     {
         if (!isClosed())
         {
@@ -510,7 +509,7 @@ public abstract class AbstractAssembly<A extends Application> implements Assembl
 
 
     @Override
-    public void onClosed(A application)
+    public void onClosed(A application, Options options)
     {
         // SKIP: nothing to do when an application is closed
     }

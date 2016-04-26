@@ -37,6 +37,7 @@ import com.oracle.tools.runtime.options.PlatformSeparators;
 import com.oracle.tools.runtime.remote.DeploymentArtifact;
 import com.oracle.tools.runtime.remote.options.Deployer;
 
+import com.oracle.tools.table.Table;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
@@ -251,9 +252,10 @@ public abstract class HttpDeployer implements Deployer
 
         try
         {
-            PlatformSeparators separators = options.get(PlatformSeparators.class);
-            String             hostName   = httpServerAddress.getAddress().getCanonicalHostName();
-            int                port       = httpServerAddress.getPort();
+            PlatformSeparators separators      = options.get(PlatformSeparators.class);
+            Table              deploymentTable = new Table();
+            String             hostName        = httpServerAddress.getAddress().getCanonicalHostName();
+            int                port            = httpServerAddress.getPort();
 
             for (Map.Entry<String, DeploymentArtifact> entry : artifacts.entrySet())
             {
@@ -261,6 +263,7 @@ public abstract class HttpDeployer implements Deployer
                 File               sourceFile      = artifact.getSourceFile();
                 URL                sourceURL       = new URL("http", hostName, port, entry.getKey());
                 File               destinationFile = artifact.getDestinationFile();
+                double             start           = System.currentTimeMillis();
 
                 String             destinationParentFolder;
                 String             destinationFileName;
@@ -285,6 +288,9 @@ public abstract class HttpDeployer implements Deployer
                 String targetFileName = destinationParentFolder + separators.getFileSeparator() + destinationFileName;
 
                 deployArtifact(sourceURL, targetFileName, platform);
+
+                double time = (System.currentTimeMillis() - start) / 1000.0d;
+                deploymentTable.addRow(sourceFile.toString(), destinationFileName, String.format("%.3f s", time));
             }
         }
         catch (Exception e)

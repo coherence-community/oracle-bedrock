@@ -27,12 +27,14 @@ package com.oracle.tools.runtime.options;
 
 import com.oracle.tools.Options;
 
+import com.oracle.tools.options.Decoration;
 import com.oracle.tools.options.Variable;
 
 import com.oracle.tools.runtime.LocalPlatform;
 import com.oracle.tools.runtime.Platform;
 
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 
 import static com.oracle.tools.runtime.options.Argument.of;
 
@@ -43,9 +45,14 @@ import static org.hamcrest.collection.IsEmptyIterable.emptyIterable;
 import static org.hamcrest.collection.IsIterableContainingInOrder.contains;
 
 import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.same;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 /**
  * Unit tests for the {@link Arguments} class.
@@ -334,5 +341,46 @@ public class ArgumentsTest
         Arguments arguments = options.get(Arguments.class).replace(null, "changed");
 
         assertThat(arguments.resolve(null, null), contains("A1", "A1", "changed", "A22", "A3", "A3"));
+    }
+
+
+    @Test
+    public void shouldCallResolveHandlers() throws Exception
+    {
+        Argument.ResolveHandler handler1 = mock(Argument.ResolveHandler.class);
+        Argument.ResolveHandler handler2 = mock(Argument.ResolveHandler.class);
+        Argument.ResolveHandler handler3 = mock(Argument.ResolveHandler.class);
+        Options                 options  = new Options();
+
+        options.add(Argument.of("foo", "foo-value", Decoration.of(handler1), Decoration.of(handler2)));
+
+        options.add(Argument.of("bar", new Argument.Multiple("bar1", "bar2"), Decoration.of(handler1), Decoration.of(handler3)));
+
+        options.get(Arguments.class).resolve(LocalPlatform.get(), options);
+
+        ArgumentCaptor<String> names1  = ArgumentCaptor.forClass(String.class);
+        ArgumentCaptor<List>   values1 = ArgumentCaptor.forClass(List.class);
+
+        verify(handler1, times(2)).onResolve(names1.capture(), values1.capture(), same(options));
+
+        assertThat(names1.getAllValues(), contains("foo", "bar"));
+        assertThat(((List<String>) values1.getAllValues().get(0)), contains("foo-value"));
+        assertThat(((List<String>) values1.getAllValues().get(1)), contains("bar1", "bar2"));
+
+        ArgumentCaptor<String> names2  = ArgumentCaptor.forClass(String.class);
+        ArgumentCaptor<List>   values2 = ArgumentCaptor.forClass(List.class);
+
+        verify(handler2, times(1)).onResolve(names2.capture(), values2.capture(), same(options));
+
+        assertThat(names2.getAllValues(), contains("foo"));
+        assertThat(((List<String>) values2.getAllValues().get(0)), contains("foo-value"));
+
+        ArgumentCaptor<String> names3  = ArgumentCaptor.forClass(String.class);
+        ArgumentCaptor<List>   values3 = ArgumentCaptor.forClass(List.class);
+
+        verify(handler3, times(1)).onResolve(names3.capture(), values3.capture(), same(options));
+
+        assertThat(names3.getAllValues(), contains("bar"));
+        assertThat(((List<String>) values3.getAllValues().get(0)), contains("bar1", "bar2"));
     }
 }

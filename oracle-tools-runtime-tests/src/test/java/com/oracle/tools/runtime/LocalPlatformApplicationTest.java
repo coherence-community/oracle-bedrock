@@ -25,6 +25,7 @@
 
 package com.oracle.tools.runtime;
 
+import com.oracle.tools.Options;
 import com.oracle.tools.junit.AbstractTest;
 
 import com.oracle.tools.options.Decoration;
@@ -47,6 +48,7 @@ import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.StringContains.containsString;
 
 import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.any;
 
 /**
  * Functional tests for {@link Application}s on a {@link LocalPlatform}.
@@ -140,8 +142,8 @@ public class LocalPlatformApplicationTest extends AbstractTest
 
             application.close();
 
-            Mockito.verify(listener, Mockito.times(1)).onClosing(Mockito.same(application));
-            Mockito.verify(listener, Mockito.times(1)).onClosed(Mockito.same(application));
+            Mockito.verify(listener, Mockito.times(1)).onClosing(Mockito.same(application), any(Options.class));
+            Mockito.verify(listener, Mockito.times(1)).onClosed(Mockito.same(application), any(Options.class));
 
             int exitCode = application.exitValue();
 

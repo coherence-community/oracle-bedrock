@@ -27,16 +27,20 @@ package com.oracle.tools.runtime.remote.winrm;
 
 import com.oracle.tools.Options;
 
+import com.oracle.tools.runtime.Application;
 import com.oracle.tools.runtime.options.WorkingDirectory;
 
 import com.oracle.tools.runtime.remote.AbstractRemoteTerminal;
 import com.oracle.tools.runtime.remote.RemoteApplicationProcess;
 import com.oracle.tools.runtime.remote.RemotePlatform;
 import com.oracle.tools.runtime.remote.RemoteTerminal;
+import com.oracle.tools.table.Table;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * A Windows implementation of a {@link RemoteTerminal}
@@ -50,6 +54,11 @@ import java.util.List;
 public class WindowsRemoteTerminal extends AbstractRemoteTerminal
 {
     /**
+     * The {@link Logger} for this class.
+     */
+    private static Logger LOGGER = Logger.getLogger(WindowsRemoteTerminal.class.getName());
+
+    /**
      * Create a Windows remote shell that will connect to the WinRM
      * service running on the {@link RemotePlatform}.
      *
@@ -62,8 +71,9 @@ public class WindowsRemoteTerminal extends AbstractRemoteTerminal
 
 
     @SuppressWarnings("unchecked")
-    public RemoteApplicationProcess launch(Launchable launchable,
-                                           Options    options)
+    public RemoteApplicationProcess launch(Launchable                   launchable,
+                                           Class<? extends Application> applicationClass,
+                                           Options                      options)
     {
         try
         {
@@ -87,6 +97,20 @@ public class WindowsRemoteTerminal extends AbstractRemoteTerminal
             WindowsRemoteApplicationProcess process = new WindowsRemoteApplicationProcess(session);
 
             // ----- start the remote application -----
+
+
+            Table diagnosticsTable = options.get(Table.class);
+
+            if (diagnosticsTable != null && LOGGER.isLoggable(Level.INFO))
+            {
+                diagnosticsTable.addRow("Application Executable ", command);
+
+                LOGGER.log(Level.INFO,
+                           "Oracle Tools Diagnostics: Starting Application...\n"
+                           + "------------------------------------------------------------------------\n"
+                           + diagnosticsTable.toString() + "\n"
+                           + "------------------------------------------------------------------------\n");
+            }
 
             process.execute(command, args);
 

@@ -36,6 +36,7 @@ import com.oracle.tools.lang.StringHelper;
 
 import com.oracle.tools.options.Variable;
 
+import com.oracle.tools.runtime.Application;
 import com.oracle.tools.runtime.options.Shell;
 import com.oracle.tools.runtime.options.WorkingDirectory;
 
@@ -43,9 +44,12 @@ import com.oracle.tools.runtime.remote.AbstractRemoteTerminal;
 import com.oracle.tools.runtime.remote.RemoteApplicationProcess;
 import com.oracle.tools.runtime.remote.RemotePlatform;
 import com.oracle.tools.runtime.remote.RemoteTerminal;
+import com.oracle.tools.table.Table;
 
 import java.util.List;
 import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * A {@link RemoteTerminal} based on SSH (uses JSch) for a {@link RemotePlatform}.
@@ -57,6 +61,11 @@ import java.util.Properties;
  */
 public class JSchRemoteTerminal extends AbstractRemoteTerminal
 {
+    /**
+     * The {@link Logger} for this class.
+     */
+    private static Logger LOGGER = Logger.getLogger(JSchRemoteTerminal.class.getName());
+
     /**
      * The {@link JSch} framework.
      */
@@ -92,8 +101,9 @@ public class JSchRemoteTerminal extends AbstractRemoteTerminal
 
 
     @Override
-    public RemoteApplicationProcess launch(Launchable launchable,
-                                           Options    options)
+    public RemoteApplicationProcess launch(Launchable                   launchable,
+                                           Class<? extends Application> applicationClass,
+                                           Options                      options)
     {
         // acquire the remote platform on which to launch the application
         RemotePlatform platform = getRemotePlatform();
@@ -160,7 +170,8 @@ public class JSchRemoteTerminal extends AbstractRemoteTerminal
             // ----- establish the application command line to execute -----
 
             // determine the command to execute remotely
-            StringBuilder command = new StringBuilder(launchable.getCommandToExecute(platform, options));
+            String        executableName = launchable.getCommandToExecute(platform, options);
+            StringBuilder command        = new StringBuilder(executableName);
 
             // add the arguments
             List<String> arguments = launchable.getCommandLineArguments(platform, options);
@@ -185,6 +196,19 @@ public class JSchRemoteTerminal extends AbstractRemoteTerminal
             RemoteApplicationProcess process = new JschRemoteApplicationProcess(session, execChannel);
 
             // ----- start the remote application -----
+
+            Table diagnosticsTable = options.get(Table.class);
+
+            if (diagnosticsTable != null && LOGGER.isLoggable(Level.INFO))
+            {
+                diagnosticsTable.addRow("Application Executable ", executableName);
+
+                LOGGER.log(Level.INFO,
+                           "Oracle Tools Diagnostics: Starting Application...\n"
+                           + "------------------------------------------------------------------------\n"
+                           + diagnosticsTable.toString() + "\n"
+                           + "------------------------------------------------------------------------\n");
+            }
 
             // connect the channel
             execChannel.connect(session.getTimeout());

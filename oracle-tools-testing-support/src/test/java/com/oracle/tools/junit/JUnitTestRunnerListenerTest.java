@@ -460,7 +460,7 @@ public class JUnitTestRunnerListenerTest
         listener.testStarted(description);
 
         // Sleep to allow some test time
-        Thread.sleep(200);
+        Thread.sleep(500);
         long end = System.currentTimeMillis();
 
         listener.testFailure(failure);

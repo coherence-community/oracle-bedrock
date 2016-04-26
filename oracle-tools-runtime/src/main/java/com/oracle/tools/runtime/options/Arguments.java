@@ -37,6 +37,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Stream;
 
 /**
  * An immutable {@link Collector} of {@link Argument}s, used to define a collection
@@ -88,28 +89,36 @@ public class Arguments implements Option.Collector<Argument, Arguments>
 
         for (Argument argument : this.arguments)
         {
-            String name      = argument.getName();
-            char   separator = argument.getSeparator();
-            String value     = argument.resolve(platform, evaluator, options);
+            String       name      = argument.getName();
+            char         separator = argument.getSeparator();
+            List<String> values    = argument.resolve(platform, evaluator, options);
 
             if (name != null &&!name.isEmpty())
             {
-                if (value != null &&!value.isEmpty())
+                if (values != null && !values.isEmpty())
                 {
                     if (separator == ' ')
                     {
-                        argList.add(name);
-                        argList.add(value);
+                        values.stream()
+                                .filter((arg) -> arg != null && !arg.isEmpty())
+                                .forEach((arg) -> {
+                                    argList.add(name);
+                                    argList.add(arg);
+                                });
                     }
                     else
                     {
-                        argList.add(name + separator + value);
+                        values.stream()
+                                .filter((arg) -> arg != null && !arg.isEmpty())
+                                .forEach((arg) -> argList.add(name + separator + arg));
                     }
                 }
             }
-            else if (value != null &&!value.isEmpty())
+            else if (values != null && !values.isEmpty())
             {
-                argList.add(value);
+                values.stream()
+                        .filter((s) -> s != null && !s.isEmpty())
+                        .forEach(argList::add);
             }
         }
 
@@ -245,6 +254,32 @@ public class Arguments implements Option.Collector<Argument, Arguments>
         Argument arg = (argument instanceof Argument) ? (Argument) argument : new Argument(argument);
 
         return without(arg);
+    }
+
+
+    /**
+     * Obtain a new {@link Arguments} that is the same as this
+     * {@link Arguments} instance with the first occurrence of
+     * the specified arguments removed.
+     *
+     * @param arguments  the arguments to remove
+     *
+     * @return  a new {@link Arguments} that is the same as this
+     *          {@link Arguments} instance with the first occurrence
+     *          of the specified argument removed
+     */
+    public Arguments without(Argument... arguments)
+    {
+        Arguments newArguments = new Arguments();
+
+        newArguments.arguments.addAll(this.arguments);
+
+        for (Argument argument : arguments)
+        {
+            newArguments.arguments.remove(argument);
+        }
+
+        return newArguments;
     }
 
 
@@ -394,6 +429,17 @@ public class Arguments implements Option.Collector<Argument, Arguments>
         }
 
         return s1 != null && s1.equals(s2);
+    }
+
+
+    /**
+     * Obtain a {@link Stream} of the contained {@link Argument}s
+     *
+     * @return  a {@link Stream} of the contained {@link Argument}s
+     */
+    public Stream<Argument> stream()
+    {
+        return arguments.stream();
     }
 
 

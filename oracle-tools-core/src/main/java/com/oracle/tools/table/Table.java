@@ -25,6 +25,7 @@
 
 package com.oracle.tools.table;
 
+import com.oracle.tools.Option;
 import com.oracle.tools.Options;
 
 import static com.oracle.tools.lang.StringHelper.trimTrailingWhiteSpace;
@@ -43,7 +44,7 @@ import java.util.Iterator;
  *
  * @author Brian Oliver
  */
-public class Table implements Iterable<Row>
+public class Table implements Iterable<Row>, Option
 {
     /**
      * The {@link Row}s in the {@link Table}.

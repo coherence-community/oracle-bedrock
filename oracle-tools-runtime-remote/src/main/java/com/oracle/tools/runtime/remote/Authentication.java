@@ -27,7 +27,7 @@ package com.oracle.tools.runtime.remote;
 
 /**
  * Provides authentication information for authenticating connections, transferring
- * information and making requests for {@link RemoteApplicationLauncher}s.
+ * information and making requests for {@link RemoteTerminal}s.
  * <p>
  * Copyright (c) 2014. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.

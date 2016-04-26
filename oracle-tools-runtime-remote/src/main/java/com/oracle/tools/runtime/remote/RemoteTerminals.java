@@ -25,6 +25,7 @@
 
 package com.oracle.tools.runtime.remote;
 
+import com.oracle.tools.runtime.Platform;
 import com.oracle.tools.runtime.remote.ssh.JSchRemoteTerminal;
 
 /**
@@ -47,9 +48,14 @@ public class RemoteTerminals
         return new RemoteTerminalBuilder()
         {
             @Override
-            public RemoteTerminal realize(RemotePlatform platform)
+            public RemoteTerminal realize(Platform platform)
             {
-                return new JSchRemoteTerminal(platform);
+                if (platform instanceof RemotePlatform)
+                {
+                    return new JSchRemoteTerminal((RemotePlatform) platform);
+                }
+
+                throw new IllegalArgumentException("The Platform must be a RemotePlatform " + platform);
             }
         };
     }

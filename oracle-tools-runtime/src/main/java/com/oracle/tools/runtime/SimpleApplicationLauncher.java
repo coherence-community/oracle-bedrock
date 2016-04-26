@@ -36,12 +36,21 @@ import com.oracle.tools.runtime.options.ErrorStreamRedirection;
 import com.oracle.tools.runtime.options.Executable;
 import com.oracle.tools.runtime.options.MetaClass;
 import com.oracle.tools.runtime.options.WorkingDirectory;
+import com.oracle.tools.table.Table;
+import com.oracle.tools.table.Tabularize;
+import com.oracle.tools.util.ReflectionHelper;
 
 import java.io.File;
 import java.io.IOException;
 
+import java.lang.reflect.Constructor;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 /**
  * An {@link ApplicationLauncher} for {@link SimpleApplication}s on a
@@ -52,40 +61,50 @@ import java.util.Properties;
  *
  * @author Jonathan Knight
  */
-public class SimpleApplicationLauncher extends AbstractApplicationLauncher<SimpleApplication, LocalPlatform>
+public class SimpleApplicationLauncher implements ApplicationLauncher<Application>
 {
+    /**
+     * The {@link Logger} for this class.
+     */
+    private static Logger LOGGER = Logger.getLogger(SimpleApplicationLauncher.class.getName());
+
     /**
      * Constructs a {@link SimpleApplicationLauncher}.
      *
-     * @param platform  the {@link Platform} on which an {@link Application} will be launched
      */
-    public SimpleApplicationLauncher(LocalPlatform platform)
+    public SimpleApplicationLauncher()
     {
-        super(platform);
     }
 
 
     @Override
-    public SimpleApplication launch(Options options)
+    public Application launch(Platform platform, Options options)
     {
+        // establish the diagnostics output table
+        Table diagnosticsTable = new Table();
+
+        diagnosticsTable.getOptions().add(Table.orderByColumn(0));
+
+        if (platform != null)
+        {
+            diagnosticsTable.addRow("Target Platform", platform.getName());
+        }
+
         // ----- determine the meta-class for our application -----
 
         // establish the options for resolving the meta-class
         Options metaOptions = new Options(platform.getOptions()).addAll(options);
 
         // determine the meta-class
-        MetaClass metaClass = metaOptions.getOrDefault(MetaClass.class, new Application.MetaClass());
+        MetaClass<?> metaClass = metaOptions.getOrDefault(MetaClass.class, new Application.MetaClass());
 
         // ----- establish the launch Options for the Application -----
 
         // add the platform options
-        Options launchOptions = new Options(platform.getOptions().asArray());
+        Options launchOptions = new Options(platform.getOptions()).addAll(options);
 
         // add the meta-class options
         metaClass.onLaunching(platform, launchOptions);
-
-        // add the launch specific options
-        launchOptions.addAll(options);
 
         // ----- establish default Profiles for this Platform (and Builder) -----
 
@@ -98,6 +117,10 @@ public class SimpleApplicationLauncher extends AbstractApplicationLauncher<Simpl
         {
             profile.onLaunching(platform, launchOptions);
         }
+
+        // ----- give the MetaClass a last chance to manipulate any options -----
+
+        metaClass.onFinalize(platform, launchOptions);
 
         // ----- determine the display name for the application -----
 
@@ -133,6 +156,8 @@ public class SimpleApplicationLauncher extends AbstractApplicationLauncher<Simpl
         if (directory != null)
         {
             processBuilder.directory(directory);
+
+            diagnosticsTable.addRow("Working Directory", directory.toString());
         }
 
         // ----- establish environment variables -----
@@ -143,14 +168,20 @@ public class SimpleApplicationLauncher extends AbstractApplicationLauncher<Simpl
         {
         case Custom :
             processBuilder.environment().clear();
+
+            diagnosticsTable.addRow("Environment Variables", "(cleared)");
             break;
 
         case ThisApplication :
             processBuilder.environment().clear();
             processBuilder.environment().putAll(System.getenv());
+
+            diagnosticsTable.addRow("Environment Variables", "(based on parent process)");
             break;
 
         case TargetPlatform :
+
+            diagnosticsTable.addRow("Environment Variables", "(based on platform defaults)");
             break;
         }
 
@@ -162,6 +193,13 @@ public class SimpleApplicationLauncher extends AbstractApplicationLauncher<Simpl
             processBuilder.environment().put(variableName, variables.getProperty(variableName));
         }
 
+        if (variables.size() > 0)
+        {
+            Table table = Tabularize.tabularize(variables);
+
+            diagnosticsTable.addRow("", table.toString());
+        }
+
         // ----- establish the application command line to execute -----
 
         List<String> command = processBuilder.command();
@@ -171,6 +209,17 @@ public class SimpleApplicationLauncher extends AbstractApplicationLauncher<Simpl
 
         command.addAll(arguments);
 
+        diagnosticsTable.addRow("Application", displayName.resolve(launchOptions));
+        diagnosticsTable.addRow("Application Executable ", executable.getName());
+
+        if (arguments.size() > 0)
+        {
+            diagnosticsTable.addRow("Application Arguments ", arguments.stream().collect(Collectors.joining(" ")));
+        }
+
+        diagnosticsTable.addRow("Application Launch Time",
+                                new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
+
         // set the actual arguments used back into the options
         launchOptions.add(Arguments.of(arguments));
 
@@ -178,6 +227,16 @@ public class SimpleApplicationLauncher extends AbstractApplicationLauncher<Simpl
         ErrorStreamRedirection redirection = launchOptions.get(ErrorStreamRedirection.class);
 
         processBuilder.redirectErrorStream(redirection.isEnabled());
+
+
+        if (LOGGER.isLoggable(Level.INFO))
+        {
+            LOGGER.log(Level.INFO,
+                       "Oracle Tools Diagnostics: Starting Application...\n"
+                       + "------------------------------------------------------------------------\n"
+                       + diagnosticsTable.toString() + "\n"
+                       + "------------------------------------------------------------------------\n");
+        }
 
         // ----- start the process and establish the application -----
 
@@ -193,10 +252,33 @@ public class SimpleApplicationLauncher extends AbstractApplicationLauncher<Simpl
             throw new RuntimeException("Failed to build the underlying native process for the application", e);
         }
 
-        // create the application based on the process
-        SimpleApplication application = new SimpleApplication(platform,
-                                                              new LocalApplicationProcess(process),
-                                                              launchOptions);
+
+        // determine the application class that will represent the running application
+        Class<? extends Application> applicationClass = metaClass.getImplementationClass(platform, launchOptions);
+
+        Application                  application;
+
+        try
+        {
+            // attempt to find a constructor(Platform, LocalApplicationProcess, Options)
+
+            Constructor<? extends Application> constructor = ReflectionHelper.getCompatibleConstructor(applicationClass,
+                                                                                                       platform.getClass(),
+                                                                                                       LocalApplicationProcess.class,
+                                                                                                       Options.class);
+            // create the application
+            application = constructor.newInstance(platform, new LocalApplicationProcess(process), launchOptions);
+        }
+        catch (Exception e)
+        {
+            throw new RuntimeException("Failed to instantiate the Application class specified by the MetaClass:"
+                                       + metaClass,
+                                       e);
+        }
+
+        // ----- notify the MetaClass that the application has been launched -----
+
+        metaClass.onLaunched(platform, application, launchOptions);
 
         // ----- notify the Profiles that the application has been realized -----
 

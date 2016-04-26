@@ -361,12 +361,19 @@ public class ClassPath implements Iterable<String>, Tabular, Option
 
         for (String path : paths)
         {
-            File   file   = new File(path);
+            // If the path is the current directory "./" or "./*" then just add it as-is
+            if ("./".equals(path) || "./*".equals(path))
+            {
+                table.addRow(path);
+            }
+            else
+            {
+                File   file   = new File(path);
+                String parent = file.getParent();
 
-            String parent = file.getParent();
-
-            table.addRow(file.getName(),
-                         parent == null ? "" : "(" + parent + ")");
+                table.addRow(file.getName(),
+                             parent == null ? "" : "(" + parent + ")");
+            }
         }
 
         return table;

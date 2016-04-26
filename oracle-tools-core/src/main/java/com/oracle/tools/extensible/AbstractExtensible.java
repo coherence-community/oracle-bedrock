@@ -66,8 +66,23 @@ public abstract class AbstractExtensible implements Extensible
     @Override
     public <T> T get(Class<T> featureClass)
     {
-        return featureClass == null
-               ? null : (featureClass.isInstance(this) ? (T) this : (T) features.get(featureClass));
+        // if the required class is null then return null
+        if (featureClass == null)
+        {
+            return null;
+        }
+
+        // check whether we have the feature
+        T feature = (T) features.get(featureClass);
+
+        // if we do not have the feature check whether this class is
+        // an implementation of the required feature
+        if (feature == null && featureClass.isInstance(this))
+        {
+            feature = (T) this;
+        }
+
+        return feature;
     }
 
 

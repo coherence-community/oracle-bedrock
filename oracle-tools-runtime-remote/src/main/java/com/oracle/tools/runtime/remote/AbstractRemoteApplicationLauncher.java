@@ -32,8 +32,8 @@ import com.oracle.tools.lang.ExpressionEvaluator;
 import com.oracle.tools.options.Variable;
 import com.oracle.tools.options.Variables;
 
-import com.oracle.tools.runtime.AbstractApplicationLauncher;
 import com.oracle.tools.runtime.Application;
+import com.oracle.tools.runtime.ApplicationLauncher;
 import com.oracle.tools.runtime.ApplicationListener;
 import com.oracle.tools.runtime.ApplicationProcess;
 import com.oracle.tools.runtime.LocalPlatform;
@@ -54,21 +54,26 @@ import com.oracle.tools.runtime.remote.options.Deployer;
 import com.oracle.tools.runtime.remote.options.Deployment;
 import com.oracle.tools.runtime.remote.ssh.SftpDeployer;
 
+import com.oracle.tools.table.Table;
+import com.oracle.tools.table.Tabularize;
 import com.oracle.tools.util.ReflectionHelper;
 
 import java.io.File;
 
 import java.lang.reflect.Constructor;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Properties;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
- * An abstract implementation of a {@link RemoteApplicationLauncher}.
+ * An abstract implementation of a {@link ApplicationLauncher}.
  *
- * @param <A> the type of the {@link Application}s the {@link RemoteApplicationLauncher} will launch
+ * @param <A> the type of the {@link Application}s the {@link ApplicationLauncher} will launch
  *            <p>
  *            Copyright (c) 2014. All Rights Reserved. Oracle Corporation.<br>
  *            Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
@@ -76,41 +81,45 @@ import java.util.UUID;
  * @author Brian Oliver
  */
 public abstract class AbstractRemoteApplicationLauncher<A extends Application>
-    extends AbstractApplicationLauncher<A, RemotePlatform> implements RemoteApplicationLauncher<A>,
-                                                                      RemoteTerminal.Launchable
+        implements ApplicationLauncher<A>, RemoteTerminal.Launchable
 {
     /**
      * Constructs an {@link AbstractRemoteApplicationLauncher}.
      *
-     * @param platform the {@link Platform} on which an {@link Application} will be launched
      */
-    public AbstractRemoteApplicationLauncher(RemotePlatform platform)
+    public AbstractRemoteApplicationLauncher()
     {
-        super(platform);
     }
 
 
     @Override
-    public A launch(Options options)
+    public A launch(Platform platform, Options options)
     {
+        // establish the diagnostics output table
+        Table diagnosticsTable = new Table();
+
+        diagnosticsTable.getOptions().add(Table.orderByColumn(0));
+
+        if (platform != null)
+        {
+            diagnosticsTable.addRow("Target Platform", platform.getName());
+        }
+
         // ----- determine the meta-class for our application -----
 
         // establish the options for resolving the meta-class
         Options metaOptions = new Options(platform.getOptions()).addAll(options);
 
         // determine the meta-class
-        MetaClass metaClass = metaOptions.getOrDefault(MetaClass.class, new Application.MetaClass());
+        MetaClass<A> metaClass = metaOptions.getOrDefault(MetaClass.class, new Application.MetaClass());
 
-        // ---- establish the Options for the Application -----
+        // ----- establish the launch Options for the Application -----
 
         // add the platform options
-        Options launchOptions = new Options(platform == null ? null : platform.getOptions().asArray());
+        Options launchOptions = new Options(platform.getOptions()).addAll(options);
 
-        // add the schema options
+        // add the meta-class options
         metaClass.onLaunching(platform, launchOptions);
-
-        // add the custom application options
-        launchOptions.addAll(options);
 
         // ---- establish the default Options ----
 
@@ -140,13 +149,23 @@ public abstract class AbstractRemoteApplicationLauncher<A extends Application>
             profile.onLaunching(platform, launchOptions);
         }
 
+        // ----- add the diagnostic table to the options so it can be used by the terminal -----
+        launchOptions.add(diagnosticsTable);
+
         // ----- prior to launching the application, let the implementation enhance the launch options -----
 
         onLaunching(launchOptions);
 
-        // ----- establish the display name for the application -----
+        // ----- give the MetaClass a last chance to manipulate any options -----
+
+        metaClass.onFinalize(platform, launchOptions);
+
+        // ----- determine the display name for the application -----
 
         DisplayName displayName = getDisplayName(launchOptions);
+
+        // determine the Executable
+        Executable executable = launchOptions.get(Executable.class);
 
         // ----- deploy remote application artifacts -----
 
@@ -187,6 +206,11 @@ public abstract class AbstractRemoteApplicationLauncher<A extends Application>
         // Set the resolved working directory back into the options
         launchOptions.add(WorkingDirectory.at(remoteDirectoryFile));
 
+        if (remoteDirectoryFile != null)
+        {
+            diagnosticsTable.addRow("Working Directory", remoteDirectoryFile.toString());
+        }
+
         // Obtain the RemoteShell that will be used to launch the process
         RemoteTerminalBuilder terminalBuilder = launchOptions.getOrDefault(RemoteTerminalBuilder.class,
                                                                            RemoteTerminals.ssh());
@@ -210,17 +234,29 @@ public abstract class AbstractRemoteApplicationLauncher<A extends Application>
         // TODO: put a try/catch around the terminal.launch here so we can clean up the RemoteExecutor if
         // the application failed to launch
 
+        // determine the application class that will represent the running application
+        Class<? extends A> applicationClass = metaClass.getImplementationClass(platform, launchOptions);
+
+        diagnosticsTable.addRow("Application", displayName.resolve(launchOptions));
+
+        if (argList.size() > 0)
+        {
+            diagnosticsTable.addRow("Application Arguments ", argList.stream().collect(Collectors.joining(" ")));
+        }
+
+        diagnosticsTable.addRow("Application Launch Time",
+                                new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
+
+        // ----- start the process and establish the application -----
+
         // launch the remote process
-        RemoteApplicationProcess remoteProcess = terminal.launch(this, launchOptions);
+        RemoteApplicationProcess remoteProcess = terminal.launch(this, applicationClass, launchOptions);
 
         // adapt the remote process into something that the application can use
         ApplicationProcess process = adapt(remoteProcess);
 
         // create the Application based on the RemoteApplicationProcess
         A application = null;
-
-        // determine the application class that will represent the running application
-        Class<? extends A> applicationClass = metaClass.getImplementationClass(platform, launchOptions);
 
         try
         {
@@ -255,7 +291,7 @@ public abstract class AbstractRemoteApplicationLauncher<A extends Application>
             profile.onLaunched(platform, application, launchOptions);
         }
 
-        // ----- notify all of the lifecycle listeners -----
+        // ----- notify all of the application listeners -----
 
         // notify the ApplicationListener-based Options that the application has been launched
         for (ApplicationListener listener : launchOptions.getInstancesOf(ApplicationListener.class))
@@ -343,6 +379,7 @@ public abstract class AbstractRemoteApplicationLauncher<A extends Application>
     public Properties getEnvironmentVariables(Platform platform,
                                               Options  options)
     {
+        Table                diagnosticsTable     = options.get(Table.class);
         EnvironmentVariables environmentVariables = options.getOrDefault(EnvironmentVariables.class,
                                                                          EnvironmentVariables.of(EnvironmentVariables
                                                                              .Source.TargetPlatform));
@@ -352,18 +389,38 @@ public abstract class AbstractRemoteApplicationLauncher<A extends Application>
         switch (environmentVariables.getSource())
         {
         case Custom :
+            if (diagnosticsTable != null)
+            {
+                diagnosticsTable.addRow("Environment Variables", "(cleared)");
+            }
             break;
 
         case ThisApplication :
             variables.putAll(System.getenv());
+
+            if (diagnosticsTable != null)
+            {
+                diagnosticsTable.addRow("Environment Variables", "(based on parent process)");
+            }
             break;
 
         case TargetPlatform :
+            if (diagnosticsTable != null)
+            {
+                diagnosticsTable.addRow("Environment Variables", "(based on platform defaults)");
+            }
             break;
         }
 
         // add the optionally defined environment variables
         variables.putAll(environmentVariables.realize(platform, options.asArray()));
+
+        if (variables.size() > 0 && diagnosticsTable != null)
+        {
+            Table table = Tabularize.tabularize(variables);
+
+            diagnosticsTable.addRow("", table.toString());
+        }
 
         return variables;
     }

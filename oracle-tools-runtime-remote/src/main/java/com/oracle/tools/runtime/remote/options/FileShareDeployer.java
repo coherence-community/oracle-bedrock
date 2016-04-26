@@ -7,8 +7,10 @@ import com.oracle.tools.runtime.Platform;
 
 import com.oracle.tools.runtime.options.PlatformSeparators;
 import com.oracle.tools.runtime.remote.DeploymentArtifact;
+import com.oracle.tools.table.Table;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 
 import java.nio.file.Files;
@@ -79,6 +81,7 @@ public abstract class FileShareDeployer implements Deployer
                        Option... deploymentOptions)
     {
         Options combinedOptions = new Options(platform == null ? null : platform.getOptions().asArray());
+        Table   deploymentTable = new Table();
 
         combinedOptions.addAll(options.asArray());
         combinedOptions.addAll(deploymentOptions);
@@ -88,9 +91,12 @@ public abstract class FileShareDeployer implements Deployer
 
         for (DeploymentArtifact artifact : artifactsToDeploy)
         {
+            double start = System.currentTimeMillis();
             try
             {
-                Path localCopy = new File(localShareName, artifact.getSourceFile().getName()).toPath();
+                File sourceFile = artifact.getSourceFile();
+                Path localCopy  = new File(localShareName, sourceFile.getName()).toPath();
+
                 Files.copy(artifact.getSourceFile().toPath(), localCopy, StandardCopyOption.REPLACE_EXISTING);
 
                 String destination;
@@ -128,6 +134,9 @@ public abstract class FileShareDeployer implements Deployer
                         Files.delete(localCopy);
                     }
                 }
+
+                double time = (System.currentTimeMillis() - start) / 1000.0d;
+                deploymentTable.addRow(sourceFile.toString(), String.valueOf(destination), String.format("%.3f s", time));
             }
             catch (IOException e)
             {
@@ -135,6 +144,11 @@ public abstract class FileShareDeployer implements Deployer
             }
         }
 
+        Table diagnosticsTable = options.get(Table.class);
+        if (diagnosticsTable != null)
+        {
+            diagnosticsTable.addRow("Application Deployments ", deploymentTable.toString());
+        }
     }
 
     /**

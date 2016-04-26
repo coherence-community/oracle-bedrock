@@ -30,9 +30,12 @@ import com.oracle.tools.Options;
 import com.oracle.tools.lang.ExpressionEvaluator;
 import com.oracle.tools.runtime.Platform;
 
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Properties;
 
 /**
@@ -264,6 +267,40 @@ public class EnvironmentVariables implements Option.Collector<EnvironmentVariabl
         }
 
         return properties;
+    }
+
+
+    /**
+     * Obtain a new {@link EnvironmentVariables} that is the union of
+     * this {@link EnvironmentVariables} and the specified {@link Collection}
+     * of {@link EnvironmentVariable} instances.
+     * <p>
+     * If an {@link EnvironmentVariable} with a given name is present in
+     * this {@link EnvironmentVariables} and in the {@link Collection} being
+     * added then the value being added takes precedence.
+     *
+     * @param variables  the {@link EnvironmentVariable}s to union with
+     *                   this {@link EnvironmentVariables}
+     *
+     * @return   a new {@link EnvironmentVariables} that is the union
+     *           of this {@link EnvironmentVariables} and the specified
+     *           array of {@link EnvironmentVariable} instances
+     */
+    public EnvironmentVariables with(Collection<EnvironmentVariable> variables)
+    {
+        if (variables == null || variables.isEmpty())
+        {
+            return this;
+        }
+
+        EnvironmentVariables environmentVariables = new EnvironmentVariables(this);
+
+        for (EnvironmentVariable variable : variables)
+        {
+            environmentVariables.variables.put(variable.getName(), variable);
+        }
+
+        return environmentVariables;
     }
 
 

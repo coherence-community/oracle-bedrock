@@ -32,6 +32,7 @@ import com.oracle.tools.runtime.AbstractPlatform;
 import com.oracle.tools.runtime.Application;
 import com.oracle.tools.runtime.ApplicationLauncher;
 
+import com.oracle.tools.runtime.Platform;
 import com.oracle.tools.runtime.java.JavaApplication;
 
 import com.oracle.tools.runtime.options.MetaClass;
@@ -49,8 +50,13 @@ import java.net.InetAddress;
  *
  * @author Jonathan Knight
  */
-public class RemotePlatform extends AbstractPlatform<RemotePlatform>
+public class RemotePlatform extends AbstractPlatform<Platform>
 {
+    /**
+     * The default port for secure connection to a remote server (over SSH)
+     */
+    public static final int DEFAULT_PORT = 22;
+
     /**
      * The {@link InetAddress} of the {@link RemotePlatform}.
      */
@@ -86,7 +92,7 @@ public class RemotePlatform extends AbstractPlatform<RemotePlatform>
                           Authentication authentication,
                           Option...      options)
     {
-        this(address.toString(), address, RemoteApplicationLauncher.DEFAULT_PORT, userName, authentication, options);
+        this(address.toString(), address, DEFAULT_PORT, userName, authentication, options);
     }
 
 
@@ -106,7 +112,7 @@ public class RemotePlatform extends AbstractPlatform<RemotePlatform>
                           Authentication authentication,
                           Option...      options)
     {
-        this(name, address, RemoteApplicationLauncher.DEFAULT_PORT, userName, authentication, options);
+        this(name, address, DEFAULT_PORT, userName, authentication, options);
     }
 
 
@@ -145,17 +151,17 @@ public class RemotePlatform extends AbstractPlatform<RemotePlatform>
 
     @Override
     protected <A extends Application,
-               B extends ApplicationLauncher<A, RemotePlatform>> B getApplicationLauncher(Class<A>     applicationClass,
-                                                                                          MetaClass<A> metaClass,
-                                                                                          Options      options) throws UnsupportedOperationException
+               B extends ApplicationLauncher<A>> B getApplicationLauncher(Class<A>     applicationClass,
+                                                                          MetaClass<A> metaClass,
+                                                                          Options      options) throws UnsupportedOperationException
     {
         if (JavaApplication.class.isAssignableFrom(applicationClass))
         {
-            return (B) new RemoteJavaApplicationLauncher(this);
+            return (B) new RemoteJavaApplicationLauncher();
         }
         else
         {
-            return (B) new SimpleRemoteApplicationLauncher(this);
+            return (B) new SimpleRemoteApplicationLauncher();
         }
     }
 

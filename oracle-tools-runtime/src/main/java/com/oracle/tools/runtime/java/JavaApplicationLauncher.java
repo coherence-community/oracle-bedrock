@@ -25,8 +25,11 @@
 
 package com.oracle.tools.runtime.java;
 
+import com.oracle.tools.Options;
 import com.oracle.tools.runtime.ApplicationLauncher;
 import com.oracle.tools.runtime.Platform;
+import com.oracle.tools.runtime.java.options.ClassName;
+import com.oracle.tools.runtime.options.DisplayName;
 
 /**
  * A {@link JavaApplicationLauncher} is Java specific {@link ApplicationLauncher}.
@@ -36,7 +39,33 @@ import com.oracle.tools.runtime.Platform;
  *
  * @author Brian Oliver
  */
-public interface JavaApplicationLauncher<A extends JavaApplication, P extends Platform> extends ApplicationLauncher<A, P>
+public interface JavaApplicationLauncher<A extends JavaApplication> extends ApplicationLauncher<A>
 {
-    // this is deliberately empty
+    @Override
+    default DisplayName getDisplayName(Options options)
+    {
+        ClassName className = options.get(ClassName.class);
+
+        if (className == null)
+        {
+            return options.get(DisplayName.class);
+        }
+        else
+        {
+            // determine the short class name of the class we're launching (as a possible default)
+            String shortClassName = className.getName();
+            int    lastDot        = shortClassName.lastIndexOf(".");
+
+            shortClassName = lastDot <= 0 ? shortClassName : shortClassName.substring(lastDot + 1);
+
+            if (shortClassName.isEmpty())
+            {
+                return options.get(DisplayName.class);
+            }
+            else
+            {
+                return options.getOrDefault(DisplayName.class, DisplayName.of(shortClassName));
+            }
+        }
+    }
 }

@@ -25,6 +25,8 @@
 
 package com.oracle.tools.runtime;
 
+import com.oracle.tools.Options;
+
 /**
  * A listener for {@link Application} life-cycle events.
  *
@@ -38,16 +40,18 @@ public interface ApplicationListener<A extends Application>
      * Called prior to an {@link Application} being closed.
      *
      * @param application  the {@link Application} being closed
+     * @param options      the {@link Options} to use
      */
-    public void onClosing(A application);
+    public void onClosing(A application, Options options);
 
 
     /**
      * Called after an {@link Application} was closed.
      *
      * @param application  the {@link Application} that was closed
+     * @param options      the {@link Options} to use
      */
-    public void onClosed(A application);
+    public void onClosed(A application, Options options);
 
 
     /**

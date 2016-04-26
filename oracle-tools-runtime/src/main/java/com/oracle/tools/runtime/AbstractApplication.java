@@ -216,11 +216,14 @@ public abstract class AbstractApplication<P extends ApplicationProcess> extends 
     @Override
     public void close(Option... options)
     {
+        // determine the custom closing behavior for the application
+        Options closingOptions = new Options(options);
+
         // ------ notify any ApplicationListener-based Features (about closing) ------
 
         for (ApplicationListener listener : getInstancesOf(ApplicationListener.class))
         {
-            listener.onClosing(this);
+            listener.onClosing(this, closingOptions);
         }
 
         // ----- notify the Profiles that the application is closing -----
@@ -234,16 +237,13 @@ public abstract class AbstractApplication<P extends ApplicationProcess> extends 
 
         for (ApplicationListener listener : getOptions().getInstancesOf(ApplicationListener.class))
         {
-            listener.onClosing(this);
+            listener.onClosing(this, closingOptions);
         }
 
         // ------ perform any necessary ApplicationClosingBehaviors ------
 
         // determine the default closing behavior (defined for the application options)
         ApplicationClosingBehavior defaultClosingBehavior = getOptions().get(ApplicationClosingBehavior.class);
-
-        // determine the custom closing behavior for the application
-        Options closingOptions = new Options(options);
 
         // determine the required closing behavior
         ApplicationClosingBehavior closingBehavior = closingOptions.getOrDefault(ApplicationClosingBehavior.class,
@@ -341,14 +341,14 @@ public abstract class AbstractApplication<P extends ApplicationProcess> extends 
 
         for (ApplicationListener listener : getOptions().getInstancesOf(ApplicationListener.class))
         {
-            listener.onClosed(this);
+            listener.onClosed(this, closingOptions);
         }
 
         // ------ notify ApplicationListener-based Features (about being closed) ------
 
         for (ApplicationListener listener : getInstancesOf(ApplicationListener.class))
         {
-            listener.onClosed(this);
+            listener.onClosed(this, closingOptions);
         }
 
         // ----- remove all of the features -----

@@ -203,13 +203,14 @@ public class SystemProperties implements Option.Collector<SystemProperty, System
      * Adds the specified {@link SystemProperty} to the {@link SystemProperties}, returning a new
      * {@link SystemProperties} containing the {@link SystemProperty}.
      *
-     * @param property the {@link SystemProperty} to add
+     * @param properties the {@link SystemProperty}s to add
      *
-     * @return the a new {@link SystemProperties} instance, including the existing {@link SystemProperty}s and the new {@link SystemProperty}
+     * @return  the a new {@link SystemProperties} instance, including
+     *          the existing {@link SystemProperty}s and the new {@link SystemProperty}
      */
-    public SystemProperties add(SystemProperty property)
+    public SystemProperties add(SystemProperty... properties)
     {
-        if (property == null)
+        if (properties == null || properties.length == 0)
         {
             return this;
         }
@@ -217,7 +218,10 @@ public class SystemProperties implements Option.Collector<SystemProperty, System
         {
             SystemProperties systemProperties = new SystemProperties(this);
 
-            systemProperties.properties.put(property.getName(), property);
+            for (SystemProperty property : properties)
+            {
+                systemProperties.properties.put(property.getName(), property);
+            }
 
             return systemProperties;
         }
@@ -425,6 +429,22 @@ public class SystemProperties implements Option.Collector<SystemProperty, System
                         Object result = evaluator.evaluate(expression, Object.class);
 
                         expression = result == null ? "" : result.toString();
+                    }
+
+                    Options                                 propertyOptions = property.getOptions();
+                    Iterable<SystemProperty.ResolveHandler> handlers        = propertyOptions
+                            .getInstancesOf(SystemProperty.ResolveHandler.class);
+
+                    for (SystemProperty.ResolveHandler handler : handlers)
+                    {
+                        try
+                        {
+                            handler.onResolve(name, expression, options);
+                        }
+                        catch (Throwable t)
+                        {
+                            t.printStackTrace();
+                        }
                     }
 
                     // record the property

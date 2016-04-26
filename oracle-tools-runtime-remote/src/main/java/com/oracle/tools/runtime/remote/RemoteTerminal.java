@@ -30,8 +30,6 @@ import com.oracle.tools.Options;
 import com.oracle.tools.runtime.Application;
 import com.oracle.tools.runtime.Platform;
 
-import java.net.InetAddress;
-
 import java.util.List;
 import java.util.Properties;
 
@@ -50,15 +48,17 @@ public interface RemoteTerminal
      * Launches an {@link Application}, represented as a {@link RemoteApplicationProcess},
      * according to the information provided by the {@link Launchable} and specified {@link Options}.
      *
-     * @param launchable  the {@link Launchable} defining how to launch the {@link Application}
-     * @param options     the {@link Options} to use when launching the {@link Application}
+     * @param launchable        the {@link Launchable} defining how to launch the {@link Application}
+     * @param applicationClass  the {@link Class} of the {@link Application} being launched
+     * @param options           the {@link Options} to use when launching the {@link Application}
      *
      * @return an {@link RemoteApplicationProcess} representing the launched {@link Application}
      *
      * @throws RuntimeException when a problem occurs while starting the application
      */
-    RemoteApplicationProcess launch(Launchable launchable,
-                                    Options    options);
+    RemoteApplicationProcess launch(Launchable                   launchable,
+                                    Class<? extends Application> applicationClass,
+                                    Options                      options);
 
 
     /**

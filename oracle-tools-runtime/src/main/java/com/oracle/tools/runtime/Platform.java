@@ -27,6 +27,8 @@ package com.oracle.tools.runtime;
 
 import com.oracle.tools.Option;
 import com.oracle.tools.Options;
+import com.oracle.tools.runtime.options.ApplicationType;
+import com.oracle.tools.runtime.options.Executable;
 
 import java.net.InetAddress;
 
@@ -92,8 +94,15 @@ public interface Platform
      *
      * @return  an {@link Application} representing the launched application
      */
-    public Application launch(String    executable,
-                              Option... options);
+    public default Application launch(String    executable,
+                                      Option... options)
+    {
+        // add the program as a launch option
+        Options launchOptions = new Options(options).add(Executable.named(executable));
+
+        // launch as a regular Application.class
+        return launch(Application.class, launchOptions.asArray());
+    }
 
 
     /**
@@ -105,6 +114,24 @@ public interface Platform
      *
      * @return  an {@link Application} representing the launched application
      */
-    public <A extends Application> A launch(Class<A>  applicationClass,
-                                            Option... options);
+    public default <A extends Application> A launch(Class<A>  applicationClass,
+                                                    Option... options)
+    {
+        // add the program as a launch option
+        Options launchOptions = new Options(options).add(ApplicationType.of(applicationClass));
+
+        // launch as a regular Application.class
+        return launch(launchOptions.asArray());
+    }
+
+
+
+    /**
+     * Launches a new {@link Application} based on the specified {@link Option}s.
+     *
+     * @param options  the {@link Option}s for the {@link Application}
+     *
+     * @return  an {@link Application} representing the launched application
+     */
+    public <A extends Application> A launch(Option... options);
 }

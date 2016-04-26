@@ -192,6 +192,13 @@ public interface Application extends Extensible, Closeable
 
 
         @Override
+        public void onFinalize(Platform platform, Options options)
+        {
+            // there's nothing to do before launching the application
+        }
+
+
+        @Override
         public void onLaunched(Platform    platform,
                                Application application,
                                Options     options)

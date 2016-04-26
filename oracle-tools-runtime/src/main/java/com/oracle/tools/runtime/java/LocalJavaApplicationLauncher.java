@@ -39,10 +39,8 @@ import com.oracle.tools.options.Timeout;
 import com.oracle.tools.options.Variable;
 import com.oracle.tools.options.Variables;
 
-import com.oracle.tools.runtime.Application;
 import com.oracle.tools.runtime.ApplicationListener;
 import com.oracle.tools.runtime.LocalApplicationProcess;
-import com.oracle.tools.runtime.LocalPlatform;
 import com.oracle.tools.runtime.Platform;
 import com.oracle.tools.runtime.Profile;
 import com.oracle.tools.runtime.Profiles;
@@ -116,7 +114,7 @@ import java.util.logging.Logger;
  * @author Brian Oliver
  */
 public class LocalJavaApplicationLauncher<A extends JavaApplication>
-    extends AbstractJavaApplicationLauncher<A, LocalPlatform>
+    implements JavaApplicationLauncher<A>
 {
     /**
      * The {@link Logger} for this class.
@@ -127,16 +125,14 @@ public class LocalJavaApplicationLauncher<A extends JavaApplication>
     /**
      * Constructs a {@link LocalJavaApplicationLauncher}.
      *
-     * @param platform the {@link Platform} on which an {@link Application} will be launched
      */
-    public LocalJavaApplicationLauncher(LocalPlatform platform)
+    public LocalJavaApplicationLauncher()
     {
-        super(platform);
     }
 
 
     @Override
-    public A launch(Options options)
+    public A launch(Platform platform, Options options)
     {
         // establish the diagnostics output table
         Table diagnosticsTable = new Table();
@@ -187,6 +183,10 @@ public class LocalJavaApplicationLauncher<A extends JavaApplication>
         {
             profile.onLaunching(platform, launchOptions);
         }
+
+        // ----- give the MetaClass a last chance to manipulate any options -----
+
+        metaClass.onFinalize(platform, launchOptions);
 
         // ----- determine the display name for the application -----
 

@@ -33,7 +33,12 @@ import com.oracle.tools.lang.ExpressionEvaluator;
 import com.oracle.tools.runtime.Application;
 import com.oracle.tools.runtime.Platform;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 
 /**
  * A representation of a command line argument to an application.
@@ -48,13 +53,13 @@ public class Argument implements Option.Collectable
     /**
      * The optional name of this argument
      */
-    private String name;
+    private final String name;
 
     /**
      * The optional separator to use between the name and
      * value.
      */
-    private char separator;
+    private final char separator;
 
     /**
      * The value of the {@link Argument}.
@@ -63,13 +68,19 @@ public class Argument implements Option.Collectable
 
 
     /**
+     * The {@link Option}s for this {@link Argument}.
+     */
+    private final Option[] options;
+
+
+    /**
      * Create an {@link Argument} with the specified value.
      *
      * @param value  the value of the {@link Argument}
      */
-    public Argument(Object value)
+    public Argument(Object value, Option... options)
     {
-        this(null, ' ', value);
+        this(null, ' ', value, options);
     }
 
 
@@ -80,10 +91,11 @@ public class Argument implements Option.Collectable
      * @param name       the name of the {@link Argument}
      * @param value      the value of the {@link Argument}
      */
-    public Argument(String name,
-                    Object value)
+    public Argument(String    name,
+                    Object    value,
+                    Option... options)
     {
-        this(name, ' ', value);
+        this(name, ' ', value, options);
     }
 
 
@@ -94,14 +106,17 @@ public class Argument implements Option.Collectable
      * @param name       the name of the {@link Argument}
      * @param separator  the separator to use between the name and value
      * @param value      the value of the {@link Argument}
+     * @param options    the {@link Option}s for this {@link Argument}
      */
-    public Argument(String name,
-                    char   separator,
-                    Object value)
+    public Argument(String    name,
+                    char      separator,
+                    Object    value,
+                    Option... options)
     {
         this.name      = name;
         this.separator = separator;
         this.value     = value;
+        this.options   = options;
     }
 
 
@@ -119,6 +134,10 @@ public class Argument implements Option.Collectable
     /**
      * Set the separator to use between the name and value when
      * realizing the arguments for an application.
+     * <p>
+     * <strong>Note</strong> {@link Argument}s are immutable so calling
+     * this method will return a copy of this {@link Argument} with
+     * the specified separator.
      *
      * @param separator  the separator to use
      *
@@ -126,9 +145,12 @@ public class Argument implements Option.Collectable
      */
     public Argument withSeparator(char separator)
     {
-        this.separator = separator;
+        if (separator == this.separator)
+        {
+            return this;
+        }
 
-        return this;
+        return new Argument(this.name, separator, this.value);
     }
 
 
@@ -156,8 +178,25 @@ public class Argument implements Option.Collectable
 
 
     /**
-     * Resolve the String representation of this {@link Argument} using the provided {@link Platform}
+     * Obtain the {@link Option}s for this {@link Argument}.
+     *
+     * @return  the {@link Option}s for this {@link Argument}
+     */
+    public Options getOptions()
+    {
+        return new Options(options);
+    }
+
+
+    /**
+     * Resolve the representation of this {@link Argument} using the provided {@link Platform}
      * and {@link Application} launch {@link Option}s.
+     * <p>
+     * An {@link Argument} may resolve to multiple values, which are each returned in the {@link List}
+     * and the command line will then contain a name/value pair for each entry returned.
+     * For example, if this {@link Argument} had the name "-foo" and this method returned
+     * a {@link List} containing the Strings "bar1" and "bar2" the command line would contain
+     * the values "-foo bar1 -foo bar2".
      *
      * @param platform   the {@link Platform} that the {@link Argument} is being realized for
      * @param evaluator  the {@link ExpressionEvaluator} to use for expression values
@@ -165,17 +204,70 @@ public class Argument implements Option.Collectable
      *
      * @return  the String representation of this {@link Argument}
      */
-    public String resolve(Platform            platform,
-                          ExpressionEvaluator evaluator,
-                          Options             options)
+    public List<String> resolve(Platform            platform,
+                                ExpressionEvaluator evaluator,
+                                Options             options)
     {
         if (value == null)
         {
-            return null;
+            return Collections.emptyList();
         }
 
-        Object argValue = value;
+        List<String> argList;
 
+        if (value instanceof Multiple)
+        {
+            argList = new ArrayList<>();
+
+            for (Object argValue : ((Multiple)value).getValues())
+            {
+                Object result = resolveValue(argValue, platform, evaluator, options);
+
+                if (result != null)
+                {
+                    argList.add(String.valueOf(result));
+                }
+            }
+        }
+        else
+        {
+            Object result = resolveValue(value, platform, evaluator, options);
+
+            if (result != null)
+            {
+                argList = Collections.singletonList(String.valueOf(result));
+            }
+            else
+            {
+                argList = Collections.emptyList();
+            }
+        }
+
+
+        Options                  argOptions = getOptions();
+        Iterable<ResolveHandler> handlers   = argOptions.getInstancesOf(ResolveHandler.class);
+
+        for (ResolveHandler handler : handlers)
+        {
+            try
+            {
+                handler.onResolve(this.name, Collections.unmodifiableList(argList), options);
+            }
+            catch (Throwable t)
+            {
+                t.printStackTrace();
+            }
+        }
+
+        return argList;
+    }
+
+
+    private Object resolveValue(Object              argValue,
+                                Platform            platform,
+                                ExpressionEvaluator evaluator,
+                                Options             options)
+    {
         if (argValue instanceof Argument.ContextSensitiveArgument)
         {
             Argument.ContextSensitiveArgument contextSensitiveValue = (Argument.ContextSensitiveArgument) argValue;
@@ -208,7 +300,7 @@ public class Argument implements Option.Collectable
         // resolve the use of expressions in the value
         Object result = evaluator.evaluate(expression, Object.class);
 
-        return result == null ? "" : result.toString();
+        return result;
     }
 
 
@@ -270,27 +362,52 @@ public class Argument implements Option.Collectable
     /**
      * Create an {@link Argument} with the specified value.
      *
-     * @param arg  the value of the {@link Argument}
+     * @param arg      the value of the {@link Argument}
+     * @param options  the {@link Option}s for this {@link Argument}
      *
      * @return  an {@link Argument} with the specified value
      */
-    public static Argument of(Object arg)
+    public static Argument of(Object arg, Option... options)
     {
-        return new Argument(arg);
+        return new Argument(arg, options);
     }
 
 
     /**
      * Create an {@link Argument} with the specified value.
      *
-     * @param arg  the value of the {@link Argument}
+     * @param name     the name of the argument
+     * @param arg      the value of the {@link Argument}
+     * @param options  the {@link Option}s for this {@link Argument}
      *
      * @return  an {@link Argument} with the specified value
      */
-    public static Argument of(String name,
-                              Object arg)
+    public static Argument of(String    name,
+                              Object    arg,
+                              Option... options)
     {
-        return new Argument(name, arg);
+        return new Argument(name, arg, options);
+    }
+
+
+    /**
+     * Create an {@link Argument} with the specified name,
+     * value and separator.
+     *
+     * @param name      the name of the argument
+     * @param separator the separator to use between the name
+     *                  and value when resolving this argument
+     * @param arg       the value of the {@link Argument}
+     * @param options   the {@link Option}s for this {@link Argument}
+     *
+     * @return  an {@link Argument} with the specified value
+     */
+    public static Argument of(String    name,
+                              char      separator,
+                              Object    arg,
+                              Option... options)
+    {
+        return new Argument(name, separator, arg, options);
     }
 
 
@@ -311,5 +428,105 @@ public class Argument implements Option.Collectable
          */
         Object resolve(Platform platform,
                        Options  options);
+    }
+
+
+    /**
+     * A value used to denote that a given argument
+     * occurs multiple times with each of the values
+     * contained within this {@link Multiple}.
+     */
+    public static class Multiple
+    {
+        /**
+         * The values for the argument.
+         */
+        private final List<?> values;
+
+
+        /**
+         * Create a {@link Multiple} with the
+         * specified values.
+         *
+         * @param values  the values for the argument
+         */
+        public Multiple(Object... values)
+        {
+            this.values = Arrays.asList(values);
+        }
+
+
+        /**
+         * Create a {@link Multiple} with the
+         * specified values.
+         *
+         * @param values  the values for the argument
+         */
+        public Multiple(Collection<?> values)
+        {
+            this.values = values == null ? Collections.emptyList() : new ArrayList<>(values);
+        }
+
+
+        /**
+         * Obtain the values for this {@link Multiple}.
+         *
+         * @return  the values for this {@link Multiple}
+         */
+        public List<?> getValues()
+        {
+            return values;
+        }
+
+
+        @Override
+        public boolean equals(Object o)
+        {
+            if (this == o)
+            {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass())
+            {
+                return false;
+            }
+
+            Multiple multiple = (Multiple) o;
+
+            return values.equals(multiple.values);
+
+        }
+
+
+        @Override
+        public int hashCode()
+        {
+            return values.hashCode();
+        }
+
+
+        @Override
+        public String toString()
+        {
+            return String.valueOf(values);
+        }
+    }
+
+
+    /**
+     * A handler that is called whenever an {@link Argument}'s value(s) are
+     * resolved.
+     */
+    @FunctionalInterface
+    public interface ResolveHandler
+    {
+        /**
+         * Called by an {@link Argument} whenever its value(s) are resolved.
+         *
+         * @param name     the name of the argument (may be null if no name was specified)
+         * @param values   an immutable {@link List} of the resolved values
+         * @param options  the {@link Options} used to resolve the values
+         */
+        void onResolve(String name, List<String> values, Options options);
     }
 }

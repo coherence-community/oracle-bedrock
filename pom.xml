@@ -80,6 +80,9 @@
 
         <module>oracle-tools-coherence</module>
 
+        <module>oracle-tools-runtime-containers</module>
+        <module>oracle-tools-runtime-containers-tests</module>
+
         <module>oracle-tools-runtime-vagrant</module>
         <module>oracle-tools-runtime-vagrant-tests</module>
 
@@ -124,7 +127,9 @@
         <cglib.version>3.2.0</cglib.version>
         <glassfish.el.version>3.0.1-b08</glassfish.el.version>
         <hamcrest.version>1.3</hamcrest.version>
+        <glassfish.json.version>1.0.4</glassfish.json.version>
         <jacoco.version>0.7.5.201505241946</jacoco.version>
+        <javax.json.version>1.0</javax.json.version>
         <jprofiler.version>9.1.1</jprofiler.version>
         <jsch.version>0.1.53</jsch.version>
         <junit.version>4.12</junit.version>

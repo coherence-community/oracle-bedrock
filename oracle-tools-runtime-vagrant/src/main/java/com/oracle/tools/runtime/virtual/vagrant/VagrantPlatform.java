@@ -95,6 +95,8 @@ public class VagrantPlatform extends VirtualPlatform
         this.vagrantFile    = vagrantFile;
         this.publicHostName = publicHostName;
         this.port           = port;
+
+        getOptions().add(StrictHostChecking.disabled());
     }
 
 
@@ -287,20 +289,6 @@ public class VagrantPlatform extends VirtualPlatform
         {
             throw new RuntimeException("Error attempting to detect VM's SSH settings", e);
         }
-
-    }
-
-
-    @Override
-    public <A extends Application> A launch(Class<A>  applicationClass,
-                                            Option... options)
-    {
-        // TODO: we need to use "default platform options" here to automatically turn off strict-host-checking
-        Options launchOptions = new Options(options);
-
-        launchOptions.addIfAbsent(StrictHostChecking.disabled());
-
-        return super.launch(applicationClass, launchOptions.asArray());
     }
 
 
