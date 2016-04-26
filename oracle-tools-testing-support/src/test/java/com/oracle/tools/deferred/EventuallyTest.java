@@ -25,29 +25,28 @@
 
 package com.oracle.tools.deferred;
 
+import com.oracle.tools.Option;
+import com.oracle.tools.matchers.ThrowableMatcher;
 import com.oracle.tools.util.StopWatch;
-
+import org.hamcrest.Matcher;
+import org.hamcrest.Matchers;
 import org.junit.Assert;
 import org.junit.Test;
 
-import static com.oracle.tools.deferred.DeferredHelper.valueOf;
-import static com.oracle.tools.deferred.DeferredHelper.within;
-
-import static org.hamcrest.CoreMatchers.nullValue;
-
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.greaterThan;
-
-import static org.hamcrest.core.Is.is;
-
-import static org.hamcrest.core.IsCollectionContaining.hasItem;
-
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
-
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
+
+import static com.oracle.tools.deferred.DeferredHelper.valueOf;
+import static com.oracle.tools.deferred.DeferredHelper.within;
+import static com.oracle.tools.matchers.ThrowableMatcher.willThrow;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.nullValue;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsCollectionContaining.hasItem;
 
 /**
  * Unit tests for {@link Eventually}.
@@ -60,7 +59,7 @@ import java.util.concurrent.atomic.AtomicLong;
 public class EventuallyTest
 {
     /**
-     * Ensure that a {@link Eventually#assertThat(Object, org.hamcrest.Matcher)}
+     * Ensure that a {@link Eventually#assertThat(Object, Matcher, Option...)}
      * waits at least the default amount of time before throwing an exception when
      * a {@link Deferred} is {@link NotAvailable}.
      */
@@ -95,7 +94,7 @@ public class EventuallyTest
 
 
     /**
-     * Ensure that a {@link Eventually#assertThat(Object, org.hamcrest.Matcher)}
+     * Ensure that a {@link Eventually#assertThat(Object, Matcher, Option...)}
      * waits at least the specified time before throwing an exception when
      * the {@link Deferred} returns <code>null</code>.
      */
@@ -132,7 +131,7 @@ public class EventuallyTest
 
 
     /**
-     * Ensure that a {@link Eventually#assertThat(Object, org.hamcrest.Matcher)}
+     * Ensure that a {@link Eventually#assertThat(Object, Matcher, Option...)}
      * fails fast when the {@link Deferred} throws an {@link PermanentlyUnavailableException}.
      */
     @Test
@@ -165,7 +164,7 @@ public class EventuallyTest
 
 
     /**
-     * Ensure that a {@link Eventually#assertThat(Object, org.hamcrest.Matcher)}
+     * Ensure that a {@link Eventually#assertThat(Object, Matcher, Option...)}
      * returns immediately if the {@link Deferred} resolves to <code>null</code>.
      */
     @Test
@@ -188,7 +187,7 @@ public class EventuallyTest
 
 
     /**
-     * Ensure that the exception thrown by {@link Eventually#assertThat(Object, org.hamcrest.Matcher)}
+     * Ensure that the exception thrown by {@link Eventually#assertThat(Object, Matcher, Option...)}
      * contains the last used value with the matcher.
      */
     @Test
@@ -265,5 +264,34 @@ public class EventuallyTest
         queue.add("The application exited, (terminated)");
 
         Eventually.assertThat(queue, hasItem(containsString("VM Started:")));
+    }
+
+
+    /**
+     * Ensure that Eventually.assertThat can be used with {@link ThrowableMatcher}s.
+     */
+    @Test
+    public void shouldEventuallyMatchAThrowable()
+    {
+        // establish a deferred that always fails
+        Deferred<Long> deferred = new Deferred<Long>()
+        {
+            @Override
+            public Long get() throws TemporarilyUnavailableException, PermanentlyUnavailableException
+            {
+                throw new NullPointerException("oops!");
+            }
+
+            @Override
+            public Class<Long> getDeferredClass()
+            {
+                return Long.class;
+            }
+        };
+
+        Eventually.assertThat(deferred,
+                              willThrow(NullPointerException.class).withMessage(equalTo("oops!"))
+                              .causedBy(Matchers.nullValue()),
+                              within(1, TimeUnit.SECONDS));
     }
 }

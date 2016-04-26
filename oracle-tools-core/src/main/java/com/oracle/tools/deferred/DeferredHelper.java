@@ -717,7 +717,7 @@ public class DeferredHelper
             DEFERRED.set(null);
         }
 
-        return ensured(deferred);
+        return deferred;
     }
 
 
@@ -748,70 +748,7 @@ public class DeferredHelper
             DEFERRED.set(null);
         }
 
-        return ensured(deferred);
-    }
-
-
-    /**
-     * Obtains a {@link Deferred} representation of the last call to a
-     * dynamic proxy created with either {@link #invoking(Object)} or
-     * {@link #invoking(Deferred)}.
-     *
-     * @param t        the value returned from an call to 'invoking'
-     * @param options  the {@link Option}s
-     *
-     * @return a {@link Deferred} representation of a previous call
-     * {@link #invoking(Object)}
-     */
-    public static <T> Deferred<T> eventually(T         t,
-                                             Option... options)
-    {
-        // get the last deferred value from invoking
-        Deferred<T> deferred = (Deferred<T>) DEFERRED.get();
-
-        if (deferred == null)
-        {
-            deferred = t instanceof Deferred ? (Deferred<T>) t : new Existing<T>(t);
-        }
-        else
-        {
-            // clear the last invoking call
-            DEFERRED.set(null);
-        }
-
-        return ensured(deferred, options);
-    }
-
-
-    /**
-     * Obtains a {@link Deferred} representation of the last call to a
-     * dynamic proxy created with either {@link #invoking(Object)} or
-     * {@link #invoking(Deferred)}.   If there was no call to create a
-     * dynamic proxy, the provided deferred is ensured and returned.
-     *
-     * @param t        the deferred value (usually returned from 'invoking')
-     * @param options  the {@link Option}s
-     *
-     * @return a {@link Deferred} representation of a previous call
-     * {@link #invoking(Object)}
-     */
-    public static <T> Deferred<T> eventually(Deferred<T> t,
-                                             Option...   options)
-    {
-        // get the last deferred value from invoking
-        Deferred<T> deferred = (Deferred<T>) DEFERRED.get();
-
-        if (deferred == null)
-        {
-            deferred = t;
-        }
-        else
-        {
-            // clear the last invoking call
-            DEFERRED.set(null);
-        }
-
-        return ensured(deferred, options);
+        return deferred;
     }
 
 

@@ -846,6 +846,15 @@ reverse chronological order.
     the SystemPropertyIsolation JUnit Rule to ensure any system properties modified
     by tests are reverted (returned to normal) upon completion of a test.
 
+*   [ORACLETOOLS-273](https://java.net/jira/browse/ORACLETOOLS-273): Introduced
+    ThrowableMatcher to allow matching exceptions thrown when resolving
+    DeferredMatchers.   This allows the following types of Eventually.assertThat
+    statements to be used:
+
+    Eventually.assertThat(invoking(someObject).someMethod(),
+                          willThrow(SomeException.class).withMessage("some message")
+                                                        .causedBy(SomeOtherException.class))
+
 <h4>oracle-tools-coherence</h4>
 
 *   [ORACLETOOLS-92](https://java.net/jira/browse/ORACLETOOLS-92): Refactored

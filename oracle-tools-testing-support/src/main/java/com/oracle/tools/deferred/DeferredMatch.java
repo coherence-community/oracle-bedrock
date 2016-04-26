@@ -25,6 +25,7 @@
 
 package com.oracle.tools.deferred;
 
+import com.oracle.tools.matchers.ThrowableMatcher;
 import org.hamcrest.Matcher;
 
 /**
@@ -119,7 +120,13 @@ public class DeferredMatch<T> implements Deferred<Boolean>
         {
             lastUsedMatchValue = deferred.get();
 
-            if (matcher.matches(lastUsedMatchValue))
+            if (matcher instanceof ThrowableMatcher)
+            {
+                // when we are matching throwables we expect
+                // the deferred will throw an exception
+                throw new TemporarilyUnavailableException(this);
+            }
+            else if (matcher.matches(lastUsedMatchValue))
             {
                 return true;
             }
@@ -134,7 +141,16 @@ public class DeferredMatch<T> implements Deferred<Boolean>
         }
         catch (Exception e)
         {
-            throw new PermanentlyUnavailableException(this, e);
+            if (matcher instanceof ThrowableMatcher)
+            {
+                ThrowableMatcher throwableMatcher = (ThrowableMatcher) matcher;
+
+                return throwableMatcher.getMatcher().matches(e);
+            }
+            else
+            {
+                throw new PermanentlyUnavailableException(this, e);
+            }
         }
     }
 

@@ -27,24 +27,18 @@ package com.oracle.tools.runtime;
 
 import com.oracle.tools.Option;
 import com.oracle.tools.Options;
-
 import com.oracle.tools.deferred.DeferredHelper;
-
 import com.oracle.tools.options.Timeout;
+
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.lang.management.ManagementFactory;
+import java.lang.management.RuntimeMXBean;
+import java.lang.reflect.Field;
 
 import static com.oracle.tools.deferred.DeferredHelper.eventually;
 import static com.oracle.tools.deferred.DeferredHelper.invoking;
 import static com.oracle.tools.deferred.DeferredHelper.within;
-
-import java.io.InputStream;
-import java.io.OutputStream;
-
-import java.lang.management.ManagementFactory;
-import java.lang.management.RuntimeMXBean;
-
-import java.lang.reflect.Field;
-
-import java.util.concurrent.TimeUnit;
 
 /**
  * An {@link ApplicationProcess} that represents a locally executing
@@ -189,7 +183,7 @@ public class LocalApplicationProcess implements ApplicationProcess
 
         Timeout timeout    = optionsMap.get(Timeout.class);
 
-        DeferredHelper.ensure(eventually(invoking(this).exitValue(), within(timeout)));
+        DeferredHelper.ensure(eventually(invoking(this).exitValue()), within(timeout));
 
         return exitValue();
     }

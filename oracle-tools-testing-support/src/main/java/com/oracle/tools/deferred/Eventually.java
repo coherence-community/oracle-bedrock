@@ -146,7 +146,7 @@ public class Eventually
                                       Option...          options) throws AssertionError
     {
         // a DeferredMatcher does the heavy lifting
-        DeferredMatch<T> deferredMatch = new DeferredMatch<T>(deferred, matcher);
+        DeferredMatch<T> deferredMatch = new DeferredMatch<>(deferred, matcher);
 
         try
         {
