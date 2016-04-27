@@ -7,18 +7,18 @@
         <version>4.0.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>oracle-tools-runtime-containers-tests</artifactId>
+    <artifactId>oracle-tools-runtime-docker-tests</artifactId>
 
-    <name>Oracle Tools for Container Runtime Management (Tests)</name>
+    <name>Oracle Tools for Docker Runtime Management (Tests)</name>
 
     <description>
-        Functional and Integration tests for the Container Runtime Management module.
+        Functional and Integration tests for the Docker Runtime Management module.
     </description>
 
     <dependencies>
         <dependency>
             <groupId>com.oracle.tools</groupId>
-            <artifactId>oracle-tools-runtime-containers</artifactId>
+            <artifactId>oracle-tools-runtime-docker</artifactId>
             <version>${project.version}</version>
         </dependency>
 
