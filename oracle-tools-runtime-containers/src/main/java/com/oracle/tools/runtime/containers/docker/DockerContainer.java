@@ -78,13 +78,13 @@ public class DockerContainer implements Feature, ApplicationListener<Application
      * @param name     the name of the container
      * @param options  the {@link Options} used to run the container
      */
-    public DockerContainer(String name, Options options)
+    public DockerContainer(String  name,
+                           Options options)
     {
         if (name == null || name.trim().isEmpty())
         {
             throw new IllegalArgumentException("The container name cannot be null or empty String");
         }
-
 
         this.name    = name;
         this.options = options == null ? new Options() : new Options(options);
@@ -176,9 +176,7 @@ public class DockerContainer implements Feature, ApplicationListener<Application
             throw new IllegalStateException("No Platform is available, is this container a feature of an Application");
         }
 
-        return createInspectCommand()
-                      .format(format)
-                      .run(platform, getDockerEnvironment());
+        return createInspectCommand().format(format).run(platform, getDockerEnvironment());
     }
 
 
@@ -237,7 +235,7 @@ public class DockerContainer implements Feature, ApplicationListener<Application
 
         Docker docker = options.get(Docker.class);
 
-        try (Application app = platform.launch(docker, Stop.containers(name)))
+        try (Application app = platform.launch(Stop.containers(name), docker))
         {
             app.waitFor();
         }
@@ -264,7 +262,7 @@ public class DockerContainer implements Feature, ApplicationListener<Application
             throw new IllegalStateException("No Platform is available, is this container a feature of an Application");
         }
 
-        Docker                 docker        = options.get(Docker.class);
+        Docker                 docker = options.get(Docker.class);
         Remove.RemoveContainer removeCommand;
 
         if (force)
@@ -276,7 +274,7 @@ public class DockerContainer implements Feature, ApplicationListener<Application
             removeCommand = Remove.containers(name);
         }
 
-        try (Application app = platform.launch(docker, removeCommand))
+        try (Application app = platform.launch(removeCommand, docker))
         {
             app.waitFor();
         }
@@ -306,14 +304,16 @@ public class DockerContainer implements Feature, ApplicationListener<Application
 
 
     @Override
-    public void onClosing(Application application, Options options)
+    public void onClosing(Application application,
+                          Options     options)
     {
         // there is nothing to do here
     }
 
 
     @Override
-    public void onClosed(Application application, Options options)
+    public void onClosed(Application application,
+                         Options     options)
     {
         Options closingOptions;
 

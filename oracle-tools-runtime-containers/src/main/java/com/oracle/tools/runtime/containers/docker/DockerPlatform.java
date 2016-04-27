@@ -31,11 +31,10 @@ import com.oracle.tools.runtime.AbstractPlatform;
 import com.oracle.tools.runtime.Application;
 import com.oracle.tools.runtime.ApplicationLauncher;
 import com.oracle.tools.runtime.LocalPlatform;
+import com.oracle.tools.runtime.MetaClass;
 import com.oracle.tools.runtime.Platform;
 import com.oracle.tools.runtime.containers.docker.commands.AbstractDockerCommand;
 import com.oracle.tools.runtime.java.JavaApplication;
-import com.oracle.tools.runtime.options.ApplicationType;
-import com.oracle.tools.runtime.options.MetaClass;
 import com.oracle.tools.runtime.remote.RemoteTerminalBuilder;
 import com.oracle.tools.runtime.remote.SimpleRemoteApplicationLauncher;
 import com.oracle.tools.runtime.remote.java.RemoteJavaApplicationLauncher;
@@ -51,21 +50,41 @@ import java.net.InetAddress;
  *
  * @author Jonathan Knight
  */
-public class DockerPlatform extends AbstractPlatform<Platform>
+public class DockerPlatform extends AbstractPlatform
 {
     private final Platform clientPlatform;
-
-    private final Docker docker;
-
+    private final Docker   docker;
 
 
-    public DockerPlatform(Platform clientPlatform, Docker docker, Option... options)
+    /**
+     * Constructs ...
+     *
+     *
+     * @param clientPlatform
+     * @param docker
+     * @param options
+     */
+    public DockerPlatform(Platform  clientPlatform,
+                          Docker    docker,
+                          Option... options)
     {
         this(clientPlatform.getName(), clientPlatform, docker, options);
     }
 
 
-    public DockerPlatform(String name, Platform clientPlatform, Docker docker, Option... options)
+    /**
+     * Constructs ...
+     *
+     *
+     * @param name
+     * @param clientPlatform
+     * @param docker
+     * @param options
+     */
+    public DockerPlatform(String    name,
+                          Platform  clientPlatform,
+                          Docker    docker,
+                          Option... options)
     {
         super(name, options);
 
@@ -113,7 +132,8 @@ public class DockerPlatform extends AbstractPlatform<Platform>
 
 
     @Override
-    public <A extends Application> A launch(Option... options)
+    public <A extends Application> A launch(MetaClass<A> metaClass,
+                                            Option...    options)
     {
         // establish the initial launch options based on those defined by the platform
         Options launchOptions = new Options(getOptions().asArray());
@@ -121,18 +141,12 @@ public class DockerPlatform extends AbstractPlatform<Platform>
         // include the options specified when this method was called
         launchOptions.addAll(options);
 
-        // obtain the application type
-        ApplicationType<A> applicationType = launchOptions.get(ApplicationType.class);
-
-        // attempt to locate the meta-class using the launchOptions
-        MetaClass<A> metaClass = applicationType.getMetaClass(launchOptions);
-
         launchOptions.add(docker);
 
         if (metaClass instanceof AbstractDockerCommand)
         {
             // The options contain a Docker command so just run it on the client platform
-            return clientPlatform.launch(launchOptions.asArray());
+            return clientPlatform.launch(metaClass, launchOptions.asArray());
         }
         else
         {
@@ -145,18 +159,18 @@ public class DockerPlatform extends AbstractPlatform<Platform>
             launchOptions.add(builder);
             launchOptions.add(terminal);
 
-            return super.launch(launchOptions.asArray());
+            return super.launch(metaClass, launchOptions.asArray());
         }
     }
 
 
     @Override
-    protected <A extends Application,
-               B extends ApplicationLauncher<A>> B getApplicationLauncher(Class<A>     applicationClass,
-                                                                          MetaClass<A> metaClass,
-                                                                          Options      options)
-                                                                          throws UnsupportedOperationException
+    protected <A extends Application, B extends ApplicationLauncher<A>> B getApplicationLauncher(MetaClass<A> metaClass,
+                                                                                                 Options      options)
+                                                                                                 throws UnsupportedOperationException
     {
+        Class<? extends A> applicationClass = metaClass.getImplementationClass(this, options);
+
         if (JavaApplication.class.isAssignableFrom(applicationClass))
         {
             return (B) new RemoteJavaApplicationLauncher();
@@ -206,7 +220,8 @@ public class DockerPlatform extends AbstractPlatform<Platform>
      * @return  a {@link DockerPlatform} using the specified client {@link Platform}
      *          and {@link Docker} environment
      */
-    public static DockerPlatform clientAt(Platform platform, Docker environment)
+    public static DockerPlatform clientAt(Platform platform,
+                                          Docker   environment)
     {
         return new DockerPlatform(platform, environment);
     }

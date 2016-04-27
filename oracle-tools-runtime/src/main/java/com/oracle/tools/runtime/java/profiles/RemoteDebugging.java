@@ -27,19 +27,16 @@ package com.oracle.tools.runtime.java.profiles;
 
 import com.oracle.tools.Option;
 import com.oracle.tools.Options;
-
 import com.oracle.tools.runtime.Application;
 import com.oracle.tools.runtime.LocalPlatform;
+import com.oracle.tools.runtime.MetaClass;
 import com.oracle.tools.runtime.Platform;
 import com.oracle.tools.runtime.Profile;
-
 import com.oracle.tools.runtime.java.JavaApplication;
 import com.oracle.tools.runtime.java.JavaVirtualMachine;
 import com.oracle.tools.runtime.java.options.Freeform;
 import com.oracle.tools.runtime.java.options.WaitToStart;
-
 import com.oracle.tools.runtime.network.AvailablePortIterator;
-
 import com.oracle.tools.util.Capture;
 import com.oracle.tools.util.PerpetualIterator;
 
@@ -156,8 +153,9 @@ public class RemoteDebugging implements Profile, Option
 
 
     @Override
-    public void onLaunching(Platform platform,
-                            Options  options)
+    public void onLaunching(Platform  platform,
+                            MetaClass metaClass,
+                            Options   options)
     {
         if (enabled)
         {

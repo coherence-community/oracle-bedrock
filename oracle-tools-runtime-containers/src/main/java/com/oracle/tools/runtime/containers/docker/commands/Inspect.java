@@ -76,7 +76,8 @@ public class Inspect extends CommandWithArgumentList<Inspect>
      * @param arguments  the command {@link Arguments}
      * @param names      the names of the items to remove
      */
-    private Inspect(Arguments arguments, List<?> names)
+    private Inspect(Arguments arguments,
+                    List<?>   names)
     {
         super(arguments, names);
     }
@@ -120,16 +121,17 @@ public class Inspect extends CommandWithArgumentList<Inspect>
 
 
     @Override
-    protected Inspect withCommandArguments(List<Argument> names, Argument... args)
+    protected Inspect withCommandArguments(List<Argument> names,
+                                           Argument...    args)
     {
         return new Inspect(getCommandArguments().with(args), names);
     }
 
 
     @Override
-    protected Inspect withoutCommandArguments(List<Argument> names, Argument... args)
+    protected Inspect withoutCommandArguments(List<Argument> names,
+                                              Argument...    args)
     {
-
         return new Inspect(getCommandArguments().without(args), names);
     }
 
@@ -195,13 +197,12 @@ public class Inspect extends CommandWithArgumentList<Inspect>
      *
      * @return  a {@link JsonArray} containing the results of the inspect command
      */
-    public JsonValue run(Platform platform, Docker environment)
+    public JsonValue run(Platform platform,
+                         Docker   environment)
     {
         CapturingApplicationConsole console = new CapturingApplicationConsole();
 
-        try (Application app = platform.launch(environment,
-                                               this,
-                                               Console.of(console)))
+        try (Application app = platform.launch(this, environment, Console.of(console)))
         {
             if (app.waitFor() != 0)
             {
@@ -209,17 +210,17 @@ public class Inspect extends CommandWithArgumentList<Inspect>
             }
         }
 
-        Queue<String> lines  = console.getCapturedOutputLines();
-        String        json   = lines.stream()
-                                    .filter((line) -> line != null && !line.equals("(terminated)"))
-                                    .collect(Collectors.joining()).trim();
+        Queue<String> lines = console.getCapturedOutputLines();
+        String json = lines.stream().filter((line) -> line != null
+                                                      &&!line.equals("(terminated)")).collect(Collectors.joining())
+                                                      .trim();
 
-        if (!json.startsWith("[") && !json.startsWith("{"))
+        if (!json.startsWith("[") &&!json.startsWith("{"))
         {
             json = "[" + json + "]";
         }
 
-        JsonReader    reader = Json.createReader(new StringReader(json));
+        JsonReader reader = Json.createReader(new StringReader(json));
 
         return reader.read();
     }

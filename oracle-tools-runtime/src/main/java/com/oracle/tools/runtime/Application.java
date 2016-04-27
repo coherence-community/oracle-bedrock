@@ -27,13 +27,8 @@ package com.oracle.tools.runtime;
 
 import com.oracle.tools.Option;
 import com.oracle.tools.Options;
-
 import com.oracle.tools.extensible.Extensible;
-
 import com.oracle.tools.options.Timeout;
-
-import com.oracle.tools.runtime.annotations.PreferredMetaClass;
-
 import com.oracle.tools.runtime.options.ApplicationClosingBehavior;
 
 import java.io.Closeable;
@@ -47,7 +42,6 @@ import java.io.Closeable;
  *
  * @author Brian Oliver
  */
-@PreferredMetaClass(Application.MetaClass.class)
 public interface Application extends Extensible, Closeable
 {
     /**
@@ -162,9 +156,9 @@ public interface Application extends Extensible, Closeable
 
 
     /**
-     * The {@link com.oracle.tools.runtime.options.MetaClass} for generic {@link Application}s.
+     * The {@link com.oracle.tools.runtime.MetaClass} for generic {@link Application}s.
      */
-    class MetaClass implements com.oracle.tools.runtime.options.MetaClass<Application>
+    class MetaClass implements com.oracle.tools.runtime.MetaClass<Application>
     {
         /**
          * Constructs a {@link MetaClass} for a {@link Application}.
@@ -192,7 +186,8 @@ public interface Application extends Extensible, Closeable
 
 
         @Override
-        public void onFinalize(Platform platform, Options options)
+        public void onLaunch(Platform platform,
+                             Options  options)
         {
             // there's nothing to do before launching the application
         }

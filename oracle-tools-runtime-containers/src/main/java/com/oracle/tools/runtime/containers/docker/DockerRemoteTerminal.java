@@ -27,7 +27,6 @@ package com.oracle.tools.runtime.containers.docker;
 
 import com.oracle.tools.Option;
 import com.oracle.tools.Options;
-import com.oracle.tools.deferred.DeferredHelper;
 import com.oracle.tools.extensible.AbstractExtensible;
 import com.oracle.tools.extensible.Feature;
 import com.oracle.tools.io.FileHelper;
@@ -36,13 +35,12 @@ import com.oracle.tools.options.Timeout;
 import com.oracle.tools.options.Variable;
 import com.oracle.tools.runtime.Application;
 import com.oracle.tools.runtime.ApplicationProcess;
+import com.oracle.tools.runtime.MetaClass;
 import com.oracle.tools.runtime.Platform;
 import com.oracle.tools.runtime.Profile;
-import com.oracle.tools.runtime.console.CapturingApplicationConsole;
 import com.oracle.tools.runtime.console.Console;
 import com.oracle.tools.runtime.console.EventsApplicationConsole;
 import com.oracle.tools.runtime.console.NullApplicationConsole;
-import com.oracle.tools.runtime.console.SystemApplicationConsole;
 import com.oracle.tools.runtime.containers.docker.commands.Build;
 import com.oracle.tools.runtime.containers.docker.commands.Events;
 import com.oracle.tools.runtime.containers.docker.commands.Kill;
@@ -52,11 +50,9 @@ import com.oracle.tools.runtime.containers.docker.options.ContainerCloseBehaviou
 import com.oracle.tools.runtime.containers.docker.options.DockerfileDeployer;
 import com.oracle.tools.runtime.containers.docker.options.ImageCloseBehaviour;
 import com.oracle.tools.runtime.java.ClassPathModifier;
-import com.oracle.tools.runtime.options.Argument;
 import com.oracle.tools.runtime.options.Arguments;
 import com.oracle.tools.runtime.options.Discriminator;
 import com.oracle.tools.runtime.options.DisplayName;
-import com.oracle.tools.runtime.options.MetaClass;
 import com.oracle.tools.runtime.options.PlatformSeparators;
 import com.oracle.tools.runtime.options.Ports;
 import com.oracle.tools.runtime.options.WorkingDirectory;
@@ -81,16 +77,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 import java.util.UUID;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-
-import static com.oracle.tools.deferred.DeferredHelper.eventually;
-import static com.oracle.tools.deferred.DeferredHelper.invoking;
-import static com.oracle.tools.deferred.DeferredHelper.within;
 
 /**
  * A specialized {@link RemoteTerminal} used to generate Docker images and
@@ -127,6 +118,7 @@ public class DockerRemoteTerminal implements RemoteTerminal, Deployer
      * The temporary folder to use to create the Dockerfile.
      */
     private final File tmpFolder;
+
 
     /**
      * Construct a new {@link DockerRemoteTerminal}.
@@ -176,7 +168,8 @@ public class DockerRemoteTerminal implements RemoteTerminal, Deployer
      *                       the build of the Dockerfile
      */
     @Override
-    public void makeDirectories(String directoryName, Options options)
+    public void makeDirectories(String  directoryName,
+                                Options options)
     {
         dockerFileCommands.add("RUN mkdir -p " + directoryName);
     }
@@ -223,8 +216,9 @@ public class DockerRemoteTerminal implements RemoteTerminal, Deployer
         }
         catch (Exception e)
         {
-            LOGGER.log(Level.SEVERE, "An error occurred. Attempting to kill and remove container "
-                                     + containerName + " and remove image " + imageTag);
+            LOGGER.log(Level.SEVERE,
+                       "An error occurred. Attempting to kill and remove container " + containerName
+                       + " and remove image " + imageTag);
 
             safelyRemoveContainer(containerName, docker);
             safelyRemoveImage(imageTag, docker);
@@ -287,8 +281,7 @@ public class DockerRemoteTerminal implements RemoteTerminal, Deployer
         {
             Table diagnosticsTable = new Table();
 
-            Files.readAllLines(dockerFile.toPath())
-                    .forEach(diagnosticsTable::addRow);
+            Files.readAllLines(dockerFile.toPath()).forEach(diagnosticsTable::addRow);
 
             LOGGER.log(Level.INFO,
                        "Oracle Tools Diagnostics: Created Dockerfile for Application...\n"
@@ -325,20 +318,20 @@ public class DockerRemoteTerminal implements RemoteTerminal, Deployer
         String      dockerFileName = dockerFile.getName();
         Timeout     timeout        = options.getOrDefault(Timeout.class, Build.DEFAULT_TIMEOUT);
 
-        try (Application application = platform.launch(displayName,
-                                                       Discriminator.of("Image"),
-                                                       docker,
-                                                       Build.fromDockerFile(dockerFileName)
-                                                            .withTags(imageTag)
-                                                            .labels("oracle.tools.image=true")
-                                                            .timeoutAfter(timeout),
-                                                       ImageCloseBehaviour.none(),
-                                                       WorkingDirectory.at(tmpFolder)))
+        try (Application application =
+            platform.launch(Build.fromDockerFile(dockerFileName).withTags(imageTag).labels("oracle.tools.image=true")
+            .timeoutAfter(timeout),
+                            displayName,
+                            Discriminator.of("Image"),
+                            docker,
+                            ImageCloseBehaviour.none(),
+                            WorkingDirectory.at(tmpFolder)))
         {
             if (application.waitFor(timeout) != 0)
             {
                 // If there is a failure attempt to remove the image, just in case it was actually created
                 String msg = "An error occurred, build returned " + application.exitValue();
+
                 LOGGER.log(Level.SEVERE, msg + ". Attempting to remove image " + imageTag);
 
                 safelyRemoveImage(imageTag, docker);
@@ -383,54 +376,49 @@ public class DockerRemoteTerminal implements RemoteTerminal, Deployer
         options.add(new CPModifier(workingDirectoryName));
 
         // ----- give the container a random UUID as a name -----
-        DisplayName    displayName = options.getOrDefault(DisplayName.class, DisplayName.of("Container"));
+        DisplayName displayName = options.getOrDefault(DisplayName.class, DisplayName.of("Container"));
 
         // ----- create the arguments to pass to the container as the command to execute
-        String               command          = launchable.getCommandToExecute(platform, options);
-        List<?>              args             = launchable.getCommandLineArguments(platform, options);
-        Arguments            containerArgs    = Arguments.of(command).with(args);
+        String    command       = launchable.getCommandToExecute(platform, options);
+        List<?>   args          = launchable.getCommandLineArguments(platform, options);
+        Arguments containerArgs = Arguments.of(command).with(args);
 
         // ----- get any captured ports to map -----
-        Ports                ports            = options.get(Ports.class);
-        List<Integer>        portList         = ports.getPorts().stream()
-                                                     .map(Ports.Port::getActualPort)
-                                                     .collect(Collectors.toList());
+        Ports         ports    = options.get(Ports.class);
+        List<Integer> portList = ports.getPorts().stream().map(Ports.Port::getActualPort).collect(Collectors.toList());
 
         // ----- create the Run command -----
-        Run                  runCommand       = Run.image(image, containerName)
-                                                    .interactive()
-                                                    .hostName(containerName)
-                                                    .env(launchable.getEnvironmentVariables(platform, options))
-                                                    .publish(portList)
-                                                    .autoRemove();
+        Run runCommand = Run.image(image,
+                                   containerName).interactive().hostName(containerName)
+                                   .env(launchable.getEnvironmentVariables(platform,
+                                                                           options)).publish(portList).autoRemove();
 
-        MetaClass            metaClass        = options.get(Application.MetaClass.class);
-        Options              containerOptions = new Options(options)
-                                                    .addAll(displayName,
-                                                            docker,
-                                                            WorkingDirectory.at(tmpFolder),
-                                                            new ContainerMetaClass(runCommand, metaClass),
-                                                            ContainerCloseBehaviour.none(),
-                                                            ImageCloseBehaviour.remove(),
-                                                            containerArgs);
+        Options containerOptions = new Options(options).addAll(displayName,
+                                                               docker,
+                                                               WorkingDirectory.at(tmpFolder),
+                                                               ContainerCloseBehaviour.none(),
+                                                               ImageCloseBehaviour.remove(),
+                                                               containerArgs);
 
         // ----- start the application to capture Docker events so that we know when the container is in the running state -----
-        EventsApplicationConsole.CountDownListener latch        = new EventsApplicationConsole.CountDownListener(1);
-        Predicate<String>                          predicate    = (line) -> line.contains("container start");
-        EventsApplicationConsole                   eventConsole = new EventsApplicationConsole()
-                                                                       .withStdOutListener(predicate, latch);
+        EventsApplicationConsole.CountDownListener latch     = new EventsApplicationConsole.CountDownListener(1);
+        Predicate<String>                          predicate = (line) -> line.contains("container start");
+        EventsApplicationConsole eventConsole = new EventsApplicationConsole().withStdOutListener(predicate, latch);
 
-        try (Application events = platform.launch(Application.class,
+        try (Application events = platform.launch(Events.fromContainer(containerName),
                                                   docker,
-                                                  Events.fromContainer(containerName),
                                                   Console.of(eventConsole)))
         {
             // ----- launch the container -----
-            ContainerApplication application  = platform.launch(ContainerApplication.class, containerOptions.asArray());
+            // TODO: is this correct? the MetaClass probably needs to be passed in
+            MetaClass metaClass = new Application.MetaClass();
+
+            ContainerApplication application = platform.launch(new ContainerMetaClass(runCommand, metaClass),
+                                                               containerOptions.asArray());
 
             // ----- get the container feature from the application -----
-            DockerContainer      container    = application.get(DockerContainer.class);
-            FeatureAddingProfile profile      = new FeatureAddingProfile(image, container);
+            DockerContainer      container = application.get(DockerContainer.class);
+            FeatureAddingProfile profile   = new FeatureAddingProfile(image, container);
 
             // ----- add the container and default close behaviour to the options
             options.add(profile);
@@ -440,7 +428,7 @@ public class DockerRemoteTerminal implements RemoteTerminal, Deployer
 
             try
             {
-                if(!latch.await(timeout.to(TimeUnit.MILLISECONDS), TimeUnit.MILLISECONDS))
+                if (!latch.await(timeout.to(TimeUnit.MILLISECONDS), TimeUnit.MILLISECONDS))
                 {
                     throw new RuntimeException("Failed to detect container start event within " + timeout);
                 }
@@ -451,26 +439,23 @@ public class DockerRemoteTerminal implements RemoteTerminal, Deployer
             }
 
             // ----- obtain the port mappings from the container -----
-            JsonArray  json      = (JsonArray) container.inspect();
-            JsonObject jsonNet   = json.getJsonObject(0).getJsonObject("NetworkSettings");
+            JsonArray  json    = (JsonArray) container.inspect();
+            JsonObject jsonNet = json.getJsonObject(0).getJsonObject("NetworkSettings");
 
             if (!jsonNet.get("Ports").getValueType().equals(JsonValue.ValueType.NULL))
             {
-                JsonObject jsonPorts = jsonNet.getJsonObject("Ports");
+                JsonObject       jsonPorts   = jsonNet.getJsonObject("Ports");
 
-                List<Ports.Port> mappedPorts = ports.getPorts().stream()
-                                                    .map((port) ->
-                                                    {
-                                                        String key      = port.getActualPort() + "/tcp";
-                                                        String hostPort = jsonPorts.getJsonArray(key)
-                                                                                   .getJsonObject(0)
-                                                                                   .getString("HostPort");
+                List<Ports.Port> mappedPorts = ports.getPorts().stream().map((port) -> {
+                                                       String key = port.getActualPort() + "/tcp";
+                                                       String hostPort =
+                                                           jsonPorts.getJsonArray(key).getJsonObject(0)
+                                                           .getString("HostPort");
 
-                                                        return new Ports.Port(port.getName(),
-                                                                              port.getActualPort(),
-                                                                              Integer.parseInt(hostPort));
-                                                    })
-                                                    .collect(Collectors.toList());
+                                                       return new Ports.Port(port.getName(),
+                                                                             port.getActualPort(),
+                                                                             Integer.parseInt(hostPort));
+                                                   }).collect(Collectors.toList());
 
                 // ----- update the options with the correctly mapped ports -----
                 options.remove(Ports.class);
@@ -491,13 +476,14 @@ public class DockerRemoteTerminal implements RemoteTerminal, Deployer
      * @param imageTag  the image to remove
      * @param docker    the {@link Docker} environment to use
      */
-    private void safelyRemoveImage(String imageTag, Docker docker)
+    private void safelyRemoveImage(String imageTag,
+                                   Docker docker)
     {
         try
         {
-            try(Application application = platform.launch(Remove.images(imageTag).force(),
-                                                          docker,
-                                                          NullApplicationConsole.builder()))
+            try (Application application = platform.launch(Remove.images(imageTag).force(),
+                                                           docker,
+                                                           NullApplicationConsole.builder()))
             {
                 application.waitFor();
             }
@@ -516,7 +502,8 @@ public class DockerRemoteTerminal implements RemoteTerminal, Deployer
      * @param containerName  the container to remove
      * @param docker         the {@link Docker} environment to use
      */
-    private void safelyRemoveContainer(String containerName, Docker docker)
+    private void safelyRemoveContainer(String containerName,
+                                       Docker docker)
     {
         try
         {
@@ -549,51 +536,6 @@ public class DockerRemoteTerminal implements RemoteTerminal, Deployer
 
 
     /**
-     * A {@link Profile} that is added to an {@link Application}s
-     * {@link Options} and will when {@link #onLaunched(Platform, Application, Options)}
-     * is called add various {@link Feature}s to the {@link Application}
-     */
-    private class FeatureAddingProfile implements Profile, Option
-    {
-        /**
-         * The {@link Feature}s to ass
-         */
-        private Feature[] features;
-
-        /**
-         * Create a {@link FeatureAddingProfile}
-         *
-         * @param features  the {@link Feature}s to add
-         */
-        public FeatureAddingProfile(Feature... features)
-        {
-            this.features = features;
-        }
-
-
-        @Override
-        public void onLaunching(Platform platform, Options options)
-        {
-            // there is nothing to do here
-        }
-
-
-        @Override
-        public void onLaunched(Platform platform, Application application, Options options)
-        {
-            Arrays.stream(features).forEach(application::add);
-        }
-
-
-        @Override
-        public void onClosing(Platform platform, Application application, Options options)
-        {
-            // there is nothing to do here
-        }
-    }
-
-
-    /**
      * A {@link ClassPathModifier} that will replace
      * occurrences of "./:./*" with the actual working
      * directory name.
@@ -604,6 +546,7 @@ public class DockerRemoteTerminal implements RemoteTerminal, Deployer
          * The working directory.
          */
         private String workingDirectory;
+
 
         /**
          * Create a {@link CPModifier}.
@@ -617,14 +560,250 @@ public class DockerRemoteTerminal implements RemoteTerminal, Deployer
             this.workingDirectory = workingDirectory;
         }
 
+
         @Override
         public String modify(String classPath)
         {
-            String path = super.modify(classPath);
+            String path     = super.modify(classPath);
 
             String modified = workingDirectory + "/:" + workingDirectory + "/*";
 
             return path.replace("./:./*", modified);
+        }
+    }
+
+
+    /**
+     * An implementation of an {@link Application} the sole purpose of which is
+     * to be able to capture the {@link ApplicationProcess}.
+     */
+    public static class ContainerApplication extends AbstractExtensible implements Application
+    {
+        /**
+         * The {@link Platform} on which the {@link Application} was launched.
+         */
+        private final Platform platform;
+
+        /**
+         * The underlying {@link ApplicationProcess} used to internally represent and
+         * manage the {@link Application}.
+         */
+        private final ApplicationProcess process;
+
+        /**
+         * The {@link Options} used to launch the {@link Application}.
+         */
+        private final Options options;
+
+
+        /**
+         * Constructs a {@link ContainerApplication}
+         *
+         * @param platform  the {@link Platform} on which the {@link Application} was launched
+         * @param process   the underlying {@link ApplicationProcess} representing the {@link Application}
+         * @param options   the {@link Options} used to launch the {@link Application}
+         */
+        public ContainerApplication(Platform           platform,
+                                    ApplicationProcess process,
+                                    Options            options)
+        {
+            this.platform = platform;
+            this.process  = process;
+            this.options  = options;
+        }
+
+
+        /**
+         * Obtain the {@link ApplicationProcess} representing
+         * the {@link Application}.
+         *
+         * @return  the {@link ApplicationProcess} representing
+         *          the {@link Application}
+         */
+        public ApplicationProcess getProcess()
+        {
+            return process;
+        }
+
+
+        @Override
+        public void close()
+        {
+        }
+
+
+        @Override
+        public String getName()
+        {
+            return null;
+        }
+
+
+        @Override
+        public Platform getPlatform()
+        {
+            return platform;
+        }
+
+
+        @Override
+        public void close(Option... options)
+        {
+        }
+
+
+        @Override
+        public int waitFor(Option... options)
+        {
+            return 0;
+        }
+
+
+        @Override
+        public int exitValue()
+        {
+            return 0;
+        }
+
+
+        @Override
+        public long getId()
+        {
+            return 0;
+        }
+
+
+        @Override
+        public Timeout getDefaultTimeout()
+        {
+            return null;
+        }
+
+
+        @Override
+        public Options getOptions()
+        {
+            return options;
+        }
+    }
+
+
+    /**
+     * The {@link MetaClass} that is used when starting a Docker
+     * container application.
+     */
+    public static class ContainerMetaClass implements MetaClass<ContainerApplication>
+    {
+        /**
+         * The real {@link MetaClass} to proxy calls to.
+         */
+        private final MetaClass metaClass;
+
+        /**
+         * The {@link Run} command used to start the container.
+         */
+        private final Run runCommand;
+
+
+        /**
+         * Create a {@link ContainerMetaClass} that wraps the specified
+         * {@link MetaClass}.
+         *
+         * @param metaClass  the {@link MetaClass} to wrap
+         */
+        public ContainerMetaClass(Run       runCommand,
+                                  MetaClass metaClass)
+        {
+            this.runCommand = runCommand;
+            this.metaClass  = metaClass;
+        }
+
+
+        @Override
+        public Class<ContainerApplication> getImplementationClass(Platform platform,
+                                                                  Options  options)
+        {
+            return ContainerApplication.class;
+        }
+
+
+        @Override
+        public void onLaunching(Platform platform,
+                                Options  options)
+        {
+            metaClass.onLaunching(platform, options);
+            runCommand.onLaunching(platform, options);
+        }
+
+
+        @Override
+        public void onLaunch(Platform platform,
+                             Options  options)
+        {
+            metaClass.onLaunch(platform, options);
+            runCommand.onLaunch(platform, options);
+        }
+
+
+        @Override
+        public void onLaunched(Platform             platform,
+                               ContainerApplication application,
+                               Options              options)
+        {
+            metaClass.onLaunched(platform, application, options);
+            runCommand.onLaunched(platform, application, options);
+        }
+    }
+
+
+    /**
+     * A {@link Profile} that is added to an {@link Application}s
+     * {@link Options} and will when {@link #onLaunched(Platform, Application, Options)}
+     * is called add various {@link Feature}s to the {@link Application}
+     */
+    private class FeatureAddingProfile implements Profile, Option
+    {
+        /**
+         * The {@link Feature}s to ass
+         */
+        private Feature[] features;
+
+
+        /**
+         * Create a {@link FeatureAddingProfile}
+         *
+         * @param features  the {@link Feature}s to add
+         */
+        public FeatureAddingProfile(Feature... features)
+        {
+            this.features = features;
+        }
+
+
+        @Override
+        public void onLaunching(Platform  platform,
+                                MetaClass metaClass,
+                                Options   options)
+        {
+            // there is nothing to do here
+        }
+
+
+        @Override
+        public void onLaunched(Platform    platform,
+                               Application application,
+                               Options     options)
+        {
+            Arrays.stream(features).forEach(application::add);
+        }
+
+
+        @Override
+        public void onClosing(Platform    platform,
+                              Application application,
+                              Options     options)
+        {
+            // there is nothing to do here
         }
     }
 
@@ -652,17 +831,20 @@ public class DockerRemoteTerminal implements RemoteTerminal, Deployer
             this.process = process;
         }
 
+
         @Override
         public void close()
         {
             process.close();
         }
 
+
         @Override
         public long getId()
         {
             return process.getId();
         }
+
 
         @Override
         @Deprecated
@@ -671,11 +853,13 @@ public class DockerRemoteTerminal implements RemoteTerminal, Deployer
             process.close();
         }
 
+
         @Override
         public int exitValue()
         {
             return process.exitValue();
         }
+
 
         @Override
         public InputStream getErrorStream()
@@ -683,11 +867,13 @@ public class DockerRemoteTerminal implements RemoteTerminal, Deployer
             return process.getErrorStream();
         }
 
+
         @Override
         public InputStream getInputStream()
         {
             return process.getInputStream();
         }
+
 
         @Override
         public OutputStream getOutputStream()
@@ -695,176 +881,11 @@ public class DockerRemoteTerminal implements RemoteTerminal, Deployer
             return process.getOutputStream();
         }
 
+
         @Override
         public int waitFor(Option... options)
         {
             return process.waitFor(options);
         }
     }
-
-
-    /**
-     * The {@link MetaClass} that is used when starting a Docker
-     * container application.
-     */
-    public static class ContainerMetaClass extends Application.MetaClass
-    {
-        /**
-         * The real {@link MetaClass} to proxy calls to.
-         */
-        private final MetaClass metaClass;
-
-        /**
-         * The {@link Run} command used to start the container.
-         */
-        private final Run runCommand;
-
-        /**
-         * Create a {@link ContainerMetaClass} that wraps the specified
-         * {@link MetaClass}.
-         *
-         * @param metaClass  the {@link MetaClass} to wrap
-         */
-        public ContainerMetaClass(Run runCommand, MetaClass metaClass)
-        {
-            this.runCommand = runCommand;
-            this.metaClass  = metaClass;
-        }
-
-
-        @Override
-        public Class<? extends Application> getImplementationClass(Platform platform, Options options)
-        {
-            return ContainerApplication.class;
-        }
-
-        @Override
-        public void onLaunching(Platform platform, Options options)
-        {
-            metaClass.onLaunching(platform, options);
-            runCommand.onLaunching(platform, options);
-        }
-
-
-        @Override
-        public void onFinalize(Platform platform, Options options)
-        {
-            metaClass.onFinalize(platform, options);
-            runCommand.onFinalize(platform, options);
-        }
-
-
-        @Override
-        public void onLaunched(Platform platform, Application application, Options options)
-        {
-            metaClass.onLaunched(platform, application, options);
-            runCommand.onLaunched(platform, application, options);
-        }
-    }
-
-
-    /**
-     * An implementation of an {@link Application} the sole purpose of which is
-     * to be able to capture the {@link ApplicationProcess}.
-     */
-    public static class ContainerApplication extends AbstractExtensible implements Application
-    {
-        /**
-         * The {@link Platform} on which the {@link Application} was launched.
-         */
-        private final Platform platform;
-
-        /**
-         * The underlying {@link ApplicationProcess} used to internally represent and
-         * manage the {@link Application}.
-         */
-        private final ApplicationProcess process;
-
-        /**
-         * The {@link Options} used to launch the {@link Application}.
-         */
-        private final Options options;
-
-        /**
-         * Constructs a {@link ContainerApplication}
-         *
-         * @param platform  the {@link Platform} on which the {@link Application} was launched
-         * @param process   the underlying {@link ApplicationProcess} representing the {@link Application}
-         * @param options   the {@link Options} used to launch the {@link Application}
-         */
-        public ContainerApplication(Platform           platform,
-                             ApplicationProcess process,
-                             Options            options)
-        {
-            this.platform = platform;
-            this.process = process;
-            this.options = options;
-        }
-
-
-        /**
-         * Obtain the {@link ApplicationProcess} representing
-         * the {@link Application}.
-         *
-         * @return  the {@link ApplicationProcess} representing
-         *          the {@link Application}
-         */
-        public ApplicationProcess getProcess()
-        {
-            return process;
-        }
-
-        @Override
-        public void close()
-        {
-        }
-
-        @Override
-        public String getName()
-        {
-            return null;
-        }
-
-        @Override
-        public Platform getPlatform()
-        {
-            return platform;
-        }
-
-        @Override
-        public void close(Option... options)
-        {
-        }
-
-        @Override
-        public int waitFor(Option... options)
-        {
-            return 0;
-        }
-
-        @Override
-        public int exitValue()
-        {
-            return 0;
-        }
-
-        @Override
-        public long getId()
-        {
-            return 0;
-        }
-
-        @Override
-        public Timeout getDefaultTimeout()
-        {
-            return null;
-        }
-
-        @Override
-        public Options getOptions()
-        {
-            return options;
-        }
-    }
-
 }

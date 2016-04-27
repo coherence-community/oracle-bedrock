@@ -26,15 +26,12 @@
 package com.oracle.tools.runtime;
 
 import com.oracle.tools.Options;
-
 import com.oracle.tools.lang.StringHelper;
-
 import com.oracle.tools.runtime.options.Arguments;
 import com.oracle.tools.runtime.options.DisplayName;
 import com.oracle.tools.runtime.options.EnvironmentVariables;
 import com.oracle.tools.runtime.options.ErrorStreamRedirection;
 import com.oracle.tools.runtime.options.Executable;
-import com.oracle.tools.runtime.options.MetaClass;
 import com.oracle.tools.runtime.options.WorkingDirectory;
 import com.oracle.tools.table.Table;
 import com.oracle.tools.table.Tabularize;
@@ -42,7 +39,6 @@ import com.oracle.tools.util.ReflectionHelper;
 
 import java.io.File;
 import java.io.IOException;
-
 import java.lang.reflect.Constructor;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -68,6 +64,7 @@ public class SimpleApplicationLauncher implements ApplicationLauncher<Applicatio
      */
     private static Logger LOGGER = Logger.getLogger(SimpleApplicationLauncher.class.getName());
 
+
     /**
      * Constructs a {@link SimpleApplicationLauncher}.
      *
@@ -78,7 +75,9 @@ public class SimpleApplicationLauncher implements ApplicationLauncher<Applicatio
 
 
     @Override
-    public Application launch(Platform platform, Options options)
+    public Application launch(Platform               platform,
+                              MetaClass<Application> metaClass,
+                              Options                options)
     {
         // establish the diagnostics output table
         Table diagnosticsTable = new Table();
@@ -89,14 +88,6 @@ public class SimpleApplicationLauncher implements ApplicationLauncher<Applicatio
         {
             diagnosticsTable.addRow("Target Platform", platform.getName());
         }
-
-        // ----- determine the meta-class for our application -----
-
-        // establish the options for resolving the meta-class
-        Options metaOptions = new Options(platform.getOptions()).addAll(options);
-
-        // determine the meta-class
-        MetaClass<?> metaClass = metaOptions.getOrDefault(MetaClass.class, new Application.MetaClass());
 
         // ----- establish the launch Options for the Application -----
 
@@ -115,12 +106,12 @@ public class SimpleApplicationLauncher implements ApplicationLauncher<Applicatio
 
         for (Profile profile : launchOptions.getInstancesOf(Profile.class))
         {
-            profile.onLaunching(platform, launchOptions);
+            profile.onLaunching(platform, metaClass, launchOptions);
         }
 
         // ----- give the MetaClass a last chance to manipulate any options -----
 
-        metaClass.onFinalize(platform, launchOptions);
+        metaClass.onLaunch(platform, launchOptions);
 
         // ----- determine the display name for the application -----
 
@@ -228,7 +219,6 @@ public class SimpleApplicationLauncher implements ApplicationLauncher<Applicatio
 
         processBuilder.redirectErrorStream(redirection.isEnabled());
 
-
         if (LOGGER.isLoggable(Level.INFO))
         {
             LOGGER.log(Level.INFO,
@@ -252,7 +242,6 @@ public class SimpleApplicationLauncher implements ApplicationLauncher<Applicatio
             throw new RuntimeException("Failed to build the underlying native process for the application", e);
         }
 
-
         // determine the application class that will represent the running application
         Class<? extends Application> applicationClass = metaClass.getImplementationClass(platform, launchOptions);
 
@@ -266,6 +255,7 @@ public class SimpleApplicationLauncher implements ApplicationLauncher<Applicatio
                                                                                                        platform.getClass(),
                                                                                                        LocalApplicationProcess.class,
                                                                                                        Options.class);
+
             // create the application
             application = constructor.newInstance(platform, new LocalApplicationProcess(process), launchOptions);
         }

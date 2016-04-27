@@ -27,19 +27,15 @@ package com.oracle.tools.runtime.java;
 
 import com.oracle.tools.Option;
 import com.oracle.tools.Options;
-
 import com.oracle.tools.io.NetworkHelper;
-
 import com.oracle.tools.runtime.AbstractPlatform;
 import com.oracle.tools.runtime.Application;
 import com.oracle.tools.runtime.ApplicationLauncher;
+import com.oracle.tools.runtime.MetaClass;
 import com.oracle.tools.runtime.Platform;
-
-import com.oracle.tools.runtime.options.MetaClass;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
-
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
@@ -52,7 +48,7 @@ import java.net.UnknownHostException;
  *
  * @author Jonathan Knight
  */
-public class JavaVirtualMachine extends AbstractPlatform<JavaVirtualMachine>
+public class JavaVirtualMachine extends AbstractPlatform
 {
     /**
      * The singleton instance of {@link JavaVirtualMachine}.
@@ -214,11 +210,12 @@ public class JavaVirtualMachine extends AbstractPlatform<JavaVirtualMachine>
 
 
     @Override
-    protected <A extends Application,
-               B extends ApplicationLauncher<A>> B getApplicationLauncher(Class<A>     applicationClass,
-                                                                          MetaClass<A> metaClass,
-                                                                          Options      options) throws UnsupportedOperationException
+    protected <A extends Application, B extends ApplicationLauncher<A>> B getApplicationLauncher(MetaClass<A> metaClass,
+                                                                                                 Options      options)
+                                                                                                 throws UnsupportedOperationException
     {
+        Class<? extends A> applicationClass = metaClass.getImplementationClass(this, options);
+
         if (JavaApplication.class.isAssignableFrom(applicationClass))
         {
             return (B) new ContainerBasedJavaApplicationLauncher();

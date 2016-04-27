@@ -26,32 +26,23 @@
 package com.oracle.tools.runtime;
 
 import com.oracle.tools.Options;
-
 import com.oracle.tools.io.NetworkHelper;
-
 import com.oracle.tools.runtime.concurrent.RemoteCallable;
 import com.oracle.tools.runtime.concurrent.RemoteChannelListener;
+import com.oracle.tools.runtime.concurrent.socket.SocketBasedRemoteChannel;
 import com.oracle.tools.runtime.concurrent.socket.SocketBasedRemoteChannelClient;
 import com.oracle.tools.runtime.concurrent.socket.SocketBasedRemoteChannelServer;
-import com.oracle.tools.runtime.concurrent.socket.SocketBasedRemoteChannel;
-
 import com.oracle.tools.runtime.java.JavaApplication;
 import com.oracle.tools.runtime.java.LocalJavaApplicationLauncher;
-
 import com.oracle.tools.runtime.network.AvailablePortIterator;
 
-import com.oracle.tools.runtime.options.MetaClass;
-
 import java.io.IOException;
-
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.UnknownHostException;
-
 import java.util.Enumeration;
 import java.util.List;
-
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -66,7 +57,7 @@ import java.util.concurrent.TimeoutException;
  * @author Jonathan Knight
  * @author Brian Oliver
  */
-public class LocalPlatform extends AbstractPlatform<LocalPlatform>
+public class LocalPlatform extends AbstractPlatform
 {
     /**
      * The singleton instance of {@link LocalPlatform}.
@@ -182,11 +173,12 @@ public class LocalPlatform extends AbstractPlatform<LocalPlatform>
 
 
     @Override
-    protected <A extends Application,
-               B extends ApplicationLauncher<A>> B getApplicationLauncher(Class<A>     applicationClass,
-                                                                          MetaClass<A> metaClass,
-                                                                          Options      options) throws UnsupportedOperationException
+    protected <A extends Application, B extends ApplicationLauncher<A>> B getApplicationLauncher(MetaClass<A> metaClass,
+                                                                                                 Options      options)
+                                                                                                 throws UnsupportedOperationException
     {
+        Class<? extends A> applicationClass = metaClass.getImplementationClass(this, options);
+
         if (JavaApplication.class.isAssignableFrom(applicationClass))
         {
             return (B) new LocalJavaApplicationLauncher();

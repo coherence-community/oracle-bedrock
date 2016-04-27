@@ -29,8 +29,10 @@ import com.oracle.tools.Option;
 import com.oracle.tools.Options;
 
 import com.oracle.tools.runtime.LocalPlatform;
+import com.oracle.tools.runtime.MetaClass;
 import com.oracle.tools.runtime.Profile;
 
+import com.oracle.tools.runtime.coherence.CoherenceClusterMember;
 import com.oracle.tools.runtime.coherence.options.CacheConfig;
 import com.oracle.tools.runtime.coherence.options.Clustering;
 import com.oracle.tools.runtime.coherence.options.LocalStorage;
@@ -89,9 +91,11 @@ public class ExtendClient implements SessionBuilder
 
         // ----- notify the Profiles that we're about to launch an application -----
 
+        MetaClass<CoherenceClusterMember> metaClass = new CoherenceClusterMember.MetaClass();
+
         for (Profile profile : launchOptions.getInstancesOf(Profile.class))
         {
-            profile.onLaunching(platform, launchOptions);
+            profile.onLaunching(platform, metaClass, launchOptions);
         }
 
         // ----- create local system properties based on those defined by the launch options -----

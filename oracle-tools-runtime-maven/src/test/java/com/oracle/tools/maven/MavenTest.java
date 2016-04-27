@@ -26,20 +26,16 @@
 package com.oracle.tools.maven;
 
 import com.oracle.tools.Options;
-
 import com.oracle.tools.runtime.LocalPlatform;
-
+import com.oracle.tools.runtime.MetaClass;
 import com.oracle.tools.runtime.java.ClassPath;
-
+import com.oracle.tools.runtime.java.JavaApplication;
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.not;
-
 import static org.hamcrest.Matchers.nullValue;
-
 import static org.hamcrest.core.Is.is;
-
 import static org.junit.Assert.assertThat;
 
 /**
@@ -58,14 +54,15 @@ public class MavenTest
     @Test
     public void shouldResolveSingleArtifact()
     {
-        LocalPlatform platform = LocalPlatform.get();
-        Options       options  = new Options();
+        LocalPlatform platform  = LocalPlatform.get();
+        MetaClass     metaClass = new JavaApplication.MetaClass();
+        Options       options   = new Options();
 
         options.add(Maven.artifact("org.hamcrest:hamcrest-library:jar:1.3"));
 
         Maven maven = options.get(Maven.class);
 
-        maven.onLaunching(platform, options);
+        maven.onLaunching(platform, metaClass, options);
 
         ClassPath classPath = options.getOrDefault(ClassPath.class, null);
 
@@ -82,14 +79,15 @@ public class MavenTest
     @Test
     public void shouldResolveSingleArtifactWithTransitiveDependency()
     {
-        LocalPlatform platform = LocalPlatform.get();
-        Options       options  = new Options();
+        LocalPlatform platform  = LocalPlatform.get();
+        MetaClass     metaClass = new JavaApplication.MetaClass();
+        Options       options   = new Options();
 
         options.add(Maven.artifact("junit:junit:jar:4.12"));
 
         Maven maven = options.get(Maven.class);
 
-        maven.onLaunching(platform, options);
+        maven.onLaunching(platform, metaClass, options);
 
         ClassPath classPath = options.getOrDefault(ClassPath.class, null);
 

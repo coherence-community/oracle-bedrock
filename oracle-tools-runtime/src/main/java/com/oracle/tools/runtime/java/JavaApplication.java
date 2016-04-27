@@ -30,7 +30,6 @@ import com.oracle.tools.Options;
 import com.oracle.tools.options.Timeout;
 import com.oracle.tools.runtime.Application;
 import com.oracle.tools.runtime.Platform;
-import com.oracle.tools.runtime.annotations.PreferredMetaClass;
 import com.oracle.tools.runtime.concurrent.RemoteCallable;
 import com.oracle.tools.runtime.concurrent.RemoteChannel;
 import com.oracle.tools.runtime.concurrent.callable.RemoteMethodInvocation;
@@ -51,7 +50,6 @@ import java.util.concurrent.TimeUnit;
  * @see Application
  * @see JavaApplicationLauncher
  */
-@PreferredMetaClass(JavaApplication.MetaClass.class)
 public interface JavaApplication extends Application, RemoteChannel
 {
     /**
@@ -152,9 +150,9 @@ public interface JavaApplication extends Application, RemoteChannel
 
 
     /**
-     * The {@link com.oracle.tools.runtime.options.MetaClass} for {@link JavaApplication}s.
+     * The {@link com.oracle.tools.runtime.MetaClass} for {@link JavaApplication}s.
      */
-    class MetaClass implements com.oracle.tools.runtime.options.MetaClass<JavaApplication>
+    class MetaClass implements com.oracle.tools.runtime.MetaClass<JavaApplication>
     {
         /**
          * Constructs a {@link MetaClass} for a {@link JavaApplication}.
@@ -174,7 +172,8 @@ public interface JavaApplication extends Application, RemoteChannel
 
 
         @Override
-        public void onFinalize(Platform platform, Options options)
+        public void onLaunch(Platform platform,
+                             Options  options)
         {
             // there's nothing to do before launching the application
         }
@@ -189,9 +188,9 @@ public interface JavaApplication extends Application, RemoteChannel
 
 
         @Override
-        public void onLaunched(Platform    platform,
-                               Application application,
-                               Options     options)
+        public void onLaunched(Platform        platform,
+                               JavaApplication application,
+                               Options         options)
         {
             // there's nothing to do after launching the application
         }

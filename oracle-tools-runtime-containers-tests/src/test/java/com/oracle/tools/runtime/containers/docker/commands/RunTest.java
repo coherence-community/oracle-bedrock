@@ -498,7 +498,7 @@ public class RunTest
         Options options  = new Options();
         Platform platform = LocalPlatform.get();
 
-        command.onFinalize(platform, options);
+        command.onLaunch(platform, options);
 
         Arguments arguments = options.get(Arguments.class);
 

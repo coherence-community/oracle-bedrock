@@ -194,7 +194,7 @@ public class EventsTest
         Options options  = new Options();
         Platform platform = LocalPlatform.get();
 
-        inspect.onFinalize(platform, options);
+        inspect.onLaunch(platform, options);
 
         Arguments arguments = options.get(Arguments.class);
 

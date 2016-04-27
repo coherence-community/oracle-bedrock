@@ -27,15 +27,13 @@ package com.oracle.tools.runtime.java;
 
 import com.oracle.tools.Option;
 import com.oracle.tools.Options;
-
 import com.oracle.tools.options.Variable;
-
 import com.oracle.tools.runtime.ApplicationListener;
+import com.oracle.tools.runtime.MetaClass;
 import com.oracle.tools.runtime.Platform;
 import com.oracle.tools.runtime.Profile;
 import com.oracle.tools.runtime.Profiles;
 import com.oracle.tools.runtime.PropertiesBuilder;
-
 import com.oracle.tools.runtime.concurrent.PipeBasedRemoteChannel;
 import com.oracle.tools.runtime.concurrent.RemoteCallable;
 import com.oracle.tools.runtime.concurrent.RemoteChannel;
@@ -43,7 +41,6 @@ import com.oracle.tools.runtime.concurrent.RemoteEvent;
 import com.oracle.tools.runtime.concurrent.RemoteEventListener;
 import com.oracle.tools.runtime.concurrent.RemoteRunnable;
 import com.oracle.tools.runtime.concurrent.callable.RemoteCallableStaticMethod;
-
 import com.oracle.tools.runtime.java.container.Container;
 import com.oracle.tools.runtime.java.container.ContainerClassLoader;
 import com.oracle.tools.runtime.java.container.ContainerScope;
@@ -53,14 +50,10 @@ import com.oracle.tools.runtime.java.options.RemoteEvents;
 import com.oracle.tools.runtime.java.options.SystemProperties;
 import com.oracle.tools.runtime.java.profiles.CommercialFeatures;
 import com.oracle.tools.runtime.java.profiles.RemoteDebugging;
-
 import com.oracle.tools.runtime.options.Arguments;
 import com.oracle.tools.runtime.options.DisplayName;
-import com.oracle.tools.runtime.options.MetaClass;
-
 import com.oracle.tools.table.Cell;
 import com.oracle.tools.table.Table;
-
 import com.oracle.tools.util.ReflectionHelper;
 
 import java.io.IOException;
@@ -68,21 +61,16 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
-
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
-
 import java.text.SimpleDateFormat;
-
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Properties;
 import java.util.UUID;
-
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -106,8 +94,7 @@ import java.util.logging.Logger;
  * @author Brian Oliver
  * @author Jonathan Knight
  */
-public class ContainerBasedJavaApplicationLauncher<A extends JavaApplication>
-    implements JavaApplicationLauncher<A>
+public class ContainerBasedJavaApplicationLauncher<A extends JavaApplication> implements JavaApplicationLauncher<A>
 {
     /**
      * The {@link Logger} for this class.
@@ -170,7 +157,9 @@ public class ContainerBasedJavaApplicationLauncher<A extends JavaApplication>
 //     }
 
     @Override
-    public A launch(Platform platform, Options options)
+    public A launch(Platform     platform,
+                    MetaClass<A> metaClass,
+                    Options      options)
     {
         // establish the diagnostics output table
         Table diagnosticsTable = new Table();
@@ -181,14 +170,6 @@ public class ContainerBasedJavaApplicationLauncher<A extends JavaApplication>
         {
             diagnosticsTable.addRow("Target Platform", platform.getName());
         }
-
-        // ----- determine the meta-class for our application -----
-
-        // establish the options for resolving the meta-class
-        Options metaOptions = new Options(platform.getOptions()).addAll(options);
-
-        // determine the meta-class
-        MetaClass metaClass = metaOptions.getOrDefault(MetaClass.class, new JavaApplication.MetaClass());
 
         // ----- establish the launch Options for the Application -----
 
@@ -219,12 +200,12 @@ public class ContainerBasedJavaApplicationLauncher<A extends JavaApplication>
 
         for (Profile profile : launchOptions.getInstancesOf(Profile.class))
         {
-            profile.onLaunching(platform, launchOptions);
+            profile.onLaunching(platform, metaClass, launchOptions);
         }
 
         // ----- give the MetaClass a last chance to manipulate any options -----
 
-        metaClass.onFinalize(platform, launchOptions);
+        metaClass.onLaunch(platform, launchOptions);
 
         // ----- determine the display name for the application -----
 
@@ -490,7 +471,7 @@ public class ContainerBasedJavaApplicationLauncher<A extends JavaApplication>
          * @return  a {@link CompletableFuture} that will be completed when
          *          the application is started, or an error occurs
          */
-        CompletableFuture<Void> start(ControllableApplication  application);
+        CompletableFuture<Void> start(ControllableApplication application);
 
 
         /**
@@ -505,7 +486,7 @@ public class ContainerBasedJavaApplicationLauncher<A extends JavaApplication>
          * @return  a {@link CompletableFuture} that will be completed when
          *          the application is started, or an error occurs
          */
-        CompletableFuture<Void> destroy(ControllableApplication  application);
+        CompletableFuture<Void> destroy(ControllableApplication application);
 
 
         /**
@@ -784,6 +765,7 @@ public class ContainerBasedJavaApplicationLauncher<A extends JavaApplication>
                     new IllegalStateException("Attempting to submit to a ContainerBasedJavaProcess that has been destroyed");
 
                 CompletableFuture<T> future = new CompletableFuture<>();
+
                 future.completeExceptionally(e);
 
                 return future;
@@ -906,7 +888,7 @@ public class ContainerBasedJavaApplicationLauncher<A extends JavaApplication>
 
 
         @Override
-        public CompletableFuture<Void> start(ControllableApplication  application)
+        public CompletableFuture<Void> start(ControllableApplication application)
         {
             if (m_callableStartStaticMethod == null)
             {
@@ -920,7 +902,7 @@ public class ContainerBasedJavaApplicationLauncher<A extends JavaApplication>
 
 
         @Override
-        public CompletableFuture<Void> destroy(ControllableApplication  application)
+        public CompletableFuture<Void> destroy(ControllableApplication application)
         {
             if (m_callableDestroyStaticMethod == null)
             {
@@ -954,14 +936,14 @@ public class ContainerBasedJavaApplicationLauncher<A extends JavaApplication>
     public static class NullController implements ApplicationController
     {
         @Override
-        public CompletableFuture<Void> start(ControllableApplication  application)
+        public CompletableFuture<Void> start(ControllableApplication application)
         {
             return CompletableFuture.completedFuture(null);
         }
 
 
         @Override
-        public CompletableFuture<Void> destroy(ControllableApplication  application)
+        public CompletableFuture<Void> destroy(ControllableApplication application)
         {
             return CompletableFuture.completedFuture(null);
         }
@@ -1034,7 +1016,7 @@ public class ContainerBasedJavaApplicationLauncher<A extends JavaApplication>
 
 
         @Override
-        public CompletableFuture<Void> start(ControllableApplication  application)
+        public CompletableFuture<Void> start(ControllableApplication application)
         {
             RemoteCallable<Void> callable = new RemoteCallableStaticMethod<Void>(applicationClassName,
                                                                                  "main",
@@ -1045,7 +1027,7 @@ public class ContainerBasedJavaApplicationLauncher<A extends JavaApplication>
 
 
         @Override
-        public CompletableFuture<Void> destroy(ControllableApplication  application)
+        public CompletableFuture<Void> destroy(ControllableApplication application)
         {
             // SKIP: there's no standard method to stop and destroy a
             // regular Java console application running in a container

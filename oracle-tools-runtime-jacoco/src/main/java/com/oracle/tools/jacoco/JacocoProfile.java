@@ -27,17 +27,13 @@ package com.oracle.tools.jacoco;
 
 import com.oracle.tools.Option;
 import com.oracle.tools.Options;
-
 import com.oracle.tools.runtime.Application;
+import com.oracle.tools.runtime.MetaClass;
 import com.oracle.tools.runtime.Platform;
 import com.oracle.tools.runtime.Profile;
-
 import com.oracle.tools.runtime.java.ClassPath;
 import com.oracle.tools.runtime.java.JavaApplication;
 import com.oracle.tools.runtime.java.options.JavaAgent;
-
-import com.oracle.tools.runtime.options.MetaClass;
-
 import org.jacoco.agent.rt.RT;
 
 import java.util.concurrent.CompletableFuture;
@@ -71,11 +67,10 @@ public class JacocoProfile implements Profile, Option
 
 
     @Override
-    public void onLaunching(Platform platform,
-                            Options  options)
+    public void onLaunching(Platform  platform,
+                            MetaClass metaClass,
+                            Options   options)
     {
-        MetaClass metaClass = options.get(MetaClass.class);
-
         if (metaClass != null
             && JavaApplication.class.isAssignableFrom(metaClass.getImplementationClass(platform, options)))
         {
@@ -113,9 +108,9 @@ public class JacocoProfile implements Profile, Option
         // prior to closing a JavaApplication we request the JaCoCo telemetry to be dumped
         if (application instanceof JavaApplication)
         {
-            JavaApplication javaApplication = (JavaApplication) application;
+            JavaApplication         javaApplication = (JavaApplication) application;
 
-            CompletableFuture<Void> future = javaApplication.submit(new Dump());
+            CompletableFuture<Void> future          = javaApplication.submit(new Dump());
 
             // Wait for the Dump to complete
             future.join();

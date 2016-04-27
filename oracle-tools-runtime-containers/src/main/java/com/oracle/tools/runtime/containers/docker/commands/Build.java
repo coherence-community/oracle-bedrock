@@ -612,7 +612,7 @@ public class Build extends AbstractDockerCommand<Build>
 
 
     @Override
-    public void onFinalize(Platform platform, Options options)
+    public void onLaunch(Platform platform, Options options)
     {
         // set the Image build timeout
         Timeout timeout = getTimeout();
@@ -627,7 +627,7 @@ public class Build extends AbstractDockerCommand<Build>
 
 
         // call super to add all of the command arguments
-        super.onFinalize(platform, options);
+        super.onLaunch(platform, options);
 
         // add the context location, which is the last argument in the chain
         options.add(Argument.of(contextLocation));

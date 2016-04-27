@@ -27,24 +27,18 @@ package com.oracle.tools.jprofiler;
 
 import com.oracle.tools.Option;
 import com.oracle.tools.Options;
-
 import com.oracle.tools.runtime.Application;
+import com.oracle.tools.runtime.MetaClass;
 import com.oracle.tools.runtime.Platform;
 import com.oracle.tools.runtime.Profile;
-
 import com.oracle.tools.runtime.java.JavaApplication;
 import com.oracle.tools.runtime.java.options.Freeform;
 import com.oracle.tools.runtime.java.options.WaitToStart;
-
 import com.oracle.tools.runtime.network.AvailablePortIterator;
-
-import com.oracle.tools.runtime.options.MetaClass;
-
 import com.oracle.tools.util.Capture;
 import com.oracle.tools.util.PerpetualIterator;
 
 import java.io.File;
-
 import java.net.InetAddress;
 
 /**
@@ -421,11 +415,10 @@ public class JprofilerProfile implements Profile, Option
 
 
     @Override
-    public void onLaunching(Platform platform,
-                            Options  options)
+    public void onLaunching(Platform  platform,
+                            MetaClass metaClass,
+                            Options   options)
     {
-        MetaClass metaClass = options.getOrDefault(MetaClass.class, new JavaApplication.MetaClass());
-
         if (metaClass != null
             && JavaApplication.class.isAssignableFrom(metaClass.getImplementationClass(platform, options))
             && isEnabled())

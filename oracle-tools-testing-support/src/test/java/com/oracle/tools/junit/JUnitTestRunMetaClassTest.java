@@ -26,19 +26,15 @@
 package com.oracle.tools.junit;
 
 import com.oracle.tools.Options;
-
-import com.oracle.tools.runtime.Application;
+import com.oracle.tools.runtime.java.JavaApplication;
 import com.oracle.tools.runtime.java.options.ClassName;
 import com.oracle.tools.runtime.options.DisplayName;
-
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.sameInstance;
-
 import static org.junit.Assert.assertThat;
-
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -111,7 +107,7 @@ public class JUnitTestRunMetaClassTest
     @Test
     public void shouldDoNothingAfterLaunchForNonJUnitApplication() throws Exception
     {
-        Application            application = mock(Application.class);
+        JavaApplication        application = mock(JavaApplication.class);
         Options                options     = new Options();
         JUnitTestRun.MetaClass metaClass   = new JUnitTestRun.MetaClass();
 
@@ -127,7 +123,7 @@ public class JUnitTestRunMetaClassTest
     @Test
     public void shouldStartTests() throws Exception
     {
-        Application            application = mock(Application.class);
+        JavaApplication        application = mock(JavaApplication.class);
         JUnitTestRun           testRun     = mock(JUnitTestRun.class);
         Options                options     = new Options();
         JUnitTestRun.MetaClass metaClass   = new JUnitTestRun.MetaClass();
@@ -138,5 +134,4 @@ public class JUnitTestRunMetaClassTest
 
         verify(testRun).startTests(options);
     }
-
 }

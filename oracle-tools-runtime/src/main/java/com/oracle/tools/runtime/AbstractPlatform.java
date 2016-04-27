@@ -28,8 +28,6 @@ package com.oracle.tools.runtime;
 import com.oracle.tools.Option;
 import com.oracle.tools.Options;
 import com.oracle.tools.extensible.AbstractExtensible;
-import com.oracle.tools.runtime.options.ApplicationType;
-import com.oracle.tools.runtime.options.MetaClass;
 
 /**
  * An abstract implementation of a {@link Platform}.
@@ -38,10 +36,8 @@ import com.oracle.tools.runtime.options.MetaClass;
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Jonathan Knight
- *
- * @param <P>  the type of {@link Platform} used by {@link ApplicationLauncher}s
  */
-public abstract class AbstractPlatform<P extends Platform> extends AbstractExtensible implements Platform
+public abstract class AbstractPlatform extends AbstractExtensible implements Platform
 {
     /**
      * The name of this {@link Platform}.
@@ -85,7 +81,8 @@ public abstract class AbstractPlatform<P extends Platform> extends AbstractExten
 
 
     @Override
-    public <A extends Application> A launch(Option... options)
+    public <A extends Application> A launch(MetaClass<A> metaClass,
+                                            Option...    options)
     {
         // establish the initial launch options based on those defined by the platform
         Options launchOptions = new Options(getOptions().asArray());
@@ -93,44 +90,26 @@ public abstract class AbstractPlatform<P extends Platform> extends AbstractExten
         // include the options specified when this method was called
         launchOptions.addAll(options);
 
-        // obtain the application type
-        ApplicationType<A> applicationType = launchOptions.get(ApplicationType.class);
-
-        // attempt to locate the meta-class using the launchOptions
-        MetaClass metaClass = applicationType.getMetaClass(launchOptions);
-
         // obtain the application launcher for the class of application
-        ApplicationLauncher<A> launcher = getApplicationLauncher(applicationType.getType(),
-                                                                 metaClass,
-                                                                 launchOptions);
+        ApplicationLauncher<A> launcher = getApplicationLauncher(metaClass, launchOptions);
 
         if (launcher == null)
         {
-            throw new IllegalArgumentException("Can't determine ApplicationLauncher for " + applicationType
-                                               + " using " + launchOptions);
+            throw new IllegalArgumentException("Can't determine ApplicationLauncher for " + metaClass + " using "
+                                               + launchOptions);
         }
         else
         {
-            // add the meta-class and application class as options
-            Options builderOptions = new Options(options);
-
-            // add the application class as a launcher option (if and only if it's not already defined)
-            builderOptions.addIfAbsent(applicationType);
-
-            // add the meta-class as a launcher option (if and only if it's not already defined)
-            builderOptions.addIfAbsent(metaClass);
-
             // now launch the application
-            return launcher.launch(this, builderOptions);
+            return launcher.launch(this, metaClass, launchOptions);
         }
     }
 
 
     /**
-     * Obtains the {@link ApplicationLauncher} for the given {@link Class} of {@link Application} with the provided
-     * {@link MetaClass} and launch {@link Options}.
+     * Obtains the {@link ApplicationLauncher} for the given {@link Application} {@link MetaClass} and launch
+     * {@link Options}.
      *
-     * @param applicationClass  the {@link Class} of {@link Application}
      * @param metaClass         the {@link MetaClass} for the {@link Application}
      * @param options           the launch {@link Options} for the {@link Application}
      *
@@ -143,8 +122,7 @@ public abstract class AbstractPlatform<P extends Platform> extends AbstractExten
      * @return  an {@link ApplicationLauncher} capable of launching the {@link Class} of {@link Application}
      */
     abstract protected <A extends Application,
-                        B extends ApplicationLauncher<A>> B getApplicationLauncher(Class<A>     applicationClass,
-                                                                                   MetaClass<A> metaClass,
+                        B extends ApplicationLauncher<A>> B getApplicationLauncher(MetaClass<A> metaClass,
                                                                                    Options      options)
                                                                                    throws UnsupportedOperationException;
 }

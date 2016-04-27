@@ -79,7 +79,8 @@ public class DockerImage implements Feature, ApplicationListener<Application>
      * @param tags     the tags to identify this image
      * @param options  the {@link Options} used to build this image
      */
-    public DockerImage(List<String> tags, Options options)
+    public DockerImage(List<String> tags,
+                       Options      options)
     {
         if (tags == null || tags.isEmpty())
         {
@@ -159,8 +160,7 @@ public class DockerImage implements Feature, ApplicationListener<Application>
             throw new IllegalStateException("No Platform is available, is this image a feature of an Application");
         }
 
-        return createInspectCommand()
-                .run(platform, getDockerEnvironment());
+        return createInspectCommand().run(platform, getDockerEnvironment());
     }
 
 
@@ -188,7 +188,7 @@ public class DockerImage implements Feature, ApplicationListener<Application>
             throw new IllegalStateException("No Platform is available, is this image a feature of an Application");
         }
 
-        try (Application app = platform.launch(getDockerEnvironment(), Remove.images(tags)))
+        try (Application app = platform.launch(Remove.images(tags), getDockerEnvironment()))
         {
             return app.waitFor() == 0;
         }
@@ -218,14 +218,16 @@ public class DockerImage implements Feature, ApplicationListener<Application>
 
 
     @Override
-    public void onClosing(Application application, Options options)
+    public void onClosing(Application application,
+                          Options     options)
     {
         // there is nothing to do here
     }
 
 
     @Override
-    public void onClosed(Application application, Options options)
+    public void onClosed(Application application,
+                         Options     options)
     {
         Options closingOptions;
 

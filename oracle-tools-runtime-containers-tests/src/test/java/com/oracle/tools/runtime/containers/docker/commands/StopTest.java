@@ -28,7 +28,6 @@ package com.oracle.tools.runtime.containers.docker.commands;
 import com.oracle.tools.Options;
 import com.oracle.tools.runtime.LocalPlatform;
 import com.oracle.tools.runtime.Platform;
-import com.oracle.tools.runtime.options.Argument;
 import com.oracle.tools.runtime.options.Arguments;
 import org.junit.Test;
 
@@ -86,7 +85,7 @@ public class StopTest
         Options options  = new Options();
         Platform platform = LocalPlatform.get();
 
-        command.onFinalize(platform, options);
+        command.onLaunch(platform, options);
 
         Arguments arguments = options.get(Arguments.class);
 

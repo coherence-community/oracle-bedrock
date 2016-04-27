@@ -31,12 +31,12 @@ import com.oracle.tools.runtime.Application;
 import com.oracle.tools.runtime.ApplicationConsole;
 import com.oracle.tools.runtime.ApplicationConsoleBuilder;
 import com.oracle.tools.runtime.LocalPlatform;
+import com.oracle.tools.runtime.MetaClass;
 import com.oracle.tools.runtime.Platform;
 import com.oracle.tools.runtime.containers.docker.Docker;
 import com.oracle.tools.runtime.options.Argument;
 import com.oracle.tools.runtime.options.Arguments;
 import org.junit.Test;
-import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
 import javax.json.JsonArray;
@@ -46,11 +46,10 @@ import java.util.List;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
-
 import static org.hamcrest.CoreMatchers.sameInstance;
 import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInAnyOrder;
-
 import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyVararg;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -68,7 +67,7 @@ public class InspectTest
     @Test
     public void shouldInspectContainer() throws Exception
     {
-        Inspect inspect = Inspect.container("Foo", "Bar");
+        Inspect      inspect   = Inspect.container("Foo", "Bar");
 
         List<String> arguments = resolveArguments(inspect);
 
@@ -81,7 +80,7 @@ public class InspectTest
     @Test
     public void shouldInspectImage() throws Exception
     {
-        Inspect inspect = Inspect.image("Foo", "Bar");
+        Inspect      inspect   = Inspect.image("Foo", "Bar");
 
         List<String> arguments = resolveArguments(inspect);
 
@@ -98,7 +97,7 @@ public class InspectTest
         List<String> before   = resolveArguments(inspect1);
         Inspect      inspect2 = inspect1.format("bar");
 
-        assertThat(inspect1, is (not(sameInstance(inspect2))));
+        assertThat(inspect1, is(not(sameInstance(inspect2))));
 
         List<String> arguments1 = resolveArguments(inspect1);
         List<String> arguments2 = resolveArguments(inspect2);
@@ -118,7 +117,7 @@ public class InspectTest
         List<String> before   = resolveArguments(inspect1);
         Inspect      inspect2 = inspect1.format("B");
 
-        assertThat(inspect1, is (not(sameInstance(inspect2))));
+        assertThat(inspect1, is(not(sameInstance(inspect2))));
 
         List<String> arguments1 = resolveArguments(inspect1);
         List<String> arguments2 = resolveArguments(inspect2);
@@ -139,7 +138,7 @@ public class InspectTest
         List<String> before   = resolveArguments(inspect1);
         Inspect      inspect2 = inspect1.includeSizes(true);
 
-        assertThat(inspect1, is (not(sameInstance(inspect2))));
+        assertThat(inspect1, is(not(sameInstance(inspect2))));
 
         List<String> arguments1 = resolveArguments(inspect1);
         List<String> arguments2 = resolveArguments(inspect2);
@@ -152,7 +151,6 @@ public class InspectTest
     }
 
 
-
     @Test
     public void shouldImmutablyExcludeSizes() throws Exception
     {
@@ -160,7 +158,7 @@ public class InspectTest
         List<String> before   = resolveArguments(inspect1);
         Inspect      inspect2 = inspect1.includeSizes(false);
 
-        assertThat(inspect1, is (not(sameInstance(inspect2))));
+        assertThat(inspect1, is(not(sameInstance(inspect2))));
 
         List<String> arguments1 = resolveArguments(inspect1);
         List<String> arguments2 = resolveArguments(inspect2);
@@ -178,7 +176,7 @@ public class InspectTest
         List<String> before   = resolveArguments(inspect1);
         Inspect      inspect2 = inspect1.withCommandArguments(Argument.of("--test1"), Argument.of("--test2"));
 
-        assertThat(inspect1, is (not(sameInstance(inspect2))));
+        assertThat(inspect1, is(not(sameInstance(inspect2))));
 
         List<String> arguments1 = resolveArguments(inspect1);
         List<String> arguments2 = resolveArguments(inspect2);
@@ -194,11 +192,12 @@ public class InspectTest
     @Test
     public void shouldImmutablyRemoveArguments() throws Exception
     {
-        Inspect      inspect1 = Inspect.container("foo").withCommandArguments(Argument.of("--test1"), Argument.of("--test2"));
+        Inspect inspect1 = Inspect.container("foo").withCommandArguments(Argument.of("--test1"),
+                                                                         Argument.of("--test2"));
         List<String> before   = resolveArguments(inspect1);
         Inspect      inspect2 = inspect1.withoutCommandArguments(Argument.of("--test1"), Argument.of("--test2"));
 
-        assertThat(inspect1, is (not(sameInstance(inspect2))));
+        assertThat(inspect1, is(not(sameInstance(inspect2))));
 
         List<String> arguments1 = resolveArguments(inspect1);
         List<String> arguments2 = resolveArguments(inspect2);
@@ -219,24 +218,27 @@ public class InspectTest
         Docker      docker      = Docker.auto();
 
         when(application.waitFor(anyVararg())).thenReturn(0);
-        when(platform.launch(anyVararg())).then((Answer<Application>) invocation ->
-        {
-            Options options = new Options();
+        when(platform.launch(any(MetaClass.class), anyVararg())).then((Answer<Application>) invocation -> {
+                                                                                                Options options =
+                                                                                                    new Options();
 
-            Arrays.stream(invocation.getArguments())
-                    .forEach((arg) -> options.add((Option) arg));
+                                                                                                Arrays.stream(invocation.getArguments())
+                                                                                                .filter(arg -> arg instanceof Option)
+                                                                                                .forEach(arg -> options.add((Option) arg));
 
-            ApplicationConsoleBuilder builder = options.get(ApplicationConsoleBuilder.class);
-            ApplicationConsole        console = builder.build("Foo");
+                                                                                                ApplicationConsoleBuilder builder =
+                                                                                                    options.get(ApplicationConsoleBuilder.class);
+                                                                                                ApplicationConsole console =
+                                                                                                    builder.build("Foo");
 
-            PrintWriter writer = console.getOutputWriter();
+                                                                                                PrintWriter writer =
+                                                                                                    console.getOutputWriter();
 
-            writer.println("[{\"Id\": \"foo-id\"}]");
-            writer.flush();
+                                                                                                writer.println("[{\"Id\": \"foo-id\"}]");
+                                                                                                writer.flush();
 
-            return application;
-        });
-
+                                                                                                return application;
+                                                                                            });
 
         JsonArray jsonArray = (JsonArray) Inspect.image("foo").run(platform, docker);
 
@@ -249,7 +251,7 @@ public class InspectTest
         Options  options  = new Options();
         Platform platform = LocalPlatform.get();
 
-        inspect.onFinalize(platform, options);
+        inspect.onLaunch(platform, options);
 
         Arguments arguments = options.get(Arguments.class);
 

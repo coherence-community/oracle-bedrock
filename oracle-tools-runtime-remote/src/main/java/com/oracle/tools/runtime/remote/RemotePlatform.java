@@ -27,16 +27,11 @@ package com.oracle.tools.runtime.remote;
 
 import com.oracle.tools.Option;
 import com.oracle.tools.Options;
-
 import com.oracle.tools.runtime.AbstractPlatform;
 import com.oracle.tools.runtime.Application;
 import com.oracle.tools.runtime.ApplicationLauncher;
-
-import com.oracle.tools.runtime.Platform;
+import com.oracle.tools.runtime.MetaClass;
 import com.oracle.tools.runtime.java.JavaApplication;
-
-import com.oracle.tools.runtime.options.MetaClass;
-
 import com.oracle.tools.runtime.remote.java.RemoteJavaApplicationLauncher;
 
 import java.net.InetAddress;
@@ -50,7 +45,7 @@ import java.net.InetAddress;
  *
  * @author Jonathan Knight
  */
-public class RemotePlatform extends AbstractPlatform<Platform>
+public class RemotePlatform extends AbstractPlatform
 {
     /**
      * The default port for secure connection to a remote server (over SSH)
@@ -150,11 +145,12 @@ public class RemotePlatform extends AbstractPlatform<Platform>
 
 
     @Override
-    protected <A extends Application,
-               B extends ApplicationLauncher<A>> B getApplicationLauncher(Class<A>     applicationClass,
-                                                                          MetaClass<A> metaClass,
-                                                                          Options      options) throws UnsupportedOperationException
+    protected <A extends Application, B extends ApplicationLauncher<A>> B getApplicationLauncher(MetaClass<A> metaClass,
+                                                                                                 Options      options)
+                                                                                                 throws UnsupportedOperationException
     {
+        Class<? extends A> applicationClass = metaClass.getImplementationClass(this, options);
+
         if (JavaApplication.class.isAssignableFrom(applicationClass))
         {
             return (B) new RemoteJavaApplicationLauncher();

@@ -27,66 +27,46 @@ package com.oracle.tools.maven;
 
 import com.oracle.tools.ComposableOption;
 import com.oracle.tools.Options;
-
 import com.oracle.tools.runtime.Application;
+import com.oracle.tools.runtime.MetaClass;
 import com.oracle.tools.runtime.Platform;
 import com.oracle.tools.runtime.Profile;
-
 import com.oracle.tools.runtime.java.ClassPath;
 import com.oracle.tools.runtime.java.JavaApplication;
-
 import com.oracle.tools.runtime.options.PlatformSeparators;
-
 import org.apache.maven.repository.internal.MavenRepositorySystemUtils;
-
 import org.apache.maven.settings.Repository;
 import org.apache.maven.settings.Settings;
-
 import org.apache.maven.settings.building.DefaultSettingsBuilderFactory;
 import org.apache.maven.settings.building.DefaultSettingsBuildingRequest;
 import org.apache.maven.settings.building.SettingsBuilder;
 import org.apache.maven.settings.building.SettingsBuildingException;
-
 import org.eclipse.aether.DefaultRepositoryCache;
 import org.eclipse.aether.DefaultRepositorySystemSession;
 import org.eclipse.aether.RepositorySystem;
-
 import org.eclipse.aether.artifact.Artifact;
 import org.eclipse.aether.artifact.DefaultArtifact;
-
 import org.eclipse.aether.collection.CollectRequest;
-
 import org.eclipse.aether.connector.basic.BasicRepositoryConnectorFactory;
-
 import org.eclipse.aether.graph.Dependency;
 import org.eclipse.aether.graph.DependencyFilter;
-
 import org.eclipse.aether.impl.DefaultServiceLocator;
-
 import org.eclipse.aether.repository.LocalRepository;
 import org.eclipse.aether.repository.RemoteRepository;
-
 import org.eclipse.aether.resolution.ArtifactResult;
 import org.eclipse.aether.resolution.DependencyRequest;
-
 import org.eclipse.aether.spi.connector.RepositoryConnectorFactory;
 import org.eclipse.aether.spi.connector.transport.TransporterFactory;
-
 import org.eclipse.aether.transport.file.FileTransporterFactory;
-
 import org.eclipse.aether.transport.http.HttpTransporterFactory;
-
 import org.eclipse.aether.util.artifact.JavaScopes;
-
 import org.eclipse.aether.util.filter.DependencyFilterUtils;
 
 import java.io.File;
-
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -258,8 +238,9 @@ public class Maven implements Profile, ComposableOption<Maven>
 
 
     @Override
-    public void onLaunching(Platform platform,
-                            Options  options)
+    public void onLaunching(Platform  platform,
+                            MetaClass metaClass,
+                            Options   options)
     {
         PlatformSeparators separators = options.get(PlatformSeparators.class);
 

@@ -25,15 +25,14 @@
 
 package com.oracle.tools.runtime.containers.docker;
 
-import com.oracle.tools.Option;
 import com.oracle.tools.Options;
 import com.oracle.tools.runtime.Application;
+import com.oracle.tools.runtime.MetaClass;
 import com.oracle.tools.runtime.Platform;
 import com.oracle.tools.runtime.containers.docker.commands.Inspect;
 import com.oracle.tools.runtime.containers.docker.commands.Remove;
 import com.oracle.tools.runtime.containers.docker.options.ImageCloseBehaviour;
 import com.oracle.tools.runtime.options.Arguments;
-import com.oracle.tools.runtime.options.MetaClass;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
@@ -46,6 +45,7 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.sameInstance;
 import static org.hamcrest.collection.IsIterableContainingInOrder.contains;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyVararg;
 import static org.mockito.Matchers.same;
 import static org.mockito.Mockito.doReturn;
@@ -121,11 +121,11 @@ public class DockerImageTest
     @Test
     public void shouldGetDocker() throws Exception
     {
-        Docker          docker  = Docker.auto();
-        Options         options = new Options(docker);
-        DockerImage     image   = new DockerImage(Arrays.asList("foo", "bar"), options);
+        Docker      docker  = Docker.auto();
+        Options     options = new Options(docker);
+        DockerImage image   = new DockerImage(Arrays.asList("foo", "bar"), options);
 
-        Docker          result  = image.getDockerEnvironment();
+        Docker      result  = image.getDockerEnvironment();
 
         assertThat(result, is(sameInstance(docker)));
     }
@@ -156,7 +156,7 @@ public class DockerImageTest
 
         assertThat(inspect, is(notNullValue()));
 
-        inspect.onFinalize(platform, options);
+        inspect.onLaunch(platform, options);
 
         Arguments    arguments = options.get(Arguments.class);
         List<String> values    = arguments.resolve(mock(Platform.class), new Options());
@@ -168,17 +168,17 @@ public class DockerImageTest
     @Test
     public void shouldRunInspect() throws Exception
     {
-        Docker          docker      = Docker.auto();
-        Platform        platform    = mock(Platform.class);
-        Application     application = mock(Application.class, "App");
-        Application     inspectApp  = mock(Application.class, "Inspect");
-        Inspect         inspect     = mock(Inspect.class);
+        Docker      docker      = Docker.auto();
+        Platform    platform    = mock(Platform.class);
+        Application application = mock(Application.class, "App");
+        Application inspectApp  = mock(Application.class, "Inspect");
+        Inspect     inspect     = mock(Inspect.class);
 
-        DockerImage image    = new DockerImage(Arrays.asList("foo", "bar"), new Options(docker));
-        DockerImage imageSpy = spy(image);
+        DockerImage image       = new DockerImage(Arrays.asList("foo", "bar"), new Options(docker));
+        DockerImage imageSpy    = spy(image);
 
         when(application.getPlatform()).thenReturn(platform);
-        when(platform.launch(anyVararg())).thenReturn(inspectApp);
+        when(platform.launch(any(MetaClass.class))).thenReturn(inspectApp);
         doReturn(inspect).when(imageSpy).createInspectCommand();
 
         imageSpy.onAddingTo(application);
@@ -208,23 +208,23 @@ public class DockerImageTest
         DockerImage image       = new DockerImage(Arrays.asList("foo"), new Options(docker));
 
         when(application.getPlatform()).thenReturn(platform);
-        when(platform.launch(anyVararg())).thenReturn(removeApp);
-
+        when(platform.launch(any(MetaClass.class), anyVararg())).thenReturn(removeApp);
 
         image.onAddingTo(application);
 
         image.remove();
 
-        ArgumentCaptor<Option> captor = ArgumentCaptor.forClass(Option.class);
+        ArgumentCaptor<MetaClass> captor = ArgumentCaptor.forClass(MetaClass.class);
 
-        verify(platform).launch(captor.capture());
+        verify(platform).launch(captor.capture(), anyVararg());
 
-        Options                options = new Options(captor.getAllValues().toArray(new Option[2]));
-        Remove.RemoveImage remove  = (Remove.RemoveImage) options.get(MetaClass.class);
+        Remove.RemoveImage remove = (Remove.RemoveImage) captor.getValue();
 
         assertThat(remove, is(notNullValue()));
 
-        remove.onFinalize(platform, options);
+        Options options = new Options();
+
+        remove.onLaunch(platform, options);
 
         Arguments    arguments = options.get(Arguments.class);
         List<String> values    = arguments.resolve(mock(Platform.class), new Options());

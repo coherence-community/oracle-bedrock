@@ -53,14 +53,17 @@ public interface ApplicationLauncher<A extends Application>
     /**
      * Launches an {@link Application} on the {@link Platform} using the provided {@link Option}s.
      *
-     * @param platform  the {@link Platform} the {@link Application} is being launched on
-     * @param options   the {@link Options} for launching the {@link Application}
+     * @param platform   the {@link Platform} the {@link Application} is being launched on
+     * @param metaClass  the {@link MetaClass} of the {@link Application}
+     * @param options    the {@link Options} for launching the {@link Application}
      *
      * @return an {@link Application} representing the application launched by the {@link ApplicationLauncher}
      *
      * @throws RuntimeException when a problem occurs while launching the application
      */
-    A launch(Platform platform, Options options);
+    A launch(Platform     platform,
+             MetaClass<A> metaClass,
+             Options      options);
 
 
     /**
@@ -76,4 +79,3 @@ public interface ApplicationLauncher<A extends Application>
         return options.get(DisplayName.class);
     }
 }
-

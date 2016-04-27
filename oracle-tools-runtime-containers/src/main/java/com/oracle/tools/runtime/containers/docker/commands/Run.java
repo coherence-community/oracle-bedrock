@@ -1702,7 +1702,7 @@ public class Run extends AbstractDockerCommand<Run>
 
 
     @Override
-    public void onFinalize(Platform platform, Options options)
+    public void onLaunch(Platform platform, Options options)
     {
         // Build up the command in the form "run [options...] image-name [args...]"
 
@@ -1711,7 +1711,7 @@ public class Run extends AbstractDockerCommand<Run>
         Arguments currentArguments = options.get(Arguments.class);
 
         // 2. call super to add all of the command arguments, the "run [options...]" part
-        super.onFinalize(platform, options);
+        super.onLaunch(platform, options);
 
         // 3. add any environment variable arguments (--env=name=value) part of the [options...] arguments
         EnvironmentVariables envVars   = EnvironmentVariables.custom().with(this.environmentVariables);

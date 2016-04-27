@@ -26,42 +26,34 @@
 package com.oracle.tools.runtime.remote;
 
 import com.oracle.tools.Options;
-
 import com.oracle.tools.lang.ExpressionEvaluator;
-
 import com.oracle.tools.options.Variable;
 import com.oracle.tools.options.Variables;
-
 import com.oracle.tools.runtime.Application;
 import com.oracle.tools.runtime.ApplicationLauncher;
 import com.oracle.tools.runtime.ApplicationListener;
 import com.oracle.tools.runtime.ApplicationProcess;
 import com.oracle.tools.runtime.LocalPlatform;
+import com.oracle.tools.runtime.MetaClass;
 import com.oracle.tools.runtime.Platform;
 import com.oracle.tools.runtime.Profile;
 import com.oracle.tools.runtime.Profiles;
-
 import com.oracle.tools.runtime.options.Arguments;
 import com.oracle.tools.runtime.options.DisplayName;
 import com.oracle.tools.runtime.options.EnvironmentVariables;
 import com.oracle.tools.runtime.options.Executable;
-import com.oracle.tools.runtime.options.MetaClass;
 import com.oracle.tools.runtime.options.PlatformSeparators;
 import com.oracle.tools.runtime.options.Shell;
 import com.oracle.tools.runtime.options.WorkingDirectory;
-
 import com.oracle.tools.runtime.remote.options.Deployer;
 import com.oracle.tools.runtime.remote.options.Deployment;
 import com.oracle.tools.runtime.remote.ssh.SftpDeployer;
-
 import com.oracle.tools.table.Table;
 import com.oracle.tools.table.Tabularize;
 import com.oracle.tools.util.ReflectionHelper;
 
 import java.io.File;
-
 import java.lang.reflect.Constructor;
-
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -80,8 +72,8 @@ import java.util.stream.Collectors;
  *
  * @author Brian Oliver
  */
-public abstract class AbstractRemoteApplicationLauncher<A extends Application>
-        implements ApplicationLauncher<A>, RemoteTerminal.Launchable
+public abstract class AbstractRemoteApplicationLauncher<A extends Application> implements ApplicationLauncher<A>,
+                                                                                          RemoteTerminal.Launchable
 {
     /**
      * Constructs an {@link AbstractRemoteApplicationLauncher}.
@@ -93,7 +85,9 @@ public abstract class AbstractRemoteApplicationLauncher<A extends Application>
 
 
     @Override
-    public A launch(Platform platform, Options options)
+    public A launch(Platform     platform,
+                    MetaClass<A> metaClass,
+                    Options      options)
     {
         // establish the diagnostics output table
         Table diagnosticsTable = new Table();
@@ -104,14 +98,6 @@ public abstract class AbstractRemoteApplicationLauncher<A extends Application>
         {
             diagnosticsTable.addRow("Target Platform", platform.getName());
         }
-
-        // ----- determine the meta-class for our application -----
-
-        // establish the options for resolving the meta-class
-        Options metaOptions = new Options(platform.getOptions()).addAll(options);
-
-        // determine the meta-class
-        MetaClass<A> metaClass = metaOptions.getOrDefault(MetaClass.class, new Application.MetaClass());
 
         // ----- establish the launch Options for the Application -----
 
@@ -146,7 +132,7 @@ public abstract class AbstractRemoteApplicationLauncher<A extends Application>
 
         for (Profile profile : launchOptions.getInstancesOf(Profile.class))
         {
-            profile.onLaunching(platform, launchOptions);
+            profile.onLaunching(platform, metaClass, launchOptions);
         }
 
         // ----- add the diagnostic table to the options so it can be used by the terminal -----
@@ -158,7 +144,7 @@ public abstract class AbstractRemoteApplicationLauncher<A extends Application>
 
         // ----- give the MetaClass a last chance to manipulate any options -----
 
-        metaClass.onFinalize(platform, launchOptions);
+        metaClass.onLaunch(platform, launchOptions);
 
         // ----- determine the display name for the application -----
 
@@ -379,7 +365,7 @@ public abstract class AbstractRemoteApplicationLauncher<A extends Application>
     public Properties getEnvironmentVariables(Platform platform,
                                               Options  options)
     {
-        Table                diagnosticsTable     = options.get(Table.class);
+        Table diagnosticsTable = options.get(Table.class);
         EnvironmentVariables environmentVariables = options.getOrDefault(EnvironmentVariables.class,
                                                                          EnvironmentVariables.of(EnvironmentVariables
                                                                              .Source.TargetPlatform));
@@ -393,6 +379,7 @@ public abstract class AbstractRemoteApplicationLauncher<A extends Application>
             {
                 diagnosticsTable.addRow("Environment Variables", "(cleared)");
             }
+
             break;
 
         case ThisApplication :
@@ -402,6 +389,7 @@ public abstract class AbstractRemoteApplicationLauncher<A extends Application>
             {
                 diagnosticsTable.addRow("Environment Variables", "(based on parent process)");
             }
+
             break;
 
         case TargetPlatform :
@@ -409,6 +397,7 @@ public abstract class AbstractRemoteApplicationLauncher<A extends Application>
             {
                 diagnosticsTable.addRow("Environment Variables", "(based on platform defaults)");
             }
+
             break;
         }
 

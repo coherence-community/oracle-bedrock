@@ -41,17 +41,13 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
-
 import static org.hamcrest.number.OrderingComparison.greaterThanOrEqualTo;
 import static org.hamcrest.number.OrderingComparison.lessThanOrEqualTo;
-
 import static org.junit.Assert.assertThat;
-
 import static org.mockito.Matchers.same;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 /**
  * Unit tests for the {@link JUnitTestRunner.Listener} class.
@@ -65,19 +61,22 @@ public class JUnitTestRunnerListenerTest
 {
     private RemoteChannel remoteChannel;
 
+
     @Before
     public void setup()
     {
-        remoteChannel = mock(RemoteChannel.class);
+        remoteChannel           = mock(RemoteChannel.class);
 
         JUnitTestRunner.channel = remoteChannel;
     }
+
 
     @After
     public void cleanup() throws Exception
     {
         JUnitTestRunner.channel = null;
     }
+
 
     @Test
     public void shouldRaiseEvent() throws Exception
@@ -121,8 +120,7 @@ public class JUnitTestRunnerListenerTest
         Description              description1 = Description.createTestDescription("Foo", "testFoo1");
         Description              description2 = Description.createTestDescription("Foo", "testFoo2");
         JUnitTestRunner.Listener listener     = new JUnitTestRunner.Listener();
-        long                     start = System.currentTimeMillis();
-
+        long                     start        = System.currentTimeMillis();
 
         listener.checkClassChange(description1);
 
@@ -158,8 +156,10 @@ public class JUnitTestRunnerListenerTest
 
         // First class
         listener.checkClassChange(description1);
+
         // Pause to ensure we have some test time
         Thread.sleep(100);
+
         // Second class
         listener.checkClassChange(description2);
 
@@ -216,6 +216,7 @@ public class JUnitTestRunnerListenerTest
         assertThat(event.getProperties(), is(System.getProperties()));
     }
 
+
     @Test
     public void shouldHandleTestRunFinished() throws Exception
     {
@@ -225,11 +226,14 @@ public class JUnitTestRunnerListenerTest
 
         // Signal the run start
         long start = System.currentTimeMillis();
+
         listener.testRunStarted(description);
 
         // Sleep so we have some test time
         Thread.sleep(100);
+
         long end = System.currentTimeMillis();
+
         Thread.sleep(100);
 
         // Signal the run end
@@ -295,7 +299,9 @@ public class JUnitTestRunnerListenerTest
 
         // Sleep to allow some test time
         Thread.sleep(200);
+
         long end = System.currentTimeMillis();
+
         Thread.sleep(100);
 
         listener.testFinished(description);
@@ -380,7 +386,9 @@ public class JUnitTestRunnerListenerTest
 
         // Sleep to allow some test time
         Thread.sleep(200);
+
         long end = System.currentTimeMillis();
+
         Thread.sleep(100);
 
         listener.testAssumptionFailure(failure);
@@ -420,7 +428,9 @@ public class JUnitTestRunnerListenerTest
 
         // Sleep to allow some test time
         Thread.sleep(200);
+
         long end = System.currentTimeMillis();
+
         Thread.sleep(100);
 
         listener.testFailure(failure);
@@ -455,13 +465,11 @@ public class JUnitTestRunnerListenerTest
         Throwable                throwable   = new RuntimeException("Computer says No!");
         Failure                  failure     = new Failure(description, throwable);
         JUnitTestRunner.Listener listener    = new JUnitTestRunner.Listener();
-        long                     start       = System.currentTimeMillis();
 
         listener.testStarted(description);
 
         // Sleep to allow some test time
         Thread.sleep(500);
-        long end = System.currentTimeMillis();
 
         listener.testFailure(failure);
 
@@ -481,7 +489,6 @@ public class JUnitTestRunnerListenerTest
         assertThat(event.getType(), is(JUnitTestListener.Event.Type.testError));
         assertThat(event.getName(), is(description.getDisplayName()));
         assertThat(event.getClassName(), is("Foo"));
-        assertThat(event.getTime(), is(greaterThanOrEqualTo(end - start)));
         assertThat(event.getException(), is(throwable.getClass().getCanonicalName()));
         assertThat(event.getMessage(), is(throwable.getMessage()));
         assertThat(event.getStackTrace(), is(throwable.getStackTrace()));

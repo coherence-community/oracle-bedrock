@@ -27,25 +27,21 @@ package com.oracle.tools.runtime.java;
 
 import com.oracle.tools.Option;
 import com.oracle.tools.Options;
-
 import com.oracle.tools.deferred.AbstractDeferred;
 import com.oracle.tools.deferred.PermanentlyUnavailableException;
 import com.oracle.tools.deferred.TemporarilyUnavailableException;
-
 import com.oracle.tools.lang.ExpressionEvaluator;
 import com.oracle.tools.lang.StringHelper;
-
 import com.oracle.tools.options.Timeout;
 import com.oracle.tools.options.Variable;
 import com.oracle.tools.options.Variables;
-
 import com.oracle.tools.runtime.ApplicationListener;
 import com.oracle.tools.runtime.LocalApplicationProcess;
+import com.oracle.tools.runtime.MetaClass;
 import com.oracle.tools.runtime.Platform;
 import com.oracle.tools.runtime.Profile;
 import com.oracle.tools.runtime.Profiles;
 import com.oracle.tools.runtime.Settings;
-
 import com.oracle.tools.runtime.concurrent.ControllableRemoteChannel;
 import com.oracle.tools.runtime.concurrent.RemoteCallable;
 import com.oracle.tools.runtime.concurrent.RemoteChannel;
@@ -53,7 +49,6 @@ import com.oracle.tools.runtime.concurrent.RemoteEvent;
 import com.oracle.tools.runtime.concurrent.RemoteEventListener;
 import com.oracle.tools.runtime.concurrent.RemoteRunnable;
 import com.oracle.tools.runtime.concurrent.socket.SocketBasedRemoteChannelServer;
-
 import com.oracle.tools.runtime.java.features.JmxFeature;
 import com.oracle.tools.runtime.java.options.ClassName;
 import com.oracle.tools.runtime.java.options.IPv4Preferred;
@@ -64,44 +59,35 @@ import com.oracle.tools.runtime.java.options.SystemProperties;
 import com.oracle.tools.runtime.java.options.WaitToStart;
 import com.oracle.tools.runtime.java.profiles.CommercialFeatures;
 import com.oracle.tools.runtime.java.profiles.RemoteDebugging;
-
 import com.oracle.tools.runtime.options.Arguments;
 import com.oracle.tools.runtime.options.DisplayName;
 import com.oracle.tools.runtime.options.EnvironmentVariables;
 import com.oracle.tools.runtime.options.ErrorStreamRedirection;
 import com.oracle.tools.runtime.options.Executable;
-import com.oracle.tools.runtime.options.MetaClass;
 import com.oracle.tools.runtime.options.Orphanable;
 import com.oracle.tools.runtime.options.WorkingDirectory;
-
 import com.oracle.tools.table.Cell;
 import com.oracle.tools.table.Table;
 import com.oracle.tools.table.Tabularize;
-
 import com.oracle.tools.util.ReflectionHelper;
-
-import static com.oracle.tools.deferred.DeferredHelper.ensure;
-import static com.oracle.tools.deferred.DeferredHelper.within;
 
 import java.io.File;
 import java.io.IOException;
-
 import java.lang.reflect.Constructor;
-
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-
 import java.text.SimpleDateFormat;
-
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.UUID;
-
 import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import static com.oracle.tools.deferred.DeferredHelper.ensure;
+import static com.oracle.tools.deferred.DeferredHelper.within;
 
 /**
  * A {@link JavaApplicationLauncher} that launches a {@link JavaApplication}s as
@@ -113,8 +99,7 @@ import java.util.logging.Logger;
  *
  * @author Brian Oliver
  */
-public class LocalJavaApplicationLauncher<A extends JavaApplication>
-    implements JavaApplicationLauncher<A>
+public class LocalJavaApplicationLauncher<A extends JavaApplication> implements JavaApplicationLauncher<A>
 {
     /**
      * The {@link Logger} for this class.
@@ -132,7 +117,9 @@ public class LocalJavaApplicationLauncher<A extends JavaApplication>
 
 
     @Override
-    public A launch(Platform platform, Options options)
+    public A launch(Platform     platform,
+                    MetaClass<A> metaClass,
+                    Options      options)
     {
         // establish the diagnostics output table
         Table diagnosticsTable = new Table();
@@ -143,14 +130,6 @@ public class LocalJavaApplicationLauncher<A extends JavaApplication>
         {
             diagnosticsTable.addRow("Target Platform", platform.getName());
         }
-
-        // ----- determine the meta-class for our application -----
-
-        // establish the options for resolving the meta-class
-        Options metaOptions = new Options(platform.getOptions()).addAll(options);
-
-        // determine the meta-class
-        MetaClass metaClass = metaOptions.getOrDefault(MetaClass.class, new JavaApplication.MetaClass());
 
         // ----- establish the launch Options for the Application -----
 
@@ -181,12 +160,12 @@ public class LocalJavaApplicationLauncher<A extends JavaApplication>
 
         for (Profile profile : launchOptions.getInstancesOf(Profile.class))
         {
-            profile.onLaunching(platform, launchOptions);
+            profile.onLaunching(platform, metaClass, launchOptions);
         }
 
         // ----- give the MetaClass a last chance to manipulate any options -----
 
-        metaClass.onFinalize(platform, launchOptions);
+        metaClass.onLaunch(platform, launchOptions);
 
         // ----- determine the display name for the application -----
 
@@ -431,8 +410,7 @@ public class LocalJavaApplicationLauncher<A extends JavaApplication>
             if (propertyName.startsWith("oracletools.profile.") ||!propertyName.startsWith("oracletools"))
             {
                 processBuilder.command().add("-D" + propertyName
-                                             + (propertyValue.isEmpty()
-                                                ? "" : "=" + propertyValue));
+                                             + (propertyValue.isEmpty() ? "" : "=" + propertyValue));
 
                 systemPropertiesTable.addRow(propertyName, propertyValue);
             }

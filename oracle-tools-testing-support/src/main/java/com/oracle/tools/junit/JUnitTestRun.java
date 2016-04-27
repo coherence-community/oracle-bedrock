@@ -1,5 +1,5 @@
 /*
- * File: JUnitApplication.java
+ * File: JUnitTestRun.java
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
@@ -26,17 +26,10 @@
 package com.oracle.tools.junit;
 
 import com.oracle.tools.Options;
-
-import com.oracle.tools.runtime.Application;
 import com.oracle.tools.runtime.Platform;
-
-import com.oracle.tools.runtime.annotations.PreferredMetaClass;
-
 import com.oracle.tools.runtime.java.JavaApplication;
 import com.oracle.tools.runtime.java.options.ClassName;
-
 import com.oracle.tools.runtime.options.DisplayName;
-
 
 /**
  * An instance of a {@link JavaApplication} that runs a suite of JUnit
@@ -47,7 +40,6 @@ import com.oracle.tools.runtime.options.DisplayName;
  *
  * @author Jonathan Knight
  */
-@PreferredMetaClass(JUnitTestRun.MetaClass.class)
 public interface JUnitTestRun extends JavaApplication
 {
     /**
@@ -61,7 +53,7 @@ public interface JUnitTestRun extends JavaApplication
     /**
      * The {@link MetaClass} for {@link JUnitTestRun}s.
      */
-    class MetaClass implements com.oracle.tools.runtime.options.MetaClass<JavaApplication>
+    class MetaClass implements com.oracle.tools.runtime.MetaClass<JavaApplication>
     {
         /**
          * Constructs a {@link MetaClass} for a {@link JavaApplication}.
@@ -73,13 +65,16 @@ public interface JUnitTestRun extends JavaApplication
 
 
         @Override
-        public Class<? extends JavaApplication> getImplementationClass(Platform platform, Options options)
+        public Class<? extends JavaApplication> getImplementationClass(Platform platform,
+                                                                       Options  options)
         {
             return SimpleJUnitTestRun.class;
         }
 
+
         @Override
-        public void onLaunching(Platform platform, Options options)
+        public void onLaunching(Platform platform,
+                                Options  options)
         {
             options.add(ClassName.of(JUnitTestRunner.class));
             options.addIfAbsent(DisplayName.of("JUnit"));
@@ -87,14 +82,17 @@ public interface JUnitTestRun extends JavaApplication
 
 
         @Override
-        public void onFinalize(Platform platform, Options options)
+        public void onLaunch(Platform platform,
+                             Options  options)
         {
             // there's nothing to do before launching the application
         }
 
 
         @Override
-        public void onLaunched(Platform platform, Application application, Options options)
+        public void onLaunched(Platform        platform,
+                               JavaApplication application,
+                               Options         options)
         {
             JUnitTestRun jUnitTestRun = application.get(JUnitTestRun.class);
 

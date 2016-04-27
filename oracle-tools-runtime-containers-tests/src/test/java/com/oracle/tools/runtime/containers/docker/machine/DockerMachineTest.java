@@ -217,6 +217,10 @@ public class DockerMachineTest
         {
             return application.waitFor() == 0;
         }
+        catch (Exception e)
+        {
+            return false;
+        }
     }
 
 
@@ -255,9 +259,8 @@ public class DockerMachineTest
         {
             assertThat(list.waitFor(), is(0));
 
-            return console.getCapturedOutputLines().stream()
-                            .filter((line) -> !"(terminated)".equals(line))
-                            .collect(Collectors.toList());
+            return console.getCapturedOutputLines().stream().filter((line) -> !"(terminated)".equals(line))
+            .collect(Collectors.toList());
         }
     }
 

@@ -120,7 +120,7 @@ public class AbstractDockerCommandTest
         Options               options    = new Options(docker);
         AbstractDockerCommand command    = new CommandStub("foo");
 
-        command.onFinalize(LocalPlatform.get(), options);
+        command.onLaunch(LocalPlatform.get(), options);
 
         Executable executable = options.get(Executable.class);
 
@@ -137,7 +137,7 @@ public class AbstractDockerCommandTest
         Options               options    = new Options(docker, existing);
         AbstractDockerCommand command    = new CommandStub("foo");
 
-        command.onFinalize(LocalPlatform.get(), options);
+        command.onLaunch(LocalPlatform.get(), options);
 
         Arguments    arguments = options.get(Arguments.class);
         List<String> argList   = arguments.resolve(LocalPlatform.get(), options);
@@ -154,7 +154,7 @@ public class AbstractDockerCommandTest
         Options               options    = new Options(docker);
         AbstractDockerCommand command    = new CommandStub("foo");
 
-        command.onFinalize(LocalPlatform.get(), options);
+        command.onLaunch(LocalPlatform.get(), options);
 
         EnvironmentVariables env  = options.get(EnvironmentVariables.class);
         Properties           vars = env.realize(LocalPlatform.get());

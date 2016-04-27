@@ -162,10 +162,10 @@ public abstract class CommandWithArgumentList<C extends CommandWithArgumentList>
      * @param options    the {@link Options}  for the command
      */
     @Override
-    public void onFinalize(Platform platform, Options options)
+    public void onLaunch(Platform platform, Options options)
     {
         // call super to add all of the command's arguments
-        super.onFinalize(platform, options);
+        super.onLaunch(platform, options);
 
         // add this class's arguments to the end of the arguments list
         argumentList.forEach(options::add);

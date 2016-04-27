@@ -34,7 +34,7 @@ import com.oracle.tools.runtime.containers.docker.Docker;
 import com.oracle.tools.runtime.options.Argument;
 import com.oracle.tools.runtime.options.Arguments;
 import com.oracle.tools.runtime.options.Executable;
-import com.oracle.tools.runtime.options.MetaClass;
+import com.oracle.tools.runtime.MetaClass;
 
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
@@ -103,7 +103,7 @@ public abstract class AbstractDockerCommand<C extends AbstractDockerCommand> imp
 
 
     @Override
-    public void onFinalize(Platform platform, Options options)
+    public void onLaunch(Platform platform, Options options)
     {
         Docker    environment = options.get(Docker.class);
         Arguments arguments   = Arguments.of(environment.getArguments())

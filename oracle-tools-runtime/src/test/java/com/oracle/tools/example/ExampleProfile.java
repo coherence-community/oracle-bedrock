@@ -27,8 +27,8 @@ package com.oracle.tools.example;
 
 import com.oracle.tools.Option;
 import com.oracle.tools.Options;
-
 import com.oracle.tools.runtime.Application;
+import com.oracle.tools.runtime.MetaClass;
 import com.oracle.tools.runtime.Platform;
 import com.oracle.tools.runtime.Profile;
 
@@ -72,8 +72,9 @@ public class ExampleProfile implements Profile, Option
 
 
     @Override
-    public void onLaunching(Platform platform,
-                            Options  options)
+    public void onLaunching(Platform  platform,
+                            MetaClass metaClass,
+                            Options   options)
     {
     }
 

@@ -32,12 +32,10 @@ import com.oracle.tools.runtime.Platform;
 import com.oracle.tools.runtime.containers.docker.DockerImage;
 import com.oracle.tools.runtime.options.Argument;
 import com.oracle.tools.runtime.options.Arguments;
-import com.oracle.tools.runtime.remote.RemotePlatform;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
 import java.io.File;
-import java.net.InetAddress;
 import java.net.URL;
 import java.util.List;
 
@@ -728,7 +726,7 @@ public class BuildTest
         Platform platform = LocalPlatform.get();
         Options  options  = new Options();
 
-        build.onFinalize(platform, options);
+        build.onLaunch(platform, options);
 
         Arguments arguments = options.get(Arguments.class);
 

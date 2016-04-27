@@ -26,18 +26,11 @@
 package com.oracle.tools.runtime.coherence;
 
 import com.oracle.tools.Options;
-
-import com.oracle.tools.runtime.Application;
 import com.oracle.tools.runtime.Platform;
-
-import com.oracle.tools.runtime.annotations.PreferredMetaClass;
-
 import com.oracle.tools.runtime.coherence.options.LocalHost;
 import com.oracle.tools.runtime.coherence.options.MachineName;
-
 import com.oracle.tools.runtime.concurrent.RemoteCallable;
 import com.oracle.tools.runtime.concurrent.callable.RemoteCallableStaticMethod;
-
 import com.oracle.tools.runtime.java.ContainerBasedJavaApplicationLauncher;
 import com.oracle.tools.runtime.java.JavaApplication;
 import com.oracle.tools.runtime.java.container.ContainerClassLoader;
@@ -46,19 +39,14 @@ import com.oracle.tools.runtime.java.options.Headless;
 import com.oracle.tools.runtime.java.options.IPv4Preferred;
 import com.oracle.tools.runtime.java.options.SystemProperties;
 import com.oracle.tools.runtime.java.options.SystemProperty;
-
 import com.oracle.tools.runtime.remote.RemotePlatform;
-
 import com.tangosol.net.NamedCache;
-
 import com.tangosol.util.UID;
 
 import java.io.NotSerializableException;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
-
 import java.net.InetAddress;
-
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
@@ -71,7 +59,6 @@ import java.util.concurrent.CompletableFuture;
  *
  * @author Brian Oliver
  */
-@PreferredMetaClass(CoherenceClusterMember.MetaClass.class)
 public interface CoherenceClusterMember extends JavaApplication
 {
     /**
@@ -199,9 +186,9 @@ public interface CoherenceClusterMember extends JavaApplication
 
 
     /**
-     * The {@link com.oracle.tools.runtime.options.MetaClass} for {@link CoherenceClusterMember}s.
+     * The {@link com.oracle.tools.runtime.MetaClass} for {@link CoherenceClusterMember}s.
      */
-    class MetaClass implements com.oracle.tools.runtime.options.MetaClass<CoherenceClusterMember>,
+    class MetaClass implements com.oracle.tools.runtime.MetaClass<CoherenceClusterMember>,
                                ContainerBasedJavaApplicationLauncher.ApplicationController
     {
         /**
@@ -304,16 +291,17 @@ public interface CoherenceClusterMember extends JavaApplication
 
 
         @Override
-        public void onFinalize(Platform platform, Options options)
+        public void onLaunch(Platform platform,
+                             Options  options)
         {
             // there's nothing to do before launching the application
         }
 
 
         @Override
-        public void onLaunched(Platform    platform,
-                               Application application,
-                               Options     options)
+        public void onLaunched(Platform               platform,
+                               CoherenceClusterMember member,
+                               Options                options)
         {
             // nothing to do after launch
         }
@@ -329,7 +317,8 @@ public interface CoherenceClusterMember extends JavaApplication
 
 
         @Override
-        public CompletableFuture<Void> destroy(ContainerBasedJavaApplicationLauncher.ControllableApplication application)
+        public CompletableFuture<Void> destroy(ContainerBasedJavaApplicationLauncher
+            .ControllableApplication application)
         {
             RemoteCallable<Void> callable = new RemoteCallableStaticMethod<>(DEFAULT_CACHE_SERVER_CLASSNAME,
                                                                              "shutdown");

@@ -27,7 +27,6 @@ package com.oracle.tools.runtime;
 
 import com.oracle.tools.Option;
 import com.oracle.tools.Options;
-import com.oracle.tools.runtime.options.ApplicationType;
 import com.oracle.tools.runtime.options.Executable;
 
 import java.net.InetAddress;
@@ -49,7 +48,7 @@ public interface Platform
      *
      * @return the name of this {@link Platform}
      */
-    public String getName();
+    String getName();
 
 
     /**
@@ -71,7 +70,7 @@ public interface Platform
      *
      * @return the {@link InetAddress} of the {@link Platform}
      */
-    public InetAddress getAddress();
+    InetAddress getAddress();
 
 
     /**
@@ -82,56 +81,67 @@ public interface Platform
      *
      * @return the {@link Options}
      */
-    public Options getOptions();
+    Options getOptions();
 
 
     /**
      * Launches a new {@link Application} based on the specified program executable / command
-     * and {@link Option}s.
+     * and provided {@link Option}s.
      *
      * @param executable  the name of the executable / command to launch the application on the {@link Platform}
-     * @param options  the {@link Option}s for the {@link Application}
+     * @param options     the {@link Option}s for the {@link Application}
      *
      * @return  an {@link Application} representing the launched application
      */
-    public default Application launch(String    executable,
-                                      Option... options)
+    default Application launch(String    executable,
+                               Option... options)
     {
         // add the program as a launch option
         Options launchOptions = new Options(options).add(Executable.named(executable));
 
-        // launch as a regular Application.class
+        // launch as an Application.class
         return launch(Application.class, launchOptions.asArray());
     }
 
 
     /**
-     * Launches a new {@link Application} based on the specified class of {@link Application} and
-     * {@link Option}s.
+     * Launches a new {@link Application} based on the {@link Class} of the {@link Application} and
+     * provided {@link Option}s.
      *
-     * @param applicationClass  type of {@link Application} to launch on the {@link Platform}
+     * @param applicationClass  {@link Class} of {@link Application} to launch on the {@link Platform}
      * @param options           the {@link Option}s for the {@link Application}
+     * @param <A>               the type of {@link Application}
      *
      * @return  an {@link Application} representing the launched application
      */
-    public default <A extends Application> A launch(Class<A>  applicationClass,
-                                                    Option... options)
+    default <A extends Application> A launch(Class<A>  applicationClass,
+                                             Option... options)
     {
-        // add the program as a launch option
-        Options launchOptions = new Options(options).add(ApplicationType.of(applicationClass));
+        // auto-detect the MetaClass for the application and launch it
+        MetaClass<A> metaClass = MetaClass.of(applicationClass);
 
-        // launch as a regular Application.class
-        return launch(launchOptions.asArray());
+        if (metaClass == null)
+        {
+            throw new IllegalArgumentException("The specified application class " + applicationClass
+                + ", the interfaces it implements and its super-class does not define a public non-static MetaClass");
+        }
+        else
+        {
+            return launch(metaClass, options);
+        }
     }
 
 
-
     /**
-     * Launches a new {@link Application} based on the specified {@link Option}s.
+     * Launches a new {@link Application} based on the {@link MetaClass} of the
+     * {@link Application} and provided {@link Option}s.
      *
-     * @param options  the {@link Option}s for the {@link Application}
+     * @param metaClass  the {@link MetaClass} of the {@link Application} to launch on the {@link Platform}
+     * @param options    the {@link Option}s for the {@link Application}
+     * @param <A>        the type of {@link Application}
      *
      * @return  an {@link Application} representing the launched application
      */
-    public <A extends Application> A launch(Option... options);
+    <A extends Application> A launch(MetaClass<A> metaClass,
+                                     Option...    options);
 }

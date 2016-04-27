@@ -27,23 +27,18 @@ package com.oracle.tools.runtime.coherence.options;
 
 import com.oracle.tools.Option;
 import com.oracle.tools.Options;
-
 import com.oracle.tools.runtime.Application;
+import com.oracle.tools.runtime.MetaClass;
 import com.oracle.tools.runtime.Platform;
 import com.oracle.tools.runtime.Profile;
-
 import com.oracle.tools.runtime.coherence.CoherenceClusterMember;
-
 import com.oracle.tools.runtime.java.options.SystemProperties;
 import com.oracle.tools.runtime.java.options.SystemProperty;
-
 import com.oracle.tools.runtime.network.AvailablePortIterator;
-
 import com.oracle.tools.util.Capture;
 import com.oracle.tools.util.PerpetualIterator;
 
 import java.net.InetAddress;
-
 import java.util.Iterator;
 
 /**
@@ -206,8 +201,9 @@ public class LocalHost implements Profile, Option
 
 
     @Override
-    public void onLaunching(Platform platform,
-                            Options  options)
+    public void onLaunching(Platform  platform,
+                            MetaClass metaClass,
+                            Options   options)
     {
         if (ports != null &&!ports.hasNext())
         {
