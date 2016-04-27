@@ -80,8 +80,8 @@
 
         <module>oracle-tools-coherence</module>
 
-        <module>oracle-tools-runtime-containers</module>
-        <module>oracle-tools-runtime-containers-tests</module>
+        <module>oracle-tools-runtime-docker</module>
+        <module>oracle-tools-runtime-docker-tests</module>
 
         <module>oracle-tools-runtime-vagrant</module>
         <module>oracle-tools-runtime-vagrant-tests</module>
