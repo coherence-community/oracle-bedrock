@@ -302,7 +302,7 @@ public class DockerMachine
         Options createOptions = new Options(options);
         Timeout timeout       = createOptions.getOrDefault(Timeout.class, Timeout.after(5, TimeUnit.MINUTES));
 
-        try (Application create = launch("create", createOptions.asArray()))
+        try (Application create = launch("create", options))
         {
             if (create.waitFor(timeout) != 0)
             {
@@ -310,7 +310,12 @@ public class DockerMachine
             }
         }
 
-        return new DockerMachinePlatform(this, machineName, options);
+
+        Options platformOptions = new Options(options);
+
+        platformOptions.remove(Arguments.class);
+
+        return new DockerMachinePlatform(this, machineName, platformOptions.asArray());
     }
 
 

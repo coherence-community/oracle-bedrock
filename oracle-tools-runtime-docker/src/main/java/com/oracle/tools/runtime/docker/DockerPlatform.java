@@ -141,7 +141,7 @@ public class DockerPlatform extends AbstractPlatform
         // include the options specified when this method was called
         launchOptions.addAll(options);
 
-        launchOptions.add(docker);
+        launchOptions.addIfAbsent(docker);
 
         if (metaClass instanceof AbstractDockerCommand)
         {

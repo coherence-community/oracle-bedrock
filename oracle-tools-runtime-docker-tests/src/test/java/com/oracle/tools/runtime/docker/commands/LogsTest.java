@@ -25,11 +25,7 @@
 
 package com.oracle.tools.runtime.docker.commands;
 
-import com.oracle.tools.Options;
-import com.oracle.tools.runtime.LocalPlatform;
-import com.oracle.tools.runtime.Platform;
 import com.oracle.tools.runtime.options.Argument;
-import com.oracle.tools.runtime.options.Arguments;
 import org.junit.Test;
 
 import java.util.List;
@@ -49,7 +45,7 @@ import static org.junit.Assert.assertThat;
  *
  * @author Jonathan Knight
  */
-public class LogsTest
+public class LogsTest extends AbstractCommandTest
 {
     @Test
     public void shouldCreateLogsCommand() throws Exception
@@ -176,18 +172,5 @@ public class LogsTest
         assertThat(arguments1.contains("--test2"), is(true));
         assertThat(arguments2.contains("--test1"), is(false));
         assertThat(arguments2.contains("--test2"), is(false));
-    }
-
-
-    private List<String> resolveArguments(Logs inspect)
-    {
-        Options options  = new Options();
-        Platform platform = LocalPlatform.get();
-
-        inspect.onLaunch(platform, options);
-
-        Arguments arguments = options.get(Arguments.class);
-
-        return arguments.resolve(platform, options);
     }
 }

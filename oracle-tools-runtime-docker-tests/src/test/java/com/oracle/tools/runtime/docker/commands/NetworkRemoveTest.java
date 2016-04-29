@@ -1,5 +1,5 @@
 /*
- * File: StopTest.java
+ * File: NetworkRemoveTest.java
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
@@ -29,48 +29,25 @@ import org.junit.Test;
 
 import java.util.List;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.CoreMatchers.sameInstance;
 import static org.hamcrest.collection.IsIterableContainingInOrder.contains;
 import static org.junit.Assert.assertThat;
 
 /**
- * Tests for {@link Stop}.
+ * Tests for the {@link Network.Remove} class.
  * <p>
  * Copyright (c) 2016. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Jonathan Knight
  */
-public class StopTest extends AbstractCommandTest
+public class NetworkRemoveTest extends AbstractCommandTest
 {
     @Test
-    public void shouldCreateStopCommand() throws Exception
+    public void shouldInspectNetwork() throws Exception
     {
-        Stop         stop = Stop.containers("foo", "bar");
-        List<String> args = resolveArguments(stop);
+        Network.Remove command = Network.remove("foo", "bar");
+        List<String>   args    = resolveArguments(command);
 
-        assertThat(args, contains("stop", "foo", "bar"));
-    }
-
-
-    @Test
-    public void shouldImmutablySetTimeToKill() throws Exception
-    {
-        Stop         stop1  = Stop.containers("foo");
-        List<String> before = resolveArguments(stop1);
-        Stop         stop2  = stop1.timeUntilKill(100);
-
-        assertThat(stop1, is (not(sameInstance(stop2))));
-
-        List<String> arguments1 = resolveArguments(stop1);
-        List<String> arguments2 = resolveArguments(stop2);
-
-        assertThat(arguments1, is(before));
-
-        arguments2.removeAll(arguments1);
-
-        assertThat(arguments2, contains("--time=100"));
+        assertThat(args, contains("network", "rm", "foo", "bar"));
     }
 }

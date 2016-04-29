@@ -29,6 +29,7 @@ import com.oracle.tools.runtime.Application;
 import com.oracle.tools.runtime.LocalPlatform;
 import com.oracle.tools.runtime.console.CapturingApplicationConsole;
 import com.oracle.tools.runtime.console.Console;
+import com.oracle.tools.runtime.docker.AbstractFunctionalTest;
 import com.oracle.tools.runtime.options.Argument;
 import org.junit.Assume;
 import org.junit.Test;
@@ -47,7 +48,7 @@ import static org.junit.Assert.assertThat;
  *
  * @author Jonathan Knight
  */
-public class DockerMachineTest
+public class DockerMachineTest extends AbstractFunctionalTest
 {
     @Test
     public void shouldCreateAndRemoveDockerMachineUsingDefaultCloseBehaviour() throws Exception
@@ -202,81 +203,6 @@ public class DockerMachineTest
             // clean up in case the test failed
             killMachine(name);
             removeMachine(name);
-        }
-    }
-
-
-    /**
-     * Determine whether Docker Machine is installed.
-     *
-     * @return  true if Docker Machine is installed locally
-     */
-    public static boolean hasDockerMachine()
-    {
-        try (Application application = LocalPlatform.get().launch("docker-machine", Argument.of("--version")))
-        {
-            return application.waitFor() == 0;
-        }
-        catch (Exception e)
-        {
-            return false;
-        }
-    }
-
-
-    public static void removeMachine(String name)
-    {
-        try (Application application = LocalPlatform.get().launch("docker-machine",
-                                                                  Argument.of("rm"),
-                                                                  Argument.of("--force"),
-                                                                  Argument.of(name)))
-        {
-            application.waitFor();
-        }
-    }
-
-
-    public static void killMachine(String name)
-    {
-        try (Application application = LocalPlatform.get().launch("docker-machine",
-                                                                  Argument.of("kill"),
-                                                                  Argument.of(name)))
-        {
-            application.waitFor();
-        }
-    }
-
-
-    public static List<String> listMachines()
-    {
-        CapturingApplicationConsole console = new CapturingApplicationConsole();
-
-        try (Application list = LocalPlatform.get().launch("docker-machine",
-                                                           Argument.of("ls"),
-                                                           Argument.of("--format"),
-                                                           Argument.of("{{.Name}}"),
-                                                           Console.of(console)))
-        {
-            assertThat(list.waitFor(), is(0));
-
-            return console.getCapturedOutputLines().stream().filter((line) -> !"(terminated)".equals(line))
-            .collect(Collectors.toList());
-        }
-    }
-
-
-    public static String status(String name)
-    {
-        CapturingApplicationConsole console = new CapturingApplicationConsole();
-
-        try (Application list = LocalPlatform.get().launch("docker-machine",
-                                                           Argument.of("status"),
-                                                           Argument.of(name),
-                                                           Console.of(console)))
-        {
-            assertThat(list.waitFor(), is(0));
-
-            return console.getCapturedOutputLines().poll();
         }
     }
 }

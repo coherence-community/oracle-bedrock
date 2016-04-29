@@ -25,10 +25,6 @@
 
 package com.oracle.tools.runtime.docker.commands;
 
-import com.oracle.tools.Options;
-import com.oracle.tools.runtime.LocalPlatform;
-import com.oracle.tools.runtime.Platform;
-import com.oracle.tools.runtime.options.Arguments;
 import org.junit.Test;
 
 import java.util.List;
@@ -47,7 +43,7 @@ import static org.junit.Assert.assertThat;
  *
  * @author Jonathan Knight
  */
-public class KillTest
+public class KillTest extends AbstractCommandTest
 {
     @Test
     public void shouldCreateKillCommand() throws Exception
@@ -76,18 +72,5 @@ public class KillTest
         arguments2.removeAll(arguments1);
 
         assertThat(arguments2, contains("--signal=SIGTERM"));
-    }
-
-
-    private List<String> resolveArguments(Kill command)
-    {
-        Options options  = new Options();
-        Platform platform = LocalPlatform.get();
-
-        command.onLaunch(platform, options);
-
-        Arguments arguments = options.get(Arguments.class);
-
-        return arguments.resolve(platform, options);
     }
 }

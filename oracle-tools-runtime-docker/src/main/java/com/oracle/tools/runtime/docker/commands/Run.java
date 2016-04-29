@@ -1242,6 +1242,11 @@ public class Run extends AbstractDockerCommand<Run>
      */
     public Run net(String name)
     {
+        if (name == null || name.trim().isEmpty())
+        {
+            return this;
+        }
+
         Argument argument = Argument.of("--net", '=', name);
 
         return new Run(getCommandArguments().replace(argument), this.imageArgument, this.environmentVariables);

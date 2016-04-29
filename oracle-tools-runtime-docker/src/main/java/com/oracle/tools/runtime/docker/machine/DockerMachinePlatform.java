@@ -66,7 +66,7 @@ public class DockerMachinePlatform extends DockerPlatform implements Closeable
     {
         super(name,
               machine.getClientPlatform(),
-              Docker.machine(name, machine),
+              Docker.machine(name, machine, options),
               options);
 
         this.machine = machine;

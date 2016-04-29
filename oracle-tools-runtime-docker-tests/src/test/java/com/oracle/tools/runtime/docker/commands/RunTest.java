@@ -50,7 +50,7 @@ import static org.junit.Assert.assertThat;
  *
  * @author Jonathan Knight
  */
-public class RunTest
+public class RunTest extends AbstractCommandTest
 {
 
     @Test
@@ -490,18 +490,5 @@ public class RunTest
         assertThat(arguments1.contains("--test2"), is(true));
         assertThat(arguments2.contains("--test1"), is(false));
         assertThat(arguments2.contains("--test2"), is(false));
-    }
-
-
-    private List<String> resolveArguments(Run command)
-    {
-        Options options  = new Options();
-        Platform platform = LocalPlatform.get();
-
-        command.onLaunch(platform, options);
-
-        Arguments arguments = options.get(Arguments.class);
-
-        return arguments.resolve(platform, options);
     }
 }

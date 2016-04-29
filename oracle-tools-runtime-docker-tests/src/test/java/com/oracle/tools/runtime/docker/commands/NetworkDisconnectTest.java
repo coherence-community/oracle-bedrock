@@ -1,5 +1,5 @@
 /*
- * File: StopTest.java
+ * File: NetworkDisconnectTest.java
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
@@ -32,45 +32,46 @@ import java.util.List;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.sameInstance;
+import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInAnyOrder;
 import static org.hamcrest.collection.IsIterableContainingInOrder.contains;
 import static org.junit.Assert.assertThat;
 
 /**
- * Tests for {@link Stop}.
+ * Tests for the {@link Network.Disconnect} class.
  * <p>
  * Copyright (c) 2016. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Jonathan Knight
  */
-public class StopTest extends AbstractCommandTest
+public class NetworkDisconnectTest extends AbstractCommandTest
 {
     @Test
-    public void shouldCreateStopCommand() throws Exception
+    public void shouldConnectToNetwork() throws Exception
     {
-        Stop         stop = Stop.containers("foo", "bar");
-        List<String> args = resolveArguments(stop);
+        Network.Disconnect command = Network.disconnect("foo", "bar");
+        List<String>       args    = resolveArguments(command);
 
-        assertThat(args, contains("stop", "foo", "bar"));
+        assertThat(args, contains("network", "disconnect", "foo", "bar"));
     }
 
 
     @Test
-    public void shouldImmutablySetTimeToKill() throws Exception
+    public void shouldImmutablyAddForce() throws Exception
     {
-        Stop         stop1  = Stop.containers("foo");
-        List<String> before = resolveArguments(stop1);
-        Stop         stop2  = stop1.timeUntilKill(100);
+        Network.Disconnect  command1 = Network.disconnect("foo", "bar");
+        List<String>        before   = resolveArguments(command1);
+        Network.Disconnect  command2 = command1.force();
 
-        assertThat(stop1, is (not(sameInstance(stop2))));
+        assertThat(command1, is (not(sameInstance(command2))));
 
-        List<String> arguments1 = resolveArguments(stop1);
-        List<String> arguments2 = resolveArguments(stop2);
+        List<String> arguments1 = resolveArguments(command1);
+        List<String> arguments2 = resolveArguments(command2);
 
         assertThat(arguments1, is(before));
 
         arguments2.removeAll(arguments1);
 
-        assertThat(arguments2, contains("--time=100"));
+        assertThat(arguments2, containsInAnyOrder("--force"));
     }
 }

@@ -25,10 +25,6 @@
 
 package com.oracle.tools.runtime.docker.commands;
 
-import com.oracle.tools.Options;
-import com.oracle.tools.runtime.LocalPlatform;
-import com.oracle.tools.runtime.Platform;
-import com.oracle.tools.runtime.options.Arguments;
 import org.junit.Test;
 
 import java.util.List;
@@ -49,7 +45,7 @@ import static org.junit.Assert.assertThat;
  *
  * @author Jonathan Knight
  */
-public class RemoveTest
+public class RemoveTest extends AbstractCommandTest
 {
     @Test
     public void shouldCreateRemoveContainerCommand() throws Exception
@@ -231,18 +227,5 @@ public class RemoveTest
         List<String> args = resolveArguments(command);
 
         assertThat(args, contains("rm", "--link", "foo/bar"));
-    }
-
-
-    private List<String> resolveArguments(AbstractDockerCommand command)
-    {
-        Options options  = new Options();
-        Platform platform = LocalPlatform.get();
-
-        command.onLaunch(platform, options);
-
-        Arguments arguments = options.get(Arguments.class);
-
-        return arguments.resolve(platform, options);
     }
 }

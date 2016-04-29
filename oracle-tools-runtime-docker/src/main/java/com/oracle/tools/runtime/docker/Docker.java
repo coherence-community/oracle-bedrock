@@ -30,6 +30,7 @@ import com.oracle.tools.Options;
 import com.oracle.tools.runtime.Application;
 import com.oracle.tools.runtime.LocalPlatform;
 import com.oracle.tools.runtime.Platform;
+import com.oracle.tools.runtime.docker.commands.Network;
 import com.oracle.tools.runtime.docker.machine.DockerMachine;
 import com.oracle.tools.runtime.docker.options.DockerDefaultBaseImages;
 import com.oracle.tools.runtime.options.Argument;
@@ -41,6 +42,7 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -208,6 +210,11 @@ public class Docker implements Option
      * classes.
      */
     private final DockerDefaultBaseImages baseImages;
+
+    /**
+     * The name of the network to connect automatically created containers to.
+     */
+    private String defaultNetwork;
 
 
     /**
@@ -405,6 +412,46 @@ public class Docker implements Option
     {
         return baseImages.getBaseImage(applicationClass);
     }
+
+
+    /**
+     * Obtain a new {@link Docker} environment that is a copy of
+     * this environment with the addition of the specified
+     * default network name.
+     *
+     * @param networkName  the name of the default network to connect
+     *                     automatically created containers to
+     *
+     * @return  a new {@link Docker} environment that is a copy of
+     *          this environment with the addition of the specified
+     *          default network name
+     */
+    public Docker withDefaultNetwork(String networkName)
+    {
+        Docker docker = new Docker(this.daemonAddress,
+                                   this.dockerExecutable,
+                                   this.environmentVariables,
+                                   this.arguments,
+                                   this.baseImages);
+
+        docker.defaultNetwork = networkName;
+
+        return docker;
+    }
+
+
+    /**
+     * Obtain the name of the default network to connect
+     * automatically run containers to.
+     *
+     * @return  the name of the default network to connect
+     *          automatically run containers to
+     */
+    public String getDefaultNetworkName()
+    {
+        return defaultNetwork;
+    }
+
 
     /**
      * Obtain a copy of this {@link Docker} environment with the
@@ -706,6 +753,24 @@ public class Docker implements Option
      */
     public Docker withEnvironmentVariables(EnvironmentVariable... environmentVariables)
     {
+        return withEnvironmentVariables(Arrays.asList(environmentVariables));
+    }
+
+
+    /**
+     * Obtain a copy of this {@link Docker} environment with the
+     * addition of the specified {@link EnvironmentVariable}s.
+     * <p>
+     * The {@link EnvironmentVariable}s will be applied to any process
+     * running Docker commands using this {@link Docker} environment.
+     *
+     * @param environmentVariables  the {@link EnvironmentVariable}s to use
+     *
+     * @return  a copy of this {@link Docker} environment with the
+     *          addition of the specified {@link EnvironmentVariable}s
+     */
+    public Docker withEnvironmentVariables(List<EnvironmentVariable> environmentVariables)
+    {
         return new Docker(this.daemonAddress,
                           this.dockerExecutable,
                           replaceEnvVariable(this.environmentVariables, environmentVariables),
@@ -761,7 +826,7 @@ public class Docker implements Option
      * @return  the copied {@link List} of {@link EnvironmentVariable}s
      */
     private List<EnvironmentVariable> replaceEnvVariable(List<EnvironmentVariable> toCopy,
-                                                         EnvironmentVariable...    environmentVariables)
+                                                         List<EnvironmentVariable> environmentVariables)
     {
         List<EnvironmentVariable> copy = new ArrayList<>(toCopy);
 
@@ -915,24 +980,23 @@ public class Docker implements Option
      * instance.
      *
      * @param machineName  the name of a Docker Machine machine
+     * @param machine      the {@link DockerMachine} environment
      */
-    public static Docker machine(String machineName, DockerMachine machine)
+    public static Docker machine(String machineName, DockerMachine machine, Option... options)
     {
+        Options                   machineOptions       = new Options(options);
         List<EnvironmentVariable> environmentVariables = machine.environmentFor(machineName);
-        List<Argument>            arguments            = new ArrayList<>();
         String                    dockerHost           = environmentVariables.stream()
                                                             .filter((envVar) -> envVar.getName().equals(ENV_DOCKER_HOST))
                                                             .findFirst()
                                                             .map((envVar) -> String.valueOf(envVar.getValue()))
                                                             .orElse(null);
 
-        arguments.add(Argument.of(ARG_HOST, '=', dockerHost));
+        Docker docker = machineOptions.get(Docker.class);
 
-        return new Docker(dockerHost,
-                          DEFAULT_EXECUTABLE,
-                          environmentVariables,
-                          arguments,
-                          DockerDefaultBaseImages.defaultImages());
+        return docker.withDaemonAddress(dockerHost)
+                     .withEnvironmentVariables(environmentVariables)
+                     .withCommandOptions(Argument.of(ARG_HOST, '=', dockerHost));
     }
 
 

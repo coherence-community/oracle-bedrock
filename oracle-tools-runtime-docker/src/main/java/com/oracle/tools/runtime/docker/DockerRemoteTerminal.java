@@ -62,7 +62,6 @@ import com.oracle.tools.runtime.remote.RemoteTerminal;
 import com.oracle.tools.runtime.remote.options.Deployer;
 import com.oracle.tools.table.Table;
 
-import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonValue;
 import java.io.File;
@@ -388,10 +387,13 @@ public class DockerRemoteTerminal implements RemoteTerminal, Deployer
         List<Integer> portList = ports.getPorts().stream().map(Ports.Port::getActualPort).collect(Collectors.toList());
 
         // ----- create the Run command -----
-        Run runCommand = Run.image(image,
-                                   containerName).interactive().hostName(containerName)
-                                   .env(launchable.getEnvironmentVariables(platform,
-                                                                           options)).publish(portList).autoRemove();
+        Run runCommand = Run.image(image, containerName)
+                            .interactive()
+                            .net(docker.getDefaultNetworkName())
+                            .hostName(containerName)
+                            .env(launchable.getEnvironmentVariables(platform, options))
+                            .publish(portList)
+                            .autoRemove();
 
         Options containerOptions = new Options(options).addAll(displayName,
                                                                docker,
@@ -401,19 +403,16 @@ public class DockerRemoteTerminal implements RemoteTerminal, Deployer
                                                                containerArgs);
 
         // ----- start the application to capture Docker events so that we know when the container is in the running state -----
-        EventsApplicationConsole.CountDownListener latch     = new EventsApplicationConsole.CountDownListener(1);
-        Predicate<String>                          predicate = (line) -> line.contains("container start");
-        EventsApplicationConsole eventConsole = new EventsApplicationConsole().withStdOutListener(predicate, latch);
+        EventsApplicationConsole.CountDownListener latch        = new EventsApplicationConsole.CountDownListener(1);
+        Predicate<String>                          predicate    = (line) -> line.contains("container start");
+        EventsApplicationConsole                   eventConsole = new EventsApplicationConsole().withStdOutListener(predicate, latch);
 
         try (Application events = platform.launch(Events.fromContainer(containerName),
                                                   docker,
                                                   Console.of(eventConsole)))
         {
             // ----- launch the container -----
-            // TODO: is this correct? the MetaClass probably needs to be passed in
-            MetaClass metaClass = new Application.MetaClass();
-
-            ContainerApplication application = platform.launch(new ContainerMetaClass(runCommand, metaClass),
+            ContainerApplication application = platform.launch(new ContainerMetaClass(runCommand),
                                                                containerOptions.asArray());
 
             // ----- get the container feature from the application -----
@@ -439,8 +438,7 @@ public class DockerRemoteTerminal implements RemoteTerminal, Deployer
             }
 
             // ----- obtain the port mappings from the container -----
-            JsonArray  json    = (JsonArray) container.inspect();
-            JsonObject jsonNet = json.getJsonObject(0).getJsonObject("NetworkSettings");
+            JsonObject jsonNet = (JsonObject) container.inspect("{{json .NetworkSettings}}");
 
             if (!jsonNet.get("Ports").getValueType().equals(JsonValue.ValueType.NULL))
             {
@@ -695,27 +693,19 @@ public class DockerRemoteTerminal implements RemoteTerminal, Deployer
     public static class ContainerMetaClass implements MetaClass<ContainerApplication>
     {
         /**
-         * The real {@link MetaClass} to proxy calls to.
-         */
-        private final MetaClass metaClass;
-
-        /**
          * The {@link Run} command used to start the container.
          */
         private final Run runCommand;
 
 
         /**
-         * Create a {@link ContainerMetaClass} that wraps the specified
-         * {@link MetaClass}.
+         * Create a {@link ContainerMetaClass}
          *
-         * @param metaClass  the {@link MetaClass} to wrap
+         * @param runCommand  the {@link Run} command being executed
          */
-        public ContainerMetaClass(Run       runCommand,
-                                  MetaClass metaClass)
+        public ContainerMetaClass(Run runCommand)
         {
             this.runCommand = runCommand;
-            this.metaClass  = metaClass;
         }
 
 
@@ -731,7 +721,6 @@ public class DockerRemoteTerminal implements RemoteTerminal, Deployer
         public void onLaunching(Platform platform,
                                 Options  options)
         {
-            metaClass.onLaunching(platform, options);
             runCommand.onLaunching(platform, options);
         }
 
@@ -740,7 +729,6 @@ public class DockerRemoteTerminal implements RemoteTerminal, Deployer
         public void onLaunch(Platform platform,
                              Options  options)
         {
-            metaClass.onLaunch(platform, options);
             runCommand.onLaunch(platform, options);
         }
 
@@ -750,7 +738,6 @@ public class DockerRemoteTerminal implements RemoteTerminal, Deployer
                                ContainerApplication application,
                                Options              options)
         {
-            metaClass.onLaunched(platform, application, options);
             runCommand.onLaunched(platform, application, options);
         }
     }

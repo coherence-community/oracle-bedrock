@@ -206,13 +206,16 @@ public class Inspect extends CommandWithArgumentList<Inspect>
         {
             if (app.waitFor() != 0)
             {
+                console.getCapturedOutputLines().forEach(System.out::println);
+                console.getCapturedErrorLines().forEach(System.err::println);
                 return null;
             }
         }
 
         Queue<String> lines = console.getCapturedOutputLines();
-        String json = lines.stream().filter((line) -> line != null
-                                                      &&!line.equals("(terminated)")).collect(Collectors.joining())
+        String        json  = lines.stream()
+                                   .filter((line) -> line != null && !line.equals("(terminated)"))
+                                   .collect(Collectors.joining("\n"))
                                                       .trim();
 
         if (!json.startsWith("[") &&!json.startsWith("{"))
@@ -222,6 +225,17 @@ public class Inspect extends CommandWithArgumentList<Inspect>
 
         JsonReader reader = Json.createReader(new StringReader(json));
 
-        return reader.read();
+        try
+        {
+            return reader.read();
+        }
+        catch (Exception e)
+        {
+            System.err.println("Error parsing JSON");
+            System.err.println(json);
+            e.printStackTrace();
+
+            return null;
+        }
     }
 }

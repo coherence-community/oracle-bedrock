@@ -28,9 +28,7 @@ package com.oracle.tools.runtime.docker.commands;
 import com.oracle.tools.Options;
 import com.oracle.tools.options.Timeout;
 import com.oracle.tools.runtime.LocalPlatform;
-import com.oracle.tools.runtime.Platform;
 import com.oracle.tools.runtime.options.Argument;
-import com.oracle.tools.runtime.options.Arguments;
 import org.junit.Test;
 
 import java.util.Collections;
@@ -55,7 +53,7 @@ import static org.junit.Assert.assertThat;
  *
  * @author Jonathan Knight
  */
-public class SimpleDockerCommandTest
+public class SimpleDockerCommandTest extends AbstractCommandTest
 {
     @Test
     public void shouldOnlyHaveCommandNameAsArguments() throws Exception
@@ -132,18 +130,5 @@ public class SimpleDockerCommandTest
         assertThat(arguments1.contains("--test2"), is(true));
         assertThat(arguments2.contains("--test1"), is(false));
         assertThat(arguments2.contains("--test2"), is(false));
-    }
-
-
-    private List<String> resolveArguments(SimpleDockerCommand command)
-    {
-        Options options  = new Options();
-        Platform platform = LocalPlatform.get();
-
-        command.onLaunch(platform, options);
-
-        Arguments arguments = options.get(Arguments.class);
-
-        return arguments.resolve(platform, options);
     }
 }

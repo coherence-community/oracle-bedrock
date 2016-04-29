@@ -27,7 +27,6 @@ package com.oracle.tools.runtime.docker.commands;
 
 import com.oracle.tools.Options;
 import com.oracle.tools.runtime.Application;
-import com.oracle.tools.runtime.LocalPlatform;
 import com.oracle.tools.runtime.Platform;
 import com.oracle.tools.runtime.docker.DockerImage;
 import com.oracle.tools.runtime.options.Argument;
@@ -59,7 +58,7 @@ import static org.mockito.Mockito.verify;
  *
  * @author Jonathan Knight
  */
-public class BuildTest
+public class BuildTest extends AbstractCommandTest
 {
     @Test
     public void shouldUseDefaultBuild() throws Exception
@@ -718,18 +717,5 @@ public class BuildTest
 
         assertThat(image, is(notNullValue()));
         assertThat(image.getTags(), containsInAnyOrder("foo", "bar"));
-    }
-
-
-    private List<String> resolveArguments(Build build)
-    {
-        Platform platform = LocalPlatform.get();
-        Options  options  = new Options();
-
-        build.onLaunch(platform, options);
-
-        Arguments arguments = options.get(Arguments.class);
-
-        return arguments.resolve(platform, options);
     }
 }

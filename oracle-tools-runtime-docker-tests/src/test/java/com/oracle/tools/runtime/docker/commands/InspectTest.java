@@ -30,13 +30,12 @@ import com.oracle.tools.Options;
 import com.oracle.tools.runtime.Application;
 import com.oracle.tools.runtime.ApplicationConsole;
 import com.oracle.tools.runtime.ApplicationConsoleBuilder;
-import com.oracle.tools.runtime.LocalPlatform;
 import com.oracle.tools.runtime.MetaClass;
 import com.oracle.tools.runtime.Platform;
 import com.oracle.tools.runtime.docker.Docker;
 import com.oracle.tools.runtime.options.Argument;
-import com.oracle.tools.runtime.options.Arguments;
 import org.junit.Test;
+import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
 import javax.json.JsonArray;
@@ -62,7 +61,7 @@ import static org.mockito.Mockito.when;
  *
  * @author Jonathan Knight
  */
-public class InspectTest
+public class InspectTest extends AbstractCommandTest
 {
     @Test
     public void shouldInspectContainer() throws Exception
@@ -218,27 +217,7 @@ public class InspectTest
         Docker      docker      = Docker.auto();
 
         when(application.waitFor(anyVararg())).thenReturn(0);
-        when(platform.launch(any(MetaClass.class), anyVararg())).then((Answer<Application>) invocation -> {
-                                                                                                Options options =
-                                                                                                    new Options();
-
-                                                                                                Arrays.stream(invocation.getArguments())
-                                                                                                .filter(arg -> arg instanceof Option)
-                                                                                                .forEach(arg -> options.add((Option) arg));
-
-                                                                                                ApplicationConsoleBuilder builder =
-                                                                                                    options.get(ApplicationConsoleBuilder.class);
-                                                                                                ApplicationConsole console =
-                                                                                                    builder.build("Foo");
-
-                                                                                                PrintWriter writer =
-                                                                                                    console.getOutputWriter();
-
-                                                                                                writer.println("[{\"Id\": \"foo-id\"}]");
-                                                                                                writer.flush();
-
-                                                                                                return application;
-                                                                                            });
+        when(platform.launch(any(MetaClass.class), anyVararg())).then(new LaunchAnswer(application));
 
         JsonArray jsonArray = (JsonArray) Inspect.image("foo").run(platform, docker);
 
@@ -246,15 +225,33 @@ public class InspectTest
     }
 
 
-    private List<String> resolveArguments(Inspect inspect)
+    private class LaunchAnswer implements Answer<Application>
     {
-        Options  options  = new Options();
-        Platform platform = LocalPlatform.get();
+        private Application application;
 
-        inspect.onLaunch(platform, options);
+        public LaunchAnswer(Application application)
+        {
+            this.application = application;
+        }
 
-        Arguments arguments = options.get(Arguments.class);
+        @Override
+        public Application answer(InvocationOnMock invocation) throws Throwable
+        {
+            Options options = new Options();
 
-        return arguments.resolve(platform, options);
+            Arrays.stream(invocation.getArguments())
+                  .filter(arg -> arg instanceof Option)
+                  .forEach(arg -> options.add((Option) arg));
+
+            ApplicationConsoleBuilder builder = options.get(ApplicationConsoleBuilder.class);
+            ApplicationConsole console = builder.build("Foo");
+
+            PrintWriter writer = console.getOutputWriter();
+
+            writer.println("[{\"Id\": \"foo-id\"}]");
+            writer.flush();
+
+            return application;
+        }
     }
 }

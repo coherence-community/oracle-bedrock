@@ -30,6 +30,7 @@ import com.oracle.tools.runtime.Platform;
 import com.oracle.tools.runtime.options.Argument;
 import com.oracle.tools.runtime.options.Arguments;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -97,6 +98,11 @@ public abstract class CommandWithArgumentList<C extends CommandWithArgumentList>
      */
     private void setArgList(List<?> values)
     {
+        if (values == null || values.isEmpty())
+        {
+            this.argumentList = Collections.emptyList();
+        }
+
         this.argumentList = values.stream()
                           .filter((value) -> value != null)
                           .map(Argument::of)
