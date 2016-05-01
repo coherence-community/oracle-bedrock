@@ -1,9 +1,9 @@
 /*
- * File: FluentPlatformSchema.java
+ * File: PlatformPredicate.java
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * The contents of this file are subject to the terms and conditions of 
+ * The contents of this file are subject to the terms and conditions of
  * the Common Development and Distribution License 1.0 (the "License").
  *
  * You may not use this file except in compliance with the License.
@@ -23,21 +23,36 @@
  * "Portions Copyright [year] [name of copyright owner]"
  */
 
-package com.oracle.tools.runtime;
+package com.oracle.tools.runtime.options;
+
+import com.oracle.tools.Option;
+import com.oracle.tools.Options;
+import com.oracle.tools.runtime.Infrastructure;
+import com.oracle.tools.runtime.LocalPlatform;
+import com.oracle.tools.runtime.Platform;
+
+import java.util.function.Predicate;
 
 /**
- * An {@link PlatformSchema} extension defining {@link PlatformSchema} specific
- * fluent-methods.
+ * An {@link Option} to specify a {@link Predicate} for matching a {@link Platform}.
  * <p>
- * Copyright (c) 2014. All Rights Reserved. Oracle Corporation.<br>
+ * Copyright (c) 2016. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
- * @author Jonathan Knight
+ * @author Brian Oliver
  *
- * @param <P>  the type of {@link Platform} that can be configured by the {@link FluentPlatformSchema}
- * @param <S>  the type of {@link FluentPlatformSchema} that will be returned from fluent methods
+ * @see Infrastructure
  */
-public interface FluentPlatformSchema<P extends Platform, S extends FluentPlatformSchema<P, S>>
-    extends PlatformSchema<P>
+public interface PlatformPredicate extends Predicate<Platform>, Option
 {
+    /**
+     * A {@link PlatformPredicate} that matches an instance of the {@link LocalPlatform}.
+     *
+     * @return  a {@link PlatformPredicate}
+     */
+    @Options.Default
+    static PlatformPredicate isLocal()
+    {
+        return platform -> platform instanceof LocalPlatform;
+    }
 }

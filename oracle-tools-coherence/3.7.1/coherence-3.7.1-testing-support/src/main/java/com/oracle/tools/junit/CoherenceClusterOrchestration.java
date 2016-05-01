@@ -207,10 +207,7 @@ public class CoherenceClusterOrchestration extends ExternalResource
 
         storageServerOptions.addAll(clusterCreationOptions);
 
-        clusterBuilder.include(storageMemberCount,
-                               platform,
-                               CoherenceClusterMember.class,
-                               storageServerOptions.asArray());
+        clusterBuilder.include(storageMemberCount, CoherenceClusterMember.class, storageServerOptions.asArray());
 
         // define the schema for the proxy enabled members of the cluster
         Options proxyServerOptions = createProxyServerOptions();
@@ -219,7 +216,7 @@ public class CoherenceClusterOrchestration extends ExternalResource
 
         int proxyMemberCount = 1;
 
-        clusterBuilder.include(proxyMemberCount, platform, CoherenceClusterMember.class, proxyServerOptions.asArray());
+        clusterBuilder.include(proxyMemberCount, CoherenceClusterMember.class, proxyServerOptions.asArray());
 
         int preferredClusterSize = storageMemberCount + proxyMemberCount;
 

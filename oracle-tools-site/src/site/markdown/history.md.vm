@@ -399,6 +399,12 @@ reverse chronological order.
     NativeJavaApplicationBuilder -> LocalJavaApplicationBuilder
     VirtualizedJavaApplicationBuilder -> ContainerBasedJavaApplicationBuilder
 
+*   [ORACLETOOLS-145](https://java.net/jira/browse/ORACLETOOLS-145): Refactored
+    Infrastructure interface to use Options.
+
+    *BREKAING CHANGE:*  Removed SimpleInfrastructure (will re-introduce later
+    as part of cloud support)
+
 *   [ORACLETOOLS-146](https://java.net/jira/browse/ORACLETOOLS-146): Refactored
     Platform.realize(...) to reorder the parameters so that using Options
     is permitted (in various other classes).
@@ -697,6 +703,21 @@ reverse chronological order.
 
     *BREAKING CHANGE:*  All uses of the previous Predicate interface must be
     refactored to use the Java 8 Predicate interface.
+
+*   [ORACLETOOLS-318](https://java.net/jira/browse/ORACLETOOLS-318): Refactored
+    Vagrant implementation to use Options and consequently remove *Schema interfaces
+    and classes.
+
+    *BREAKING CHANGE:*  All Vagrant*Schema interfaces have now been replaced
+    with the new options in the com.oracle.tools.runtime.virtual.vagrant package.
+
+*   [ORACLETOOLS-319](https://java.net/jira/browse/ORACLETOOLS-319): Refactored
+    AssemblyBuilder to use Infrastructure and remove the requirement to provide
+    a Platform when defining an Application
+
+    *BREAKING CHANGE:*  Adding application definitions to an AssemblyBuilder
+    no longer requires a Platform.  Instead the provided Options are used
+    to automatically determine the desired Platform.
 
 <h4>oracle-tools-runtime-jacoco</h4>
 

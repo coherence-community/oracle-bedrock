@@ -25,163 +25,60 @@
 
 package com.oracle.tools.runtime;
 
-import java.io.Closeable;
-import java.io.IOException;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import com.oracle.tools.Option;
+import com.oracle.tools.Options;
+import com.oracle.tools.runtime.options.PlatformPredicate;
 
 /**
- * An Infrastructure represents a set of one or more {@link Platform}s.
- * </p>
- * An Infrastructure is created using an {@link InfrastructureBuilder}.
+ * {@link Infrastructure} represents and provides a mechanism to acquire {@link Platform}s
+ * satisfying zero or more {@link Option}s.
  * <p>
  * Copyright (c) 2014. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Jonathan Knight
+ * @author Brian Oliver
  */
-public class Infrastructure<P extends Platform> implements Iterable<P>, Closeable
+public interface Infrastructure
 {
     /**
-     * The {@link Platform}s that make up this {@link Infrastructure}.
-     */
-    private final Map<String, P> platforms;
-
-    /**
-     * Construct an empty {@link Infrastructure}.
-     */
-    public Infrastructure()
-    {
-        this(null);
-    }
-
-    /**
-     * Construct an {@link Infrastructure} made up of the specified
-     * {@link Platform}s.
+     * Acquire the {@link Platform} that satisfies the specified {@link Option}s.
+     * <p>
+     * Typically {@link Infrastructure} implementations will look for the {@link PlatformPredicate}
+     * {@link Option} in order to determine, match and provide a suitable {@link Platform},
+     * however this behavior ultimately dependent on the type of {@link Infrastructure}.
      *
-     * @param platforms  the {@link Platform}s that this {@link Infrastructure} will contain
+     * @param options  the {@link Option}s
+     *
+     * @return  the {@link Platform} or <code>null</code> if the {@link Infrastructure}
+     *          can't provide a {@link Platform} satisfying the {@link Option}s
+     *
+     * @see PlatformPredicate
      */
-    public Infrastructure(Map<String, P> platforms)
-    {
-        this.platforms = new HashMap<String,P>();
-        if (platforms != null)
-        {
-            this.platforms.putAll(platforms);
-        }
-    }
+    Platform getPlatform(Option... options);
 
 
     /**
-     * Obtain the number of {@link Platform}s in this {@link Infrastructure}.
+     * Obtains {@link Infrastructure} represents the {@link LocalPlatform}.
+     * <p>
+     * All calls to {@link #getPlatform(Option...)} will attempt to match against
+     * the {@link LocalPlatform}.
      *
-     * @return the number of {@link Platform}s in this {@link Infrastructure}
+     * @return  {@link Infrastructure} representing the {@link LocalPlatform}
      */
-    public int size()
+    static Infrastructure local()
     {
-        return platforms.size();
-    }
+        return (options -> {
 
-    /**
-     * Obtain the {@link Platform} with the specified name from
-     * this {@link Infrastructure}.
-     *
-     * @param name  the name of the {@link Platform} to obtain
-     *
-     * @return the {@link Platform} with the specified name or null
-     *         if this {@link Infrastructure} contains no {@link Platform}
-     *         with the specified name
-     */
-    @SuppressWarnings("unchecked")
-    public <T extends P> T getPlatform(String name)
-    {
-        return (T) platforms.get(name);
-    }
+            // obtain the PlatformPredicate (just in case one has been provided)
+                    Options platformOptions = Options.from(options);
 
-    /**
-     * Add an existing {@link Platform} to this infrastructure.
-     *
-     * @param platform  the {@link Platform} to add
-     *
-     * @throws IllegalArgumentException if a {@link Platform} with the same name
-     *                                  already exists in this {@link Infrastructure}
-     */
-    public void addPlatform(P platform)
-    {
-        String name = platform.getName();
-        if (platforms.containsKey(name))
-        {
-            throw new IllegalArgumentException("This infrastructure already contains a platform with the name " + name);
-        }
+                    // assume using the LocalPlatform if there's no predicate
+                    PlatformPredicate predicate = platformOptions.getOrDefault(PlatformPredicate.class,
+                                                                               PlatformPredicate.isLocal());
 
-        platforms.put(name, platform);
-    }
-
-    /**
-     * Obtain an {@link Iterator} that will iterate over
-     * the {@link Platform}s contained within this
-     * {@link Infrastructure}.
-     *
-     * @return an {@link Iterator} that will iterate over
-     *         the {@link Platform}s contained within this
-     *         {@link Infrastructure}
-     */
-    @Override
-    public Iterator<P> iterator()
-    {
-        return Collections.unmodifiableCollection(platforms.values()).iterator();
-    }
-
-    /**
-     * Close the {@link Platform} with the specified name
-     * and remove it from this {@link Infrastructure}.
-     *
-     * @param name  the name of the {@link Platform} to close
-     */
-    public void closePlatform(String name)
-    {
-        P platform = platforms.remove(name);
-        if (platform instanceof Closeable)
-        {
-            try
-            {
-                ((Closeable) platform).close();
-            }
-            catch (IOException e)
-            {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    /**
-     * Close this {@link Infrastructure} by closing all of the
-     * {@link Platform}s that are contained within it that also
-     * implement {@link java.io.Closeable}.
-     *
-     * @throws IOException if an error occurs
-     *
-     * @see java.io.Closeable
-     */
-    @Override
-    public void close() throws IOException
-    {
-        for (P platform : platforms.values())
-        {
-            if (platform instanceof Closeable)
-            {
-                try
-                {
-                    ((Closeable) platform).close();
-                }
-                catch (IOException e)
-                {
-                    e.printStackTrace();
-                }
-            }
-        }
-
-        platforms.clear();
+                    // only return the LocalPlatform if the predicate matches
+                    return predicate.test(LocalPlatform.get()) ? LocalPlatform.get() : null;
+                });
     }
 }

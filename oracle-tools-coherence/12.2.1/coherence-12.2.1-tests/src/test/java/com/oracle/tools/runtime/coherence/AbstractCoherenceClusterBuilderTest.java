@@ -86,7 +86,6 @@ public abstract class AbstractCoherenceClusterBuilderTest extends AbstractTest
         CoherenceClusterBuilder builder        = new CoherenceClusterBuilder();
 
         builder.include(CLUSTER_SIZE,
-                        getPlatform(),
                         CoherenceClusterMember.class,
                         clusterPort,
                         LocalHost.only(),
@@ -117,7 +116,6 @@ public abstract class AbstractCoherenceClusterBuilderTest extends AbstractTest
         CoherenceClusterBuilder builder        = new CoherenceClusterBuilder();
 
         builder.include(2,
-                        getPlatform(),
                         CoherenceClusterMember.class,
                         DisplayName.of("storage"),
                         clusterPort,
@@ -127,7 +125,6 @@ public abstract class AbstractCoherenceClusterBuilderTest extends AbstractTest
                         LocalStorage.enabled());
 
         builder.include(1,
-                        getPlatform(),
                         CoherenceClusterMember.class,
                         DisplayName.of("extend"),
                         clusterPort,
@@ -192,7 +189,6 @@ public abstract class AbstractCoherenceClusterBuilderTest extends AbstractTest
         CoherenceClusterBuilder clusterBuilder     = new CoherenceClusterBuilder();
 
         clusterBuilder.include(desiredClusterSize,
-                               getPlatform(),
                                CoherenceClusterMember.class,
                                DisplayName.of("storage"),
                                LocalStorage.enabled(),
@@ -230,7 +226,6 @@ public abstract class AbstractCoherenceClusterBuilderTest extends AbstractTest
         CoherenceClusterBuilder builder        = new CoherenceClusterBuilder();
 
         builder.include(CLUSTER_SIZE,
-                        platform,
                         CoherenceClusterMember.class,
                         DisplayName.of("DCS"),
                         clusterPort,
@@ -246,7 +241,7 @@ public abstract class AbstractCoherenceClusterBuilderTest extends AbstractTest
                 StabilityPredicate.of(c -> c.findAny().get().getServiceStatus("PartitionedCache")
                                            == ServiceStatus.NODE_SAFE);
 
-            cluster.unordered().limit(2).relaunch(predicate);
+            cluster.unordered().relaunch(predicate);
 
             assertThat(invoking(cluster).getClusterSize(), is(CLUSTER_SIZE));
 
@@ -280,7 +275,6 @@ public abstract class AbstractCoherenceClusterBuilderTest extends AbstractTest
         CoherenceClusterBuilder builder        = new CoherenceClusterBuilder();
 
         builder.include(CLUSTER_SIZE,
-                        getPlatform(),
                         CoherenceClusterMember.class,
                         clusterPort,
                         ClusterName.of("Access"));
@@ -320,7 +314,6 @@ public abstract class AbstractCoherenceClusterBuilderTest extends AbstractTest
         CoherenceClusterBuilder builder        = new CoherenceClusterBuilder();
 
         builder.include(CLUSTER_SIZE,
-                        getPlatform(),
                         CoherenceClusterMember.class,
                         clusterPort,
                         ClusterName.of("Access"),

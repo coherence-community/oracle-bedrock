@@ -28,7 +28,7 @@ package com.oracle.tools.runtime;
 import com.oracle.tools.Option;
 
 /**
- * A builder of {@link Assembly}s.
+ * A builder of {@link Assembly}s on {@link Infrastructure}.
  * <p>
  * Copyright (c) 2014. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
@@ -39,36 +39,57 @@ import com.oracle.tools.Option;
 public interface AssemblyBuilder<A extends Application, G extends Assembly<A>>
 {
     /**
-     * Includes the necessary information required for launching one or more {@link Application}s of a specified
-     * type as part of an {@link Assembly} on the specified {@link Platform} when {@link #build(Option...)}
-     * method is called.
+     * Includes the necessary information for launching one or more {@link Application}s of a specified
+     * type as part of an {@link Assembly}, using {@link Platform#launch(Class, Option...)} when
+     * {@link #build(Infrastructure, Option...)} method is called.
+     * <p>
+     * The {@link Platform} on which the {@link Application}s are launch on the {@link Infrastructure} is
+     * based on the specified {@link Option}s.
      * <p>
      * Multiple calls to this method are permitted, allowing an {@link Assembly} to be created containing
      * multiple different types of {@link Application}s.
      *
      * @param count             the number of instances of the {@link Application} that should be launched for
      *                          the {@link Assembly}
-     * @param platform          the {@link Platform} on which to launch the {@link Application}s
      * @param applicationClass  the class of {@link Application}
      * @param options           the {@link Option}s to use for launching the {@link Application}s
      *
      * @see Platform#launch(String, Option...)
      */
     void include(int                count,
-                 Platform           platform,
                  Class<? extends A> applicationClass,
                  Option...          options);
 
 
     /**
-     * Builds an {@link Assembly}, using the specified {@link Option}s to override those
-     * defined by the {@link Platform}s and {@link Application}s.
+     * Builds an {@link Assembly} using the provided {@link Infrastructure} and overriding {@link Option}s
+     * for launching {@link Application}s.
      *
-     * @param options  the {@link Option}s to override those specified in {@link #include(int, Platform, Class, Option...)}
+     * @param infrastructure  the {@link Infrastructure} on which to launch the {@link Application}s
+     * @param options         the {@link Option}s to override those specified in {@link #include(int, Class, Option...)}
      *
      * @return an {@link Assembly} representing the collection of launched {@link Application}s.
      *
      * @throws RuntimeException when a problem occurs building the {@link Assembly}
      */
-    G build(Option... options);
+    G build(Infrastructure infrastructure,
+            Option...      options);
+
+
+    /**
+     * Builds an {@link Assembly} using local {@link Infrastructure} and overriding {@link Option}s
+     * for launching {@link Application}s.
+     *
+     * @param options  the {@link Option}s to override those specified in {@link #include(int, Class, Option...)}
+     *
+     * @return an {@link Assembly} representing the collection of launched {@link Application}s.
+     *
+     * @throws RuntimeException when a problem occurs building the {@link Assembly}
+     *
+     * @see Infrastructure#local()
+     */
+    default G build(Option... options)
+    {
+        return build(Infrastructure.local(), options);
+    }
 }

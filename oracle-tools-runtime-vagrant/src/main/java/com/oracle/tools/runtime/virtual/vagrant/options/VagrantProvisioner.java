@@ -1,5 +1,5 @@
 /*
- * File: VagrantProvision.java
+ * File: VagrantProvisioner.java
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
@@ -23,7 +23,10 @@
  * "Portions Copyright [year] [name of copyright owner]"
  */
 
-package com.oracle.tools.runtime.virtual.vagrant;
+package com.oracle.tools.runtime.virtual.vagrant.options;
+
+import com.oracle.tools.Option;
+import com.oracle.tools.runtime.virtual.vagrant.VagrantPlatform;
 
 import java.io.PrintWriter;
 
@@ -35,8 +38,13 @@ import java.io.PrintWriter;
  *
  * @author Jonathan Knight
  */
-public class VagrantProvisioner
+public class VagrantProvisioner implements Option.Collectable
 {
+    /**
+     * Whether this {@link VagrantProvisioner} is always run
+     */
+    protected boolean runAlways = false;
+
     /**
      * The type of this {@link VagrantProvisioner}.
      */
@@ -47,11 +55,6 @@ public class VagrantProvisioner
      */
     private final String configuration;
 
-    /**
-     * Whether this {@link VagrantProvisioner} is always run
-     */
-    protected boolean runAlways = false;
-
 
     /**
      * Create a new {@link VagrantProvisioner} of the specified type.
@@ -59,7 +62,8 @@ public class VagrantProvisioner
      * @param type           the type of this {@link VagrantProvisioner}
      * @param configuration  the configuration of the {@link VagrantProvisioner}
      */
-    protected VagrantProvisioner(String type, String configuration)
+    protected VagrantProvisioner(String type,
+                                 String configuration)
     {
         this.type          = type;
         this.configuration = configuration;
@@ -106,20 +110,28 @@ public class VagrantProvisioner
 
 
     /**
-     * Write the configuration of this {@link VagrantProvisioner} to
-     * a Vagranfile.
+     * Write the configuration of this {@link VagrantProvisioner} to a {@link PrintWriter}.
      *
-     * @param writer   the {@link PrintWriter} that will write the Vagrantfile
+     * @param writer   the {@link PrintWriter}
      * @param prefix   the prefix to write before each configuration
      * @param padding  the padding to write before each line
      */
-    public void write(PrintWriter writer, String prefix, String padding)
+    public void write(PrintWriter writer,
+                      String      prefix,
+                      String      padding)
     {
         String sRunAlways = runAlways ? ", run: \"always\"" : "";
 
         writer.printf("%s    %s.vm.provision \"%s\"%s, ", padding, prefix, type, sRunAlways);
         writer.printf(configuration);
         writer.println();
+    }
+
+
+    @Override
+    public Class<? extends Collector> getCollectorClass()
+    {
+        return VagrantProvisioners.class;
     }
 
 
@@ -144,10 +156,11 @@ public class VagrantProvisioner
      *
      * @return  an in-line shell {@link VagrantProvisioner}
      */
-    public static VagrantProvisioner file(String source, String destination)
+    public static VagrantProvisioner file(String source,
+                                          String destination)
     {
         return new VagrantProvisioner("file",
-                String.format("source: \"%s\", destination: \"%s\"", source, destination));
+                                      String.format("source: \"%s\", destination: \"%s\"", source, destination));
     }
 
 
@@ -159,8 +172,51 @@ public class VagrantProvisioner
      *
      * @return  an in-line shell {@link VagrantProvisioner}
      */
-    public static VagrantProvisioner custom(String type, String configuraton)
+    public static VagrantProvisioner custom(String type,
+                                            String configuraton)
     {
         return new VagrantProvisioner(type, configuraton);
+    }
+
+
+    @Override
+    public boolean equals(Object o)
+    {
+        if (this == o)
+        {
+            return true;
+        }
+
+        if (!(o instanceof VagrantProvisioner))
+        {
+            return false;
+        }
+
+        VagrantProvisioner that = (VagrantProvisioner) o;
+
+        if (runAlways != that.runAlways)
+        {
+            return false;
+        }
+
+        if (type != null ? !type.equals(that.type) : that.type != null)
+        {
+            return false;
+        }
+
+        return configuration != null ? configuration.equals(that.configuration) : that.configuration == null;
+
+    }
+
+
+    @Override
+    public int hashCode()
+    {
+        int result = (runAlways ? 1 : 0);
+
+        result = 31 * result + (type != null ? type.hashCode() : 0);
+        result = 31 * result + (configuration != null ? configuration.hashCode() : 0);
+
+        return result;
     }
 }

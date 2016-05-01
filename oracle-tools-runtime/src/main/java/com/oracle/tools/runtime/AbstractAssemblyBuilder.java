@@ -27,7 +27,6 @@ package com.oracle.tools.runtime;
 
 import com.oracle.tools.Option;
 import com.oracle.tools.Options;
-import com.oracle.tools.runtime.console.NullApplicationConsole;
 import com.oracle.tools.runtime.console.SystemApplicationConsole;
 import com.oracle.tools.runtime.options.Discriminator;
 
@@ -66,22 +65,22 @@ public abstract class AbstractAssemblyBuilder<A extends Application, G extends A
 
     @Override
     public void include(int                count,
-                        Platform           platform,
                         Class<? extends A> applicationClass,
                         Option...          options)
     {
-        characteristics.add(new Characteristics(count, platform, applicationClass, options));
+        characteristics.add(new Characteristics(count, applicationClass, options));
     }
 
 
     @Override
-    public G build(Option... options)
+    public G build(Infrastructure infrastructure,
+                   Option...      options)
     {
         // build a list of applications
         LinkedList<A> applications = new LinkedList<>();
 
         // establish the applications for the assembly
-        launchApplications(applications, options);
+        launchApplications(applications, infrastructure, options);
 
         // establish the assembly based on the applications
         G assembly = createAssembly(applications, Options.from(options));
@@ -93,16 +92,17 @@ public abstract class AbstractAssemblyBuilder<A extends Application, G extends A
     /**
      * Launch the {@link Application}s based on the defined {@link Characteristics}.
      *
-     * @param applications  the list to add each realized {@link Application} to
-     * @param options       the {@link Option}s for overriding any defined {@link Characteristics}
+     * @param applications    the list to add each realized {@link Application} to
+     * @param infrastructure  the {@link Infrastructure} on which to launch the {@link Application}s
+     * @param options         the {@link Option}s for overriding any defined {@link Characteristics}
      */
-    protected void launchApplications(LinkedList<A> applications,
-                                      Option...     options)
+    protected void launchApplications(LinkedList<A>  applications,
+                                      Infrastructure infrastructure,
+                                      Option...      options)
     {
         for (Characteristics characteristic : characteristics)
         {
             int                instanceCount    = characteristic.getCount();
-            Platform           platform         = characteristic.getPlatform();
             Class<? extends A> applicationClass = characteristic.getApplicationClass();
 
             for (int i = 1; i <= instanceCount; i++)
@@ -116,8 +116,14 @@ public abstract class AbstractAssemblyBuilder<A extends Application, G extends A
                 // ensure there's at least a system console
                 launchOptions.addIfAbsent(SystemApplicationConsole.builder());
 
+                // finalize the launching options
+                Option[] launchingOptions = launchOptions.asArray();
+
+                // determine the platform
+                Platform platform = infrastructure.getPlatform(launchingOptions);
+
                 // launch the application
-                A application = platform.launch(applicationClass, launchOptions.asArray());
+                A application = platform.launch(applicationClass, launchingOptions);
 
                 // add the application to the assembly
                 applications.add(application);
@@ -150,11 +156,6 @@ public abstract class AbstractAssemblyBuilder<A extends Application, G extends A
         private int count;
 
         /**
-         * The {@link Platform} to be used to build the {@link Application}s.
-         */
-        private Platform platform;
-
-        /**
          * The class of {@link Application} to create.
          */
         private Class<? extends A> applicationClass;
@@ -169,17 +170,14 @@ public abstract class AbstractAssemblyBuilder<A extends Application, G extends A
          * Constructs an {@link Characteristics}.
          *
          * @param count             the number of {@link Application} instances to be created
-         * @param platform          the {@link Platform} used to create the {@link Application}s
          * @param applicationClass  the class of {@link Application} to create
          * @param options           the {@link Option}s for launching the application
          */
         public Characteristics(int                count,
-                               Platform           platform,
                                Class<? extends A> applicationClass,
                                Option...          options)
         {
             this.count            = count;
-            this.platform         = platform;
             this.applicationClass = applicationClass;
             this.options          = options;
         }
@@ -194,17 +192,6 @@ public abstract class AbstractAssemblyBuilder<A extends Application, G extends A
         public int getCount()
         {
             return count;
-        }
-
-
-        /**
-         * Obtains the {@link Platform} on which to build the {@link Application}s.
-         *
-         * @return  the {@link Platform}
-         */
-        public Platform getPlatform()
-        {
-            return platform;
         }
 
 

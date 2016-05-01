@@ -38,6 +38,7 @@ import com.oracle.tools.runtime.options.DisplayName;
 import com.oracle.tools.runtime.options.Executable;
 import com.oracle.tools.runtime.options.WorkingDirectory;
 import com.oracle.tools.runtime.remote.SecureKeys;
+import com.oracle.tools.runtime.remote.options.HostName;
 import com.oracle.tools.runtime.remote.options.StrictHostChecking;
 import com.oracle.tools.runtime.virtual.CloseAction;
 import com.oracle.tools.runtime.virtual.VirtualPlatform;
@@ -47,6 +48,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
@@ -61,40 +63,81 @@ import java.util.concurrent.TimeUnit;
  */
 public class VagrantPlatform extends VirtualPlatform
 {
-    /** The default command used to run the Vagrant command line interface. */
+    /**
+     * The default command used to run the Vagrant command line interface.
+     */
     public static final String DEFAULT_VAGRANT_COMMAND = "vagrant";
 
-    /** The command to use to run the Vagrant command line interface. */
+    /**
+     * The command to use to run the Vagrant command line interface.
+     */
     private String vagrantCommand = getDefaultVagrantCommand();
 
     /**
-     * The location of this {@link VagrantPlatform}'s VagrantFile.
+     * The working directory for the {@link VagrantPlatform}.
      */
-    private File   vagrantFile;
-    private String publicHostName;
+    private File workingDirectory;
 
 
     /**
      * Construct a new {@link VagrantPlatform}.
      *
      * @param name            the name of this {@link VagrantPlatform}
-     * @param vagrantFile     the location of this {@link VagrantPlatform}'s VagrantFile
-     * @param publicHostName  the host name of the public interface of the {@link VagrantPlatform}
      * @param port            the remote port that will be used to SSH into
      *                        this {@link VirtualPlatform}
      * @param options         the {@link Option}s for the {@link VirtualPlatform}
      */
-    public VagrantPlatform(String    name,
-                           File      vagrantFile,
-                           String    publicHostName,
-                           int       port,
-                           Option... options)
+    public VagrantPlatform(String             name,
+                           VagrantFileBuilder builder,
+                           int                port,
+                           Option...          options)
     {
         super(name, null, 0, null, null, options);
 
-        this.vagrantFile    = vagrantFile;
-        this.publicHostName = publicHostName;
-        this.port           = port;
+        this.port = port;
+
+        // ----- configure the default options -----
+
+        getOptions().addIfAbsent(CloseAction.Destroy);
+        getOptions().addIfAbsent(Timeout.after(5, TimeUnit.MINUTES));
+
+        // ----- establish the working directory for the platform -----
+
+        WorkingDirectory directory = getOptions().getOrDefault(WorkingDirectory.class,
+                                                               WorkingDirectory.at(new File(".")));
+
+        File base = directory.resolve(this, getOptions());
+
+        this.workingDirectory = base == null ? new File(".", name) : new File(base, name);
+
+        if (!workingDirectory.exists())
+        {
+            if (!workingDirectory.mkdirs())
+            {
+                throw new RuntimeException("Could not create working directory: " + directory);
+            }
+        }
+
+        // ----- build the vagrant file defining the platform -----
+
+        try
+        {
+            // build the vagrant file
+            File               vagrantFile = new File(workingDirectory, "Vagrantfile");
+
+            Optional<HostName> hostName    = builder.create(vagrantFile);
+
+            // remember the host name (when defined)
+            if (hostName.isPresent())
+            {
+                getOptions().add(hostName.get());
+            }
+
+        }
+        catch (IOException e)
+        {
+            throw new RuntimeException("Failed to create VagrantFile at " + workingDirectory, e);
+        }
 
         getOptions().add(StrictHostChecking.disabled());
     }
@@ -128,9 +171,9 @@ public class VagrantPlatform extends VirtualPlatform
      *
      * @return the location of this {@link VagrantPlatform}'s VagrantFile
      */
-    public File getVagrantFile()
+    public File getWorkingDirectory()
     {
-        return vagrantFile;
+        return workingDirectory;
     }
 
 
@@ -141,7 +184,7 @@ public class VagrantPlatform extends VirtualPlatform
      */
     public String getPublicHostName()
     {
-        return publicHostName;
+        return getOptions().get(HostName.class).get();
     }
 
 
@@ -202,9 +245,11 @@ public class VagrantPlatform extends VirtualPlatform
 
         try
         {
+            HostName hostName = getOptions().get(HostName.class);
+
             // If no public host name has been specified then use the
             // settings configured by Vagrant
-            if (publicHostName == null || publicHostName.isEmpty())
+            if (hostName == null || hostName.get().isEmpty())
             {
                 // Important:  At this point all we know is that we can connect to the local loopback
                 // NAT'd address so we can SSH into the Vagrant Box.   We don't know what the
@@ -216,7 +261,7 @@ public class VagrantPlatform extends VirtualPlatform
             }
             else
             {
-                this.address        = InetAddress.getByName(publicHostName);
+                this.address        = InetAddress.getByName(hostName.get());
                 this.userName       = sshProperties.getProperty("User");
                 this.authentication = SecureKeys.fromPrivateKeyFile(sshProperties.getProperty("IdentityFile"));
             }
@@ -321,7 +366,7 @@ public class VagrantPlatform extends VirtualPlatform
     protected Options getDefaultOptions()
     {
         return new Options(Executable.named(vagrantCommand),
-                           WorkingDirectory.at(vagrantFile),
+                           WorkingDirectory.at(workingDirectory),
                            Timeout.after(5, TimeUnit.MINUTES),
                            DisplayName.of("Vagrant"));
     }

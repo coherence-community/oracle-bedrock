@@ -1,9 +1,9 @@
 /*
- * File: LocalPlatformSchema.java
+ * File: AbstractNetwork.java
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * The contents of this file are subject to the terms and conditions of 
+ * The contents of this file are subject to the terms and conditions of
  * the Common Development and Distribution License 1.0 (the "License").
  *
  * You may not use this file except in compliance with the License.
@@ -23,44 +23,53 @@
  * "Portions Copyright [year] [name of copyright owner]"
  */
 
-package com.oracle.tools.runtime;
+package com.oracle.tools.runtime.virtual.vagrant.options;
 
 /**
- * A {@link PlatformSchema} encapsulating configuration and operational settings that a
- * {@link com.oracle.tools.runtime.PlatformBuilder} will use to build a
- * {@link LocalPlatform} platform.
+ * An abstract implementation of a {@link Network}.
  * <p>
- * Copyright (c) 2014. All Rights Reserved. Oracle Corporation.<br>
+ * Copyright (c) 2016. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
- * @author Jonathan Knight
+ * @author Brian Oliver
  */
-public class LocalPlatformSchema implements PlatformSchema<LocalPlatform>
+public abstract class AbstractNetwork implements Network
 {
     /**
-     * The singleton instance of the {@link LocalPlatformSchema}.
+     * The identifier of the {@link Network}.
      */
-    public static LocalPlatformSchema INSTANCE = new LocalPlatformSchema();
+    private String id;
+
+    /**
+     * The optional mac address of the {@link Network}.
+     */
+    private String macAddress;
 
 
     /**
-     * This constructor is private as there is no configuration required for the
-     * {@link com.oracle.tools.runtime.java.JavaVirtualMachine} platform, which is also a singleton.
+     * Constructs an {@link AbstractNetwork}.
+     *
+     * @param id          the network id
+     * @param macAddress  the mac address (may be null)
      */
-    private LocalPlatformSchema()
+    protected AbstractNetwork(String id,
+                              String macAddress)
     {
+        this.id         = id;
+        this.macAddress = macAddress;
     }
 
 
     @Override
-    public String getName()
+    public String getId()
     {
-        return LocalPlatform.get().getName();
+        return id;
     }
 
+
     @Override
-    public boolean isSingleton()
+    public String getMacAddress()
     {
-        return true;
+        return macAddress;
     }
 }

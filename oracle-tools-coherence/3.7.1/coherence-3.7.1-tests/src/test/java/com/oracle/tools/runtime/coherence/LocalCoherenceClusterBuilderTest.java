@@ -104,7 +104,6 @@ public class LocalCoherenceClusterBuilderTest extends AbstractCoherenceClusterBu
         CoherenceClusterBuilder builder        = new CoherenceClusterBuilder();
 
         builder.include(2,
-                        getPlatform(),
                         CoherenceClusterMember.class,
                         DisplayName.of("storage"),
                         ClusterPort.of(clusterPort),
@@ -116,7 +115,6 @@ public class LocalCoherenceClusterBuilderTest extends AbstractCoherenceClusterBu
                         RuntimeExit.withExitCode(0));
 
         builder.include(1,
-                        getPlatform(),
                         CoherenceClusterMember.class,
                         DisplayName.of("extend"),
                         ClusterPort.of(clusterPort),
