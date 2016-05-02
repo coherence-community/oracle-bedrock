@@ -96,10 +96,12 @@ class OptionsBasedVagrantFileBuilder implements VagrantFileBuilder
 
 
     @Override
-    public Optional<HostName> create(File file) throws IOException
+    public Optional<HostName> create(File file, Options createOptions) throws IOException
     {
         try (PrintWriter writer = new PrintWriter(file))
         {
+            Options vagrantOptions = new Options(this.options).addAll(createOptions);
+
             // ----- output the header -----
             writer.println("# -*- mode: ruby -*-");
             writer.println("# vi: set ft=ruby :");
@@ -114,7 +116,7 @@ class OptionsBasedVagrantFileBuilder implements VagrantFileBuilder
 
             // ----- output the operating system -----
 
-            OperatingSystem operatingSystem = options.getOrDefault(OperatingSystem.class, null);
+            OperatingSystem operatingSystem = vagrantOptions.getOrDefault(OperatingSystem.class, null);
 
             if (operatingSystem != null)
             {
@@ -124,25 +126,25 @@ class OptionsBasedVagrantFileBuilder implements VagrantFileBuilder
 
             // ----- output the provisioners -----
 
-            VagrantProvisioners provisioners = options.get(VagrantProvisioners.class);
+            VagrantProvisioners provisioners = vagrantOptions.get(VagrantProvisioners.class);
 
             provisioners.write(writer, prefix, padding);
 
             // ----- write the configurations -----
 
-            VagrantConfigurations configurations = options.get(VagrantConfigurations.class);
+            VagrantConfigurations configurations = vagrantOptions.get(VagrantConfigurations.class);
 
             configurations.write(writer, padding);
 
             // ----- output the VagrantProperties -----
 
-            VagrantProperties properties = options.get(VagrantProperties.class);
+            VagrantProperties properties = vagrantOptions.get(VagrantProperties.class);
 
             properties.write(writer, prefix, padding);
 
             // ----- output the Networks -----
 
-            Networks networks = options.get(Networks.class);
+            Networks networks = vagrantOptions.get(Networks.class);
 
             Optional<HostName> hostName = networks.write(writer, prefix, padding);
 

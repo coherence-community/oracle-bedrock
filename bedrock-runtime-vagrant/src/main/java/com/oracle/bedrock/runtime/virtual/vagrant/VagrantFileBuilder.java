@@ -25,6 +25,7 @@
 
 package com.oracle.bedrock.runtime.virtual.vagrant;
 
+import com.oracle.bedrock.Options;
 import com.oracle.bedrock.runtime.remote.options.HostName;
 import com.oracle.bedrock.Option;
 
@@ -53,7 +54,7 @@ public interface VagrantFileBuilder
      *
      * @throws IOException  when the {@link File} could not be created
      */
-    Optional<HostName> create(File file) throws IOException;
+    Optional<HostName> create(File file, Options options) throws IOException;
 
 
     /**

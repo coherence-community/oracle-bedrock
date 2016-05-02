@@ -42,7 +42,7 @@ public class HostAddressIteratorTest
     @Test
     public void shouldParseAddress() throws Exception
     {
-        HostAddressIterator provider = new HostAddressIterator("192.168.1.200");
+        HostAddressIterator provider = HostAddressIterator.startingAt("192.168.1.200");
 
         assertThat(provider.hasNext(), is(true));
         assertThat(provider.next(), is("192.168.1.200"));
@@ -53,7 +53,7 @@ public class HostAddressIteratorTest
     @Test
     public void shouldEndWhenLastPartIs255() throws Exception
     {
-        HostAddressIterator provider = new HostAddressIterator("192.168.1.255");
+        HostAddressIterator provider = HostAddressIterator.startingAt("192.168.1.255");
 
         assertThat(provider.hasNext(), is(true));
         assertThat(provider.next(), is("192.168.1.255"));
@@ -79,7 +79,7 @@ public class HostAddressIteratorTest
     {
         try
         {
-            new HostAddressIterator(address);
+            HostAddressIterator.startingAt(address);
             fail("Expected IllegalArgumentExeption for address " + address);
         }
         catch (IllegalArgumentException e)

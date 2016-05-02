@@ -26,10 +26,12 @@
 package com.oracle.bedrock.runtime.virtual.vagrant.options;
 
 import com.oracle.bedrock.runtime.remote.options.HostName;
+import com.oracle.bedrock.runtime.virtual.HostAddressIterator;
 import com.oracle.bedrock.runtime.virtual.vagrant.VagrantPlatform;
 import com.oracle.bedrock.Option;
 
 import java.io.PrintWriter;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.Optional;
 
@@ -70,6 +72,22 @@ public class HostOnlyNetwork extends AbstractNetwork
     public boolean isPublic()
     {
         return true;
+    }
+
+
+    /**
+     * Obtain a new {@link HostOnlyNetwork} option that is a copy of this
+     * {@link HostOnlyNetwork} with the addition of the specified MAC address.
+     *
+     * @param macAddress  that MAC address to apply.
+     *
+     * @return  a new {@link HostOnlyNetwork} option that is a copy of this
+     *          {@link HostOnlyNetwork} with the addition of the specified
+     *          MAC address
+     */
+    public HostOnlyNetwork withMacAddress(String macAddress)
+    {
+        return new HostOnlyNetwork(getId(), macAddress, this.addresses);
     }
 
 
@@ -115,5 +133,70 @@ public class HostOnlyNetwork extends AbstractNetwork
         writer.println();
 
         return address == null ? Optional.empty() : Optional.of(HostName.of(address));
+    }
+
+
+    /**
+     * Create a {@link HostOnlyNetwork} that will create a
+     * Vagrant private network that will use DHCP to obtain
+     * an IP address.
+     *
+     * @return  a {@link HostOnlyNetwork} that will create a
+     *          Vagrant private network that will use DHCP to
+     *          obtain an IP address
+     */
+    public static HostOnlyNetwork dhcp()
+    {
+        return new HostOnlyNetwork(null, null, null);
+    }
+
+
+    /**
+     * Create a {@link HostOnlyNetwork} that will create a
+     * Vagrant private network with the specified address.
+     *
+     * @param address  the IP address to use
+     *
+     * @return  a {@link HostOnlyNetwork} that will create a
+     *          Vagrant private network with the specified
+     *          address
+     */
+    public static HostOnlyNetwork of(String address)
+    {
+        return new HostOnlyNetwork(null, null, Collections.singleton(address).iterator());
+    }
+
+
+    /**
+     * Create a {@link HostOnlyNetwork} that will create a
+     * Vagrant private network with the specified address.
+     *
+     * @param addresses  the {@link Iterator} to use to provide
+     *                   IP addresses
+     *
+     * @return  a {@link HostOnlyNetwork} that will create a
+     *          Vagrant private network with the specified
+     *          address
+     */
+    public static HostOnlyNetwork from(Iterator<String> addresses)
+    {
+        return new HostOnlyNetwork(null, null, addresses);
+    }
+
+
+    /**
+     * Create a {@link HostOnlyNetwork} that will create a
+     * Vagrant private network with the specified address.
+     *
+     * @param startingAddress  the starting address to use
+     *                         to allocate IP addresses
+     *
+     * @return  a {@link HostOnlyNetwork} that will create a
+     *          Vagrant private network with the specified
+     *          address
+     */
+    public static HostOnlyNetwork startingAt(String startingAddress)
+    {
+        return new HostOnlyNetwork(null, null, HostAddressIterator.startingAt(startingAddress));
     }
 }

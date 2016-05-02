@@ -83,29 +83,46 @@ public class VagrantPlatform extends VirtualPlatform
     /**
      * Construct a new {@link VagrantPlatform}.
      *
-     * @param name            the name of this {@link VagrantPlatform}
-     * @param port            the remote port that will be used to SSH into
-     *                        this {@link VirtualPlatform}
-     * @param options         the {@link Option}s for the {@link VirtualPlatform}
+     * @param name     the name of this {@link VagrantPlatform}
+     * @param builder  the {@link VagrantFileBuilder} to use to build the
+     *                 Vagranfile for the VM
+     * @param options  the {@link Option}s for the {@link VagrantPlatform}
+     */
+    public VagrantPlatform(String             name,
+                           VagrantFileBuilder builder,
+                           Option...          options)
+    {
+        this(name, builder, 22, options);
+    }
+
+    /**
+     * Construct a new {@link VagrantPlatform}.
+     *
+     * @param name     the name of this {@link VagrantPlatform}
+     * @param builder  the {@link VagrantFileBuilder} to use to build
+     *                 the Vagrantfile for the VM
+     * @param port     the remote port that will be used to SSH into
+     *                 this {@link VirtualPlatform}
+     * @param options  the {@link Option}s for the {@link VagrantPlatform}
      */
     public VagrantPlatform(String             name,
                            VagrantFileBuilder builder,
                            int                port,
                            Option...          options)
     {
-        super(name, null, 0, null, null, options);
-
-        this.port = port;
+        super(name, null, port, null, null, options);
 
         // ----- configure the default options -----
 
         getOptions().addIfAbsent(CloseAction.Destroy);
         getOptions().addIfAbsent(Timeout.after(5, TimeUnit.MINUTES));
+        getOptions().add(StrictHostChecking.disabled());
+        getOptions().add(DisplayName.of(name));
 
         // ----- establish the working directory for the platform -----
 
         WorkingDirectory directory = getOptions().getOrDefault(WorkingDirectory.class,
-                                                               WorkingDirectory.at(new File(".")));
+                                                               WorkingDirectory.subDirectoryOf(new File(".")));
 
         File base = directory.resolve(this, getOptions());
 
@@ -125,22 +142,21 @@ public class VagrantPlatform extends VirtualPlatform
         {
             // build the vagrant file
             File               vagrantFile = new File(workingDirectory, "Vagrantfile");
-
-            Optional<HostName> hostName = builder.create(vagrantFile);
+            Optional<HostName> hostName    = builder.create(vagrantFile, getOptions());
 
             // remember the host name (when defined)
             if (hostName.isPresent())
             {
                 getOptions().add(hostName.get());
             }
-
         }
         catch (IOException e)
         {
             throw new RuntimeException("Failed to create VagrantFile at " + workingDirectory, e);
         }
 
-        getOptions().add(StrictHostChecking.disabled());
+        // start the Vagrant VM
+        start();
     }
 
 
