@@ -40,11 +40,11 @@
             <topBarEnabled>false</topBarEnabled>
             <sideBarEnabled>true</sideBarEnabled>
             <topBarIcon>
-                <name>Oracle Tools ${project.version}</name>
+                <name>Oracle Bedrock ${project.version}</name>
                 <href>index.html</href>
             </topBarIcon>
             <gitHub>
-                <projectId>coherence-community/oracle-tools/</projectId>
+                <projectId>coherence-community/bedrock/</projectId>
                 <ribbonOrientation>right</ribbonOrientation>
                 <ribbonColor>red</ribbonColor>
             </gitHub>
@@ -86,7 +86,7 @@
         </menu>
 
         <footer>
-            <div class="copyright">Copyright &#169; 2008-2013 Oracle Corporation. All rights reserved.</div>
+            <div class="copyright">Copyright &#169; 2008-2016 Oracle Corporation. All rights reserved.</div>
             <div class="version">Version ${project.version}: ${timestamp}</div>
         </footer>
     </body>

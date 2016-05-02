@@ -75,7 +75,7 @@
                     <message>Creating site for ${project.version}</message>
                     <path>${project.version}</path>
                     <merge>true</merge>
-                    <repositoryName>oracle-tools</repositoryName>
+                    <repositoryName>oracle-bedrock</repositoryName>
                     <repositoryOwner>coherence-community</repositoryOwner>
                 </configuration>
                 <executions>
