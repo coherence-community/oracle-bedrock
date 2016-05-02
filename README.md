@@ -1,7 +1,6 @@
 Oracle Bedrock
 ==============
 
-## About
 Oracle Bedrock provides a general purpose framework for the development, deployment,
 orchestration and testing of highly concurrent distributed applications.
 
