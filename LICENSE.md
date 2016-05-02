@@ -1,14 +1,15 @@
-ORACLE TOOLS LICENSE
+Oracle Bedrock License
+======================
 
-Oracle licenses the Oracle Tools under the Common Development and 
+Oracle licenses Oracle Bedrock under the Common Development and
 Distribution License v 1.0 ("CDDL").
 
-Your use of the Oracle Tools is governed by the condition that you 
+Your use of Oracle Bedrock is governed by the condition that you
 accept all of the terms of the CDDL. Read the terms carefully. If you are not 
-willing to be bound by these terms, do not download or use the Oracle Tools
+willing to be bound by these terms, do not download or use Oracle Bedrock.
 
 Third party and other Oracle technology that may be necessary for use with or
-to use the Oracle Tools is specified in THIRDPARTYLICENSE.txt. Such 
+to use Oracle Bedrock is specified in THIRDPARTYLICENSE.txt. Such
 third party technology is licensed to you under the terms of the third party 
 technology license agreement specified and not under the CDDL.
 
