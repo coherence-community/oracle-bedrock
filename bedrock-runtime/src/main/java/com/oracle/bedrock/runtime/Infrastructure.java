@@ -81,4 +81,17 @@ public interface Infrastructure
                     return predicate.test(LocalPlatform.get()) ? LocalPlatform.get() : null;
                 });
     }
+
+
+    /**
+     * Obtains {@link Infrastructure} representing a collection of {@link Platform}s.
+     *
+     * @param platforms  the {@link Platform}s
+     *
+     * @return an {@link Infrastructure}
+     */
+    static Infrastructure of(Platform... platforms)
+    {
+        return StaticInfrastructure.of(platforms);
+    }
 }

@@ -28,6 +28,7 @@ package com.oracle.bedrock.runtime;
 import com.oracle.bedrock.Option;
 import com.oracle.bedrock.Options;
 import com.oracle.bedrock.runtime.options.Executable;
+import com.oracle.bedrock.runtime.options.PlatformPredicate;
 
 import java.net.InetAddress;
 
@@ -144,4 +145,34 @@ public interface Platform
      */
     <A extends Application> A launch(MetaClass<A> metaClass,
                                      Option...    options);
+
+
+    /**
+     * Obtains a {@link PlatformPredicate} that will match a specified {@link Platform#getName()}.
+     *
+     * @param regularExpression  the regular expression for matching the {@link Platform#getName()}
+     *
+     * @return a {@link PlatformPredicate}
+     *
+     * @see PlatformPredicate#named(String)
+     */
+    static PlatformPredicate named(String regularExpression)
+    {
+        return PlatformPredicate.named(regularExpression);
+    }
+
+
+    /**
+     * Obtains a {@link PlatformPredicate} that matches a specific {@link Platform}.
+     *
+     * @param platform  the {@link Platform}
+     *
+     * @return a {@link PlatformPredicate}
+     *
+     * @see PlatformPredicate#is(Platform)
+     */
+    static PlatformPredicate is(Platform platform)
+    {
+        return PlatformPredicate.is(platform);
+    }
 }
