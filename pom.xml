@@ -7,23 +7,23 @@
         <version>4</version>
     </parent>
 
-    <groupId>com.oracle.tools</groupId>
-    <artifactId>oracle-tools</artifactId>
+    <groupId>com.oracle.bedrock</groupId>
+    <artifactId>project</artifactId>
     <version>4.0.0-SNAPSHOT</version>
 
     <packaging>pom</packaging>
 
-    <name>Oracle Tools</name>
+    <name>Bedrock Project</name>
 
     <description>
-        A set of open source runtime tools and utilities for use with
-        products developed by, with or in part Oracle Corporation.
+        A framework for the development, orchestration and testing of
+        concurrent and distributed applications.
 
         Developed as part of the Oracle Coherence Community, though Oracle
         Coherence is not really required.
     </description>
 
-    <url>http://java.net/projects/oracletools</url>
+    <url>https://github.com/coherence-community/bedrock</url>
 
     <licenses>
         <license>
@@ -48,45 +48,45 @@
     </developers>
 
     <scm>
-        <connection>scm:git:https://github.com/coherence-community/oracle-tools.git</connection>
-        <developerConnection>scm:git:https://github.com/coherence-community/oracle-tools.git</developerConnection>
-        <url>https://github.com/coherence-community/oracle-tools.git</url>
+        <connection>scm:git:https://github.com/coherence-community/bedrock.git</connection>
+        <developerConnection>scm:git:https://github.com/coherence-community/bedrock.git</developerConnection>
+        <url>https://github.com/coherence-community/bedrock.git</url>
       <tag>HEAD</tag>
     </scm>
 
     <modules>
-        <module>oracle-tools-core</module>
+        <module>bedrock-core</module>
 
-        <module>oracle-tools-runtime</module>
-        <module>oracle-tools-runtime-tests</module>
+        <module>bedrock-runtime</module>
+        <module>bedrock-runtime-tests</module>
 
-        <module>oracle-tools-runtime-maven</module>
-        <module>oracle-tools-runtime-maven-tests</module>
+        <module>bedrock-runtime-maven</module>
+        <module>bedrock-runtime-maven-tests</module>
 
-        <module>oracle-tools-runtime-jacoco</module>
-        <module>oracle-tools-runtime-jprofiler</module>
+        <module>bedrock-runtime-jacoco</module>
+        <module>bedrock-runtime-jprofiler</module>
 
-        <module>oracle-tools-testing-support</module>
-        <module>oracle-tools-testing-support-tests</module>
+        <module>bedrock-testing-support</module>
+        <module>bedrock-testing-support-tests</module>
 
-        <module>oracle-tools-runtime-remote</module>
-        <module>oracle-tools-runtime-remote-tests</module>
+        <module>bedrock-runtime-remote</module>
+        <module>bedrock-runtime-remote-tests</module>
 
-        <module>oracle-tools-runtime-virtual</module>
-        <module>oracle-tools-runtime-virtual-tests</module>
+        <module>bedrock-runtime-virtual</module>
+        <module>bedrock-runtime-virtual-tests</module>
 
-        <module>oracle-tools-runtime-windows</module>
-        <module>oracle-tools-runtime-windows-tests</module>
+        <module>bedrock-runtime-windows</module>
+        <module>bedrock-runtime-windows-tests</module>
 
-        <module>oracle-tools-coherence</module>
+        <module>bedrock-coherence</module>
 
-        <module>oracle-tools-runtime-docker</module>
-        <module>oracle-tools-runtime-docker-tests</module>
+        <module>bedrock-runtime-docker</module>
+        <module>bedrock-runtime-docker-tests</module>
 
-        <module>oracle-tools-runtime-vagrant</module>
-        <module>oracle-tools-runtime-vagrant-tests</module>
+        <module>bedrock-runtime-vagrant</module>
+        <module>bedrock-runtime-vagrant-tests</module>
 
-        <module>oracle-tools-site</module>
+        <module>bedrock-site</module>
     </modules>
 
     <properties>
@@ -242,7 +242,7 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>${maven.surefire.plugin.version}</version>
                 <configuration>
-                    <argLine>-Xms800m -Xmx800m -XX:MaxPermSize=500m</argLine>
+                    <argLine>-Xms800m -Xmx800m</argLine>
                     <includes>
                         <include>**/*IT.java</include>
                         <include>**/*Test.java</include>
