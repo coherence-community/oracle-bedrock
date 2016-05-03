@@ -42,7 +42,7 @@ import java.net.InetAddress;
  * @author Jonathan Knight
  * @author Brian Oliver
  */
-public interface Platform
+public interface Platform extends Infrastructure
 {
     /**
      * Obtain the name of this {@link Platform}.
@@ -83,6 +83,17 @@ public interface Platform
      * @return the {@link Options}
      */
     Options getOptions();
+
+
+    @Override
+    default Platform getPlatform(Option... options)
+    {
+        Options           platformOptions = Options.from(options);
+
+        PlatformPredicate predicate       = platformOptions.get(PlatformPredicate.class);
+
+        return predicate.test(this) ? this : null;
+    }
 
 
     /**
@@ -145,6 +156,17 @@ public interface Platform
      */
     <A extends Application> A launch(MetaClass<A> metaClass,
                                      Option...    options);
+
+
+    /**
+     * Obtains a {@link PlatformPredicate} that matches any {@link Platform}.
+     *
+     * @return a {@link PlatformPredicate}
+     */
+    static PlatformPredicate any()
+    {
+        return platform -> true;
+    }
 
 
     /**

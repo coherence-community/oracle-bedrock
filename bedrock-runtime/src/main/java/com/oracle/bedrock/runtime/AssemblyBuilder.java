@@ -62,8 +62,8 @@ public interface AssemblyBuilder<A extends Application, G extends Assembly<A>>
 
 
     /**
-     * Builds an {@link Assembly} using the provided {@link Infrastructure} and overriding {@link Option}s
-     * for launching {@link Application}s.
+     * Builds an {@link Assembly} using the provided {@link Infrastructure} to acquire {@link Platform}s on which
+     * to launch {@link Application}s.
      *
      * @param infrastructure  the {@link Infrastructure} on which to launch the {@link Application}s
      * @param options         the {@link Option}s to override those specified in {@link #include(int, Class, Option...)}
@@ -71,6 +71,8 @@ public interface AssemblyBuilder<A extends Application, G extends Assembly<A>>
      * @return an {@link Assembly} representing the collection of launched {@link Application}s.
      *
      * @throws RuntimeException when a problem occurs building the {@link Assembly}
+     *
+     * @see Platform
      */
     G build(Infrastructure infrastructure,
             Option...      options);

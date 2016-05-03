@@ -76,14 +76,6 @@ public class LocalApplicationProcess implements ApplicationProcess
 
 
     @Override
-    @Deprecated
-    public void destroy()
-    {
-        close();
-    }
-
-
-    @Override
     public void close()
     {
         process.destroy();

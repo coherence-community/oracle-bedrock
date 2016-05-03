@@ -518,13 +518,6 @@ public class RemoteJavaApplicationLauncher extends AbstractRemoteApplicationLaun
 
 
         @Override
-        public void destroy()
-        {
-            process.destroy();
-        }
-
-
-        @Override
         public Properties getSystemProperties()
         {
             return systemProperties;

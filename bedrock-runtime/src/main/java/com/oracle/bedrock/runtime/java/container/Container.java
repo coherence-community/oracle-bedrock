@@ -298,7 +298,7 @@ public class Container
      */
     public static AvailablePortIterator getAvailablePorts()
     {
-        return LocalPlatform.getInstance().getAvailablePorts();
+        return LocalPlatform.get().getAvailablePorts();
     }
 
 

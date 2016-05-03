@@ -834,14 +834,6 @@ public class DockerRemoteTerminal implements RemoteTerminal, Deployer
 
 
         @Override
-        @Deprecated
-        public void destroy()
-        {
-            process.close();
-        }
-
-
-        @Override
         public int exitValue()
         {
             return process.exitValue();

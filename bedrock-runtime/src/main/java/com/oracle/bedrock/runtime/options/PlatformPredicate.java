@@ -50,7 +50,6 @@ public interface PlatformPredicate extends Predicate<Platform>, Option
      *
      * @return  a {@link PlatformPredicate}
      */
-    @Options.Default
     static PlatformPredicate isLocal()
     {
         return platform -> platform instanceof LocalPlatform;
@@ -62,6 +61,7 @@ public interface PlatformPredicate extends Predicate<Platform>, Option
      *
      * @return a {@link PlatformPredicate}
      */
+    @Options.Default
     static PlatformPredicate any()
     {
         return platform -> true;

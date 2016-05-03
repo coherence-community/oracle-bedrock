@@ -145,14 +145,6 @@ public class WindowsRemoteApplicationProcess implements RemoteApplicationProcess
 
 
     @Override
-    @Deprecated
-    public void destroy()
-    {
-        close();
-    }
-
-
-    @Override
     public int exitValue()
     {
         return session.exitValue();

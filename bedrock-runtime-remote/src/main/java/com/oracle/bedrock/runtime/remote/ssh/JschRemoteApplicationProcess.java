@@ -27,20 +27,16 @@ package com.oracle.bedrock.runtime.remote.ssh;
 
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.Session;
-
-import com.oracle.bedrock.runtime.Application;
-import com.oracle.bedrock.runtime.ApplicationProcess;
 import com.oracle.bedrock.Option;
 import com.oracle.bedrock.Options;
-
 import com.oracle.bedrock.options.Timeout;
-
+import com.oracle.bedrock.runtime.Application;
+import com.oracle.bedrock.runtime.ApplicationProcess;
 import com.oracle.bedrock.runtime.remote.RemoteApplicationProcess;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -125,14 +121,6 @@ public class JschRemoteApplicationProcess implements RemoteApplicationProcess
     public long getId()
     {
         return channel.getId();
-    }
-
-
-    @Override
-    @Deprecated
-    public void destroy()
-    {
-        close();
     }
 
 

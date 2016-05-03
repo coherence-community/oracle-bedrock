@@ -342,7 +342,7 @@ public abstract class HttpDeployer implements Deployer
     {
         try
         {
-            LocalPlatform platform = LocalPlatform.getInstance();
+            LocalPlatform platform = LocalPlatform.get();
             InetAddress   address  = NetworkHelper.getFeasibleLocalHost();
             int           port     = platform.getAvailablePorts().next();
             HttpServer    server   = HttpServer.create(new InetSocketAddress(address, port), 0);

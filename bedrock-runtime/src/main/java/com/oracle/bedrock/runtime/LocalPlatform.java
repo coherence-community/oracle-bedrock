@@ -25,17 +25,17 @@
 
 package com.oracle.bedrock.runtime;
 
+import com.oracle.bedrock.Options;
+import com.oracle.bedrock.io.NetworkHelper;
 import com.oracle.bedrock.runtime.concurrent.RemoteCallable;
 import com.oracle.bedrock.runtime.concurrent.RemoteChannel;
 import com.oracle.bedrock.runtime.concurrent.RemoteChannelListener;
 import com.oracle.bedrock.runtime.concurrent.socket.SocketBasedRemoteChannel;
 import com.oracle.bedrock.runtime.concurrent.socket.SocketBasedRemoteChannelClient;
+import com.oracle.bedrock.runtime.concurrent.socket.SocketBasedRemoteChannelServer;
 import com.oracle.bedrock.runtime.java.JavaApplication;
 import com.oracle.bedrock.runtime.java.LocalJavaApplicationLauncher;
 import com.oracle.bedrock.runtime.network.AvailablePortIterator;
-import com.oracle.bedrock.Options;
-import com.oracle.bedrock.io.NetworkHelper;
-import com.oracle.bedrock.runtime.concurrent.socket.SocketBasedRemoteChannelServer;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -145,20 +145,6 @@ public class LocalPlatform extends AbstractPlatform
     public AvailablePortIterator getAvailablePorts()
     {
         return availablePortIterator;
-    }
-
-
-    /**
-     * Obtain the singleton instance of the {@link LocalPlatform}.
-     * <p>
-     * DEPRECATED: use {@link #get()} instead.
-     *
-     * @return the singleton instance of the {@link LocalPlatform}
-     */
-    @Deprecated
-    public static LocalPlatform getInstance()
-    {
-        return get();
     }
 
 

@@ -92,6 +92,19 @@ public interface Infrastructure
      */
     static Infrastructure of(Platform... platforms)
     {
+        return using(platforms);
+    }
+
+
+    /**
+     * Obtains {@link Infrastructure} based on collection of {@link Platform}s.
+     *
+     * @param platforms  the {@link Platform}s
+     *
+     * @return an {@link Infrastructure}
+     */
+    static Infrastructure using(Platform... platforms)
+    {
         return StaticInfrastructure.of(platforms);
     }
 }

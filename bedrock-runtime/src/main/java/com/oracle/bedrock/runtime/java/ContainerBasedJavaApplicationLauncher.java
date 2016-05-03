@@ -25,12 +25,12 @@
 
 package com.oracle.bedrock.runtime.java;
 
-import com.oracle.bedrock.runtime.ApplicationListener;
-import com.oracle.bedrock.runtime.Platform;
 import com.oracle.bedrock.Option;
 import com.oracle.bedrock.Options;
 import com.oracle.bedrock.options.Variable;
+import com.oracle.bedrock.runtime.ApplicationListener;
 import com.oracle.bedrock.runtime.MetaClass;
+import com.oracle.bedrock.runtime.Platform;
 import com.oracle.bedrock.runtime.Profile;
 import com.oracle.bedrock.runtime.Profiles;
 import com.oracle.bedrock.runtime.PropertiesBuilder;
@@ -157,7 +157,7 @@ public class ContainerBasedJavaApplicationLauncher<A extends JavaApplication> im
 //     }
 
     @Override
-    public A launch(Platform platform,
+    public A launch(Platform     platform,
                     MetaClass<A> metaClass,
                     Options      options)
     {
@@ -744,14 +744,6 @@ public class ContainerBasedJavaApplicationLauncher<A extends JavaApplication> im
 
             // notify the container to stop managing the scope
             Container.unmanage(scope);
-        }
-
-
-        @Override
-        @Deprecated
-        public void destroy()
-        {
-            close();
         }
 
 

@@ -66,19 +66,6 @@ public interface ApplicationProcess extends Closeable
 
 
     /**
-     * <b>WARNING:</b>This method is now deprecated.  It is replaced by {@link #close()}.
-     * <p>
-     * Attempts to kill the executing {@link ApplicationProcess}.  If the
-     * {@link ApplicationProcess} has already terminated, calling this method
-     * has no effect.
-     *
-     * @deprecated This method has been replaced by {@link #close()}
-     */
-    @Deprecated
-    public void destroy();
-
-
-    /**
      * Closes the {@link ApplicationProcess} and releases all resources maintained
      * by the {@link ApplicationProcess}.
      * <p>
