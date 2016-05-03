@@ -25,16 +25,15 @@
 
 package com.oracle.bedrock.junit;
 
+import com.oracle.bedrock.Option;
+import com.oracle.bedrock.Options;
 import com.oracle.bedrock.runtime.LocalPlatform;
+import com.oracle.bedrock.runtime.MetaClass;
 import com.oracle.bedrock.runtime.Profile;
 import com.oracle.bedrock.runtime.coherence.CoherenceClusterMember;
 import com.oracle.bedrock.runtime.coherence.options.CacheConfig;
 import com.oracle.bedrock.runtime.coherence.options.LocalStorage;
 import com.oracle.bedrock.runtime.coherence.options.RoleName;
-import com.oracle.bedrock.Option;
-import com.oracle.bedrock.Options;
-import com.oracle.bedrock.runtime.MetaClass;
-import com.oracle.bedrock.util.SystemProperties;
 import com.tangosol.net.CacheFactory;
 import com.tangosol.net.ConfigurableCacheFactory;
 import com.tangosol.net.ScopedCacheFactoryBuilder;
@@ -52,7 +51,7 @@ import java.util.Properties;
 public class StorageDisabledMember implements SessionBuilder
 {
     @Override
-    public ConfigurableCacheFactory build(LocalPlatform platform,
+    public ConfigurableCacheFactory build(LocalPlatform                 platform,
                                           CoherenceClusterOrchestration orchestration,
                                           Option...                     options)
     {
@@ -74,9 +73,6 @@ public class StorageDisabledMember implements SessionBuilder
 
         // ----- create local system properties based on those defined by the launch options -----
 
-        // take a snapshot of the system properties as we're about to mess with them
-        Properties systemPropertiesSnapshot = SystemProperties.createSnapshot();
-
         // modify the current system properties to include/override those in the schema
         com.oracle.bedrock.runtime.java.options.SystemProperties systemProperties =
             launchOptions.get(com.oracle.bedrock.runtime.java.options.SystemProperties.class);
@@ -95,9 +91,6 @@ public class StorageDisabledMember implements SessionBuilder
 
         // as this is a cluster member we have to join the cluster
         CacheFactory.ensureCluster();
-
-        // replace the system properties
-        SystemProperties.replaceWith(systemPropertiesSnapshot);
 
         return session;
     }

@@ -99,9 +99,6 @@ public class ExtendClient implements SessionBuilder
 
         // ----- create local system properties based on those defined by the launch options -----
 
-        // take a snapshot of the system properties as we're about to mess with them
-        Properties systemPropertiesSnapshot = SystemProperties.createSnapshot();
-
         // modify the current system properties to include/override those in the schema
         com.oracle.bedrock.runtime.java.options.SystemProperties systemProperties =
             launchOptions.get(com.oracle.bedrock.runtime.java.options.SystemProperties.class);
@@ -116,9 +113,6 @@ public class ExtendClient implements SessionBuilder
         // create the session
         ConfigurableCacheFactory session = new ScopedCacheFactoryBuilder().getConfigurableCacheFactory(cacheConfigURI,
                                                                                                        getClass().getClassLoader());
-
-        // replace the system properties
-        SystemProperties.replaceWith(systemPropertiesSnapshot);
 
         return session;
     }

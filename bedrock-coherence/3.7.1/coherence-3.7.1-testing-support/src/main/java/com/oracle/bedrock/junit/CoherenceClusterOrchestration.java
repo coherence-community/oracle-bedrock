@@ -25,20 +25,20 @@
 
 package com.oracle.bedrock.junit;
 
-import com.oracle.bedrock.runtime.Platform;
-import com.oracle.bedrock.runtime.coherence.CoherenceClusterMember;
-import com.oracle.bedrock.runtime.coherence.options.LocalStorage;
-import com.oracle.bedrock.runtime.coherence.options.Multicast;
 import com.oracle.bedrock.Option;
 import com.oracle.bedrock.Options;
 import com.oracle.bedrock.deferred.Eventually;
 import com.oracle.bedrock.runtime.LocalPlatform;
+import com.oracle.bedrock.runtime.Platform;
 import com.oracle.bedrock.runtime.coherence.CoherenceCluster;
 import com.oracle.bedrock.runtime.coherence.CoherenceClusterBuilder;
+import com.oracle.bedrock.runtime.coherence.CoherenceClusterMember;
 import com.oracle.bedrock.runtime.coherence.callables.GetAutoStartServiceNames;
 import com.oracle.bedrock.runtime.coherence.options.ClusterName;
 import com.oracle.bedrock.runtime.coherence.options.ClusterPort;
 import com.oracle.bedrock.runtime.coherence.options.LocalHost;
+import com.oracle.bedrock.runtime.coherence.options.LocalStorage;
+import com.oracle.bedrock.runtime.coherence.options.Multicast;
 import com.oracle.bedrock.runtime.coherence.options.RoleName;
 import com.oracle.bedrock.runtime.console.SystemApplicationConsole;
 import com.oracle.bedrock.runtime.java.options.Headless;
@@ -55,6 +55,7 @@ import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
 
 import java.util.HashMap;
+import java.util.Properties;
 import java.util.Set;
 
 import static com.oracle.bedrock.deferred.DeferredHelper.invoking;
@@ -117,15 +118,24 @@ public class CoherenceClusterOrchestration extends ExternalResource
     private CoherenceCluster cluster;
 
     /**
+     * The original system properties to be restored when the orchestration is complete.
+     */
+    private Properties systemProperties;
+
+    /**
      * The {@link ConfigurableCacheFactory} sessions that have been
      * created against the orchestrated {@link CoherenceCluster}.
      */
     private HashMap<SessionBuilder, ConfigurableCacheFactory> sessions;
 
-    // the Coherence Cluster Port
+    /**
+     * The cluster port.
+     */
     private Capture<Integer> clusterPort;
 
-    // the Coherence *Extend port
+    /**
+     * The extend port.
+     */
     private Capture<Integer> extendPort;
 
 
@@ -199,6 +209,9 @@ public class CoherenceClusterOrchestration extends ExternalResource
     @Override
     protected void before() throws Throwable
     {
+        // take a snapshot of the system properties
+        systemProperties = com.oracle.bedrock.util.SystemProperties.createSnapshot();
+
         // establish a CoherenceClusterBuilder with the required configuration
         CoherenceClusterBuilder clusterBuilder = new CoherenceClusterBuilder();
 
@@ -257,6 +270,9 @@ public class CoherenceClusterOrchestration extends ExternalResource
 
         // close the cluster
         cluster.close(clusterClosingOptions.asArray());
+
+        // restore the system properties
+        com.oracle.bedrock.util.SystemProperties.replaceWith(systemProperties);
 
         // let the super-class perform it's cleanup as well
         super.after();

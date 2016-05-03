@@ -40,6 +40,7 @@ import com.oracle.bedrock.runtime.console.SystemApplicationConsole;
 import com.oracle.bedrock.runtime.java.options.Headless;
 import com.oracle.bedrock.runtime.java.options.HeapSize;
 import com.oracle.bedrock.runtime.java.options.HotSpot;
+import com.oracle.bedrock.runtime.java.options.SystemProperties;
 import com.oracle.bedrock.runtime.options.ApplicationClosingBehavior;
 import com.oracle.bedrock.runtime.options.DisplayName;
 import com.oracle.bedrock.Option;
@@ -54,6 +55,7 @@ import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
 
 import java.util.HashMap;
+import java.util.Properties;
 import java.util.Set;
 
 import static com.oracle.bedrock.deferred.DeferredHelper.invoking;
@@ -114,6 +116,12 @@ public class CoherenceClusterOrchestration extends ExternalResource
      * The {@link CoherenceCluster} established by the orchestrator.
      */
     private CoherenceCluster cluster;
+
+    /**
+     * The original system properties to be restored when the orchestration is complete.
+     */
+    private Properties systemProperties;
+
 
     /**
      * The {@link ConfigurableCacheFactory} sessions that have been
@@ -199,6 +207,9 @@ public class CoherenceClusterOrchestration extends ExternalResource
     @Override
     protected void before() throws Throwable
     {
+        // take a snapshot of the system properties
+        systemProperties = com.oracle.bedrock.util.SystemProperties.createSnapshot();
+
         // establish a CoherenceClusterBuilder with the required configuration
         CoherenceClusterBuilder clusterBuilder = new CoherenceClusterBuilder();
 
@@ -266,6 +277,9 @@ public class CoherenceClusterOrchestration extends ExternalResource
 
         // close the cluster
         cluster.close(clusterClosingOptions.asArray());
+
+        // restore the system properties
+        com.oracle.bedrock.util.SystemProperties.replaceWith(systemProperties);
 
         // let the super-class perform it's cleanup as well
         super.after();
@@ -428,6 +442,9 @@ public class CoherenceClusterOrchestration extends ExternalResource
      */
     public synchronized ConfigurableCacheFactory getSessionFor(SessionBuilder builder)
     {
+        // restore the system properties (as the session needs to start cleanly)
+        com.oracle.bedrock.util.SystemProperties.replaceWith(systemProperties);
+
         ConfigurableCacheFactory session = sessions.get(builder);
 
         if (session == null)
