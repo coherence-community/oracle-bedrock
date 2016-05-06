@@ -3,7 +3,7 @@
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * The contents of this file are subject to the terms and conditions of
+ * The contents of this file are subject to the terms and conditions of 
  * the Common Development and Distribution License 1.0 (the "License").
  *
  * You may not use this file except in compliance with the License.
@@ -25,18 +25,17 @@
 
 package com.oracle.bedrock.runtime.remote;
 
-import com.oracle.bedrock.runtime.ApplicationListener;
-import com.oracle.bedrock.runtime.Platform;
-import com.oracle.bedrock.runtime.remote.options.Deployer;
 import com.oracle.bedrock.Options;
 import com.oracle.bedrock.lang.ExpressionEvaluator;
 import com.oracle.bedrock.options.Variable;
 import com.oracle.bedrock.options.Variables;
 import com.oracle.bedrock.runtime.Application;
 import com.oracle.bedrock.runtime.ApplicationLauncher;
+import com.oracle.bedrock.runtime.ApplicationListener;
 import com.oracle.bedrock.runtime.ApplicationProcess;
 import com.oracle.bedrock.runtime.LocalPlatform;
 import com.oracle.bedrock.runtime.MetaClass;
+import com.oracle.bedrock.runtime.Platform;
 import com.oracle.bedrock.runtime.Profile;
 import com.oracle.bedrock.runtime.Profiles;
 import com.oracle.bedrock.runtime.options.Arguments;
@@ -46,6 +45,7 @@ import com.oracle.bedrock.runtime.options.Executable;
 import com.oracle.bedrock.runtime.options.PlatformSeparators;
 import com.oracle.bedrock.runtime.options.Shell;
 import com.oracle.bedrock.runtime.options.WorkingDirectory;
+import com.oracle.bedrock.runtime.remote.options.Deployer;
 import com.oracle.bedrock.runtime.remote.options.Deployment;
 import com.oracle.bedrock.runtime.remote.ssh.SftpDeployer;
 import com.oracle.bedrock.table.Table;
@@ -85,7 +85,7 @@ public abstract class AbstractRemoteApplicationLauncher<A extends Application> i
 
 
     @Override
-    public A launch(Platform platform,
+    public A launch(Platform     platform,
                     MetaClass<A> metaClass,
                     Options      options)
     {
@@ -200,7 +200,7 @@ public abstract class AbstractRemoteApplicationLauncher<A extends Application> i
         // Obtain the RemoteShell that will be used to launch the process
         RemoteTerminalBuilder terminalBuilder = launchOptions.getOrDefault(RemoteTerminalBuilder.class,
                                                                            RemoteTerminals.ssh());
-        RemoteTerminal terminal = terminalBuilder.realize(platform);
+        RemoteTerminal terminal = terminalBuilder.build(platform);
 
         // create the working directory
         terminal.makeDirectories(remoteDirectory, launchOptions);

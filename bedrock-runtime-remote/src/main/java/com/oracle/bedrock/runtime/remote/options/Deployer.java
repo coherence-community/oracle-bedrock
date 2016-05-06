@@ -25,10 +25,9 @@
 
 package com.oracle.bedrock.runtime.remote.options;
 
-import com.oracle.bedrock.runtime.Platform;
 import com.oracle.bedrock.Option;
 import com.oracle.bedrock.Options;
-
+import com.oracle.bedrock.runtime.Platform;
 import com.oracle.bedrock.runtime.remote.DeploymentArtifact;
 
 import java.util.List;

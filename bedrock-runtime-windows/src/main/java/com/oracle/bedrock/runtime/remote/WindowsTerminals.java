@@ -51,7 +51,7 @@ public class WindowsTerminals
         return new RemoteTerminalBuilder()
         {
             @Override
-            public RemoteTerminal realize(Platform platform)
+            public RemoteTerminal build(Platform platform)
             {
                 if (platform instanceof RemotePlatform)
                 {

@@ -29,20 +29,15 @@ import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
-
-import com.oracle.bedrock.runtime.remote.RemotePlatform;
 import com.oracle.bedrock.Options;
-
 import com.oracle.bedrock.lang.StringHelper;
-
 import com.oracle.bedrock.options.Variable;
-
 import com.oracle.bedrock.runtime.Application;
 import com.oracle.bedrock.runtime.options.Shell;
 import com.oracle.bedrock.runtime.options.WorkingDirectory;
-
 import com.oracle.bedrock.runtime.remote.AbstractRemoteTerminal;
 import com.oracle.bedrock.runtime.remote.RemoteApplicationProcess;
+import com.oracle.bedrock.runtime.remote.RemotePlatform;
 import com.oracle.bedrock.runtime.remote.RemoteTerminal;
 import com.oracle.bedrock.table.Table;
 

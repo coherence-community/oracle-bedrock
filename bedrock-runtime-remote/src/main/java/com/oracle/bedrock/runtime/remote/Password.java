@@ -84,30 +84,34 @@ public class Password implements Authentication, JSchBasedAuthentication, HttpBa
         session.setPassword(password);
     }
 
+
     @Override
-    public HttpURLConnection openConnection(URL url, String userName, Options options) throws IOException
+    public HttpURLConnection openConnection(URL     url,
+                                            String  userName,
+                                            Options options) throws IOException
+    {
+        HttpAuthenticationType authType = options.getOrDefault(HttpAuthenticationType.class,
+                                                               HttpAuthenticationType.Basic);
+        HttpProxy         proxy = options.getOrDefault(HttpProxy.class, HttpProxy.none());
+        HttpURLConnection connection;
+
+        switch (authType)
         {
-            HttpAuthenticationType authType   = options.getOrDefault(HttpAuthenticationType.class, HttpAuthenticationType.Basic);
-            HttpProxy              proxy      = options.getOrDefault(HttpProxy.class, HttpProxy.none());
-            HttpURLConnection      connection;
+        case Basic :
+            String userPassword = userName + ":" + password;
+            String encoding     = new sun.misc.BASE64Encoder().encode(userPassword.getBytes());
 
-        switch(authType)
-        {
-            case Basic:
-                String userPassword = userName + ":" + password;
-                String encoding     = new sun.misc.BASE64Encoder().encode(userPassword.getBytes());
+            connection = proxy.openConnection(url);
 
-                connection = proxy.openConnection(url);
+            connection.setRequestProperty("Authorization", "Basic " + encoding);
+            break;
 
-                connection.setRequestProperty("Authorization", "Basic " + encoding);
-                break;
-            case NTLM:
-            case Kerberos:
-            default:
-                throw new IllegalArgumentException("Unsupported HTTP authentication type " + authType);
+        case NTLM :
+        case Kerberos :
+        default :
+            throw new IllegalArgumentException("Unsupported HTTP authentication type " + authType);
         }
 
         return connection;
     }
-
 }

@@ -25,8 +25,8 @@
 
 package com.oracle.bedrock.runtime.remote;
 
-import com.oracle.bedrock.runtime.ApplicationProcess;
 import com.oracle.bedrock.runtime.Application;
+import com.oracle.bedrock.runtime.ApplicationProcess;
 
 /**
  * An {@link ApplicationProcess} that is executing or executed on

@@ -3,7 +3,7 @@
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * The contents of this file are subject to the terms and conditions of
+ * The contents of this file are subject to the terms and conditions of 
  * the Common Development and Distribution License 1.0 (the "License").
  *
  * You may not use this file except in compliance with the License.
@@ -28,10 +28,10 @@ package com.oracle.bedrock.runtime.remote.ssh;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
-import com.oracle.bedrock.runtime.remote.Authentication;
-import com.oracle.bedrock.runtime.remote.options.StrictHostChecking;
 import com.oracle.bedrock.Options;
 import com.oracle.bedrock.options.Timeout;
+import com.oracle.bedrock.runtime.remote.Authentication;
+import com.oracle.bedrock.runtime.remote.options.StrictHostChecking;
 
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
@@ -52,6 +52,7 @@ public class JSchSessionFactory
      */
     protected JSch jsch;
 
+
     /**
      * Create a {@link JSchSessionFactory}.
      */
@@ -59,6 +60,7 @@ public class JSchSessionFactory
     {
         this(new JSch());
     }
+
 
     /**
      * Create a {@link JSchSessionFactory} using the specified
@@ -70,6 +72,7 @@ public class JSchSessionFactory
     {
         this.jsch = jsch;
     }
+
 
     /**
      * Create a JSch {@link Session} connected to the specified remote host.
@@ -85,8 +88,12 @@ public class JSchSessionFactory
      *
      * @throws JSchException if an error occurs creating the {@link Session}
      */
-    public Session createSession(String hostName, int port, String userName, Authentication authentication,
-                                 JSchSocketFactory socketFactory, Options options) throws JSchException
+    public Session createSession(String            hostName,
+                                 int               port,
+                                 String            userName,
+                                 Authentication    authentication,
+                                 JSchSocketFactory socketFactory,
+                                 Options           options) throws JSchException
     {
         // allow the authentication to configure the framework
         if (authentication instanceof JSchBasedAuthentication)

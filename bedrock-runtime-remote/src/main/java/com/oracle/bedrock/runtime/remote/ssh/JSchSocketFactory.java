@@ -30,7 +30,6 @@ import com.jcraft.jsch.SocketFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-
 import java.net.InetAddress;
 import java.net.Socket;
 
@@ -52,7 +51,8 @@ public class JSchSocketFactory implements SocketFactory
 
 
     @Override
-    public Socket createSocket(String host, int port) throws IOException
+    public Socket createSocket(String host,
+                               int    port) throws IOException
     {
         Socket socket = new Socket(host, port);
 

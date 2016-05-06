@@ -25,8 +25,9 @@
 
 package com.oracle.bedrock.runtime.remote;
 
-import com.oracle.bedrock.runtime.Platform;
 import com.oracle.bedrock.Option;
+import com.oracle.bedrock.annotations.Internal;
+import com.oracle.bedrock.runtime.Platform;
 
 /**
  * A internal mechanism to build {@link RemoteTerminal}s for {@link RemotePlatform}s.
@@ -36,12 +37,15 @@ import com.oracle.bedrock.Option;
  *
  * @author Jonathan Knight
  */
+@Internal
 public interface RemoteTerminalBuilder extends Option
 {
     /**
-     * Realizes a {@link RemoteTerminal} that will connect to a {@link Platform}.
+     * Builds a {@link RemoteTerminal} that will connect to a {@link Platform}.
      *
      * @param platform  the {@link Platform}
+     *
+     * @return a {@link RemoteTerminal}
      */
-    RemoteTerminal realize(Platform platform);
+    RemoteTerminal build(Platform platform);
 }

@@ -35,7 +35,6 @@ import com.oracle.bedrock.Option;
  *
  * @author Jonathan Knight
  */
-public enum HttpAuthenticationType implements Option
-{
-    Basic, NTLM, Kerberos
-}
+public enum HttpAuthenticationType implements Option{Basic,
+                                                     NTLM,
+                                                     Kerberos}

@@ -1,9 +1,9 @@
 /*
- * File: HostBasedAuthentication.java
+ * File: HostBased.java
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * The contents of this file are subject to the terms and conditions of
+ * The contents of this file are subject to the terms and conditions of 
  * the Common Development and Distribution License 1.0 (the "License").
  *
  * You may not use this file except in compliance with the License.
@@ -25,10 +25,10 @@
 
 package com.oracle.bedrock.runtime.remote;
 
+import com.jcraft.jsch.HostBasedUserAuth;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
-import com.jcraft.jsch.HostBasedUserAuth;
 import com.oracle.bedrock.runtime.remote.ssh.JSchBasedAuthentication;
 import com.oracle.bedrock.util.Triple;
 
@@ -64,7 +64,7 @@ public class HostBased implements Authentication, JSchBasedAuthentication
     /**
      * The list of identities to try to use for authentication
      */
-    private List<Triple<String,String,byte[]>> identities;
+    private List<Triple<String, String, byte[]>> identities;
 
 
     /**
@@ -86,7 +86,8 @@ public class HostBased implements Authentication, JSchBasedAuthentication
      * @param privateKey  the private key to use to authenticate
      * @param passphrase  he optional pass phrase for the private key
      */
-    public HostBased(String privateKey, byte[] passphrase)
+    public HostBased(String privateKey,
+                     byte[] passphrase)
     {
         this(privateKey, null, passphrase);
     }
@@ -99,7 +100,8 @@ public class HostBased implements Authentication, JSchBasedAuthentication
      * @param privateKey  the private key to use to authenticate
      * @param passphrase  he optional pass phrase for the private key
      */
-    public HostBased(String privateKey, String passphrase)
+    public HostBased(String privateKey,
+                     String passphrase)
     {
         this(privateKey, null, stringToBytes(passphrase));
     }
@@ -113,9 +115,17 @@ public class HostBased implements Authentication, JSchBasedAuthentication
      * @param publicKey   the optional public key to use to authenticate
      * @param passphrase  he optional pass phrase for the private key
      */
-    public HostBased(String privateKey, String publicKey, String passphrase)
+    public HostBased(String privateKey,
+                     String publicKey,
+                     byte[] passphrase)
     {
-        this(privateKey, publicKey, stringToBytes(passphrase));
+        if (privateKey == null || privateKey.isEmpty())
+        {
+            throw new IllegalArgumentException("The private key file name is required");
+        }
+
+        identities = new ArrayList<>();
+        identities.add(new Triple<>(privateKey, publicKey, passphrase));
     }
 
 
@@ -127,15 +137,11 @@ public class HostBased implements Authentication, JSchBasedAuthentication
      * @param publicKey   the optional public key to use to authenticate
      * @param passphrase  he optional pass phrase for the private key
      */
-    public HostBased(String privateKey, String publicKey, byte[] passphrase)
+    public HostBased(String privateKey,
+                     String publicKey,
+                     String passphrase)
     {
-        if (privateKey == null || privateKey.isEmpty())
-        {
-            throw new IllegalArgumentException("The private key file name is required");
-        }
-
-        identities = new ArrayList<>();
-        identities.add(new Triple<>(privateKey, publicKey, passphrase));
+        this(privateKey, publicKey, stringToBytes(passphrase));
     }
 
 
@@ -160,7 +166,8 @@ public class HostBased implements Authentication, JSchBasedAuthentication
      *
      * @return  this {@link HostBased}
      */
-    public HostBased addIdentity(String privateKey, String passphrase)
+    public HostBased addIdentity(String privateKey,
+                                 String passphrase)
     {
         return addIdentity(privateKey, null, stringToBytes(passphrase));
     }
@@ -174,7 +181,8 @@ public class HostBased implements Authentication, JSchBasedAuthentication
      *
      * @return  this {@link HostBased}
      */
-    public HostBased addIdentity(String privateKey, byte[] passphrase)
+    public HostBased addIdentity(String privateKey,
+                                 byte[] passphrase)
     {
         return addIdentity(privateKey, null, passphrase);
     }
@@ -189,7 +197,9 @@ public class HostBased implements Authentication, JSchBasedAuthentication
      *
      * @return  this {@link HostBased}
      */
-    public HostBased addIdentity(String privateKey, String publicKey, String passphrase)
+    public HostBased addIdentity(String privateKey,
+                                 String publicKey,
+                                 String passphrase)
     {
         return addIdentity(privateKey, publicKey, stringToBytes(passphrase));
     }
@@ -204,7 +214,9 @@ public class HostBased implements Authentication, JSchBasedAuthentication
      *
      * @return  this {@link HostBased}
      */
-    public HostBased addIdentity(String privateKey, String publicKey, byte[] passphrase)
+    public HostBased addIdentity(String privateKey,
+                                 String publicKey,
+                                 byte[] passphrase)
     {
         if (privateKey == null || privateKey.isEmpty())
         {
@@ -223,7 +235,7 @@ public class HostBased implements Authentication, JSchBasedAuthentication
         try
         {
             // Add all of the identities
-            for (Triple<String,String,byte[]> identity : identities)
+            for (Triple<String, String, byte[]> identity : identities)
             {
                 String privateKey = identity.getX();
                 String publicKey  = identity.getY();
@@ -254,7 +266,7 @@ public class HostBased implements Authentication, JSchBasedAuthentication
             String[] auths        = preferredAuthentications.split(",");
             boolean  hasHostBased = false;
 
-            for (int i = 0; i < auths.length && !hasHostBased; i++)
+            for (int i = 0; i < auths.length &&!hasHostBased; i++)
             {
                 hasHostBased = auths[i].toLowerCase().equals(AUTH_HOSTBASED);
             }

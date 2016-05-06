@@ -28,7 +28,6 @@ package com.oracle.bedrock.runtime.remote;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
-
 import com.oracle.bedrock.runtime.remote.ssh.JSchBasedAuthentication;
 
 /**

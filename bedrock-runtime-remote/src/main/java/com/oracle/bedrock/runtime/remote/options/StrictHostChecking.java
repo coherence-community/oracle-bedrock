@@ -25,10 +25,9 @@
 
 package com.oracle.bedrock.runtime.remote.options;
 
-import com.oracle.bedrock.runtime.remote.RemotePlatform;
 import com.oracle.bedrock.Option;
-
 import com.oracle.bedrock.Options;
+import com.oracle.bedrock.runtime.remote.RemotePlatform;
 
 /**
  * An {@link Option} to define the is strict host checking is required for

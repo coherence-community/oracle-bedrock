@@ -25,11 +25,10 @@
 
 package com.oracle.bedrock.runtime.remote.http;
 
-import com.oracle.bedrock.runtime.remote.Authentication;
 import com.oracle.bedrock.Options;
+import com.oracle.bedrock.runtime.remote.Authentication;
 
 import java.io.IOException;
-
 import java.net.HttpURLConnection;
 import java.net.URL;
 
@@ -53,8 +52,10 @@ public interface HttpBasedAuthentication extends Authentication
      * @param options   an {@link Options} to use to configure authentication
      *
      * @return an authenticated {@link HttpURLConnection} to the specified {@link URL}
+     *
+     * @throws IOException  when the connection can't be opened
      */
-    HttpURLConnection openConnection(URL       url,
-                                     String    userName,
-                                     Options   options) throws IOException;
+    HttpURLConnection openConnection(URL     url,
+                                     String  userName,
+                                     Options options) throws IOException;
 }

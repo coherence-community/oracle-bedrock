@@ -25,18 +25,14 @@
 
 package com.oracle.bedrock.runtime.remote.http;
 
-import com.oracle.bedrock.runtime.Platform;
-import com.oracle.bedrock.runtime.remote.options.Deployer;
 import com.oracle.bedrock.Option;
 import com.oracle.bedrock.Options;
-
 import com.oracle.bedrock.io.NetworkHelper;
 import com.oracle.bedrock.runtime.LocalPlatform;
-
+import com.oracle.bedrock.runtime.Platform;
 import com.oracle.bedrock.runtime.options.PlatformSeparators;
-
 import com.oracle.bedrock.runtime.remote.DeploymentArtifact;
-
+import com.oracle.bedrock.runtime.remote.options.Deployer;
 import com.oracle.bedrock.table.Table;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
@@ -46,21 +42,17 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URL;
-
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 
@@ -80,6 +72,7 @@ public abstract class HttpDeployer implements Deployer
      */
     private Options options;
 
+
     /**
      * Create a new {@link HttpDeployer}.
      *
@@ -90,6 +83,7 @@ public abstract class HttpDeployer implements Deployer
     {
         this.options = new Options(options);
     }
+
 
     /**
      * Set the size of the byte buffer that will be used to
@@ -106,6 +100,7 @@ public abstract class HttpDeployer implements Deployer
         return this;
     }
 
+
     /**
      * Set the size of the byte buffer that will be used to
      * send the response of a HTTP request.
@@ -118,6 +113,7 @@ public abstract class HttpDeployer implements Deployer
     {
         return withBufferSize(size * 1024);
     }
+
 
     /**
      * Set the size of the byte buffer that will be used to
@@ -132,9 +128,14 @@ public abstract class HttpDeployer implements Deployer
         return withBufferSize(size * 1024 * 1024);
     }
 
+
     /**
      * A static helper method to return an {@link HttpDeployer}
      * that will use wget to retrieve artifacts.
+     *
+     * @param options the {@link Options}
+     *
+     * @return a new {@link HttpDeployer}
      */
     public static HttpDeployer wget(Option... options)
     {
@@ -149,8 +150,11 @@ public abstract class HttpDeployer implements Deployer
      * @param wgetLocation the location of the wget executable
      *                     (for example "/usr/local/bin/wget")
      * @param options the {@link Option}s controlling the deployer
+     *
+     * @return a new {@link HttpDeployer}
      */
-    public static HttpDeployer wgetAt(String wgetLocation, Option... options)
+    public static HttpDeployer wgetAt(String    wgetLocation,
+                                      Option... options)
     {
         return new WGetHttpDeployer(wgetLocation, options);
     }
@@ -161,6 +165,8 @@ public abstract class HttpDeployer implements Deployer
      * that will use wget to retrieve artifacts.
      *
      * @param options the {@link Option}s controlling the deployer
+     *
+     * @return a new {@link HttpDeployer}
      */
     public static HttpDeployer curl(Option... options)
     {
@@ -175,8 +181,11 @@ public abstract class HttpDeployer implements Deployer
      * @param curlLocation the location of the curl executable
      *                     (for example "/usr/local/bin/curl")
      * @param options the {@link Option}s controlling the deployer
+     *
+     * @return a new {@link HttpDeployer}
      */
-    public static HttpDeployer curlAt(String curlLocation, Option... options)
+    public static HttpDeployer curlAt(String    curlLocation,
+                                      Option... options)
     {
         return new CurlHttpDeployer(curlLocation, options);
     }
@@ -185,7 +194,7 @@ public abstract class HttpDeployer implements Deployer
     @Override
     public void deploy(List<DeploymentArtifact> artifactsToDeploy,
                        String                   remoteDirectory,
-                       Platform platform,
+                       Platform                 platform,
                        Option...                deploymentOptions)
     {
         if (artifactsToDeploy == null || artifactsToDeploy.isEmpty())
@@ -290,6 +299,7 @@ public abstract class HttpDeployer implements Deployer
                 deployArtifact(sourceURL, targetFileName, platform);
 
                 double time = (System.currentTimeMillis() - start) / 1000.0d;
+
                 deploymentTable.addRow(sourceFile.toString(), destinationFileName, String.format("%.3f s", time));
             }
         }
@@ -316,6 +326,7 @@ public abstract class HttpDeployer implements Deployer
         return null;
     }
 
+
     /**
      * Deploy the specified artifact.
      *
@@ -336,6 +347,7 @@ public abstract class HttpDeployer implements Deployer
      * @param artifacts a {@link Map} of {@link DeploymentArtifact}s to deploy
      *                  keyed by the URL path for each artifact
      *
+     * @return the {@link HttpServer}
      */
     protected HttpServer createServer(ExecutorService                 executor,
                                       Map<String, DeploymentArtifact> artifacts)
@@ -377,6 +389,7 @@ public abstract class HttpDeployer implements Deployer
          */
         private final Options options;
 
+
         /**
          * Create a {@link ArtifactsHandler} to serve the specified
          * {@link List} of {@link DeploymentArtifact}s.
@@ -384,7 +397,8 @@ public abstract class HttpDeployer implements Deployer
          * @param artifacts the {@link DeploymentArtifact}s to serve
          * @param options   the {@link Option}s controlling the {@link ArtifactsHandler}
          */
-        public ArtifactsHandler(Map<String, DeploymentArtifact> artifacts, Option... options)
+        public ArtifactsHandler(Map<String, DeploymentArtifact> artifacts,
+                                Option...                       options)
         {
             this.artifacts = artifacts;
             this.options   = new Options(options);
@@ -415,7 +429,7 @@ public abstract class HttpDeployer implements Deployer
             BufferSize bufferSize  = options.getOrDefault(BufferSize.class, new BufferSize(1000000));
             int        bufferBytes = bufferSize.getBufferSize();
 
-            byte[] buff = new byte[bufferBytes];
+            byte[]     buff        = new byte[bufferBytes];
 
             try (InputStream data = sourceURI.toURL().openStream();
                 OutputStream os = httpExchange.getResponseBody())
@@ -435,18 +449,33 @@ public abstract class HttpDeployer implements Deployer
         }
     }
 
+
+    /**
+     * Class description
+     *
+     * @version        Enter version here..., 16/05/06
+     * @author         Enter your name here...    
+     */
     public static class BufferSize implements Option
     {
+        private int bufferSize;
+
+
+        /**
+         * Constructs ...
+         *
+         *
+         * @param bufferSize
+         */
         public BufferSize(int bufferSize)
         {
             this.bufferSize = bufferSize;
         }
 
+
         public int getBufferSize()
         {
             return bufferSize;
         }
-
-        private int bufferSize;
     }
 }

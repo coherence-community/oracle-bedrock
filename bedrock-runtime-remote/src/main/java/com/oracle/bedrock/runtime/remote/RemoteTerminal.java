@@ -25,10 +25,10 @@
 
 package com.oracle.bedrock.runtime.remote;
 
-import com.oracle.bedrock.runtime.Platform;
 import com.oracle.bedrock.Options;
-
+import com.oracle.bedrock.annotations.Internal;
 import com.oracle.bedrock.runtime.Application;
+import com.oracle.bedrock.runtime.Platform;
 
 import java.util.List;
 import java.util.Properties;
@@ -42,6 +42,7 @@ import java.util.Properties;
  *
  * @author Jonathan Knight
  */
+@Internal
 public interface RemoteTerminal
 {
     /**
@@ -64,7 +65,8 @@ public interface RemoteTerminal
     /**
      * Ensure that the specified directory exists on the {@link RemotePlatform}.
      *
-     * @param directoryName the directory to create
+     * @param directoryName  the directory to create
+     * @param options        the {@link Options}
      */
     void makeDirectories(String  directoryName,
                          Options options);
@@ -79,6 +81,9 @@ public interface RemoteTerminal
         /**
          * Obtains the command to launch an {@link Application} using a {@link RemoteTerminal}.
          *
+         * @param platform  the {@link Platform}
+         * @param options   the {@link Options}
+         *
          * @return  the command
          */
         String getCommandToExecute(Platform platform,
@@ -88,6 +93,9 @@ public interface RemoteTerminal
         /**
          * Obtains the command line arguments when launching an {@link Application} using a {@link RemoteTerminal}.
          *
+         * @param platform  the {@link Platform}
+         * @param options   the {@link Options}
+         *
          * @return  the command line arguments to use when launching the {@link Application}
          */
         List<String> getCommandLineArguments(Platform platform,
@@ -96,6 +104,9 @@ public interface RemoteTerminal
 
         /**
          * Obtains the environment variables to use when launching an {@link Application} using a {@link RemoteTerminal}.
+         *
+         * @param platform  the {@link Platform}
+         * @param options   the {@link Options}
          *
          * @return  a {@link Properties} representing the required remote environment variables
          */

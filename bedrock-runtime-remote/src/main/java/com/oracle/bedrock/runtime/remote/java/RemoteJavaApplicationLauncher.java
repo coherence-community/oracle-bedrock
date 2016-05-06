@@ -3,7 +3,7 @@
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * The contents of this file are subject to the terms and conditions of
+ * The contents of this file are subject to the terms and conditions of 
  * the Common Development and Distribution License 1.0 (the "License").
  *
  * You may not use this file except in compliance with the License.
@@ -25,69 +25,60 @@
 
 package com.oracle.bedrock.runtime.remote.java;
 
+import com.oracle.bedrock.Option;
+import com.oracle.bedrock.Options;
+import com.oracle.bedrock.deferred.AbstractDeferred;
+import com.oracle.bedrock.deferred.PermanentlyUnavailableException;
+import com.oracle.bedrock.deferred.TemporarilyUnavailableException;
+import com.oracle.bedrock.lang.ExpressionEvaluator;
+import com.oracle.bedrock.lang.StringHelper;
+import com.oracle.bedrock.options.Timeout;
 import com.oracle.bedrock.runtime.ApplicationProcess;
 import com.oracle.bedrock.runtime.Platform;
+import com.oracle.bedrock.runtime.Settings;
+import com.oracle.bedrock.runtime.concurrent.ControllableRemoteChannel;
 import com.oracle.bedrock.runtime.concurrent.RemoteCallable;
 import com.oracle.bedrock.runtime.concurrent.RemoteChannel;
+import com.oracle.bedrock.runtime.concurrent.RemoteEvent;
 import com.oracle.bedrock.runtime.concurrent.RemoteEventListener;
+import com.oracle.bedrock.runtime.concurrent.RemoteRunnable;
+import com.oracle.bedrock.runtime.concurrent.socket.SocketBasedRemoteChannelServer;
 import com.oracle.bedrock.runtime.java.ClassPath;
 import com.oracle.bedrock.runtime.java.ClassPathModifier;
 import com.oracle.bedrock.runtime.java.JavaApplication;
 import com.oracle.bedrock.runtime.java.JavaApplicationLauncher;
 import com.oracle.bedrock.runtime.java.JavaApplicationProcess;
+import com.oracle.bedrock.runtime.java.JavaApplicationRunner;
 import com.oracle.bedrock.runtime.java.features.JmxFeature;
+import com.oracle.bedrock.runtime.java.options.ClassName;
+import com.oracle.bedrock.runtime.java.options.JavaHome;
+import com.oracle.bedrock.runtime.java.options.JvmOption;
 import com.oracle.bedrock.runtime.java.options.RemoteEvents;
 import com.oracle.bedrock.runtime.java.options.SystemProperties;
 import com.oracle.bedrock.runtime.java.options.WaitToStart;
 import com.oracle.bedrock.runtime.java.profiles.CommercialFeatures;
 import com.oracle.bedrock.runtime.java.profiles.RemoteDebugging;
 import com.oracle.bedrock.runtime.options.Arguments;
+import com.oracle.bedrock.runtime.options.Executable;
 import com.oracle.bedrock.runtime.options.Orphanable;
+import com.oracle.bedrock.runtime.options.PlatformSeparators;
 import com.oracle.bedrock.runtime.remote.AbstractRemoteApplicationLauncher;
+import com.oracle.bedrock.runtime.remote.RemoteApplicationProcess;
 import com.oracle.bedrock.runtime.remote.java.options.JavaDeployment;
 import com.oracle.bedrock.runtime.remote.options.Deployment;
-import com.oracle.bedrock.Option;
-import com.oracle.bedrock.Options;
-
-import com.oracle.bedrock.deferred.AbstractDeferred;
-import com.oracle.bedrock.deferred.PermanentlyUnavailableException;
-import com.oracle.bedrock.deferred.TemporarilyUnavailableException;
-
-import com.oracle.bedrock.lang.ExpressionEvaluator;
-import com.oracle.bedrock.lang.StringHelper;
-
-import com.oracle.bedrock.options.Timeout;
-
-import com.oracle.bedrock.runtime.Settings;
-
-import com.oracle.bedrock.runtime.concurrent.ControllableRemoteChannel;
-import com.oracle.bedrock.runtime.concurrent.RemoteEvent;
-import com.oracle.bedrock.runtime.concurrent.RemoteRunnable;
-import com.oracle.bedrock.runtime.concurrent.socket.SocketBasedRemoteChannelServer;
-
-import com.oracle.bedrock.runtime.java.JavaApplicationRunner;
-import com.oracle.bedrock.runtime.java.options.ClassName;
-import com.oracle.bedrock.runtime.java.options.JavaHome;
-import com.oracle.bedrock.runtime.java.options.JvmOption;
-
-import com.oracle.bedrock.runtime.options.Executable;
-import com.oracle.bedrock.runtime.options.PlatformSeparators;
-
-import com.oracle.bedrock.runtime.remote.RemoteApplicationProcess;
 import com.oracle.bedrock.table.Cell;
 import com.oracle.bedrock.table.Table;
-
-import static com.oracle.bedrock.deferred.DeferredHelper.ensure;
-import static com.oracle.bedrock.deferred.DeferredHelper.within;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.CompletableFuture;
+
+import static com.oracle.bedrock.deferred.DeferredHelper.ensure;
+import static com.oracle.bedrock.deferred.DeferredHelper.within;
 
 /**
  * A {@link JavaApplicationLauncher} that launches a {@link JavaApplication} on a {@link Platform}.
@@ -303,6 +294,7 @@ public class RemoteJavaApplicationLauncher extends AbstractRemoteApplicationLaun
             commandBuilder.append(StringHelper.doubleQuoteIfNecessary(javaExecutable));
 
             Table diagnosticsTable = options.get(Table.class);
+
             if (diagnosticsTable != null)
             {
                 diagnosticsTable.addRow("Java Home", javaHomePath);
@@ -328,7 +320,7 @@ public class RemoteJavaApplicationLauncher extends AbstractRemoteApplicationLaun
         systemPropertiesTable.getOptions().add(Cell.Separator.of(""));
 
         // establish the URI for this (the parent) process
-        String parentURI = "//${local.address}:" + remoteChannel.getPort();
+        String              parentURI       = "//${local.address}:" + remoteChannel.getPort();
 
         ExpressionEvaluator evaluator       = new ExpressionEvaluator(options);
         String              parentUriString = evaluator.evaluate(parentURI, String.class);
@@ -354,6 +346,7 @@ public class RemoteJavaApplicationLauncher extends AbstractRemoteApplicationLaun
         arguments.add(classPath);
 
         Table diagnosticsTable = options.get(Table.class);
+
         if (diagnosticsTable != null)
         {
             Table classPathTable = remoteClassPath.getTable();
@@ -569,7 +562,7 @@ public class RemoteJavaApplicationLauncher extends AbstractRemoteApplicationLaun
 
         @Override
         public <T> CompletableFuture<T> submit(RemoteCallable<T> callable,
-                                               Option...             options) throws IllegalStateException
+                                               Option...         options) throws IllegalStateException
         {
             return remoteChannel.submit(callable, options);
         }
@@ -577,7 +570,7 @@ public class RemoteJavaApplicationLauncher extends AbstractRemoteApplicationLaun
 
         @Override
         public CompletableFuture<Void> submit(RemoteRunnable runnable,
-                           Option...      options) throws IllegalStateException
+                                              Option...      options) throws IllegalStateException
         {
             return remoteChannel.submit(runnable, options);
         }

@@ -25,22 +25,18 @@
 
 package com.oracle.bedrock.runtime.remote.java.options;
 
-import com.oracle.bedrock.runtime.Platform;
 import com.oracle.bedrock.Option;
 import com.oracle.bedrock.Options;
-
 import com.oracle.bedrock.io.FileHelper;
-
+import com.oracle.bedrock.runtime.Platform;
 import com.oracle.bedrock.runtime.java.ClassPath;
 import com.oracle.bedrock.runtime.java.JavaApplication;
-
 import com.oracle.bedrock.runtime.remote.DeploymentArtifact;
 import com.oracle.bedrock.runtime.remote.options.Deployment;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;

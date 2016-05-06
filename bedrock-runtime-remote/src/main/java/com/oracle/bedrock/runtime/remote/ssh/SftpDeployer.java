@@ -3,7 +3,7 @@
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * The contents of this file are subject to the terms and conditions of
+ * The contents of this file are subject to the terms and conditions of 
  * the Common Development and Distribution License 1.0 (the "License").
  *
  * You may not use this file except in compliance with the License.
@@ -29,24 +29,19 @@ import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import com.jcraft.jsch.SftpException;
-
-import com.oracle.bedrock.runtime.Platform;
-import com.oracle.bedrock.runtime.remote.Authentication;
-import com.oracle.bedrock.runtime.remote.RemotePlatform;
-import com.oracle.bedrock.runtime.remote.options.Deployer;
 import com.oracle.bedrock.Option;
 import com.oracle.bedrock.Options;
-
+import com.oracle.bedrock.runtime.Platform;
 import com.oracle.bedrock.runtime.options.PlatformSeparators;
-
+import com.oracle.bedrock.runtime.remote.Authentication;
 import com.oracle.bedrock.runtime.remote.DeploymentArtifact;
-
+import com.oracle.bedrock.runtime.remote.RemotePlatform;
+import com.oracle.bedrock.runtime.remote.options.Deployer;
 import com.oracle.bedrock.table.Table;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-
 import java.util.List;
 
 /**
@@ -65,6 +60,7 @@ public class SftpDeployer implements Deployer
      */
     private JSchSessionFactory sessionFactory;
 
+
     /**
      * Create a {@link SftpDeployer}.
      */
@@ -73,18 +69,24 @@ public class SftpDeployer implements Deployer
         this(new JSchSessionFactory());
     }
 
+
     /**
      * Create a {@link SftpDeployer} that will use the
      * specified {@link JSchSessionFactory}.
+     *
+     * @param sessionFactory  the {@link JSchSocketFactory}
      */
     public SftpDeployer(JSchSessionFactory sessionFactory)
     {
         this.sessionFactory = sessionFactory;
     }
 
+
     @Override
-    public void deploy(List<DeploymentArtifact> artifactsToDeploy, String remoteDirectory, Platform platform,
-                       Option... deploymentOptions)
+    public void deploy(List<DeploymentArtifact> artifactsToDeploy,
+                       String                   remoteDirectory,
+                       Platform                 platform,
+                       Option...                deploymentOptions)
     {
         if (artifactsToDeploy == null || artifactsToDeploy.isEmpty())
         {
@@ -106,8 +108,10 @@ public class SftpDeployer implements Deployer
 
         // Create the deplpyment options
         Options options = new Options();
+
         // Add the Platform options
         options.addAll(platform.getOptions().asArray());
+
         // Override with specified Options
         options.addAll(deploymentOptions);
 
@@ -166,6 +170,7 @@ public class SftpDeployer implements Deployer
                             String destinationFilePath = separators.asPlatformFileName(destinationFile.getParent());
 
                             String dirName;
+
                             if (destinationFilePath == null)
                             {
                                 dirName = separators.asPlatformFileName(remoteDirectory);
@@ -182,13 +187,18 @@ public class SftpDeployer implements Deployer
 
                         // copy the source artifact to the destination file
                         double start = System.currentTimeMillis();
+
                         sftpChannel.put(new FileInputStream(sourceFile), destinationFileName);
+
                         double time = (System.currentTimeMillis() - start) / 1000.0d;
 
-                        deploymentTable.addRow(sourceFile.toString(), String.valueOf(destinationFile), String.format("%.3f s", time));
+                        deploymentTable.addRow(sourceFile.toString(),
+                                               String.valueOf(destinationFile),
+                                               String.format("%.3f s", time));
                     }
 
                     Table diagnosticsTable = options.get(Table.class);
+
                     if (diagnosticsTable != null)
                     {
                         diagnosticsTable.addRow("Application Deployments ", deploymentTable.toString());

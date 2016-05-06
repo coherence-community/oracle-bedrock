@@ -25,14 +25,14 @@
 
 package com.oracle.bedrock.runtime.remote;
 
-import com.oracle.bedrock.runtime.AbstractPlatform;
-import com.oracle.bedrock.runtime.LocalPlatform;
-import com.oracle.bedrock.runtime.Platform;
 import com.oracle.bedrock.Option;
 import com.oracle.bedrock.Options;
+import com.oracle.bedrock.runtime.AbstractPlatform;
 import com.oracle.bedrock.runtime.Application;
 import com.oracle.bedrock.runtime.ApplicationLauncher;
+import com.oracle.bedrock.runtime.LocalPlatform;
 import com.oracle.bedrock.runtime.MetaClass;
+import com.oracle.bedrock.runtime.Platform;
 import com.oracle.bedrock.runtime.java.JavaApplication;
 import com.oracle.bedrock.runtime.remote.java.RemoteJavaApplicationLauncher;
 
