@@ -26,20 +26,15 @@
 package com.oracle.bedrock.junit;
 
 import com.oracle.bedrock.deferred.Eventually;
-
 import com.oracle.bedrock.runtime.coherence.CoherenceCluster;
-
 import com.tangosol.net.ConfigurableCacheFactory;
 import com.tangosol.net.NamedCache;
-
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 
 import static com.oracle.bedrock.deferred.DeferredHelper.invoking;
-
 import static org.hamcrest.CoreMatchers.not;
-
 import static org.hamcrest.core.Is.is;
 
 /**
@@ -96,9 +91,10 @@ public class DefaultCoherenceClusterOrchestrationTest
     @Test
     public void shouldCreateExtendClientSession()
     {
-        ConfigurableCacheFactory session = orchestration.getSessionFor(SessionBuilders.extendClient("proxy-cache-config.xml"));
+        ConfigurableCacheFactory session =
+            orchestration.getSessionFor(SessionBuilders.extendClient("proxy-cache-config.xml"));
 
-        NamedCache               cache   = session.ensureCache("dist-example", null);
+        NamedCache cache = session.ensureCache("dist-example", null);
 
         Assert.assertThat(orchestration.getCluster().getClusterSize(), is(3));
 
@@ -120,9 +116,11 @@ public class DefaultCoherenceClusterOrchestrationTest
 
         ConfigurableCacheFactory cacheFactory2 = orchestration.getSessionFor(SessionBuilders.storageDisabledMember());
 
-        ConfigurableCacheFactory cacheFactory3 = orchestration.getSessionFor(SessionBuilders.extendClient("proxy-cache-config.xml"));
+        ConfigurableCacheFactory cacheFactory3 =
+            orchestration.getSessionFor(SessionBuilders.extendClient("proxy-cache-config.xml"));
 
-        ConfigurableCacheFactory cacheFactory4 = orchestration.getSessionFor(SessionBuilders.extendClient("proxy-cache-config.xml"));
+        ConfigurableCacheFactory cacheFactory4 =
+            orchestration.getSessionFor(SessionBuilders.extendClient("proxy-cache-config.xml"));
 
         Assert.assertThat(cacheFactory1, is(cacheFactory2));
         Assert.assertThat(cacheFactory3, is(cacheFactory4));

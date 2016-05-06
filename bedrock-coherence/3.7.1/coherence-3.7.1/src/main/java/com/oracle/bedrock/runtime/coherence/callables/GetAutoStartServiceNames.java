@@ -26,11 +26,9 @@
 package com.oracle.bedrock.runtime.coherence.callables;
 
 import com.oracle.bedrock.runtime.concurrent.RemoteCallable;
-
 import com.tangosol.net.CacheFactory;
 import com.tangosol.net.ConfigurableCacheFactory;
 import com.tangosol.net.DefaultConfigurableCacheFactory;
-
 import com.tangosol.run.xml.XmlElement;
 
 import java.util.HashSet;

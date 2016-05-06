@@ -26,7 +26,6 @@
 package com.oracle.bedrock.matchers;
 
 import com.tangosol.net.partition.PartitionSet;
-
 import org.hamcrest.Description;
 import org.hamcrest.Factory;
 import org.hamcrest.Matcher;

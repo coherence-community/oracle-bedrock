@@ -49,6 +49,8 @@ public class SessionBuilders
     /**
      * Constructs a {@link SessionBuilder} for a *Extend Client.
      *
+     * @param cacheConfigURI  the Cache Configuration URI
+     *
      * @return a {@link SessionBuilder}
      */
     public static SessionBuilder extendClient(String cacheConfigURI)

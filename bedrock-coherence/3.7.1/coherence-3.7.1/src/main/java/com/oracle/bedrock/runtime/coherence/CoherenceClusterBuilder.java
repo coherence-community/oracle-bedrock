@@ -25,8 +25,8 @@
 
 package com.oracle.bedrock.runtime.coherence;
 
-import com.oracle.bedrock.runtime.AbstractAssemblyBuilder;
 import com.oracle.bedrock.Options;
+import com.oracle.bedrock.runtime.AbstractAssemblyBuilder;
 import com.oracle.bedrock.runtime.AssemblyBuilder;
 
 import java.util.List;

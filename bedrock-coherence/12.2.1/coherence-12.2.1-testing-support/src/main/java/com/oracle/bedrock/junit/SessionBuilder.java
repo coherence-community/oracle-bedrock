@@ -51,7 +51,7 @@ public interface SessionBuilder
      *
      * @return a {@link ConfigurableCacheFactory}
      */
-    ConfigurableCacheFactory build(LocalPlatform platform,
+    ConfigurableCacheFactory build(LocalPlatform                 platform,
                                    CoherenceClusterOrchestration orchestration,
-                                   Option... options);
+                                   Option...                     options);
 }

@@ -3,7 +3,7 @@
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * The contents of this file are subject to the terms and conditions of
+ * The contents of this file are subject to the terms and conditions of 
  * the Common Development and Distribution License 1.0 (the "License").
  *
  * You may not use this file except in compliance with the License.
@@ -27,9 +27,9 @@ package com.oracle.bedrock.runtime.coherence;
 
 import com.oracle.bedrock.runtime.concurrent.RemoteChannel;
 import com.oracle.bedrock.runtime.concurrent.RemoteEvent;
+import com.oracle.bedrock.runtime.concurrent.RemoteRunnable;
 import com.oracle.bedrock.runtime.concurrent.options.StreamName;
 import com.oracle.bedrock.runtime.java.JavaApplication;
-import com.oracle.bedrock.runtime.concurrent.RemoteRunnable;
 import com.tangosol.net.DefaultCacheServer;
 
 /**
@@ -43,7 +43,9 @@ import com.tangosol.net.DefaultCacheServer;
  */
 public class CustomServer
 {
-
+    /** 
+     *Field description 
+     */
     @RemoteChannel.Inject
     public static RemoteChannel channel;
 
@@ -60,7 +62,9 @@ public class CustomServer
      * @param application  the application to fire the event from
      * @param event        the event to fire
      */
-    public static void fireEvent(JavaApplication application, String streamName, RemoteEvent event)
+    public static void fireEvent(JavaApplication application,
+                                 String          streamName,
+                                 RemoteEvent     event)
     {
         application.submit(new FireEvent(streamName, event));
     }
@@ -75,6 +79,7 @@ public class CustomServer
          * The identifier of this event.
          */
         private int id;
+
 
         /**
          * Create an {@link Event} with the specified identifier.
@@ -105,6 +110,7 @@ public class CustomServer
             {
                 return true;
             }
+
             if (o == null || getClass() != o.getClass())
             {
                 return false;
@@ -127,9 +133,7 @@ public class CustomServer
         @Override
         public String toString()
         {
-            return "Event(" +
-                   "id=" + id +
-                   ')';
+            return "Event(" + "id=" + id + ')';
         }
     }
 
@@ -140,15 +144,24 @@ public class CustomServer
      */
     public static class FireEvent implements RemoteRunnable
     {
-        private String streamName;
-
+        private String      streamName;
         private RemoteEvent event;
 
-        public FireEvent(String streamName, RemoteEvent event)
+
+        /**
+         * Constructs ...
+         *
+         *
+         * @param streamName
+         * @param event
+         */
+        public FireEvent(String      streamName,
+                         RemoteEvent event)
         {
             this.streamName = streamName;
             this.event      = event;
         }
+
 
         @Override
         public void run()

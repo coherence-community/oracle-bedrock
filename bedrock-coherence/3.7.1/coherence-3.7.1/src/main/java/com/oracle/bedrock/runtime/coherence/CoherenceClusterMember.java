@@ -25,9 +25,8 @@
 
 package com.oracle.bedrock.runtime.coherence;
 
-import com.oracle.bedrock.runtime.Platform;
-import com.oracle.bedrock.runtime.remote.RemotePlatform;
 import com.oracle.bedrock.Options;
+import com.oracle.bedrock.runtime.Platform;
 import com.oracle.bedrock.runtime.coherence.options.LocalHost;
 import com.oracle.bedrock.runtime.coherence.options.MachineName;
 import com.oracle.bedrock.runtime.concurrent.RemoteCallable;
@@ -40,6 +39,7 @@ import com.oracle.bedrock.runtime.java.options.Headless;
 import com.oracle.bedrock.runtime.java.options.IPv4Preferred;
 import com.oracle.bedrock.runtime.java.options.SystemProperties;
 import com.oracle.bedrock.runtime.java.options.SystemProperty;
+import com.oracle.bedrock.runtime.remote.RemotePlatform;
 import com.tangosol.net.NamedCache;
 import com.tangosol.util.UID;
 

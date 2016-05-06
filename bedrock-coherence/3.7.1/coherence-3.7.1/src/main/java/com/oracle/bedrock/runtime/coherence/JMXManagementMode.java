@@ -25,14 +25,14 @@
 
 package com.oracle.bedrock.runtime.coherence;
 
-import com.oracle.bedrock.runtime.Platform;
-import com.oracle.bedrock.runtime.Profile;
-import com.oracle.bedrock.runtime.java.features.JmxFeature;
-import com.oracle.bedrock.runtime.java.options.SystemProperties;
 import com.oracle.bedrock.Option;
 import com.oracle.bedrock.Options;
 import com.oracle.bedrock.runtime.Application;
 import com.oracle.bedrock.runtime.MetaClass;
+import com.oracle.bedrock.runtime.Platform;
+import com.oracle.bedrock.runtime.Profile;
+import com.oracle.bedrock.runtime.java.features.JmxFeature;
+import com.oracle.bedrock.runtime.java.options.SystemProperties;
 import com.oracle.bedrock.runtime.java.options.SystemProperty;
 
 /**
@@ -122,7 +122,7 @@ public enum JMXManagementMode implements Option, Profile
 
 
     @Override
-    public void onLaunching(Platform platform,
+    public void onLaunching(Platform  platform,
                             MetaClass metaClass,
                             Options   options)
     {

@@ -25,22 +25,22 @@
 
 package com.oracle.bedrock.runtime.coherence;
 
-import com.oracle.bedrock.runtime.Platform;
-import com.oracle.bedrock.runtime.coherence.callables.GetClusterMemberUIDs;
-import com.oracle.bedrock.runtime.coherence.callables.GetServiceStatus;
-import com.oracle.bedrock.runtime.java.AbstractJavaApplication;
-import com.oracle.bedrock.runtime.java.JavaApplicationProcess;
 import com.oracle.bedrock.Options;
 import com.oracle.bedrock.runtime.Application;
 import com.oracle.bedrock.runtime.ApplicationProcess;
+import com.oracle.bedrock.runtime.Platform;
+import com.oracle.bedrock.runtime.coherence.callables.GetClusterMemberUIDs;
 import com.oracle.bedrock.runtime.coherence.callables.GetClusterName;
 import com.oracle.bedrock.runtime.coherence.callables.GetClusterSize;
 import com.oracle.bedrock.runtime.coherence.callables.GetLocalMemberId;
 import com.oracle.bedrock.runtime.coherence.callables.GetLocalMemberRoleName;
 import com.oracle.bedrock.runtime.coherence.callables.GetLocalMemberSiteName;
 import com.oracle.bedrock.runtime.coherence.callables.GetLocalMemberUID;
+import com.oracle.bedrock.runtime.coherence.callables.GetServiceStatus;
 import com.oracle.bedrock.runtime.coherence.callables.IsServiceRunning;
+import com.oracle.bedrock.runtime.java.AbstractJavaApplication;
 import com.oracle.bedrock.runtime.java.JavaApplication;
+import com.oracle.bedrock.runtime.java.JavaApplicationProcess;
 import com.oracle.bedrock.runtime.java.features.JmxFeature;
 import com.tangosol.net.NamedCache;
 import com.tangosol.util.UID;

@@ -25,10 +25,7 @@
 
 package com.oracle.bedrock.junit;
 
-import java.io.IOException;
-import java.net.UnknownHostException;
 import java.util.concurrent.TimeUnit;
-
 
 /**
  * A simple application that sleeps and then terminates.
@@ -41,11 +38,13 @@ import java.util.concurrent.TimeUnit;
 public class SleepingApplication
 {
     /**
-     * Entry Point of the Application
+     * Entry Point of the Application.
      *
-     * @param arguments
+     * @param arguments the arguments
+     *
+     * @throws InterruptedException  when the sleeping was interrupted
      */
-    public static void main(String[] arguments) throws UnknownHostException, IOException, InterruptedException
+    public static void main(String[] arguments) throws InterruptedException
     {
         System.out.printf("%s started\n", SleepingApplication.class.getName());
 

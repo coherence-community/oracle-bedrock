@@ -3,7 +3,7 @@
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * The contents of this file are subject to the terms and conditions of
+ * The contents of this file are subject to the terms and conditions of 
  * the Common Development and Distribution License 1.0 (the "License").
  *
  * You may not use this file except in compliance with the License.
@@ -22,12 +22,10 @@
  * enclosed by brackets [] replaced by your own identifying information:
  * "Portions Copyright [year] [name of copyright owner]"
  */
+
 package com.oracle.bedrock.junit;
 
-import java.io.IOException;
-import java.net.UnknownHostException;
 import java.util.concurrent.TimeUnit;
-
 
 /**
  * A simple application that sleeps and then terminates.
@@ -40,11 +38,13 @@ import java.util.concurrent.TimeUnit;
 public class SleepingApplication
 {
     /**
-     * Entry Point of the Application
+     * Entry Point of the Application.
      *
-     * @param arguments
+     * @param arguments the arguments
+     *
+     * @throws InterruptedException  when the sleeping was interrupted
      */
-    public static void main(String[] arguments) throws UnknownHostException, IOException, InterruptedException
+    public static void main(String[] arguments) throws InterruptedException
     {
         System.out.printf("%s started\n", SleepingApplication.class.getName());
 

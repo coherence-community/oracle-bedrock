@@ -26,12 +26,9 @@
 package com.oracle.bedrock.runtime.coherence.callables;
 
 import com.oracle.bedrock.runtime.coherence.ServiceStatus;
-
 import com.oracle.bedrock.runtime.concurrent.RemoteCallable;
-
 import com.tangosol.coherence.component.util.daemon.queueProcessor.service.grid.PartitionedService;
 import com.tangosol.coherence.component.util.safeService.safeCacheService.SafeDistributedCacheService;
-
 import com.tangosol.net.CacheFactory;
 import com.tangosol.net.Service;
 

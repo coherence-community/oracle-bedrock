@@ -25,38 +25,30 @@
 
 package com.oracle.bedrock.runtime.coherence;
 
+import com.oracle.bedrock.runtime.LocalPlatform;
 import com.oracle.bedrock.runtime.Platform;
 import com.oracle.bedrock.runtime.coherence.options.CacheConfig;
+import com.oracle.bedrock.runtime.coherence.options.ClusterName;
+import com.oracle.bedrock.runtime.coherence.options.ClusterPort;
+import com.oracle.bedrock.runtime.coherence.options.LocalHost;
 import com.oracle.bedrock.runtime.coherence.options.LocalStorage;
 import com.oracle.bedrock.runtime.concurrent.runnable.RuntimeExit;
 import com.oracle.bedrock.runtime.console.SystemApplicationConsole;
 import com.oracle.bedrock.runtime.java.ClassPath;
 import com.oracle.bedrock.runtime.java.LocalJavaApplicationLauncher;
-import com.oracle.bedrock.runtime.options.DisplayName;
-import com.oracle.bedrock.runtime.LocalPlatform;
-
-import com.oracle.bedrock.runtime.coherence.options.ClusterName;
-import com.oracle.bedrock.runtime.coherence.options.ClusterPort;
-import com.oracle.bedrock.runtime.coherence.options.LocalHost;
-
 import com.oracle.bedrock.runtime.java.options.JavaAgent;
-
 import com.oracle.bedrock.runtime.network.AvailablePortIterator;
-
+import com.oracle.bedrock.runtime.options.DisplayName;
 import com.oracle.bedrock.util.Capture;
-
 import org.jacoco.agent.rt.RT;
-
 import org.junit.Assert;
 import org.junit.Test;
 
-import static com.oracle.bedrock.deferred.DeferredHelper.invoking;
-
-import static com.oracle.bedrock.deferred.Eventually.assertThat;
-
-import static org.hamcrest.CoreMatchers.is;
-
 import java.io.File;
+
+import static com.oracle.bedrock.deferred.DeferredHelper.invoking;
+import static com.oracle.bedrock.deferred.Eventually.assertThat;
+import static org.hamcrest.CoreMatchers.is;
 
 /**
  * Functional Tests for {@link CoherenceClusterBuilder}

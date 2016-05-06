@@ -25,20 +25,16 @@
 
 package com.oracle.bedrock.junit;
 
-import com.oracle.bedrock.runtime.coherence.CoherenceCluster;
 import com.oracle.bedrock.deferred.Eventually;
-
+import com.oracle.bedrock.runtime.coherence.CoherenceCluster;
 import com.tangosol.net.ConfigurableCacheFactory;
 import com.tangosol.net.NamedCache;
-
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 
 import static com.oracle.bedrock.deferred.DeferredHelper.invoking;
-
 import static org.hamcrest.CoreMatchers.not;
-
 import static org.hamcrest.core.Is.is;
 
 /**
@@ -95,9 +91,10 @@ public class DefaultCoherenceClusterOrchestrationTest
     @Test
     public void shouldCreateExtendClientSession()
     {
-        ConfigurableCacheFactory session = orchestration.getSessionFor(SessionBuilders.extendClient("coherence-cache-config.xml"));
+        ConfigurableCacheFactory session =
+            orchestration.getSessionFor(SessionBuilders.extendClient("coherence-cache-config.xml"));
 
-        NamedCache               cache   = session.ensureCache("dist-example", null);
+        NamedCache cache = session.ensureCache("dist-example", null);
 
         Assert.assertThat(orchestration.getCluster().getClusterSize(), is(3));
 

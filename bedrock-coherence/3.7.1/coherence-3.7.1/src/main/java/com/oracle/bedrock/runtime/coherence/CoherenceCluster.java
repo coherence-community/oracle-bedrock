@@ -25,11 +25,11 @@
 
 package com.oracle.bedrock.runtime.coherence;
 
+import com.oracle.bedrock.Options;
 import com.oracle.bedrock.runtime.AbstractAssembly;
 import com.oracle.bedrock.runtime.Assembly;
 import com.oracle.bedrock.runtime.coherence.callables.GetAutoStartServiceNames;
 import com.oracle.bedrock.runtime.coherence.callables.GetServiceStatus;
-import com.oracle.bedrock.Options;
 import com.tangosol.net.NamedCache;
 import com.tangosol.util.UID;
 

@@ -25,11 +25,11 @@
 
 package com.oracle.bedrock.runtime.coherence;
 
-import com.oracle.bedrock.runtime.Assembly;
-import com.oracle.bedrock.runtime.coherence.callables.GetServiceStatus;
 import com.oracle.bedrock.Options;
 import com.oracle.bedrock.runtime.AbstractAssembly;
+import com.oracle.bedrock.runtime.Assembly;
 import com.oracle.bedrock.runtime.coherence.callables.GetAutoStartServiceNames;
+import com.oracle.bedrock.runtime.coherence.callables.GetServiceStatus;
 import com.tangosol.net.NamedCache;
 import com.tangosol.util.UID;
 
@@ -111,6 +111,9 @@ public class CoherenceCluster extends AbstractAssembly<CoherenceClusterMember>
      * @param cacheName   the name of the {@link NamedCache}
      * @param keyClass    the type of the keys for the {@link NamedCache}
      * @param valueClass  the type of the values for the {@link NamedCache}
+     *
+     * @param <K>         the type of the key class
+     * @param <V>         the type of the value class
      *
      * @return  a proxy to the {@link NamedCache}
      */

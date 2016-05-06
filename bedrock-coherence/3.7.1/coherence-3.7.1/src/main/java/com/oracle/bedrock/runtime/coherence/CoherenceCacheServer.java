@@ -25,12 +25,11 @@
 
 package com.oracle.bedrock.runtime.coherence;
 
+import com.oracle.bedrock.Options;
+import com.oracle.bedrock.runtime.Application;
 import com.oracle.bedrock.runtime.ApplicationProcess;
 import com.oracle.bedrock.runtime.Platform;
 import com.oracle.bedrock.runtime.java.JavaApplicationProcess;
-import com.oracle.bedrock.Options;
-
-import com.oracle.bedrock.runtime.Application;
 
 /**
  * A runtime representation of a {@link CoherenceCacheServer}.

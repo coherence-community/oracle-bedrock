@@ -25,56 +25,37 @@
 
 package com.oracle.bedrock.runtime.coherence;
 
-import com.oracle.bedrock.matchers.MapMatcher;
-import com.oracle.bedrock.runtime.Platform;
-import com.oracle.bedrock.runtime.coherence.callables.GetServiceStatus;
-import com.oracle.bedrock.runtime.concurrent.options.StreamName;
-import com.oracle.bedrock.runtime.options.Discriminator;
 import com.oracle.bedrock.junit.AbstractTest;
-
+import com.oracle.bedrock.matchers.MapMatcher;
 import com.oracle.bedrock.options.Diagnostics;
-
 import com.oracle.bedrock.runtime.LocalPlatform;
-
+import com.oracle.bedrock.runtime.Platform;
 import com.oracle.bedrock.runtime.coherence.callables.GetClusterName;
 import com.oracle.bedrock.runtime.coherence.callables.GetClusterSize;
 import com.oracle.bedrock.runtime.coherence.callables.GetLocalMemberId;
+import com.oracle.bedrock.runtime.coherence.callables.GetServiceStatus;
 import com.oracle.bedrock.runtime.coherence.options.ClusterPort;
 import com.oracle.bedrock.runtime.coherence.options.LocalHost;
 import com.oracle.bedrock.runtime.coherence.options.OperationalOverride;
 import com.oracle.bedrock.runtime.coherence.options.RoleName;
 import com.oracle.bedrock.runtime.coherence.options.SiteName;
-
 import com.oracle.bedrock.runtime.concurrent.RemoteEvent;
 import com.oracle.bedrock.runtime.concurrent.RemoteEventListener;
-
+import com.oracle.bedrock.runtime.concurrent.options.StreamName;
 import com.oracle.bedrock.runtime.console.SystemApplicationConsole;
-
 import com.oracle.bedrock.runtime.java.features.JmxFeature;
 import com.oracle.bedrock.runtime.java.options.ClassName;
 import com.oracle.bedrock.runtime.java.options.SystemProperty;
-
 import com.oracle.bedrock.runtime.network.AvailablePortIterator;
-
+import com.oracle.bedrock.runtime.options.Discriminator;
 import com.oracle.bedrock.util.Capture;
-
 import com.tangosol.net.NamedCache;
-
 import com.tangosol.util.aggregator.LongSum;
-
 import com.tangosol.util.extractor.IdentityExtractor;
-
 import com.tangosol.util.filter.PresentFilter;
-
 import org.junit.Test;
 
-import static com.oracle.bedrock.deferred.DeferredHelper.invoking;
-
-import static com.oracle.bedrock.deferred.Eventually.assertThat;
-
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.notNullValue;
-
+import javax.management.ObjectName;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -82,11 +63,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-import javax.management.ObjectName;
+import static com.oracle.bedrock.deferred.DeferredHelper.invoking;
+import static com.oracle.bedrock.deferred.Eventually.assertThat;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
 
 /**
  * Functional Tests for {@link CoherenceCacheServer}s.

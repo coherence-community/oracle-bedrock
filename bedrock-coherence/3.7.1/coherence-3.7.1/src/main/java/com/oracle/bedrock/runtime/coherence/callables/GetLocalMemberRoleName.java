@@ -26,7 +26,6 @@
 package com.oracle.bedrock.runtime.coherence.callables;
 
 import com.oracle.bedrock.runtime.concurrent.RemoteCallable;
-
 import com.tangosol.net.CacheFactory;
 
 /**

@@ -26,11 +26,8 @@
 package com.oracle.bedrock.junit;
 
 import com.oracle.bedrock.Option;
-
 import com.oracle.bedrock.runtime.LocalPlatform;
-
 import com.tangosol.net.ConfigurableCacheFactory;
-
 import net.sf.cglib.core.Local;
 
 /**

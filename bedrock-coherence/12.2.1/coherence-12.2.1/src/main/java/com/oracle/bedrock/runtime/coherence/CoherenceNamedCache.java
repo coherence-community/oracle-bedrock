@@ -27,19 +27,14 @@ package com.oracle.bedrock.runtime.coherence;
 
 import com.oracle.bedrock.runtime.concurrent.callable.RemoteCallableStaticMethod;
 import com.oracle.bedrock.runtime.concurrent.callable.RemoteMethodInvocation;
-
 import com.oracle.bedrock.util.ReflectionHelper;
-
 import com.tangosol.net.CacheService;
 import com.tangosol.net.NamedCache;
-
 import com.tangosol.util.Filter;
 import com.tangosol.util.MapListener;
 
 import java.io.Serializable;
-
 import java.lang.reflect.Method;
-
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -139,7 +134,10 @@ class CoherenceNamedCache<K, V> implements NamedCache<K, V>
         interceptor.onBeforeRemoteInvocation(method, arguments);
 
         // submit the remote method invocation
-        CompletableFuture future = member.submit(new RemoteMethodInvocation(producer, methodName, arguments, interceptor));
+        CompletableFuture future = member.submit(new RemoteMethodInvocation(producer,
+                                                                            methodName,
+                                                                            arguments,
+                                                                            interceptor));
 
         try
         {
@@ -180,7 +178,10 @@ class CoherenceNamedCache<K, V> implements NamedCache<K, V>
         interceptor.onBeforeRemoteInvocation(method, arguments);
 
         // submit the remote method invocation
-        CompletableFuture future = member.submit(new RemoteMethodInvocation(producer, methodName, arguments, interceptor));
+        CompletableFuture future = member.submit(new RemoteMethodInvocation(producer,
+                                                                            methodName,
+                                                                            arguments,
+                                                                            interceptor));
 
         try
         {

@@ -25,6 +25,8 @@
 
 package com.oracle.bedrock.junit;
 
+import com.oracle.bedrock.Option;
+import com.oracle.bedrock.Options;
 import com.oracle.bedrock.deferred.Eventually;
 import com.oracle.bedrock.runtime.LocalPlatform;
 import com.oracle.bedrock.runtime.Platform;
@@ -32,6 +34,7 @@ import com.oracle.bedrock.runtime.coherence.CoherenceCluster;
 import com.oracle.bedrock.runtime.coherence.CoherenceClusterBuilder;
 import com.oracle.bedrock.runtime.coherence.CoherenceClusterMember;
 import com.oracle.bedrock.runtime.coherence.callables.GetAutoStartServiceNames;
+import com.oracle.bedrock.runtime.coherence.options.ClusterName;
 import com.oracle.bedrock.runtime.coherence.options.ClusterPort;
 import com.oracle.bedrock.runtime.coherence.options.LocalStorage;
 import com.oracle.bedrock.runtime.coherence.options.Multicast;
@@ -40,13 +43,9 @@ import com.oracle.bedrock.runtime.console.SystemApplicationConsole;
 import com.oracle.bedrock.runtime.java.options.Headless;
 import com.oracle.bedrock.runtime.java.options.HeapSize;
 import com.oracle.bedrock.runtime.java.options.HotSpot;
-import com.oracle.bedrock.runtime.java.options.SystemProperties;
+import com.oracle.bedrock.runtime.java.options.SystemProperty;
 import com.oracle.bedrock.runtime.options.ApplicationClosingBehavior;
 import com.oracle.bedrock.runtime.options.DisplayName;
-import com.oracle.bedrock.Option;
-import com.oracle.bedrock.Options;
-import com.oracle.bedrock.runtime.coherence.options.ClusterName;
-import com.oracle.bedrock.runtime.java.options.SystemProperty;
 import com.oracle.bedrock.util.Capture;
 import com.tangosol.net.CacheFactory;
 import com.tangosol.net.ConfigurableCacheFactory;
@@ -121,7 +120,6 @@ public class CoherenceClusterOrchestration extends ExternalResource
      * The original system properties to be restored when the orchestration is complete.
      */
     private Properties systemProperties;
-
 
     /**
      * The {@link ConfigurableCacheFactory} sessions that have been
@@ -424,7 +422,7 @@ public class CoherenceClusterOrchestration extends ExternalResource
 
 
     /**
-     * Obtains a session (represented as a {@link ConfigurableCacheFactory)} against the
+     * Obtains a session (represented as a {@link ConfigurableCacheFactory} against the
      * orchestrated Coherence Cluster for interacting with Coherence.
      * <p>
      * Only a single session may be created by a {@link CoherenceClusterOrchestration}

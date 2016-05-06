@@ -46,6 +46,7 @@ public class ContainerBasedCoherenceClusterBuilderTest extends AbstractCoherence
         return JavaVirtualMachine.get();
     }
 
+
     @Override
     @Ignore
     public void shouldPerformRollingRestartOfCluster()

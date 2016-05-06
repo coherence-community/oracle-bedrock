@@ -26,7 +26,6 @@
 package com.oracle.bedrock.runtime.coherence;
 
 import com.tangosol.util.InvocableMap;
-
 import com.tangosol.util.processor.AbstractProcessor;
 
 /**

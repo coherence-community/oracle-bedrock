@@ -25,22 +25,17 @@
 
 package com.oracle.bedrock.junit;
 
+import com.oracle.bedrock.Option;
+import com.oracle.bedrock.Options;
+import com.oracle.bedrock.runtime.LocalPlatform;
+import com.oracle.bedrock.runtime.MetaClass;
 import com.oracle.bedrock.runtime.Profile;
 import com.oracle.bedrock.runtime.coherence.CoherenceClusterMember;
 import com.oracle.bedrock.runtime.coherence.options.CacheConfig;
 import com.oracle.bedrock.runtime.coherence.options.Clustering;
 import com.oracle.bedrock.runtime.coherence.options.LocalStorage;
 import com.oracle.bedrock.runtime.coherence.options.RoleName;
-import com.oracle.bedrock.Option;
-import com.oracle.bedrock.Options;
-
-import com.oracle.bedrock.runtime.LocalPlatform;
-import com.oracle.bedrock.runtime.MetaClass;
-
 import com.oracle.bedrock.runtime.java.options.SystemProperty;
-
-import com.oracle.bedrock.util.SystemProperties;
-
 import com.tangosol.net.ConfigurableCacheFactory;
 import com.tangosol.net.ScopedCacheFactoryBuilder;
 

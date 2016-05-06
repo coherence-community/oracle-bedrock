@@ -3,7 +3,7 @@
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * The contents of this file are subject to the terms and conditions of
+ * The contents of this file are subject to the terms and conditions of 
  * the Common Development and Distribution License 1.0 (the "License").
  *
  * You may not use this file except in compliance with the License.
@@ -107,7 +107,7 @@ public class CustomCoherenceClusterOrchestrationTest
 
         // we must ensure all auto-start services are safe
         StabilityPredicate stabilityPredicate =
-                StabilityPredicate.of(CoherenceCluster.Predicates.autoStartServicesSafe());
+            StabilityPredicate.of(CoherenceCluster.Predicates.autoStartServicesSafe());
 
         // only restart storage enabled members
         cluster.filter(member -> member.getName().startsWith("storage")).relaunch(stabilityPredicate);

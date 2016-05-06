@@ -3,7 +3,7 @@
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * The contents of this file are subject to the terms and conditions of
+ * The contents of this file are subject to the terms and conditions of 
  * the Common Development and Distribution License 1.0 (the "License").
  *
  * You may not use this file except in compliance with the License.
@@ -25,16 +25,16 @@
 
 package com.oracle.bedrock.runtime.coherence.options;
 
-import com.oracle.bedrock.runtime.Platform;
-import com.oracle.bedrock.runtime.Profile;
-import com.oracle.bedrock.runtime.coherence.CoherenceClusterMember;
-import com.oracle.bedrock.runtime.java.options.SystemProperties;
-import com.oracle.bedrock.runtime.network.AvailablePortIterator;
 import com.oracle.bedrock.Option;
 import com.oracle.bedrock.Options;
 import com.oracle.bedrock.runtime.Application;
 import com.oracle.bedrock.runtime.MetaClass;
+import com.oracle.bedrock.runtime.Platform;
+import com.oracle.bedrock.runtime.Profile;
+import com.oracle.bedrock.runtime.coherence.CoherenceClusterMember;
+import com.oracle.bedrock.runtime.java.options.SystemProperties;
 import com.oracle.bedrock.runtime.java.options.SystemProperty;
+import com.oracle.bedrock.runtime.network.AvailablePortIterator;
 import com.oracle.bedrock.util.Capture;
 import com.oracle.bedrock.util.PerpetualIterator;
 
@@ -201,7 +201,7 @@ public class LocalHost implements Profile, Option
 
 
     @Override
-    public void onLaunching(Platform platform,
+    public void onLaunching(Platform  platform,
                             MetaClass metaClass,
                             Options   options)
     {

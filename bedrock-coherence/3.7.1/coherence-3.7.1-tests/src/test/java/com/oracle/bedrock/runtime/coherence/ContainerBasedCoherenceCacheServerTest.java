@@ -26,10 +26,8 @@
 package com.oracle.bedrock.runtime.coherence;
 
 import com.oracle.bedrock.runtime.Platform;
-
 import com.oracle.bedrock.runtime.java.ContainerBasedJavaApplicationLauncher;
 import com.oracle.bedrock.runtime.java.JavaVirtualMachine;
-
 import org.junit.Ignore;
 
 /**

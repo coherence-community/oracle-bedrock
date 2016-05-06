@@ -25,21 +25,21 @@
 
 package com.oracle.bedrock.runtime.coherence;
 
-import com.oracle.bedrock.runtime.Platform;
-import com.oracle.bedrock.runtime.concurrent.RemoteCallable;
-import com.oracle.bedrock.runtime.java.ContainerBasedJavaApplicationLauncher;
-import com.oracle.bedrock.runtime.java.JavaApplication;
-import com.oracle.bedrock.runtime.java.options.SystemProperties;
-import com.oracle.bedrock.runtime.remote.RemotePlatform;
 import com.oracle.bedrock.Options;
+import com.oracle.bedrock.runtime.Platform;
 import com.oracle.bedrock.runtime.coherence.options.LocalHost;
 import com.oracle.bedrock.runtime.coherence.options.MachineName;
+import com.oracle.bedrock.runtime.concurrent.RemoteCallable;
 import com.oracle.bedrock.runtime.concurrent.callable.RemoteCallableStaticMethod;
+import com.oracle.bedrock.runtime.java.ContainerBasedJavaApplicationLauncher;
+import com.oracle.bedrock.runtime.java.JavaApplication;
 import com.oracle.bedrock.runtime.java.container.ContainerClassLoader;
 import com.oracle.bedrock.runtime.java.options.ClassName;
 import com.oracle.bedrock.runtime.java.options.Headless;
 import com.oracle.bedrock.runtime.java.options.IPv4Preferred;
+import com.oracle.bedrock.runtime.java.options.SystemProperties;
 import com.oracle.bedrock.runtime.java.options.SystemProperty;
+import com.oracle.bedrock.runtime.remote.RemotePlatform;
 import com.tangosol.net.NamedCache;
 import com.tangosol.util.UID;
 
@@ -158,6 +158,9 @@ public interface CoherenceClusterMember extends JavaApplication
      * @param keyClass    the type of the keys for the {@link NamedCache}
      * @param valueClass  the type of the values for the {@link NamedCache}
      *
+     * @param <K>         the type of the key class
+     * @param <V>         the type of the value class
+     *
      * @return  a proxy to the {@link NamedCache}
      */
     <K, V> NamedCache<K, V> getCache(String   cacheName,
@@ -189,7 +192,7 @@ public interface CoherenceClusterMember extends JavaApplication
      * The {@link com.oracle.bedrock.runtime.MetaClass} for {@link CoherenceClusterMember}s.
      */
     class MetaClass implements com.oracle.bedrock.runtime.MetaClass<CoherenceClusterMember>,
-            ContainerBasedJavaApplicationLauncher.ApplicationController
+                               ContainerBasedJavaApplicationLauncher.ApplicationController
     {
         /**
          * The com.tangosol.net.DefaultCacheServer classname.

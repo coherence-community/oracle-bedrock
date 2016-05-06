@@ -25,9 +25,9 @@
 
 package com.oracle.bedrock.runtime.coherence;
 
+import com.oracle.bedrock.runtime.LocalPlatform;
 import com.oracle.bedrock.runtime.Platform;
 import com.oracle.bedrock.runtime.java.LocalJavaApplicationLauncher;
-import com.oracle.bedrock.runtime.LocalPlatform;
 
 /**
  * Functional Test for {@link CoherenceCacheServer}s using a {@link LocalJavaApplicationLauncher}.

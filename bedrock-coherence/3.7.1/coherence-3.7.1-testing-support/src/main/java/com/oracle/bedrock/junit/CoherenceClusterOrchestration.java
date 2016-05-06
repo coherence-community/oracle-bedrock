@@ -417,7 +417,7 @@ public class CoherenceClusterOrchestration extends ExternalResource
 
 
     /**
-     * Obtains a session (represented as a {@link ConfigurableCacheFactory)} against the
+     * Obtains a session (represented as a {@link ConfigurableCacheFactory} against the
      * orchestrated Coherence Cluster for interacting with Coherence.
      * <p>
      * Attempts to request a session multiple times with the same {@link SessionBuilder}
