@@ -3,7 +3,7 @@
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * The contents of this file are subject to the terms and conditions of
+ * The contents of this file are subject to the terms and conditions of 
  * the Common Development and Distribution License 1.0 (the "License").
  *
  * You may not use this file except in compliance with the License.
@@ -34,10 +34,8 @@ import com.jprofiler.api.agent.TrackingOptions;
 import com.oracle.bedrock.runtime.concurrent.RemoteCallable;
 import com.oracle.bedrock.runtime.concurrent.callable.RemoteCallableStaticMethod;
 
-import java.awt.Color;
-
+import java.awt.*;
 import java.io.File;
-
 
 /**
  * A factory for {@link RemoteCallable} to execute JProfiler functions
@@ -83,7 +81,9 @@ public class JProfiler
      *
      * @return a {@link JProfiler} that adds a bookmark at the current time
      */
-    public static RemoteCallable<Void> addBookmark(String description, Color color, boolean dashed)
+    public static RemoteCallable<Void> addBookmark(String  description,
+                                                   Color   color,
+                                                   boolean dashed)
     {
         return new RemoteCallableStaticMethod<>(CONTROLLER_CLASS, "addBookmark", description, color, dashed);
     }
@@ -216,7 +216,8 @@ public class JProfiler
      *
      * @return a {@link JProfiler} that starts recording of memory allocations
      */
-    public static RemoteCallable<Void> startAllocRecording(boolean reset, TrackingOptions options)
+    public static RemoteCallable<Void> startAllocRecording(boolean         reset,
+                                                           TrackingOptions options)
     {
         return new RemoteCallableStaticMethod<>(CONTROLLER_CLASS, "startAllocRecording", reset, options);
     }
@@ -245,7 +246,9 @@ public class JProfiler
      *
      * @return a {@link JProfiler} that starts the call tracer
      */
-    public static RemoteCallable<Void> startCallTracer(int cap, boolean recordFiltered, boolean reset)
+    public static RemoteCallable<Void> startCallTracer(int     cap,
+                                                       boolean recordFiltered,
+                                                       boolean reset)
     {
         return new RemoteCallableStaticMethod<>(CONTROLLER_CLASS, "startCallTracer", cap, recordFiltered, reset);
     }
@@ -281,6 +284,7 @@ public class JProfiler
         return new RemoteCallableStaticMethod<>(CONTROLLER_CLASS, "startCPURecording", reset);
     }
 
+
     /**
      * Create a {@link JProfiler} that starts recording CPU data.
      * This method can be called repeatedly and alternately with stopCPURecording().
@@ -293,7 +297,8 @@ public class JProfiler
      *
      * @return a {@link JProfiler} that starts recording CPU data
      */
-    public static RemoteCallable<Void> startCPURecording(boolean reset, TrackingOptions options)
+    public static RemoteCallable<Void> startCPURecording(boolean         reset,
+                                                         TrackingOptions options)
     {
         return new RemoteCallableStaticMethod<>(CONTROLLER_CLASS, "startCPURecording", reset, options);
     }
@@ -361,7 +366,8 @@ public class JProfiler
      *
      * @return a {@link JProfiler}
      */
-    public static RemoteCallable<Void> startMonitorRecording(int blockingThreshold, int waitingThreshold)
+    public static RemoteCallable<Void> startMonitorRecording(int blockingThreshold,
+                                                             int waitingThreshold)
     {
         return new RemoteCallableStaticMethod<>(CONTROLLER_CLASS,
                                                 "startMonitorRecording",
@@ -396,7 +402,8 @@ public class JProfiler
      *
      * @return a {@link JProfiler} that starts recording data for a selected probe
      */
-    public static RemoteCallable<Void> startProbeRecording(String probeName, boolean events)
+    public static RemoteCallable<Void> startProbeRecording(String  probeName,
+                                                           boolean events)
     {
         return new RemoteCallableStaticMethod<>(CONTROLLER_CLASS, "startProbeRecording", probeName, events);
     }
@@ -414,7 +421,8 @@ public class JProfiler
      *
      * @return a {@link JProfiler} that starts recording data for a selected probe
      */
-    public static RemoteCallable<Void> startProbeRecording(String probeName, ProbeRecordingOptions options)
+    public static RemoteCallable<Void> startProbeRecording(String                probeName,
+                                                           ProbeRecordingOptions options)
     {
         return new RemoteCallableStaticMethod<>(CONTROLLER_CLASS, "startProbeRecording", probeName, options);
     }
@@ -452,8 +460,10 @@ public class JProfiler
      *
      * @return a {@link JProfiler} that starts tracking selected elements for a selected probe
      */
-    public static RemoteCallable<Void> startProbeTracking(String probeName, String[] descriptions,
-                                                       ProbeObjectType objectType, ProbeValueType valueType)
+    public static RemoteCallable<Void> startProbeTracking(String          probeName,
+                                                          String[]        descriptions,
+                                                          ProbeObjectType objectType,
+                                                          ProbeValueType  valueType)
     {
         return new RemoteCallableStaticMethod<>(CONTROLLER_CLASS,
                                                 "startProbeTracking",
@@ -480,8 +490,10 @@ public class JProfiler
      *
      * @return a {@link JProfiler} that stops tracking selected elements for a selected probe
      */
-    public static RemoteCallable<Void> stopProbeTracking(String probeName, String[] descriptions,
-                                                         ProbeObjectType objectType, ProbeValueType valueType)
+    public static RemoteCallable<Void> stopProbeTracking(String          probeName,
+                                                         String[]        descriptions,
+                                                         ProbeObjectType objectType,
+                                                         ProbeValueType  valueType)
     {
         return new RemoteCallableStaticMethod<>(CONTROLLER_CLASS,
                                                 "stopProbeTracking",

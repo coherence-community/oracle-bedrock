@@ -3,7 +3,7 @@
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * The contents of this file are subject to the terms and conditions of
+ * The contents of this file are subject to the terms and conditions of 
  * the Common Development and Distribution License 1.0 (the "License").
  *
  * You may not use this file except in compliance with the License.
@@ -25,11 +25,11 @@
 
 package com.oracle.bedrock.jprofiler;
 
-import com.oracle.bedrock.runtime.Platform;
 import com.oracle.bedrock.Option;
 import com.oracle.bedrock.Options;
 import com.oracle.bedrock.runtime.Application;
 import com.oracle.bedrock.runtime.MetaClass;
+import com.oracle.bedrock.runtime.Platform;
 import com.oracle.bedrock.runtime.Profile;
 import com.oracle.bedrock.runtime.java.JavaApplication;
 import com.oracle.bedrock.runtime.java.options.Freeform;
@@ -119,6 +119,17 @@ public class JprofilerProfile implements Profile, Option
 
     /**
      * Constructs a {@link JprofilerProfile}.
+     *
+     * @param enabled            enabling
+     * @param agentLibraryFile   the agent library file
+     * @param offline            start offline
+     * @param configurationFile  the configuration file
+     * @param sessionId          the session id
+     * @param startSuspended     start suspended
+     * @param verbose            verbose output
+     * @param jniInterception    use JNI interception
+     * @param stack              the stack
+     * @param samplingStack      the sampling stack size
      */
     public JprofilerProfile(boolean       enabled,
                             String        agentLibraryFile,
@@ -217,6 +228,8 @@ public class JprofilerProfile implements Profile, Option
     /**
      * Start the application in listen mode listening on the specified
      * {@link ListenAddress}.
+     *
+     * @param listenAddress   the {@link ListenAddress}
      *
      * @return this {@link JprofilerProfile} for fluent method chaining
      */
@@ -375,6 +388,8 @@ public class JprofilerProfile implements Profile, Option
      * when JProfiler emits corresponding warning messages.
      * The default value is 200.
      *
+     * @param samplingStack   the samplign stack size
+     *
      * @return this {@link JprofilerProfile} for fluent method chaining
      */
     public JprofilerProfile samplingStack(int samplingStack)
@@ -415,7 +430,7 @@ public class JprofilerProfile implements Profile, Option
 
 
     @Override
-    public void onLaunching(Platform platform,
+    public void onLaunching(Platform  platform,
                             MetaClass metaClass,
                             Options   options)
     {

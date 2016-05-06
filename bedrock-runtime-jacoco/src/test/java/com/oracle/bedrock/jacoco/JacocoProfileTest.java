@@ -3,7 +3,7 @@
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * The contents of this file are subject to the terms and conditions of
+ * The contents of this file are subject to the terms and conditions of 
  * the Common Development and Distribution License 1.0 (the "License").
  *
  * You may not use this file except in compliance with the License.
@@ -26,26 +26,19 @@
 package com.oracle.bedrock.jacoco;
 
 import applications.SleepingApplication;
-
-import com.oracle.bedrock.runtime.java.JavaApplication;
 import com.oracle.bedrock.Option;
-
 import com.oracle.bedrock.lang.ExpressionEvaluator;
-
 import com.oracle.bedrock.runtime.LocalPlatform;
-
+import com.oracle.bedrock.runtime.java.JavaApplication;
 import com.oracle.bedrock.runtime.java.options.ClassName;
 import com.oracle.bedrock.runtime.java.options.IPv4Preferred;
-
 import org.junit.Test;
 
-import static org.hamcrest.Matchers.greaterThan;
-
-import static org.hamcrest.core.Is.is;
-
-import static org.junit.Assert.assertThat;
-
 import java.io.File;
+
+import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertThat;
 
 /**
  * Tests for the {@link JacocoProfile}.

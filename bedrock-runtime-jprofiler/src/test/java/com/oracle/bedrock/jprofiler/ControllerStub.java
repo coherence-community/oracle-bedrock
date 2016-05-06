@@ -3,7 +3,7 @@
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * The contents of this file are subject to the terms and conditions of
+ * The contents of this file are subject to the terms and conditions of 
  * the Common Development and Distribution License 1.0 (the "License").
  *
  * You may not use this file except in compliance with the License.
@@ -44,28 +44,39 @@ import static org.mockito.Mockito.mock;
  */
 public class ControllerStub
 {
+    /** 
+     *Field description 
+     */
     public static final MethodStub methodStub = mock(MethodStub.class, Answers.RETURNS_SMART_NULLS.get());
+
 
     public static void startCPURecording(boolean reset)
     {
         methodStub.method("startCPURecording", reset);
     }
 
-    public static void startCPURecording(boolean reset, TrackingOptions trackingOptions)
+
+    public static void startCPURecording(boolean         reset,
+                                         TrackingOptions trackingOptions)
     {
         methodStub.method("startCPURecording", reset, trackingOptions);
 
     }
 
-    public static void startProbeRecording(String probeName, boolean events)
+
+    public static void startProbeRecording(String  probeName,
+                                           boolean events)
     {
         methodStub.method("startProbeRecording", probeName, events);
     }
 
-    public static void startProbeRecording(String probeName, ProbeRecordingOptions recordingOptions)
+
+    public static void startProbeRecording(String                probeName,
+                                           ProbeRecordingOptions recordingOptions)
     {
         methodStub.method("startProbeRecording", probeName, recordingOptions);
     }
+
 
     public static void stopProbeRecording(String probeName)
     {
@@ -73,17 +84,26 @@ public class ControllerStub
 
     }
 
-    public static void startProbeTracking(String probeName, String[] descriptions, ProbeObjectType objectType, ProbeValueType valueType)
+
+    public static void startProbeTracking(String          probeName,
+                                          String[]        descriptions,
+                                          ProbeObjectType objectType,
+                                          ProbeValueType  valueType)
     {
         methodStub.method("startProbeTracking", probeName, descriptions, objectType, valueType);
 
     }
 
-    public static void stopProbeTracking(String probeName, String[] description, ProbeObjectType objectType, ProbeValueType valueType)
+
+    public static void stopProbeTracking(String          probeName,
+                                         String[]        description,
+                                         ProbeObjectType objectType,
+                                         ProbeValueType  valueType)
     {
         methodStub.method("stopProbeTracking", probeName, description, objectType, valueType);
 
     }
+
 
     public static void stopCPURecording()
     {
@@ -91,65 +111,84 @@ public class ControllerStub
 
     }
 
-    public static void startCallTracer(int cap, boolean recordFiltered, boolean reset)
+
+    public static void startCallTracer(int     cap,
+                                       boolean recordFiltered,
+                                       boolean reset)
     {
         methodStub.method("startCallTracer", cap, recordFiltered, reset);
     }
+
 
     public static void stopCallTracer()
     {
         methodStub.method("stopCallTracer");
     }
 
+
     public static void startMethodStatsRecording()
     {
         methodStub.method("startMethodStatsRecording");
     }
+
 
     public static void stopMethodStatsRecording()
     {
         methodStub.method("stopMethodStatsRecording");
     }
 
+
     public static void startMonitorRecording()
     {
         methodStub.method("startMonitorRecording");
     }
 
-    public static void startMonitorRecording(int blockingThreshold, int waitingThreshold)
+
+    public static void startMonitorRecording(int blockingThreshold,
+                                             int waitingThreshold)
     {
         methodStub.method("startMonitorRecording", blockingThreshold, waitingThreshold);
     }
+
 
     public static void stopMonitorRecording()
     {
         methodStub.method("stopMonitorRecording");
     }
 
+
     public static void startAllocRecording(boolean reset)
     {
         methodStub.method("startAllocRecording", reset);
     }
 
-    public static void startAllocRecording(boolean reset, TrackingOptions trackingOptions)
+
+    public static void startAllocRecording(boolean         reset,
+                                           TrackingOptions trackingOptions)
     {
         methodStub.method("startAllocRecording", reset, trackingOptions);
     }
+
 
     public static void stopAllocRecording()
     {
         methodStub.method("stopAllocRecording");
     }
 
+
     public static void addBookmark(String description)
     {
         methodStub.method("addBookmark", description);
     }
 
-    public static void addBookmark(String description, Color color, boolean dashed)
+
+    public static void addBookmark(String  description,
+                                   Color   color,
+                                   boolean dashed)
     {
         methodStub.method("addBookmark", description, color, dashed);
     }
+
 
     public static void triggerThreadDump()
     {
@@ -157,15 +196,18 @@ public class ControllerStub
 
     }
 
+
     public static void triggerHeapDump()
     {
         methodStub.method("triggerHeapDump");
     }
 
+
     public static void triggerHeapDump(HeapDumpOptions heapDumpOptions)
     {
         methodStub.method("triggerHeapDump", heapDumpOptions);
     }
+
 
     public static void saveSnapshot(File file)
     {
@@ -173,20 +215,24 @@ public class ControllerStub
 
     }
 
+
     public static void startThreadProfiling()
     {
         methodStub.method("startThreadProfiling");
     }
+
 
     public static void stopThreadProfiling()
     {
         methodStub.method("stopThreadProfiling");
     }
 
+
     public static void startVMTelemetryRecording()
     {
         methodStub.method("startVMTelemetryRecording");
     }
+
 
     public static void stopVMTelemetryRecording()
     {
@@ -194,15 +240,19 @@ public class ControllerStub
 
     }
 
+
     public static void saveSnapshotOnExit(File file)
     {
         methodStub.method("saveSnapshotOnExit", file);
     }
 
-    public static void enableTriggerGroup(boolean enabled, String groupId) throws IllegalArgumentException
+
+    public static void enableTriggerGroup(boolean enabled,
+                                          String  groupId) throws IllegalArgumentException
     {
         methodStub.method("enableTriggerGroup", enabled, groupId);
     }
+
 
     public static void enableTriggers(boolean enabled)
     {
@@ -210,6 +260,12 @@ public class ControllerStub
     }
 
 
+    /**
+     * Interface description
+     *
+     * @version        Enter version here..., 16/05/06
+     * @author         Enter your name here...    
+     */
     public static interface MethodStub
     {
         public void method(Object... args);

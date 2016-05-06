@@ -3,7 +3,7 @@
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * The contents of this file are subject to the terms and conditions of
+ * The contents of this file are subject to the terms and conditions of 
  * the Common Development and Distribution License 1.0 (the "License").
  *
  * You may not use this file except in compliance with the License.
@@ -39,13 +39,16 @@ import java.io.IOException;
  */
 public class WaitingApplication
 {
-
     /**
      * The monitor that this application sychronizes on to wait.
      */
     public static final Object MONITOR = new Object();
 
+    /** 
+     *Field description 
+     */
     public static boolean sleep = true;
+
 
     /**
      * Entry Point of the Application
@@ -74,6 +77,13 @@ public class WaitingApplication
         System.out.println("Finished sleeping... now terminating");
     }
 
+
+    /**
+     * Class description
+     *
+     * @version        Enter version here..., 16/05/06
+     * @author         Enter your name here...    
+     */
     public static class Terminate implements RemoteRunnable
     {
         @Override
