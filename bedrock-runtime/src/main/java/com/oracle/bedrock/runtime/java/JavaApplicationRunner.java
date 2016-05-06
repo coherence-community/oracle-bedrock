@@ -1,5 +1,5 @@
 /*
- * File: JavaApplicationLauncher.java
+ * File: JavaApplicationRunner.java
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
@@ -25,21 +25,18 @@
 
 package com.oracle.bedrock.runtime.java;
 
+import com.oracle.bedrock.runtime.Settings;
 import com.oracle.bedrock.runtime.concurrent.RemoteChannel;
 import com.oracle.bedrock.runtime.concurrent.RemoteChannelListener;
 import com.oracle.bedrock.runtime.concurrent.socket.SocketBasedRemoteChannelClient;
-import com.oracle.bedrock.runtime.Settings;
 
 import java.io.IOException;
-
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-
 import java.net.InetAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.UnknownHostException;
-
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -58,13 +55,15 @@ public class JavaApplicationRunner
     private final String  parent;
     private final boolean isOrphanable;
 
+
     /**
      * Create a JavaApplicationRunner
      *
      * @param parent        the uri of the parent
      * @param isOrphanable  true if this process can live after the parent is closed
      */
-    public JavaApplicationRunner(String parent, boolean isOrphanable)
+    public JavaApplicationRunner(String  parent,
+                                 boolean isOrphanable)
     {
         this.parent       = parent;
         this.isOrphanable = isOrphanable;
@@ -78,7 +77,8 @@ public class JavaApplicationRunner
      * @param applicationClassName  the {@link Class} to run
      * @param arguments             the arguments to use
      */
-    public void run(String applicationClassName, String[] arguments)
+    public void run(String   applicationClassName,
+                    String[] arguments)
     {
         // a flag indicating if this application is in the process of
         // shutting down naturally
@@ -89,14 +89,13 @@ public class JavaApplicationRunner
         // terminating due to natural causes
         // (like it's finished or a System.exit(...) was called)
         Runtime.getRuntime().addShutdownHook(new Thread()
-        {
-            @Override
-            public void run()
-            {
-                isShuttingDown.set(true);
-            }
-        });
-
+                                             {
+                                                 @Override
+                                                 public void run()
+                                                 {
+                                                     isShuttingDown.set(true);
+                                                 }
+                                             });
 
         SocketBasedRemoteChannelClient channel = null;
 
@@ -112,24 +111,24 @@ public class JavaApplicationRunner
             channel = new SocketBasedRemoteChannelClient(inetAddress, parentURI.getPort());
 
             channel.addListener(new RemoteChannelListener()
-            {
-                @Override
-                public void onOpened(RemoteChannel channel)
-                {
-                    // connected to the parent!
-                }
+                                {
+                                    @Override
+                                    public void onOpened(RemoteChannel channel)
+                                    {
+                                        // connected to the parent!
+                                    }
 
-                @Override
-                public void onClosed(RemoteChannel channel)
-                {
-                    // disconnected from the parent so terminate
-                    // (if we're not orphanable)
-                    if (!isOrphanable)
-                    {
-                        Runtime.getRuntime().halt(2);
-                    }
-                }
-            });
+                                    @Override
+                                    public void onClosed(RemoteChannel channel)
+                                    {
+                                        // disconnected from the parent so terminate
+                                        // (if we're not orphanable)
+                                        if (!isOrphanable)
+                                        {
+                                            Runtime.getRuntime().halt(2);
+                                        }
+                                    }
+                                });
 
             // connect to the parent
             channel.open();
@@ -163,7 +162,6 @@ public class JavaApplicationRunner
             {
                 // attempt to load the application class
                 Class<?> applicationClass = Class.forName(applicationClassName);
-
 
                 // Inject the RemoteEventChannel (if required by the main Class
                 RemoteChannel.Injector.injectChannel(applicationClass, channel);
@@ -199,6 +197,7 @@ public class JavaApplicationRunner
         }
     }
 
+
     /**
      * {@link JavaApplicationRunner} entry point.
      * <p>
@@ -217,8 +216,7 @@ public class JavaApplicationRunner
     {
         if (arguments.length == 0)
         {
-            System.out
-                .println("JavaApplicationLauncher: No application (fqcn) was specified to start. An application must be specified as an argument.");
+            System.out.println("JavaApplicationLauncher: No application (fqcn) was specified to start. An application must be specified as an argument.");
             Runtime.getRuntime().halt(1);
         }
         else
@@ -228,8 +226,7 @@ public class JavaApplicationRunner
 
             if (parent == null)
             {
-                System.out
-                    .println("JavaApplicationLauncher: No parent URI was specified.  The parent URI must be specified to start the application.");
+                System.out.println("JavaApplicationLauncher: No parent URI was specified.  The parent URI must be specified to start the application.");
 
                 Runtime.getRuntime().halt(1);
             }

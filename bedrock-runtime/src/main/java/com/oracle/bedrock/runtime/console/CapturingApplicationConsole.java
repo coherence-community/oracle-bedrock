@@ -30,10 +30,8 @@ import com.oracle.bedrock.runtime.ApplicationConsole;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
-
 import java.util.LinkedList;
 import java.util.Queue;
-
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
@@ -78,7 +76,7 @@ public class CapturingApplicationConsole extends AbstractPipedApplicationConsole
 
     /**
      * Constructs {@link CapturingApplicationConsole}.
-     * </p>
+     * <p>
      * This constructor will set the maximum number of lines to capture to {@link Integer#MAX_VALUE}.
      */
     public CapturingApplicationConsole()
@@ -105,7 +103,8 @@ public class CapturingApplicationConsole extends AbstractPipedApplicationConsole
      * @param diagnosticMode  if true, output to this console is not formatted
      *                        with application details or line numbers
      */
-    public CapturingApplicationConsole(int maximumLines, boolean diagnosticMode)
+    public CapturingApplicationConsole(int     maximumLines,
+                                       boolean diagnosticMode)
     {
         this(maximumLines, diagnosticMode, DEFAULT_PIPE_SIZE);
     }

@@ -41,6 +41,7 @@ public class JavaVirtualMachineMockHelper
 {
     private static JavaVirtualMachine savedJVM;
 
+
     /**
      * Mock out the {@link JavaVirtualMachine#INSTANCE} so we can
      * mock its methods

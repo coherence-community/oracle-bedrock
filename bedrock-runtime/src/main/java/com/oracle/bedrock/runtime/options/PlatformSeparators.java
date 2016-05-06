@@ -25,10 +25,10 @@
 
 package com.oracle.bedrock.runtime.options;
 
-import com.oracle.bedrock.runtime.LocalPlatform;
-import com.oracle.bedrock.runtime.Platform;
 import com.oracle.bedrock.Option;
 import com.oracle.bedrock.Options;
+import com.oracle.bedrock.runtime.LocalPlatform;
+import com.oracle.bedrock.runtime.Platform;
 
 import java.io.File;
 
@@ -241,6 +241,10 @@ public class PlatformSeparators implements Option
 
     /**
      * Constructs a custom {@link PlatformSeparators}.
+     *
+     * @param fileSeparator  the file separator (like /)
+     * @param pathSeparator  the path separator (like ;)
+     * @param lineSeparator  the line separator (like /n)
      *
      * @return the custom {@link PlatformSeparators}
      */

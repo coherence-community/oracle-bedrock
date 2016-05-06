@@ -25,10 +25,10 @@
 
 package com.oracle.bedrock.runtime;
 
-import com.oracle.bedrock.runtime.options.Discriminator;
 import com.oracle.bedrock.Option;
 import com.oracle.bedrock.Options;
 import com.oracle.bedrock.runtime.console.SystemApplicationConsole;
+import com.oracle.bedrock.runtime.options.Discriminator;
 
 import java.util.LinkedList;
 import java.util.List;

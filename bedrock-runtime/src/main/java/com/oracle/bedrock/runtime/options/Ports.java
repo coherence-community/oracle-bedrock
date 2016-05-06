@@ -3,7 +3,7 @@
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * The contents of this file are subject to the terms and conditions of
+ * The contents of this file are subject to the terms and conditions of 
  * the Common Development and Distribution License 1.0 (the "License").
  *
  * You may not use this file except in compliance with the License.
@@ -25,14 +25,19 @@
 
 package com.oracle.bedrock.runtime.options;
 
-import com.oracle.bedrock.runtime.java.options.SystemProperties;
-import com.oracle.bedrock.Option;
 import com.oracle.bedrock.ComposableOption;
+import com.oracle.bedrock.Option;
 import com.oracle.bedrock.Options;
 import com.oracle.bedrock.options.Decoration;
+import com.oracle.bedrock.runtime.java.options.SystemProperties;
 import com.oracle.bedrock.runtime.java.options.SystemProperty;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * An {@link Option} used to hold and capture ports.
@@ -47,10 +52,10 @@ public class Ports implements ComposableOption<Ports>
     /**
      * The {@link List} of ports.
      */
-    private final Map<String,Port> ports;
+    private final Map<String, Port> ports;
 
 
-    private Ports(Map<String,Port> ports)
+    private Ports(Map<String, Port> ports)
     {
         this.ports = ports;
     }
@@ -78,12 +83,13 @@ public class Ports implements ComposableOption<Ports>
      */
     public SystemProperties asMappedProperties(SystemProperties properties)
     {
-        SystemProperties   copy             = new SystemProperties(properties);
-        Map<String,Object> mappedProperties = new HashMap<>();
+        SystemProperties    copy             = new SystemProperties(properties);
+        Map<String, Object> mappedProperties = new HashMap<>();
 
         for (SystemProperty property : properties)
         {
             String name = property.getName();
+
             if (ports.containsKey(name))
             {
                 Port port = ports.get(name);
@@ -99,7 +105,7 @@ public class Ports implements ComposableOption<Ports>
     @Override
     public synchronized Ports compose(Ports other)
     {
-        Map<String,Port> set = new HashMap<>(this.ports);
+        Map<String, Port> set = new HashMap<>(this.ports);
 
         set.putAll(other.ports);
 
@@ -133,7 +139,7 @@ public class Ports implements ComposableOption<Ports>
      */
     public static Ports of(Collection<Port> ports)
     {
-        Map<String,Port> map = new HashMap<>();
+        Map<String, Port> map = new HashMap<>();
 
         ports.forEach((port) -> map.put(port.getName(), port));
 
@@ -152,6 +158,7 @@ public class Ports implements ComposableOption<Ports>
     {
         return ports.containsKey(name);
     }
+
 
     /**
      * Create a default empty {@link Ports}.
@@ -179,65 +186,43 @@ public class Ports implements ComposableOption<Ports>
 
 
     /**
-     * A {@link Argument.ResolveHandler} and {@link SystemProperty.ResolveHandler}
-     * used to capture port values.
+     * Class description
+     *
+     * @version        Enter version here..., 16/05/06
+     * @author         Enter your name here...    
      */
-    private static class ResolveHandler implements Argument.ResolveHandler, SystemProperty.ResolveHandler
-    {
-        /**
-         * The singleton instance of a {@link ResolveHandler}.
-         */
-        private static ResolveHandler INSTANCE = new ResolveHandler();
-
-
-        @Override
-        public void onResolve(String name, String value, Options options)
-        {
-            try
-            {
-                options.add(Ports.of(new Port(name, Integer.parseInt(value))));
-            }
-            catch (NumberFormatException e)
-            {
-                // ignored - we just don't capture non-numeric values
-            }
-        }
-
-
-        @Override
-        public void onResolve(String name, List<String> values, Options options)
-        {
-            for (String value : values)
-            {
-                try
-                {
-                    options.add(Ports.of(new Port(name, Integer.parseInt(value))));
-                }
-                catch (NumberFormatException e)
-                {
-                    // ignored - we just don't capture non-numeric values
-                }
-            }
-        }
-    }
-
-
     public static class Port
     {
         private final String name;
-
-        private final int actualPort;
-
-        private final int mappedPort;
+        private final int    actualPort;
+        private final int    mappedPort;
 
 
-        public Port(String name, int actualPort)
+        /**
+         * Constructs ...
+         *
+         *
+         * @param name
+         * @param actualPort
+         */
+        public Port(String name,
+                    int    actualPort)
         {
             this(name, actualPort, actualPort);
         }
 
 
-        public Port(String name, int actualPort, int mappedPort)
+        /**
+         * Constructs ...
+         *
+         *
+         * @param name
+         * @param actualPort
+         * @param mappedPort
+         */
+        public Port(String name,
+                    int    actualPort,
+                    int    mappedPort)
         {
             this.name       = name;
             this.actualPort = actualPort;
@@ -262,6 +247,7 @@ public class Ports implements ComposableOption<Ports>
             return mappedPort;
         }
 
+
         @Override
         public boolean equals(Object o)
         {
@@ -269,6 +255,7 @@ public class Ports implements ComposableOption<Ports>
             {
                 return true;
             }
+
             if (o == null || getClass() != o.getClass())
             {
                 return false;
@@ -280,10 +267,12 @@ public class Ports implements ComposableOption<Ports>
             {
                 return false;
             }
+
             if (mappedPort != port.mappedPort)
             {
                 return false;
             }
+
             return name != null ? name.equals(port.name) : port.name == null;
 
         }
@@ -293,8 +282,10 @@ public class Ports implements ComposableOption<Ports>
         public int hashCode()
         {
             int result = name != null ? name.hashCode() : 0;
+
             result = 31 * result + actualPort;
             result = 31 * result + mappedPort;
+
             return result;
         }
 
@@ -303,6 +294,54 @@ public class Ports implements ComposableOption<Ports>
         public String toString()
         {
             return "Port(name='" + name + "' " + actualPort + "=" + mappedPort + ')';
+        }
+    }
+
+
+    /**
+     * A {@link Argument.ResolveHandler} and {@link SystemProperty.ResolveHandler}
+     * used to capture port values.
+     */
+    private static class ResolveHandler implements Argument.ResolveHandler, SystemProperty.ResolveHandler
+    {
+        /**
+         * The singleton instance of a {@link ResolveHandler}.
+         */
+        private static ResolveHandler INSTANCE = new ResolveHandler();
+
+
+        @Override
+        public void onResolve(String  name,
+                              String  value,
+                              Options options)
+        {
+            try
+            {
+                options.add(Ports.of(new Port(name, Integer.parseInt(value))));
+            }
+            catch (NumberFormatException e)
+            {
+                // ignored - we just don't capture non-numeric values
+            }
+        }
+
+
+        @Override
+        public void onResolve(String       name,
+                              List<String> values,
+                              Options      options)
+        {
+            for (String value : values)
+            {
+                try
+                {
+                    options.add(Ports.of(new Port(name, Integer.parseInt(value))));
+                }
+                catch (NumberFormatException e)
+                {
+                    // ignored - we just don't capture non-numeric values
+                }
+            }
         }
     }
 }

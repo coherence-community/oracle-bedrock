@@ -3,7 +3,7 @@
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * The contents of this file are subject to the terms and conditions of
+ * The contents of this file are subject to the terms and conditions of 
  * the Common Development and Distribution License 1.0 (the "License").
  *
  * You may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 /**
- * list resources available from a {@link ClassPath}.
+ * List resources available from a {@link ClassPath}.
  * <p>
  * Copyright (c) 2016. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
@@ -49,16 +49,20 @@ import java.util.zip.ZipFile;
 public class ClassPathScanner
 {
     /**
-     * for all elements of a {@link ClassPath} get a {@link List} of resources
+     * For all elements of a {@link ClassPath} get a {@link List} of resources
      * that match the specified pattern.
      * <p>
      * Pattern pattern = Pattern.compile(".*") gets all resources
      *
-     * @param pattern the pattern to match, or null to match everything
+     * @param classPath  the {@link ClassPath}
+     * @param pattern    the pattern to match, or null to match everything
      *
      * @return the resources in the order they are found
+     *
+     * @throws Exception  when the resources can't be located or determined
      */
-    public List<String> getResources(ClassPath classPath, Pattern pattern) throws Exception
+    public List<String> getResources(ClassPath classPath,
+                                     Pattern   pattern) throws Exception
     {
         if (pattern == null)
         {
@@ -86,7 +90,9 @@ public class ClassPathScanner
         return result;
     }
 
-    private Collection<String> getResources(File file, Pattern pattern) throws IOException
+
+    private Collection<String> getResources(File    file,
+                                            Pattern pattern) throws IOException
     {
         ArrayList<String> retval = new ArrayList<>();
 
@@ -102,7 +108,9 @@ public class ClassPathScanner
         return retval;
     }
 
-    private List<String> getResourcesFromJarFile(File file, Pattern pattern) throws IOException
+
+    private List<String> getResourcesFromJarFile(File    file,
+                                                 Pattern pattern) throws IOException
     {
         if (!ClassPath.isResourceAnArchive(file.getCanonicalPath()))
         {
@@ -130,7 +138,9 @@ public class ClassPathScanner
         return retval;
     }
 
-    private List<String> getResourcesFromDirectory(File directory, Pattern pattern) throws IOException
+
+    private List<String> getResourcesFromDirectory(File    directory,
+                                                   Pattern pattern) throws IOException
     {
         File[] fileList = directory.listFiles();
 
@@ -161,11 +171,14 @@ public class ClassPathScanner
         return list;
     }
 
+
     /**
-     * list the resources that match args[0]
+     * List the resources that match args[0]
      *
      * @param args args[0] is the pattern to match, or list all resources if
      *             there are no args
+     *
+     * @throws Exception  the exception
      */
     public static void main(String[] args) throws Exception
     {

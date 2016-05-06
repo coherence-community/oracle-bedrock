@@ -36,7 +36,7 @@ import com.oracle.bedrock.runtime.Application;
  *
  * @author Brian Oliver
  *
- * @param <A>
+ * @param <A>  the type of {@link Application}
  */
 public interface ApplicationClosingBehavior<A extends Application> extends Option
 {

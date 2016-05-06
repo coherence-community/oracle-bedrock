@@ -27,8 +27,8 @@ package com.oracle.bedrock.runtime.console;
 
 import com.oracle.bedrock.runtime.ApplicationConsole;
 import com.oracle.bedrock.runtime.ApplicationConsoleBuilder;
-import com.oracle.bedrock.runtime.java.io.NullWriter;
 import com.oracle.bedrock.runtime.java.io.NullReader;
+import com.oracle.bedrock.runtime.java.io.NullWriter;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -109,10 +109,11 @@ public class NullApplicationConsole implements ApplicationConsole
         return m_inputReader;
     }
 
+
     /**
      * Obtains the flag indicating whether output to this {@link ApplicationConsole}
      * should be formatted to include information about the application.
-     * </p>
+     * <p>
      * This method always returns false as the {@link NullApplicationConsole}
      * does not output anything so there is no point wasting CPU cycles adding
      * a extra information to the output.
@@ -124,6 +125,7 @@ public class NullApplicationConsole implements ApplicationConsole
     {
         return false;
     }
+
 
     /**
      * Obtains a {@link ApplicationConsoleBuilder} for the

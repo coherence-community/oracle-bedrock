@@ -28,8 +28,8 @@ package com.oracle.bedrock.runtime.console;
 import com.oracle.bedrock.runtime.Application;
 import com.oracle.bedrock.runtime.ApplicationConsole;
 import com.oracle.bedrock.runtime.ApplicationConsoleBuilder;
-import com.oracle.bedrock.runtime.java.container.Scope;
 import com.oracle.bedrock.runtime.java.container.Container;
+import com.oracle.bedrock.runtime.java.container.Scope;
 
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
@@ -69,6 +69,7 @@ public class SystemApplicationConsole implements ApplicationConsole
         init(Container.getPlatformScope());
     }
 
+
     /**
      * Initialise the streams for this console
      */
@@ -81,14 +82,14 @@ public class SystemApplicationConsole implements ApplicationConsole
             {
             }
         };
-        m_errorWriter  = new PrintWriter(scope.getStandardError())
+        m_errorWriter = new PrintWriter(scope.getStandardError())
         {
             @Override
             public void close()
             {
             }
         };
-        m_inputReader  = new InputStreamReader(scope.getStandardInput());
+        m_inputReader = new InputStreamReader(scope.getStandardInput());
     }
 
 
@@ -119,10 +120,11 @@ public class SystemApplicationConsole implements ApplicationConsole
         return m_inputReader;
     }
 
+
     /**
      * Obtains the flag indicating whether output to this {@link ApplicationConsole}
      * should not be formatted to include information about the application.
-     * </p>
+     * <p>
      * This method always returns true as the {@link SystemApplicationConsole}
      * is writing to the controlling process StdOut or StdErr and the output
      * from {@link Application}s should be differentiated
@@ -135,6 +137,7 @@ public class SystemApplicationConsole implements ApplicationConsole
     {
         return true;
     }
+
 
     /**
      * Obtains a {@link ApplicationConsoleBuilder} for the

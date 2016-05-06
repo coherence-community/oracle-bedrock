@@ -26,7 +26,6 @@
 package com.oracle.bedrock.runtime.java;
 
 import com.oracle.bedrock.runtime.ApplicationProcess;
-
 import com.oracle.bedrock.runtime.concurrent.RemoteChannel;
 
 import java.util.Properties;

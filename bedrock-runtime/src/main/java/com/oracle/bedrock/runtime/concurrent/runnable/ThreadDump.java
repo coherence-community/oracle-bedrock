@@ -3,7 +3,7 @@
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * The contents of this file are subject to the terms and conditions of
+ * The contents of this file are subject to the terms and conditions of 
  * the Common Development and Distribution License 1.0 (the "License").
  *
  * You may not use this file except in compliance with the License.
@@ -45,7 +45,7 @@ public class ThreadDump implements RemoteRunnable
 {
     /**
      * A flag indicating whether to write the thread dump to
-     * stdout ({@linkplain true}, or to stderr {@linkplain false}
+     * stdout, <code>true</code> for stdout, <code>false</code> for stderr.
      */
     private boolean useStdOut;
 
@@ -55,15 +55,14 @@ public class ThreadDump implements RemoteRunnable
      * the specified location.
      *
      * @param useStdOut  write the thread dump to stdout
-     *                   ({@linkplain true}, or to stderr
-     *                   ({@linkplain false})
+     *                   (<code>true</code> for stdout, <code>false</code> for stderr)
      */
     private ThreadDump(boolean useStdOut)
     {
         this.useStdOut = useStdOut;
     }
 
-    
+
     @Override
     public void run()
     {
@@ -86,7 +85,7 @@ public class ThreadDump implements RemoteRunnable
     public void generateThreadDump(PrintStream out)
     {
         ThreadMXBean threadMXBean = ManagementFactory.getThreadMXBean();
-        ThreadInfo[] threadInfos = threadMXBean.getThreadInfo(threadMXBean.getAllThreadIds(), 100);
+        ThreadInfo[] threadInfos  = threadMXBean.getThreadInfo(threadMXBean.getAllThreadIds(), 100);
 
         for (ThreadInfo threadInfo : threadInfos)
         {

@@ -3,7 +3,7 @@
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * The contents of this file are subject to the terms and conditions of
+ * The contents of this file are subject to the terms and conditions of 
  * the Common Development and Distribution License 1.0 (the "License").
  *
  * You may not use this file except in compliance with the License.
@@ -25,10 +25,9 @@
 
 package com.oracle.bedrock.runtime.options;
 
-import com.oracle.bedrock.runtime.Platform;
 import com.oracle.bedrock.Option;
-
 import com.oracle.bedrock.runtime.Application;
+import com.oracle.bedrock.runtime.Platform;
 
 import java.util.Iterator;
 
@@ -104,6 +103,8 @@ public class EnvironmentVariable implements Option.Collectable
      * Constructs a {@link EnvironmentVariable} with no value.
      *
      * @param name the name of the {@link EnvironmentVariable}
+     *
+     * @return a new {@link EnvironmentVariable}
      */
     public static EnvironmentVariable of(String name)
     {
@@ -116,6 +117,8 @@ public class EnvironmentVariable implements Option.Collectable
      *
      * @param name  the name of the {@link EnvironmentVariable}
      * @param value the value of the {@link EnvironmentVariable}
+     *
+     * @return a new {@link EnvironmentVariable}
      */
     public static EnvironmentVariable of(String name,
                                          String value)
@@ -129,6 +132,8 @@ public class EnvironmentVariable implements Option.Collectable
      *
      * @param name  the name of the {@link EnvironmentVariable}
      * @param value the value of the {@link EnvironmentVariable}
+     *
+     * @return a new {@link EnvironmentVariable}
      */
     public static EnvironmentVariable of(String                name,
                                          ContextSensitiveValue value)
@@ -142,6 +147,8 @@ public class EnvironmentVariable implements Option.Collectable
      *
      * @param name     the name of the {@link EnvironmentVariable}
      * @param iterator the iterator that can provide values for the {@link EnvironmentVariable}
+     *
+     * @return a new {@link EnvironmentVariable}
      */
     public static EnvironmentVariable of(String   name,
                                          Iterator iterator)
@@ -155,6 +162,8 @@ public class EnvironmentVariable implements Option.Collectable
      *
      * @param name   the name of the {@link EnvironmentVariable}
      * @param object the values for the {@link EnvironmentVariable}
+     *
+     * @return a new {@link EnvironmentVariable}
      */
     public static EnvironmentVariable of(String name,
                                          Object object)
@@ -201,7 +210,7 @@ public class EnvironmentVariable implements Option.Collectable
 
     /**
      * A context sensitive value, possibly based on the {@link Platform} and/or
-     * {@link ApplicationSchema} in which the {@link EnvironmentVariable} is being used.
+     * {@link Application} in which the {@link EnvironmentVariable} is being used.
      */
     public interface ContextSensitiveValue
     {

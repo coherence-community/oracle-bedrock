@@ -29,15 +29,13 @@ import com.oracle.bedrock.runtime.LocalPlatform;
 import com.oracle.bedrock.runtime.java.JavaApplication;
 import com.oracle.bedrock.runtime.java.options.ClassName;
 import com.oracle.bedrock.runtime.options.Arguments;
-
 import org.junit.Test;
+
+import java.io.BufferedReader;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
-
 import static org.junit.Assert.assertThat;
-
-import java.io.BufferedReader;
 
 /**
  * Tests for {@link PipedApplicationConsole}

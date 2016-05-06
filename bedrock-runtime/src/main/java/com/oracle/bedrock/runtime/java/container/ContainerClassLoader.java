@@ -25,18 +25,16 @@
 
 package com.oracle.bedrock.runtime.java.container;
 
+import com.oracle.bedrock.runtime.LocalPlatform;
 import com.oracle.bedrock.runtime.PropertiesBuilder;
 import com.oracle.bedrock.runtime.java.ClassPath;
 import com.oracle.bedrock.runtime.network.AvailablePortIterator;
-import com.oracle.bedrock.runtime.LocalPlatform;
 
 import java.net.URL;
-
 import java.security.AllPermission;
 import java.security.CodeSource;
 import java.security.PermissionCollection;
 import java.security.Permissions;
-
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -195,10 +193,13 @@ public class ContainerClassLoader extends ContainerScopeClassLoader
     /**
      * A helper method to instantiate a new {@link ContainerClassLoader}.
      *
-     * @param applicationName  the name of the application
-     * @param classPath        the {@link ClassPath} of the application
-     * @param localProperties  the local system properties for the {@link ClassLoader}
-     * @param systemProperties the System properties to use to get the default class path
+     * @param applicationName      the name of the application
+     * @param classPath            the {@link ClassPath} of the application
+     * @param localProperties      the local system properties for the {@link ClassLoader}
+     * @param systemProperties     the System properties to use to get the default class path
+     * @param availablePorts       the {@link AvailablePortIterator}
+     * @param redirectErrorStream  should the error stream be redirected to stdout
+     * @param pipeBufferSizeBytes  the size of the pipe buffer for I/O redirection
      *
      * @return  a {@link ContainerClassLoader} for the application
      *
@@ -266,7 +267,8 @@ public class ContainerClassLoader extends ContainerScopeClassLoader
         // the following packages must not be isolated (ie: loaded by the parent)
         loader.addPackageToLoadFromParent("com.oracle.bedrock.runtime.java");
         loader.addPackageToLoadFromParent("com.oracle.bedrock.runtime.java.container");
-        //loader.addPackageToLoadFromParent("com.oracle.bedrock.runtime.concurrent");
+
+        // loader.addPackageToLoadFromParent("com.oracle.bedrock.runtime.concurrent");
 
         // the following packages must be loaded by the container (ie: not loaded/shared with the parent)
         // eg: loader.addPackageToLoadInContainer("com.oracle.bedrock.runtime.java.concurrent");

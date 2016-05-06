@@ -62,10 +62,15 @@ public class AbstractApplicationOutputRedirectorTest
 
         BufferedReader reader = new BufferedReader(new StringReader(writer.getBuffer().toString()));
         String         line1  = reader.readLine();
+
         assertThat(line1, is("foo"));
-        String         line2  = reader.readLine();
+
+        String line2 = reader.readLine();
+
         assertThat(line2, is("(terminated)"));
-        String         line3  = reader.readLine();
+
+        String line3 = reader.readLine();
+
         assertThat(line3, is(nullValue()));
     }
 
@@ -89,10 +94,15 @@ public class AbstractApplicationOutputRedirectorTest
 
         BufferedReader reader = new BufferedReader(new StringReader(writer.getBuffer().toString()));
         String         line1  = reader.readLine();
+
         assertThat(line1, is("[TestApp:X:1234]    1: foo"));
-        String         line2  = reader.readLine();
+
+        String line2 = reader.readLine();
+
         assertThat(line2, is("[TestApp:X:1234]    2: (terminated)"));
-        String         line3  = reader.readLine();
+
+        String line3 = reader.readLine();
+
         assertThat(line3, is(nullValue()));
     }
 }

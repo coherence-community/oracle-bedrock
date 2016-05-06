@@ -40,8 +40,12 @@ import static org.junit.Assert.assertThat;
  */
 public class FileWriterApplicationConsoleTest
 {
+    /** 
+     *Field description 
+     */
     @ClassRule
     public static TemporaryFolder temporaryFolder = new TemporaryFolder();
+
 
     @Test
     public void shouldBeDiagnosticModeByDefault() throws Exception
@@ -54,6 +58,7 @@ public class FileWriterApplicationConsoleTest
         assertThat(console2.isDiagnosticsEnabled(), is(true));
     }
 
+
     @Test
     public void shouldNotBeDiagnosticMode() throws Exception
     {
@@ -62,6 +67,7 @@ public class FileWriterApplicationConsoleTest
 
         assertThat(console.isDiagnosticsEnabled(), is(false));
     }
+
 
     @Test
     public void shouldBeDiagnosticMode() throws Exception

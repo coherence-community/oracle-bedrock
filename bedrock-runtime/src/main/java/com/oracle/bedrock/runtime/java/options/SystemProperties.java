@@ -279,6 +279,8 @@ public class SystemProperties implements Option.Collector<SystemProperty, System
      * as individual {@link SystemProperty}s, returning a new {@link SystemProperties}.
      *
      * @param properties the {@link Map} of properties
+     *
+     * @return a new {@link SystemProperties}
      */
     public SystemProperties addAll(Map<String, Object> properties)
     {
@@ -298,6 +300,8 @@ public class SystemProperties implements Option.Collector<SystemProperty, System
      * returning a new {@link SystemProperties}.
      *
      * @param properties the {@link SystemProperties}
+     *
+     * @return a new {@link SystemProperties}
      */
     public SystemProperties addAll(SystemProperties properties)
     {
@@ -319,7 +323,7 @@ public class SystemProperties implements Option.Collector<SystemProperty, System
      * @param propertyName the name of the {@link SystemProperty}
      *
      * @return <code>true</code> if the {@link SystemProperties} contains a {@link SystemProperty}
-     * with the specified name, <code>false</code> otherwise
+     *         with the specified name, <code>false</code> otherwise
      */
     public boolean contains(String propertyName)
     {

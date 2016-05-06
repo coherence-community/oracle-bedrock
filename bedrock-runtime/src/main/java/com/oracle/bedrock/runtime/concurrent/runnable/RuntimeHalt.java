@@ -26,11 +26,8 @@
 package com.oracle.bedrock.runtime.concurrent.runnable;
 
 import com.oracle.bedrock.Option;
-
 import com.oracle.bedrock.runtime.concurrent.RemoteRunnable;
-
 import com.oracle.bedrock.runtime.java.JavaApplication;
-
 import com.oracle.bedrock.runtime.options.ApplicationClosingBehavior;
 
 /**

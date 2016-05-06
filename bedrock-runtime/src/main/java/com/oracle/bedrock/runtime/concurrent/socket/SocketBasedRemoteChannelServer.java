@@ -3,7 +3,7 @@
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * The contents of this file are subject to the terms and conditions of
+ * The contents of this file are subject to the terms and conditions of 
  * the Common Development and Distribution License 1.0 (the "License").
  *
  * You may not use this file except in compliance with the License.
@@ -25,6 +25,8 @@
 
 package com.oracle.bedrock.runtime.concurrent.socket;
 
+import com.oracle.bedrock.Option;
+import com.oracle.bedrock.io.NetworkHelper;
 import com.oracle.bedrock.runtime.concurrent.AbstractControllableRemoteChannel;
 import com.oracle.bedrock.runtime.concurrent.ControllableRemoteChannel;
 import com.oracle.bedrock.runtime.concurrent.RemoteCallable;
@@ -32,8 +34,6 @@ import com.oracle.bedrock.runtime.concurrent.RemoteChannel;
 import com.oracle.bedrock.runtime.concurrent.RemoteEvent;
 import com.oracle.bedrock.runtime.concurrent.RemoteEventListener;
 import com.oracle.bedrock.runtime.concurrent.RemoteRunnable;
-import com.oracle.bedrock.Option;
-import com.oracle.bedrock.io.NetworkHelper;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -64,7 +64,7 @@ public class SocketBasedRemoteChannelServer extends AbstractControllableRemoteCh
     /**
      * The {@link ServerSocket} that will be used to accept {@link SocketBasedRemoteChannelClient}
      * connections and requests.
-     * <p/>
+     * <p>
      * When this is <code>null</code> the {@link SocketBasedRemoteChannelServer} is not open.
      */
     private ServerSocket serverSocket;
@@ -72,7 +72,7 @@ public class SocketBasedRemoteChannelServer extends AbstractControllableRemoteCh
     /**
      * The {@link Thread} that will manage accepting {@link SocketBasedRemoteChannelClient}
      * connections.
-     * <p/>
+     * <p>
      * When this is <code>null</code> the {@link SocketBasedRemoteChannelServer} is not running.
      */
     private ServerThread serverThread;
@@ -106,11 +106,13 @@ public class SocketBasedRemoteChannelServer extends AbstractControllableRemoteCh
 
     /**
      * Opens and starts the {@link SocketBasedRemoteChannelServer}.
-     * <p/>
+     * <p>
      * Does nothing if the {@link SocketBasedRemoteChannelServer} is already open.
      *
      * @return the {@link java.net.InetAddress} on which the {@link SocketBasedRemoteChannelServer}
      *         is accepting requests from {@link SocketBasedRemoteChannelClient}s.
+     *
+     * @throws IOException  when a {@link ServerSocket} can't be established
      */
     public synchronized InetAddress open() throws IOException
     {

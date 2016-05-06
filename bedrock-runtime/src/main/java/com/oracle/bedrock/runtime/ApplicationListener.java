@@ -42,7 +42,8 @@ public interface ApplicationListener<A extends Application>
      * @param application  the {@link Application} being closed
      * @param options      the {@link Options} to use
      */
-    public void onClosing(A application, Options options);
+    public void onClosing(A       application,
+                          Options options);
 
 
     /**
@@ -51,7 +52,8 @@ public interface ApplicationListener<A extends Application>
      * @param application  the {@link Application} that was closed
      * @param options      the {@link Options} to use
      */
-    public void onClosed(A application, Options options);
+    public void onClosed(A       application,
+                         Options options);
 
 
     /**

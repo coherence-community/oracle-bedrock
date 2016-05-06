@@ -3,7 +3,7 @@
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * The contents of this file are subject to the terms and conditions of
+ * The contents of this file are subject to the terms and conditions of 
  * the Common Development and Distribution License 1.0 (the "License").
  *
  * You may not use this file except in compliance with the License.
@@ -25,18 +25,16 @@
 
 package com.oracle.bedrock.runtime.options;
 
+import com.oracle.bedrock.Options;
 import com.oracle.bedrock.runtime.Platform;
 import com.oracle.bedrock.runtime.java.options.SystemProperties;
-import com.oracle.bedrock.Options;
 import com.oracle.bedrock.runtime.java.options.SystemProperty;
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.is;
-
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.collection.IsEmptyIterable.emptyIterable;
 import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInAnyOrder;
-
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 
@@ -92,10 +90,9 @@ public class PortsTest
         Ports.Port port4   = new Ports.Port("bar.2", 2, 2);
         Ports.Port port5   = new Ports.Port("bar.3", 3, 3);
 
-        Options    options = Options.of(Ports.of(port1, port2),
-                                        Ports.of(port3, port4, port5));
+        Options    options = Options.of(Ports.of(port1, port2), Ports.of(port3, port4, port5));
 
-        Ports   ports   = options.get(Ports.class);
+        Ports      ports   = options.get(Ports.class);
 
         assertThat(ports.getPorts(), containsInAnyOrder(port1, port2, port3, port4, port5));
     }
@@ -114,12 +111,11 @@ public class PortsTest
         properties.resolve(mock(Platform.class), options);
         arguments.resolve(mock(Platform.class), options);
 
+        Ports      ports = options.get(Ports.class);
 
-        Ports ports = options.get(Ports.class);
-
-        Ports.Port port1   = new Ports.Port("test-port", 19, 19);
-        Ports.Port port2   = new Ports.Port("--port1", 20, 20);
-        Ports.Port port3   = new Ports.Port("--port2", 100, 100);
+        Ports.Port port1 = new Ports.Port("test-port", 19, 19);
+        Ports.Port port2 = new Ports.Port("--port1", 20, 20);
+        Ports.Port port3 = new Ports.Port("--port2", 100, 100);
 
         assertThat(ports.getPorts(), containsInAnyOrder(port1, port2, port3));
     }

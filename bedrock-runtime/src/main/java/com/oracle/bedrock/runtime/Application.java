@@ -25,11 +25,11 @@
 
 package com.oracle.bedrock.runtime;
 
-import com.oracle.bedrock.runtime.options.ApplicationClosingBehavior;
 import com.oracle.bedrock.Option;
 import com.oracle.bedrock.Options;
 import com.oracle.bedrock.extensible.Extensible;
 import com.oracle.bedrock.options.Timeout;
+import com.oracle.bedrock.runtime.options.ApplicationClosingBehavior;
 
 import java.io.Closeable;
 

@@ -3,7 +3,7 @@
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * The contents of this file are subject to the terms and conditions of
+ * The contents of this file are subject to the terms and conditions of 
  * the Common Development and Distribution License 1.0 (the "License").
  *
  * You may not use this file except in compliance with the License.
@@ -25,11 +25,10 @@
 
 package com.oracle.bedrock.runtime.options;
 
-import com.oracle.bedrock.runtime.Platform;
 import com.oracle.bedrock.Option;
 import com.oracle.bedrock.Options;
-
 import com.oracle.bedrock.lang.ExpressionEvaluator;
+import com.oracle.bedrock.runtime.Platform;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -94,30 +93,27 @@ public class Arguments implements Option.Collector<Argument, Arguments>
 
             if (name != null &&!name.isEmpty())
             {
-                if (values != null && !values.isEmpty())
+                if (values != null &&!values.isEmpty())
                 {
                     if (separator == ' ')
                     {
-                        values.stream()
-                                .filter((arg) -> arg != null && !arg.isEmpty())
-                                .forEach((arg) -> {
-                                    argList.add(name);
-                                    argList.add(arg);
-                                });
+                        values.stream().filter((arg) -> arg != null &&!arg.isEmpty()).forEach(
+                            (arg) -> {
+                                argList.add(name);
+                                argList.add(arg);
+                            });
                     }
                     else
                     {
-                        values.stream()
-                                .filter((arg) -> arg != null && !arg.isEmpty())
-                                .forEach((arg) -> argList.add(name + separator + arg));
+                        values.stream().filter((arg) -> arg != null
+                                                        &&!arg.isEmpty()).forEach((arg) -> argList.add(name + separator
+                                                                                                       + arg));
                     }
                 }
             }
-            else if (values != null && !values.isEmpty())
+            else if (values != null &&!values.isEmpty())
             {
-                values.stream()
-                        .filter((s) -> s != null && !s.isEmpty())
-                        .forEach(argList::add);
+                values.stream().filter((s) -> s != null &&!s.isEmpty()).forEach(argList::add);
             }
         }
 

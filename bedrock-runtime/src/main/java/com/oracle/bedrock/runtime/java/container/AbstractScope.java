@@ -29,9 +29,7 @@ import com.oracle.bedrock.runtime.network.AvailablePortIterator;
 
 import java.io.InputStream;
 import java.io.PrintStream;
-
 import java.util.Properties;
-
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**

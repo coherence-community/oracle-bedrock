@@ -25,9 +25,9 @@
 
 package com.oracle.bedrock.runtime;
 
-import com.oracle.bedrock.runtime.options.DisplayName;
 import com.oracle.bedrock.Option;
 import com.oracle.bedrock.Options;
+import com.oracle.bedrock.runtime.options.DisplayName;
 
 /**
  * An internal mechanism to launch {@link Application}s for a specific type of

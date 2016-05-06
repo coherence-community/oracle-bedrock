@@ -25,17 +25,17 @@
 
 package com.oracle.bedrock.runtime.java.profiles;
 
-import com.oracle.bedrock.runtime.Platform;
-import com.oracle.bedrock.runtime.Profile;
-import com.oracle.bedrock.runtime.java.JavaApplication;
-import com.oracle.bedrock.runtime.java.options.Freeform;
-import com.oracle.bedrock.runtime.java.options.WaitToStart;
 import com.oracle.bedrock.Option;
 import com.oracle.bedrock.Options;
 import com.oracle.bedrock.runtime.Application;
 import com.oracle.bedrock.runtime.LocalPlatform;
 import com.oracle.bedrock.runtime.MetaClass;
+import com.oracle.bedrock.runtime.Platform;
+import com.oracle.bedrock.runtime.Profile;
+import com.oracle.bedrock.runtime.java.JavaApplication;
 import com.oracle.bedrock.runtime.java.JavaVirtualMachine;
+import com.oracle.bedrock.runtime.java.options.Freeform;
+import com.oracle.bedrock.runtime.java.options.WaitToStart;
 import com.oracle.bedrock.runtime.network.AvailablePortIterator;
 import com.oracle.bedrock.util.Capture;
 import com.oracle.bedrock.util.PerpetualIterator;
@@ -140,12 +140,22 @@ public class RemoteDebugging implements Profile, Option
     }
 
 
+    /**
+     * Obtains the {@link RemoteDebugging} {@link Behavior}.
+     *
+     * @return  the {@link Behavior}
+     */
     public Behavior getBehavior()
     {
         return behavior;
     }
 
 
+    /**
+     * Obtains the {@link RemoteDebugging} {@link TransportAddress}.
+     *
+     * @return the {@link TransportAddress}
+     */
     public TransportAddress getTransportAddress()
     {
         return transportAddress;
@@ -260,6 +270,8 @@ public class RemoteDebugging implements Profile, Option
      * Obtains a {@link RemoteDebugging} {@link Profile}, with debugging enabled but
      * with starting optionally suspended.
      *
+     * @param startSuspended  should {@link RemoteDebugging} start suspended
+     *
      * @return  a {@link RemoteDebugging} {@link Option}
      */
     public RemoteDebugging startSuspended(boolean startSuspended)
@@ -292,6 +304,8 @@ public class RemoteDebugging implements Profile, Option
 
     /**
      * Obtains a {@link RemoteDebugging} profile that configures a specific {@link TransportAddress}.
+     *
+     * @param transportAddress   the {@link TransportAddress}
      *
      * @return a new {@link RemoteDebugging} profile
      */

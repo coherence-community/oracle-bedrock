@@ -3,7 +3,7 @@
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * The contents of this file are subject to the terms and conditions of
+ * The contents of this file are subject to the terms and conditions of 
  * the Common Development and Distribution License 1.0 (the "License").
  *
  * You may not use this file except in compliance with the License.
@@ -25,14 +25,12 @@
 
 package com.oracle.bedrock.runtime.options;
 
-import com.oracle.bedrock.runtime.Platform;
 import com.oracle.bedrock.Option;
 import com.oracle.bedrock.Options;
-
 import com.oracle.bedrock.lang.ExpressionEvaluator;
+import com.oracle.bedrock.runtime.Platform;
 
 import java.io.File;
-
 import java.util.Calendar;
 import java.util.Iterator;
 

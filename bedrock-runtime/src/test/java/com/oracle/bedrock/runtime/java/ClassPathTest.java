@@ -26,27 +26,20 @@
 package com.oracle.bedrock.runtime.java;
 
 import com.oracle.bedrock.Option;
-
 import com.oracle.bedrock.io.FileHelper;
-
 import com.oracle.bedrock.runtime.options.PlatformSeparators;
-
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.io.File;
+import java.net.URL;
+
 import static org.hamcrest.CoreMatchers.is;
-
 import static org.junit.Assert.assertThat;
-
 import static org.mockito.Matchers.anyString;
-
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-
-import java.io.File;
-
-import java.net.URL;
 
 /**
  * Unit Tests for {@link ClassPath}s.

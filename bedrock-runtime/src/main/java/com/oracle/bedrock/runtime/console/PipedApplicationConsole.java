@@ -63,7 +63,7 @@ public class PipedApplicationConsole extends AbstractPipedApplicationConsole
 {
     /**
      * Constructs {@link PipedApplicationConsole}.
-     * </p>
+     * <p>
      * The buffers for the pipes used by this {@link PipedApplicationConsole}
      * will be set to the default size {@link PipedApplicationConsole#DEFAULT_PIPE_SIZE}.
      * Once the buffer is filled to this size then no more output will be captured until
@@ -78,6 +78,7 @@ public class PipedApplicationConsole extends AbstractPipedApplicationConsole
     {
         this(DEFAULT_PIPE_SIZE, true);
     }
+
 
     /**
      * Constructs {@link PipedApplicationConsole}.
@@ -95,6 +96,7 @@ public class PipedApplicationConsole extends AbstractPipedApplicationConsole
         this(pipeSize, false);
     }
 
+
     /**
      * Constructs {@link PipedApplicationConsole}.
      *
@@ -108,10 +110,13 @@ public class PipedApplicationConsole extends AbstractPipedApplicationConsole
      *
      * @throws IOException if an error occurs creating this {@link PipedApplicationConsole}
      */
-    public PipedApplicationConsole(int pipeSize, boolean diagnosticMode) throws IOException
+    public PipedApplicationConsole(int     pipeSize,
+                                   boolean diagnosticMode) throws IOException
     {
         super(pipeSize, diagnosticMode);
     }
+
+
     /**
      * Obtains a {@link BufferedReader} that can be used to read the stdout
      * from an {@link ApplicationConsole}.

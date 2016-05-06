@@ -25,11 +25,10 @@
 
 package com.oracle.bedrock.runtime.java;
 
+import com.oracle.bedrock.Options;
+import com.oracle.bedrock.runtime.Application;
 import com.oracle.bedrock.runtime.ApplicationProcess;
 import com.oracle.bedrock.runtime.Platform;
-import com.oracle.bedrock.Options;
-
-import com.oracle.bedrock.runtime.Application;
 
 /**
  * A {@link SimpleJavaApplication} is concrete implementation of a {@link JavaApplication}.

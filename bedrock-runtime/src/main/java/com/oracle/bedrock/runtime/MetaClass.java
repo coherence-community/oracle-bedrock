@@ -3,7 +3,7 @@
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * The contents of this file are subject to the terms and conditions of
+ * The contents of this file are subject to the terms and conditions of 
  * the Common Development and Distribution License 1.0 (the "License").
  *
  * You may not use this file except in compliance with the License.
@@ -33,6 +33,8 @@ import com.oracle.bedrock.Options;
  * <p>
  * Copyright (c) 2016. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
+ *
+ * @param <A> the type of the {@link Application}
  *
  * @author Brian Oliver
  * @author Jonathan Knight
@@ -99,6 +101,8 @@ public interface MetaClass<A extends Application>
      * Detect the {@link MetaClass} for the specified {@link Class} of {@link Application}.
      *
      * @param applicationClass  the {@link Class} of {@link Application}
+     *
+     * @param <A>               the type of the {@link Application}
      *
      * @return  the {@link MetaClass} of the {@link Application} or <code>null</code> if not defined
      */

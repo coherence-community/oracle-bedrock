@@ -26,13 +26,12 @@
 package com.oracle.bedrock.runtime.java.console;
 
 import com.oracle.bedrock.runtime.console.PipedApplicationConsole;
-
 import org.junit.Assert;
 import org.junit.Test;
 
-import static org.hamcrest.CoreMatchers.is;
-
 import java.io.BufferedReader;
+
+import static org.hamcrest.CoreMatchers.is;
 
 /**
  * Unit Tests for {@link PipedApplicationConsole}s.

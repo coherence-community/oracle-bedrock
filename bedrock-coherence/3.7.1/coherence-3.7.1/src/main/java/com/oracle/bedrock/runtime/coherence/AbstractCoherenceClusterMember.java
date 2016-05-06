@@ -151,7 +151,7 @@ public abstract class AbstractCoherenceClusterMember extends AbstractJavaApplica
 
     /**
      * Obtains the Coherence Service {@link MBeanInfo} for the {@link AbstractCoherenceClusterMember}.
-     * <p/>
+     * <p>
      * If the JMX infrastructure in the {@link JavaApplication} is not yet
      * available, it will block at wait for the default application timeout
      * until it becomes available.

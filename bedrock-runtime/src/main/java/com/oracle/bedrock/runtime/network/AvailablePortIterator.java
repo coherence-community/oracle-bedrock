@@ -28,13 +28,11 @@ package com.oracle.bedrock.runtime.network;
 import com.oracle.bedrock.io.NetworkHelper;
 
 import java.io.IOException;
-
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.UnknownHostException;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -44,7 +42,6 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Queue;
 import java.util.Set;
-
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
@@ -229,6 +226,8 @@ public class AvailablePortIterator implements Iterator<Integer>, Iterable<Intege
      * @param host            the host name on which to scan (as a String)
      * @param portRangeStart  the port at which to start scanning (inclusive)
      * @param portRangeEnd    the port at which to destroy scanning (inclusive)
+     *
+     * @throws UnknownHostException  when the specified host is not resolvable
      */
     public AvailablePortIterator(String host,
                                  int    portRangeStart,

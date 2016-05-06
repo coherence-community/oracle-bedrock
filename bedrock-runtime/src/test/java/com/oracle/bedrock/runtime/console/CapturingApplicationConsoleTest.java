@@ -26,30 +26,21 @@
 package com.oracle.bedrock.runtime.console;
 
 import com.oracle.bedrock.deferred.DeferredHelper;
-
 import com.oracle.bedrock.predicate.Predicates;
-
 import com.oracle.bedrock.runtime.LocalPlatform;
-
 import com.oracle.bedrock.runtime.java.JavaApplication;
 import com.oracle.bedrock.runtime.java.options.ClassName;
-
 import com.oracle.bedrock.runtime.options.Arguments;
-
 import org.junit.Test;
+
+import java.io.PrintWriter;
+import java.util.Queue;
 
 import static com.oracle.bedrock.deferred.DeferredHelper.eventually;
 import static com.oracle.bedrock.deferred.DeferredHelper.invoking;
-
 import static org.hamcrest.CoreMatchers.is;
-
 import static org.hamcrest.collection.IsIterableContainingInOrder.contains;
-
 import static org.junit.Assert.assertThat;
-
-import java.io.PrintWriter;
-
-import java.util.Queue;
 
 /**
  * Tests for {@link CapturingApplicationConsole}.

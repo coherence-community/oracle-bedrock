@@ -3,7 +3,7 @@
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * The contents of this file are subject to the terms and conditions of
+ * The contents of this file are subject to the terms and conditions of 
  * the Common Development and Distribution License 1.0 (the "License").
  *
  * You may not use this file except in compliance with the License.
@@ -25,36 +25,30 @@
 
 package com.oracle.bedrock.runtime.java.features;
 
-import com.oracle.bedrock.runtime.java.JavaApplication;
 import com.oracle.bedrock.deferred.Cached;
 import com.oracle.bedrock.deferred.Deferred;
 import com.oracle.bedrock.deferred.PermanentlyUnavailableException;
-
 import com.oracle.bedrock.deferred.jmx.DeferredJMXConnector;
 import com.oracle.bedrock.deferred.jmx.DeferredMBeanAttribute;
 import com.oracle.bedrock.deferred.jmx.DeferredMBeanInfo;
 import com.oracle.bedrock.deferred.jmx.DeferredMBeanProxy;
-
 import com.oracle.bedrock.extensible.AbstractFeature;
 import com.oracle.bedrock.extensible.Extensible;
 import com.oracle.bedrock.extensible.Feature;
-
 import com.oracle.bedrock.options.Timeout;
-
-import static com.oracle.bedrock.deferred.DeferredHelper.cached;
-import static com.oracle.bedrock.deferred.DeferredHelper.ensured;
-import static com.oracle.bedrock.deferred.DeferredHelper.within;
-
-import java.io.IOException;
-
-import java.util.Set;
+import com.oracle.bedrock.runtime.java.JavaApplication;
 
 import javax.management.MBeanInfo;
 import javax.management.ObjectInstance;
 import javax.management.ObjectName;
 import javax.management.QueryExp;
-
 import javax.management.remote.JMXConnector;
+import java.io.IOException;
+import java.util.Set;
+
+import static com.oracle.bedrock.deferred.DeferredHelper.cached;
+import static com.oracle.bedrock.deferred.DeferredHelper.ensured;
+import static com.oracle.bedrock.deferred.DeferredHelper.within;
 
 /**
  * A {@link Feature} for {@link JavaApplication}s that provides the ability to interact
@@ -271,9 +265,10 @@ public class JmxFeature extends AbstractFeature
      * Obtains a {@link Deferred} representing a local proxy to an MBean
      * registered with the JMX infrastructure of the {@link JmxFeature}.
      *
-     * @param <T>
      * @param objectName  the name of the MBean
      * @param proxyClass  the type of the proxy
+     *
+     * @param <T>         the type of the {@link Deferred} value
      *
      * @return a {@link Deferred} of type T
      */

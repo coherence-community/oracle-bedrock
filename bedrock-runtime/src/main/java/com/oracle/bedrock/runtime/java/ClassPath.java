@@ -27,23 +27,18 @@ package com.oracle.bedrock.runtime.java;
 
 import com.oracle.bedrock.Option;
 import com.oracle.bedrock.Options;
-
 import com.oracle.bedrock.lang.StringHelper;
-
 import com.oracle.bedrock.runtime.options.PlatformSeparators;
-
 import com.oracle.bedrock.table.Table;
 import com.oracle.bedrock.table.Tabular;
 
 import java.io.File;
 import java.io.IOException;
-
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
@@ -311,6 +306,8 @@ public class ClassPath implements Iterable<String>, Tabular, Option
      * Note:  The returned String may contain spaces in which case the caller should
      * appropriate double-quote the String for their appropriate Platform.
      *
+     * @param options  the {@link Options} for converting the {@link ClassPath} into a String
+     *
      * @return the Java class-path
      */
     public String toString(Options options)
@@ -345,6 +342,8 @@ public class ClassPath implements Iterable<String>, Tabular, Option
      * <p>
      * Note:  The returned String may contain spaces in which case the caller should
      * appropriate double-quote the String for their appropriate Platform.
+     *
+     * @param options   the {@link Options}
      *
      * @return the Java class-path
      */
@@ -462,7 +461,7 @@ public class ClassPath implements Iterable<String>, Tabular, Option
     /**
      * Attempts to determine if the specified resource Java Archive type
      * (based on the resource name, not attempting to load or unpack it).
-     * </p>
+     * <p>
      * The algorithm succeeds if the specified resource ends in a
      * known Java Archive type extension (eg: .jar).  Alternatively it succeeds
      * if the specified resource uses a Java Archive type as a URI protocol
@@ -633,6 +632,8 @@ public class ClassPath implements Iterable<String>, Tabular, Option
      * Obtains a {@link ClassPath} containing only absolute path of the specified File
      *
      * @param file the file
+     *
+     * @return a {@link ClassPath} of a file
      */
     public static ClassPath ofFile(File file)
     {

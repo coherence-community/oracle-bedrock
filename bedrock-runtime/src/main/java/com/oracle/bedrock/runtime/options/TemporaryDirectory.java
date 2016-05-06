@@ -25,11 +25,10 @@
 
 package com.oracle.bedrock.runtime.options;
 
-import com.oracle.bedrock.runtime.Platform;
 import com.oracle.bedrock.Option;
+import com.oracle.bedrock.runtime.Platform;
 
 import java.io.File;
-
 import java.nio.file.Path;
 
 /**

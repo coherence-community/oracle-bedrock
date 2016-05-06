@@ -25,9 +25,11 @@
 
 package com.oracle.bedrock.runtime.network;
 
-import java.net.*;
-
-import java.util.*;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
+import java.util.Collections;
+import java.util.Enumeration;
 
 import static java.lang.System.out;
 

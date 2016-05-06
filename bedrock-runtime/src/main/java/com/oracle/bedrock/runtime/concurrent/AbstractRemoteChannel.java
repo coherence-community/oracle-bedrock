@@ -3,7 +3,7 @@
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * The contents of this file are subject to the terms and conditions of
+ * The contents of this file are subject to the terms and conditions of 
  * the Common Development and Distribution License 1.0 (the "License").
  *
  * You may not use this file except in compliance with the License.
@@ -27,11 +27,8 @@ package com.oracle.bedrock.runtime.concurrent;
 
 import com.oracle.bedrock.Option;
 import com.oracle.bedrock.Options;
-
 import com.oracle.bedrock.lang.ThreadFactories;
-
 import com.oracle.bedrock.runtime.concurrent.options.StreamName;
-
 import com.oracle.bedrock.runtime.java.io.ClassLoaderAwareObjectInputStream;
 
 import java.io.ByteArrayInputStream;
@@ -43,20 +40,15 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
-
 import java.lang.reflect.Constructor;
-
 import java.net.Socket;
-
 import java.util.HashMap;
 import java.util.Set;
-
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -84,14 +76,14 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
 
     /**
      * The {@link ObjectOutputStream} from the {@link RemoteChannel}.
-     * <p/>
+     * <p>
      * When this is <code>null</code> the {@link RemoteChannel} is not connected.
      */
     private ObjectOutputStream output;
 
     /**
      * The {@link ObjectInputStream} into the {@link RemoteChannel}.
-     * <p/>
+     * <p>
      * When this is <code>null</code> the {@link RemoteChannel} is not connected.
      */
     private ObjectInputStream input;
@@ -110,7 +102,7 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
 
     /**
      * The {@link Thread} to read {@link Callable}s from the {@link Socket}.
-     * <p/>
+     * <p>
      * When this is <code>null</code> the {@link AbstractRemoteChannel} is not connected.
      */
     private Thread requestAcceptorThread;
@@ -369,15 +361,15 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
 
 
     @Override
-    public <T> CompletableFuture<T> submit(RemoteCallable<T>     callable,
-                                           Option...             options) throws IllegalStateException
+    public <T> CompletableFuture<T> submit(RemoteCallable<T> callable,
+                                           Option...         options) throws IllegalStateException
     {
         if (isOpen())
         {
-            Options                       submitOptions = Options.from(options);
-            RemoteChannel.AcknowledgeWhen acknowledge   = submitOptions.getOrDefault(AcknowledgeWhen.class,
-                                                                                     AcknowledgeWhen.PROCESSED);
-            CallableOperation             operation     = new CallableOperation(callable, acknowledge);
+            Options submitOptions = Options.from(options);
+            RemoteChannel.AcknowledgeWhen acknowledge = submitOptions.getOrDefault(AcknowledgeWhen.class,
+                                                                                   AcknowledgeWhen.PROCESSED);
+            CallableOperation operation = new CallableOperation(callable, acknowledge);
 
             return sendOperation(operation, acknowledge);
         }
@@ -394,9 +386,9 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
     {
         if (isOpen())
         {
-            Options                       submitOptions   = Options.from(options);
-            RemoteChannel.AcknowledgeWhen acknowledge     = submitOptions.get(AcknowledgeWhen.class);
-            RunnableOperation             operation       = new RunnableOperation(runnable, acknowledge);
+            Options                       submitOptions = Options.from(options);
+            RemoteChannel.AcknowledgeWhen acknowledge   = submitOptions.get(AcknowledgeWhen.class);
+            RunnableOperation             operation     = new RunnableOperation(runnable, acknowledge);
 
             return sendOperation(operation, acknowledge);
         }
@@ -427,7 +419,8 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
     }
 
 
-    private <T> CompletableFuture<T> sendOperation(Operation operation, AcknowledgeWhen acknowledge)
+    private <T> CompletableFuture<T> sendOperation(Operation       operation,
+                                                   AcknowledgeWhen acknowledge)
     {
         long   sequence = nextSequenceNumber.getAndIncrement();
         Sender sender   = new Sender(sequence, operation);
@@ -447,6 +440,7 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
             return future;
         }
     }
+
 
     /**
      * An {@link Operation} to be executed in-order by a {@link AbstractRemoteChannel}.
@@ -667,8 +661,8 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
          * The {@link RemoteEvent} to eventually execute.
          */
         private RemoteEvent event;
+        private boolean     isAckRequired;
 
-        private boolean isAckRequired;
 
         /**
          * Constructs an {@link EventOperation}
@@ -990,7 +984,8 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
          * @throws NullPointerException      should the {@link Runnable} be <code>null</code>
          * @throws IllegalArgumentException  should the {@link Runnable} be an anonymous inner class
          */
-        public RunnableOperation(Runnable runnable, AcknowledgeWhen acknowledgeWhen)
+        public RunnableOperation(Runnable        runnable,
+                                 AcknowledgeWhen acknowledgeWhen)
         {
             if (runnable == null)
             {

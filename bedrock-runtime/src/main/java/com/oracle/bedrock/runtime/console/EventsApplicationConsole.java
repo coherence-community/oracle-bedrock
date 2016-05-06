@@ -50,12 +50,12 @@ public class EventsApplicationConsole extends AbstractPipedApplicationConsole
     /**
      * The {@link Listener}s listening to StdOut
      */
-    private final ConcurrentLinkedQueue<Pair<Predicate<String>,Listener>> stdoutListeners;
+    private final ConcurrentLinkedQueue<Pair<Predicate<String>, Listener>> stdoutListeners;
 
     /**
      * The {@link Listener}s listening to StdErr
      */
-    private final ConcurrentLinkedQueue<Pair<Predicate<String>,Listener>> stderrListeners;
+    private final ConcurrentLinkedQueue<Pair<Predicate<String>, Listener>> stderrListeners;
 
     /**
      * The {@link Thread} capturing StdOut lines
@@ -70,7 +70,7 @@ public class EventsApplicationConsole extends AbstractPipedApplicationConsole
 
     /**
      * Constructs {@link EventsApplicationConsole}.
-     * </p>
+     * <p>
      * This constructor will set the maximum number of lines to capture to {@link Integer#MAX_VALUE}.
      */
     public EventsApplicationConsole()
@@ -127,7 +127,8 @@ public class EventsApplicationConsole extends AbstractPipedApplicationConsole
      *
      * @return  this {@link EventsApplicationConsole}
      */
-    public EventsApplicationConsole withStdOutListener(Predicate<String> predicate, Listener listener)
+    public EventsApplicationConsole withStdOutListener(Predicate<String> predicate,
+                                                       Listener          listener)
     {
         if (predicate == null)
         {
@@ -137,7 +138,6 @@ public class EventsApplicationConsole extends AbstractPipedApplicationConsole
         {
             stdoutListeners.add(new Pair<>(predicate, listener));
         }
-
 
         return this;
     }
@@ -165,7 +165,8 @@ public class EventsApplicationConsole extends AbstractPipedApplicationConsole
      *
      * @return  this {@link EventsApplicationConsole}
      */
-    public EventsApplicationConsole withStdErrListener(Predicate<String> predicate, Listener listener)
+    public EventsApplicationConsole withStdErrListener(Predicate<String> predicate,
+                                                       Listener          listener)
     {
         if (predicate == null)
         {
@@ -175,7 +176,6 @@ public class EventsApplicationConsole extends AbstractPipedApplicationConsole
         {
             stderrListeners.add(new Pair<>(predicate, listener));
         }
-
 
         return this;
     }
@@ -190,75 +190,6 @@ public class EventsApplicationConsole extends AbstractPipedApplicationConsole
     public PrintWriter getInputWriter()
     {
         return stdinWriter;
-    }
-
-
-    /**
-     * The {@link Runnable} used to capture lines of output.
-     */
-    class OutputCaptor implements Runnable
-    {
-        /**
-         * The {@link BufferedReader} to capture output from.
-         */
-        BufferedReader reader;
-
-        /**
-         * The {@link Listener}a to send output lines to.
-         */
-        ConcurrentLinkedQueue<Pair<Predicate<String>,Listener>> listeners;
-
-
-        /**
-         * Create an {@link OutputCaptor}.
-         *
-         * @param reader      The {@link BufferedReader} to capture output from
-         * @param listeners   The {@link Listener}s to send output lines to
-         */
-        OutputCaptor(BufferedReader                                  reader,
-                     ConcurrentLinkedQueue<Pair<Predicate<String>,Listener>> listeners)
-        {
-            this.reader    = reader;
-            this.listeners = listeners;
-        }
-
-
-        /**
-         * The {@link Runnable#run()} method for this {@link OutputCaptor}
-         * that will capture output.
-         */
-        @Override
-        public void run()
-        {
-            try
-            {
-                String line = reader.readLine();
-
-                while (line != null)
-                {
-                    for (Pair<Predicate<String>,Listener> pair : listeners)
-                    {
-                        try
-                        {
-                            if (pair.getX().test(line))
-                            {
-                                pair.getY().onOutput(line);
-                            }
-                        }
-                        catch (Throwable t)
-                        {
-                            t.printStackTrace();
-                        }
-                    }
-
-                line = reader.readLine();
-                }
-            }
-            catch (IOException e)
-            {
-                // Skip: Likely caused by application termination
-            }
-        }
     }
 
 
@@ -299,10 +230,80 @@ public class EventsApplicationConsole extends AbstractPipedApplicationConsole
             super(count);
         }
 
+
         @Override
         public void onOutput(String line)
         {
             countDown();
+        }
+    }
+
+
+    /**
+     * The {@link Runnable} used to capture lines of output.
+     */
+    class OutputCaptor implements Runnable
+    {
+        /**
+         * The {@link BufferedReader} to capture output from.
+         */
+        BufferedReader reader;
+
+        /**
+         * The {@link Listener}a to send output lines to.
+         */
+        ConcurrentLinkedQueue<Pair<Predicate<String>, Listener>> listeners;
+
+
+        /**
+         * Create an {@link OutputCaptor}.
+         *
+         * @param reader      The {@link BufferedReader} to capture output from
+         * @param listeners   The {@link Listener}s to send output lines to
+         */
+        OutputCaptor(BufferedReader                                           reader,
+                     ConcurrentLinkedQueue<Pair<Predicate<String>, Listener>> listeners)
+        {
+            this.reader    = reader;
+            this.listeners = listeners;
+        }
+
+
+        /**
+         * The {@link Runnable#run()} method for this {@link OutputCaptor}
+         * that will capture output.
+         */
+        @Override
+        public void run()
+        {
+            try
+            {
+                String line = reader.readLine();
+
+                while (line != null)
+                {
+                    for (Pair<Predicate<String>, Listener> pair : listeners)
+                    {
+                        try
+                        {
+                            if (pair.getX().test(line))
+                            {
+                                pair.getY().onOutput(line);
+                            }
+                        }
+                        catch (Throwable t)
+                        {
+                            t.printStackTrace();
+                        }
+                    }
+
+                    line = reader.readLine();
+                }
+            }
+            catch (IOException e)
+            {
+                // Skip: Likely caused by application termination
+            }
         }
     }
 }

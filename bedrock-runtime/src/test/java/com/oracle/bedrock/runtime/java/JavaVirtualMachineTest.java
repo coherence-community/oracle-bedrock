@@ -25,29 +25,24 @@
 
 package com.oracle.bedrock.runtime.java;
 
-import com.oracle.bedrock.runtime.Platform;
 import com.oracle.bedrock.runtime.LocalPlatform;
-
+import com.oracle.bedrock.runtime.Platform;
 import com.oracle.bedrock.runtime.java.profiles.RemoteDebugging;
-
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.lang.management.RuntimeMXBean;
+import java.util.Arrays;
+import java.util.List;
+
 import static org.hamcrest.CoreMatchers.is;
-
 import static org.hamcrest.MatcherAssert.assertThat;
-
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-
-import java.lang.management.RuntimeMXBean;
-
-import java.util.Arrays;
-import java.util.List;
 
 /**
  * Unit tests for {@link JavaVirtualMachine}s.

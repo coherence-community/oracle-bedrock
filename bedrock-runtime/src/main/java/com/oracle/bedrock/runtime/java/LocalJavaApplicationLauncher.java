@@ -3,7 +3,7 @@
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * The contents of this file are subject to the terms and conditions of
+ * The contents of this file are subject to the terms and conditions of 
  * the Common Development and Distribution License 1.0 (the "License").
  *
  * You may not use this file except in compliance with the License.
@@ -25,9 +25,6 @@
 
 package com.oracle.bedrock.runtime.java;
 
-import com.oracle.bedrock.runtime.ApplicationListener;
-import com.oracle.bedrock.runtime.Platform;
-import com.oracle.bedrock.runtime.options.Orphanable;
 import com.oracle.bedrock.Option;
 import com.oracle.bedrock.Options;
 import com.oracle.bedrock.deferred.AbstractDeferred;
@@ -38,8 +35,10 @@ import com.oracle.bedrock.lang.StringHelper;
 import com.oracle.bedrock.options.Timeout;
 import com.oracle.bedrock.options.Variable;
 import com.oracle.bedrock.options.Variables;
+import com.oracle.bedrock.runtime.ApplicationListener;
 import com.oracle.bedrock.runtime.LocalApplicationProcess;
 import com.oracle.bedrock.runtime.MetaClass;
+import com.oracle.bedrock.runtime.Platform;
 import com.oracle.bedrock.runtime.Profile;
 import com.oracle.bedrock.runtime.Profiles;
 import com.oracle.bedrock.runtime.Settings;
@@ -65,6 +64,7 @@ import com.oracle.bedrock.runtime.options.DisplayName;
 import com.oracle.bedrock.runtime.options.EnvironmentVariables;
 import com.oracle.bedrock.runtime.options.ErrorStreamRedirection;
 import com.oracle.bedrock.runtime.options.Executable;
+import com.oracle.bedrock.runtime.options.Orphanable;
 import com.oracle.bedrock.runtime.options.WorkingDirectory;
 import com.oracle.bedrock.table.Cell;
 import com.oracle.bedrock.table.Table;
@@ -117,7 +117,7 @@ public class LocalJavaApplicationLauncher<A extends JavaApplication> implements 
 
 
     @Override
-    public A launch(Platform platform,
+    public A launch(Platform     platform,
                     MetaClass<A> metaClass,
                     Options      options)
     {

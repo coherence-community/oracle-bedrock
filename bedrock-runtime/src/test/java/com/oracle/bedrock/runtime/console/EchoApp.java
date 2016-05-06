@@ -49,6 +49,7 @@ public class EchoApp
     {
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
         String         line   = reader.readLine();
+
         while (line != null)
         {
             if ("quit".equalsIgnoreCase(line.trim()))
@@ -57,8 +58,9 @@ public class EchoApp
             }
 
             System.out.println("Echo: " + line);
-            line   = reader.readLine();
+            line = reader.readLine();
         }
+
         System.out.flush();
     }
 }

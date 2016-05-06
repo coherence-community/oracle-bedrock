@@ -28,7 +28,6 @@ package com.oracle.bedrock.runtime.concurrent.socket;
 import com.oracle.bedrock.runtime.concurrent.RemoteChannel;
 
 import java.io.IOException;
-
 import java.net.InetAddress;
 import java.net.Socket;
 

@@ -3,7 +3,7 @@
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * The contents of this file are subject to the terms and conditions of
+ * The contents of this file are subject to the terms and conditions of 
  * the Common Development and Distribution License 1.0 (the "License").
  *
  * You may not use this file except in compliance with the License.
@@ -25,10 +25,10 @@
 
 package com.oracle.bedrock.runtime;
 
-import com.oracle.bedrock.runtime.options.Discriminator;
 import com.oracle.bedrock.Option;
 import com.oracle.bedrock.Options;
 import com.oracle.bedrock.deferred.DeferredPredicate;
+import com.oracle.bedrock.runtime.options.Discriminator;
 import com.oracle.bedrock.runtime.options.StabilityPredicate;
 
 import java.util.ArrayList;
@@ -283,7 +283,7 @@ public abstract class AbstractAssembly<A extends Application> implements Assembl
      * @param options           the {@link Option}s to use for launching the {@link Application}s
      *
      * @see Platform#launch(String, Option...)
-     * @see AssemblyBuilder#include(int, Platform, Class, Option...)
+     * @see AssemblyBuilder#include(int, Class, Option...)
      */
     public void expand(int                count,
                        Platform           platform,
@@ -408,7 +408,9 @@ public abstract class AbstractAssembly<A extends Application> implements Assembl
                     application.close(options);
 
                     // ensure the stability of the assembly (if required)
-                    StabilityPredicate<Assembly> stabilityPredicate = launchOptions.getOrDefault(StabilityPredicate.class, null);
+                    StabilityPredicate<Assembly> stabilityPredicate =
+                        launchOptions.getOrDefault(StabilityPredicate.class,
+                                                   null);
 
                     if (stabilityPredicate != null)
                     {
@@ -438,7 +440,7 @@ public abstract class AbstractAssembly<A extends Application> implements Assembl
             });
 
         // finally ensure the stability of the assembly (if required)
-        Options launchOptions = Options.from(options);
+        Options                      launchOptions      = Options.from(options);
 
         StabilityPredicate<Assembly> stabilityPredicate = launchOptions.getOrDefault(StabilityPredicate.class, null);
 
@@ -497,7 +499,8 @@ public abstract class AbstractAssembly<A extends Application> implements Assembl
 
 
     @Override
-    public void onClosing(A application, Options options)
+    public void onClosing(A       application,
+                          Options options)
     {
         if (!isClosed())
         {
@@ -509,7 +512,8 @@ public abstract class AbstractAssembly<A extends Application> implements Assembl
 
 
     @Override
-    public void onClosed(A application, Options options)
+    public void onClosed(A       application,
+                         Options options)
     {
         // SKIP: nothing to do when an application is closed
     }

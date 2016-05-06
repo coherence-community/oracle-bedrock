@@ -3,7 +3,7 @@
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * The contents of this file are subject to the terms and conditions of
+ * The contents of this file are subject to the terms and conditions of 
  * the Common Development and Distribution License 1.0 (the "License").
  *
  * You may not use this file except in compliance with the License.
@@ -25,13 +25,11 @@
 
 package com.oracle.bedrock.runtime.options;
 
-import com.oracle.bedrock.runtime.Platform;
 import com.oracle.bedrock.Option;
 import com.oracle.bedrock.Options;
-
 import com.oracle.bedrock.lang.ExpressionEvaluator;
-
 import com.oracle.bedrock.runtime.Application;
+import com.oracle.bedrock.runtime.Platform;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -66,7 +64,6 @@ public class Argument implements Option.Collectable
      */
     private final Object value;
 
-
     /**
      * The {@link Option}s for this {@link Argument}.
      */
@@ -76,9 +73,11 @@ public class Argument implements Option.Collectable
     /**
      * Create an {@link Argument} with the specified value.
      *
-     * @param value  the value of the {@link Argument}
+     * @param value    the value of the {@link Argument}
+     * @param options  the {@link Option}s for the {@link Argument}
      */
-    public Argument(Object value, Option... options)
+    public Argument(Object    value,
+                    Option... options)
     {
         this(null, ' ', value, options);
     }
@@ -88,8 +87,9 @@ public class Argument implements Option.Collectable
      * Create an {@link Argument} with the specified name,
      * and value.
      *
-     * @param name       the name of the {@link Argument}
-     * @param value      the value of the {@link Argument}
+     * @param name     the name of the {@link Argument}
+     * @param value    the value of the {@link Argument}
+     * @param options  the {@link Option}s for the {@link Argument}
      */
     public Argument(String    name,
                     Object    value,
@@ -219,7 +219,7 @@ public class Argument implements Option.Collectable
         {
             argList = new ArrayList<>();
 
-            for (Object argValue : ((Multiple)value).getValues())
+            for (Object argValue : ((Multiple) value).getValues())
             {
                 Object result = resolveValue(argValue, platform, evaluator, options);
 
@@ -242,7 +242,6 @@ public class Argument implements Option.Collectable
                 argList = Collections.emptyList();
             }
         }
-
 
         Options                  argOptions = getOptions();
         Iterable<ResolveHandler> handlers   = argOptions.getInstancesOf(ResolveHandler.class);
@@ -367,7 +366,8 @@ public class Argument implements Option.Collectable
      *
      * @return  an {@link Argument} with the specified value
      */
-    public static Argument of(Object arg, Option... options)
+    public static Argument of(Object    arg,
+                              Option... options)
     {
         return new Argument(arg, options);
     }
@@ -432,6 +432,26 @@ public class Argument implements Option.Collectable
 
 
     /**
+     * A handler that is called whenever an {@link Argument}'s value(s) are
+     * resolved.
+     */
+    @FunctionalInterface
+    public interface ResolveHandler
+    {
+        /**
+         * Called by an {@link Argument} whenever its value(s) are resolved.
+         *
+         * @param name     the name of the argument (may be null if no name was specified)
+         * @param values   an immutable {@link List} of the resolved values
+         * @param options  the {@link Options} used to resolve the values
+         */
+        void onResolve(String       name,
+                       List<String> values,
+                       Options      options);
+    }
+
+
+    /**
      * A value used to denote that a given argument
      * occurs multiple times with each of the values
      * contained within this {@link Multiple}.
@@ -450,9 +470,9 @@ public class Argument implements Option.Collectable
          *
          * @param values  the values for the argument
          */
-        public Multiple(Object... values)
+        public Multiple(Collection<?> values)
         {
-            this.values = Arrays.asList(values);
+            this.values = values == null ? Collections.emptyList() : new ArrayList<>(values);
         }
 
 
@@ -462,9 +482,9 @@ public class Argument implements Option.Collectable
          *
          * @param values  the values for the argument
          */
-        public Multiple(Collection<?> values)
+        public Multiple(Object... values)
         {
-            this.values = values == null ? Collections.emptyList() : new ArrayList<>(values);
+            this.values = Arrays.asList(values);
         }
 
 
@@ -486,6 +506,7 @@ public class Argument implements Option.Collectable
             {
                 return true;
             }
+
             if (o == null || getClass() != o.getClass())
             {
                 return false;
@@ -510,23 +531,5 @@ public class Argument implements Option.Collectable
         {
             return String.valueOf(values);
         }
-    }
-
-
-    /**
-     * A handler that is called whenever an {@link Argument}'s value(s) are
-     * resolved.
-     */
-    @FunctionalInterface
-    public interface ResolveHandler
-    {
-        /**
-         * Called by an {@link Argument} whenever its value(s) are resolved.
-         *
-         * @param name     the name of the argument (may be null if no name was specified)
-         * @param values   an immutable {@link List} of the resolved values
-         * @param options  the {@link Options} used to resolve the values
-         */
-        void onResolve(String name, List<String> values, Options options);
     }
 }

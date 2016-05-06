@@ -25,34 +25,27 @@
 
 package com.oracle.bedrock.runtime.options;
 
-import com.oracle.bedrock.runtime.Platform;
 import com.oracle.bedrock.Options;
-
 import com.oracle.bedrock.options.Decoration;
 import com.oracle.bedrock.options.Variable;
-
 import com.oracle.bedrock.runtime.LocalPlatform;
-
+import com.oracle.bedrock.runtime.Platform;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 import static com.oracle.bedrock.runtime.options.Argument.of;
-
 import static org.hamcrest.CoreMatchers.is;
-
 import static org.hamcrest.collection.IsEmptyIterable.emptyIterable;
-
 import static org.hamcrest.collection.IsIterableContainingInOrder.contains;
-
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.same;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * Unit tests for the {@link Arguments} class.
@@ -354,7 +347,10 @@ public class ArgumentsTest
 
         options.add(Argument.of("foo", "foo-value", Decoration.of(handler1), Decoration.of(handler2)));
 
-        options.add(Argument.of("bar", new Argument.Multiple("bar1", "bar2"), Decoration.of(handler1), Decoration.of(handler3)));
+        options.add(Argument.of("bar",
+                                new Argument.Multiple("bar1", "bar2"),
+                                Decoration.of(handler1),
+                                Decoration.of(handler3)));
 
         options.get(Arguments.class).resolve(LocalPlatform.get(), options);
 

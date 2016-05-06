@@ -43,6 +43,8 @@ public interface ApplicationConsole extends Closeable
     /**
      * Obtains the {@link PrintWriter} that an {@link Application} will use
      * for stdout.
+     *
+     * @return the {@link Reader}
      */
     public PrintWriter getOutputWriter();
 
@@ -50,6 +52,8 @@ public interface ApplicationConsole extends Closeable
     /**
      * Obtains the {@link PrintWriter} that an {@link Application} will use
      * for stderr.
+     *
+     * @return the {@link Reader}
      */
     public PrintWriter getErrorWriter();
 
@@ -57,6 +61,8 @@ public interface ApplicationConsole extends Closeable
     /**
      * Obtains the {@link Reader} that an {@link Application} will use
      * for stdin.
+     *
+     * @return the {@link Reader}
      */
     public Reader getInputReader();
 
@@ -66,6 +72,7 @@ public interface ApplicationConsole extends Closeable
      * be used.
      */
     public void close();
+
 
     /**
      * Determines if diagnostic information should be logged for {@link Application}s

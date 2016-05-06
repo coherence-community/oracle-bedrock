@@ -27,7 +27,6 @@ package com.oracle.bedrock.runtime.java.io;
 
 import java.io.IOException;
 import java.io.Writer;
-
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -43,7 +42,7 @@ public class NullWriter extends Writer
     /**
      * Has the Writer been closed?
      */
-    private AtomicBoolean m_isClosed;
+    private AtomicBoolean closed;
 
 
     /**
@@ -52,48 +51,33 @@ public class NullWriter extends Writer
     public NullWriter()
     {
         super();
-        m_isClosed = new AtomicBoolean(false);
+        closed = new AtomicBoolean(false);
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void close() throws IOException
     {
-        m_isClosed.set(true);
+        closed.set(true);
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void flush() throws IOException
     {
-        if (m_isClosed.get())
+        if (closed.get())
         {
             throw new IOException("NullWriter is closed");
         }
     }
 
 
-    /**
-     * Method description
-     *
-     * @param chars
-     * @param i
-     * @param i2
-     *
-     * @throws IOException
-     */
     @Override
     public void write(char[] chars,
                       int    i,
                       int    i2) throws IOException
     {
-        if (m_isClosed.get())
+        if (closed.get())
         {
             throw new IOException("NullWriter is closed");
         }

@@ -28,9 +28,7 @@ package com.oracle.bedrock.runtime;
 import com.oracle.bedrock.runtime.java.options.SystemProperties;
 
 import java.io.IOException;
-
 import java.net.URL;
-
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -448,8 +446,8 @@ public class PropertiesBuilder
                         }
                         else
                         {
-                            throw new IndexOutOfBoundsException(String
-                                .format("No more values available for the property [%s]", name));
+                            throw new IndexOutOfBoundsException(String.format("No more values available for the property [%s]",
+                                                                              name));
                         }
                     }
                     else

@@ -56,16 +56,16 @@ public interface Platform extends Infrastructure
      * Obtains the {@link InetAddress} that could <strong>feasibly</strong>
      * be used by {@link Application}s running on other {@link Platform}s to
      * connect to {@link Application}s running on this {@link Platform}.
-     * <p/>
+     * <p>
      * There is no guarantee that the {@link InetAddress} returned by this
      * method is actually reachable by other {@link Platform}s.
-     * <p/>
+     * <p>
      * In some cases it may not be possible to determine an {@link InetAddress}
      * of the {@link Platform}, in which case the {@link InetAddress#getLoopbackAddress()}
      * will be returned.  When this happens the {@link Platform} is considered
      * isolated to a single host; it may only be contacted by other {@link Platform}s
      * running on the same host.
-     * <p/>
+     * <p>
      * Should a specific {@link InetAddress} be returned, applications
      * can define the "bedrock.runtime.address" system-property.
      *

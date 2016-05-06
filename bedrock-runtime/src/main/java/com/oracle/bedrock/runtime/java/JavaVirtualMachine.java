@@ -25,14 +25,14 @@
 
 package com.oracle.bedrock.runtime.java;
 
-import com.oracle.bedrock.runtime.AbstractPlatform;
-import com.oracle.bedrock.runtime.Application;
-import com.oracle.bedrock.runtime.ApplicationLauncher;
-import com.oracle.bedrock.runtime.Platform;
 import com.oracle.bedrock.Option;
 import com.oracle.bedrock.Options;
 import com.oracle.bedrock.io.NetworkHelper;
+import com.oracle.bedrock.runtime.AbstractPlatform;
+import com.oracle.bedrock.runtime.Application;
+import com.oracle.bedrock.runtime.ApplicationLauncher;
 import com.oracle.bedrock.runtime.MetaClass;
+import com.oracle.bedrock.runtime.Platform;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;

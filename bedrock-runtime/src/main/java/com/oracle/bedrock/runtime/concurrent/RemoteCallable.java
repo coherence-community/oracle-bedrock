@@ -26,7 +26,6 @@
 package com.oracle.bedrock.runtime.concurrent;
 
 import java.io.Serializable;
-
 import java.util.concurrent.Callable;
 
 /**

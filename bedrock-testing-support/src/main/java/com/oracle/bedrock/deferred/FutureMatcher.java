@@ -54,7 +54,7 @@ public class FutureMatcher<T> extends TypeSafeDiagnosingMatcher<CompletableFutur
     /**
      * Decorates another Matcher, retaining its behaviour, but allowing tests
      * to be slightly more expressive.
-     * <p/>
+     * <p>
      * For example:
      * <pre>assertThat(cheese, is(equalTo(smelly)))</pre>
      * instead of:
@@ -68,7 +68,7 @@ public class FutureMatcher<T> extends TypeSafeDiagnosingMatcher<CompletableFutur
 
     /**
      * A shortcut to the frequently used <code>is(equalTo(x))</code>.
-     * <p/>
+     * <p>
      * For example:
      * <pre>assertThat(cheese, is(smelly))</pre>
      * instead of:

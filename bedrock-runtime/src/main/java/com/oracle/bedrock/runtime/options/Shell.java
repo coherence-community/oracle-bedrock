@@ -25,8 +25,8 @@
 
 package com.oracle.bedrock.runtime.options;
 
-import com.oracle.bedrock.runtime.Platform;
 import com.oracle.bedrock.Option;
+import com.oracle.bedrock.runtime.Platform;
 
 /**
  * An {@link Option} to configure the type of {@link Shell} a {@link Platform} uses
@@ -39,6 +39,12 @@ import com.oracle.bedrock.Option;
  */
 public class Shell implements Option
 {
+    /**
+     * The type of the {@link Shell}, <code>null</code> if unknown.
+     */
+    private Type type;
+
+
     /**
      * The type of {@link Shell}.
      */
@@ -69,12 +75,6 @@ public class Shell implements Option
          */
         TSCH,
     }
-
-
-    /**
-     * The type of the {@link Shell}, <code>null</code> if unknown.
-     */
-    private Type type;
 
 
     /**

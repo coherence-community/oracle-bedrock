@@ -25,10 +25,10 @@
 
 package com.oracle.bedrock.runtime.options;
 
-import com.oracle.bedrock.runtime.Platform;
 import com.oracle.bedrock.Option;
 import com.oracle.bedrock.Options;
 import com.oracle.bedrock.lang.ExpressionEvaluator;
+import com.oracle.bedrock.runtime.Platform;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -101,6 +101,8 @@ public class EnvironmentVariables implements Option.Collector<EnvironmentVariabl
 
     /**
      * Constructs an empty {@link EnvironmentVariables} using the specified source.
+     *
+     * @param source the {@link Source}
      */
     public EnvironmentVariables(Source source)
     {

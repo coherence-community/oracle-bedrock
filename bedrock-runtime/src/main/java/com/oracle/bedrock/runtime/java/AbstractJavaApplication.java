@@ -3,7 +3,7 @@
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * The contents of this file are subject to the terms and conditions of
+ * The contents of this file are subject to the terms and conditions of 
  * the Common Development and Distribution License 1.0 (the "License").
  *
  * You may not use this file except in compliance with the License.
@@ -27,28 +27,22 @@ package com.oracle.bedrock.runtime.java;
 
 import com.oracle.bedrock.Option;
 import com.oracle.bedrock.Options;
-
 import com.oracle.bedrock.runtime.AbstractApplication;
 import com.oracle.bedrock.runtime.Application;
 import com.oracle.bedrock.runtime.ApplicationProcess;
 import com.oracle.bedrock.runtime.Platform;
-
 import com.oracle.bedrock.runtime.concurrent.RemoteCallable;
 import com.oracle.bedrock.runtime.concurrent.RemoteEvent;
 import com.oracle.bedrock.runtime.concurrent.RemoteEventListener;
 import com.oracle.bedrock.runtime.concurrent.RemoteRunnable;
 import com.oracle.bedrock.runtime.concurrent.callable.GetSystemProperty;
 import com.oracle.bedrock.runtime.concurrent.callable.RemoteMethodInvocation;
-
 import com.oracle.bedrock.util.ProxyHelper;
-
 import net.sf.cglib.proxy.MethodInterceptor;
 import net.sf.cglib.proxy.MethodProxy;
 
 import java.lang.reflect.Method;
-
 import java.util.Properties;
-
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
@@ -101,8 +95,8 @@ public abstract class AbstractJavaApplication<P extends JavaApplicationProcess> 
 
 
     @Override
-    public <T> CompletableFuture<T> submit(RemoteCallable<T>     callable,
-                                           Option...             options)
+    public <T> CompletableFuture<T> submit(RemoteCallable<T> callable,
+                                           Option...         options)
     {
         return process.submit(callable, options);
     }
@@ -198,11 +192,11 @@ public abstract class AbstractJavaApplication<P extends JavaApplicationProcess> 
             }
 
             RemoteMethodInvocation<T> invocation = new RemoteMethodInvocation<>(instanceProducer,
-                                                                                 method.getName(),
-                                                                                 args,
-                                                                                 interceptor);
+                                                                                method.getName(),
+                                                                                args,
+                                                                                interceptor);
 
-            CompletableFuture<Object> future     = AbstractJavaApplication.this.submit(invocation);
+            CompletableFuture<Object> future = AbstractJavaApplication.this.submit(invocation);
 
             try
             {

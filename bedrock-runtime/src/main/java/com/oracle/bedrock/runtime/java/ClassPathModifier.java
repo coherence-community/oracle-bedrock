@@ -1,3 +1,28 @@
+/*
+ * File: ClassPathModifier.java
+ *
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ *
+ * The contents of this file are subject to the terms and conditions of 
+ * the Common Development and Distribution License 1.0 (the "License").
+ *
+ * You may not use this file except in compliance with the License.
+ *
+ * You can obtain a copy of the License by consulting the LICENSE.txt file
+ * distributed with this file, or by consulting https://oss.oracle.com/licenses/CDDL
+ *
+ * See the License for the specific language governing permissions
+ * and limitations under the License.
+ *
+ * When distributing the software, include this License Header Notice in each
+ * file and include the License file LICENSE.txt.
+ *
+ * MODIFICATIONS:
+ * If applicable, add the following below the License Header, with the fields
+ * enclosed by brackets [] replaced by your own identifying information:
+ * "Portions Copyright [year] [name of copyright owner]"
+ */
+
 package com.oracle.bedrock.runtime.java;
 
 import com.oracle.bedrock.Option;
@@ -9,13 +34,13 @@ import com.oracle.bedrock.Options;
  *
  * @author jk 2015.01.15
  */
-public class ClassPathModifier
-    implements Option
+public class ClassPathModifier implements Option
 {
     /**
      * Flag indicating whether the class path should be quoted
      */
     private boolean useQuotes = true;
+
 
     /**
      * Create an instance of {@link ClassPathModifier}
@@ -28,6 +53,7 @@ public class ClassPathModifier
         this.useQuotes = useQuotes;
     }
 
+
     /**
      * Apply any required modifications to the original class path String.
      *
@@ -39,6 +65,7 @@ public class ClassPathModifier
     {
         return classPath;
     }
+
 
     /**
      * Apply quotes to the specified class path if this
@@ -72,6 +99,7 @@ public class ClassPathModifier
         return classPath;
     }
 
+
     /**
      * Obtain a ClassPathModifier that performs no modification
      * on a class path String.
@@ -85,6 +113,7 @@ public class ClassPathModifier
         return new ClassPathModifier(true);
     }
 
+
     /**
      * Obtain a ClassPathModifier that performs modifications
      * to the class path required by Cygwin platforms.
@@ -96,6 +125,7 @@ public class ClassPathModifier
     {
         return new CygwinModifier(true);
     }
+
 
     /**
      * Obtain a ClassPathModifier that performs modifications
@@ -109,6 +139,7 @@ public class ClassPathModifier
         return new WindowsModifier(false);
     }
 
+
     /**
      * Obtain a ClassPathModifier that performs modifications
      * to the class path required by Cygwin platforms.
@@ -121,17 +152,24 @@ public class ClassPathModifier
         return new WindowsModifier(true);
     }
 
+
     /**
      * An implementation of {@link ClassPathModifier} that
      * applies modifications for the Cygwin platform.
      */
-    private static class CygwinModifier
-        extends ClassPathModifier
+    private static class CygwinModifier extends ClassPathModifier
     {
+        /**
+         * Constructs ...
+         *
+         *
+         * @param useQuotes
+         */
         public CygwinModifier(boolean useQuotes)
         {
             super(useQuotes);
         }
+
 
         @Override
         public String modify(String classPath)
@@ -140,17 +178,24 @@ public class ClassPathModifier
         }
     }
 
+
     /**
      * An implementation of {@link ClassPathModifier} that
      * applies modifications for the Windows platform.
      */
-    private static class WindowsModifier
-            extends ClassPathModifier
+    private static class WindowsModifier extends ClassPathModifier
     {
+        /**
+         * Constructs ...
+         *
+         *
+         * @param useQuotes
+         */
         public WindowsModifier(boolean useQuotes)
         {
             super(useQuotes);
         }
+
 
         @Override
         public String modify(String classPath)

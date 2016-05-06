@@ -1,9 +1,9 @@
 /*
- * File: RemoteChannelTest.java
+ * File: SocketBasedRemoteChannelTest.java
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * The contents of this file are subject to the terms and conditions of
+ * The contents of this file are subject to the terms and conditions of 
  * the Common Development and Distribution License 1.0 (the "License").
  *
  * You may not use this file except in compliance with the License.
@@ -73,7 +73,7 @@ public class SocketBasedRemoteChannelTest
     public void shouldNotInjectIntoNonStaticField() throws Exception
     {
         RemoteChannel channel = mock(RemoteChannel.class);
-        TestTypeThree      type    = new TestTypeThree();
+        TestTypeThree type    = new TestTypeThree();
 
         RemoteChannel.Injector.injectChannel(type.getClass(), channel);
 
@@ -185,73 +185,16 @@ public class SocketBasedRemoteChannelTest
     }
 
 
-    public static class TestTypeOne
-    {
-        /** Valid annotation use */
-        @RemoteChannel.Inject
-        public static RemoteChannel channel;
-    }
-
-    public static class TestTypeTwo
-    {
-        /** Invalid annotation use - field is not public */
-        @RemoteChannel.Inject
-        private static RemoteChannel channel;
-    }
-
-    public static class TestTypeThree
-    {
-        /** Invalid annotation use - field is not static */
-        @RemoteChannel.Inject
-        public RemoteChannel channel;
-    }
-
-    public static class TestTypeFour
-    {
-        /** Valid annotation use - field is wrong type */
-        @RemoteChannel.Inject
-        public static String channel;
-    }
-
-    public static class TestTypeFive
-    {
-        private static RemoteChannel channel;
-
-        /** Valid annotation use */
-        @RemoteChannel.Inject
-        public static void setEventChannel(RemoteChannel eventChannel)
-        {
-            channel = eventChannel;
-        }
-    }
-
-    public static class TestTypeSix
-    {
-        private static RemoteChannel channel;
-
-        /** Invalid annotation use - method is not public */
-        @RemoteChannel.Inject
-        private static void setEventChannel(RemoteChannel eventChannel)
-        {
-            channel = eventChannel;
-        }
-    }
-
-    public static class TestTypeSeven
-    {
-        private static RemoteChannel channel;
-
-        /** Invalid annotation use - method is not static */
-        @RemoteChannel.Inject
-        public void setEventChannel(RemoteChannel eventChannel)
-        {
-            channel = eventChannel;
-        }
-    }
-
+    /**
+     * Class description
+     *
+     * @version        Enter version here..., 16/05/06
+     * @author         Enter your name here...    
+     */
     public static class TestTypeEight
     {
         private static String channel;
+
 
         /** Invalid annotation use - method has wrong parameter type */
         @RemoteChannel.Inject
@@ -261,21 +204,140 @@ public class SocketBasedRemoteChannelTest
         }
     }
 
-    public static class TestTypeNine
-    {
-        private static Object channel;
 
-        /** Invalid annotation use - method has too many parameters */
+    /**
+     * Class description
+     *
+     * @version        Enter version here..., 16/05/06
+     * @author         Enter your name here...    
+     */
+    public static class TestTypeEleven
+    {
+        /** Valid annotation use - field type is superclass of RemoteEventChannel.Publisher */
         @RemoteChannel.Inject
-        public static void setEventChannel(RemoteChannel eventChannel, String foo)
+        public static Object channel;
+    }
+
+
+    /**
+     * Class description
+     *
+     * @version        Enter version here..., 16/05/06
+     * @author         Enter your name here...    
+     */
+    public static class TestTypeFive
+    {
+        private static RemoteChannel channel;
+
+
+        /** Valid annotation use */
+        @RemoteChannel.Inject
+        public static void setEventChannel(RemoteChannel eventChannel)
         {
             channel = eventChannel;
         }
     }
 
+
+    /**
+     * Class description
+     *
+     * @version        Enter version here..., 16/05/06
+     * @author         Enter your name here...    
+     */
+    public static class TestTypeFour
+    {
+        /** Valid annotation use - field is wrong type */
+        @RemoteChannel.Inject
+        public static String channel;
+    }
+
+
+    /**
+     * Class description
+     *
+     * @version        Enter version here..., 16/05/06
+     * @author         Enter your name here...    
+     */
+    public static class TestTypeNine
+    {
+        private static Object channel;
+
+
+        /** Invalid annotation use - method has too many parameters */
+        @RemoteChannel.Inject
+        public static void setEventChannel(RemoteChannel eventChannel,
+                                           String        foo)
+        {
+            channel = eventChannel;
+        }
+    }
+
+
+    /**
+     * Class description
+     *
+     * @version        Enter version here..., 16/05/06
+     * @author         Enter your name here...    
+     */
+    public static class TestTypeOne
+    {
+        /** Valid annotation use */
+        @RemoteChannel.Inject
+        public static RemoteChannel channel;
+    }
+
+
+    /**
+     * Class description
+     *
+     * @version        Enter version here..., 16/05/06
+     * @author         Enter your name here...    
+     */
+    public static class TestTypeSeven
+    {
+        private static RemoteChannel channel;
+
+
+        /** Invalid annotation use - method is not static */
+        @RemoteChannel.Inject
+        public void setEventChannel(RemoteChannel eventChannel)
+        {
+            channel = eventChannel;
+        }
+    }
+
+
+    /**
+     * Class description
+     *
+     * @version        Enter version here..., 16/05/06
+     * @author         Enter your name here...    
+     */
+    public static class TestTypeSix
+    {
+        private static RemoteChannel channel;
+
+
+        /** Invalid annotation use - method is not public */
+        @RemoteChannel.Inject
+        private static void setEventChannel(RemoteChannel eventChannel)
+        {
+            channel = eventChannel;
+        }
+    }
+
+
+    /**
+     * Class description
+     *
+     * @version        Enter version here..., 16/05/06
+     * @author         Enter your name here...    
+     */
     public static class TestTypeTen
     {
         private static Object channel;
+
 
         /** Valid annotation use - method parameter is super class of RemoteEventChannel */
         @RemoteChannel.Inject
@@ -285,12 +347,31 @@ public class SocketBasedRemoteChannelTest
         }
     }
 
-    public static class TestTypeEleven
+
+    /**
+     * Class description
+     *
+     * @version        Enter version here..., 16/05/06
+     * @author         Enter your name here...    
+     */
+    public static class TestTypeThree
     {
-        /** Valid annotation use - field type is superclass of RemoteEventChannel.Publisher */
+        /** Invalid annotation use - field is not static */
         @RemoteChannel.Inject
-        public static Object channel;
+        public RemoteChannel channel;
     }
 
 
+    /**
+     * Class description
+     *
+     * @version        Enter version here..., 16/05/06
+     * @author         Enter your name here...    
+     */
+    public static class TestTypeTwo
+    {
+        /** Invalid annotation use - field is not public */
+        @RemoteChannel.Inject
+        private static RemoteChannel channel;
+    }
 }

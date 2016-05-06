@@ -26,7 +26,6 @@
 package com.oracle.bedrock.runtime;
 
 import com.oracle.bedrock.Option;
-
 import com.oracle.bedrock.runtime.options.ApplicationClosingBehavior;
 
 import java.io.Closeable;

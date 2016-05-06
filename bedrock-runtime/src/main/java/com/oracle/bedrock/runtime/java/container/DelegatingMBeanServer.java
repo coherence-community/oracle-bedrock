@@ -25,10 +25,6 @@
 
 package com.oracle.bedrock.runtime.java.container;
 
-import java.io.ObjectInputStream;
-
-import java.util.Set;
-
 import javax.management.Attribute;
 import javax.management.AttributeList;
 import javax.management.AttributeNotFoundException;
@@ -49,8 +45,9 @@ import javax.management.ObjectName;
 import javax.management.OperationsException;
 import javax.management.QueryExp;
 import javax.management.ReflectionException;
-
 import javax.management.loading.ClassLoaderRepository;
+import java.io.ObjectInputStream;
+import java.util.Set;
 
 /**
  * A {@link DelegatingMBeanServer} is an {@link MBeanServer} implementation
@@ -67,15 +64,17 @@ public class DelegatingMBeanServer implements MBeanServer
     /**
      * The domain of the {@link DelegatingMBeanServer}.
      */
-    private String m_domain;
+    private String domain;
 
 
     /**
      * Constructs a {@link DelegatingMBeanServer}.
+     *
+     * @param domain  the domain
      */
     public DelegatingMBeanServer(String domain)
     {
-        m_domain = domain;
+        this.domain = domain;
     }
 
 
@@ -87,7 +86,7 @@ public class DelegatingMBeanServer implements MBeanServer
      */
     public String getDomain()
     {
-        return m_domain;
+        return domain;
     }
 
 
@@ -103,11 +102,11 @@ public class DelegatingMBeanServer implements MBeanServer
         ContainerMBeanServerBuilder builder = scope == null
                                               ? Container.getDefaultScope().getMBeanServerBuilder()
                                               : scope.getMBeanServerBuilder();
-        MBeanServer mBeanServer = builder.getMBeanServer(m_domain);
+        MBeanServer mBeanServer = builder.getMBeanServer(domain);
 
         if (mBeanServer == null)
         {
-            mBeanServer = builder.newMBeanServer(m_domain, null, builder.newMBeanServerDelegate());
+            mBeanServer = builder.newMBeanServer(domain, null, builder.newMBeanServerDelegate());
         }
 
         return mBeanServer;

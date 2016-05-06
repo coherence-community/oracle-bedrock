@@ -25,18 +25,15 @@
 
 package com.oracle.bedrock.runtime;
 
-import com.oracle.bedrock.runtime.console.SystemApplicationConsole;
-import com.oracle.bedrock.runtime.options.ApplicationClosingBehavior;
-import com.oracle.bedrock.runtime.options.DisplayName;
 import com.oracle.bedrock.Option;
 import com.oracle.bedrock.Options;
-
 import com.oracle.bedrock.extensible.AbstractExtensible;
-
 import com.oracle.bedrock.options.Diagnostics;
 import com.oracle.bedrock.options.Timeout;
-
+import com.oracle.bedrock.runtime.console.SystemApplicationConsole;
 import com.oracle.bedrock.runtime.java.container.Container;
+import com.oracle.bedrock.runtime.options.ApplicationClosingBehavior;
+import com.oracle.bedrock.runtime.options.DisplayName;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;

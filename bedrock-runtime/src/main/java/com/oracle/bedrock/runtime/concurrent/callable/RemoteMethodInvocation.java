@@ -26,11 +26,9 @@
 package com.oracle.bedrock.runtime.concurrent.callable;
 
 import com.oracle.bedrock.runtime.concurrent.RemoteCallable;
-
 import com.oracle.bedrock.util.ReflectionHelper;
 
 import java.io.Serializable;
-
 import java.lang.reflect.Method;
 
 /**
@@ -197,6 +195,7 @@ public class RemoteMethodInvocation<T> implements RemoteCallable<Object>
          * @param method     the {@link Method} that was invoked
          * @param arguments  the arguments supplied to the {@link Method}
          * @param result     the returned result
+         *
          * @return   the result that should be returned
          */
         public Object onAfterRemoteInvocation(Method   method,
@@ -218,6 +217,7 @@ public class RemoteMethodInvocation<T> implements RemoteCallable<Object>
          * @param method     the {@link Method} that was invoked
          * @param arguments  the arguments supplied to the {@link Method}
          * @param exception  the {@link Exception} that occurred
+         *
          * @return  the {@link Exception} to throw
          */
         public Exception onRemoteInvocationException(Method    method,
@@ -248,6 +248,7 @@ public class RemoteMethodInvocation<T> implements RemoteCallable<Object>
          * @param method     the {@link Method} that was invoked
          * @param arguments  the arguments supplied to the {@link Method}
          * @param result     the returned result
+         *
          * @return  the result that should be returned
          */
         public Object onAfterInvocation(Object   instance,
@@ -265,6 +266,8 @@ public class RemoteMethodInvocation<T> implements RemoteCallable<Object>
          * @param method     the {@link Method} that was invoked
          * @param arguments  the arguments supplied to the {@link Method}
          * @param exception  the {@link Exception} that occurred
+         *
+         * @return the {@link Exception} to be thrown
          */
         public Exception onInvocationException(Object    instance,
                                                Method    method,

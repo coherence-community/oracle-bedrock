@@ -25,8 +25,8 @@
 
 package com.oracle.bedrock.runtime.java.container;
 
-import com.oracle.bedrock.runtime.network.AvailablePortIterator;
 import com.oracle.bedrock.runtime.LocalPlatform;
+import com.oracle.bedrock.runtime.network.AvailablePortIterator;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -34,7 +34,6 @@ import java.io.OutputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.io.PrintStream;
-
 import java.util.Properties;
 
 /**
@@ -139,12 +138,7 @@ public class ContainerScope extends AbstractContainerScope
     public ContainerScope(String     name,
                           Properties properties)
     {
-        this(name,
-             properties,
-             LocalPlatform.get().getAvailablePorts(),
-             null,
-             false,
-             Container.PIPE_BUFFER_SIZE_BYTES);
+        this(name, properties, LocalPlatform.get().getAvailablePorts(), null, false, Container.PIPE_BUFFER_SIZE_BYTES);
     }
 
 

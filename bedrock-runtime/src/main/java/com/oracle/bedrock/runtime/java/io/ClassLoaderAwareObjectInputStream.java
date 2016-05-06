@@ -55,7 +55,7 @@ public class ClassLoaderAwareObjectInputStream extends ObjectInputStream
      * @param classLoader  the {@link ClassLoader} to use when resolving classes
      * @param inputStream  the {@link InputStream} to adapt into an {@link ObjectInputStream}
      *
-     * @throws IOException
+     * @throws IOException if the {@link ObjectInputStream} could not be established
      */
     public ClassLoaderAwareObjectInputStream(ClassLoader classLoader,
                                              InputStream inputStream) throws IOException

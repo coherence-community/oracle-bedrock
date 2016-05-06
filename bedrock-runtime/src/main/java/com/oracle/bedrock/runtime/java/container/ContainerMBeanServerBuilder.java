@@ -25,36 +25,28 @@
 
 package com.oracle.bedrock.runtime.java.container;
 
+import com.oracle.bedrock.runtime.LocalPlatform;
 import com.oracle.bedrock.runtime.java.JavaApplication;
 import com.oracle.bedrock.runtime.java.features.JmxFeature;
-import com.oracle.bedrock.runtime.LocalPlatform;
-
 import com.oracle.bedrock.runtime.network.AvailablePortIterator;
-
-import java.io.IOException;
-
-import java.net.URL;
-
-import java.rmi.RemoteException;
-
-import java.rmi.registry.LocateRegistry;
-import java.rmi.registry.Registry;
-
-import java.rmi.server.ExportException;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
 
 import javax.management.MBeanServer;
 import javax.management.MBeanServerBuilder;
 import javax.management.MBeanServerDelegate;
-
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXConnectorServer;
 import javax.management.remote.JMXConnectorServerFactory;
 import javax.management.remote.JMXServiceURL;
+import java.io.IOException;
+import java.net.URL;
+import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
+import java.rmi.server.ExportException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
 
 /**
  * A {@link ContainerMBeanServerBuilder} is an {@link MBeanServerBuilder}
@@ -170,6 +162,8 @@ public class ContainerMBeanServerBuilder extends MBeanServerBuilder
     /**
      * Constructs a {@link ContainerMBeanServerBuilder}.
      *
+     * @param jmxConnectorFactory    the {@link ConnectorFactory}
+     * @param rmiRegistryFactory     the {@link RmiRegistryFactory}
      * @param availablePortIterator  the {@link AvailablePortIterator} to use for
      *                               acquiring ports for server connectors
      */
@@ -421,7 +415,7 @@ public class ContainerMBeanServerBuilder extends MBeanServerBuilder
          *
          * @return a new {@link JMXConnectorServer}
          *
-         * @throws IOException
+         * @throws IOException  when we fail to create a {@link JMXConnectorServer}
          */
         public JMXConnectorServer createJMXConnectorServer(JMXServiceURL  url,
                                                            Map<String, ?> environment,
@@ -436,7 +430,7 @@ public class ContainerMBeanServerBuilder extends MBeanServerBuilder
          *
          * @return the {@link JMXConnector}
          *
-         * @throws IOException
+         * @throws IOException  when we fail to create a {@link JMXConnectorServer}
          */
         public JMXConnector createJMXConnector(JMXServiceURL  url,
                                                Map<String, ?> environment) throws IOException;

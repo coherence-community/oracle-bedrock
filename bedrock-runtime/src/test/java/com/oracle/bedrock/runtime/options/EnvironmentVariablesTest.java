@@ -3,7 +3,7 @@
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * The contents of this file are subject to the terms and conditions of
+ * The contents of this file are subject to the terms and conditions of 
  * the Common Development and Distribution License 1.0 (the "License").
  *
  * You may not use this file except in compliance with the License.
@@ -26,18 +26,15 @@
 package com.oracle.bedrock.runtime.options;
 
 import com.oracle.bedrock.Option;
-
 import com.oracle.bedrock.runtime.LocalPlatform;
-
 import org.hamcrest.Matchers;
-
 import org.junit.Test;
-
-import static org.junit.Assert.assertThat;
 
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Properties;
+
+import static org.junit.Assert.assertThat;
 
 /**
  * Tests for the {@link Executable} {@link Option}.

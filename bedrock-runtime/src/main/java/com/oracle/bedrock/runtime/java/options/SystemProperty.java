@@ -25,9 +25,9 @@
 
 package com.oracle.bedrock.runtime.java.options;
 
-import com.oracle.bedrock.runtime.Platform;
 import com.oracle.bedrock.Option;
 import com.oracle.bedrock.Options;
+import com.oracle.bedrock.runtime.Platform;
 
 import java.util.Iterator;
 
@@ -87,8 +87,11 @@ public class SystemProperty implements Option.Collectable
      *
      * @param name     the name of the {@link SystemProperty}
      * @param options  then {@link Options} for this {@link SystemProperty}
+     *
+     * @return a new {@link SystemProperty}
      */
-    public static SystemProperty of(String name, Option... options)
+    public static SystemProperty of(String    name,
+                                    Option... options)
     {
         return new SystemProperty(name, "", options);
     }
@@ -100,6 +103,8 @@ public class SystemProperty implements Option.Collectable
      * @param name     the name of the {@link SystemProperty}
      * @param value    the value of the {@link SystemProperty}
      * @param options  then {@link Options} for this {@link SystemProperty}
+     *
+     * @return a new {@link SystemProperty}
      */
     public static SystemProperty of(String    name,
                                     String    value,
@@ -115,6 +120,8 @@ public class SystemProperty implements Option.Collectable
      * @param name     the name of the {@link SystemProperty}
      * @param value    the value of the {@link SystemProperty}
      * @param options  then {@link Options} for this {@link SystemProperty}
+     *
+     * @return a new {@link SystemProperty}
      */
     public static SystemProperty of(String                name,
                                     ContextSensitiveValue value,
@@ -130,6 +137,8 @@ public class SystemProperty implements Option.Collectable
      * @param name     the name of the {@link SystemProperty}
      * @param iterator the iterator that can provide values for the {@link SystemProperty}
      * @param options  then {@link Options} for this {@link SystemProperty}
+     *
+     * @return a new {@link SystemProperty}
      */
     public static SystemProperty of(String    name,
                                     Iterator  iterator,
@@ -145,6 +154,8 @@ public class SystemProperty implements Option.Collectable
      * @param name   the name of the {@link SystemProperty}
      * @param object the values for the {@link SystemProperty}
      * @param options  then {@link Options} for this {@link SystemProperty}
+     *
+     * @return a new {@link SystemProperty}
      */
     public static SystemProperty of(String    name,
                                     Object    object,
@@ -237,6 +248,8 @@ public class SystemProperty implements Option.Collectable
          * @param value    the resolved value of the system property
          * @param options  the {@link Options} used to resolve the values
          */
-        void onResolve(String name, String value, Options options);
+        void onResolve(String  name,
+                       String  value,
+                       Options options);
     }
 }

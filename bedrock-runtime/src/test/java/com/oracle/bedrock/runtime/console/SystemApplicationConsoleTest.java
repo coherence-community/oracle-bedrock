@@ -81,6 +81,7 @@ public class SystemApplicationConsoleTest
         verify(stdOut, never()).close();
     }
 
+
     /**
      * Make sure that if the PrintWriter wrapping System.err
      * is closed that System.err is not closed.

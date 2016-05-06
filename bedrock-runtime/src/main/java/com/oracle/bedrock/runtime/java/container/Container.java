@@ -25,11 +25,10 @@
 
 package com.oracle.bedrock.runtime.java.container;
 
-import com.oracle.bedrock.runtime.network.AvailablePortIterator;
 import com.oracle.bedrock.runtime.LocalPlatform;
+import com.oracle.bedrock.runtime.network.AvailablePortIterator;
 
 import java.io.PrintStream;
-
 import java.util.HashSet;
 
 /**
@@ -48,6 +47,12 @@ import java.util.HashSet;
  */
 public class Container
 {
+    /**
+     * The number of bytes to reserve for i/o buffers used by
+     * pipes between application i/o streams.
+     */
+    public static final int PIPE_BUFFER_SIZE_BYTES = 16 * 1024;
+
     /**
      * A {@link PlatformScope} that represents the Java Virtual Machine runtime
      * platform resources.   These are the underlying resources on which we
@@ -74,11 +79,21 @@ public class Container
      */
     private static HashSet<ContainerScope> scopes;
 
+
     /**
-     * The number of bytes to reserve for i/o buffers used by
-     * pipes between application i/o streams.
+     * Static Initialization.
      */
-    public static final int PIPE_BUFFER_SIZE_BYTES = 16 * 1024;
+    static
+    {
+        // establish the ability to track Scopes by thread
+        threadScope = new InheritableThreadLocal<ContainerScope>();
+
+        // create a PlatformScope representing the platform itself
+        platformScope = new PlatformScope(getAvailablePorts());
+
+        // establish the scopes set to track scopes being managed
+        scopes = new HashSet<ContainerScope>();
+    }
 
 
     /**
@@ -260,9 +275,10 @@ public class Container
             }
             else
             {
-                throw new IllegalStateException(String
-                    .format("Attempted to associateThreadWith(%s) on Thread [%s] when it is already associated with ContainerScope(%s)",
-                            scope.getName(), Thread.currentThread(), existingScope.getName()));
+                throw new IllegalStateException(String.format("Attempted to associateThreadWith(%s) on Thread [%s] when it is already associated with ContainerScope(%s)",
+                                                              scope.getName(),
+                                                              Thread.currentThread(),
+                                                              existingScope.getName()));
             }
         }
     }
@@ -299,21 +315,5 @@ public class Container
     public static AvailablePortIterator getAvailablePorts()
     {
         return LocalPlatform.get().getAvailablePorts();
-    }
-
-
-    /**
-     * Static Initialization.
-     */
-    static
-    {
-        // establish the ability to track Scopes by thread
-        threadScope = new InheritableThreadLocal<ContainerScope>();
-
-        // create a PlatformScope representing the platform itself
-        platformScope = new PlatformScope(getAvailablePorts());
-
-        // establish the scopes set to track scopes being managed
-        scopes = new HashSet<ContainerScope>();
     }
 }

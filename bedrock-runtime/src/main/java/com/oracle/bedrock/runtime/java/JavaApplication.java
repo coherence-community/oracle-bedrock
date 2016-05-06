@@ -25,14 +25,14 @@
 
 package com.oracle.bedrock.runtime.java;
 
-import com.oracle.bedrock.runtime.Platform;
-import com.oracle.bedrock.runtime.concurrent.RemoteCallable;
-import com.oracle.bedrock.runtime.concurrent.callable.RemoteMethodInvocation;
 import com.oracle.bedrock.Option;
 import com.oracle.bedrock.Options;
 import com.oracle.bedrock.options.Timeout;
 import com.oracle.bedrock.runtime.Application;
+import com.oracle.bedrock.runtime.Platform;
+import com.oracle.bedrock.runtime.concurrent.RemoteCallable;
 import com.oracle.bedrock.runtime.concurrent.RemoteChannel;
+import com.oracle.bedrock.runtime.concurrent.callable.RemoteMethodInvocation;
 
 import java.io.NotSerializableException;
 import java.util.Properties;

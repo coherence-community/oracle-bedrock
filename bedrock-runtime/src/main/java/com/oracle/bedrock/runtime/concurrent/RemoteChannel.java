@@ -25,9 +25,9 @@
 
 package com.oracle.bedrock.runtime.concurrent;
 
-import com.oracle.bedrock.runtime.concurrent.options.StreamName;
 import com.oracle.bedrock.Option;
 import com.oracle.bedrock.Options;
+import com.oracle.bedrock.runtime.concurrent.options.StreamName;
 
 import java.io.Closeable;
 import java.lang.annotation.Annotation;
@@ -157,6 +157,9 @@ public interface RemoteChannel extends Closeable
      *
      * @param event    the {@link RemoteEvent}
      * @param options  the {@link Option}s
+     *
+     * @return a {@link CompletableFuture} allowing an application to determine
+     *         when the event has been raised
      */
     public CompletableFuture<Void> raise(RemoteEvent event,
                                          Option...   options);

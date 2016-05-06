@@ -26,7 +26,6 @@
 package com.oracle.bedrock.runtime.options;
 
 import com.oracle.bedrock.Option;
-
 import com.oracle.bedrock.Options;
 import com.oracle.bedrock.runtime.Application;
 

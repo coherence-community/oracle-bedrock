@@ -180,7 +180,10 @@ public class LocalPlatform extends AbstractPlatform
     /**
      * Perform and output diagnostics concerning the {@link LocalPlatform}.
      *
-     * @param arguments
+     * @param arguments  the arguments
+     *
+     * @throws UnknownHostException  when the diagnotiscs failed to identify the local host
+     * @throws SocketException       when the diagnostics failed to connect to itself
      */
     public static void main(String[] arguments) throws UnknownHostException, SocketException
     {

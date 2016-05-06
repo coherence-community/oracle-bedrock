@@ -25,9 +25,9 @@
 
 package com.oracle.bedrock.runtime.concurrent;
 
-import com.oracle.bedrock.runtime.concurrent.options.StreamName;
 import com.oracle.bedrock.Option;
 import com.oracle.bedrock.Options;
+import com.oracle.bedrock.runtime.concurrent.options.StreamName;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
@@ -72,7 +72,8 @@ public abstract class AbstractControllableRemoteChannel implements ControllableR
     /**
      * Sets if the {@link ControllableRemoteChannel} is open.
      *
-     * @param isOpen
+     * @param isOpen  a flag indicating if the {@link ControllableRemoteChannel}
+     *                is open
      */
     protected synchronized void setOpen(boolean isOpen)
     {

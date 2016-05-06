@@ -73,23 +73,6 @@ public class FileWriterApplicationConsole implements ApplicationConsole
      */
     private boolean m_diagnosticMode;
 
-    /**
-     * Constructs a {@link FileWriterApplicationConsole}.
-     *
-     * @param fileWriter       the {@link FileWriter} to use for the console
-     * @param diagnosticMode   if true, output to this console is formatted
-     *                         with application details and line numbers
-     */
-    public FileWriterApplicationConsole(FileWriter fileWriter, boolean diagnosticMode)
-    {
-        m_diagnosticMode = diagnosticMode;
-        m_fileWriter   = fileWriter;
-
-        m_outputWriter = new PrintWriter(fileWriter);
-        m_errorWriter  = new PrintWriter(fileWriter);
-        m_inputReader  = new InputStreamReader(Container.getPlatformScope().getStandardInput());
-    }
-
 
     /**
      * Constructs a {@link FileWriterApplicationConsole}.
@@ -112,6 +95,25 @@ public class FileWriterApplicationConsole implements ApplicationConsole
     public FileWriterApplicationConsole(String fileName) throws IOException
     {
         this(new FileWriter(fileName, true), true);
+    }
+
+
+    /**
+     * Constructs a {@link FileWriterApplicationConsole}.
+     *
+     * @param fileWriter       the {@link FileWriter} to use for the console
+     * @param diagnosticMode   if true, output to this console is formatted
+     *                         with application details and line numbers
+     */
+    public FileWriterApplicationConsole(FileWriter fileWriter,
+                                        boolean    diagnosticMode)
+    {
+        m_diagnosticMode = diagnosticMode;
+        m_fileWriter     = fileWriter;
+
+        m_outputWriter   = new PrintWriter(fileWriter);
+        m_errorWriter    = new PrintWriter(fileWriter);
+        m_inputReader    = new InputStreamReader(Container.getPlatformScope().getStandardInput());
     }
 
 
@@ -156,11 +158,13 @@ public class FileWriterApplicationConsole implements ApplicationConsole
         return m_inputReader;
     }
 
+
     @Override
     public boolean isDiagnosticsEnabled()
     {
         return m_diagnosticMode;
     }
+
 
     /**
      * Obtains a {@link ApplicationConsoleBuilder} for the

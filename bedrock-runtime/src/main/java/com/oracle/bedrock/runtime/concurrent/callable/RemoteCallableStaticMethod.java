@@ -26,14 +26,11 @@
 package com.oracle.bedrock.runtime.concurrent.callable;
 
 import com.oracle.bedrock.runtime.concurrent.RemoteCallable;
-
 import com.oracle.bedrock.util.ReflectionHelper;
 
 import java.io.Serializable;
-
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 

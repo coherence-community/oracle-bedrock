@@ -95,7 +95,10 @@ public class Serialization
      * @param clazz        the expected type of the object
      * @param classLoader  the {@link ClassLoader} to use for deserialization
      *
+     * @param <T>          the type of the {@link Object}
+     *
      * @return  an {@link Object}
+     *
      * @throws IOException  should deserialization fail
      */
     public static <T> T fromByteArray(byte[]      bytes,
