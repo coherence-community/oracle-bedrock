@@ -26,8 +26,6 @@
 package com.oracle.bedrock.deferred;
 
 import com.oracle.bedrock.runtime.concurrent.RemoteCallable;
-import com.oracle.bedrock.deferred.Deferred;
-
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -47,14 +45,15 @@ public class DeferredRemoteExecutionTest
     @Test
     public void shouldReturnCorrectCallableType()
     {
-        Deferred<String> deferred = new DeferredRemoteExecution<String>(null, new RemoteCallable<String>()
-        {
-            @Override
-            public String call() throws Exception
-            {
-                return "hello world";
-            }
-        });
+        Deferred<String> deferred = new DeferredRemoteExecution<String>(null,
+                                                                        new RemoteCallable<String>()
+                                                                        {
+                                                                            @Override
+                                                                            public String call() throws Exception
+                                                                            {
+                                                                                return "hello world";
+                                                                            }
+                                                                        });
 
         Assert.assertEquals(String.class, deferred.getDeferredClass());
     }

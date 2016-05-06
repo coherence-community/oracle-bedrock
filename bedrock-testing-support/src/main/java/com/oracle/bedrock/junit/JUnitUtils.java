@@ -3,7 +3,7 @@
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * The contents of this file are subject to the terms and conditions of
+ * The contents of this file are subject to the terms and conditions of 
  * the Common Development and Distribution License 1.0 (the "License").
  *
  * You may not use this file except in compliance with the License.
@@ -26,7 +26,6 @@
 package com.oracle.bedrock.junit;
 
 import org.junit.Ignore;
-
 import org.junit.runner.Description;
 import org.junit.runner.notification.Failure;
 
@@ -48,13 +47,14 @@ public abstract class JUnitUtils
 
     public static String findClassName(Description description)
     {
-        String displayName = description.getDisplayName();
-        Matcher matcher = BRACKETS.matcher(displayName);
-        String name = matcher.find() ? matcher.group(1) : displayName;
+        String  displayName = description.getDisplayName();
+        Matcher matcher     = BRACKETS.matcher(displayName);
+        String  name        = matcher.find() ? matcher.group(1) : displayName;
 
         if (name == null || "null".equals(name))
         {
             Description childDescription = description.getChildren().get(0);
+
             if (childDescription != null)
             {
                 String childName = childDescription.getDisplayName();
@@ -77,7 +77,8 @@ public abstract class JUnitUtils
     {
         String message = null;
 
-        Ignore ignore = description.getAnnotation(Ignore.class);
+        Ignore ignore  = description.getAnnotation(Ignore.class);
+
         if (ignore != null)
         {
             message = ignore.value();
@@ -91,7 +92,7 @@ public abstract class JUnitUtils
     {
         String header = failure.getTestHeader();
 
-        if (header == null || "null".equals(header) )
+        if (header == null || "null".equals(header))
         {
             header = "Failed to construct test";
         }

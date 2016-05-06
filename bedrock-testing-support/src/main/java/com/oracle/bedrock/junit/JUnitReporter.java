@@ -3,7 +3,7 @@
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * The contents of this file are subject to the terms and conditions of
+ * The contents of this file are subject to the terms and conditions of 
  * the Common Development and Distribution License 1.0 (the "License").
  *
  * You may not use this file except in compliance with the License.
@@ -49,6 +49,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 public abstract class JUnitReporter implements JUnitTestListener
 {
     /**
+     * A {@link Map} of {@link TestResults} instances keyed by the test class name.
+     */
+    private Map<String, TestResults> results = new ConcurrentHashMap<>();
+
+    /**
      * The folder to write the test report to.
      */
     private final File reportFolder;
@@ -57,11 +62,6 @@ public abstract class JUnitReporter implements JUnitTestListener
      * The System properties of the JUnit tests.
      */
     private Properties testProperties;
-
-    /**
-     * A {@link Map} of {@link TestResults} instances keyed by the test class name.
-     */
-    private Map<String,TestResults> results = new ConcurrentHashMap<>();
 
 
     /**
@@ -132,7 +132,8 @@ public abstract class JUnitReporter implements JUnitTestListener
      * @param out   the {@link PrintStream} to write the test to
      * @param test  the {@link TestResults} to use to write the report
      */
-    public abstract void writeReport(PrintStream out, TestResults test);
+    public abstract void writeReport(PrintStream out,
+                                     TestResults test);
 
 
     /**
@@ -163,6 +164,7 @@ public abstract class JUnitReporter implements JUnitTestListener
     public void testRunStarted(Event event)
     {
         String className = event.getClassName();
+
         if (className != null)
         {
             ensureTest(className).addEvent(event);
@@ -287,11 +289,6 @@ public abstract class JUnitReporter implements JUnitTestListener
     public static class TestResults
     {
         /**
-         * The name of the test class
-         */
-        private final String className;
-
-        /**
          * The number of tests executed
          */
         private AtomicInteger testCount = new AtomicInteger(0);
@@ -321,9 +318,15 @@ public abstract class JUnitReporter implements JUnitTestListener
         private Queue<Event> events = new ConcurrentLinkedQueue<>();
 
         /**
+         * The name of the test class
+         */
+        private final String className;
+
+        /**
          * The time in seconds taken for the tests to run.
          */
         private float testTimeSeconds;
+
 
         /**
          * Create a new {@link TestResults} for the specified class name.

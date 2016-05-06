@@ -25,16 +25,8 @@
 
 package com.oracle.bedrock.deferred;
 
-import com.oracle.bedrock.matchers.ThrowableMatcher;
 import com.oracle.bedrock.Option;
-import com.oracle.bedrock.deferred.Deferred;
-import com.oracle.bedrock.deferred.DeferredHelper;
-import com.oracle.bedrock.deferred.DeferredNull;
-import com.oracle.bedrock.deferred.Existing;
-import com.oracle.bedrock.deferred.NeverAvailable;
-import com.oracle.bedrock.deferred.NotAvailable;
-import com.oracle.bedrock.deferred.PermanentlyUnavailableException;
-import com.oracle.bedrock.deferred.TemporarilyUnavailableException;
+import com.oracle.bedrock.matchers.ThrowableMatcher;
 import com.oracle.bedrock.util.StopWatch;
 import org.hamcrest.Matcher;
 import org.hamcrest.Matchers;
@@ -49,7 +41,6 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import static com.oracle.bedrock.deferred.DeferredHelper.valueOf;
 import static com.oracle.bedrock.deferred.DeferredHelper.within;
-import static com.oracle.bedrock.matchers.ThrowableMatcher.willThrow;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.Matchers.containsString;

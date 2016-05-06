@@ -3,7 +3,7 @@
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * The contents of this file are subject to the terms and conditions of
+ * The contents of this file are subject to the terms and conditions of 
  * the Common Development and Distribution License 1.0 (the "License").
  *
  * You may not use this file except in compliance with the License.
@@ -25,31 +25,25 @@
 
 package com.oracle.bedrock.junit;
 
-import com.oracle.bedrock.junit.options.TestClasses;
-import com.oracle.bedrock.runtime.concurrent.RemoteCallable;
-import com.oracle.bedrock.runtime.java.JavaVirtualMachine;
 import com.oracle.bedrock.Option;
 import com.oracle.bedrock.Options;
-
+import com.oracle.bedrock.junit.options.TestClasses;
 import com.oracle.bedrock.junit.options.Tests;
-
 import com.oracle.bedrock.options.Decoration;
+import com.oracle.bedrock.runtime.concurrent.RemoteCallable;
 import com.oracle.bedrock.runtime.concurrent.RemoteChannel;
 import com.oracle.bedrock.runtime.concurrent.RemoteRunnable;
 import com.oracle.bedrock.runtime.concurrent.options.StreamName;
-
+import com.oracle.bedrock.runtime.java.JavaVirtualMachine;
 import org.junit.runner.Description;
 import org.junit.runner.JUnitCore;
 import org.junit.runner.Request;
 import org.junit.runner.Result;
-
 import org.junit.runner.manipulation.Filter;
-
 import org.junit.runner.notification.Failure;
 import org.junit.runner.notification.RunListener;
 
 import java.io.IOException;
-
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
@@ -57,7 +51,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-
 
 /**
  * A class that runs a set of JUnit tests.
@@ -75,42 +68,15 @@ public class JUnitTestRunner implements Runnable
     public static final StreamName STREAM_NAME = StreamName.of("JUnit");
 
     /**
-     * The different states that this {@link JUnitTestRunner} can be in.
+     * The singleton instance of the {@link JUnitTestRunner}.
      */
-    public enum State
-    {
-        /**
-         * Waiting to start run.
-         */
-        NotRunning,
-        /**
-         * Waiting to start tests.
-         */
-        Waiting,
-        /**
-         * Running a set of tests.
-         */
-        Running,
-        /**
-         * Completed a set of tests.
-         */
-        Completed,
-        /**
-         * The application has stopped.
-         */
-        Stopped;
-    }
+    public static final JUnitTestRunner INSTANCE = new JUnitTestRunner();
 
     /**
      * The {@link RemoteChannel} to use to publish JUnit test events.
      */
     @RemoteChannel.Inject
     public static RemoteChannel channel;
-
-    /**
-     * The singleton instance of the {@link JUnitTestRunner}.
-     */
-    public static final JUnitTestRunner INSTANCE = new JUnitTestRunner();
 
     /**
      * The current state of this {@link JUnitTestRunner}.
@@ -129,6 +95,38 @@ public class JUnitTestRunner implements Runnable
 
 
     /**
+     * The different states that this {@link JUnitTestRunner} can be in.
+     */
+    public enum State
+    {
+        /**
+         * Waiting to start run.
+         */
+        NotRunning,
+
+        /**
+         * Waiting to start tests.
+         */
+        Waiting,
+
+        /**
+         * Running a set of tests.
+         */
+        Running,
+
+        /**
+         * Completed a set of tests.
+         */
+        Completed,
+
+        /**
+         * The application has stopped.
+         */
+        Stopped;
+    }
+
+
+    /**
      * Obtain the current {@link State}.
      *
      * @return  the current {@link State}
@@ -137,6 +135,7 @@ public class JUnitTestRunner implements Runnable
     {
         return state;
     }
+
 
     /**
      * The main run method.
@@ -187,9 +186,10 @@ public class JUnitTestRunner implements Runnable
                     }
                 }
 
-                long                          end         = System.currentTimeMillis();
+                long end = System.currentTimeMillis();
                 RemoteChannel.AcknowledgeWhen acknowledge = (state != State.Stopped)
-                        ? RemoteChannel.AcknowledgeWhen.PROCESSED : RemoteChannel.AcknowledgeWhen.SENT;
+                                                            ? RemoteChannel.AcknowledgeWhen.PROCESSED
+                                                            : RemoteChannel.AcknowledgeWhen.SENT;
 
                 if (channel != null)
                 {
@@ -396,155 +396,6 @@ public class JUnitTestRunner implements Runnable
 
 
     /**
-     * A {@link RemoteCallable} to use to start a test run.
-     */
-    public static class StartTests implements RemoteCallable<Boolean>
-    {
-        /**
-         * The {@link Option}s to use to start the test run.
-         */
-        private Option[] options;
-
-        /**
-         * The {@link JUnitTestRunner} to use to run tests.
-         */
-        private transient JUnitTestRunner runner = JUnitTestRunner.INSTANCE;
-
-        /**
-         * Create a {@link StartTests} runnable with the
-         * specified options.
-         *
-         * @param options  the {@link Option}s to use
-         */
-        public StartTests(Options options)
-        {
-            List<Option>           list          = new ArrayList<>();
-            Iterable<Serializable> serializables = options.getInstancesOf(Serializable.class);
-
-            serializables.forEach((opt) -> list.add(opt instanceof Option ? (Option) opt : Decoration.of(opt)));
-
-            this.options = list.toArray(new Option[list.size()]);
-        }
-
-
-        /**
-         * Obtain the {@link Option}s that will be used to start
-         * the test run.
-         *
-         * @return  the {@link Option}s that will be used to start
-         *          the test run
-         */
-        Option[] getOptions()
-        {
-            return options;
-        }
-
-
-        @Override
-        public Boolean call()
-        {
-            if (runner == null)
-            {
-                 runner = JUnitTestRunner.INSTANCE;
-            }
-
-            runner.run(new Options(options));
-
-            return true;
-        }
-
-
-        /**
-         * Set the {@link JUnitTestRunner} to use to run tests.
-         *
-         * @param runner  the {@link JUnitTestRunner} to use to
-         *                run tests
-         */
-        public void setRunner(JUnitTestRunner runner)
-        {
-            this.runner = runner;
-        }
-
-
-        /**
-         * We need to have custom Java serialization logic otherwise this
-         * class fails to serialize properly if run inside the containerised
-         * {@link JavaVirtualMachine} platform.
-         *
-         * @param out  the stream to serialize to
-         *
-         * @throws IOException  if an error occurs
-         */
-        private void writeObject(ObjectOutputStream out) throws IOException
-        {
-            out.writeInt(options.length);
-            for (Option option : options)
-            {
-                out.writeObject(option);
-            }
-        }
-
-
-        /**
-         * We need to have custom Java serialization logic otherwise this
-         * class fails to deserialize properly if run inside the containerised
-         * {@link JavaVirtualMachine} platform.
-         *
-         * @param in  the stream to deserialize from
-         *
-         * @throws IOException  if an error occurs
-         */
-         private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException
-         {
-             int length = in.readInt();
-
-             options = new Option[length];
-
-             for (int i=0; i<length; i++)
-             {
-                 options[i] = (Option) in.readObject();
-             }
-         }
-    }
-
-
-    /**
-     * A {@link RemoteCallable} to use to stop a test run.
-     */
-    public static class StopTests implements RemoteRunnable
-    {
-        /**
-         * The {@link JUnitTestRunner} to use.
-         */
-        private transient JUnitTestRunner runner = JUnitTestRunner.INSTANCE;
-
-
-        /**
-         * Set the {@link JUnitTestRunner} to use to run tests.
-         *
-         * @param runner  the {@link JUnitTestRunner} to use to
-         *                run tests
-         */
-        public void setRunner(JUnitTestRunner runner)
-        {
-            this.runner = runner;
-        }
-
-
-        @Override
-        public void run()
-        {
-            if (runner == null)
-            {
-                 runner = JUnitTestRunner.INSTANCE;
-            }
-
-            runner.stop();
-        }
-    }
-
-
-    /**
      * An instance of a JUnit {@link RunListener} that listens for JUnit run events
      * and forwards them on the the {@link RemoteChannel} as {@link JUnitTestListener.Event}s.
      */
@@ -639,8 +490,8 @@ public class JUnitTestRunner implements Runnable
         /**
          * Determine whether the current test has failed.
          *
-         * @return  {@linkplain true} if the current test
-         *          has failed, otherwise {@linkplain false}
+         * @return  <code>true</code> if the current test
+         *          has failed, otherwise <code>false</code>
          */
         public Boolean hasTestFailed()
         {
@@ -651,8 +502,8 @@ public class JUnitTestRunner implements Runnable
         /**
          * Set whether the current test has failed.
          *
-         * @param failed  {@linkplain true} if the test has
-         *                failed, {@linkplain false} if the
+         * @param failed  <code>true</code> if the test has
+         *                failed, <code>false</code> if the
          *                test has not failed
          */
         public void setTestFailed(boolean failed)
@@ -713,7 +564,7 @@ public class JUnitTestRunner implements Runnable
             // If there were no failures, errors or Assume errors then raise a success event
             Boolean isFailure = hasTestFailed();
 
-            if (isFailure == null || !isFailure)
+            if (isFailure == null ||!isFailure)
             {
                 long endTime = System.currentTimeMillis();
                 long time    = endTime - testStartTime.get();
@@ -809,11 +660,12 @@ public class JUnitTestRunner implements Runnable
             String testClass = JUnitUtils.findClassName(description);
             String current   = currentTestClass.get();
 
-            if (current == null || !current.equals(testClass))
+            if (current == null ||!current.equals(testClass))
             {
                 if (current != null)
                 {
                     long time = endTime - classStartTime.get();
+
                     raiseEvent(JUnitTestListener.Event.testClassFinished(current, time));
                 }
 
@@ -838,6 +690,158 @@ public class JUnitTestRunner implements Runnable
             {
                 channel.raise(event, STREAM_NAME);
             }
+        }
+    }
+
+
+    /**
+     * A {@link RemoteCallable} to use to start a test run.
+     */
+    public static class StartTests implements RemoteCallable<Boolean>
+    {
+        /**
+         * The {@link JUnitTestRunner} to use to run tests.
+         */
+        private transient JUnitTestRunner runner = JUnitTestRunner.INSTANCE;
+
+        /**
+         * The {@link Option}s to use to start the test run.
+         */
+        private Option[] options;
+
+
+        /**
+         * Create a {@link StartTests} runnable with the
+         * specified options.
+         *
+         * @param options  the {@link Option}s to use
+         */
+        public StartTests(Options options)
+        {
+            List<Option>           list          = new ArrayList<>();
+            Iterable<Serializable> serializables = options.getInstancesOf(Serializable.class);
+
+            serializables.forEach((opt) -> list.add(opt instanceof Option ? (Option) opt : Decoration.of(opt)));
+
+            this.options = list.toArray(new Option[list.size()]);
+        }
+
+
+        /**
+         * Obtain the {@link Option}s that will be used to start
+         * the test run.
+         *
+         * @return  the {@link Option}s that will be used to start
+         *          the test run
+         */
+        Option[] getOptions()
+        {
+            return options;
+        }
+
+
+        @Override
+        public Boolean call()
+        {
+            if (runner == null)
+            {
+                runner = JUnitTestRunner.INSTANCE;
+            }
+
+            runner.run(new Options(options));
+
+            return true;
+        }
+
+
+        /**
+         * Set the {@link JUnitTestRunner} to use to run tests.
+         *
+         * @param runner  the {@link JUnitTestRunner} to use to
+         *                run tests
+         */
+        public void setRunner(JUnitTestRunner runner)
+        {
+            this.runner = runner;
+        }
+
+
+        /**
+         * We need to have custom Java serialization logic otherwise this
+         * class fails to serialize properly if run inside the containerised
+         * {@link JavaVirtualMachine} platform.
+         *
+         * @param out  the stream to serialize to
+         *
+         * @throws IOException  if an error occurs
+         */
+        private void writeObject(ObjectOutputStream out) throws IOException
+        {
+            out.writeInt(options.length);
+
+            for (Option option : options)
+            {
+                out.writeObject(option);
+            }
+        }
+
+
+        /**
+         * We need to have custom Java serialization logic otherwise this
+         * class fails to deserialize properly if run inside the containerised
+         * {@link JavaVirtualMachine} platform.
+         *
+         * @param in  the stream to deserialize from
+         *
+         * @throws IOException             when the option can't be read
+         * @throws ClassNotFoundException  when the option class can't be found
+         */
+        private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException
+        {
+            int length = in.readInt();
+
+            options = new Option[length];
+
+            for (int i = 0; i < length; i++)
+            {
+                options[i] = (Option) in.readObject();
+            }
+        }
+    }
+
+
+    /**
+     * A {@link RemoteCallable} to use to stop a test run.
+     */
+    public static class StopTests implements RemoteRunnable
+    {
+        /**
+         * The {@link JUnitTestRunner} to use.
+         */
+        private transient JUnitTestRunner runner = JUnitTestRunner.INSTANCE;
+
+
+        /**
+         * Set the {@link JUnitTestRunner} to use to run tests.
+         *
+         * @param runner  the {@link JUnitTestRunner} to use to
+         *                run tests
+         */
+        public void setRunner(JUnitTestRunner runner)
+        {
+            this.runner = runner;
+        }
+
+
+        @Override
+        public void run()
+        {
+            if (runner == null)
+            {
+                runner = JUnitTestRunner.INSTANCE;
+            }
+
+            runner.stop();
         }
     }
 }

@@ -3,7 +3,7 @@
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * The contents of this file are subject to the terms and conditions of
+ * The contents of this file are subject to the terms and conditions of 
  * the Common Development and Distribution License 1.0 (the "License").
  *
  * You may not use this file except in compliance with the License.
@@ -34,9 +34,7 @@ import java.io.Serializable;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.collection.IsArrayContainingInAnyOrder.arrayContainingInAnyOrder;
-
 import static org.junit.Assert.assertThat;
-
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
@@ -50,7 +48,6 @@ import static org.mockito.Mockito.verify;
  */
 public class JUnitTestRunnerStartTestsTest
 {
-
     @Test
     public void shouldStartTests() throws Exception
     {
@@ -69,21 +66,41 @@ public class JUnitTestRunnerStartTestsTest
 
         verify(runner).run(captor.capture());
 
-        Options  arg = captor.getValue();
+        Options arg = captor.getValue();
 
         assertThat(arg.asArray(), is(arrayContainingInAnyOrder(opt1, opt2)));
     }
 
 
+    /**
+     * Class description
+     *
+     * @version        Enter version here..., 16/05/06
+     * @author         Enter your name here...    
+     */
     public static class DummyOptionOne implements Option, Serializable
     {
     }
 
-    public static class DummyOptionTwo implements Option, Serializable
+
+    /**
+     * Class description
+     *
+     * @version        Enter version here..., 16/05/06
+     * @author         Enter your name here...    
+     */
+    public static class DummyOptionThree implements Option
     {
     }
 
-    public static class DummyOptionThree implements Option
+
+    /**
+     * Class description
+     *
+     * @version        Enter version here..., 16/05/06
+     * @author         Enter your name here...    
+     */
+    public static class DummyOptionTwo implements Option, Serializable
     {
     }
 }

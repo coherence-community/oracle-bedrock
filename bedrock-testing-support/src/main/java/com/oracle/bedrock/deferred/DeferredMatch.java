@@ -26,10 +26,6 @@
 package com.oracle.bedrock.deferred;
 
 import com.oracle.bedrock.matchers.ThrowableMatcher;
-import com.oracle.bedrock.deferred.Deferred;
-import com.oracle.bedrock.deferred.PermanentlyUnavailableException;
-import com.oracle.bedrock.deferred.TemporarilyUnavailableException;
-import com.oracle.bedrock.deferred.UnavailableException;
 import org.hamcrest.Matcher;
 
 /**

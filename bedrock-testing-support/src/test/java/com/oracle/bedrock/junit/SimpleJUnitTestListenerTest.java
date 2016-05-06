@@ -3,7 +3,7 @@
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * The contents of this file are subject to the terms and conditions of
+ * The contents of this file are subject to the terms and conditions of 
  * the Common Development and Distribution License 1.0 (the "License").
  *
  * You may not use this file except in compliance with the License.
@@ -36,7 +36,6 @@ import java.util.concurrent.TimeUnit;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.collection.IsIterableContainingInOrder.contains;
-
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -153,18 +152,18 @@ public class SimpleJUnitTestListenerTest
         JUnitTestListener.Event event    = mock(JUnitTestListener.Event.class);
         SimpleJUnitTestListener listener = new SimpleJUnitTestListener();
 
-        CompletableFuture.runAsync(() ->
-        {
-            try
-            {
-                Thread.sleep(500);
-                listener.junitCompleted(event);
-            }
-            catch (InterruptedException e)
-            {
-                // ignored
-            }
-        });
+        CompletableFuture.runAsync(
+            () -> {
+                try
+                {
+                    Thread.sleep(500);
+                    listener.junitCompleted(event);
+                }
+                catch (InterruptedException e)
+                {
+                    // ignored
+                }
+            });
 
         assertThat(listener.awaitCompletion(1, TimeUnit.MINUTES), is(true));
     }
@@ -199,7 +198,7 @@ public class SimpleJUnitTestListenerTest
 
         assertThat(option, is(notNullValue()));
 
-        Options options = new Options(option);
+        Options                     options  = new Options(option);
 
         Iterable<JUnitTestListener> iterable = options.getInstancesOf(JUnitTestListener.class);
 

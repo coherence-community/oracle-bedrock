@@ -26,9 +26,7 @@
 package com.oracle.bedrock.junit;
 
 import org.junit.rules.ExternalResource;
-
 import org.junit.runner.Description;
-
 import org.junit.runners.model.Statement;
 
 import java.util.Properties;

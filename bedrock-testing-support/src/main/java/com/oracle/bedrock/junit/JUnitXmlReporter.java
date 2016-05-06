@@ -3,7 +3,7 @@
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * The contents of this file are subject to the terms and conditions of
+ * The contents of this file are subject to the terms and conditions of 
  * the Common Development and Distribution License 1.0 (the "License").
  *
  * You may not use this file except in compliance with the License.
@@ -29,7 +29,6 @@ import com.oracle.bedrock.Option;
 
 import java.io.File;
 import java.io.PrintStream;
-
 import java.util.Properties;
 import java.util.Queue;
 import java.util.TreeSet;
@@ -45,19 +44,31 @@ import java.util.TreeSet;
  */
 public class JUnitXmlReporter extends JUnitReporter
 {
+    /**
+     * Constructs ...
+     *
+     */
     public JUnitXmlReporter()
     {
         super(null);
     }
 
 
+    /**
+     * Constructs ...
+     *
+     *
+     * @param reportFolder
+     */
     public JUnitXmlReporter(File reportFolder)
     {
         super(reportFolder);
     }
 
+
     @Override
-    public void writeReport(PrintStream out, TestResults test)
+    public void writeReport(PrintStream out,
+                            TestResults test)
     {
         Queue<Event> results = test.getEvents();
 
@@ -76,19 +87,23 @@ public class JUnitXmlReporter extends JUnitReporter
         if (properties != null)
         {
             out.println("  <properties>");
+
             for (String name : new TreeSet<>(properties.stringPropertyNames()))
             {
                 out.printf("    <property name=\"%s\" value=\"%s\"/>\n", name, properties.getProperty(name));
             }
+
             out.println("  </properties>");
         }
 
         for (Event result : results)
         {
-            float       testTime    = ((float) result.getTime()) / 1000.0f;
+            float testTime = ((float) result.getTime()) / 1000.0f;
 
             out.printf("  <testcase name=\"%s\" classname=\"%s\" time=\"%.3f\"",
-                              result.getName(), result.getClassName(), testTime);
+                       result.getName(),
+                       result.getClassName(),
+                       testTime);
 
             if (result.isSkipped())
             {
@@ -113,13 +128,16 @@ public class JUnitXmlReporter extends JUnitReporter
                 out.printf(">\n    <failure message=\"%s\" type=\"%s\"", message, exception);
 
                 StackTraceElement[] stackTrace = result.getStackTrace();
+
                 if (stackTrace != null)
                 {
                     out.printf("><![CDATA[%s: %s\n", exception, message);
+
                     for (StackTraceElement element : stackTrace)
                     {
                         out.println("\tat " + element.toString());
                     }
+
                     out.println("]]></failure>");
                 }
                 else
@@ -153,7 +171,7 @@ public class JUnitXmlReporter extends JUnitReporter
 
     public static Option at(File folder)
     {
-        if (folder.exists() && !folder.isDirectory())
+        if (folder.exists() &&!folder.isDirectory())
         {
             throw new IllegalStateException("Report folder exists but is not a directory " + folder);
         }

@@ -25,14 +25,10 @@
 
 package com.oracle.bedrock.deferred;
 
-import com.oracle.bedrock.deferred.Deferred;
-import com.oracle.bedrock.deferred.Existing;
-import com.oracle.bedrock.deferred.TemporarilyUnavailableException;
 import org.junit.Assert;
 import org.junit.Test;
 
 import static org.hamcrest.core.Is.is;
-
 import static org.junit.Assert.fail;
 
 /**

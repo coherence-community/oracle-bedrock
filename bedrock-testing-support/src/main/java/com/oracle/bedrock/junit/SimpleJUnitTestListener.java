@@ -3,7 +3,7 @@
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * The contents of this file are subject to the terms and conditions of
+ * The contents of this file are subject to the terms and conditions of 
  * the Common Development and Distribution License 1.0 (the "License").
  *
  * You may not use this file except in compliance with the License.
@@ -49,11 +49,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class SimpleJUnitTestListener implements JUnitTestListener
 {
     /**
-     * The System properties of the JVM running the tests.
-     */
-    private Properties testProperties;
-
-    /**
      * The number of tests executed.
      * <p>
      * This figure only includes tests actually started so will
@@ -93,6 +88,11 @@ public class SimpleJUnitTestListener implements JUnitTestListener
      * The {@link CountDownLatch} to use to await completion of all tests.
      */
     private CountDownLatch completed = new CountDownLatch(1);
+
+    /**
+     * The System properties of the JVM running the tests.
+     */
+    private Properties testProperties;
 
 
     /**
@@ -230,7 +230,8 @@ public class SimpleJUnitTestListener implements JUnitTestListener
      * @throws InterruptedException if the current thread is interrupted
      *         while waiting
      */
-    public boolean awaitCompletion(long timeout, TimeUnit unit) throws InterruptedException
+    public boolean awaitCompletion(long     timeout,
+                                   TimeUnit unit) throws InterruptedException
     {
         return completed.await(timeout, unit);
     }

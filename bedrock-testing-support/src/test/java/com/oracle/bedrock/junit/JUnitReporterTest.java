@@ -3,7 +3,7 @@
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * The contents of this file are subject to the terms and conditions of
+ * The contents of this file are subject to the terms and conditions of 
  * the Common Development and Distribution License 1.0 (the "License").
  *
  * You may not use this file except in compliance with the License.
@@ -64,13 +64,17 @@ import static org.mockito.Mockito.when;
  */
 public class JUnitReporterTest
 {
+    /** 
+     *Field description 
+     */
     @ClassRule
     public static TemporaryFolder temporaryFolder = new TemporaryFolder();
+
 
     @Test
     public void shouldHaveSpecifiedReportFolder() throws Exception
     {
-        File folder = new File("/foo");
+        File          folder   = new File("/foo");
 
         JUnitReporter reporter = new JUnitReporterStub(folder);
 
@@ -81,7 +85,7 @@ public class JUnitReporterTest
     @Test
     public void shouldEnsureTestResults() throws Exception
     {
-        JUnitReporter reporter = new JUnitReporterStub(null);
+        JUnitReporter             reporter = new JUnitReporterStub(null);
 
         JUnitReporter.TestResults results1 = reporter.ensureTest("foo");
         JUnitReporter.TestResults results2 = reporter.ensureTest("foo");
@@ -108,7 +112,7 @@ public class JUnitReporterTest
 
         assertThat(option, is(notNullValue()));
 
-        Options options = new Options(option);
+        Options                     options  = new Options(option);
 
         Iterable<JUnitTestListener> iterable = options.getInstancesOf(JUnitTestListener.class);
 
@@ -153,9 +157,9 @@ public class JUnitReporterTest
     @Test
     public void shouldHandleTestStartedEvent() throws Exception
     {
-        String                  className  = "FooTest";
-        JUnitTestListener.Event event      = mock(JUnitTestListener.Event.class);
-        JUnitReporter           reporter   = new JUnitReporterStub(null);
+        String                  className = "FooTest";
+        JUnitTestListener.Event event     = mock(JUnitTestListener.Event.class);
+        JUnitReporter           reporter  = new JUnitReporterStub(null);
 
         when(event.getClassName()).thenReturn(className);
 
@@ -181,9 +185,9 @@ public class JUnitReporterTest
     @Test
     public void shouldHandleTestSucceededEvent() throws Exception
     {
-        String                  className  = "FooTest";
-        JUnitTestListener.Event event      = mock(JUnitTestListener.Event.class);
-        JUnitReporter           reporter   = new JUnitReporterStub(null);
+        String                  className = "FooTest";
+        JUnitTestListener.Event event     = mock(JUnitTestListener.Event.class);
+        JUnitReporter           reporter  = new JUnitReporterStub(null);
 
         when(event.getClassName()).thenReturn(className);
 
@@ -209,9 +213,9 @@ public class JUnitReporterTest
     @Test
     public void shouldHandleTestIgnoredEvent() throws Exception
     {
-        String                  className  = "FooTest";
-        JUnitTestListener.Event event      = mock(JUnitTestListener.Event.class);
-        JUnitReporter           reporter   = new JUnitReporterStub(null);
+        String                  className = "FooTest";
+        JUnitTestListener.Event event     = mock(JUnitTestListener.Event.class);
+        JUnitReporter           reporter  = new JUnitReporterStub(null);
 
         when(event.getClassName()).thenReturn(className);
 
@@ -237,9 +241,9 @@ public class JUnitReporterTest
     @Test
     public void shouldHandleTestFailedEvent() throws Exception
     {
-        String                  className  = "FooTest";
-        JUnitTestListener.Event event      = mock(JUnitTestListener.Event.class);
-        JUnitReporter           reporter   = new JUnitReporterStub(null);
+        String                  className = "FooTest";
+        JUnitTestListener.Event event     = mock(JUnitTestListener.Event.class);
+        JUnitReporter           reporter  = new JUnitReporterStub(null);
 
         when(event.getClassName()).thenReturn(className);
 
@@ -265,9 +269,9 @@ public class JUnitReporterTest
     @Test
     public void shouldHandleTestErrorEvent() throws Exception
     {
-        String                  className  = "FooTest";
-        JUnitTestListener.Event event      = mock(JUnitTestListener.Event.class);
-        JUnitReporter           reporter   = new JUnitReporterStub(null);
+        String                  className = "FooTest";
+        JUnitTestListener.Event event     = mock(JUnitTestListener.Event.class);
+        JUnitReporter           reporter  = new JUnitReporterStub(null);
 
         when(event.getClassName()).thenReturn(className);
 
@@ -293,9 +297,9 @@ public class JUnitReporterTest
     @Test
     public void shouldHandleTestAssumptionFailedEvent() throws Exception
     {
-        String                  className  = "FooTest";
-        JUnitTestListener.Event event      = mock(JUnitTestListener.Event.class);
-        JUnitReporter           reporter   = new JUnitReporterStub(null);
+        String                  className = "FooTest";
+        JUnitTestListener.Event event     = mock(JUnitTestListener.Event.class);
+        JUnitReporter           reporter  = new JUnitReporterStub(null);
 
         when(event.getClassName()).thenReturn(className);
 
@@ -321,9 +325,9 @@ public class JUnitReporterTest
     @Test
     public void shouldNotWriteReportIfTestClassFinishedEventHasNullClassName() throws Exception
     {
-        String                  className  = null;
-        JUnitTestListener.Event event      = mock(JUnitTestListener.Event.class);
-        JUnitReporter           reporter   = new JUnitReporterStub(null);
+        String                  className = null;
+        JUnitTestListener.Event event     = mock(JUnitTestListener.Event.class);
+        JUnitReporter           reporter  = new JUnitReporterStub(null);
 
         when(event.getClassName()).thenReturn(className);
 
@@ -338,10 +342,10 @@ public class JUnitReporterTest
     @Test
     public void shouldWriteReportToSystemOut() throws Exception
     {
-        String                    className  = "FooTest";
-        JUnitTestListener.Event   event      = mock(JUnitTestListener.Event.class);
-        JUnitReporter             reporter   = new JUnitReporterStub(null);
-        JUnitReporter.TestResults results    = reporter.ensureTest(className);
+        String                    className = "FooTest";
+        JUnitTestListener.Event   event     = mock(JUnitTestListener.Event.class);
+        JUnitReporter             reporter  = new JUnitReporterStub(null);
+        JUnitReporter.TestResults results   = reporter.ensureTest(className);
 
         when(event.getClassName()).thenReturn(className);
         when(event.getTime()).thenReturn(10500L);
@@ -359,11 +363,11 @@ public class JUnitReporterTest
     @Test
     public void shouldWriteReportToFile() throws Exception
     {
-        File                      folder     = temporaryFolder.newFolder();
-        String                    className  = "FooTest";
-        JUnitTestListener.Event   event      = mock(JUnitTestListener.Event.class);
-        JUnitReporter             reporter   = new JUnitReporterStub(folder);
-        JUnitReporter.TestResults results    = reporter.ensureTest(className);
+        File                      folder    = temporaryFolder.newFolder();
+        String                    className = "FooTest";
+        JUnitTestListener.Event   event     = mock(JUnitTestListener.Event.class);
+        JUnitReporter             reporter  = new JUnitReporterStub(folder);
+        JUnitReporter.TestResults results   = reporter.ensureTest(className);
 
         when(event.getClassName()).thenReturn(className);
         when(event.getTime()).thenReturn(10500L);
@@ -395,19 +399,28 @@ public class JUnitReporterTest
      */
     public static class JUnitReporterStub extends JUnitReporter
     {
+        /**
+         * Constructs ...
+         *
+         *
+         * @param reportFolder
+         */
         public JUnitReporterStub(File reportFolder)
         {
             super(reportFolder);
         }
 
+
         @Override
-        public void writeReport(PrintStream out, TestResults test)
+        public void writeReport(PrintStream out,
+                                TestResults test)
         {
             if (out != null)
             {
                 out.println("Dummy test report");
             }
         }
+
 
         @Override
         public String getReportFileName(String className)

@@ -26,7 +26,6 @@
 package com.oracle.bedrock.junit;
 
 import com.oracle.bedrock.runtime.java.container.Container;
-
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;

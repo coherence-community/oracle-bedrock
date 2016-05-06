@@ -1,9 +1,9 @@
 /*
- * File: SimpleJUnitTestRun.java
+ * File: SimpleJUnitTestRunTest.java
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * The contents of this file are subject to the terms and conditions of
+ * The contents of this file are subject to the terms and conditions of 
  * the Common Development and Distribution License 1.0 (the "License").
  *
  * You may not use this file except in compliance with the License.
@@ -25,14 +25,14 @@
 
 package com.oracle.bedrock.junit;
 
-import com.oracle.bedrock.runtime.Platform;
-import com.oracle.bedrock.runtime.java.JavaApplicationProcess;
 import com.oracle.bedrock.Option;
 import com.oracle.bedrock.Options;
 import com.oracle.bedrock.junit.options.TestClasses;
 import com.oracle.bedrock.options.Decoration;
+import com.oracle.bedrock.runtime.Platform;
 import com.oracle.bedrock.runtime.concurrent.RemoteCallable;
 import com.oracle.bedrock.runtime.concurrent.RemoteEventListener;
+import com.oracle.bedrock.runtime.java.JavaApplicationProcess;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
@@ -41,20 +41,16 @@ import java.util.List;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInAnyOrder;
 import static org.hamcrest.collection.IsArrayContainingInAnyOrder.arrayContainingInAnyOrder;
-
+import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInAnyOrder;
 import static org.junit.Assert.assertThat;
-
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyVararg;
-
 import static org.mockito.Matchers.same;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
-
 
 /**
  * Tests for {@link SimpleJUnitTestRun}
@@ -282,11 +278,12 @@ public class SimpleJUnitTestRunTest
     }
 
 
-    public void fireEvent(JUnitTestListener.Event event, JUnitTestListener... listeners) throws Exception
+    public void fireEvent(JUnitTestListener.Event event,
+                          JUnitTestListener...    listeners) throws Exception
     {
-        Platform                platform  = mock(Platform.class);
-        JavaApplicationProcess  process   = mock(JavaApplicationProcess.class);
-        Options                 options   = new Options();
+        Platform               platform = mock(Platform.class);
+        JavaApplicationProcess process  = mock(JavaApplicationProcess.class);
+        Options                options  = new Options();
 
         for (JUnitTestListener listener : listeners)
         {
@@ -306,10 +303,8 @@ public class SimpleJUnitTestRunTest
             assertThat(eventListener, is(notNullValue()));
             assertThat(listenerOpts, containsInAnyOrder(JUnitTestRunner.STREAM_NAME));
 
-
             eventListener.onEvent(event);
         }
 
     }
-
 }

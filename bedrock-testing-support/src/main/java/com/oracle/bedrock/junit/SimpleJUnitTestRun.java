@@ -3,7 +3,7 @@
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * The contents of this file are subject to the terms and conditions of
+ * The contents of this file are subject to the terms and conditions of 
  * the Common Development and Distribution License 1.0 (the "License").
  *
  * You may not use this file except in compliance with the License.
@@ -25,20 +25,19 @@
 
 package com.oracle.bedrock.junit;
 
-import com.oracle.bedrock.runtime.ApplicationProcess;
-import com.oracle.bedrock.runtime.Platform;
-import com.oracle.bedrock.runtime.java.JavaApplication;
-import com.oracle.bedrock.runtime.java.JavaApplicationProcess;
 import com.oracle.bedrock.Options;
 import com.oracle.bedrock.runtime.Application;
+import com.oracle.bedrock.runtime.ApplicationProcess;
+import com.oracle.bedrock.runtime.Platform;
 import com.oracle.bedrock.runtime.concurrent.RemoteEvent;
 import com.oracle.bedrock.runtime.concurrent.RemoteEventListener;
+import com.oracle.bedrock.runtime.java.JavaApplication;
+import com.oracle.bedrock.runtime.java.JavaApplicationProcess;
 import com.oracle.bedrock.runtime.java.SimpleJavaApplication;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
 
 /**
  * An implementation of a {@link JavaApplication} that runs
@@ -65,7 +64,9 @@ public class SimpleJUnitTestRun extends SimpleJavaApplication implements JUnitTe
      * @param process   the underlying {@link ApplicationProcess} representing the {@link Application}
      * @param options   the {@link Options} used to launch the {@link Application}
      */
-    public SimpleJUnitTestRun(Platform platform, JavaApplicationProcess process, Options options)
+    public SimpleJUnitTestRun(Platform               platform,
+                              JavaApplicationProcess process,
+                              Options                options)
     {
         super(platform, process, options);
 
@@ -148,6 +149,7 @@ public class SimpleJUnitTestRun extends SimpleJavaApplication implements JUnitTe
         }
     }
 
+
     protected void fireTestRunFinished(JUnitTestListener.Event event)
     {
         for (JUnitTestListener listener : runListeners)
@@ -178,6 +180,7 @@ public class SimpleJUnitTestRun extends SimpleJavaApplication implements JUnitTe
             }
         }
     }
+
 
     protected void fireTestClassFinished(JUnitTestListener.Event event)
     {
@@ -302,44 +305,56 @@ public class SimpleJUnitTestRun extends SimpleJavaApplication implements JUnitTe
             }
 
             JUnitTestListener.Event jUnitEvent = (JUnitTestListener.Event) event;
+
             switch (jUnitEvent.getType())
             {
-                case JUnitStarted:
-                    fireJUnitStarted(jUnitEvent);
-                    break;
-                case JUnitCompleted:
-                    fireJUnitCompleted(jUnitEvent);
-                    break;
-                case testRunStarted:
-                    fireTestRunStarted(jUnitEvent);
-                    break;
-                case testRunFinished:
-                    fireTestRunFinished(jUnitEvent);
-                    break;
-                case testClassStarted:
-                    fireTestClassStarted(jUnitEvent);
-                    break;
-                case testClassFinished:
-                    fireTestClassFinished(jUnitEvent);
-                    break;
-                case testStarted:
-                    fireTestStarted(jUnitEvent);
-                    break;
-                case testSuccess:
-                    fireTestSucceeded(jUnitEvent);
-                    break;
-                case testIgnored:
-                    fireTestIgnored(jUnitEvent);
-                    break;
-                case testAssumptionFailure:
-                    fireTestAssumptionFailure(jUnitEvent);
-                    break;
-                case testFailure:
-                    fireTestFailure(jUnitEvent);
-                    break;
-                case testError:
-                    fireTestError(jUnitEvent);
-                    break;
+            case JUnitStarted :
+                fireJUnitStarted(jUnitEvent);
+                break;
+
+            case JUnitCompleted :
+                fireJUnitCompleted(jUnitEvent);
+                break;
+
+            case testRunStarted :
+                fireTestRunStarted(jUnitEvent);
+                break;
+
+            case testRunFinished :
+                fireTestRunFinished(jUnitEvent);
+                break;
+
+            case testClassStarted :
+                fireTestClassStarted(jUnitEvent);
+                break;
+
+            case testClassFinished :
+                fireTestClassFinished(jUnitEvent);
+                break;
+
+            case testStarted :
+                fireTestStarted(jUnitEvent);
+                break;
+
+            case testSuccess :
+                fireTestSucceeded(jUnitEvent);
+                break;
+
+            case testIgnored :
+                fireTestIgnored(jUnitEvent);
+                break;
+
+            case testAssumptionFailure :
+                fireTestAssumptionFailure(jUnitEvent);
+                break;
+
+            case testFailure :
+                fireTestFailure(jUnitEvent);
+                break;
+
+            case testError :
+                fireTestError(jUnitEvent);
+                break;
             }
         }
     }

@@ -25,16 +25,13 @@
 
 package com.oracle.bedrock.deferred;
 
-import com.oracle.bedrock.runtime.concurrent.RemoteCallable;
-import com.oracle.bedrock.runtime.java.JavaApplication;
 import com.oracle.bedrock.Option;
-import com.oracle.bedrock.deferred.Deferred;
-import com.oracle.bedrock.deferred.DeferredHelper;
-import com.oracle.bedrock.deferred.PermanentlyUnavailableException;
 import com.oracle.bedrock.deferred.options.InitialDelay;
 import com.oracle.bedrock.deferred.options.MaximumRetryDelay;
 import com.oracle.bedrock.deferred.options.RetryFrequency;
 import com.oracle.bedrock.options.Timeout;
+import com.oracle.bedrock.runtime.concurrent.RemoteCallable;
+import com.oracle.bedrock.runtime.java.JavaApplication;
 import org.hamcrest.Matcher;
 
 import java.util.concurrent.TimeUnit;

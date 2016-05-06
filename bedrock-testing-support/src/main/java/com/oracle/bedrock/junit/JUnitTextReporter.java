@@ -3,7 +3,7 @@
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * The contents of this file are subject to the terms and conditions of
+ * The contents of this file are subject to the terms and conditions of 
  * the Common Development and Distribution License 1.0 (the "License").
  *
  * You may not use this file except in compliance with the License.
@@ -44,7 +44,8 @@ public class JUnitTextReporter extends JUnitReporter
     /**
      * A line of dashes used on reports.
      */
-    public static final String DASHES = "-------------------------------------------------------------------------------";
+    public static final String DASHES =
+        "-------------------------------------------------------------------------------";
 
 
     /**
@@ -70,7 +71,8 @@ public class JUnitTextReporter extends JUnitReporter
 
 
     @Override
-    public void writeReport(PrintStream out, TestResults test)
+    public void writeReport(PrintStream out,
+                            TestResults test)
     {
         String className = test.getClassName();
         int    failures  = test.getFailureCount();
@@ -142,7 +144,7 @@ public class JUnitTextReporter extends JUnitReporter
      */
     public static Option at(File folder)
     {
-        if (folder.exists() && !folder.isDirectory())
+        if (folder.exists() &&!folder.isDirectory())
         {
             throw new IllegalStateException("Report folder exists but is not a directory " + folder);
         }
