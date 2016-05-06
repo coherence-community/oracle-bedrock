@@ -3,7 +3,7 @@
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * The contents of this file are subject to the terms and conditions of
+ * The contents of this file are subject to the terms and conditions of 
  * the Common Development and Distribution License 1.0 (the "License").
  *
  * You may not use this file except in compliance with the License.
@@ -65,7 +65,8 @@ public class Logs extends CommandWithArgumentList<Logs>
      * @param arguments  the command {@link Arguments}
      * @param names      the names of the containers
      */
-    private Logs(Arguments arguments, List<?> names)
+    private Logs(Arguments arguments,
+                 List<?>   names)
     {
         super(arguments, names);
     }
@@ -73,6 +74,8 @@ public class Logs extends CommandWithArgumentList<Logs>
 
     /**
      * Follow log output (equates to the --follow argument).
+     *
+     * @param enabled should follow logging be enabled
      *
      * @return  a new {@link Logs} instance that is the same as this
      *          instance with the --follow option applied
@@ -136,14 +139,16 @@ public class Logs extends CommandWithArgumentList<Logs>
 
 
     @Override
-    protected Logs withCommandArguments(List<Argument> endArgs, Argument... args)
+    protected Logs withCommandArguments(List<Argument> endArgs,
+                                        Argument...    args)
     {
         return new Logs(getCommandArguments().with(args), endArgs);
     }
 
 
     @Override
-    protected Logs withoutCommandArguments(List<Argument> names, Argument... args)
+    protected Logs withoutCommandArguments(List<Argument> names,
+                                           Argument...    args)
     {
         return new Logs(getCommandArguments().without(args), names);
     }

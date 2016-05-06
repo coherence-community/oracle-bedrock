@@ -3,7 +3,7 @@
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * The contents of this file are subject to the terms and conditions of
+ * The contents of this file are subject to the terms and conditions of 
  * the Common Development and Distribution License 1.0 (the "License").
  *
  * You may not use this file except in compliance with the License.
@@ -25,25 +25,6 @@
 
 package com.oracle.bedrock.runtime.docker;
 
-import com.oracle.bedrock.runtime.ApplicationProcess;
-import com.oracle.bedrock.runtime.Platform;
-import com.oracle.bedrock.runtime.Profile;
-import com.oracle.bedrock.runtime.console.Console;
-import com.oracle.bedrock.runtime.console.EventsApplicationConsole;
-import com.oracle.bedrock.runtime.docker.commands.Build;
-import com.oracle.bedrock.runtime.docker.commands.Events;
-import com.oracle.bedrock.runtime.docker.commands.Kill;
-import com.oracle.bedrock.runtime.docker.commands.Run;
-import com.oracle.bedrock.runtime.docker.options.DockerfileDeployer;
-import com.oracle.bedrock.runtime.docker.options.ImageCloseBehaviour;
-import com.oracle.bedrock.runtime.java.ClassPathModifier;
-import com.oracle.bedrock.runtime.options.Arguments;
-import com.oracle.bedrock.runtime.options.Discriminator;
-import com.oracle.bedrock.runtime.options.DisplayName;
-import com.oracle.bedrock.runtime.options.Ports;
-import com.oracle.bedrock.runtime.remote.DeploymentArtifact;
-import com.oracle.bedrock.runtime.remote.RemoteTerminal;
-import com.oracle.bedrock.runtime.remote.options.Deployer;
 import com.oracle.bedrock.Option;
 import com.oracle.bedrock.Options;
 import com.oracle.bedrock.extensible.AbstractExtensible;
@@ -53,13 +34,32 @@ import com.oracle.bedrock.lang.StringHelper;
 import com.oracle.bedrock.options.Timeout;
 import com.oracle.bedrock.options.Variable;
 import com.oracle.bedrock.runtime.Application;
+import com.oracle.bedrock.runtime.ApplicationProcess;
 import com.oracle.bedrock.runtime.MetaClass;
+import com.oracle.bedrock.runtime.Platform;
+import com.oracle.bedrock.runtime.Profile;
+import com.oracle.bedrock.runtime.console.Console;
+import com.oracle.bedrock.runtime.console.EventsApplicationConsole;
 import com.oracle.bedrock.runtime.console.NullApplicationConsole;
+import com.oracle.bedrock.runtime.docker.commands.Build;
+import com.oracle.bedrock.runtime.docker.commands.Events;
+import com.oracle.bedrock.runtime.docker.commands.Kill;
 import com.oracle.bedrock.runtime.docker.commands.Remove;
+import com.oracle.bedrock.runtime.docker.commands.Run;
 import com.oracle.bedrock.runtime.docker.options.ContainerCloseBehaviour;
+import com.oracle.bedrock.runtime.docker.options.DockerfileDeployer;
+import com.oracle.bedrock.runtime.docker.options.ImageCloseBehaviour;
+import com.oracle.bedrock.runtime.java.ClassPathModifier;
+import com.oracle.bedrock.runtime.options.Arguments;
+import com.oracle.bedrock.runtime.options.Discriminator;
+import com.oracle.bedrock.runtime.options.DisplayName;
 import com.oracle.bedrock.runtime.options.PlatformSeparators;
+import com.oracle.bedrock.runtime.options.Ports;
 import com.oracle.bedrock.runtime.options.WorkingDirectory;
+import com.oracle.bedrock.runtime.remote.DeploymentArtifact;
 import com.oracle.bedrock.runtime.remote.RemoteApplicationProcess;
+import com.oracle.bedrock.runtime.remote.RemoteTerminal;
+import com.oracle.bedrock.runtime.remote.options.Deployer;
 import com.oracle.bedrock.table.Table;
 
 import javax.json.JsonObject;
@@ -387,13 +387,12 @@ public class DockerRemoteTerminal implements RemoteTerminal, Deployer
         List<Integer> portList = ports.getPorts().stream().map(Ports.Port::getActualPort).collect(Collectors.toList());
 
         // ----- create the Run command -----
-        Run runCommand = Run.image(image, containerName)
-                            .interactive()
-                            .net(docker.getDefaultNetworkName())
-                            .hostName(containerName)
-                            .env(launchable.getEnvironmentVariables(platform, options))
-                            .publish(portList)
-                            .autoRemove();
+        Run runCommand = Run.image(image,
+                                   containerName).interactive().net(docker.getDefaultNetworkName())
+                                   .hostName(containerName).env(launchable.getEnvironmentVariables(platform,
+                                                                                                   options))
+                                                                                                   .publish(portList)
+                                                                                                   .autoRemove();
 
         Options containerOptions = new Options(options).addAll(displayName,
                                                                docker,
@@ -403,9 +402,9 @@ public class DockerRemoteTerminal implements RemoteTerminal, Deployer
                                                                containerArgs);
 
         // ----- start the application to capture Docker events so that we know when the container is in the running state -----
-        EventsApplicationConsole.CountDownListener latch        = new EventsApplicationConsole.CountDownListener(1);
-        Predicate<String>                          predicate    = (line) -> line.contains("container start");
-        EventsApplicationConsole                   eventConsole = new EventsApplicationConsole().withStdOutListener(predicate, latch);
+        EventsApplicationConsole.CountDownListener latch     = new EventsApplicationConsole.CountDownListener(1);
+        Predicate<String>                          predicate = (line) -> line.contains("container start");
+        EventsApplicationConsole eventConsole = new EventsApplicationConsole().withStdOutListener(predicate, latch);
 
         try (Application events = platform.launch(Events.fromContainer(containerName),
                                                   docker,

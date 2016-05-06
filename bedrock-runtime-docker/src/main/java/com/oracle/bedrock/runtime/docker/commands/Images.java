@@ -86,7 +86,6 @@ public class Images extends CommandWithArgumentList<Images>
     public static final String FORMAT_SIZE = "{{.Size}}";
 
 
-
     /**
      * Create a {@link Images} command to list Docker images.
      */
@@ -112,7 +111,8 @@ public class Images extends CommandWithArgumentList<Images>
      * @param arguments  the command {@link Arguments}
      * @param tags       the [REPOSITORY[:TAG]] to list
      */
-    private Images(Arguments arguments, List<?> tags)
+    private Images(Arguments arguments,
+                   List<?>   tags)
     {
         super(arguments, tags);
     }
@@ -233,14 +233,16 @@ public class Images extends CommandWithArgumentList<Images>
 
 
     @Override
-    protected Images withCommandArguments(List<Argument> endArgs, Argument... args)
+    protected Images withCommandArguments(List<Argument> endArgs,
+                                          Argument...    args)
     {
         return new Images(getCommandArguments().with(args), endArgs);
     }
 
 
     @Override
-    protected Images withoutCommandArguments(List<Argument> endArgs, Argument... args)
+    protected Images withoutCommandArguments(List<Argument> endArgs,
+                                             Argument...    args)
     {
         return new Images(getCommandArguments().without(args), endArgs);
     }

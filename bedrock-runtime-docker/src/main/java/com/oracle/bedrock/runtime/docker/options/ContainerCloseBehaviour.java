@@ -3,7 +3,7 @@
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * The contents of this file are subject to the terms and conditions of
+ * The contents of this file are subject to the terms and conditions of 
  * the Common Development and Distribution License 1.0 (the "License").
  *
  * You may not use this file except in compliance with the License.
@@ -25,9 +25,9 @@
 
 package com.oracle.bedrock.runtime.docker.options;
 
-import com.oracle.bedrock.runtime.docker.DockerContainer;
 import com.oracle.bedrock.Option;
 import com.oracle.bedrock.Options;
+import com.oracle.bedrock.runtime.docker.DockerContainer;
 
 import java.util.function.Consumer;
 
@@ -75,15 +75,20 @@ public class ContainerCloseBehaviour implements Option, Consumer<DockerContainer
 
     /**
      * Do nothing when a container application is closed.
+     *
+     * @return a {@link ContainerCloseBehaviour}
      */
     public static ContainerCloseBehaviour none()
     {
-        return new ContainerCloseBehaviour((container) -> {});
+        return new ContainerCloseBehaviour((container) -> {}
+        );
     }
 
 
     /**
      * Stop the Docker container when a container application is closed.
+     *
+     * @return a {@link ContainerCloseBehaviour}
      */
     public static ContainerCloseBehaviour stop()
     {
@@ -93,13 +98,15 @@ public class ContainerCloseBehaviour implements Option, Consumer<DockerContainer
 
     /**
      * Stop and remove the Docker container when a container application is closed.
+     *
+     * @return a {@link ContainerCloseBehaviour}
      */
     @Options.Default
     public static ContainerCloseBehaviour remove()
     {
         return new ContainerCloseBehaviour(((container) -> {
-            container.stop();
-            container.remove(true);
-        }));
+                                                container.stop();
+                                                container.remove(true);
+                                            }));
     }
 }

@@ -3,7 +3,7 @@
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * The contents of this file are subject to the terms and conditions of
+ * The contents of this file are subject to the terms and conditions of 
  * the Common Development and Distribution License 1.0 (the "License").
  *
  * You may not use this file except in compliance with the License.
@@ -25,13 +25,13 @@
 
 package com.oracle.bedrock.runtime.docker.machine;
 
-import com.oracle.bedrock.runtime.remote.RemotePlatform;
-import com.oracle.bedrock.runtime.remote.options.StrictHostChecking;
 import com.oracle.bedrock.Option;
 import com.oracle.bedrock.Options;
 import com.oracle.bedrock.runtime.docker.Docker;
 import com.oracle.bedrock.runtime.docker.DockerPlatform;
 import com.oracle.bedrock.runtime.remote.Password;
+import com.oracle.bedrock.runtime.remote.RemotePlatform;
+import com.oracle.bedrock.runtime.remote.options.StrictHostChecking;
 
 import java.io.Closeable;
 import java.net.InetAddress;
@@ -62,12 +62,11 @@ public class DockerMachinePlatform extends DockerPlatform implements Closeable
      * @param name     the name of the Docker Machine VM instance
      * @param options  any {@link Option}s to apply to the platform
      */
-    public DockerMachinePlatform(DockerMachine machine, String name, Option... options)
+    public DockerMachinePlatform(DockerMachine machine,
+                                 String        name,
+                                 Option...     options)
     {
-        super(name,
-              machine.getClientPlatform(),
-              Docker.machine(name, machine, options),
-              options);
+        super(name, machine.getClientPlatform(), Docker.machine(name, machine, options), options);
 
         this.machine = machine;
     }
@@ -98,15 +97,15 @@ public class DockerMachinePlatform extends DockerPlatform implements Closeable
     /**
      * Obtain a {@link RemotePlatform} on the Docker machine instance.
      *
+     * @param options  the {@link Option}s
+     *
      * @return a {@link RemotePlatform} on the Docker machine instance
      */
     public RemotePlatform getRemotePlatform(Option... options)
     {
         String      name            = getName();
         InetAddress address         = machine.getAddress(name);
-        Options     platformOptions = this.getOptions()
-                                          .add(StrictHostChecking.disabled())
-                                          .addAll(options);
+        Options     platformOptions = this.getOptions().add(StrictHostChecking.disabled()).addAll(options);
 
         return new RemotePlatform(name, address, "docker", new Password("tcuser"), platformOptions.asArray());
     }

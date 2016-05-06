@@ -3,7 +3,7 @@
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * The contents of this file are subject to the terms and conditions of
+ * The contents of this file are subject to the terms and conditions of 
  * the Common Development and Distribution License 1.0 (the "License").
  *
  * You may not use this file except in compliance with the License.
@@ -25,11 +25,11 @@
 
 package com.oracle.bedrock.runtime.docker.options;
 
+import com.oracle.bedrock.Option;
+import com.oracle.bedrock.Options;
 import com.oracle.bedrock.runtime.Platform;
 import com.oracle.bedrock.runtime.remote.options.Deployer;
 import com.oracle.bedrock.runtime.remote.options.FileShareDeployer;
-import com.oracle.bedrock.Option;
-import com.oracle.bedrock.Options;
 
 import java.io.File;
 import java.io.PrintWriter;
@@ -54,18 +54,21 @@ public class DockerfileDeployer extends FileShareDeployer
      */
     private final SortedSet<AddFile> addList;
 
+
     /**
      * Construct a new {@link DockerfileDeployer}.
      *
      * @param workingDirectory  the folder to copy the artifacts to
      * @param options           the {@link Options} controlling the Dockerfile
      */
-    public DockerfileDeployer(String workingDirectory, Option... options)
+    public DockerfileDeployer(String    workingDirectory,
+                              Option... options)
     {
         super(workingDirectory, workingDirectory, options);
 
         this.addList = new TreeSet<>();
     }
+
 
     /**
      * Write an ADD statement for the specified artifact.
@@ -78,7 +81,10 @@ public class DockerfileDeployer extends FileShareDeployer
      * @return  this method always returns true
      */
     @Override
-    protected boolean performRemoteCopy(String source, String destination, Platform platform, Options options)
+    protected boolean performRemoteCopy(String   source,
+                                        String   destination,
+                                        Platform platform,
+                                        Options  options)
     {
         File   sourceFile = new File(source);
         String sourceName = sourceFile.getName();
@@ -102,9 +108,7 @@ public class DockerfileDeployer extends FileShareDeployer
      */
     public void write(PrintWriter writer)
     {
-        addList.forEach((file) -> writer.printf("ADD %-50s %s\n",
-                                                      file.getSource(),
-                                                      file.getDestination()));
+        addList.forEach((file) -> writer.printf("ADD %-50s %s\n", file.getSource(), file.getDestination()));
     }
 
 
@@ -130,7 +134,8 @@ public class DockerfileDeployer extends FileShareDeployer
          * @param source       the source file name.
          * @param destination  the destination in the Dockerfile
          */
-        public AddFile(String source, String destination)
+        public AddFile(String source,
+                       String destination)
         {
             this.source      = Objects.requireNonNull(source);
             this.destination = Objects.requireNonNull(destination);
@@ -180,6 +185,7 @@ public class DockerfileDeployer extends FileShareDeployer
             {
                 return true;
             }
+
             if (o == null || getClass() != o.getClass())
             {
                 return false;
@@ -191,15 +197,19 @@ public class DockerfileDeployer extends FileShareDeployer
             {
                 return false;
             }
+
             return destination.equals(addFile.destination);
 
         }
+
 
         @Override
         public int hashCode()
         {
             int result = source.hashCode();
+
             result = 31 * result + destination.hashCode();
+
             return result;
         }
 

@@ -3,7 +3,7 @@
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * The contents of this file are subject to the terms and conditions of
+ * The contents of this file are subject to the terms and conditions of 
  * the Common Development and Distribution License 1.0 (the "License").
  *
  * You may not use this file except in compliance with the License.
@@ -25,12 +25,12 @@
 
 package com.oracle.bedrock.runtime.docker.commands;
 
+import com.oracle.bedrock.runtime.Application;
 import com.oracle.bedrock.runtime.Platform;
 import com.oracle.bedrock.runtime.console.CapturingApplicationConsole;
 import com.oracle.bedrock.runtime.console.Console;
-import com.oracle.bedrock.runtime.options.Argument;
-import com.oracle.bedrock.runtime.Application;
 import com.oracle.bedrock.runtime.docker.Docker;
+import com.oracle.bedrock.runtime.options.Argument;
 import com.oracle.bedrock.runtime.options.Arguments;
 
 import javax.json.Json;
@@ -208,14 +208,14 @@ public class Inspect extends CommandWithArgumentList<Inspect>
             {
                 console.getCapturedOutputLines().forEach(System.out::println);
                 console.getCapturedErrorLines().forEach(System.err::println);
+
                 return null;
             }
         }
 
         Queue<String> lines = console.getCapturedOutputLines();
-        String        json  = lines.stream()
-                                   .filter((line) -> line != null && !line.equals("(terminated)"))
-                                   .collect(Collectors.joining("\n"))
+        String json = lines.stream().filter((line) -> line != null
+                                                      &&!line.equals("(terminated)")).collect(Collectors.joining("\n"))
                                                       .trim();
 
         if (!json.startsWith("[") &&!json.startsWith("{"))

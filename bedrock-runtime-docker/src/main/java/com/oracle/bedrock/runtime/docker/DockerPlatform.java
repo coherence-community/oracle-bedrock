@@ -3,7 +3,7 @@
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * The contents of this file are subject to the terms and conditions of
+ * The contents of this file are subject to the terms and conditions of 
  * the Common Development and Distribution License 1.0 (the "License").
  *
  * You may not use this file except in compliance with the License.
@@ -25,19 +25,19 @@
 
 package com.oracle.bedrock.runtime.docker;
 
-import com.oracle.bedrock.runtime.AbstractPlatform;
-import com.oracle.bedrock.runtime.Platform;
-import com.oracle.bedrock.runtime.java.JavaApplication;
-import com.oracle.bedrock.runtime.remote.RemoteTerminalBuilder;
-import com.oracle.bedrock.runtime.remote.SimpleRemoteApplicationLauncher;
-import com.oracle.bedrock.runtime.remote.java.RemoteJavaApplicationLauncher;
 import com.oracle.bedrock.Option;
 import com.oracle.bedrock.Options;
+import com.oracle.bedrock.runtime.AbstractPlatform;
 import com.oracle.bedrock.runtime.Application;
 import com.oracle.bedrock.runtime.ApplicationLauncher;
 import com.oracle.bedrock.runtime.LocalPlatform;
 import com.oracle.bedrock.runtime.MetaClass;
+import com.oracle.bedrock.runtime.Platform;
 import com.oracle.bedrock.runtime.docker.commands.AbstractDockerCommand;
+import com.oracle.bedrock.runtime.java.JavaApplication;
+import com.oracle.bedrock.runtime.remote.RemoteTerminalBuilder;
+import com.oracle.bedrock.runtime.remote.SimpleRemoteApplicationLauncher;
+import com.oracle.bedrock.runtime.remote.java.RemoteJavaApplicationLauncher;
 
 import java.net.InetAddress;
 
@@ -52,17 +52,23 @@ import java.net.InetAddress;
  */
 public class DockerPlatform extends AbstractPlatform
 {
+    /**
+     * The {@link Platform} on which {@link Docker} is running.
+     */
     private final Platform clientPlatform;
-    private final Docker   docker;
+
+    /**
+     * The {@link Docker} environment.
+     */
+    private final Docker docker;
 
 
     /**
-     * Constructs ...
+     * Constructs a {@link DockerPlatform}.
      *
-     *
-     * @param clientPlatform
-     * @param docker
-     * @param options
+     * @param clientPlatform  the client {@link Platform}
+     * @param docker          the {@link Docker}
+     * @param options         the {@link Option}s
      */
     public DockerPlatform(Platform  clientPlatform,
                           Docker    docker,
@@ -73,13 +79,12 @@ public class DockerPlatform extends AbstractPlatform
 
 
     /**
-     * Constructs ...
+     * Constructs a {@link DockerPlatform} with a specific name.
      *
-     *
-     * @param name
-     * @param clientPlatform
-     * @param docker
-     * @param options
+     * @param name            the name
+     * @param clientPlatform  the client {@link Platform}
+     * @param docker          the {@link Docker}
+     * @param options         the {@link Option}s
      */
     public DockerPlatform(String    name,
                           Platform  clientPlatform,

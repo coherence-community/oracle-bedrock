@@ -3,7 +3,7 @@
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * The contents of this file are subject to the terms and conditions of
+ * The contents of this file are subject to the terms and conditions of 
  * the Common Development and Distribution License 1.0 (the "License").
  *
  * You may not use this file except in compliance with the License.
@@ -75,15 +75,20 @@ public class ImageCloseBehaviour implements Option, Consumer<DockerImage>
 
     /**
      * Do nothing when an image application is closed.
+     *
+     * @return an {@link ImageCloseBehaviour}
      */
     public static ImageCloseBehaviour none()
     {
-        return new ImageCloseBehaviour((image) -> {});
+        return new ImageCloseBehaviour((image) -> {}
+        );
     }
 
 
     /**
      * Remove the Docker image when an image application is closed.
+     *
+     * @return an {@link ImageCloseBehaviour}
      */
     @Options.Default
     public static ImageCloseBehaviour remove()

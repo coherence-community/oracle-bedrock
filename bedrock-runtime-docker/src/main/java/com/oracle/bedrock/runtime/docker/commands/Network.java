@@ -3,7 +3,7 @@
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * The contents of this file are subject to the terms and conditions of
+ * The contents of this file are subject to the terms and conditions of 
  * the Common Development and Distribution License 1.0 (the "License").
  *
  * You may not use this file except in compliance with the License.
@@ -25,8 +25,8 @@
 
 package com.oracle.bedrock.runtime.docker.commands;
 
-import com.oracle.bedrock.runtime.Platform;
 import com.oracle.bedrock.runtime.Application;
+import com.oracle.bedrock.runtime.Platform;
 import com.oracle.bedrock.runtime.console.CapturingApplicationConsole;
 import com.oracle.bedrock.runtime.console.Console;
 import com.oracle.bedrock.runtime.docker.Docker;
@@ -62,9 +62,329 @@ public abstract class Network<C extends CommandWithArgumentList> extends Command
      *                   that will be appended to the end of
      *                   the command  line
      */
-    private Network(Arguments arguments, List<?> argList)
+    private Network(Arguments arguments,
+                    List<?>   argList)
     {
         super(arguments, argList);
+    }
+
+
+    /**
+     * Create a Docker network using the bridge driver.
+     *
+     * @param name  the name of the network to create
+     *
+     * @return  a new {@link Create} command.
+     */
+    public static Create createBridge(String name)
+    {
+        return create(name, "bridge");
+    }
+
+
+    /**
+     * Create a Docker network using the overlay driver.
+     *
+     * @param name  the name of the network to create
+     *
+     * @return  a new {@link Create} command.
+     */
+    public static Create createOverlay(String name)
+    {
+        return create(name, "overlay");
+    }
+
+
+    /**
+     * Create a Docker network using the specified driver.
+     *
+     * @param name    the name of the network to create
+     * @param driver  the name of the network driver to use
+     *
+     * @return  a new {@link Create} command.
+     */
+    public static Create create(String name,
+                                String driver)
+    {
+        return new Create(name, driver);
+    }
+
+
+    /**
+     * Connect a container to a Docker network.
+     *
+     * @param network    the name of the network to connect to
+     * @param container  the name of the container to connect to the network
+     *
+     * @return  a new {@link Connect} command.
+     */
+    public static Connect connect(String network,
+                                  String container)
+    {
+        return new Connect(network, container);
+    }
+
+
+    /**
+     * Connect a container to a Docker network.
+     *
+     * @param network    the name of the network to connect to
+     * @param container  the name of the container to connect to the network
+     *
+     * @return  a new {@link Connect} command.
+     */
+    public static Disconnect disconnect(String network,
+                                        String container)
+    {
+        return new Disconnect(network, container);
+    }
+
+
+    /**
+     * Inspect the specified networks.
+     *
+     * @param names  the names of the networks to inspect
+     *
+     * @return a new {@link Inspect}
+     */
+    public static Inspect inspect(String... names)
+    {
+        return inspect(Arrays.asList(names));
+    }
+
+
+    /**
+     * Inspect the specified networks.
+     *
+     * @param names  the names of the networks to inspect
+     *
+     * @return a new {@link Inspect}
+     */
+    public static Inspect inspect(List<String> names)
+    {
+        return new Inspect(names);
+    }
+
+
+    /**
+     * Execute an {@link Inspect} command on the specified {@link Platform}
+     * using the specified {@link Docker} environment.
+     *
+     * @param platform     the {@link Platform} to use to execute the command
+     * @param environment  the {@link Docker} environment to use
+     * @param networks     the names of the networks to inspect
+     *
+     * @return  a {@link JsonArray} containing the results of the inspect command
+     */
+    public static JsonValue inspect(Platform  platform,
+                                    Docker    environment,
+                                    String... networks)
+    {
+        CapturingApplicationConsole console = new CapturingApplicationConsole();
+
+        Inspect                     inspect = inspect(networks);
+
+        try (Application app = platform.launch(inspect, environment, Console.of(console)))
+        {
+            if (app.waitFor() != 0)
+            {
+                console.getCapturedOutputLines().forEach(System.out::println);
+                console.getCapturedErrorLines().forEach(System.err::println);
+
+                return null;
+            }
+        }
+
+        Queue<String> lines = console.getCapturedOutputLines();
+        String json = lines.stream().filter((line) -> line != null
+                                                      &&!line.equals("(terminated)")).collect(Collectors.joining("\n"))
+                                                      .trim();
+
+        if (!json.startsWith("[") &&!json.startsWith("{"))
+        {
+            json = "[" + json + "]";
+        }
+
+        JsonReader reader = Json.createReader(new StringReader(json));
+
+        try
+        {
+            return reader.read();
+        }
+        catch (Exception e)
+        {
+            System.err.println("Error parsing JSON");
+            System.err.println(json);
+            e.printStackTrace();
+
+            return null;
+        }
+    }
+
+
+    /**
+     * List the available Docker networks,
+     *
+     * @return  a new {@link LS} command.
+     */
+    public static LS list()
+    {
+        return new LS();
+    }
+
+
+    /**
+     * Remove one or more Docker networks.
+     *
+     * @param names  the names of the network to remove
+     *
+     * @return  a new {@link Remove} command.
+     */
+    public static Remove remove(String... names)
+    {
+        return remove(Arrays.asList(names));
+    }
+
+
+    /**
+     * Remove one or more Docker networks.
+     *
+     * @param names  the names of the network to remove
+     *
+     * @return  a new {@link Remove} command.
+     */
+    public static Remove remove(List<String> names)
+    {
+        return new Remove(names);
+    }
+
+
+    /**
+     * A representation of the Docker Network Connect command.
+     */
+    public static class Connect extends Network<Connect>
+    {
+        /**
+         * Create a {@link Connect}.
+         *
+         * @param arguments  the command {@link Arguments}
+         * @param argList    {@link List} of {@link Argument}s
+         *                   that will be appended to the end of
+         *                   the command  line
+         */
+        private Connect(Arguments arguments,
+                        List<?>   argList)
+        {
+            super(arguments, argList);
+        }
+
+
+        /**
+         * Create a {@link Connect} command.
+         *
+         * @param networkName    the name of the network to connect to
+         * @param containerName  the name of the container to
+         *                       connect to the network
+         */
+        private Connect(String networkName,
+                        String containerName)
+        {
+            super(Arguments.of("network", "connect"), Arrays.asList(networkName, containerName));
+        }
+
+
+        /**
+         * Add network-scoped aliases for the container (equates to the --alias argument).
+         *
+         * @param alias  values that resolve to one or more valid
+         *               aliases
+         *
+         * @return  a new {@link Connect} instance that is the same as this
+         *          instance with the --alias option applied
+         */
+        public Connect alias(Object... alias)
+        {
+            if (alias == null)
+            {
+                return this;
+            }
+
+            return withCommandArguments(Argument.of("--alias", '=', new Argument.Multiple(alias)));
+        }
+
+
+        /**
+         * Set the IPv4 Address (equates to the --ip argument).
+         *
+         * @param address  a value that resolves to a valid IPv4 addresses
+         *
+         * @return  a new {@link Create} instance that is the same as this
+         *          instance with the --ip option applied
+         */
+        public Connect ip(Object address)
+        {
+            if (address == null)
+            {
+                return this;
+            }
+
+            return withCommandArguments(Argument.of("--ip", '=', address));
+        }
+
+
+        /**
+         * Set the IPv6 Address (equates to the --ip6 argument).
+         *
+         * @param address  a value that resolves to a valid IPv6 addresses
+         *
+         * @return  a new {@link Create} instance that is the same as this
+         *          instance with the --ip6 option applied
+         */
+        public Connect ip6(Object address)
+        {
+            if (address == null)
+            {
+                return this;
+            }
+
+            return withCommandArguments(Argument.of("--ip6", '=', address));
+        }
+
+
+        /**
+         * Add a link to another container (equates to the --link argument).
+         *
+         * @param containers  values that resolve to one or more valid
+         *                    container names
+         *
+         * @return  a new {@link Create} instance that is the same as this
+         *          instance with the --link option applied
+         */
+        public Connect link(Object... containers)
+        {
+            if (containers == null || containers.length == 0)
+            {
+                return this;
+            }
+
+            return withCommandArguments(Argument.of("--link", '=', new Argument.Multiple(containers)));
+        }
+
+
+        @Override
+        protected Connect withCommandArguments(List<Argument> endArgs,
+                                               Argument...    args)
+        {
+            return new Connect(getCommandArguments().with(args), endArgs);
+        }
+
+
+        @Override
+        protected Connect withoutCommandArguments(List<Argument> endArgs,
+                                                  Argument...    args)
+        {
+            return new Connect(getCommandArguments().without(args), endArgs);
+        }
     }
 
 
@@ -74,19 +394,6 @@ public abstract class Network<C extends CommandWithArgumentList> extends Command
     public static class Create extends Network<Create>
     {
         /**
-         * Create a new {@link Create} command.
-         *
-         * @param name    the name of the network to create
-         * @param driver  the name of the network driver
-         */
-        private Create(String name, String driver)
-        {
-            super(Arguments.of("network", "create", Argument.of("--driver", '=', driver)),
-                  Collections.singletonList(name));
-        }
-
-
-        /**
          * Create a {@link Create}.
          *
          * @param arguments  the command {@link Arguments}
@@ -94,9 +401,24 @@ public abstract class Network<C extends CommandWithArgumentList> extends Command
          *                   that will be appended to the end of
          *                   the command  line
          */
-        private Create(Arguments arguments, List<?> argList)
+        private Create(Arguments arguments,
+                       List<?>   argList)
         {
             super(arguments, argList);
+        }
+
+
+        /**
+         * Create a new {@link Create} command.
+         *
+         * @param name    the name of the network to create
+         * @param driver  the name of the network driver
+         */
+        private Create(String name,
+                       String driver)
+        {
+            super(Arguments.of("network", "create", Argument.of("--driver", '=', driver)),
+                  Collections.singletonList(name));
         }
 
 
@@ -286,142 +608,18 @@ public abstract class Network<C extends CommandWithArgumentList> extends Command
 
 
         @Override
-        protected Create withCommandArguments(List<Argument> endArgs, Argument... args)
+        protected Create withCommandArguments(List<Argument> endArgs,
+                                              Argument...    args)
         {
             return new Create(getCommandArguments().with(args), endArgs);
         }
 
 
         @Override
-        protected Create withoutCommandArguments(List<Argument> endArgs, Argument... args)
+        protected Create withoutCommandArguments(List<Argument> endArgs,
+                                                 Argument...    args)
         {
             return new Create(getCommandArguments().without(args), endArgs);
-        }
-    }
-
-
-    /**
-     * A representation of the Docker Network Connect command.
-     */
-    public static class Connect extends Network<Connect>
-    {
-        /**
-         * Create a {@link Connect} command.
-         *
-         * @param networkName    the name of the network to connect to
-         * @param containerName  the name of the container to
-         *                       connect to the network
-         */
-        private Connect(String networkName, String containerName)
-        {
-            super(Arguments.of("network", "connect"), Arrays.asList(networkName, containerName));
-        }
-
-
-        /**
-         * Create a {@link Connect}.
-         *
-         * @param arguments  the command {@link Arguments}
-         * @param argList    {@link List} of {@link Argument}s
-         *                   that will be appended to the end of
-         *                   the command  line
-         */
-        private Connect(Arguments arguments, List<?> argList)
-        {
-            super(arguments, argList);
-        }
-
-
-        /**
-         * Add network-scoped aliases for the container (equates to the --alias argument).
-         *
-         * @param alias  values that resolve to one or more valid
-         *               aliases
-         *
-         * @return  a new {@link Connect} instance that is the same as this
-         *          instance with the --alias option applied
-         */
-        public Connect alias(Object... alias)
-        {
-            if (alias == null)
-            {
-                return this;
-            }
-
-            return withCommandArguments(Argument.of("--alias", '=', new Argument.Multiple(alias)));
-        }
-
-
-
-        /**
-         * Set the IPv4 Address (equates to the --ip argument).
-         *
-         * @param address  a value that resolves to a valid IPv4 addresses
-         *
-         * @return  a new {@link Create} instance that is the same as this
-         *          instance with the --ip option applied
-         */
-        public Connect ip(Object address)
-        {
-            if (address == null)
-            {
-                return this;
-            }
-
-            return withCommandArguments(Argument.of("--ip", '=', address));
-        }
-
-
-        /**
-         * Set the IPv6 Address (equates to the --ip6 argument).
-         *
-         * @param address  a value that resolves to a valid IPv6 addresses
-         *
-         * @return  a new {@link Create} instance that is the same as this
-         *          instance with the --ip6 option applied
-         */
-        public Connect ip6(Object address)
-        {
-            if (address == null)
-            {
-                return this;
-            }
-
-            return withCommandArguments(Argument.of("--ip6", '=', address));
-        }
-
-
-        /**
-         * Add a link to another container (equates to the --link argument).
-         *
-         * @param containers  values that resolve to one or more valid
-         *                    container names
-         *
-         * @return  a new {@link Create} instance that is the same as this
-         *          instance with the --link option applied
-         */
-        public Connect link(Object... containers)
-        {
-            if (containers == null || containers.length == 0)
-            {
-                return this;
-            }
-
-            return withCommandArguments(Argument.of("--link", '=', new Argument.Multiple(containers)));
-        }
-
-
-        @Override
-        protected Connect withCommandArguments(List<Argument> endArgs, Argument... args)
-        {
-            return new Connect(getCommandArguments().with(args), endArgs);
-        }
-
-
-        @Override
-        protected Connect withoutCommandArguments(List<Argument> endArgs, Argument... args)
-        {
-            return new Connect(getCommandArguments().without(args), endArgs);
         }
     }
 
@@ -432,19 +630,6 @@ public abstract class Network<C extends CommandWithArgumentList> extends Command
     public static class Disconnect extends Network<Disconnect>
     {
         /**
-         * Create a {@link Disconnect} command.
-         *
-         * @param networkName    the name of the network to connect to
-         * @param containerName  the name of the container to
-         *                       connect to the network
-         */
-        private Disconnect(String networkName, String containerName)
-        {
-            super(Arguments.of("network", "disconnect"), Arrays.asList(networkName, containerName));
-        }
-
-
-        /**
          * Create a {@link Disconnect}.
          *
          * @param arguments  the command {@link Arguments}
@@ -452,9 +637,24 @@ public abstract class Network<C extends CommandWithArgumentList> extends Command
          *                   that will be appended to the end of
          *                   the command  line
          */
-        private Disconnect(Arguments arguments, List<?> argList)
+        private Disconnect(Arguments arguments,
+                           List<?>   argList)
         {
             super(arguments, argList);
+        }
+
+
+        /**
+         * Create a {@link Disconnect} command.
+         *
+         * @param networkName    the name of the network to connect to
+         * @param containerName  the name of the container to
+         *                       connect to the network
+         */
+        private Disconnect(String networkName,
+                           String containerName)
+        {
+            super(Arguments.of("network", "disconnect"), Arrays.asList(networkName, containerName));
         }
 
 
@@ -471,14 +671,16 @@ public abstract class Network<C extends CommandWithArgumentList> extends Command
 
 
         @Override
-        protected Disconnect withCommandArguments(List<Argument> endArgs, Argument... args)
+        protected Disconnect withCommandArguments(List<Argument> endArgs,
+                                                  Argument...    args)
         {
             return new Disconnect(getCommandArguments().with(args), endArgs);
         }
 
 
         @Override
-        protected Disconnect withoutCommandArguments(List<Argument> endArgs, Argument... args)
+        protected Disconnect withoutCommandArguments(List<Argument> endArgs,
+                                                     Argument...    args)
         {
             return new Disconnect(getCommandArguments().without(args), endArgs);
         }
@@ -509,7 +711,8 @@ public abstract class Network<C extends CommandWithArgumentList> extends Command
          *                   that will be appended to the end of
          *                   the command  line
          */
-        private Inspect(Arguments arguments, List<?> argList)
+        private Inspect(Arguments arguments,
+                        List<?>   argList)
         {
             super(arguments, argList);
         }
@@ -535,14 +738,16 @@ public abstract class Network<C extends CommandWithArgumentList> extends Command
 
 
         @Override
-        protected Inspect withCommandArguments(List<Argument> endArgs, Argument... args)
+        protected Inspect withCommandArguments(List<Argument> endArgs,
+                                               Argument...    args)
         {
             return new Inspect(getCommandArguments().with(args), endArgs);
         }
 
 
         @Override
-        protected Inspect withoutCommandArguments(List<Argument> endArgs, Argument... args)
+        protected Inspect withoutCommandArguments(List<Argument> endArgs,
+                                                  Argument...    args)
         {
             return new Inspect(getCommandArguments().without(args), endArgs);
         }
@@ -571,7 +776,8 @@ public abstract class Network<C extends CommandWithArgumentList> extends Command
          *                   that will be appended to the end of
          *                   the command  line
          */
-        private LS(Arguments arguments, List<?> argList)
+        private LS(Arguments arguments,
+                   List<?>   argList)
         {
             super(arguments, argList);
         }
@@ -621,14 +827,16 @@ public abstract class Network<C extends CommandWithArgumentList> extends Command
 
 
         @Override
-        protected LS withCommandArguments(List<Argument> endArgs, Argument... args)
+        protected LS withCommandArguments(List<Argument> endArgs,
+                                          Argument...    args)
         {
             return new LS(getCommandArguments().with(args), endArgs);
         }
 
 
         @Override
-        protected LS withoutCommandArguments(List<Argument> endArgs, Argument... args)
+        protected LS withoutCommandArguments(List<Argument> endArgs,
+                                             Argument...    args)
         {
             return new LS(getCommandArguments().without(args), endArgs);
         }
@@ -651,206 +859,26 @@ public abstract class Network<C extends CommandWithArgumentList> extends Command
         }
 
 
-        private Remove(Arguments arguments, List<?> argList)
+        private Remove(Arguments arguments,
+                       List<?>   argList)
         {
             super(arguments, argList);
         }
 
 
         @Override
-        protected Remove withCommandArguments(List<Argument> endArgs, Argument... args)
+        protected Remove withCommandArguments(List<Argument> endArgs,
+                                              Argument...    args)
         {
             return new Remove(getCommandArguments().with(args), endArgs);
         }
 
 
         @Override
-        protected Remove withoutCommandArguments(List<Argument> endArgs, Argument... args)
+        protected Remove withoutCommandArguments(List<Argument> endArgs,
+                                                 Argument...    args)
         {
             return new Remove(getCommandArguments().without(args), endArgs);
         }
-    }
-
-
-    /**
-     * Create a Docker network using the bridge driver.
-     *
-     * @param name  the name of the network to create
-     *
-     * @return  a new {@link Create} command.
-     */
-    public static Create createBridge(String name)
-    {
-        return create(name, "bridge");
-    }
-
-
-    /**
-     * Create a Docker network using the overlay driver.
-     *
-     * @param name  the name of the network to create
-     *
-     * @return  a new {@link Create} command.
-     */
-    public static Create createOverlay(String name)
-    {
-        return create(name, "overlay");
-    }
-
-
-    /**
-     * Create a Docker network using the specified driver.
-     *
-     * @param name    the name of the network to create
-     * @param driver  the name of the network driver to use
-     *
-     * @return  a new {@link Create} command.
-     */
-    public static Create create(String name, String driver)
-    {
-        return new Create(name, driver);
-    }
-
-
-    /**
-     * Connect a container to a Docker network.
-     *
-     * @param network    the name of the network to connect to
-     * @param container  the name of the container to connect to the network
-     *
-     * @return  a new {@link Connect} command.
-     */
-    public static Connect connect(String network, String container)
-    {
-        return new Connect(network, container);
-    }
-
-
-    /**
-     * Connect a container to a Docker network.
-     *
-     * @param network    the name of the network to connect to
-     * @param container  the name of the container to connect to the network
-     *
-     * @return  a new {@link Connect} command.
-     */
-    public static Disconnect disconnect(String network, String container)
-    {
-        return new Disconnect(network, container);
-    }
-
-
-    /**
-     * Inspect the specified networks.
-     *
-     * @param names  the names of the networks to inspect
-     */
-    public static Inspect inspect(String... names)
-    {
-        return inspect(Arrays.asList(names));
-    }
-
-
-    /**
-     * Inspect the specified networks.
-     *
-     * @param names  the names of the networks to inspect
-     */
-    public static Inspect inspect(List<String> names)
-    {
-        return new Inspect(names);
-    }
-
-
-    /**
-     * Execute an {@link Inspect} command on the specified {@link Platform}
-     * using the specified {@link Docker} environment.
-     *
-     * @param platform     the {@link Platform} to use to execute the command
-     * @param environment  the {@link Docker} environment to use
-     * @param networks     the names of the networks to inspect
-     *
-     * @return  a {@link JsonArray} containing the results of the inspect command
-     */
-    public static JsonValue inspect(Platform  platform,
-                                    Docker    environment,
-                                    String... networks)
-    {
-        CapturingApplicationConsole console = new CapturingApplicationConsole();
-
-        Inspect inspect = inspect(networks);
-
-        try (Application app = platform.launch(inspect, environment, Console.of(console)))
-        {
-            if (app.waitFor() != 0)
-            {
-                console.getCapturedOutputLines().forEach(System.out::println);
-                console.getCapturedErrorLines().forEach(System.err::println);
-                return null;
-            }
-        }
-
-        Queue<String> lines = console.getCapturedOutputLines();
-        String        json  = lines.stream()
-                                   .filter((line) -> line != null && !line.equals("(terminated)"))
-                                   .collect(Collectors.joining("\n"))
-                                                      .trim();
-
-        if (!json.startsWith("[") &&!json.startsWith("{"))
-        {
-            json = "[" + json + "]";
-        }
-
-        JsonReader reader = Json.createReader(new StringReader(json));
-
-        try
-        {
-            return reader.read();
-        }
-        catch (Exception e)
-        {
-            System.err.println("Error parsing JSON");
-            System.err.println(json);
-            e.printStackTrace();
-
-            return null;
-        }
-    }
-
-
-    /**
-     * List the available Docker networks,
-     *
-     * @return  a new {@link LS} command.
-     */
-    public static LS list()
-    {
-        return new LS();
-    }
-
-
-    /**
-     * Remove one or more Docker networks.
-     *
-     * @param names  the names of the network to remove
-     *
-     * @return  a new {@link Remove} command.
-     */
-    public static Remove remove(String... names)
-    {
-        return remove(Arrays.asList(names));
-    }
-
-
-    /**
-     * Remove one or more Docker networks.
-     *
-     * @param names  the names of the network to remove
-     *
-     * @return  a new {@link Remove} command.
-     */
-    public static Remove remove(List<String> names)
-    {
-        return new Remove(names);
     }
 }

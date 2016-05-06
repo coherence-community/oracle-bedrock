@@ -3,7 +3,7 @@
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * The contents of this file are subject to the terms and conditions of
+ * The contents of this file are subject to the terms and conditions of 
  * the Common Development and Distribution License 1.0 (the "License").
  *
  * You may not use this file except in compliance with the License.
@@ -48,27 +48,101 @@ import java.util.List;
 public abstract class Remove<R extends Remove> extends CommandWithArgumentList<R>
 {
     /**
-     * Create a {@link Remove} command.
-     *
-     * @param command  the name of the command (rm or rmi)
-     * @param names    the names of the items to be removed
-     */
-    private Remove(String command, List<?> names)
-    {
-        super(command, names);
-    }
-
-
-    /**
      * Create a {@link Remove} command with the specified {@link Arguments}
      * and items to be removed.
      *
      * @param arguments  the command {@link Arguments}
      * @param names      the names of the items to remove
      */
-    private Remove(Arguments arguments, List<?> names)
+    private Remove(Arguments arguments,
+                   List<?>   names)
     {
         super(arguments, names);
+    }
+
+
+    /**
+     * Create a {@link Remove} command.
+     *
+     * @param command  the name of the command (rm or rmi)
+     * @param names    the names of the items to be removed
+     */
+    private Remove(String  command,
+                   List<?> names)
+    {
+        super(command, names);
+    }
+
+
+    /**
+     * Create a {@link RemoveContainer} command to remove specific containers.
+     *
+     * @param names  values that will resolve to a set of tags for containers
+     *               to be removed
+     *
+     * @return  a {@link RemoveContainer} command to remove specific containers
+     */
+    public static RemoveContainer containers(Object... names)
+    {
+        return containers(Arrays.asList(names));
+    }
+
+
+    /**
+     * Create a {@link RemoveContainer} command to remove specific containers.
+     *
+     * @param names  a {@link List} of values that will resolve to a set of
+     *               tags for containers to be removed
+     *
+     * @return  a {@link RemoveContainer} command to remove specific containers
+     */
+    public static RemoveContainer containers(List<?> names)
+    {
+        return new RemoveContainer(names);
+    }
+
+
+    /**
+     * Create a {@link Remove} command to remove a link between two containers.
+     *
+     * @param first   the name of the first container
+     * @param second  the name of the second container
+     *
+     * @return  a {@link Remove} command to remove a link between two containers
+     */
+    public static Remove link(String first,
+                              String second)
+    {
+        List<?> names = Collections.singletonList(first + '/' + second);
+
+        return new RemoveLink(names).withCommandArguments(Argument.of("--link"));
+    }
+
+
+    /**
+     * Create a {@link RemoveImage} command to remove specific images.
+     *
+     * @param tags  values that will resolve to a set of tags for images to be removed
+     *
+     * @return  a {@link RemoveImage} command to remove specific images
+     */
+    public static RemoveImage images(Object... tags)
+    {
+        return images(Arrays.asList(tags));
+    }
+
+
+    /**
+     * Create a {@link RemoveImage} command to remove specific images.
+     *
+     * @param tags  a {@link List} of values that will resolve to a set of
+     *              tags for images to be removed
+     *
+     * @return  a {@link RemoveImage} command to remove specific images
+     */
+    public static RemoveImage images(List<?> tags)
+    {
+        return new RemoveImage(tags);
     }
 
 
@@ -97,7 +171,8 @@ public abstract class Remove<R extends Remove> extends CommandWithArgumentList<R
          * @param arguments   the command {@link Arguments}
          * @param containers  the names of the containers to remove
          */
-        private RemoveContainer(Arguments arguments, List<?> containers)
+        private RemoveContainer(Arguments arguments,
+                                List<?>   containers)
         {
             super(arguments, containers);
         }
@@ -168,55 +243,18 @@ public abstract class Remove<R extends Remove> extends CommandWithArgumentList<R
 
 
         @Override
-        protected RemoveContainer withCommandArguments(List<Argument> containers, Argument... args)
+        protected RemoveContainer withCommandArguments(List<Argument> containers,
+                                                       Argument...    args)
         {
             return new RemoveContainer(getCommandArguments().with(args), containers);
         }
 
 
         @Override
-        protected RemoveContainer withoutCommandArguments(List<Argument> names, Argument... args)
+        protected RemoveContainer withoutCommandArguments(List<Argument> names,
+                                                          Argument...    args)
         {
             return new RemoveContainer(getCommandArguments().without(args), names);
-        }
-    }
-
-
-    /**
-     * A representation of a Docker command to remove a link between two
-     * containers (equates to the Docker rm --link containerA/contaunerB command).
-     */
-    public static class RemoveLink extends Remove<RemoveLink>
-    {
-        private RemoveLink(List<?> names)
-        {
-            super("rm", names);
-        }
-
-        /**
-         * Create a {@link RemoveLink} command with the specified {@link Arguments}
-         * and containers to be un-linked.
-         *
-         * @param arguments  the command {@link Arguments}
-         * @param names      the names of the containers to be unlinked
-         */
-        private RemoveLink(Arguments arguments, List<?> names)
-        {
-            super(arguments, names);
-        }
-
-
-        @Override
-        protected RemoveLink withCommandArguments(List<Argument> containers, Argument... args)
-        {
-            return new RemoveLink(getCommandArguments().with(args), containers);
-        }
-
-
-        @Override
-        protected RemoveLink withoutCommandArguments(List<Argument> names, Argument... args)
-        {
-            return new RemoveLink(getCommandArguments().without(args), names);
         }
     }
 
@@ -244,7 +282,8 @@ public abstract class Remove<R extends Remove> extends CommandWithArgumentList<R
          * @param arguments  the command {@link Arguments}
          * @param names      the names of the images to remove
          */
-        private RemoveImage(Arguments arguments, List<?> names)
+        private RemoveImage(Arguments arguments,
+                            List<?>   names)
         {
             super(arguments, names);
         }
@@ -299,7 +338,7 @@ public abstract class Remove<R extends Remove> extends CommandWithArgumentList<R
          *
          * @param noPrune  true to add the <code>--no-prune</code> option or false
          *                 to remove the <code>--no-prune</code> option
-
+         *
          * @return  a new {@link RemoveImage} instance that is the same as this
          *          instance with the --no-prune option applied
          */
@@ -315,14 +354,16 @@ public abstract class Remove<R extends Remove> extends CommandWithArgumentList<R
 
 
         @Override
-        protected RemoveImage withCommandArguments(List<Argument> images, Argument... args)
+        protected RemoveImage withCommandArguments(List<Argument> images,
+                                                   Argument...    args)
         {
             return new RemoveImage(getCommandArguments().with(args), images);
         }
 
 
         @Override
-        protected RemoveImage withoutCommandArguments(List<Argument> names, Argument... args)
+        protected RemoveImage withoutCommandArguments(List<Argument> names,
+                                                      Argument...    args)
         {
             return new RemoveImage(getCommandArguments().without(args), names);
         }
@@ -330,72 +371,44 @@ public abstract class Remove<R extends Remove> extends CommandWithArgumentList<R
 
 
     /**
-     * Create a {@link RemoveContainer} command to remove specific containers.
-     *
-     * @param names  values that will resolve to a set of tags for containers
-     *               to be removed
-     *
-     * @return  a {@link RemoveContainer} command to remove specific containers
+     * A representation of a Docker command to remove a link between two
+     * containers (equates to the Docker rm --link containerA/contaunerB command).
      */
-    public static RemoveContainer containers(Object... names)
+    public static class RemoveLink extends Remove<RemoveLink>
     {
-        return containers(Arrays.asList(names));
-    }
+        private RemoveLink(List<?> names)
+        {
+            super("rm", names);
+        }
 
 
-    /**
-     * Create a {@link RemoveContainer} command to remove specific containers.
-     *
-     * @param names  a {@link List} of values that will resolve to a set of
-     *               tags for containers to be removed
-     *
-     * @return  a {@link RemoveContainer} command to remove specific containers
-     */
-    public static RemoveContainer containers(List<?> names)
-    {
-        return new RemoveContainer(names);
-    }
+        /**
+         * Create a {@link RemoveLink} command with the specified {@link Arguments}
+         * and containers to be un-linked.
+         *
+         * @param arguments  the command {@link Arguments}
+         * @param names      the names of the containers to be unlinked
+         */
+        private RemoveLink(Arguments arguments,
+                           List<?>   names)
+        {
+            super(arguments, names);
+        }
 
 
-    /**
-     * Create a {@link Remove} command to remove a link between two containers.
-     *
-     * @param first   the name of the first container
-     * @param second  the name of the second container
-     *
-     * @return  a {@link Remove} command to remove a link between two containers
-     */
-    public static Remove link(String first, String second)
-    {
-        List<?> names = Collections.singletonList(first + '/' + second);
-
-        return new RemoveLink(names).withCommandArguments(Argument.of("--link"));
-    }
+        @Override
+        protected RemoveLink withCommandArguments(List<Argument> containers,
+                                                  Argument...    args)
+        {
+            return new RemoveLink(getCommandArguments().with(args), containers);
+        }
 
 
-    /**
-     * Create a {@link RemoveImage} command to remove specific images.
-     *
-     * @param tags  values that will resolve to a set of tags for images to be removed
-     *
-     * @return  a {@link RemoveImage} command to remove specific images
-     */
-    public static RemoveImage images(Object... tags)
-    {
-        return images(Arrays.asList(tags));
-    }
-
-
-    /**
-     * Create a {@link RemoveImage} command to remove specific images.
-     *
-     * @param tags  a {@link List} of values that will resolve to a set of
-     *              tags for images to be removed
-     *
-     * @return  a {@link RemoveImage} command to remove specific images
-     */
-    public static RemoveImage images(List<?> tags)
-    {
-        return new RemoveImage(tags);
+        @Override
+        protected RemoveLink withoutCommandArguments(List<Argument> names,
+                                                     Argument...    args)
+        {
+            return new RemoveLink(getCommandArguments().without(args), names);
+        }
     }
 }

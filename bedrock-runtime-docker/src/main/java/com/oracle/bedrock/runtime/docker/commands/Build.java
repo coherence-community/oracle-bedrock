@@ -3,7 +3,7 @@
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * The contents of this file are subject to the terms and conditions of
+ * The contents of this file are subject to the terms and conditions of 
  * the Common Development and Distribution License 1.0 (the "License").
  *
  * You may not use this file except in compliance with the License.
@@ -73,11 +73,11 @@ public class Build extends AbstractDockerCommand<Build>
     private Build()
     {
         super("build");
-        
+
         this.contextLocation = ".";
     }
-    
-    
+
+
     /**
      * Create a {@link Build} command with the specified {@link Arguments}
      * and build context folder.
@@ -86,13 +86,14 @@ public class Build extends AbstractDockerCommand<Build>
      * @param contextLocation  a value that will resolve to the location of
      *                         the build context folder
      */
-    private Build(Arguments arguments, Object contextLocation)
+    private Build(Arguments arguments,
+                  Object    contextLocation)
     {
         super(arguments);
         this.contextLocation = contextLocation;
     }
-    
-    
+
+
     @Override
     public Build withCommandArguments(Argument... args)
     {
@@ -574,7 +575,7 @@ public class Build extends AbstractDockerCommand<Build>
      * Create a new {@link Build} command that is a copy of this {@link Build}
      * command with the <code>--shm-size</code> option applied.
      * <p>
-     * The format is `<number><unit>`. `number` must be greater than `0`.
+     * The format is `&lt;number&gt;&lt;unit&gt;`. `number` must be greater than `0`.
      * Unit is optional and can be `b` (bytes), `k` (kilobytes), `m` (megabytes), or
      * `g` (gigabytes). If you omit the unit, the system uses bytes. If you omit the
      * size entirely, the system uses `64m`.
@@ -612,7 +613,8 @@ public class Build extends AbstractDockerCommand<Build>
 
 
     @Override
-    public void onLaunch(Platform platform, Options options)
+    public void onLaunch(Platform platform,
+                         Options  options)
     {
         // set the Image build timeout
         Timeout timeout = getTimeout();
@@ -625,7 +627,6 @@ public class Build extends AbstractDockerCommand<Build>
 
         options.addIfAbsent(timeout);
 
-
         // call super to add all of the command arguments
         super.onLaunch(platform, options);
 
@@ -635,17 +636,18 @@ public class Build extends AbstractDockerCommand<Build>
 
 
     @Override
-    public void onLaunched(Platform platform, Application application, Options options)
+    public void onLaunched(Platform    platform,
+                           Application application,
+                           Options     options)
     {
-        Arguments    arguments = options.get(Arguments.class);
-        String       tagPrefix = "--tag=";
-        int          prefixLen = tagPrefix.length();
+        Arguments arguments = options.get(Arguments.class);
+        String    tagPrefix = "--tag=";
+        int       prefixLen = tagPrefix.length();
 
-        List<String> tags      = arguments.stream()
-                                          .map((arg) ->  String.valueOf(arg.getValue()))
-                                          .filter((tagArg) -> tagArg.startsWith(tagPrefix))
-                                          .map((tagArg) -> tagArg.substring(prefixLen))
-                                          .collect(Collectors.toList());
+        List<String> tags =
+            arguments.stream().map((arg) -> String.valueOf(arg.getValue()))
+            .filter((tagArg) -> tagArg.startsWith(tagPrefix)).map((tagArg) -> tagArg.substring(prefixLen))
+            .collect(Collectors.toList());
 
         DockerImage image = new DockerImage(tags, options);
 
@@ -666,9 +668,7 @@ public class Build extends AbstractDockerCommand<Build>
         // We must have a tag to identify the image so create a random one.
         // The user can override it if they wish
 
-        return new Build()
-                .dockerFileName("Dockerfile")
-                .withTags(UUID.randomUUID().toString());
+        return new Build().dockerFileName("Dockerfile").withTags(UUID.randomUUID().toString());
     }
 
 
@@ -676,6 +676,8 @@ public class Build extends AbstractDockerCommand<Build>
      * Create a {@link Build} command that will build an image
      * using the Dockerfile with the specified name located in
      * the working directory that the command is launched in.
+     *
+     * @param dockerFileName  the docker file name
      *
      * @return  a {@link Build} command
      */

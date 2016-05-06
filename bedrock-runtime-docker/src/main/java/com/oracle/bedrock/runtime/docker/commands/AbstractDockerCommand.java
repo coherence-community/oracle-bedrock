@@ -3,7 +3,7 @@
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * The contents of this file are subject to the terms and conditions of
+ * The contents of this file are subject to the terms and conditions of 
  * the Common Development and Distribution License 1.0 (the "License").
  *
  * You may not use this file except in compliance with the License.
@@ -25,16 +25,16 @@
 
 package com.oracle.bedrock.runtime.docker.commands;
 
-import com.oracle.bedrock.runtime.Platform;
-import com.oracle.bedrock.runtime.SimpleApplication;
-import com.oracle.bedrock.runtime.options.Argument;
-import com.oracle.bedrock.runtime.options.Arguments;
-import com.oracle.bedrock.runtime.options.Executable;
 import com.oracle.bedrock.Options;
 import com.oracle.bedrock.options.Timeout;
 import com.oracle.bedrock.runtime.Application;
-import com.oracle.bedrock.runtime.docker.Docker;
 import com.oracle.bedrock.runtime.MetaClass;
+import com.oracle.bedrock.runtime.Platform;
+import com.oracle.bedrock.runtime.SimpleApplication;
+import com.oracle.bedrock.runtime.docker.Docker;
+import com.oracle.bedrock.runtime.options.Argument;
+import com.oracle.bedrock.runtime.options.Arguments;
+import com.oracle.bedrock.runtime.options.Executable;
 
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
@@ -54,26 +54,14 @@ import java.util.concurrent.TimeUnit;
 public abstract class AbstractDockerCommand<C extends AbstractDockerCommand> implements MetaClass<Application>
 {
     /**
-     * The {@link Argument}s representing the options for the command.
-     */
-    private Arguments commandArguments;
-
-    /**
      * The {@link Timeout} to use when executing the command.
      */
     private Timeout timeout = Timeout.after(2, TimeUnit.MINUTES);
 
-
     /**
-     * Constructs a {@link AbstractDockerCommand} for a given
-     * Docker command.
-     *
-     * @param command  the Docker command that will be executed
+     * The {@link Argument}s representing the options for the command.
      */
-    public AbstractDockerCommand(String command)
-    {
-        this(Arguments.of(Argument.of(command)));
-    }
+    private Arguments commandArguments;
 
 
     /**
@@ -88,26 +76,40 @@ public abstract class AbstractDockerCommand<C extends AbstractDockerCommand> imp
     }
 
 
+    /**
+     * Constructs a {@link AbstractDockerCommand} for a given
+     * Docker command.
+     *
+     * @param command  the Docker command that will be executed
+     */
+    public AbstractDockerCommand(String command)
+    {
+        this(Arguments.of(Argument.of(command)));
+    }
+
+
     @Override
-    public Class<? extends Application> getImplementationClass(Platform platform, Options options)
+    public Class<? extends Application> getImplementationClass(Platform platform,
+                                                               Options  options)
     {
         return SimpleApplication.class;
     }
 
 
     @Override
-    public void onLaunching(Platform platform, Options options)
+    public void onLaunching(Platform platform,
+                            Options  options)
     {
         // there is nothing to do here
     }
 
 
     @Override
-    public void onLaunch(Platform platform, Options options)
+    public void onLaunch(Platform platform,
+                         Options  options)
     {
-        Docker environment = options.get(Docker.class);
-        Arguments arguments   = Arguments.of(environment.getArguments())
-                                         .with(commandArguments);
+        Docker    environment = options.get(Docker.class);
+        Arguments arguments   = Arguments.of(environment.getArguments()).with(commandArguments);
 
         // Set the executable name to "docker"
         options.add(Executable.named(environment.getDockerExecutable()));
@@ -129,7 +131,9 @@ public abstract class AbstractDockerCommand<C extends AbstractDockerCommand> imp
 
 
     @Override
-    public void onLaunched(Platform platform, Application application, Options options)
+    public void onLaunched(Platform    platform,
+                           Application application,
+                           Options     options)
     {
         // there is nothing to do here
     }
@@ -193,7 +197,8 @@ public abstract class AbstractDockerCommand<C extends AbstractDockerCommand> imp
      * @return  a copy of this {@link AbstractDockerCommand} with
      *          the addition of the specified timeout
      */
-    public C timeoutAfter(long duration, TimeUnit units)
+    public C timeoutAfter(long     duration,
+                          TimeUnit units)
     {
         return timeoutAfter(Timeout.after(duration, units));
     }

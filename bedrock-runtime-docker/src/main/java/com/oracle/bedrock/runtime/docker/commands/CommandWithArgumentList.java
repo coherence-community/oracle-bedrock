@@ -1,9 +1,9 @@
 /*
- * File: CommandWithList.java
+ * File: CommandWithArgumentList.java
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * The contents of this file are subject to the terms and conditions of
+ * The contents of this file are subject to the terms and conditions of 
  * the Common Development and Distribution License 1.0 (the "License").
  *
  * You may not use this file except in compliance with the License.
@@ -25,10 +25,10 @@
 
 package com.oracle.bedrock.runtime.docker.commands;
 
+import com.oracle.bedrock.Options;
 import com.oracle.bedrock.runtime.Platform;
 import com.oracle.bedrock.runtime.options.Argument;
 import com.oracle.bedrock.runtime.options.Arguments;
-import com.oracle.bedrock.Options;
 
 import java.util.Collections;
 import java.util.List;
@@ -61,29 +61,32 @@ public abstract class CommandWithArgumentList<C extends CommandWithArgumentList>
     /**
      * Create a {@link CommandWithArgumentList}.
      *
-     * @param command  the Docker command
-     * @param argList  {@link List} of {@link Argument}s
-     *                 that will be appended to the end of
-     *                 the command  line
-     */
-    protected CommandWithArgumentList(String command, List<?> argList)
-    {
-        super(command);
-
-        setArgList(argList);
-    }
-
-    /**
-     * Create a {@link CommandWithArgumentList}.
-     *
      * @param arguments  the command {@link Arguments}
      * @param argList    {@link List} of {@link Argument}s
      *                   that will be appended to the end of
      *                   the command  line
      */
-    protected CommandWithArgumentList(Arguments arguments, List<?> argList)
+    protected CommandWithArgumentList(Arguments arguments,
+                                      List<?>   argList)
     {
         super(arguments);
+
+        setArgList(argList);
+    }
+
+
+    /**
+     * Create a {@link CommandWithArgumentList}.
+     *
+     * @param command  the Docker command
+     * @param argList  {@link List} of {@link Argument}s
+     *                 that will be appended to the end of
+     *                 the command  line
+     */
+    protected CommandWithArgumentList(String  command,
+                                      List<?> argList)
+    {
+        super(command);
 
         setArgList(argList);
     }
@@ -103,11 +106,10 @@ public abstract class CommandWithArgumentList<C extends CommandWithArgumentList>
             this.argumentList = Collections.emptyList();
         }
 
-        this.argumentList = values.stream()
-                          .filter((value) -> value != null)
-                          .map(Argument::of)
-                          .collect(Collectors.toList());
+        this.argumentList = values.stream().filter((value) -> value
+                                                              != null).map(Argument::of).collect(Collectors.toList());
     }
+
 
     /**
      * Obtain a copy of this {@link CommandWithArgumentList} with the
@@ -143,7 +145,8 @@ public abstract class CommandWithArgumentList<C extends CommandWithArgumentList>
      * @return  a copy of this {@link CommandWithArgumentList} with the
      *          addition of the specified command arguments {@link Argument}s
      */
-    protected abstract C withCommandArguments(List<Argument> endArgs, Argument... args);
+    protected abstract C withCommandArguments(List<Argument> endArgs,
+                                              Argument...    args);
 
 
     /**
@@ -157,7 +160,8 @@ public abstract class CommandWithArgumentList<C extends CommandWithArgumentList>
      * @return  a copy of this {@link CommandWithArgumentList} without the
      *          specified command arguments {@link Argument}s
      */
-    protected abstract C withoutCommandArguments(List<Argument> endArgs, Argument... args);
+    protected abstract C withoutCommandArguments(List<Argument> endArgs,
+                                                 Argument...    args);
 
 
     /**
@@ -168,7 +172,8 @@ public abstract class CommandWithArgumentList<C extends CommandWithArgumentList>
      * @param options    the {@link Options}  for the command
      */
     @Override
-    public void onLaunch(Platform platform, Options options)
+    public void onLaunch(Platform platform,
+                         Options  options)
     {
         // call super to add all of the command's arguments
         super.onLaunch(platform, options);

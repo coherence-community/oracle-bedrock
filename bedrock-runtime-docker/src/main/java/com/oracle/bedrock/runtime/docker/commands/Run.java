@@ -3,7 +3,7 @@
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * The contents of this file are subject to the terms and conditions of
+ * The contents of this file are subject to the terms and conditions of 
  * the Common Development and Distribution License 1.0 (the "License").
  *
  * You may not use this file except in compliance with the License.
@@ -25,15 +25,15 @@
 
 package com.oracle.bedrock.runtime.docker.commands;
 
-import com.oracle.bedrock.runtime.Platform;
-import com.oracle.bedrock.runtime.options.EnvironmentVariable;
-import com.oracle.bedrock.runtime.options.EnvironmentVariables;
 import com.oracle.bedrock.Options;
 import com.oracle.bedrock.runtime.Application;
+import com.oracle.bedrock.runtime.Platform;
 import com.oracle.bedrock.runtime.docker.DockerContainer;
 import com.oracle.bedrock.runtime.docker.DockerImage;
 import com.oracle.bedrock.runtime.options.Argument;
 import com.oracle.bedrock.runtime.options.Arguments;
+import com.oracle.bedrock.runtime.options.EnvironmentVariable;
+import com.oracle.bedrock.runtime.options.EnvironmentVariables;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -77,12 +77,10 @@ public class Run extends AbstractDockerCommand<Run>
      * @param imageName      the name of the image to run
      * @param containerName  the name to give the container
      */
-    private Run(String imageName, Object containerName)
+    private Run(String imageName,
+                Object containerName)
     {
-        this(Arguments.of(Argument.of("run"),
-                          Argument.of("--name", '=', containerName)),
-             imageName,
-             new ArrayList<>());
+        this(Arguments.of(Argument.of("run"), Argument.of("--name", '=', containerName)), imageName, new ArrayList<>());
     }
 
 
@@ -99,7 +97,7 @@ public class Run extends AbstractDockerCommand<Run>
     {
         super(commandOptions);
 
-        this.imageArgument = Argument.of(image);
+        this.imageArgument        = Argument.of(image);
         this.environmentVariables = environmentVariables;
     }
 
@@ -120,17 +118,14 @@ public class Run extends AbstractDockerCommand<Run>
 
     /**
      * Create a new {@link Run} command that is a copy of this {@link Run}
-     * command with the <code></code> option applied.
+     * command with the option applied.
      *
      * @return  a new {@link Run} command that is a copy of this
-     *          {@link Run} command with the <code></code> option
-     *          applied.
+     *          {@link Run} command with the <code>--detach</code> option applied
      */
     public Run detached()
     {
-        Arguments args = getCommandArguments()
-                .with(Argument.of("--detach"))
-                .without(Argument.of("--interactive"));
+        Arguments args = getCommandArguments().with(Argument.of("--detach")).without(Argument.of("--interactive"));
 
         return new Run(args, imageArgument, environmentVariables);
     }
@@ -146,9 +141,7 @@ public class Run extends AbstractDockerCommand<Run>
      */
     public Run interactive()
     {
-        Arguments args = getCommandArguments()
-                .with(Argument.of("--interactive"))
-                .without(Argument.of("--detach"));
+        Arguments args = getCommandArguments().with(Argument.of("--interactive")).without(Argument.of("--detach"));
 
         return new Run(args, imageArgument, environmentVariables);
     }
@@ -173,6 +166,8 @@ public class Run extends AbstractDockerCommand<Run>
      * command with the <code>--env</code> option applied using the specified
      * environment variable name.
      *
+     * @param name the name
+     *
      * @return  a new {@link Run} command that is a copy of this
      *          {@link Run} command with the <code>--env</code> option
      *          applied.
@@ -192,11 +187,15 @@ public class Run extends AbstractDockerCommand<Run>
      * command with the <code>--env</code> option applied using the specified
      * environment variable name and value.
      *
+     * @param name   the name
+     * @param value  the value
+     *
      * @return  a new {@link Run} command that is a copy of this
      *          {@link Run} command with the <code>--env</code> option
      *          applied.
      */
-    public Run env(String name, Object value)
+    public Run env(String name,
+                   Object value)
     {
         List<EnvironmentVariable> variables = new ArrayList<>(this.environmentVariables);
 
@@ -210,6 +209,8 @@ public class Run extends AbstractDockerCommand<Run>
      * Create a new {@link Run} command that is a copy of this {@link Run}
      * command with the <code>--env</code> option applied using the specified
      * environment variable names and values from the specified {@link Properties}.
+     *
+     * @param variables   the variables
      *
      * @return  a new {@link Run} command that is a copy of this
      *          {@link Run} command with the <code>--env</code> option
@@ -225,9 +226,8 @@ public class Run extends AbstractDockerCommand<Run>
 
         List<EnvironmentVariable> copy = new ArrayList<>(this.environmentVariables);
 
-        variables.entrySet().stream()
-                .map((entry) -> EnvironmentVariable.of(entry.getKey().toString(), entry.getValue()))
-                .forEach(copy::add);
+        variables.entrySet().stream().map((entry) -> EnvironmentVariable.of(entry.getKey().toString(),
+                                                                            entry.getValue())).forEach(copy::add);
 
         return new Run(this.getCommandArguments(), this.imageArgument, copy);
     }
@@ -247,9 +247,7 @@ public class Run extends AbstractDockerCommand<Run>
     {
         Argument arg = Argument.of("--expose", '=', new Argument.Multiple(ports));
 
-        return new Run(this.getCommandArguments().replace(arg),
-                       this.imageArgument,
-                       this.environmentVariables);
+        return new Run(this.getCommandArguments().replace(arg), this.imageArgument, this.environmentVariables);
     }
 
 
@@ -268,9 +266,7 @@ public class Run extends AbstractDockerCommand<Run>
     {
         Arguments arguments = this.getCommandArguments().with(Argument.of("--publish-all"));
 
-        return new Run(arguments,
-                       this.imageArgument,
-                       this.environmentVariables);
+        return new Run(arguments, this.imageArgument, this.environmentVariables);
     }
 
 
@@ -318,12 +314,11 @@ public class Run extends AbstractDockerCommand<Run>
             return this;
         }
 
-        Arguments arguments = this.getCommandArguments()
-                .with(Argument.of("--publish", '=', new Argument.Multiple(portMappings)));
+        Arguments arguments = this.getCommandArguments().with(Argument.of("--publish",
+                                                                          '=',
+                                                                          new Argument.Multiple(portMappings)));
 
-        return new Run(arguments,
-                       this.imageArgument,
-                       this.environmentVariables);
+        return new Run(arguments, this.imageArgument, this.environmentVariables);
     }
 
 
@@ -353,9 +348,7 @@ public class Run extends AbstractDockerCommand<Run>
     {
         Argument argument = Argument.of("--attach");
 
-        return new Run(getCommandArguments().replace(argument),
-                       this.imageArgument,
-                       this.environmentVariables);
+        return new Run(getCommandArguments().replace(argument), this.imageArgument, this.environmentVariables);
     }
 
 
@@ -373,9 +366,7 @@ public class Run extends AbstractDockerCommand<Run>
     {
         Argument argument = Argument.of("--add-host", '=', new Argument.Multiple(hostMappings));
 
-        return new Run(getCommandArguments().replace(argument),
-                       this.imageArgument,
-                       this.environmentVariables);
+        return new Run(getCommandArguments().replace(argument), this.imageArgument, this.environmentVariables);
     }
 
 
@@ -393,9 +384,7 @@ public class Run extends AbstractDockerCommand<Run>
     {
         Argument argument = Argument.of("--blkio-weight", '=', weight);
 
-        return new Run(getCommandArguments().replace(argument),
-                       this.imageArgument,
-                       this.environmentVariables);
+        return new Run(getCommandArguments().replace(argument), this.imageArgument, this.environmentVariables);
     }
 
 
@@ -414,9 +403,7 @@ public class Run extends AbstractDockerCommand<Run>
     {
         Argument argument = Argument.of("--blkio-weight-device", '=', weight);
 
-        return new Run(getCommandArguments().replace(argument),
-                       this.imageArgument,
-                       this.environmentVariables);
+        return new Run(getCommandArguments().replace(argument), this.imageArgument, this.environmentVariables);
     }
 
 
@@ -452,9 +439,7 @@ public class Run extends AbstractDockerCommand<Run>
     {
         Argument argument = Argument.of("--cap-add", '=', new Argument.Multiple(capabilities));
 
-        return new Run(getCommandArguments().replace(argument),
-                       this.imageArgument,
-                       this.environmentVariables);
+        return new Run(getCommandArguments().replace(argument), this.imageArgument, this.environmentVariables);
     }
 
 
@@ -472,9 +457,7 @@ public class Run extends AbstractDockerCommand<Run>
     {
         Argument argument = Argument.of("--cap-drop", '=', new Argument.Multiple(capabilities));
 
-        return new Run(getCommandArguments().replace(argument),
-                       this.imageArgument,
-                       this.environmentVariables);
+        return new Run(getCommandArguments().replace(argument), this.imageArgument, this.environmentVariables);
     }
 
 
@@ -492,9 +475,7 @@ public class Run extends AbstractDockerCommand<Run>
     {
         Argument argument = Argument.of("--cgroup-parent", '=', parent);
 
-        return new Run(getCommandArguments().replace(argument),
-                       this.imageArgument,
-                       this.environmentVariables);
+        return new Run(getCommandArguments().replace(argument), this.imageArgument, this.environmentVariables);
     }
 
 
@@ -512,9 +493,7 @@ public class Run extends AbstractDockerCommand<Run>
     {
         Argument argument = Argument.of("--cidfile", '=', file);
 
-        return new Run(getCommandArguments().replace(argument),
-                       this.imageArgument,
-                       this.environmentVariables);
+        return new Run(getCommandArguments().replace(argument), this.imageArgument, this.environmentVariables);
     }
 
 
@@ -593,6 +572,8 @@ public class Run extends AbstractDockerCommand<Run>
     /**
      * Create a new {@link Run} command that is a copy of this {@link Run}
      * command with the <code>--detach</code> option applied.
+     *
+     * @param name  the name
      *
      * @return  a new {@link Run} command that is a copy of this
      *          {@link Run} command with the <code>--detach</code>
@@ -1346,6 +1327,8 @@ public class Run extends AbstractDockerCommand<Run>
      * Create a new {@link Run} command that is a copy of this {@link Run}
      * command with the <code>--privileged</code> option applied.
      *
+     * @param limit  the limit
+     *
      * @return  a new {@link Run} command that is a copy of this
      *          {@link Run} command with the <code>--privileged</code>
      *          option applied.
@@ -1484,7 +1467,7 @@ public class Run extends AbstractDockerCommand<Run>
      * Create a new {@link Run} command that is a copy of this {@link Run}
      * command with the <code>--shm-size</code> option applied.
      * <p>
-     * The format is `<number><unit>`. `number` must be greater than `0`.
+     * The format is `&lt;number&gt;&lt;unit&gt;`. `number` must be greater than `0`.
      * Unit is optional and can be `b` (bytes), `k` (kilobytes), `m` (megabytes), or
      * `g` (gigabytes). If you omit the unit, the system uses bytes. If you omit the
      * size entirely, the system uses `64m`.
@@ -1561,7 +1544,7 @@ public class Run extends AbstractDockerCommand<Run>
      * Create a new {@link Run} command that is a copy of this {@link Run}
      * command with the <code>--user</code> option applied.
      *
-     * @param username  the username or UID to use (format: <name|uid>[:<group|gid>])
+     * @param username  the username or UID to use (format: &lt;name|uid&gt;[:&lt;group|gid&gt;])
      *
      * @return  a new {@link Run} command that is a copy of this
      *          {@link Run} command with the <code>--user</code>
@@ -1707,7 +1690,8 @@ public class Run extends AbstractDockerCommand<Run>
 
 
     @Override
-    public void onLaunch(Platform platform, Options options)
+    public void onLaunch(Platform platform,
+                         Options  options)
     {
         // Build up the command in the form "run [options...] image-name [args...]"
 
@@ -1722,16 +1706,15 @@ public class Run extends AbstractDockerCommand<Run>
         EnvironmentVariables envVars   = EnvironmentVariables.custom().with(this.environmentVariables);
         Properties           variables = envVars.realize(platform, options.asArray());
 
-        variables.entrySet().stream()
-                          .map((entry) -> {
-                              if (entry.getValue() == null)
-                              {
-                                  return entry.getKey().toString();
-                              }
-                              return entry.getKey() + "=" + entry.getValue();
-                          })
-                          .map((value) -> Argument.of("--env", value))
-                          .forEach(options::add);
+        variables.entrySet().stream().map(
+            (entry) -> {
+                if (entry.getValue() == null)
+                {
+                    return entry.getKey().toString();
+                }
+
+                return entry.getKey() + "=" + entry.getValue();
+            }).map((value) -> Argument.of("--env", value)).forEach(options::add);
 
         // 4. The next parameter is the image name
         options.add(imageArgument);
@@ -1742,14 +1725,15 @@ public class Run extends AbstractDockerCommand<Run>
 
 
     @Override
-    public void onLaunched(Platform platform, Application application, Options options)
+    public void onLaunched(Platform    platform,
+                           Application application,
+                           Options     options)
     {
         // Pull the container name out of the command line arguments by looking for the --name argument
-        String name = getCommandArguments().stream()
-                                    .filter((arg) -> arg.getName() != null && arg.getName().equals("--name"))
-                                    .map((arg) ->  String.valueOf(arg.getValue()))
-                                    .findFirst()
-                                    .orElse(null);
+        String name = getCommandArguments().stream().filter((arg) -> arg.getName() != null
+                                                                     && arg.getName().equals("--name"))
+                                                                     .map((arg) -> String.valueOf(arg.getValue()))
+                                                                     .findFirst().orElse(null);
 
         DockerContainer container = new DockerContainer(name, options);
 
@@ -1778,14 +1762,15 @@ public class Run extends AbstractDockerCommand<Run>
      * Create a {@link Run} command to run a container from the
      * specified image name.
      *
-     * @param image
+     * @param image          the image name
      * @param containerName  a value that will resolve to a unique
      *                       container name
      *
      * @return  a {@link Run} command to run a container from
      *          the specified image name
      */
-    public static Run image(String image, Object containerName)
+    public static Run image(String image,
+                            Object containerName)
     {
         return new Run(image, containerName);
     }
@@ -1819,9 +1804,9 @@ public class Run extends AbstractDockerCommand<Run>
      * @return  a {@link Run} command to run a container from
      *          the specified image
      */
-    public static Run image(DockerImage image, Object containerName)
+    public static Run image(DockerImage image,
+                            Object      containerName)
     {
         return new Run(image.getFirstTag(), containerName);
     }
 }
-

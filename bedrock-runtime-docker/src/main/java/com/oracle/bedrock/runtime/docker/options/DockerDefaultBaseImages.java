@@ -3,7 +3,7 @@
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * The contents of this file are subject to the terms and conditions of
+ * The contents of this file are subject to the terms and conditions of 
  * the Common Development and Distribution License 1.0 (the "License").
  *
  * You may not use this file except in compliance with the License.
@@ -60,24 +60,10 @@ public class DockerDefaultBaseImages implements Option
      */
     private final String baseImageName;
 
-
     /**
      * The list of base images for sub-classes of this {@link DockerDefaultBaseImages#applicationClass}.
      */
     private final Map<Class<? extends Application>, DockerDefaultBaseImages> subClassBaseImages;
-
-
-    /**
-     * Create a {@link DockerDefaultBaseImages} with the specified root application class
-     * and base image name to be used for that class.
-     *
-     * @param applicationClass  the application class
-     * @param baseImageName     the base image to use for classes
-     */
-    public DockerDefaultBaseImages(Class<? extends Application> applicationClass, String baseImageName)
-    {
-        this(applicationClass, baseImageName, new HashMap<>());
-    }
 
 
     /**
@@ -99,9 +85,23 @@ public class DockerDefaultBaseImages implements Option
      * @param applicationClass  the application class
      * @param baseImageName     the base image to use for classes
      */
+    public DockerDefaultBaseImages(Class<? extends Application> applicationClass,
+                                   String                       baseImageName)
+    {
+        this(applicationClass, baseImageName, new HashMap<>());
+    }
+
+
+    /**
+     * Create a {@link DockerDefaultBaseImages} with the specified root application class
+     * and base image name to be used for that class.
+     *
+     * @param applicationClass  the application class
+     * @param baseImageName     the base image to use for classes
+     */
     private DockerDefaultBaseImages(Class<? extends Application>                               applicationClass,
-                                   String                                                     baseImageName,
-                                   Map<Class<? extends Application>, DockerDefaultBaseImages> subClassBaseImages)
+                                    String                                                     baseImageName,
+                                    Map<Class<? extends Application>, DockerDefaultBaseImages> subClassBaseImages)
     {
         if (applicationClass == null)
         {
@@ -138,8 +138,11 @@ public class DockerDefaultBaseImages implements Option
      *
      * @param applicationClass  the application class
      * @param baseImageName     the base image to use for classes
+     *
+     * @return a {@link DockerDefaultBaseImages}
      */
-    public synchronized DockerDefaultBaseImages with(Class<? extends Application> applicationClass, String baseImageName)
+    public synchronized DockerDefaultBaseImages with(Class<? extends Application> applicationClass,
+                                                     String                       baseImageName)
     {
         // We do not add a null tree or add ourselves
         if (applicationClass == null)
@@ -167,19 +170,16 @@ public class DockerDefaultBaseImages implements Option
         {
             if (applicationClass.isAssignableFrom(this.applicationClass))
             {
-                throw new IllegalArgumentException("Cannot add super class"
-                                                   + applicationClass
-                                                   + " to this tree class "
+                throw new IllegalArgumentException("Cannot add super class" + applicationClass + " to this tree class "
                                                    + this.applicationClass);
             }
 
             // the application class must be a sub-class of this tree
 
             // Do we already have the class or a super-class of it in our sub-class map
-            DockerDefaultBaseImages parent = subClassBaseImages.values().stream()
-                    .filter((value) -> value.applicationClass.isAssignableFrom(applicationClass))
-                    .findFirst()
-                    .orElse(null);
+            DockerDefaultBaseImages parent =
+                subClassBaseImages.values().stream()
+                .filter((value) -> value.applicationClass.isAssignableFrom(applicationClass)).findFirst().orElse(null);
 
             if (parent != null)
             {
@@ -227,10 +227,8 @@ public class DockerDefaultBaseImages implements Option
         else if (this.applicationClass.isAssignableFrom(applicationClass))
         {
             return this.subClassBaseImages.values().stream()
-                            .map((baseImage) -> baseImage.getBaseImage(applicationClass))
-                            .filter((imageName) -> imageName != null)
-                            .findFirst()
-                            .orElseGet(() -> this.baseImageName);
+            .map((baseImage) -> baseImage.getBaseImage(applicationClass)).filter((imageName) -> imageName != null)
+            .findFirst().orElseGet(() -> this.baseImageName);
         }
 
         return null;

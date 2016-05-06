@@ -3,7 +3,7 @@
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * The contents of this file are subject to the terms and conditions of
+ * The contents of this file are subject to the terms and conditions of 
  * the Common Development and Distribution License 1.0 (the "License").
  *
  * You may not use this file except in compliance with the License.
@@ -25,13 +25,13 @@
 
 package com.oracle.bedrock.runtime.docker.machine;
 
-import com.oracle.bedrock.runtime.Platform;
 import com.oracle.bedrock.Option;
 import com.oracle.bedrock.Options;
 import com.oracle.bedrock.lang.StringHelper;
 import com.oracle.bedrock.options.Timeout;
 import com.oracle.bedrock.runtime.Application;
 import com.oracle.bedrock.runtime.LocalPlatform;
+import com.oracle.bedrock.runtime.Platform;
 import com.oracle.bedrock.runtime.console.CapturingApplicationConsole;
 import com.oracle.bedrock.runtime.console.Console;
 import com.oracle.bedrock.runtime.docker.DockerPlatform;
@@ -52,7 +52,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
 
 /**
  * An encapsulation of a Docker Machine environment.
@@ -91,7 +90,8 @@ public class DockerMachine
      *
      * @param clientPlatform  the {@link Platform} to use to execute client commands
      */
-    private DockerMachine(Platform clientPlatform, Arguments arguments)
+    private DockerMachine(Platform  clientPlatform,
+                          Arguments arguments)
     {
         this.clientPlatform = clientPlatform;
         this.arguments      = arguments;
@@ -141,9 +141,11 @@ public class DockerMachine
 
 
     /**
-     * Specify the storage path
+     * Specify the storage path.
      * <p>
      * Equates to the <code>--storage-path</code> command option.
+     *
+     * @param path  the storage path
      *
      * @return  a {@link DockerMachine} that is a copy of this instance
      *          with the <code>--storage-path</code> option applied
@@ -159,6 +161,8 @@ public class DockerMachine
      * <p>
      * Equates to the <code>--tls-ca-cert</code> command option.
      *
+     * @param cert  the cert
+     *
      * @return  a {@link DockerMachine} that is a copy of this instance
      *          with the <code>--tls-ca-cert</code> option applied
      */
@@ -172,6 +176,8 @@ public class DockerMachine
      * Specify the private key to generate certificates.
      * <p>
      * Equates to the <code>--tls-ca-key</code> command option.
+     *
+     * @param key  the key
      *
      * @return  a {@link DockerMachine} that is a copy of this instance
      *          with the <code>--tls-ca-key</code> option applied
@@ -187,8 +193,10 @@ public class DockerMachine
      * <p>
      * Equates to the <code>--tls-client-cert</code> command option.
      *
+     * @param cert  the cert
+     *
      * @return  a {@link DockerMachine} that is a copy of this instance
-     *          with the <code--tls-client-cert></code> option applied
+     *          with the <code>--tls-client-cert</code> option applied
      */
     public DockerMachine tlsClientCert(Object cert)
     {
@@ -200,6 +208,8 @@ public class DockerMachine
      * Specify the private key used in client TLS auth
      * <p>
      * Equates to the <code>--tls-client-key</code> command option.
+     *
+     * @param key   the key
      *
      * @return  a {@link DockerMachine} that is a copy of this instance
      *          with the <code>--tls-client-key</code> option applied
@@ -214,6 +224,8 @@ public class DockerMachine
      * Specify the token to use for requests to the Github API
      * <p>
      * Equates to the <code>--github-api-token</code> command option.
+     *
+     * @param token  the token
      *
      * @return  a {@link DockerMachine} that is a copy of this instance
      *          with the <code>--github-api-token</code> option applied
@@ -243,8 +255,10 @@ public class DockerMachine
      * <p>
      * Equates to the <code>--bugsnag-api-token</code> command option.
      *
+     * @param token  the token
+     *
      * @return  a {@link DockerMachine} that is a copy of this instance
-     *          with the <code></code> option applied
+     *          with the <code>--bugsnag-api-token</code> option applied
      */
     public DockerMachine bugSnagToken(String token)
     {
@@ -267,14 +281,14 @@ public class DockerMachine
     {
         CapturingApplicationConsole console = new CapturingApplicationConsole();
 
-        try (Application application = launch("ip",
-                                              Argument.of(machineName),
-                                              Console.of(console)))
+        try (Application application = launch("ip", Argument.of(machineName), Console.of(console)))
         {
             if (application.waitFor() != 0)
             {
                 String msg = "Error obtaining IP address for docker-machine " + machineName;
+
                 logError(msg, console);
+
                 throw new RuntimeException(msg);
             }
 
@@ -297,7 +311,8 @@ public class DockerMachine
      *
      * @return  a {@link DockerMachinePlatform} wrapping a new Docker Machine VM
      */
-    public DockerMachinePlatform create(String machineName, Option... options)
+    public DockerMachinePlatform create(String    machineName,
+                                        Option... options)
     {
         Options createOptions = new Options(options);
         Timeout timeout       = createOptions.getOrDefault(Timeout.class, Timeout.after(5, TimeUnit.MINUTES));
@@ -309,7 +324,6 @@ public class DockerMachine
                 throw new RuntimeException("Error creating Docker Machine instance");
             }
         }
-
 
         Options platformOptions = new Options(options);
 
@@ -327,14 +341,13 @@ public class DockerMachine
      *
      * @return  the {@link Application} executing the command
      */
-    public Application launch(String command, Option... opts)
+    public Application launch(String    command,
+                              Option... opts)
     {
-        Options   options   = new Options(opts);
-        Arguments arguments = options.get(Arguments.class);
+        Options   options    = new Options(opts);
+        Arguments arguments  = options.get(Arguments.class);
 
-        Arguments launchArgs = this.arguments
-                                   .with(Argument.of(command))
-                                   .with(arguments);
+        Arguments launchArgs = this.arguments.with(Argument.of(command)).with(arguments);
 
         options.add(launchArgs);
 
@@ -354,9 +367,7 @@ public class DockerMachine
     {
         CapturingApplicationConsole console = new CapturingApplicationConsole();
 
-        try (Application application = launch("status",
-                                              Argument.of(machineName),
-                                              Console.of(console)))
+        try (Application application = launch("status", Argument.of(machineName), Console.of(console)))
         {
             if (application.waitFor() == 0)
             {
@@ -384,13 +395,12 @@ public class DockerMachine
     {
         CapturingApplicationConsole console = new CapturingApplicationConsole();
 
-        try (Application application = launch("inspect",
-                                              Argument.of(machineName),
-                                              Console.of(console)))
+        try (Application application = launch("inspect", Argument.of(machineName), Console.of(console)))
         {
             if (application.waitFor() != 0)
             {
                 String msg = "Error inspecting docker machine " + machineName;
+
                 logError(msg, console);
 
                 throw new RuntimeException(msg);
@@ -429,12 +439,14 @@ public class DockerMachine
     /**
      * Remove the specified Docker Machine instances.
      *
+     * @param force         force removal or not
      * @param machineNames  the name of the Docker Machine
      *                      instance to remove
      *
      * @return  the exit code from the remove command
      */
-    public int remove(boolean force, String... machineNames)
+    public int remove(boolean   force,
+                      String... machineNames)
     {
         Arguments arguments = Arguments.empty();
 
@@ -513,28 +525,25 @@ public class DockerMachine
     {
         CapturingApplicationConsole console = new CapturingApplicationConsole();
 
-        try (Application application = launch("env",
-                                              Argument.of(machineName),
-                                              Console.of(console)))
+        try (Application application = launch("env", Argument.of(machineName), Console.of(console)))
         {
             if (application.waitFor() == 0)
             {
-                return console.getCapturedOutputLines().stream()
-                                .filter((line) -> line.startsWith("export"))
-                                .map((line) -> line.substring(7))
-                                .map((line -> {
-                                    int index = line.indexOf('=');
-                                    if (index >= 0)
-                                    {
-                                        String name  = line.substring(0, index);
-                                        String value = StringHelper.unquote(line.substring(index + 1));
+                return console.getCapturedOutputLines().stream().filter((line) -> line.startsWith("export"))
+                .map((line) -> line.substring(7)).map((
+                    line -> {
+                        int index = line.indexOf('=');
 
-                                        return EnvironmentVariable.of(name, value);
-                                    }
+                        if (index >= 0)
+                        {
+                            String name  = line.substring(0, index);
+                            String value = StringHelper.unquote(line.substring(index + 1));
 
-                                    return EnvironmentVariable.of(line);
-                                }))
-                                .collect(Collectors.toList());
+                            return EnvironmentVariable.of(name, value);
+                        }
+
+                        return EnvironmentVariable.of(line);
+                    })).collect(Collectors.toList());
             }
 
             String msg = "Error obtaining environment for docker-machine " + machineName;
@@ -546,12 +555,13 @@ public class DockerMachine
     }
 
 
-    private void logError(String msg, CapturingApplicationConsole console)
+    private void logError(String                      msg,
+                          CapturingApplicationConsole console)
     {
         LOGGER.log(Level.SEVERE, msg);
-        LOGGER.log(Level.SEVERE, Stream.concat(console.getCapturedOutputLines().stream(),
-                                               console.getCapturedErrorLines().stream())
-                                       .collect(Collectors.joining("\n")));
+        LOGGER.log(Level.SEVERE,
+                   Stream.concat(console.getCapturedOutputLines().stream(),
+                                 console.getCapturedErrorLines().stream()).collect(Collectors.joining("\n")));
     }
 
 
@@ -570,6 +580,8 @@ public class DockerMachine
     /**
      * Create a {@link DockerMachine} using the specified {@link Platform}
      * as the platform to execute Docker Machine commands.
+     *
+     * @param platform   the {@link Platform}
      *
      * @return  a {@link DockerMachine} using the specified client {@link Platform}
      */

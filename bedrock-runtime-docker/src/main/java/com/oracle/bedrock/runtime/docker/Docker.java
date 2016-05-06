@@ -1,9 +1,9 @@
 /*
- * File: DockerEnvironment.java
+ * File: Docker.java
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * The contents of this file are subject to the terms and conditions of
+ * The contents of this file are subject to the terms and conditions of 
  * the Common Development and Distribution License 1.0 (the "License").
  *
  * You may not use this file except in compliance with the License.
@@ -25,15 +25,15 @@
 
 package com.oracle.bedrock.runtime.docker;
 
+import com.oracle.bedrock.Option;
+import com.oracle.bedrock.Options;
+import com.oracle.bedrock.runtime.Application;
 import com.oracle.bedrock.runtime.LocalPlatform;
 import com.oracle.bedrock.runtime.Platform;
 import com.oracle.bedrock.runtime.docker.machine.DockerMachine;
 import com.oracle.bedrock.runtime.docker.options.DockerDefaultBaseImages;
 import com.oracle.bedrock.runtime.options.Argument;
 import com.oracle.bedrock.runtime.options.EnvironmentVariable;
-import com.oracle.bedrock.Option;
-import com.oracle.bedrock.Options;
-import com.oracle.bedrock.runtime.Application;
 
 import java.io.File;
 import java.net.InetAddress;
@@ -50,8 +50,8 @@ import java.util.stream.Collectors;
  * An encapsulation of the various settings required to run Docker commands.
  * <p>
  * <strong>A {@link Docker} instance is immutable</strong>, methods that
-  * add options and configuration to this {@link Docker} environment return a
-  * new instance of a {@link Docker} environment with the modifications applied
+ *  add options and configuration to this {@link Docker} environment return a
+ *  new instance of a {@link Docker} environment with the modifications applied
  * <p>
  * Copyright (c) 2016. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
@@ -188,7 +188,6 @@ public class Docker implements Option
      */
     public static final String DEFAULT_EXECUTABLE = "docker";
 
-
     /**
      * An immutable list of {@link EnvironmentVariable}s to use to configure a Docker environment.
      */
@@ -215,7 +214,6 @@ public class Docker implements Option
      */
     private String defaultNetwork;
 
-
     /**
      * The address of the Docker daemon.
      */
@@ -235,13 +233,12 @@ public class Docker implements Option
                    List<Argument>            arguments,
                    DockerDefaultBaseImages   baseImages)
     {
-        this.daemonAddress        = daemonAddress;
-        this.baseImages           = baseImages;
+        this.daemonAddress = daemonAddress;
+        this.baseImages    = baseImages;
 
         // We are immutable so make sure we cannot change these lists
         this.environmentVariables = Collections.unmodifiableList(environmentVariables);
         this.arguments            = Collections.unmodifiableList(arguments);
-
 
         if (executable == null || executable.isEmpty())
         {
@@ -308,11 +305,7 @@ public class Docker implements Option
             return this;
         }
 
-        return new Docker(daemonAddress,
-                          executable,
-                          environmentVariables,
-                          arguments,
-                          baseImages);
+        return new Docker(daemonAddress, executable, environmentVariables, arguments, baseImages);
     }
 
 
@@ -363,12 +356,13 @@ public class Docker implements Option
      * @return  a new instance of {@link Docker} that is a copy of this
      *          instance with the addition of the base image default
      *
-     * @see {@link #getBaseImage(Class)}
+     * @see #getBaseImage(Class)
      *
      * @throws IllegalArgumentException if the application class is null or
      *                                  if the base image name is null or blank
      */
-    public Docker withBaseImage(Class<? extends Application> applicationClass, String baseImageName)
+    public Docker withBaseImage(Class<? extends Application> applicationClass,
+                                String                       baseImageName)
     {
         if (applicationClass == null)
         {
@@ -389,11 +383,7 @@ public class Docker implements Option
         // DockerDefaultBaseImages is immutable so create a new on from ours with the additional class
         DockerDefaultBaseImages images = this.baseImages.with(applicationClass, baseImageName);
 
-        return new Docker(this.daemonAddress,
-                          this.dockerExecutable,
-                          this.environmentVariables,
-                          this.arguments,
-                          images);
+        return new Docker(this.daemonAddress, this.dockerExecutable, this.environmentVariables, this.arguments, images);
     }
 
 
@@ -405,7 +395,7 @@ public class Docker implements Option
      *
      * @return  the name of the base image to use
      *
-     * @see {@link #withBaseImage(Class, String)}
+     * @see #withBaseImage(Class, String)
      */
     public String getBaseImage(Class<? extends Application> applicationClass)
     {
@@ -458,7 +448,7 @@ public class Docker implements Option
      * <p>
      * Equates to the Docker <code>--config</code> command option.
      *
-     * @param config
+     * @param config the config
      *
      * @return  a copy of this {@link Docker} environment with the
      *          addition of the specified location of client config files
@@ -795,10 +785,9 @@ public class Docker implements Option
 
         for (Argument argument : arguments)
         {
-            String         name     = argument.getName();
-            List<Argument> existing = toCopy.stream()
-                                            .filter((arg) -> arg.getName().equals(name))
-                                            .collect(Collectors.toList());
+            String name = argument.getName();
+            List<Argument> existing =
+                toCopy.stream().filter((arg) -> arg.getName().equals(name)).collect(Collectors.toList());
 
             // remove any arguments with the same name from the copy
             if (!existing.isEmpty())
@@ -831,10 +820,9 @@ public class Docker implements Option
 
         for (EnvironmentVariable environmentVariable : environmentVariables)
         {
-            String                    name     = environmentVariable.getName();
-            List<EnvironmentVariable> existing = copy.stream()
-                                                     .filter((env) -> env.getName().equals(name))
-                                                     .collect(Collectors.toList());
+            String name = environmentVariable.getName();
+            List<EnvironmentVariable> existing =
+                copy.stream().filter((env) -> env.getName().equals(name)).collect(Collectors.toList());
 
             // remove any environment variables with the same name from the copy
             if (!existing.isEmpty())
@@ -925,6 +913,7 @@ public class Docker implements Option
                 catch (UnknownHostException e)
                 {
                     e.printStackTrace();
+
                     // do nothing, if an error occurs use the client address
                 }
             }
@@ -941,6 +930,8 @@ public class Docker implements Option
      * configured on the client platform with environment variables
      * pointing to the Docker daemon or the Docker daemon is local
      * to the client platform.
+     *
+     * @return a new {@link Docker}
      */
     @Options.Default
     public static Docker auto()
@@ -964,6 +955,8 @@ public class Docker implements Option
      * instance.
      *
      * @param machineName  the name of a Docker Machine machine
+     *
+     * @return a new {@link Docker}
      */
     public static Docker machine(String machineName)
     {
@@ -980,22 +973,26 @@ public class Docker implements Option
      *
      * @param machineName  the name of a Docker Machine machine
      * @param machine      the {@link DockerMachine} environment
+     * @param options      the {@link Option}s
+     *
+     * @return a new {@link Docker}
      */
-    public static Docker machine(String machineName, DockerMachine machine, Option... options)
+    public static Docker machine(String        machineName,
+                                 DockerMachine machine,
+                                 Option...     options)
     {
         Options                   machineOptions       = new Options(options);
         List<EnvironmentVariable> environmentVariables = machine.environmentFor(machineName);
-        String                    dockerHost           = environmentVariables.stream()
-                                                            .filter((envVar) -> envVar.getName().equals(ENV_DOCKER_HOST))
-                                                            .findFirst()
-                                                            .map((envVar) -> String.valueOf(envVar.getValue()))
-                                                            .orElse(null);
+        String dockerHost =
+            environmentVariables.stream().filter((envVar) -> envVar.getName().equals(ENV_DOCKER_HOST)).findFirst()
+            .map((envVar) -> String.valueOf(envVar.getValue())).orElse(null);
 
         Docker docker = machineOptions.get(Docker.class);
 
-        return docker.withDaemonAddress(dockerHost)
-                     .withEnvironmentVariables(environmentVariables)
-                     .withCommandOptions(Argument.of(ARG_HOST, '=', dockerHost));
+        return docker.withDaemonAddress(dockerHost).withEnvironmentVariables(environmentVariables)
+        .withCommandOptions(Argument.of(ARG_HOST,
+                                        '=',
+                                        dockerHost));
     }
 
 
@@ -1006,6 +1003,8 @@ public class Docker implements Option
      * to connect to the Docker daemon at the specified address.
      *
      * @param address  the address of the Docker daemon
+     *
+     * @return a new {@link Docker}
      */
     public static Docker daemonAt(String address)
     {

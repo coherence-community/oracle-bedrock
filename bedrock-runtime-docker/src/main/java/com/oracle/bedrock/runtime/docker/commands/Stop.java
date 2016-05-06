@@ -3,7 +3,7 @@
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * The contents of this file are subject to the terms and conditions of
+ * The contents of this file are subject to the terms and conditions of 
  * the Common Development and Distribution License 1.0 (the "License").
  *
  * You may not use this file except in compliance with the License.
@@ -63,7 +63,8 @@ public class Stop extends CommandWithArgumentList<Stop>
      * @param arguments   the command {@link Arguments}
      * @param containers  the containers to stop
      */
-    private Stop(Arguments arguments, List<?> containers)
+    private Stop(Arguments arguments,
+                 List<?>   containers)
     {
         super(arguments, containers);
     }
@@ -89,14 +90,16 @@ public class Stop extends CommandWithArgumentList<Stop>
 
 
     @Override
-    public Stop withCommandArguments(List<Argument> names, Argument... args)
+    public Stop withCommandArguments(List<Argument> names,
+                                     Argument...    args)
     {
         return new Stop(getCommandArguments().with(args), names);
     }
 
 
     @Override
-    protected Stop withoutCommandArguments(List<Argument> names, Argument... args)
+    protected Stop withoutCommandArguments(List<Argument> names,
+                                           Argument...    args)
     {
         return new Stop(getCommandArguments().without(args), names);
     }

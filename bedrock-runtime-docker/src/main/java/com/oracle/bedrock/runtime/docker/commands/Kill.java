@@ -3,7 +3,7 @@
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * The contents of this file are subject to the terms and conditions of
+ * The contents of this file are subject to the terms and conditions of 
  * the Common Development and Distribution License 1.0 (the "License").
  *
  * You may not use this file except in compliance with the License.
@@ -66,7 +66,8 @@ public class Kill extends CommandWithArgumentList<Kill>
      * @param arguments   the command {@link Arguments}
      * @param containers  the containers to kill
      */
-    private Kill(Arguments arguments, List<?> containers)
+    private Kill(Arguments arguments,
+                 List<?>   containers)
     {
         super(arguments, containers);
     }
@@ -89,14 +90,16 @@ public class Kill extends CommandWithArgumentList<Kill>
 
 
     @Override
-    public Kill withCommandArguments(List<Argument> names, Argument... args)
+    public Kill withCommandArguments(List<Argument> names,
+                                     Argument...    args)
     {
         return new Kill(getCommandArguments().with(args), names);
     }
 
 
     @Override
-    protected Kill withoutCommandArguments(List<Argument> names, Argument... args)
+    protected Kill withoutCommandArguments(List<Argument> names,
+                                           Argument...    args)
     {
         return new Kill(getCommandArguments().without(args), names);
     }
