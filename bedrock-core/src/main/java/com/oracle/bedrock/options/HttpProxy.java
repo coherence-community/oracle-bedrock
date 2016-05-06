@@ -1,9 +1,33 @@
+/*
+ * File: HttpProxy.java
+ *
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ *
+ * The contents of this file are subject to the terms and conditions of 
+ * the Common Development and Distribution License 1.0 (the "License").
+ *
+ * You may not use this file except in compliance with the License.
+ *
+ * You can obtain a copy of the License by consulting the LICENSE.txt file
+ * distributed with this file, or by consulting https://oss.oracle.com/licenses/CDDL
+ *
+ * See the License for the specific language governing permissions
+ * and limitations under the License.
+ *
+ * When distributing the software, include this License Header Notice in each
+ * file and include the License file LICENSE.txt.
+ *
+ * MODIFICATIONS:
+ * If applicable, add the following below the License Header, with the fields
+ * enclosed by brackets [] replaced by your own identifying information:
+ * "Portions Copyright [year] [name of copyright owner]"
+ */
+
 package com.oracle.bedrock.options;
 
 import com.oracle.bedrock.Option;
 
 import java.io.IOException;
-
 import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
@@ -20,11 +44,11 @@ import java.net.URL;
  */
 public class HttpProxy implements Option
 {
-
     /**
      * The {@link Proxy} to use for HTTP connections
      */
     private Proxy proxy;
+
 
     /**
      * Create an {@link HttpProxy} option that uses the specified
@@ -81,7 +105,8 @@ public class HttpProxy implements Option
      * @return an {@link HttpProxy} that provides a {@link Proxy} of
      *         the specified type on the specified socket
      */
-    public static HttpProxy proxy(final Proxy.Type type, final InetSocketAddress address)
+    public static HttpProxy proxy(final Proxy.Type        type,
+                                  final InetSocketAddress address)
     {
         return new HttpProxy(new Proxy(type, address));
     }

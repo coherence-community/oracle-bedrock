@@ -51,8 +51,9 @@ public final class StringHelper
         // remove quotes
         return (string != null
                 && ((string.startsWith("\"") && string.endsWith("\""))
-                    || (string.startsWith("'")
-                        && string.endsWith("'")))) ? string = string.substring(1, string.length() - 1) : string;
+                    || (string.startsWith("'") && string.endsWith("'")))) ? string = string.substring(1,
+                                                                                                      string.length()
+                                                                                                      - 1) : string;
 
     }
 
@@ -103,8 +104,10 @@ public final class StringHelper
      */
     public static String doubleQuoteIfNecessary(String string)
     {
-        return string != null && string.contains(" ") &&!string.startsWith("\"") &&!string.endsWith("\"")
-               ? "\"" + string + "\"" : string;
+        return string != null
+               && string.contains(" ")
+               &&!string.startsWith("\"")
+               &&!string.endsWith("\"") ? "\"" + string + "\"" : string;
     }
 
 

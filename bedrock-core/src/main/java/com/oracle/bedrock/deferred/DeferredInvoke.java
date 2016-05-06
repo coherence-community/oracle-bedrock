@@ -155,8 +155,8 @@ public class DeferredInvoke<T> implements Deferred<T>
      *
      * @return the result of the invocation
      *
-     * @throws IllegalAccessException
-     * @throws InvocationTargetException
+     * @throws IllegalAccessException     when access to the underlying method is not permitted
+     * @throws InvocationTargetException  when the underlying method throws an exception
      */
     protected Object invoke(Method    method,
                             Object    object,

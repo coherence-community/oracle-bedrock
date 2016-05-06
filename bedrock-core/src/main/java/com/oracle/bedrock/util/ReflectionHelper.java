@@ -26,7 +26,6 @@
 package com.oracle.bedrock.util;
 
 import java.lang.annotation.Annotation;
-
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -47,6 +46,8 @@ public class ReflectionHelper
      *
      * @param clazz          the class which we want to construct
      * @param argumentTypes  the types required of the constructor
+     *
+     * @param <T>            the type of the class
      *
      * @return a compatible constructor or null if none exists
      */
@@ -129,6 +130,7 @@ public class ReflectionHelper
      * Obtains the {@link Method} that is compatible to the supplied parameter types.
      *
      * @param clazz            the {@link Class} on which to find the {@link Method}
+     * @param methodName       the name of the {@link Method}
      * @param actualArguments  the actual arguments for the {@link Method}
      *
      * @return a compatible {@link Method} or <code>null</code> if one can't be found

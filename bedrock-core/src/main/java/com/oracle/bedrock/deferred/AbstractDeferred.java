@@ -47,7 +47,7 @@ public abstract class AbstractDeferred<T> implements Deferred<T>
 
         if (type instanceof ParameterizedType)
         {
-            return (Class)((ParameterizedType)type).getActualTypeArguments()[0];
+            return (Class) ((ParameterizedType) type).getActualTypeArguments()[0];
         }
         else
         {

@@ -107,18 +107,11 @@ public class Options
      * Obtains the {@link Option} for a specified concrete type from the collection.
      *
      * <p>Should the {@link Option} not exist in the collection, an attempt is made
-     * to determine a suitable default based on the use of the {@link Default}
-     * annotation in the specified class, firstly by looking for and evaluating
-     * the annotated "public static T getter()" method, failing that, looking for
-     * and evaluating the annotated "public static T value = ...;" field, failing
-     * that, looking for an evaluating the annotated public no args constructor
-     * and finally, failing that, looking for an annotated field on an enum
-     * (assuming the class is an enum).  Failing these approaches,
-     * <code>null</code> is returned.  Should a default be found, it is added to
-     * the collection prior to returning.</p>
+     * to determine a default value using {@link #getDefaultFor(Class, Object...)}.
      *
-     * @param classOfOption the concrete type of {@link Option} to obtain
-     * @param <T>           the type of value
+     * @param classOfOption  the concrete type of {@link Option} to obtain
+     * @param arguments      the optional arguments for determining the default
+     * @param <T>            the type of value
      *
      * @return the {@link Option} of the specified type or if undefined, the
      *         suitable default value (or <code>null</code> if one can't be determined)
@@ -143,28 +136,6 @@ public class Options
 
             return option;
         }
-    }
-
-
-    /**
-     * Obtains the {@link Option} of a specified concrete type from the collection.  Should the type of
-     * {@link Option} not exist, the specified default is added to the collection and returned.
-     * <p>
-     * DEPRECATED: Use {@link #getOrDefault(Class, Option)} instead.
-     *
-     * @param <T>            the type of value
-     * @param <D>            the type of the default value
-     *
-     * @param classOfOption  the type of {@link Option} to obtain
-     * @param defaultOption  the {@link Option} to return if the specified type is not defined
-     *
-     * @return the option of the specified type or the default if it's not defined
-     */
-    @Deprecated
-    public <T extends Option, D extends T> T get(Class<T> classOfOption,
-                                                 D        defaultOption)
-    {
-        return getOrDefault(classOfOption, defaultOption);
     }
 
 
@@ -464,10 +435,11 @@ public class Options
     /**
      * Removes the specified type of {@link Option}
      *
-     * @param classOfOption the class of {@link Option}
+     * @param classOfOption  the class of {@link Option}
+     * @param <T>            the type of the {@link Option}
      *
      * @return <code>true</code> if the {@link Option} was removed,
-     * <code>false</code> otherwise
+     *         <code>false</code> otherwise
      */
     public <T extends Option> boolean remove(Class<T> classOfOption)
     {
@@ -635,12 +607,13 @@ public class Options
     /**
      * Attempts to determine a "default" value for a given class.
      *
-     * <p>Aan attempt is made to determine a suitable default based on the use
+     * <p>An attempt is made to determine a suitable default based on the use
      * of the {@link Default} annotation in the specified class, firstly by
      * looking for and evaluating the annotated "public static U getter()"
-     * method, failing that, looking for and evaluating the annotated
-     * "public static U value = ...;" field, failing that, looking for an
-     * evaluating the annotated public no args constructor and finally, failing
+     * method (using the provided arguments if supplied), failing that,
+     * looking for and evaluating the annotated "public static U value = ...;"
+     * field, failing that, looking for and evaluating the annotated public
+     * constructor (using the provided arguments if supplied) and finally, failing
      * that, looking for an annotated field on an enum
      * (assuming the class is an enum).  Failing these approaches,
      * <code>null</code> is returned.</p>

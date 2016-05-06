@@ -53,7 +53,7 @@ public class RandomIterator implements Iterator<Long>
      * Constructs a {@link RandomIterator} that uses the
      * ranges provided by the range {@link Iterator} for
      * each random number generated.
-     * <p/>
+     * <p>
      * Ranges are from 0 to the numbers provided by the
      * specified {@link Iterator} (exclusive).
      *

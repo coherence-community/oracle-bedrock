@@ -29,9 +29,9 @@ import com.oracle.bedrock.Option;
 import com.oracle.bedrock.Options;
 import com.oracle.bedrock.deferred.options.InitialDelay;
 import com.oracle.bedrock.deferred.options.MaximumRetryDelay;
+import com.oracle.bedrock.deferred.options.RetryFrequency;
 import com.oracle.bedrock.options.Timeout;
 import com.oracle.bedrock.util.Duration;
-import com.oracle.bedrock.deferred.options.RetryFrequency;
 
 import java.util.Iterator;
 import java.util.concurrent.TimeUnit;

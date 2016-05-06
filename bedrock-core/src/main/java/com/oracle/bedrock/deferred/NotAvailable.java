@@ -46,7 +46,7 @@ public class NotAvailable<T> implements Deferred<T>
     /**
      * Constructor for a {@link NotAvailable} reference.
      *
-     * @param deferredClass
+     * @param deferredClass  the class of the {@link Deferred} value
      */
     public NotAvailable(Class<T> deferredClass)
     {

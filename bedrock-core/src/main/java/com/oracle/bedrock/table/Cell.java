@@ -55,7 +55,7 @@ public class Cell
 
     /**
      * Constructs a {@link Cell} given an array of separate lines.
-     * </p>
+     * <p>
      * Should the lines themselves contain new-lines, they are split in to separate lines.
      *
      * @param lines  the lines of content for the {@link Cell}

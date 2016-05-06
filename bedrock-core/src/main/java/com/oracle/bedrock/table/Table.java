@@ -28,11 +28,11 @@ package com.oracle.bedrock.table;
 import com.oracle.bedrock.Option;
 import com.oracle.bedrock.Options;
 
-import static com.oracle.bedrock.lang.StringHelper.trimTrailingWhiteSpace;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
+
+import static com.oracle.bedrock.lang.StringHelper.trimTrailingWhiteSpace;
 
 /**
  * A {@link Table} represents a collection of zero or more vertically arranged
@@ -236,8 +236,9 @@ public class Table implements Iterable<Row>, Option
                 // determine the width of the cell
                 // (use the width is defined by the cell, then the row, then the table)
                 Cell.Width width = options.getOrDefault(Cell.Width.class,
-                                               row.getOptions().getOrDefault(Cell.Width.class,
-                                                                    this.getOptions().get(Cell.Width.class)));
+                                                        row.getOptions().getOrDefault(Cell.Width.class,
+                                                                                      this.getOptions()
+                                                                                      .get(Cell.Width.class)));
 
                 int cellWidth;
 
@@ -303,11 +304,12 @@ public class Table implements Iterable<Row>, Option
                     // determine the cell justification
                     // (use the justification defined by the cell, then the row, then the table)
                     Cell.Justification justification = cell.getOptions().getOrDefault(Cell.Justification.class,
-                                                                             row.getOptions()
-                                                                                 .getOrDefault(Cell.Justification.class,
-                                                                                      this.getOptions()
-                                                                                          .get(Cell
-                                                                                              .Justification.class)));
+                                                                                      row.getOptions()
+                                                                                      .getOrDefault(Cell
+                                                                                          .Justification.class,
+                                                                                                    this.getOptions()
+                                                                                                    .get(Cell
+                                                                                                        .Justification.class)));
 
                     int cellHeight = cell.height();
 

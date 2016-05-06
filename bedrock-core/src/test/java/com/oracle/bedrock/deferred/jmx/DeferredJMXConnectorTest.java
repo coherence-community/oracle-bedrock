@@ -26,21 +26,27 @@
 package com.oracle.bedrock.deferred.jmx;
 
 import org.junit.Test;
-import org.mockito.ArgumentCaptor;
 
-import javax.management.remote.JMXConnector;
-import javax.management.remote.JMXServiceURL;
-import java.util.Map;
+import org.mockito.ArgumentCaptor;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.sameInstance;
+
 import static org.hamcrest.collection.IsArrayContainingInOrder.arrayContaining;
+
 import static org.junit.Assert.assertThat;
+
 import static org.mockito.Matchers.anyMap;
 import static org.mockito.Matchers.eq;
+
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import java.util.Map;
+
+import javax.management.remote.JMXConnector;
+import javax.management.remote.JMXServiceURL;
 
 /**
  * Unit tests for the {@link DeferredJMXConnector}.

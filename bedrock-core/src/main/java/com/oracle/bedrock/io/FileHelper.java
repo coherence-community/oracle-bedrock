@@ -28,12 +28,9 @@ package com.oracle.bedrock.io;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-
 import java.util.UUID;
-
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -49,6 +46,8 @@ public class FileHelper
 {
     /**
      * Create a Temporary Folder.
+     *
+     * @param prefix   the prefix to use for the temporary folder
      *
      * @return a File representing the temporary folder
      *
@@ -139,10 +138,12 @@ public class FileHelper
      * @param files           the {@link File}s (including directories) to zip
      * @param baseFolderName  the folder that will be created when unzipping the zip file
      * @param toZipFile       the zip file (that will be created)
+     *
+     * @throws IOException  when the files can't be zipped for some reason
      */
     public static void zip(Iterable<File> files,
                            String         baseFolderName,
-                           String         toZipFile) throws FileNotFoundException, IOException
+                           String         toZipFile) throws IOException
     {
         ZipOutputStream zip = new ZipOutputStream(new FileOutputStream(toZipFile));
 
@@ -184,8 +185,8 @@ public class FileHelper
                                      String          parentFolderName,
                                      ZipOutputStream zip) throws IOException
     {
-        String parent = parentFolderName == null || parentFolderName.trim().isEmpty()
-                        ? "" : parentFolderName.trim() + "/";
+        String parent = parentFolderName == null
+                        || parentFolderName.trim().isEmpty() ? "" : parentFolderName.trim() + "/";
 
         if (file.exists())
         {
@@ -219,8 +220,8 @@ public class FileHelper
                                        String          parentFolderName,
                                        ZipOutputStream zip) throws IOException
     {
-        String parent = parentFolderName == null || parentFolderName.trim().isEmpty()
-                        ? "" : parentFolderName.trim() + "/";
+        String parent = parentFolderName == null
+                        || parentFolderName.trim().isEmpty() ? "" : parentFolderName.trim() + "/";
 
         if (folder.exists())
         {

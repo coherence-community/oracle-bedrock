@@ -26,6 +26,7 @@
 package com.oracle.bedrock.predicate;
 
 import java.util.Collection;
+
 import java.util.function.Predicate;
 
 /**

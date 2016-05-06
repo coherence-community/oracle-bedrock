@@ -3,7 +3,7 @@
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * The contents of this file are subject to the terms and conditions of
+ * The contents of this file are subject to the terms and conditions of 
  * the Common Development and Distribution License 1.0 (the "License").
  *
  * You may not use this file except in compliance with the License.
@@ -64,6 +64,8 @@ public class Decoration implements Option.Collectable
      * Constructs a {@link Decoration}.
      *
      * @param object the object for the {@link Decoration}
+     *
+     * @return  a {@link Decoration} for the specified {@link Object}
      */
     public static Decoration of(Object object)
     {

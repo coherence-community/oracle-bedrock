@@ -3,7 +3,7 @@
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * The contents of this file are subject to the terms and conditions of
+ * The contents of this file are subject to the terms and conditions of 
  * the Common Development and Distribution License 1.0 (the "License").
  *
  * You may not use this file except in compliance with the License.
@@ -50,6 +50,10 @@ public interface Extensible
     /**
      * Determines if an {@link Extensible} currently has and supports the specified type of feature.
      *
+     * @param featureClass  the {@link Class} of the feature
+     *
+     * @param <T>           the type of the feature
+     *
      * @return <code>true</code> if the {@link Extensible} supports the specified feature,
      *         <code>false</code> otherwise
      */
@@ -59,6 +63,10 @@ public interface Extensible
     /**
      * Obtains a reference to the current implementation of the specified type of feature on
      * the {@link Extensible}.
+     *
+     * @param featureClass  the {@link Class} of the feature
+     *
+     * @param <T>           the type of the feature
      *
      * @return the implementation of the specified feature class or <code>null</code> if the
      *         feature is not supported
@@ -77,6 +85,8 @@ public interface Extensible
      *
      * @param featureClass  the {@link Class} to be used to identify the feature
      * @param feature       the implementation of the feature
+     *
+     * @param <T>           the type of the feature
      *
      * @return the previous implementation of the featured or <code>null</code> if the feature
      *         was not defined
@@ -99,6 +109,8 @@ public interface Extensible
      *
      * @param feature  the implementation of the feature
      *
+     * @param <T>      the type of the feature
+     *
      * @return the previous implementation of the featured or <code>null</code> if the feature
      *         was not defined
      *
@@ -117,6 +129,8 @@ public interface Extensible
      * method is called using this {@link Extensible} as the parameter.
      *
      * @param featureClass  the type of feature to remove
+     *
+     * @param <T>           the type of the feature
      *
      * @return the feature implementation or <code>null</code> if the feature was not defined
      *

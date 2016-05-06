@@ -25,18 +25,16 @@
 
 package com.oracle.bedrock.deferred.jmx;
 
-import com.oracle.bedrock.deferred.PermanentlyUnavailableException;
 import com.oracle.bedrock.deferred.Deferred;
+import com.oracle.bedrock.deferred.PermanentlyUnavailableException;
 import com.oracle.bedrock.deferred.TemporarilyUnavailableException;
-
-import java.io.IOException;
-
-import java.util.HashMap;
-import java.util.Map;
 
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * A {@link DeferredJMXConnector} is a {@link Deferred} for a

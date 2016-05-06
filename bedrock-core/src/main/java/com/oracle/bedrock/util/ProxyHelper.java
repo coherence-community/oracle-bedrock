@@ -28,10 +28,8 @@ package com.oracle.bedrock.util;
 import net.sf.cglib.proxy.Callback;
 import net.sf.cglib.proxy.Enhancer;
 import net.sf.cglib.proxy.MethodInterceptor;
-
 import org.objenesis.Objenesis;
 import org.objenesis.ObjenesisStd;
-
 
 /**
  * A collection of utilities to assist in using Objenesis to create object proxies.
@@ -50,6 +48,8 @@ public class ProxyHelper
      * @param object       the {@link Object} to proxy
      * @param interceptor  the {@link MethodInterceptor}
      *
+     * @param <T>          the type of the {@link Object} to proxy
+     *
      * @return a dynamic proxy of the specified {@link Object}
      */
     @SuppressWarnings("unchecked")
@@ -66,6 +66,8 @@ public class ProxyHelper
      *
      * @param clazz        the {@link Class} to proxy
      * @param interceptor  the {@link MethodInterceptor}
+     *
+     * @param <T>          the type of the {@link Class} to proxy
      *
      * @return a dynamic proxy of the specified {@link Class}
      */

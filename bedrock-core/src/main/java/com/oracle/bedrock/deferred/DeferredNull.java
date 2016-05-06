@@ -42,10 +42,9 @@ public class DeferredNull<T> implements Deferred<T>
 
 
     /**
-     * Constructs ...
+     * Constructs a {@link DeferredNull}
      *
-     *
-     * @param deferredClass
+     * @param deferredClass  the class of the {@link DeferredNull} value
      */
     public DeferredNull(Class<T> deferredClass)
     {

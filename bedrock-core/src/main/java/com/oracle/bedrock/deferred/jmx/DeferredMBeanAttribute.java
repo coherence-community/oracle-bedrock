@@ -30,13 +30,11 @@ import com.oracle.bedrock.deferred.PermanentlyUnavailableException;
 import com.oracle.bedrock.deferred.TemporarilyUnavailableException;
 import com.oracle.bedrock.deferred.UnavailableException;
 
-import java.io.IOException;
-
 import javax.management.InstanceNotFoundException;
 import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
-
 import javax.management.remote.JMXConnector;
+import java.io.IOException;
 
 /**
  * A {@link DeferredMBeanAttribute} is a {@link Deferred} for an

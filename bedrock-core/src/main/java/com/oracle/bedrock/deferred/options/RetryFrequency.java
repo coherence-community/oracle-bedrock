@@ -3,7 +3,7 @@
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * The contents of this file are subject to the terms and conditions of
+ * The contents of this file are subject to the terms and conditions of 
  * the Common Development and Distribution License 1.0 (the "License").
  *
  * You may not use this file except in compliance with the License.
@@ -32,8 +32,8 @@ import com.oracle.bedrock.util.Duration;
 import com.oracle.bedrock.util.ExponentialIterator;
 import com.oracle.bedrock.util.FibonacciIterator;
 import com.oracle.bedrock.util.MappingIterator;
-import com.oracle.bedrock.util.RandomIterator;
 import com.oracle.bedrock.util.PerpetualIterator;
+import com.oracle.bedrock.util.RandomIterator;
 
 import java.util.ArrayList;
 import java.util.Arrays;

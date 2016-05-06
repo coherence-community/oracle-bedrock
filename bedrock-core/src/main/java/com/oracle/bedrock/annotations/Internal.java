@@ -1,5 +1,5 @@
 /*
- * File: Contains.java
+ * File: Internal.java
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
@@ -23,51 +23,23 @@
  * "Portions Copyright [year] [name of copyright owner]"
  */
 
-package com.oracle.bedrock.predicate;
+package com.oracle.bedrock.annotations;
 
-import java.util.Collection;
-
-import java.util.function.Predicate;
+import java.lang.annotation.Documented;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
- * A {@link Predicate} to determine if a value is in a {@link Collection}.
+ * Annotates that a class, interface, enum, method, attribute or parameter is
+ * considered internal and should not be used outside of Oracle Bedrock.
  * <p>
- * Copyright (c) 2014. All Rights Reserved. Oracle Corporation.<br>
+ * Copyright (c) 2016. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
- *
- * @param <T>  the type of the {@link Predicate} value
  *
  * @author Brian Oliver
  */
-public class Contains<T> extends AbstractPredicate<Collection<T>>
+@Documented
+@Retention(RetentionPolicy.RUNTIME)
+public @interface Internal
 {
-    /**
-     * The value to locate in the collection
-     */
-    private T value;
-
-
-    /**
-     * Constructor for a {@link Contains} {@link Predicate}.
-     *
-     * @param value  the value to locate in the collection
-     */
-    public Contains(T value)
-    {
-        this.value = value;
-    }
-
-
-    @Override
-    public boolean test(Collection<T> set)
-    {
-        return set == null ? false : set.contains(value);
-    }
-
-
-    @Override
-    public String toString()
-    {
-        return "Contains{" + value + "}";
-    }
 }

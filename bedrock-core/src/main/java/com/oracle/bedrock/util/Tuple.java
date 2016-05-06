@@ -50,7 +50,7 @@ public interface Tuple
      *
      * @return  the value at the specified position in the {@link Tuple}
      *
-     * @throws IndexOutOfBoundsException when 0 < index <= size()
+     * @throws IndexOutOfBoundsException when 0 &lt; index &lt;= size()
      */
     public Object get(int index) throws IndexOutOfBoundsException;
 }

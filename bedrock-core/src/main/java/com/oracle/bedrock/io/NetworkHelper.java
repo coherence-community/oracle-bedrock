@@ -221,9 +221,11 @@ public class NetworkHelper
      * Acquires the first {@link InetAddress} (of the machine on which this code is executing)
      * that matches the specified {@link Predicate}.
      *
+     * @param predicate  the {@link InetAddress} {@link Predicate}
+     *
      * @return an {@link InetAddress} or <code>null</code> if no matching {@link InetAddress}
      *
-     * @throws SocketException
+     * @throws SocketException  when an {@link InetAddress} is not available
      */
     public static InetAddress getInetAddress(Predicate<InetAddress> predicate) throws SocketException
     {
@@ -247,6 +249,8 @@ public class NetworkHelper
     /**
      * Obtains the list of {@link InetAddress}es (of the machine on which this code is executing)
      * that matches the specified {@link Predicate}.
+     *
+     * @param predicate  the {@link InetAddress} {@link Predicate}
      *
      * @return a {@link List} of {@link InetAddress} matching the {@link Predicate} or an empty
      *         list if no matching {@link InetAddress} can be found
@@ -282,6 +286,8 @@ public class NetworkHelper
     /**
      * Obtains the list of {@link NetworkInterface}s (of the machine on which this code is executing),
      * ordered by {@link NetworkInterface#getIndex()}, that satisfy the specified {@link Predicate}.
+     *
+     * @param predicate  the {@link NetworkInterface} {@link Predicate}
      *
      * @return  a list of {@link NetworkInterface}s
      */
@@ -329,13 +335,15 @@ public class NetworkHelper
      * Obtains an {@link InetAddress} that is feasibly a reachable, bindable, non-loopback, site-local network address of the
      * localhost, especially in cases where a localhost is multi-homed with numerous virtual network adapters, including
      * loop-back.
-     * <p/>
+     * <p>
      * This method will consult all of the network interfaces defined by the localhost to determine the
      * {@link InetAddress} that is feasibly a locally reachable network address.  When a localhost has numerous network
      * interfaces, this method will return the first available and active site-local {@link InetAddress}, like 192.168.x.x
      * or 10.10.x.x.  Should one not be available, this method will attempt to return the first non-loop-back address.
      * Should both of these approaches fail, the {@link InetAddress#getLocalHost()} will returned and failing that
      * not being available {@link InetAddress#getLoopbackAddress()} will be returned.
+     *
+     * @return the feasible {@link InetAddress}
      */
     public static InetAddress getFeasibleLocalHost()
     {

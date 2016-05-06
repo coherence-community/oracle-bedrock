@@ -55,7 +55,8 @@ public class Future<T> implements Deferred<T>
     /**
      * Constructs a {@link Future} based on a Java {@link java.util.concurrent.Future}.
      *
-     * @param future  the Java {@link java.util.concurrent.Future}
+     * @param classOfResult  the class of the {@link Deferred} value
+     * @param future         the Java {@link java.util.concurrent.Future}
      */
     public Future(Class<T>                       classOfResult,
                   java.util.concurrent.Future<T> future)

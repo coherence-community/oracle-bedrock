@@ -25,18 +25,18 @@
 
 package com.oracle.bedrock.deferred;
 
-import com.oracle.bedrock.deferred.atomic.DeferredAtomicInteger;
-import com.oracle.bedrock.deferred.options.InitialDelay;
-import com.oracle.bedrock.util.Duration;
-import com.oracle.bedrock.util.ProxyHelper;
 import com.oracle.bedrock.Option;
 import com.oracle.bedrock.deferred.atomic.DeferredAtomicBoolean;
+import com.oracle.bedrock.deferred.atomic.DeferredAtomicInteger;
 import com.oracle.bedrock.deferred.atomic.DeferredAtomicLong;
+import com.oracle.bedrock.deferred.options.InitialDelay;
 import com.oracle.bedrock.options.Timeout;
+import com.oracle.bedrock.util.Duration;
 import com.oracle.bedrock.util.ExponentialIterator;
 import com.oracle.bedrock.util.FibonacciIterator;
 import com.oracle.bedrock.util.MappingIterator;
 import com.oracle.bedrock.util.PerpetualIterator;
+import com.oracle.bedrock.util.ProxyHelper;
 import com.oracle.bedrock.util.RandomIterator;
 import net.sf.cglib.proxy.MethodInterceptor;
 import net.sf.cglib.proxy.MethodProxy;
@@ -64,7 +64,7 @@ public class DeferredHelper
 {
     /**
      * The system property defining the retry strategy that will be used for {@link Ensured}s.
-     * <p/>
+     * <p>
      * Legal Values are:
      * <ol>
      *     <li>constant            = polling every 250ms</li>
@@ -78,7 +78,7 @@ public class DeferredHelper
      *                               order from an exponential sequence
      *                               (a rate of 50%)</li>
      * </ol>
-     * <p/>
+     * <p>
      * The default strategy is "random.fibonacci"
      */
     public static final String BEDROCK_DEFERRED_RETRY_STRATEGY = "bedrock.deferred.retry.strategy";
@@ -86,7 +86,7 @@ public class DeferredHelper
     /**
      * The system property defining the total maximum time (retry timeout) that
      * can be used attempting to ensure a {@link Deferred}.
-     * <p/>
+     * <p>
      * By default values are measured in milliseconds, however when
      * time units are specified after the amount eg:
      * (ms = milliseconds, m = minutes, s = seconds, h = hours),
@@ -103,7 +103,7 @@ public class DeferredHelper
     /**
      * The system property defining the maximum time permitted to wait between
      * attempts to ensure a {@link Deferred}.
-     * <p/>
+     * <p>
      * By default values are measured in milliseconds, however when
      * time units are specified after the amount eg:
      * (ms = milliseconds, m = minutes, s = seconds, h = hours),
@@ -372,6 +372,7 @@ public class DeferredHelper
      * Obtains an ensured of the specified {@link Deferred}.
      *
      * @param deferred  the {@link Deferred} to ensure
+     * @param <T>       the type of the {@link Deferred} value
      *
      * @return an {@link Ensured} of the {@link Deferred}
      */
@@ -386,6 +387,8 @@ public class DeferredHelper
      *
      * @param deferred  the {@link Deferred} to ensure
      * @param options   the {@link Option}s for ensuring the {@link Deferred}
+     *
+     * @param <T>       the type of the {@link Deferred} value
      *
      * @return an {@link Ensured} of the {@link Deferred}
      */
@@ -403,6 +406,8 @@ public class DeferredHelper
      *
      * @param value  the value
      *
+     * @param <T>    the type of the {@link Deferred} value
+     *
      * @return the value
      */
     public static <T> T ensure(T value)
@@ -418,6 +423,8 @@ public class DeferredHelper
      * {@link #ensured(Deferred)}.
      *
      * @param deferred  the {@link Deferred} to ensure
+     *
+     * @param <T>       the type of the {@link Deferred} value
      *
      * @return the value of the {@link Deferred}
      */
@@ -436,6 +443,8 @@ public class DeferredHelper
      * @param deferred  the {@link Deferred} to ensure
      * @param options   the {@link Option}s
      *
+     * @param <T>       the type of the {@link Deferred} value
+     *
      * @return the value of the {@link Deferred}
      */
     public static <T> T ensure(Deferred<T> deferred,
@@ -445,6 +454,16 @@ public class DeferredHelper
     }
 
 
+    /**
+     * Ensures the {@link Deferred} satisfies the specified {@link Predicate}.
+     *
+     * @param deferred   the {@link Deferred}
+     * @param predicate  the {@link Predicate}
+     *
+     * @param <T>        the type of the {@link Deferred} value
+     *
+     * @return a boolean indicating if the predicate was satisfied.
+     */
     public static <T> boolean ensure(Deferred<T>          deferred,
                                      Predicate<? super T> predicate)
     {
@@ -456,6 +475,8 @@ public class DeferredHelper
      * Obtains an {@link Cached} of the specified {@link Deferred}.
      *
      * @param deferred  the {@link Deferred} to cache
+     *
+     * @param <T>       the type of the {@link Deferred} value
      *
      * @return a {@link Cached} of the {@link Deferred}
      */
@@ -471,6 +492,8 @@ public class DeferredHelper
      * @param clzOfResult  the {@link Class} of result from the
      *                     {@link java.util.concurrent.Future}
      * @param future       the {@link java.util.concurrent.Future}
+     *
+     * @param <T>          the type of the {@link Deferred} value
      *
      * @return a {@link Deferred}
      */
@@ -491,8 +514,9 @@ public class DeferredHelper
      * a {@link Deferred}), applications must wrap the result in a
      * call to {@link #eventually(Object)}.
      *
-     * @param <T>     the type of {@link Object}
      * @param object  the {@link Object} to proxy
+     *
+     * @param <T>     the type of {@link Object}
      *
      * @return a recording dynamic proxy of the {@link Object}
      */
@@ -513,10 +537,11 @@ public class DeferredHelper
      * a {@link Deferred}), applications must wrap the result in a call
      * to {@link #eventually(Object)}.
      *
-     * @param <T>            the specific type to proxy
-     * @param <O>            the type of the {@link Object} (a sub-type of T)
      * @param object         the {@link Object} to proxy
      * @param specificClass  the specific {@link Class} to proxy
+     *
+     * @param <T>            the specific type to proxy
+     * @param <O>            the type of the {@link Object} (a sub-type of T)
      *
      * @return a recording dynamic proxy of the {@link Object} represented
      *         as the specified {@link Class}
@@ -537,8 +562,9 @@ public class DeferredHelper
      * and/or other dynamic proxies.  To determine the actual result (as
      * a {@link Deferred}), one must call {@link #eventually(Object)}.
      *
-     * @param <T>       the type of {@link Object}
      * @param deferred  the {@link Deferred} object to proxy
+     *
+     * @param <T>       the type of the {@link Deferred} value
      *
      * @return a recording dynamic proxy of the {@link Object}
      */
@@ -575,8 +601,9 @@ public class DeferredHelper
      * within 'eventually' / 'assertThat' calls, where no method chaining is required or used
      * (unlike {@link #invoking}).
      *
-     * @param <T>       the type of {@link Object}
      * @param deferred  the {@link Deferred}
+     *
+     * @param <T>       the type of the {@link Deferred} value
      *
      * @return  a dummy value representing the {@link Deferred}
      */
@@ -610,11 +637,12 @@ public class DeferredHelper
      * especially useful for strongly-typed lambda expressions.
      * <p>
      * For Example:
-     * <code>Eventually.assertThat(valueOf(() -> 42, Integer.class), is(42));</code>
+     * <code>Eventually.assertThat(valueOf(() -&gt; 42, Integer.class), is(42));</code>
      *
-     * @param <T>         the specific type of the callable
      * @param callable    the {@link Callable} to evaluate
      * @param returnType  the {@link Class} representing the type of value returned by the {@link Callable}
+     *
+     * @param <T>         the specific type of the callable
      *
      * @return  a dummy {@link Class} value
      */
@@ -678,10 +706,11 @@ public class DeferredHelper
      * 'eventually' calls, especially useful for lambda expressions.
      * <p>
      * For Example:
-     * <code>Eventually.assertThat(valueOf(() -> 42), is(42));</code>
+     * <code>Eventually.assertThat(valueOf(() -&gt; 42), is(42));</code>
+     *
+     * @param callable    the {@link Callable} to evaluate
      *
      * @param <T>         the specific type of the callable
-     * @param callable    the {@link Callable} to evaluate
      *
      * @return  a dummy {@link Class} value
      */
@@ -696,10 +725,11 @@ public class DeferredHelper
      * dynamic proxy created with either {@link #invoking(Object)} or
      * {@link #invoking(Deferred)}.
      *
-     * @param t  the value returned from an call to 'invoking'
+     * @param t    the value returned from an call to 'invoking'
      *
-     * @return a {@link Deferred} representation of a previous call
-     * {@link #invoking(Object)}
+     * @param <T>  the type of the {@link Deferred} value
+     *
+     * @return a {@link Deferred} representation of a previous call {@link #invoking(Object)}
      */
     @SuppressWarnings("unchecked")
     public static <T> Deferred<T> eventually(T t)
@@ -729,8 +759,9 @@ public class DeferredHelper
      *
      * @param t  the deferred value (usually returned from 'invoking')
      *
-     * @return a {@link Deferred} representation of a previous call
-     * {@link #invoking(Object)}
+     * @param <T>  the type of the {@link Deferred} value
+     *
+     * @return a {@link Deferred} representation of a previous call {@link #invoking(Object)}
      */
     @SuppressWarnings("unchecked")
     public static <T> Deferred<T> eventually(Deferred<T> t)

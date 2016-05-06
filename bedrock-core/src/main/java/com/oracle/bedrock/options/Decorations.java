@@ -3,7 +3,7 @@
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * The contents of this file are subject to the terms and conditions of
+ * The contents of this file are subject to the terms and conditions of 
  * the Common Development and Distribution License 1.0 (the "License").
  *
  * You may not use this file except in compliance with the License.
@@ -172,6 +172,8 @@ public class Decorations implements Option.Collector<Decoration, Decorations>
      * returning a new {@link Decorations}.
      *
      * @param decorations the {@link Decorations}
+     *
+     * @return a new {@link Decorations}
      */
     public Decorations addAll(Decorations decorations)
     {
