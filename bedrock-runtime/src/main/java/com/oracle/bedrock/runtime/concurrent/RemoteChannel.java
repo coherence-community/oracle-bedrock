@@ -27,6 +27,7 @@ package com.oracle.bedrock.runtime.concurrent;
 
 import com.oracle.bedrock.Option;
 import com.oracle.bedrock.Options;
+import com.oracle.bedrock.annotations.Experimental;
 import com.oracle.bedrock.annotations.Internal;
 import com.oracle.bedrock.runtime.concurrent.options.StreamName;
 
@@ -59,7 +60,6 @@ import java.util.concurrent.CompletableFuture;
  * @author Brian Oliver
  * @author Jonathan Knight
  */
-@Internal
 public interface RemoteChannel extends Closeable
 {
     /**
@@ -171,6 +171,7 @@ public interface RemoteChannel extends Closeable
      * An abstract class with a single method to inject a {@link RemoteChannel}
      * into static fields or static methods of other classes.
      */
+    @Experimental
     abstract class Injector
     {
         /**
