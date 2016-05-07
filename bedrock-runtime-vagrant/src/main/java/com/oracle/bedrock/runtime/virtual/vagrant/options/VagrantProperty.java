@@ -3,7 +3,7 @@
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * The contents of this file are subject to the terms and conditions of
+ * The contents of this file are subject to the terms and conditions of 
  * the Common Development and Distribution License 1.0 (the "License").
  *
  * You may not use this file except in compliance with the License.
@@ -77,6 +77,8 @@ public class VagrantProperty implements Option.Collectable
      *
      * @param name     the name of the {@link VagrantProperty}
      * @param value    the value of the {@link VagrantProperty}
+     *
+     * @return a {@link VagrantProperty}
      */
     public static VagrantProperty of(String name,
                                      String value)
@@ -90,6 +92,8 @@ public class VagrantProperty implements Option.Collectable
      *
      * @param name     the name of the {@link VagrantProperty}
      * @param iterator the iterator that can provide values for the {@link VagrantProperty}
+     *
+     * @return a {@link VagrantProperty}
      */
     public static VagrantProperty of(String   name,
                                      Iterator iterator)
@@ -103,6 +107,8 @@ public class VagrantProperty implements Option.Collectable
      *
      * @param name   the name of the {@link VagrantProperty}
      * @param object the values for the {@link VagrantProperty}
+     *
+     * @return a {@link VagrantProperty}
      */
     public static VagrantProperty of(String name,
                                      Object object)

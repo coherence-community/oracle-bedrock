@@ -3,7 +3,7 @@
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * The contents of this file are subject to the terms and conditions of
+ * The contents of this file are subject to the terms and conditions of 
  * the Common Development and Distribution License 1.0 (the "License").
  *
  * You may not use this file except in compliance with the License.
@@ -25,12 +25,12 @@
 
 package com.oracle.bedrock.runtime.virtual.vagrant;
 
-import com.oracle.bedrock.runtime.virtual.vagrant.options.Networks;
 import com.oracle.bedrock.Option;
 import com.oracle.bedrock.Options;
 import com.oracle.bedrock.runtime.options.OperatingSystem;
 import com.oracle.bedrock.runtime.remote.options.HostName;
 import com.oracle.bedrock.runtime.virtual.vagrant.options.BoxName;
+import com.oracle.bedrock.runtime.virtual.vagrant.options.Networks;
 import com.oracle.bedrock.runtime.virtual.vagrant.options.UpdateBox;
 import com.oracle.bedrock.runtime.virtual.vagrant.options.VagrantConfigurations;
 import com.oracle.bedrock.runtime.virtual.vagrant.options.VagrantProperties;
@@ -96,7 +96,8 @@ class OptionsBasedVagrantFileBuilder implements VagrantFileBuilder
 
 
     @Override
-    public Optional<HostName> create(File file, Options createOptions) throws IOException
+    public Optional<HostName> create(File    file,
+                                     Options createOptions) throws IOException
     {
         try (PrintWriter writer = new PrintWriter(file))
         {
@@ -144,7 +145,7 @@ class OptionsBasedVagrantFileBuilder implements VagrantFileBuilder
 
             // ----- output the Networks -----
 
-            Networks networks = vagrantOptions.get(Networks.class);
+            Networks           networks = vagrantOptions.get(Networks.class);
 
             Optional<HostName> hostName = networks.write(writer, prefix, padding);
 

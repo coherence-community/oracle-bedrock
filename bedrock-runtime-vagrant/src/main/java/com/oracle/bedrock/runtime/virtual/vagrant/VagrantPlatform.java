@@ -25,24 +25,24 @@
 
 package com.oracle.bedrock.runtime.virtual.vagrant;
 
-import com.oracle.bedrock.runtime.Platform;
-import com.oracle.bedrock.runtime.console.Console;
-import com.oracle.bedrock.runtime.remote.SecureKeys;
-import com.oracle.bedrock.runtime.remote.options.HostName;
-import com.oracle.bedrock.runtime.remote.options.StrictHostChecking;
-import com.oracle.bedrock.runtime.virtual.VirtualPlatform;
 import com.oracle.bedrock.Option;
 import com.oracle.bedrock.Options;
 import com.oracle.bedrock.options.Timeout;
 import com.oracle.bedrock.runtime.Application;
 import com.oracle.bedrock.runtime.LocalPlatform;
+import com.oracle.bedrock.runtime.Platform;
+import com.oracle.bedrock.runtime.console.Console;
 import com.oracle.bedrock.runtime.console.PipedApplicationConsole;
 import com.oracle.bedrock.runtime.options.Argument;
 import com.oracle.bedrock.runtime.options.Arguments;
 import com.oracle.bedrock.runtime.options.DisplayName;
 import com.oracle.bedrock.runtime.options.Executable;
 import com.oracle.bedrock.runtime.options.WorkingDirectory;
+import com.oracle.bedrock.runtime.remote.SecureKeys;
+import com.oracle.bedrock.runtime.remote.options.HostName;
+import com.oracle.bedrock.runtime.remote.options.StrictHostChecking;
 import com.oracle.bedrock.runtime.virtual.CloseAction;
+import com.oracle.bedrock.runtime.virtual.VirtualPlatform;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -94,6 +94,7 @@ public class VagrantPlatform extends VirtualPlatform
     {
         this(name, builder, 22, options);
     }
+
 
     /**
      * Construct a new {@link VagrantPlatform}.

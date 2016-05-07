@@ -3,7 +3,7 @@
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * The contents of this file are subject to the terms and conditions of
+ * The contents of this file are subject to the terms and conditions of 
  * the Common Development and Distribution License 1.0 (the "License").
  *
  * You may not use this file except in compliance with the License.
@@ -25,8 +25,8 @@
 
 package com.oracle.bedrock.runtime.virtual.vagrant.options;
 
-import com.oracle.bedrock.runtime.virtual.vagrant.VagrantPlatform;
 import com.oracle.bedrock.Option;
+import com.oracle.bedrock.runtime.virtual.vagrant.VagrantPlatform;
 
 import java.io.PrintWriter;
 
@@ -151,8 +151,8 @@ public class VagrantProvisioner implements Option.Collectable
     /**
      * Create a file copy {@link VagrantProvisioner}.
      *
-     * @param source  the source file to copy
-     * @param source  the destination to copy the file to
+     * @param source       the source file to copy
+     * @param destination  the destination to copy the file to
      *
      * @return  an in-line shell {@link VagrantProvisioner}
      */
