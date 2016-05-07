@@ -25,6 +25,7 @@
 
 package com.oracle.bedrock.runtime.java.container;
 
+import com.oracle.bedrock.annotations.Internal;
 import com.oracle.bedrock.runtime.LocalPlatform;
 import com.oracle.bedrock.runtime.java.JavaApplication;
 import com.oracle.bedrock.runtime.java.features.JmxFeature;
@@ -62,6 +63,7 @@ import java.util.Properties;
  * @author Brian Oliver
  * @author Jonathan Knight
  */
+@Internal
 public class ContainerMBeanServerBuilder extends MBeanServerBuilder
 {
     /**

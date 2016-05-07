@@ -25,6 +25,7 @@
 
 package com.oracle.bedrock.runtime.java;
 
+import com.oracle.bedrock.annotations.Internal;
 import com.oracle.bedrock.runtime.Settings;
 import com.oracle.bedrock.runtime.concurrent.RemoteChannel;
 import com.oracle.bedrock.runtime.concurrent.RemoteChannelListener;
@@ -50,6 +51,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  *
  * @author Brian Oliver
  */
+@Internal
 public class JavaApplicationRunner
 {
     private final String  parent;

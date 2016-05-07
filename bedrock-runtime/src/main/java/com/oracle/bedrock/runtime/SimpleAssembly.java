@@ -26,6 +26,7 @@
 package com.oracle.bedrock.runtime;
 
 import com.oracle.bedrock.Options;
+import com.oracle.bedrock.annotations.Internal;
 
 import java.util.List;
 
@@ -39,6 +40,7 @@ import java.util.List;
  *
  * @param <A> the type of {@link Application} contained within this {@link SimpleAssembly}
  */
+@Internal
 public class SimpleAssembly<A extends Application> extends AbstractAssembly<A>
 {
     /**

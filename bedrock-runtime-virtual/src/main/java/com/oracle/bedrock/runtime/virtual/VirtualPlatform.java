@@ -25,6 +25,7 @@
 
 package com.oracle.bedrock.runtime.virtual;
 
+import com.oracle.bedrock.annotations.Internal;
 import com.oracle.bedrock.runtime.Platform;
 import com.oracle.bedrock.runtime.remote.Authentication;
 import com.oracle.bedrock.runtime.remote.RemotePlatform;

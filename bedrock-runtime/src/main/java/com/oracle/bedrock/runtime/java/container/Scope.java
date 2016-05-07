@@ -25,6 +25,7 @@
 
 package com.oracle.bedrock.runtime.java.container;
 
+import com.oracle.bedrock.annotations.Internal;
 import com.oracle.bedrock.runtime.network.AvailablePortIterator;
 
 import java.io.InputStream;
@@ -44,6 +45,7 @@ import java.util.Properties;
  *
  * @author Brian Oliver
  */
+@Internal
 public interface Scope
 {
     /**

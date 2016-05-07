@@ -25,6 +25,8 @@
 
 package com.oracle.bedrock.runtime.java.container;
 
+import com.oracle.bedrock.annotations.Internal;
+
 import javax.management.Attribute;
 import javax.management.AttributeList;
 import javax.management.AttributeNotFoundException;
@@ -59,6 +61,7 @@ import java.util.Set;
  *
  * @author Brian Oliver
  */
+@Internal
 public class DelegatingMBeanServer implements MBeanServer
 {
     /**

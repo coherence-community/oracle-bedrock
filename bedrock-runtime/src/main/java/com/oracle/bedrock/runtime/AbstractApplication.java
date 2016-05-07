@@ -27,6 +27,7 @@ package com.oracle.bedrock.runtime;
 
 import com.oracle.bedrock.Option;
 import com.oracle.bedrock.Options;
+import com.oracle.bedrock.annotations.Internal;
 import com.oracle.bedrock.extensible.AbstractExtensible;
 import com.oracle.bedrock.options.Diagnostics;
 import com.oracle.bedrock.options.Timeout;
@@ -56,6 +57,7 @@ import java.io.Reader;
  * @param <P>  the type of {@link ApplicationProcess} used to internally represent
  *             the underlying {@link Application} at runtime
  */
+@Internal
 public abstract class AbstractApplication<P extends ApplicationProcess> extends AbstractExtensible
     implements Application
 {

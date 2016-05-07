@@ -25,6 +25,8 @@
 
 package com.oracle.bedrock.runtime.java.container;
 
+import com.oracle.bedrock.annotations.Internal;
+
 import javax.management.MBeanServer;
 import javax.management.MBeanServerBuilder;
 import javax.management.MBeanServerDelegate;
@@ -39,6 +41,7 @@ import javax.management.MBeanServerDelegate;
  *
  * @author Brian Oliver
  */
+@Internal
 public class DelegatingMBeanServerBuilder extends MBeanServerBuilder
 {
     /**

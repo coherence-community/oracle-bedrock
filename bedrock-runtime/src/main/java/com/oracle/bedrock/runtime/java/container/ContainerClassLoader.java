@@ -25,6 +25,7 @@
 
 package com.oracle.bedrock.runtime.java.container;
 
+import com.oracle.bedrock.annotations.Internal;
 import com.oracle.bedrock.runtime.LocalPlatform;
 import com.oracle.bedrock.runtime.PropertiesBuilder;
 import com.oracle.bedrock.runtime.java.ClassPath;
@@ -67,6 +68,7 @@ import java.util.Set;
  * @author Andrew Wilson
  * @author Brian Oliver
  */
+@Internal
 public class ContainerClassLoader extends ContainerScopeClassLoader
 {
     /**

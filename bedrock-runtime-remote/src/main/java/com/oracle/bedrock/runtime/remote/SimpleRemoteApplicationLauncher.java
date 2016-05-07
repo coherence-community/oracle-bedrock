@@ -26,6 +26,7 @@
 package com.oracle.bedrock.runtime.remote;
 
 import com.oracle.bedrock.Options;
+import com.oracle.bedrock.annotations.Internal;
 import com.oracle.bedrock.runtime.ApplicationLauncher;
 import com.oracle.bedrock.runtime.SimpleApplication;
 
@@ -37,6 +38,7 @@ import com.oracle.bedrock.runtime.SimpleApplication;
  *
  * @author Brian Oliver
  */
+@Internal
 public class SimpleRemoteApplicationLauncher extends AbstractRemoteApplicationLauncher<SimpleApplication>
 {
     /**

@@ -25,6 +25,7 @@
 
 package com.oracle.bedrock.runtime.concurrent.socket;
 
+import com.oracle.bedrock.annotations.Internal;
 import com.oracle.bedrock.runtime.concurrent.RemoteChannel;
 
 import java.io.IOException;
@@ -39,6 +40,7 @@ import java.net.Socket;
  *
  * @author Brian Oliver
  */
+@Internal
 public class SocketBasedRemoteChannelClient extends SocketBasedRemoteChannel
 {
     /**

@@ -25,6 +25,8 @@
 
 package com.oracle.bedrock.runtime.remote;
 
+import com.oracle.bedrock.annotations.Internal;
+
 /**
  * An abstract {@link RemoteTerminal}.
  * <p>
@@ -33,6 +35,7 @@ package com.oracle.bedrock.runtime.remote;
  *
  * @author Jonathan Knight
  */
+@Internal
 public abstract class AbstractRemoteTerminal implements RemoteTerminal
 {
     /**

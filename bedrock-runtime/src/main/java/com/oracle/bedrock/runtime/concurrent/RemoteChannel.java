@@ -27,6 +27,7 @@ package com.oracle.bedrock.runtime.concurrent;
 
 import com.oracle.bedrock.Option;
 import com.oracle.bedrock.Options;
+import com.oracle.bedrock.annotations.Internal;
 import com.oracle.bedrock.runtime.concurrent.options.StreamName;
 
 import java.io.Closeable;
@@ -58,6 +59,7 @@ import java.util.concurrent.CompletableFuture;
  * @author Brian Oliver
  * @author Jonathan Knight
  */
+@Internal
 public interface RemoteChannel extends Closeable
 {
     /**

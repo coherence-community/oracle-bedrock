@@ -26,6 +26,7 @@
 package com.oracle.bedrock.runtime.concurrent.socket;
 
 import com.oracle.bedrock.Option;
+import com.oracle.bedrock.annotations.Internal;
 import com.oracle.bedrock.io.NetworkHelper;
 import com.oracle.bedrock.runtime.concurrent.AbstractControllableRemoteChannel;
 import com.oracle.bedrock.runtime.concurrent.ControllableRemoteChannel;
@@ -59,6 +60,7 @@ import static com.oracle.bedrock.predicate.Predicates.allOf;
  *
  * @author Brian Oliver
  */
+@Internal
 public class SocketBasedRemoteChannelServer extends AbstractControllableRemoteChannel
 {
     /**

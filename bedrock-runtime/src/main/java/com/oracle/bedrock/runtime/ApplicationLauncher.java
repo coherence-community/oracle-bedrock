@@ -27,6 +27,7 @@ package com.oracle.bedrock.runtime;
 
 import com.oracle.bedrock.Option;
 import com.oracle.bedrock.Options;
+import com.oracle.bedrock.annotations.Internal;
 import com.oracle.bedrock.runtime.options.DisplayName;
 
 /**
@@ -48,6 +49,7 @@ import com.oracle.bedrock.runtime.options.DisplayName;
  *
  * @param <A>  the type of {@link Application}s the {@link ApplicationLauncher} will launch
  */
+@Internal
 public interface ApplicationLauncher<A extends Application>
 {
     /**

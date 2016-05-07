@@ -26,6 +26,7 @@
 package com.oracle.bedrock.runtime.java;
 
 import com.oracle.bedrock.Options;
+import com.oracle.bedrock.annotations.Internal;
 import com.oracle.bedrock.runtime.ApplicationLauncher;
 import com.oracle.bedrock.runtime.java.options.ClassName;
 import com.oracle.bedrock.runtime.options.DisplayName;
@@ -38,6 +39,7 @@ import com.oracle.bedrock.runtime.options.DisplayName;
  *
  * @author Brian Oliver
  */
+@Internal
 public interface JavaApplicationLauncher<A extends JavaApplication> extends ApplicationLauncher<A>
 {
     @Override

@@ -25,6 +25,8 @@
 
 package com.oracle.bedrock.runtime.java.container;
 
+import com.oracle.bedrock.annotations.Internal;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -49,6 +51,7 @@ import java.util.Set;
  * @author Brian Oliver
  * @author Jonathan Knight
  */
+@Internal
 @SuppressWarnings("serial")
 public class DelegatingProperties extends Properties
 {

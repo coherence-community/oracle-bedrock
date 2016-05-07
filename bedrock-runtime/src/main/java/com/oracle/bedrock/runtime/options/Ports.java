@@ -189,7 +189,7 @@ public class Ports implements ComposableOption<Ports>
      * Class description
      *
      * @version        Enter version here..., 16/05/06
-     * @author         Enter your name here...    
+     * @author         Enter your name here...
      */
     public static class Port
     {

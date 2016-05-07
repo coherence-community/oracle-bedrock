@@ -25,6 +25,8 @@
 
 package com.oracle.bedrock.runtime.concurrent;
 
+import com.oracle.bedrock.annotations.Internal;
+
 /**
  * Provides the ability to receive callbacks when certain events
  * occur on a {@link RemoteChannel}.
@@ -34,6 +36,7 @@ package com.oracle.bedrock.runtime.concurrent;
  *
  * @author Brian Oliver
  */
+@Internal
 public interface RemoteChannelListener
 {
     /**

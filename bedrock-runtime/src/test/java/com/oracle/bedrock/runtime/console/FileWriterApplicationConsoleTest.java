@@ -40,8 +40,8 @@ import static org.junit.Assert.assertThat;
  */
 public class FileWriterApplicationConsoleTest
 {
-    /** 
-     *Field description 
+    /**
+     * Field description
      */
     @ClassRule
     public static TemporaryFolder temporaryFolder = new TemporaryFolder();

@@ -87,7 +87,7 @@ public class StaticInfrastructure implements Infrastructure
 
         PlatformPredicate  predicate = platformOptions.getOrDefault(PlatformPredicate.class, PlatformPredicate.any());
 
-        Optional<Platform> platform        = platforms.stream().filter(predicate).findFirst();
+        Optional<Platform> platform        = platforms.stream().filter(predicate).unordered().findFirst();
 
         return platform.isPresent() ? platform.get() : null;
     }

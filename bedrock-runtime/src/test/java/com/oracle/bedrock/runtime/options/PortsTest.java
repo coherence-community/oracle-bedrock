@@ -26,16 +26,23 @@
 package com.oracle.bedrock.runtime.options;
 
 import com.oracle.bedrock.Options;
+
 import com.oracle.bedrock.runtime.Platform;
+
 import com.oracle.bedrock.runtime.java.options.SystemProperties;
 import com.oracle.bedrock.runtime.java.options.SystemProperty;
+
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
+
 import static org.hamcrest.collection.IsEmptyIterable.emptyIterable;
+
 import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInAnyOrder;
+
 import static org.junit.Assert.assertThat;
+
 import static org.mockito.Mockito.mock;
 
 /**

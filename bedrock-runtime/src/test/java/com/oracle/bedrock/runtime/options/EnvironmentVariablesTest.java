@@ -26,15 +26,18 @@
 package com.oracle.bedrock.runtime.options;
 
 import com.oracle.bedrock.Option;
+
 import com.oracle.bedrock.runtime.LocalPlatform;
+
 import org.hamcrest.Matchers;
+
 import org.junit.Test;
+
+import static org.junit.Assert.assertThat;
 
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Properties;
-
-import static org.junit.Assert.assertThat;
 
 /**
  * Tests for the {@link Executable} {@link Option}.

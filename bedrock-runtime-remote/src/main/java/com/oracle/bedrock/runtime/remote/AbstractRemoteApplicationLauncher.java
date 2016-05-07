@@ -26,6 +26,7 @@
 package com.oracle.bedrock.runtime.remote;
 
 import com.oracle.bedrock.Options;
+import com.oracle.bedrock.annotations.Internal;
 import com.oracle.bedrock.lang.ExpressionEvaluator;
 import com.oracle.bedrock.options.Variable;
 import com.oracle.bedrock.options.Variables;
@@ -72,6 +73,7 @@ import java.util.stream.Collectors;
  *
  * @author Brian Oliver
  */
+@Internal
 public abstract class AbstractRemoteApplicationLauncher<A extends Application> implements ApplicationLauncher<A>,
                                                                                           RemoteTerminal.Launchable
 {

@@ -27,6 +27,7 @@ package com.oracle.bedrock.runtime.concurrent;
 
 import com.oracle.bedrock.Option;
 import com.oracle.bedrock.Options;
+import com.oracle.bedrock.annotations.Internal;
 import com.oracle.bedrock.lang.ThreadFactories;
 import com.oracle.bedrock.runtime.concurrent.options.StreamName;
 import com.oracle.bedrock.runtime.java.io.ClassLoaderAwareObjectInputStream;
@@ -60,6 +61,7 @@ import java.util.concurrent.atomic.AtomicLong;
  *
  * @author Brian Oliver
  */
+@Internal
 public abstract class AbstractRemoteChannel extends AbstractControllableRemoteChannel
 {
     /**

@@ -26,12 +26,16 @@
 package com.oracle.bedrock.runtime;
 
 import com.oracle.bedrock.Options;
+
 import com.oracle.bedrock.example.ExampleProfile;
+
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.nullValue;
+
 import static org.hamcrest.core.Is.is;
+
 import static org.junit.Assert.assertThat;
 
 /**

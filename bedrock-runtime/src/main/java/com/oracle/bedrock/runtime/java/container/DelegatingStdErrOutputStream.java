@@ -25,6 +25,8 @@
 
 package com.oracle.bedrock.runtime.java.container;
 
+import com.oracle.bedrock.annotations.Internal;
+
 import java.io.OutputStream;
 
 /**
@@ -36,6 +38,7 @@ import java.io.OutputStream;
  *
  * @author Brian Oliver
  */
+@Internal
 public class DelegatingStdErrOutputStream extends AbstractDelegatingOutputStream
 {
     /**

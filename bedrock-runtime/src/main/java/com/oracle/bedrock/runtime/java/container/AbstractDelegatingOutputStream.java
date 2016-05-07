@@ -25,6 +25,8 @@
 
 package com.oracle.bedrock.runtime.java.container;
 
+import com.oracle.bedrock.annotations.Internal;
+
 import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -39,6 +41,7 @@ import java.io.OutputStream;
  *
  * @author Brian Oliver
  */
+@Internal
 public abstract class AbstractDelegatingOutputStream extends FilterOutputStream
 {
     /**

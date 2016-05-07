@@ -27,6 +27,7 @@ package com.oracle.bedrock.runtime.java;
 
 import com.oracle.bedrock.Option;
 import com.oracle.bedrock.Options;
+import com.oracle.bedrock.annotations.Internal;
 import com.oracle.bedrock.options.Variable;
 import com.oracle.bedrock.runtime.ApplicationListener;
 import com.oracle.bedrock.runtime.MetaClass;
@@ -94,6 +95,7 @@ import java.util.logging.Logger;
  * @author Brian Oliver
  * @author Jonathan Knight
  */
+@Internal
 public class ContainerBasedJavaApplicationLauncher<A extends JavaApplication> implements JavaApplicationLauncher<A>
 {
     /**

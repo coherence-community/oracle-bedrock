@@ -30,7 +30,9 @@ import org.junit.Test;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.CoreMatchers.sameInstance;
+
 import static org.junit.Assert.assertThat;
+
 import static org.mockito.Mockito.mock;
 
 /**
@@ -189,7 +191,7 @@ public class SocketBasedRemoteChannelTest
      * Class description
      *
      * @version        Enter version here..., 16/05/06
-     * @author         Enter your name here...    
+     * @author         Enter your name here...
      */
     public static class TestTypeEight
     {
@@ -209,7 +211,7 @@ public class SocketBasedRemoteChannelTest
      * Class description
      *
      * @version        Enter version here..., 16/05/06
-     * @author         Enter your name here...    
+     * @author         Enter your name here...
      */
     public static class TestTypeEleven
     {
@@ -223,7 +225,7 @@ public class SocketBasedRemoteChannelTest
      * Class description
      *
      * @version        Enter version here..., 16/05/06
-     * @author         Enter your name here...    
+     * @author         Enter your name here...
      */
     public static class TestTypeFive
     {
@@ -243,7 +245,7 @@ public class SocketBasedRemoteChannelTest
      * Class description
      *
      * @version        Enter version here..., 16/05/06
-     * @author         Enter your name here...    
+     * @author         Enter your name here...
      */
     public static class TestTypeFour
     {
@@ -257,7 +259,7 @@ public class SocketBasedRemoteChannelTest
      * Class description
      *
      * @version        Enter version here..., 16/05/06
-     * @author         Enter your name here...    
+     * @author         Enter your name here...
      */
     public static class TestTypeNine
     {
@@ -278,7 +280,7 @@ public class SocketBasedRemoteChannelTest
      * Class description
      *
      * @version        Enter version here..., 16/05/06
-     * @author         Enter your name here...    
+     * @author         Enter your name here...
      */
     public static class TestTypeOne
     {
@@ -292,7 +294,7 @@ public class SocketBasedRemoteChannelTest
      * Class description
      *
      * @version        Enter version here..., 16/05/06
-     * @author         Enter your name here...    
+     * @author         Enter your name here...
      */
     public static class TestTypeSeven
     {
@@ -312,7 +314,7 @@ public class SocketBasedRemoteChannelTest
      * Class description
      *
      * @version        Enter version here..., 16/05/06
-     * @author         Enter your name here...    
+     * @author         Enter your name here...
      */
     public static class TestTypeSix
     {
@@ -332,7 +334,7 @@ public class SocketBasedRemoteChannelTest
      * Class description
      *
      * @version        Enter version here..., 16/05/06
-     * @author         Enter your name here...    
+     * @author         Enter your name here...
      */
     public static class TestTypeTen
     {
@@ -352,7 +354,7 @@ public class SocketBasedRemoteChannelTest
      * Class description
      *
      * @version        Enter version here..., 16/05/06
-     * @author         Enter your name here...    
+     * @author         Enter your name here...
      */
     public static class TestTypeThree
     {
@@ -366,7 +368,7 @@ public class SocketBasedRemoteChannelTest
      * Class description
      *
      * @version        Enter version here..., 16/05/06
-     * @author         Enter your name here...    
+     * @author         Enter your name here...
      */
     public static class TestTypeTwo
     {

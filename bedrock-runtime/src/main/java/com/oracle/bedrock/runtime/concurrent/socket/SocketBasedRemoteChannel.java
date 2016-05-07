@@ -25,6 +25,7 @@
 
 package com.oracle.bedrock.runtime.concurrent.socket;
 
+import com.oracle.bedrock.annotations.Internal;
 import com.oracle.bedrock.runtime.concurrent.AbstractRemoteChannel;
 import com.oracle.bedrock.runtime.concurrent.RemoteChannel;
 
@@ -41,6 +42,7 @@ import java.util.concurrent.Callable;
  *
  * @author Brian Oliver
  */
+@Internal
 public class SocketBasedRemoteChannel extends AbstractRemoteChannel
 {
     /**

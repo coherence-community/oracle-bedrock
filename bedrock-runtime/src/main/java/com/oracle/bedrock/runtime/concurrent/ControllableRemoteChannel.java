@@ -25,6 +25,8 @@
 
 package com.oracle.bedrock.runtime.concurrent;
 
+import com.oracle.bedrock.annotations.Internal;
+
 import java.io.Closeable;
 
 /**
@@ -37,6 +39,7 @@ import java.io.Closeable;
  *
  * @see RemoteChannel
  */
+@Internal
 public interface ControllableRemoteChannel extends RemoteChannel, Closeable
 {
     /**

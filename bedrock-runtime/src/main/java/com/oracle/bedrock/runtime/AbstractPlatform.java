@@ -27,6 +27,7 @@ package com.oracle.bedrock.runtime;
 
 import com.oracle.bedrock.Option;
 import com.oracle.bedrock.Options;
+import com.oracle.bedrock.annotations.Internal;
 import com.oracle.bedrock.extensible.AbstractExtensible;
 
 /**
@@ -37,6 +38,7 @@ import com.oracle.bedrock.extensible.AbstractExtensible;
  *
  * @author Jonathan Knight
  */
+@Internal
 public abstract class AbstractPlatform extends AbstractExtensible implements Platform
 {
     /**

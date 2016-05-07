@@ -25,6 +25,7 @@
 
 package com.oracle.bedrock.runtime.remote;
 
+import com.oracle.bedrock.annotations.Internal;
 import com.oracle.bedrock.runtime.Platform;
 import com.oracle.bedrock.runtime.remote.ssh.JSchRemoteTerminal;
 
@@ -36,6 +37,7 @@ import com.oracle.bedrock.runtime.remote.ssh.JSchRemoteTerminal;
  *
  * @author Brian Oliver
  */
+@Internal
 public class RemoteTerminals
 {
     /**

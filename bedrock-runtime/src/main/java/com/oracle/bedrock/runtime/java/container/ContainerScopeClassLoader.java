@@ -25,6 +25,7 @@
 
 package com.oracle.bedrock.runtime.java.container;
 
+import com.oracle.bedrock.annotations.Internal;
 import com.oracle.bedrock.runtime.java.ClassPath;
 
 import java.net.URLClassLoader;
@@ -40,6 +41,7 @@ import java.net.URLClassLoader;
  * @author Brian Oliver
  * @author Jonathan Knight
  */
+@Internal
 public class ContainerScopeClassLoader extends URLClassLoader
 {
     /**

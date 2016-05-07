@@ -26,17 +26,21 @@
 package com.oracle.bedrock.runtime.options;
 
 import com.oracle.bedrock.Options;
+
 import com.oracle.bedrock.runtime.LocalPlatform;
 import com.oracle.bedrock.runtime.Platform;
-import org.junit.Test;
 
-import java.io.File;
-import java.util.Arrays;
-import java.util.Iterator;
+import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
+
 import static org.junit.Assert.assertThat;
+
+import java.io.File;
+
+import java.util.Arrays;
+import java.util.Iterator;
 
 /**
  * Unit tests for the {@link WorkingDirectory} class.

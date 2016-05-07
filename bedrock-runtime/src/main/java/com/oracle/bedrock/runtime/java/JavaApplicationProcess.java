@@ -25,6 +25,7 @@
 
 package com.oracle.bedrock.runtime.java;
 
+import com.oracle.bedrock.annotations.Internal;
 import com.oracle.bedrock.runtime.ApplicationProcess;
 import com.oracle.bedrock.runtime.concurrent.RemoteChannel;
 
@@ -39,6 +40,7 @@ import java.util.Properties;
  *
  * @author Brian Oliver
  */
+@Internal
 public interface JavaApplicationProcess extends ApplicationProcess, RemoteChannel
 {
     /**

@@ -27,6 +27,7 @@ package com.oracle.bedrock.runtime;
 
 import com.oracle.bedrock.Option;
 import com.oracle.bedrock.Options;
+import com.oracle.bedrock.annotations.Internal;
 import com.oracle.bedrock.runtime.console.SystemApplicationConsole;
 import com.oracle.bedrock.runtime.options.Discriminator;
 
@@ -45,6 +46,7 @@ import java.util.List;
  *             built by the {@link AssemblyBuilder}
  * @param <G>  the type of the {@link Assembly} built by the {@link AssemblyBuilder}
  */
+@Internal
 public abstract class AbstractAssemblyBuilder<A extends Application, G extends Assembly<A>>
     implements AssemblyBuilder<A, G>
 {

@@ -27,6 +27,7 @@ package com.oracle.bedrock.runtime.concurrent;
 
 import com.oracle.bedrock.Option;
 import com.oracle.bedrock.Options;
+import com.oracle.bedrock.annotations.Internal;
 import com.oracle.bedrock.runtime.concurrent.options.StreamName;
 
 import java.util.concurrent.ConcurrentHashMap;
@@ -40,6 +41,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
  *
  * @author Brian Oliver
  */
+@Internal
 public abstract class AbstractControllableRemoteChannel implements ControllableRemoteChannel
 {
     /**

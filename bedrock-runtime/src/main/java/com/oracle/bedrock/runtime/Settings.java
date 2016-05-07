@@ -25,6 +25,7 @@
 
 package com.oracle.bedrock.runtime;
 
+import com.oracle.bedrock.annotations.Internal;
 import com.oracle.bedrock.runtime.java.container.Container;
 
 import java.util.Properties;
@@ -38,6 +39,7 @@ import java.util.Properties;
  *
  * @author Brian Oliver
  */
+@Internal
 public class Settings
 {
     /**

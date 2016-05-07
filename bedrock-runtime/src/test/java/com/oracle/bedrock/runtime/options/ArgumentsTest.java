@@ -26,26 +26,36 @@
 package com.oracle.bedrock.runtime.options;
 
 import com.oracle.bedrock.Options;
+
 import com.oracle.bedrock.options.Decoration;
 import com.oracle.bedrock.options.Variable;
+
 import com.oracle.bedrock.runtime.LocalPlatform;
 import com.oracle.bedrock.runtime.Platform;
+
 import org.junit.Test;
+
 import org.mockito.ArgumentCaptor;
+
+import static com.oracle.bedrock.runtime.options.Argument.of;
+
+import static org.hamcrest.CoreMatchers.is;
+
+import static org.hamcrest.collection.IsEmptyIterable.emptyIterable;
+
+import static org.hamcrest.collection.IsIterableContainingInOrder.contains;
+
+import static org.junit.Assert.assertThat;
+
+import static org.mockito.Matchers.same;
+
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-
-import static com.oracle.bedrock.runtime.options.Argument.of;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.collection.IsEmptyIterable.emptyIterable;
-import static org.hamcrest.collection.IsIterableContainingInOrder.contains;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.same;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
 /**
  * Unit tests for the {@link Arguments} class.

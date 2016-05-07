@@ -27,6 +27,7 @@ package com.oracle.bedrock.runtime.java;
 
 import com.oracle.bedrock.Option;
 import com.oracle.bedrock.Options;
+import com.oracle.bedrock.annotations.Internal;
 import com.oracle.bedrock.runtime.AbstractApplication;
 import com.oracle.bedrock.runtime.Application;
 import com.oracle.bedrock.runtime.ApplicationProcess;
@@ -55,6 +56,7 @@ import java.util.concurrent.ExecutionException;
  *
  * @author Brian Oliver
  */
+@Internal
 public abstract class AbstractJavaApplication<P extends JavaApplicationProcess> extends AbstractApplication<P>
     implements JavaApplication
 {

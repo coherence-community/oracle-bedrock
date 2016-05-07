@@ -26,6 +26,7 @@
 package com.oracle.bedrock.runtime;
 
 import com.oracle.bedrock.Option;
+import com.oracle.bedrock.annotations.Internal;
 import com.oracle.bedrock.options.Timeout;
 
 import java.io.Closeable;
@@ -51,6 +52,7 @@ import java.io.OutputStream;
  *
  * @author Brian Oliver
  */
+@Internal
 public interface ApplicationProcess extends Closeable
 {
     /**

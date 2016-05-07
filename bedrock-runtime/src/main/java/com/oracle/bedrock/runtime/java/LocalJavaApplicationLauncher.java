@@ -27,6 +27,7 @@ package com.oracle.bedrock.runtime.java;
 
 import com.oracle.bedrock.Option;
 import com.oracle.bedrock.Options;
+import com.oracle.bedrock.annotations.Internal;
 import com.oracle.bedrock.deferred.AbstractDeferred;
 import com.oracle.bedrock.deferred.PermanentlyUnavailableException;
 import com.oracle.bedrock.deferred.TemporarilyUnavailableException;
@@ -99,6 +100,7 @@ import static com.oracle.bedrock.deferred.DeferredHelper.within;
  *
  * @author Brian Oliver
  */
+@Internal
 public class LocalJavaApplicationLauncher<A extends JavaApplication> implements JavaApplicationLauncher<A>
 {
     /**

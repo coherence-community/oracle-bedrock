@@ -25,6 +25,7 @@
 
 package com.oracle.bedrock.runtime.java.container;
 
+import com.oracle.bedrock.annotations.Internal;
 import com.oracle.bedrock.runtime.network.AvailablePortIterator;
 
 /**
@@ -41,6 +42,7 @@ import com.oracle.bedrock.runtime.network.AvailablePortIterator;
  *
  * @author Brian Oliver
  */
+@Internal
 public class PlatformScope extends AbstractScope
 {
     /**

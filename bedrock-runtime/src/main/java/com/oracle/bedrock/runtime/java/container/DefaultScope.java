@@ -25,6 +25,8 @@
 
 package com.oracle.bedrock.runtime.java.container;
 
+import com.oracle.bedrock.annotations.Internal;
+
 /**
  * A {@link Scope} to use in a Container when a {@link ContainerScope} could
  * not be determined.
@@ -34,6 +36,7 @@ package com.oracle.bedrock.runtime.java.container;
  *
  * @author Brian Oliver
  */
+@Internal
 public class DefaultScope extends AbstractContainerScope
 {
     /**

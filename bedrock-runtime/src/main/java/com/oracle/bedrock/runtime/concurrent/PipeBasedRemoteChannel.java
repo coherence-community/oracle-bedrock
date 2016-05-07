@@ -25,6 +25,8 @@
 
 package com.oracle.bedrock.runtime.concurrent;
 
+import com.oracle.bedrock.annotations.Internal;
+
 import java.io.IOException;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
@@ -37,6 +39,7 @@ import java.io.PipedOutputStream;
  *
  * @author Brian Oliver
  */
+@Internal
 public class PipeBasedRemoteChannel extends AbstractRemoteChannel
 {
     /**

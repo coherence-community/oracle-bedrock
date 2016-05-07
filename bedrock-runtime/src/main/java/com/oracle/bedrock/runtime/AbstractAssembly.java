@@ -27,6 +27,7 @@ package com.oracle.bedrock.runtime;
 
 import com.oracle.bedrock.Option;
 import com.oracle.bedrock.Options;
+import com.oracle.bedrock.annotations.Internal;
 import com.oracle.bedrock.deferred.DeferredPredicate;
 import com.oracle.bedrock.runtime.options.Discriminator;
 import com.oracle.bedrock.runtime.options.StabilityPredicate;
@@ -62,6 +63,7 @@ import static com.oracle.bedrock.predicate.Predicates.is;
  *
  * @param <A>  the type of {@link Application} that belongs to the {@link Assembly}.
  */
+@Internal
 public abstract class AbstractAssembly<A extends Application> implements Assembly<A>,
                                                                          ApplicationListener<A>,
                                                                          ApplicationStream<A>

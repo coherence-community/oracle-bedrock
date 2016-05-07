@@ -26,12 +26,14 @@
 package com.oracle.bedrock.runtime;
 
 import com.oracle.bedrock.io.NetworkHelper;
+
 import org.junit.Test;
 
-import java.net.InetAddress;
-
 import static org.hamcrest.CoreMatchers.is;
+
 import static org.hamcrest.MatcherAssert.assertThat;
+
+import java.net.InetAddress;
 
 /**
  * Unit tests for {@link LocalPlatform}s.

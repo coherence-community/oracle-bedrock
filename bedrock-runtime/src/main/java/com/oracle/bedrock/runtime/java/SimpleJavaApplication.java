@@ -26,6 +26,7 @@
 package com.oracle.bedrock.runtime.java;
 
 import com.oracle.bedrock.Options;
+import com.oracle.bedrock.annotations.Internal;
 import com.oracle.bedrock.runtime.Application;
 import com.oracle.bedrock.runtime.ApplicationProcess;
 import com.oracle.bedrock.runtime.Platform;
@@ -38,6 +39,7 @@ import com.oracle.bedrock.runtime.Platform;
  *
  * @author Brian Oliver
  */
+@Internal
 public class SimpleJavaApplication extends AbstractJavaApplication<JavaApplicationProcess>
 {
     /**

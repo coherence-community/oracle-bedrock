@@ -25,6 +25,8 @@
 
 package com.oracle.bedrock.runtime.java.container;
 
+import com.oracle.bedrock.annotations.Internal;
+
 import java.io.InputStream;
 
 /**
@@ -36,6 +38,7 @@ import java.io.InputStream;
  *
  * @author Jonathan Knight
  */
+@Internal
 public class DelegatingStdInInputStream extends AbstractDelegatingInputStream
 {
     /**

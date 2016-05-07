@@ -27,6 +27,7 @@ package com.oracle.bedrock.runtime;
 
 import com.oracle.bedrock.Option;
 import com.oracle.bedrock.Options;
+import com.oracle.bedrock.annotations.Internal;
 import com.oracle.bedrock.deferred.DeferredHelper;
 import com.oracle.bedrock.options.Timeout;
 
@@ -49,6 +50,7 @@ import static com.oracle.bedrock.deferred.DeferredHelper.within;
  *
  * @author Brian Oliver
  */
+@Internal
 public class LocalApplicationProcess implements ApplicationProcess
 {
     /**
