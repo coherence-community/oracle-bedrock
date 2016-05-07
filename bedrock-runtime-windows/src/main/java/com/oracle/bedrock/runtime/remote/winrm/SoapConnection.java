@@ -25,35 +25,28 @@
 
 package com.oracle.bedrock.runtime.remote.winrm;
 
-import com.oracle.bedrock.runtime.remote.Authentication;
 import com.oracle.bedrock.Option;
 import com.oracle.bedrock.Options;
-
 import com.oracle.bedrock.options.HttpProxy;
-
+import com.oracle.bedrock.runtime.remote.Authentication;
 import com.oracle.bedrock.runtime.remote.http.HttpBasedAuthentication;
-
 import org.w3c.soap.envelope.Envelope;
 import org.w3c.soap.envelope.Fault;
-
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStreamWriter;
-
-import java.net.HttpURLConnection;
-import java.net.URL;
-
-import java.util.List;
-import java.util.Properties;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
-
 import javax.xml.ws.http.HTTPException;
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStreamWriter;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.List;
+import java.util.Properties;
 
 /**
  * This class encapsulate the sending of a SOAP message and
@@ -109,6 +102,7 @@ public class SoapConnection
      *
      * @param hostName       the host name of the host running the SOAP service
      * @param port           the port that the SOAP service is listening on
+     * @param servicePath    the service path
      * @param userName       the name of the user to use to connect to the WinRM service
      * @param authentication the authentication to use to connect to the WinRM
      * @param options        the {@link com.oracle.bedrock.Option}s controlling the session
@@ -192,6 +186,7 @@ public class SoapConnection
         return authentication;
     }
 
+
     /**
      * Obtain a {@link Marshaller} to use to marshal
      * objects to XML.
@@ -202,12 +197,14 @@ public class SoapConnection
     Marshaller createMarshaller() throws JAXBException
     {
         Marshaller marshaller = jaxbContext.createMarshaller();
+
         marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
         marshaller.setProperty(Marshaller.JAXB_FRAGMENT, Boolean.TRUE);
         marshaller.setProperty(Marshaller.JAXB_ENCODING, "UTF-8");
 
         return marshaller;
     }
+
 
     /**
      * Obtain an {@link Unmarshaller} to use to un-marshal
@@ -313,6 +310,10 @@ public class SoapConnection
      * @param stream the {@link InputStream} containing the XML to un-marshall
      *
      * @return the un-marshaled JAXB objects
+     *
+     * @throws JAXBException       when the contents can't be parsed
+     * @throws IOException         when the IO stream fails
+     * @throws SoapFaultException  when SOAP connection fails
      */
     protected List<Object> getSOAPBodyContents(InputStream stream) throws JAXBException, IOException, SoapFaultException
     {
