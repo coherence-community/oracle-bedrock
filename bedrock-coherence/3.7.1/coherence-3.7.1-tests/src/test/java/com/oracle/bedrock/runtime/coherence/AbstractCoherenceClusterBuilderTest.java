@@ -38,7 +38,6 @@ import com.oracle.bedrock.runtime.console.SystemApplicationConsole;
 import com.oracle.bedrock.runtime.java.JavaApplicationLauncher;
 import com.oracle.bedrock.runtime.java.options.SystemProperty;
 import com.oracle.bedrock.runtime.network.AvailablePortIterator;
-import com.oracle.bedrock.runtime.network.Constants;
 import com.oracle.bedrock.runtime.options.DisplayName;
 import com.oracle.bedrock.runtime.options.StabilityPredicate;
 import com.oracle.bedrock.util.Capture;
@@ -177,7 +176,7 @@ public abstract class AbstractCoherenceClusterBuilderTest extends AbstractTest
     {
         Capture<Integer>        wkaPort            = new Capture<>(LocalPlatform.get().getAvailablePorts());
         ClusterPort             clusterPort = ClusterPort.of(new Capture<>(LocalPlatform.get().getAvailablePorts()));
-        String                  localHost          = Constants.getLocalHost();
+        String                  localHost          = System.getProperty("tangosol.coherence.localhost", "127.0.0.1");
 
         String                  clusterName        = "WKA" + getClass().getSimpleName();
 

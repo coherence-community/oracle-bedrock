@@ -186,20 +186,6 @@ public class JavaVirtualMachine extends AbstractPlatform
 
     /**
      * Obtain the singleton instance of the {@link JavaVirtualMachine}.
-     * <p>
-     * DEPRECATED: Use {@link #get()} instead.
-     *
-     * @return the singleton instance of the {@link JavaVirtualMachine}
-     */
-    @Deprecated
-    public static JavaVirtualMachine getInstance()
-    {
-        return get();
-    }
-
-
-    /**
-     * Obtain the singleton instance of the {@link JavaVirtualMachine}.
      *
      * @return the singleton instance of the {@link JavaVirtualMachine}
      */

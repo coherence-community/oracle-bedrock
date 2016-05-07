@@ -337,26 +337,6 @@ public class PropertiesBuilder
 
 
     /**
-     * Removes the specified named property value from {@link PropertiesBuilder}.
-     * <p>
-     * If the specified property is not contained by the {@link PropertiesBuilder},
-     * nothing happens.
-     *
-     * @param name The name of the property value to remove.
-     */
-    @Deprecated
-    public void removePropertyValue(String name)
-    {
-        Property property = properties.get(name);
-
-        if (property != null)
-        {
-            property.setValue(null);
-        }
-    }
-
-
-    /**
      * Clears all of the currently defined properties from the
      * {@link PropertiesBuilder}.
      */

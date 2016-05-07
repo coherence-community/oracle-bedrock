@@ -154,24 +154,6 @@ public class AvailablePortIterator implements Iterator<Integer>, Iterable<Intege
 
 
     /**
-     * Constructs an {@link AvailablePortIterator}.
-     *
-     * @param inetAddress     the {@link InetAddress} on which to scan ports
-     * @param portRangeStart  the port at which to start scanning (inclusive)
-     * @param portRangeEnd    the port at which to destroy scanning (inclusive)
-     *
-     * @deprecated use {@link #AvailablePortIterator(int, int, InetAddress...)} instead
-     */
-    @Deprecated
-    public AvailablePortIterator(InetAddress inetAddress,
-                                 int         portRangeStart,
-                                 int         portRangeEnd)
-    {
-        this(portRangeStart, portRangeEnd, inetAddress);
-    }
-
-
-    /**
      * Constructs an {@link AvailablePortIterator} for an array of {@link InetAddress}es
      * over a range of ports.
      *
