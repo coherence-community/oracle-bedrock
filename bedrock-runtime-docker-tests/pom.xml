@@ -4,7 +4,7 @@
     <parent>
         <groupId>com.oracle.bedrock</groupId>
         <artifactId>project</artifactId>
-        <version>4.0.0-SNAPSHOT</version>
+        <version>4.0.0</version>
     </parent>
 
     <artifactId>bedrock-runtime-docker-tests</artifactId>
@@ -16,7 +16,7 @@
     </description>
 
     <properties>
-        <oracle.bedrock.container.tests.jre/>
+        <oracle.bedrock.container.tests.jre />
     </properties>
 
     <dependencies>
