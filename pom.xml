@@ -42,9 +42,9 @@
     </developers>
 
     <scm>
-        <connection>scm:git:https://github.com/coherence-community/bedrock.git</connection>
-        <developerConnection>scm:git:https://github.com/coherence-community/bedrock.git</developerConnection>
-        <url>https://github.com/coherence-community/bedrock.git</url>
+        <connection>scm:git:https://github.com/coherence-community/oracle-bedrock.git</connection>
+        <developerConnection>scm:git:https://github.com/coherence-community/oracle-bedrock.git</developerConnection>
+        <url>https://github.com/coherence-community/oracle-bedrock.git</url>
       <tag>4.0.0</tag>
     </scm>
 
