@@ -3,7 +3,7 @@
 
     <groupId>com.oracle.bedrock</groupId>
     <artifactId>project</artifactId>
-    <version>4.0.1-SNAPSHOT</version>
+    <version>4.0.0</version>
 
     <packaging>pom</packaging>
 
@@ -263,6 +263,9 @@
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>flatten-maven-plugin</artifactId>
                 <version>${maven.flatten.plugin.version}</version>
+                <configuration>
+                    <flattenMode>ossrh</flattenMode>
+                </configuration>
                 <executions>
                     <!-- enable flattening -->
                     <execution>
