@@ -30,7 +30,7 @@ import classloader.applications.EventingApplication;
 import com.oracle.bedrock.options.Diagnostics;
 
 import com.oracle.bedrock.runtime.console.AbstractPipedApplicationConsole;
-import com.oracle.bedrock.runtime.console.Console;
+import com.oracle.bedrock.runtime.options.Console;
 import com.oracle.bedrock.runtime.console.PipedApplicationConsole;
 
 import com.oracle.bedrock.runtime.java.options.ClassName;

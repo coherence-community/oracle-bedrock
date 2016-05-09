@@ -29,6 +29,7 @@ import com.oracle.bedrock.runtime.LocalPlatform;
 import com.oracle.bedrock.runtime.java.JavaApplication;
 import com.oracle.bedrock.runtime.java.options.ClassName;
 import com.oracle.bedrock.runtime.options.Arguments;
+import com.oracle.bedrock.runtime.options.Console;
 import org.junit.Test;
 
 import java.io.BufferedReader;

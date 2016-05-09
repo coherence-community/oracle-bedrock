@@ -26,7 +26,7 @@
 package com.oracle.bedrock.maven;
 
 import com.oracle.bedrock.runtime.console.CapturingApplicationConsole;
-import com.oracle.bedrock.runtime.console.Console;
+import com.oracle.bedrock.runtime.options.Console;
 import com.oracle.bedrock.runtime.java.JavaApplication;
 import com.oracle.bedrock.deferred.Eventually;
 

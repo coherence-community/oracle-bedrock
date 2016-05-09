@@ -34,7 +34,7 @@ import com.oracle.bedrock.runtime.MetaClass;
 import com.oracle.bedrock.runtime.Platform;
 import com.oracle.bedrock.runtime.concurrent.RemoteCallable;
 import com.oracle.bedrock.runtime.console.CapturingApplicationConsole;
-import com.oracle.bedrock.runtime.console.Console;
+import com.oracle.bedrock.runtime.options.Console;
 import com.oracle.bedrock.runtime.java.JavaApplication;
 import com.oracle.bedrock.runtime.java.options.ClassName;
 import com.oracle.bedrock.runtime.java.options.Freeform;

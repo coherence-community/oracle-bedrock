@@ -30,7 +30,7 @@ import com.oracle.bedrock.runtime.docker.commands.Build;
 import com.oracle.bedrock.runtime.Application;
 import com.oracle.bedrock.runtime.LocalPlatform;
 import com.oracle.bedrock.runtime.console.CapturingApplicationConsole;
-import com.oracle.bedrock.runtime.console.Console;
+import com.oracle.bedrock.runtime.options.Console;
 import com.oracle.bedrock.runtime.docker.commands.Images;
 import com.oracle.bedrock.runtime.docker.options.ImageCloseBehaviour;
 import com.oracle.bedrock.runtime.options.Argument;

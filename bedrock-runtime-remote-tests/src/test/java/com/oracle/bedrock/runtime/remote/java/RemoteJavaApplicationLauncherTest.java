@@ -39,7 +39,7 @@ import com.oracle.bedrock.runtime.concurrent.RemoteEvent;
 import com.oracle.bedrock.runtime.concurrent.RemoteEventListener;
 import com.oracle.bedrock.runtime.concurrent.callable.GetSystemProperty;
 import com.oracle.bedrock.runtime.console.CapturingApplicationConsole;
-import com.oracle.bedrock.runtime.console.Console;
+import com.oracle.bedrock.runtime.options.Console;
 import com.oracle.bedrock.runtime.console.SystemApplicationConsole;
 import com.oracle.bedrock.runtime.java.options.ClassName;
 import com.oracle.bedrock.runtime.java.options.IPv4Preferred;

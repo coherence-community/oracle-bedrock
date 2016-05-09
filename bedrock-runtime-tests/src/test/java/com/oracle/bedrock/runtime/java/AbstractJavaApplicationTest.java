@@ -50,7 +50,7 @@ import com.oracle.bedrock.runtime.concurrent.callable.GetSystemProperty;
 import com.oracle.bedrock.runtime.concurrent.callable.RemoteCallableStaticMethod;
 import com.oracle.bedrock.runtime.concurrent.options.StreamName;
 
-import com.oracle.bedrock.runtime.console.Console;
+import com.oracle.bedrock.runtime.options.Console;
 import com.oracle.bedrock.runtime.console.PipedApplicationConsole;
 
 import com.oracle.bedrock.runtime.java.options.ClassName;

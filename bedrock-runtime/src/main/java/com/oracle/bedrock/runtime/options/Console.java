@@ -23,15 +23,19 @@
  * "Portions Copyright [year] [name of copyright owner]"
  */
 
-package com.oracle.bedrock.runtime.console;
+package com.oracle.bedrock.runtime.options;
 
+import com.oracle.bedrock.Option;
 import com.oracle.bedrock.runtime.ApplicationConsole;
 import com.oracle.bedrock.runtime.ApplicationConsoleBuilder;
+import com.oracle.bedrock.runtime.console.FileWriterApplicationConsole;
+import com.oracle.bedrock.runtime.console.NullApplicationConsole;
+import com.oracle.bedrock.runtime.console.SystemApplicationConsole;
 
 /**
- * An mechanism to represent an {@link ApplicationConsole} as a {@link ApplicationConsoleBuilder}.
+ * An {@link Option} to represent an builder of an {@link ApplicationConsole}
  * <p>
- * Copyright (c) 2014. All Rights Reserved. Oracle Corporation.<br>
+ * Copyright (c) 2016. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Brian Oliver
@@ -56,7 +60,7 @@ public class Console implements ApplicationConsoleBuilder
 
 
     /**
-     * Constructs a {@link Console} for the specified {@link ApplicationConsole}.
+     * Constructs an {@link ApplicationConsoleBuilder} for the specified {@link ApplicationConsole}.
      *
      * @param console  the {@link ApplicationConsole}
      *
@@ -65,6 +69,43 @@ public class Console implements ApplicationConsoleBuilder
     public static Console of(ApplicationConsole console)
     {
         return new Console(console);
+    }
+
+
+    /**
+     * Constructs an {@link ApplicationConsoleBuilder} for the {@link SystemApplicationConsole}.
+     *
+     * @return an {@link ApplicationConsoleBuilder}
+     */
+    public static ApplicationConsoleBuilder system()
+    {
+        return SystemApplicationConsole.builder();
+    }
+
+
+    /**
+     * Constructs an {@link ApplicationConsoleBuilder} for the {@link NullApplicationConsole}.
+     *
+     * @return an {@link ApplicationConsoleBuilder}
+     */
+    public static ApplicationConsoleBuilder none()
+    {
+        return NullApplicationConsole.builder();
+    }
+
+
+    /**
+     * Constructs an {@link ApplicationConsoleBuilder} for the {@link FileWriterApplicationConsole}.
+     *
+     * @param directory  the directory in which to write the files
+     * @param prefix     the file-name prefix
+     *
+     * @return an {@link ApplicationConsoleBuilder}
+     */
+    public static ApplicationConsoleBuilder file(String directory,
+                                                 String prefix)
+    {
+        return FileWriterApplicationConsole.builder(directory, prefix);
     }
 
 

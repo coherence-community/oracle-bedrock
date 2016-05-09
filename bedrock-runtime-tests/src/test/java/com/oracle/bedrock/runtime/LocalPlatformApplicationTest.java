@@ -25,7 +25,7 @@
 
 package com.oracle.bedrock.runtime;
 
-import com.oracle.bedrock.runtime.console.Console;
+import com.oracle.bedrock.runtime.options.Console;
 import com.oracle.bedrock.runtime.options.Argument;
 import com.oracle.bedrock.runtime.options.DisplayName;
 import com.oracle.bedrock.runtime.options.ErrorStreamRedirection;

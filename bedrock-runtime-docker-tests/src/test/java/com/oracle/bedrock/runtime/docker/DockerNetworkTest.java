@@ -30,7 +30,7 @@ import callables.FindNetworks;
 import com.oracle.bedrock.options.Timeout;
 import com.oracle.bedrock.runtime.Application;
 import com.oracle.bedrock.runtime.console.CapturingApplicationConsole;
-import com.oracle.bedrock.runtime.console.Console;
+import com.oracle.bedrock.runtime.options.Console;
 import com.oracle.bedrock.runtime.docker.commands.Network;
 import com.oracle.bedrock.runtime.docker.commands.Run;
 import com.oracle.bedrock.runtime.docker.machine.DockerMachine;

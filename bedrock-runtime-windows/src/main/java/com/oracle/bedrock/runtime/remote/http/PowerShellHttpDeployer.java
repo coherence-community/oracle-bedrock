@@ -27,7 +27,7 @@ package com.oracle.bedrock.runtime.remote.http;
 
 import com.oracle.bedrock.runtime.Platform;
 import com.oracle.bedrock.runtime.console.CapturingApplicationConsole;
-import com.oracle.bedrock.runtime.console.Console;
+import com.oracle.bedrock.runtime.options.Console;
 import com.oracle.bedrock.runtime.options.DisplayName;
 import com.oracle.bedrock.Option;
 

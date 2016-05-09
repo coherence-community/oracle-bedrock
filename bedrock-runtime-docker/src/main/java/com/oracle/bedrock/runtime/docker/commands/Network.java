@@ -28,7 +28,7 @@ package com.oracle.bedrock.runtime.docker.commands;
 import com.oracle.bedrock.runtime.Application;
 import com.oracle.bedrock.runtime.Platform;
 import com.oracle.bedrock.runtime.console.CapturingApplicationConsole;
-import com.oracle.bedrock.runtime.console.Console;
+import com.oracle.bedrock.runtime.options.Console;
 import com.oracle.bedrock.runtime.docker.Docker;
 import com.oracle.bedrock.runtime.options.Argument;
 import com.oracle.bedrock.runtime.options.Arguments;

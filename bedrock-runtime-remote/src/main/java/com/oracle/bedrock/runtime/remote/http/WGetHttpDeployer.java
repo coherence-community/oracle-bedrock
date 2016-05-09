@@ -29,7 +29,7 @@ import com.oracle.bedrock.Option;
 import com.oracle.bedrock.runtime.Application;
 import com.oracle.bedrock.runtime.Platform;
 import com.oracle.bedrock.runtime.console.CapturingApplicationConsole;
-import com.oracle.bedrock.runtime.console.Console;
+import com.oracle.bedrock.runtime.options.Console;
 import com.oracle.bedrock.runtime.options.Argument;
 import com.oracle.bedrock.runtime.options.DisplayName;
 import com.oracle.bedrock.runtime.options.Executable;

@@ -38,7 +38,7 @@ import com.oracle.bedrock.runtime.concurrent.runnable.RuntimeHalt;
 import com.oracle.bedrock.runtime.concurrent.runnable.SystemExit;
 import com.oracle.bedrock.runtime.concurrent.socket.SocketBasedRemoteChannelTests;
 import com.oracle.bedrock.runtime.console.CapturingApplicationConsole;
-import com.oracle.bedrock.runtime.console.Console;
+import com.oracle.bedrock.runtime.options.Console;
 import com.oracle.bedrock.runtime.java.options.ClassName;
 import com.oracle.bedrock.runtime.java.options.HeapSize;
 import com.oracle.bedrock.runtime.java.options.HotSpot;
