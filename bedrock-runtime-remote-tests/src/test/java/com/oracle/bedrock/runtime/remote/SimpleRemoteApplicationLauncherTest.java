@@ -1,9 +1,9 @@
 /*
- * File: SimpleRemoteApplicationBuilderTest.java
+ * File: SimpleRemoteApplicationLauncherTest.java
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * The contents of this file are subject to the terms and conditions of 
+ * The contents of this file are subject to the terms and conditions of
  * the Common Development and Distribution License 1.0 (the "License").
  *
  * You may not use this file except in compliance with the License.
@@ -25,20 +25,18 @@
 
 package com.oracle.bedrock.runtime.remote;
 
+import com.oracle.bedrock.runtime.Application;
 import com.oracle.bedrock.runtime.console.SystemApplicationConsole;
 import com.oracle.bedrock.runtime.options.Argument;
+import com.oracle.bedrock.runtime.options.Console;
 import com.oracle.bedrock.runtime.remote.options.CustomDeployment;
-import com.oracle.bedrock.runtime.Application;
-
 import org.junit.Test;
 
-import static org.hamcrest.CoreMatchers.is;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-
 import java.io.File;
-
 import java.net.URL;
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 /**
  * Functional tests for {@link SimpleRemoteApplicationLauncher}s.
@@ -55,6 +53,25 @@ public class SimpleRemoteApplicationLauncherTest extends AbstractRemoteTest
      */
     @Test
     public void shouldLaunchSimpleApplicationRemotely() throws Exception
+    {
+        RemotePlatform platform    = getRemotePlatform();
+
+        try (Application application = platform.launch("ls", Argument.of("-la"), Console.system()))
+        {
+            assertThat(application.waitFor(), is(0));
+
+            application.close();
+
+            assertThat(application.exitValue(), is(0));
+        }
+    }
+
+
+    /**
+     * Ensure that we can launch deploy a test file.
+     */
+    @Test
+    public void shouldDeployAndLaunchSimpleApplicationRemotely() throws Exception
     {
         RemotePlatform platform    = getRemotePlatform();
 
