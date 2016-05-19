@@ -1,0 +1,1 @@
+A simple example resource that we can lookup on the classpath.

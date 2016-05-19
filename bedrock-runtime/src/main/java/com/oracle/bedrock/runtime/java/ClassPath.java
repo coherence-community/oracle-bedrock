@@ -629,6 +629,26 @@ public class ClassPath implements Iterable<String>, Tabular, Option
 
 
     /**
+     * Obtains the {@link ClassPath} for the specified Class.
+     *
+     * @param className    the class name
+     * @param classLoader  the {@link ClassLoader} to use for loading the class
+     *
+     * @return a {@link ClassPath} representing the location of the specified Class
+     *
+     * @throws ClassNotFoundException  when the specified class can't be located
+     * @throws IOException             when the resource can't be located
+     */
+    public static ClassPath ofClass(String      className,
+                                    ClassLoader classLoader) throws ClassNotFoundException, IOException
+    {
+        Class<?> clazz = classLoader.loadClass(className);
+
+        return ofClass(clazz);
+    }
+
+
+    /**
      * Obtains a {@link ClassPath} containing only absolute path of the specified File
      *
      * @param file the file

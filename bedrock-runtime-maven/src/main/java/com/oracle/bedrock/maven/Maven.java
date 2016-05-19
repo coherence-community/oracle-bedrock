@@ -123,6 +123,11 @@ public class Maven implements Profile, ComposableOption<Maven>
      */
     private final LinkedHashSet<Artifact> artifacts;
 
+    /**
+     * The additional {@link ClassPath} to add to the {@link ClassPath} of the resolved artifacts.
+     */
+    private ClassPath additionalClassPath;
+
 
     /**
      * Constructs a {@link Maven} {@link Profile} based on another {@link Maven} {@link Profile}.
@@ -131,30 +136,38 @@ public class Maven implements Profile, ComposableOption<Maven>
      */
     private Maven(Maven maven)
     {
-        this(maven.globalSettingsFile, maven.userSettingsFile, maven.isOffline, maven.scope, maven.artifacts);
+        this(maven.globalSettingsFile,
+             maven.userSettingsFile,
+             maven.isOffline,
+             maven.scope,
+             maven.artifacts,
+             maven.additionalClassPath);
     }
 
 
     /**
      * Constructs a {@link Maven} {@link Profile}.
      *
-     * @param globalSettingsFile  the location of the global settings.xml (use {@code null} for the default)
-     * @param userSettingsFile    the location of the user settings.xml (use {@code null} for the default)
-     * @param isOffline               if {@link Maven} is to operate in offline-mode  (use {@code null} for default)
-     * @param scope                   the scope to use for resolving artifacts
-     * @param artifacts               the set of {@link Artifact}s
+     * @param globalSettingsFile   the location of the global settings.xml (use {@code null} for the default)
+     * @param userSettingsFile     the location of the user settings.xml (use {@code null} for the default)
+     * @param isOffline            if {@link Maven} is to operate in offline-mode  (use {@code null} for default)
+     * @param scope                the scope to use for resolving artifacts
+     * @param artifacts            the set of {@link Artifact}s
+     * @param additionalClassPath  the additional {@link ClassPath} to add to the resolved artifacts
      */
     private Maven(File                    globalSettingsFile,
                   File                    userSettingsFile,
                   Boolean                 isOffline,
                   String                  scope,
-                  LinkedHashSet<Artifact> artifacts)
+                  LinkedHashSet<Artifact> artifacts,
+                  ClassPath               additionalClassPath)
     {
-        this.globalSettingsFile = globalSettingsFile;
-        this.userSettingsFile   = userSettingsFile;
-        this.isOffline          = isOffline;
-        this.scope              = scope;
-        this.artifacts          = new LinkedHashSet<>();
+        this.globalSettingsFile  = globalSettingsFile;
+        this.userSettingsFile    = userSettingsFile;
+        this.isOffline           = isOffline;
+        this.scope               = scope;
+        this.artifacts           = new LinkedHashSet<>();
+        this.additionalClassPath = additionalClassPath;
 
         // add all of the artifacts (if there are any)
         if (artifacts != null)
@@ -338,6 +351,9 @@ public class Maven implements Profile, ComposableOption<Maven>
             // define the ClassPath based on the artifact paths
             ClassPath classPath = new ClassPath(artifactPaths);
 
+            // add the additional ClassPaths (when defined)
+            classPath = additionalClassPath == null ? classPath : new ClassPath(classPath, additionalClassPath);
+
             options.add(classPath);
         }
         catch (Exception e)
@@ -497,6 +513,24 @@ public class Maven implements Profile, ComposableOption<Maven>
 
 
     /**
+     * Create a default {@link Maven} {@link Profile} that includes the specified {@link ClassPath}, that is
+     * included after any resolved Maven artifacts.
+     *
+     * @param classPath  the additional {@link ClassPath}
+     *
+     * @return  a {@link Maven} {@link Profile} with the additional {@link ClassPath}
+     */
+    public static Maven include(ClassPath classPath)
+    {
+        Maven maven = Maven.autoDetect();
+
+        maven.additionalClassPath = classPath;
+
+        return maven;
+    }
+
+
+    /**
      * Obtains a {@link Maven} {@link Profile}, automatically detecting the
      * configuration from the underlying environment, without any {@link Artifact}s
      * defined, and being online by default.
@@ -506,7 +540,7 @@ public class Maven implements Profile, ComposableOption<Maven>
     @Options.Default
     public static Maven autoDetect()
     {
-        return new Maven(null, null, null, null, null);
+        return new Maven(null, null, null, null, null, null);
     }
 
 
@@ -551,6 +585,14 @@ public class Maven implements Profile, ComposableOption<Maven>
             maven.artifacts.add(artifact);
         }
 
+        // include the additional ClassPath
+        if (other.additionalClassPath != null)
+        {
+            maven.additionalClassPath = maven.additionalClassPath == null
+                                        ? other.additionalClassPath : new ClassPath(maven.additionalClassPath,
+                                                                                    other.additionalClassPath);
+        }
+
         return maven;
     }
 
@@ -592,7 +634,13 @@ public class Maven implements Profile, ComposableOption<Maven>
             return false;
         }
 
-        return artifacts.equals(maven.artifacts);
+        if (artifacts != null ? !artifacts.equals(maven.artifacts) : maven.artifacts != null)
+        {
+            return false;
+        }
+
+        return additionalClassPath != null
+               ? additionalClassPath.equals(maven.additionalClassPath) : maven.additionalClassPath == null;
 
     }
 
@@ -605,7 +653,8 @@ public class Maven implements Profile, ComposableOption<Maven>
         result = 31 * result + (globalSettingsFile != null ? globalSettingsFile.hashCode() : 0);
         result = 31 * result + (isOffline != null ? isOffline.hashCode() : 0);
         result = 31 * result + (scope != null ? scope.hashCode() : 0);
-        result = 31 * result + artifacts.hashCode();
+        result = 31 * result + (artifacts != null ? artifacts.hashCode() : 0);
+        result = 31 * result + (additionalClassPath != null ? additionalClassPath.hashCode() : 0);
 
         return result;
     }

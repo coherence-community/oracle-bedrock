@@ -25,21 +25,17 @@
 
 package com.oracle.bedrock.maven;
 
-import com.oracle.bedrock.runtime.console.CapturingApplicationConsole;
-import com.oracle.bedrock.runtime.options.Console;
-import com.oracle.bedrock.runtime.java.JavaApplication;
 import com.oracle.bedrock.deferred.Eventually;
-
 import com.oracle.bedrock.options.Diagnostics;
-
 import com.oracle.bedrock.runtime.LocalPlatform;
-
+import com.oracle.bedrock.runtime.console.CapturingApplicationConsole;
+import com.oracle.bedrock.runtime.java.JavaApplication;
 import com.oracle.bedrock.runtime.java.options.ClassName;
-
+import com.oracle.bedrock.runtime.java.options.SystemProperty;
+import com.oracle.bedrock.runtime.options.Console;
 import org.junit.Test;
 
 import static com.oracle.bedrock.deferred.DeferredHelper.invoking;
-
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasItem;
 
@@ -61,13 +57,15 @@ public class MavenTest
     {
         LocalPlatform               platform = LocalPlatform.get();
 
-        CapturingApplicationConsole console = new CapturingApplicationConsole();
+        CapturingApplicationConsole console  = new CapturingApplicationConsole();
 
         try (JavaApplication application = platform.launch(JavaApplication.class,
                                                            ClassName.of("com.tangosol.net.DefaultCacheServer"),
                                                            Maven.artifact("com.oracle.coherence",
                                                                           "coherence",
                                                                           "3.7.1.14"),
+                                                           SystemProperty.of("tangosol.coherence.cacheconfig",
+                                                                             "coherence-cache-config.xml"),
                                                            Console.of(console),
                                                            Diagnostics.enabled()))
         {

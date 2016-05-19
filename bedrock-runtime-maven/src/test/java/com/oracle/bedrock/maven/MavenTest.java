@@ -32,6 +32,8 @@ import com.oracle.bedrock.runtime.java.ClassPath;
 import com.oracle.bedrock.runtime.java.JavaApplication;
 import org.junit.Test;
 
+import java.io.IOException;
+
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.Matchers.nullValue;
@@ -96,5 +98,35 @@ public class MavenTest
 
         assertThat(classPath.toString(), containsString("junit-4.12.jar"));
         assertThat(classPath.toString(), containsString("hamcrest-core-1.3.jar"));
+    }
+
+
+    /**
+     * Ensure that {@link Maven} includes additional {@link ClassPath}s when requested.
+     */
+    @Test
+    public void shouldIncludeAdditionalClassPaths() throws IOException
+    {
+        LocalPlatform platform  = LocalPlatform.get();
+        MetaClass     metaClass = new JavaApplication.MetaClass();
+        Options       options   = new Options();
+
+        options.addAll(Maven.artifact("junit:junit:jar:4.12"),
+                       Maven.include(ClassPath.ofClass(MavenTest.class)),
+                       Maven.include(ClassPath.ofResource("example-resource.txt")));
+
+        Maven maven = options.get(Maven.class);
+
+        maven.onLaunching(platform, metaClass, options);
+
+        ClassPath classPath = options.getOrDefault(ClassPath.class, null);
+
+        assertThat(classPath, is(not(nullValue())));
+        assertThat(classPath.size(), is(3));
+
+        assertThat(classPath.toString(), containsString("junit-4.12.jar"));
+        assertThat(classPath.toString(), containsString("hamcrest-core-1.3.jar"));
+        assertThat(classPath.toString(), containsString(ClassPath.ofClass(MavenTest.class).toString()));
+        assertThat(classPath.toString(), containsString(ClassPath.ofResource("example-resource.txt").toString()));
     }
 }
