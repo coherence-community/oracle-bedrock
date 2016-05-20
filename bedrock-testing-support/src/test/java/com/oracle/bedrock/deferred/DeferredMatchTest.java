@@ -54,9 +54,9 @@ public class DeferredMatchTest
         try
         {
             deferredMatch.get();
-            fail("Match should have thrown an TemporarilyUnavailableException");
+            fail("Match should have thrown an PermanentlyUnavailableException");
         }
-        catch (TemporarilyUnavailableException e)
+        catch (PermanentlyUnavailableException e)
         {
             Assert.assertEquals("Hello World", deferredMatch.getLastUsedMatchValue());
         }

@@ -293,4 +293,63 @@ public class EventuallyTest
                               .causedBy(Matchers.nullValue()),
                               within(1, TimeUnit.SECONDS));
     }
+
+
+    /**
+     * Ensure that Eventually.assertThat on a deferred constant (Number) does not wait for full 2 minutes
+     * and gives up straight away.
+     */
+    @Test
+    public void shouldNotWaitForDeferredConstant()
+    {
+         Boolean myBoolean = true;
+         checkConstant(true, is(myBoolean));
+         checkConstant(1, is(2));
+         checkConstant(1d, is(2d));
+         checkConstant(1.01f, is(2.0f));
+         checkConstant(1L, is(2L));
+    }
+
+    /**
+     * Ensure that message regarding simple value was returned.
+     */
+    @Test
+    public void shouldRaiseAssertionWithDeferredConstant()
+        {
+        try
+        {
+            Eventually.assertThat(1, is(2));
+            Assert.fail("Should have raised AssertionError but did not");
+        }
+        catch (AssertionError e)
+        {
+            Assert.assertTrue(e.getMessage() != null && e.getMessage().contains("Deferred was not retried as it was a simple value"));
+        }
+    }
+
+    /**
+     * Helper to ensure that Eventually.assertThat on a deferred constant (Number)
+     * does not wait for full 2 minutes and gives up straight away.
+     *
+     * @param value         value to check
+     * @param matchedValue  matcher
+     */
+    private void checkConstant(Object value, Matcher matchedValue)
+    {
+        StopWatch stopWatch = new StopWatch();
+
+        try
+        {
+            stopWatch.start();
+            Eventually.assertThat(value, matchedValue);
+        }
+        catch (AssertionError e)
+        {
+            stopWatch.stop();
+            long seconds = stopWatch.getElapsedTimeIn(TimeUnit.SECONDS);
+            Assert.assertTrue(String.format("Failed to return immediately when encountering a deferred constant value. Returned after %d sec", seconds),
+                    seconds < DeferredHelper.BEDROCK_DEFERRED_RETRY_TIMEOUT_SECS);
+            Assert.assertTrue(e.getMessage() != null && e.getMessage().contains("Deferred was not retried as it was a simple value"));
+        }
+    }
 }

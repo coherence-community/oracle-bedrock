@@ -27,8 +27,11 @@ package com.oracle.bedrock.runtime.java;
 
 import classloader.applications.EventingApplication;
 
+import classloader.applications.SleepingApplication;
+import com.oracle.bedrock.deferred.Eventually;
 import com.oracle.bedrock.options.Diagnostics;
 
+import com.oracle.bedrock.runtime.concurrent.RemoteCallable;
 import com.oracle.bedrock.runtime.console.AbstractPipedApplicationConsole;
 import com.oracle.bedrock.runtime.options.Console;
 import com.oracle.bedrock.runtime.console.PipedApplicationConsole;
@@ -38,6 +41,7 @@ import com.oracle.bedrock.runtime.java.options.IPv4Preferred;
 
 import com.oracle.bedrock.runtime.options.Argument;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.instanceOf;
@@ -50,6 +54,9 @@ import static org.junit.Assert.fail;
 import java.io.BufferedReader;
 import java.io.IOException;
 
+import java.io.NotSerializableException;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -204,6 +211,48 @@ public class ContainerBasedJavaApplicationTest extends AbstractJavaApplicationTe
             int result = application.submit(new EventingApplication.RoundTripCallable()).get();
 
             assertThat(result, is(1234));
+        }
+    }
+
+
+    /**
+     * Ensure that we don't get silent failure of a RemoteCallable that
+     * is a non static inner class.
+     */
+    @Test
+    public void shouldNotAllowNonStaticInnerClassRemoteCallable()
+        {
+        try (JavaApplication application = getPlatform().launch(JavaApplication.class,
+                                                                ClassName.of(SleepingApplication.class),
+                                                                IPv4Preferred.yes()))
+        {
+            RemoteCallable<String> callable = new NonStaticInnerClassCallable().new InvalidCallable();
+
+            // test that this is truly a non-static inner class as this should fail
+            CompletableFuture<String> future = application.submit(callable);
+
+            try
+            {
+                future.join();
+                Assert.fail("Should not reach this code as NonStaticInnerClassCallable will throw java.io.NotSerializableException");
+            }
+            catch (Exception e)
+            {
+                Assert.assertTrue(e instanceof CompletionException && e.getCause() instanceof NotSerializableException);
+            }
+
+            try
+            {
+                Eventually.assertThat(application, callable, is("OK"));
+                throw new RuntimeException("Should not reach this code as NonStaticInnerClassCallable will throw java.io.NotSerializableException");
+            }
+            catch (AssertionError e)
+            {
+                Throwable cause = e.getCause();
+                Assert.assertNotNull(cause);
+                Assert.assertTrue("Should have received cause of NotSerializableException but received " + e,
+                        cause.getCause() instanceof NotSerializableException);
+            }
         }
     }
 }

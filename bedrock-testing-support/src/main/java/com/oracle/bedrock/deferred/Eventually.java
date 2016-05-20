@@ -34,6 +34,7 @@ import com.oracle.bedrock.runtime.concurrent.RemoteCallable;
 import com.oracle.bedrock.runtime.java.JavaApplication;
 import org.hamcrest.Matcher;
 
+import java.io.NotSerializableException;
 import java.util.concurrent.TimeUnit;
 
 import static com.oracle.bedrock.deferred.DeferredHelper.eventually;
@@ -155,20 +156,31 @@ public class Eventually
         catch (PermanentlyUnavailableException e)
         {
             AssertionError error;
+            String         cause = "";
 
             if (deferredMatch.getLastUsedMatchValue() == null)
             {
+                if (e.getCause() instanceof NotSerializableException)
+                {
+                    cause = " (NotSerializableException thrown)";
+                }
                 error = new AssertionError((message == null ? "" : message + ": ") + "Failed to resolve a value for ["
                                                                                    + deferredMatch.getDeferred()
                                                                                    + "] to evaluate with matcher ["
-                                                                                   + deferredMatch.getMatcher() + "]");
+                                                                                   + deferredMatch.getMatcher() + "]"
+                                                                                   + cause);
                 error.initCause(e);
             }
             else
             {
+                if (deferred instanceof Existing)
+                {
+                    cause = ", (Deferred was not retried as it was a simple value)";
+                }
+
                 error = new AssertionError((message == null ? "" : message + ": ") + "Matcher [" + matcher
                     + "] failed to match last resolved value [" + deferredMatch.getLastUsedMatchValue() + "] for ["
-                    + deferredMatch.getDeferred() + "]");
+                    + deferredMatch.getDeferred() + "]" + cause);
                 error.initCause(e);
             }
 
