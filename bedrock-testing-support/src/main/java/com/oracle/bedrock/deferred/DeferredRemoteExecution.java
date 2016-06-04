@@ -28,6 +28,7 @@ package com.oracle.bedrock.deferred;
 import com.oracle.bedrock.runtime.concurrent.RemoteCallable;
 import com.oracle.bedrock.runtime.concurrent.RemoteChannel;
 
+import java.io.NotSerializableException;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.concurrent.Callable;
@@ -154,6 +155,12 @@ public class DeferredRemoteExecution<T> implements Deferred<T>
                     catch (Exception e)
                     {
                         throw new PermanentlyUnavailableException(this, e);
+                    }
+
+                    // catch the case where the callable was not able to be serialized
+                    if (this.throwable instanceof NotSerializableException)
+                    {
+                        throw new PermanentlyUnavailableException(this, this.throwable);
                     }
 
                     // we throw an instance unavailable exception immediately as we have to wait for the result

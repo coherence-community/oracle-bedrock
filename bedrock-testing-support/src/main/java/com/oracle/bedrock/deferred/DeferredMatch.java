@@ -132,7 +132,16 @@ public class DeferredMatch<T> implements Deferred<Boolean>
             }
             else
             {
-                throw new TemporarilyUnavailableException(this);
+                // If it doesn't match then check to see if was have a Existing as a matcher
+                // and if so return immediately as the constant will never change
+                if (deferred instanceof Existing)
+                {
+                    throw new PermanentlyUnavailableException(this);
+                }
+                else
+                {
+                    throw new TemporarilyUnavailableException(this);
+                }
             }
         }
         catch (UnavailableException e)
