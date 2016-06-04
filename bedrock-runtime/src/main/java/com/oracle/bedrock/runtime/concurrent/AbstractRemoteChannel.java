@@ -42,6 +42,7 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Modifier;
 import java.net.Socket;
 import java.util.HashMap;
 import java.util.Set;
@@ -537,13 +538,19 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
         public CallableOperation(Callable<?>     callable,
                                  AcknowledgeWhen acknowledgeWhen)
         {
-            if (callable == null)
+            Class<?> callableClass = callable == null ? null : callable.getClass();
+
+            if (callableClass == null)
             {
                 throw new NullPointerException("Callable can't be null");
             }
-            else if (callable.getClass().isAnonymousClass())
+            else if (callableClass.isAnonymousClass())
             {
                 throw new IllegalArgumentException("Callable can't be an anonymous inner-class");
+            }
+            else if (callableClass.isMemberClass() &&!Modifier.isStatic(callableClass.getModifiers()))
+            {
+                throw new IllegalArgumentException("Callable can't be an non-static inner-class");
             }
             else
             {
@@ -989,13 +996,19 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
         public RunnableOperation(Runnable        runnable,
                                  AcknowledgeWhen acknowledgeWhen)
         {
-            if (runnable == null)
+            Class<?> runnableClass = runnable == null ? null : runnable.getClass();
+
+            if (runnableClass == null)
             {
                 throw new NullPointerException("Runnable can't be null");
             }
-            else if (runnable.getClass().isAnonymousClass())
+            else if (runnableClass.isAnonymousClass())
             {
                 throw new IllegalArgumentException("Runnable can't be an anonymous inner-class");
+            }
+            else if (runnableClass.isMemberClass() &&!Modifier.isStatic(runnableClass.getModifiers()))
+            {
+                throw new IllegalArgumentException("Runnable can't be an non-static inner-class");
             }
             else
             {

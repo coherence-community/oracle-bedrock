@@ -28,7 +28,6 @@ package com.oracle.bedrock.runtime.concurrent;
 import com.oracle.bedrock.Option;
 import com.oracle.bedrock.Options;
 import com.oracle.bedrock.annotations.Experimental;
-import com.oracle.bedrock.annotations.Internal;
 import com.oracle.bedrock.runtime.concurrent.options.StreamName;
 
 import java.io.Closeable;
@@ -94,8 +93,10 @@ public interface RemoteChannel extends Closeable
      * @return  a {@link CompletableFuture} that will be completed with the result
      *                                      of the {@link RemoteCallable} execution.
      *
-     * @throws IllegalStateException  if the {@link RemoteChannel} is closed or
-     *                                is unable to accept the submission
+     * @throws IllegalStateException     if the {@link RemoteChannel} is closed or
+     *                                   is unable to accept the submission
+     * @throws IllegalArgumentException  if the {@link RemoteCallable} isn't serializable, is anonymous
+     *                                   or a non-static inner class
      */
     public <T> CompletableFuture<T> submit(RemoteCallable<T> callable,
                                            Option...         options) throws IllegalStateException;
@@ -111,8 +112,10 @@ public interface RemoteChannel extends Closeable
      * @return  a {@link CompletableFuture} that will be completed when the
      *                                      {@link RemoteRunnable} is executed.
      *
-     * @throws IllegalStateException  if the {@link RemoteChannel} is closed or
-     *                                is unable to accept the submission
+     * @throws IllegalStateException     if the {@link RemoteChannel} is closed or
+     *                                   is unable to accept the submission
+     * @throws IllegalArgumentException  if the {@link RemoteCallable} isn't serializable, is anonymous
+     *                                   or a non-static inner class
      */
     public CompletableFuture<Void> submit(RemoteRunnable runnable,
                                           Option...      options) throws IllegalStateException;

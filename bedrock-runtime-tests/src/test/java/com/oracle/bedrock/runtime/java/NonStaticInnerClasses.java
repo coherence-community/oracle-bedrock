@@ -1,5 +1,5 @@
 /*
- * File: NonStaticInnerClassCallable.java
+ * File: NonStaticInnerClasses.java
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
@@ -26,6 +26,7 @@
 package com.oracle.bedrock.runtime.java;
 
 import com.oracle.bedrock.runtime.concurrent.RemoteCallable;
+import com.oracle.bedrock.runtime.concurrent.RemoteRunnable;
 
 /**
  * Supporting class for {@link ContainerBasedJavaApplicationTest#shouldNotAllowNonStaticInnerClassRemoteCallable()}
@@ -37,7 +38,7 @@ import com.oracle.bedrock.runtime.concurrent.RemoteCallable;
  *
  * @author Tim Middleton
  */
-public class NonStaticInnerClassCallable
+public class NonStaticInnerClasses
 {
     /**
      * A non-static {@link RemoteCallable} inner class that will return a result of "OK".
@@ -48,6 +49,19 @@ public class NonStaticInnerClassCallable
         public String call() throws Exception
         {
             return "OK";
+        }
+    }
+
+
+    /**
+     * A non-static {@link RemoteRunnable} inner class.
+     */
+    public class InvalidRunnable implements RemoteRunnable
+    {
+        @Override
+        public void run()
+        {
+            // do nothing
         }
     }
 }

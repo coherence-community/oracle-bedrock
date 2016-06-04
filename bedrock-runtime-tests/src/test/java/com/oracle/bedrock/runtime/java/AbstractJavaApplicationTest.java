@@ -30,62 +30,48 @@ import classloader.applications.SleepingApplication;
 import classloader.applications.Tester;
 import classloader.applications.TesterApplication;
 import classloader.applications.TesterProducer;
-
-import com.oracle.bedrock.runtime.Platform;
 import com.oracle.bedrock.deferred.Eventually;
-
 import com.oracle.bedrock.junit.AbstractTest;
-
 import com.oracle.bedrock.lang.StringHelper;
-
 import com.oracle.bedrock.options.Diagnostics;
-
 import com.oracle.bedrock.runtime.DummyApp;
 import com.oracle.bedrock.runtime.DummyClassPathApp;
-
+import com.oracle.bedrock.runtime.Platform;
 import com.oracle.bedrock.runtime.concurrent.RemoteCallable;
 import com.oracle.bedrock.runtime.concurrent.RemoteEvent;
 import com.oracle.bedrock.runtime.concurrent.RemoteEventListener;
+import com.oracle.bedrock.runtime.concurrent.RemoteRunnable;
 import com.oracle.bedrock.runtime.concurrent.callable.GetSystemProperty;
 import com.oracle.bedrock.runtime.concurrent.callable.RemoteCallableStaticMethod;
 import com.oracle.bedrock.runtime.concurrent.options.StreamName;
-
-import com.oracle.bedrock.runtime.options.Console;
 import com.oracle.bedrock.runtime.console.PipedApplicationConsole;
-
 import com.oracle.bedrock.runtime.java.options.ClassName;
 import com.oracle.bedrock.runtime.java.options.IPv4Preferred;
 import com.oracle.bedrock.runtime.java.options.RemoteEvents;
 import com.oracle.bedrock.runtime.java.options.SystemProperty;
-
 import com.oracle.bedrock.runtime.options.Argument;
 import com.oracle.bedrock.runtime.options.Arguments;
+import com.oracle.bedrock.runtime.options.Console;
 import com.oracle.bedrock.runtime.options.DisplayName;
-
 import org.junit.Assert;
 import org.junit.Test;
-
 import org.mockito.Mock;
-
-import static org.hamcrest.CoreMatchers.is;
-
-import static org.hamcrest.Matchers.nullValue;
-
-import static org.hamcrest.core.StringContains.containsString;
-
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.Matchers.nullValue;
+import static org.hamcrest.core.StringContains.containsString;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
 /**
  * Integration Tests for {@link JavaApplication} launched across various {@link Platform}s.
@@ -231,10 +217,10 @@ public abstract class AbstractJavaApplicationTest<P extends Platform> extends Ab
                                                                 ClassName.of(TesterApplication.class),
                                                                 IPv4Preferred.yes()))
         {
-            RemoteCallable<Integer>    callable = new RemoteCallableStaticMethod<>(TesterApplication.class.getName(),
-                                                                                   "getMeaningOfLife");
+            RemoteCallable<Integer> callable = new RemoteCallableStaticMethod<>(TesterApplication.class.getName(),
+                                                                                "getMeaningOfLife");
 
-            CompletableFuture<Integer> future   = application.submit(callable);
+            CompletableFuture<Integer> future = application.submit(callable);
 
             assertThat(future.get(), is(42));
 
@@ -404,6 +390,44 @@ public abstract class AbstractJavaApplicationTest<P extends Platform> extends Ab
             Assert.assertThat(listener.getEvents().get(0), is(event));
 
             application.close();
+        }
+    }
+
+
+    /**
+     * Ensure that we don't get silent failure of a {@link RemoteCallable} that
+     * is a non static inner class.
+     */
+    @Test(expected = IllegalArgumentException.class)
+    public void shouldNotAllowNonStaticInnerClassRemoteCallable()
+    {
+        try (JavaApplication application = getPlatform().launch(JavaApplication.class,
+                                                                ClassName.of(SleepingApplication.class),
+                                                                IPv4Preferred.yes()))
+        {
+            RemoteCallable<String> callable = new NonStaticInnerClasses().new InvalidCallable();
+
+            // ensure attempting to use a non-static inner-class will raise an IllegalArgumentException
+            application.submit(callable);
+        }
+    }
+
+
+    /**
+     * Ensure that we don't get silent failure of a {@link RemoteRunnable} that
+     * is a non static inner class.
+     */
+    @Test(expected = IllegalArgumentException.class)
+    public void shouldNotAllowNonStaticInnerClassRemoteRunnable()
+    {
+        try (JavaApplication application = getPlatform().launch(JavaApplication.class,
+                                                                ClassName.of(SleepingApplication.class),
+                                                                IPv4Preferred.yes()))
+        {
+            RemoteRunnable runnable = new NonStaticInnerClasses().new InvalidRunnable();
+
+            // ensure attempting to use a non-static inner-class will raise an IllegalArgumentException
+            application.submit(runnable);
         }
     }
 

@@ -29,6 +29,9 @@ import classloader.applications.EventingApplication;
 import classloader.applications.ParentApplication;
 import classloader.applications.SleepingApplication;
 import com.oracle.bedrock.deferred.Eventually;
+import com.oracle.bedrock.io.NetworkHelper;
+import com.oracle.bedrock.options.Timeout;
+import com.oracle.bedrock.runtime.Application;
 import com.oracle.bedrock.runtime.LocalPlatform;
 import com.oracle.bedrock.runtime.concurrent.RemoteChannel;
 import com.oracle.bedrock.runtime.concurrent.RemoteChannelListener;
@@ -36,25 +39,22 @@ import com.oracle.bedrock.runtime.concurrent.callable.GetSystemProperty;
 import com.oracle.bedrock.runtime.concurrent.runnable.RuntimeExit;
 import com.oracle.bedrock.runtime.concurrent.runnable.RuntimeHalt;
 import com.oracle.bedrock.runtime.concurrent.runnable.SystemExit;
+import com.oracle.bedrock.runtime.concurrent.socket.SocketBasedRemoteChannelServer;
 import com.oracle.bedrock.runtime.concurrent.socket.SocketBasedRemoteChannelTests;
 import com.oracle.bedrock.runtime.console.CapturingApplicationConsole;
-import com.oracle.bedrock.runtime.options.Console;
 import com.oracle.bedrock.runtime.java.options.ClassName;
 import com.oracle.bedrock.runtime.java.options.HeapSize;
 import com.oracle.bedrock.runtime.java.options.HotSpot;
 import com.oracle.bedrock.runtime.java.options.IPv4Preferred;
 import com.oracle.bedrock.runtime.java.options.JavaHome;
+import com.oracle.bedrock.runtime.java.options.SystemProperty;
 import com.oracle.bedrock.runtime.java.profiles.CommercialFeatures;
 import com.oracle.bedrock.runtime.java.profiles.RemoteDebugging;
 import com.oracle.bedrock.runtime.options.Argument;
+import com.oracle.bedrock.runtime.options.Console;
 import com.oracle.bedrock.runtime.options.DisplayName;
 import com.oracle.bedrock.runtime.options.Executable;
 import com.oracle.bedrock.runtime.options.Orphanable;
-import com.oracle.bedrock.io.NetworkHelper;
-import com.oracle.bedrock.options.Timeout;
-import com.oracle.bedrock.runtime.Application;
-import com.oracle.bedrock.runtime.concurrent.socket.SocketBasedRemoteChannelServer;
-import com.oracle.bedrock.runtime.java.options.SystemProperty;
 import com.oracle.bedrock.runtime.options.PlatformSeparators;
 import com.oracle.bedrock.runtime.options.WorkingDirectory;
 import com.oracle.bedrock.util.Capture;
@@ -374,7 +374,7 @@ public class LocalPlatformJavaApplicationTest extends AbstractJavaApplicationTes
             }
 
             // submit the child a request to prove that it's orphaned
-            RemoteChannel child = listener.getExecutor();
+            RemoteChannel             child    = listener.getExecutor();
 
             CompletableFuture<String> response = child.submit(new SocketBasedRemoteChannelTests.PingPong());
 
