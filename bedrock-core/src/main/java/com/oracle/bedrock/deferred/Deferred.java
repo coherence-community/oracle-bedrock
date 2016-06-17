@@ -47,8 +47,6 @@ package com.oracle.bedrock.deferred;
  * builder/factory would instead be used to create connections to any number of
  * servers.
  * <p>
- * Once resolved, the referenced value of a {@link Deferred} will not change.
- * <p>
  * While similar to Java {@link java.util.concurrent.Future}s, {@link Deferred}s
  * are not Java {@link java.util.concurrent.Future}s.  In most circumstances,
  * {@link java.util.concurrent.Future}s are used to represent a mechanism to

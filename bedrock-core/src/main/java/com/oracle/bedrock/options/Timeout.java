@@ -174,4 +174,47 @@ public class Timeout implements Option
     {
         return new Timeout(Duration.of(duration));
     }
+
+
+    /**
+     * Obtains a {@link Timeout} for a specific time.
+     *
+     * @param duration  the duration for the {@link Timeout}
+     * @param units     the {@link TimeUnit}s for the duration of the {@link Timeout}
+     *
+     * @return  the {@link Timeout}
+     */
+    public static Timeout of(long     duration,
+                             TimeUnit units)
+    {
+        return Timeout.after(duration, units);
+    }
+
+
+    /**
+     * Obtains a {@link Timeout} for a specific time.
+     *
+     * @param duration  the duration for the {@link Timeout}
+     *
+     * @return  the {@link Timeout}
+     */
+    public static Timeout of(Duration duration)
+    {
+        return Timeout.after(duration);
+    }
+
+
+    /**
+     * Obtains a {@link Timeout} for a specified time represented as a {@link String}
+     * formatted as (0-9)+['ms'|'s'|'m'|'h'].  If no units are specified, the unit
+     * of 'ms' is assumed.
+     *
+     * @param duration  the timeout string
+     *
+     * @return  a {@link Timeout}
+     */
+    public static Timeout of(String duration)
+    {
+        return Timeout.after(duration);
+    }
 }

@@ -121,22 +121,22 @@ public class Ensured<T> implements Deferred<T>
         this.deferred = deferred instanceof Ensured ? ((Ensured<T>) deferred).getDeferred() : deferred;
 
         // determine the timeout constraints based on the provided options
-        Options ensuredOptions = Options.from(options);
+        Options optionsByType = Options.from(options);
 
-        this.initialDelayDurationMS = ensuredOptions.getOrDefault(InitialDelay.class,
-                                                                  InitialDelay.none()).to(TimeUnit.MILLISECONDS);
+        this.initialDelayDurationMS = optionsByType.getOrDefault(InitialDelay.class,
+                                                                 InitialDelay.none()).to(TimeUnit.MILLISECONDS);
 
-        this.maximumRetryDurationMS = ensuredOptions.getOrDefault(Timeout.class,
-                                                                  Timeout.after(DeferredHelper.getDefaultEnsuredMaximumRetryDuration()))
-                                                                  .to(TimeUnit.MILLISECONDS);
+        this.maximumRetryDurationMS = optionsByType.getOrDefault(Timeout.class,
+                                                                 Timeout.after(DeferredHelper.getDefaultEnsuredMaximumRetryDuration()))
+                                                                 .to(TimeUnit.MILLISECONDS);
 
-        this.maximumPollingDurationMS = ensuredOptions.getOrDefault(MaximumRetryDelay.class,
-                                                                    MaximumRetryDelay.of(DeferredHelper.getDefaultEnsuredMaximumPollingDuration()))
-                                                                    .to(TimeUnit.MILLISECONDS);
+        this.maximumPollingDurationMS = optionsByType.getOrDefault(MaximumRetryDelay.class,
+                                                                   MaximumRetryDelay.of(DeferredHelper.getDefaultEnsuredMaximumPollingDuration()))
+                                                                   .to(TimeUnit.MILLISECONDS);
 
-        this.retryDurations = ensuredOptions.getOrDefault(RetryFrequency.class,
-                                                          RetryFrequency.of(DeferredHelper.getDefaultEnsuredRetryDurationsIterable()))
-                                                          .get().iterator();
+        this.retryDurations = optionsByType.getOrDefault(RetryFrequency.class,
+                                                         RetryFrequency.of(DeferredHelper.getDefaultEnsuredRetryDurationsIterable()))
+                                                         .get().iterator();
     }
 
 
