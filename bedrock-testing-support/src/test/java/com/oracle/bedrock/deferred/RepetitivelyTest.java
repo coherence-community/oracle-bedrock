@@ -26,6 +26,7 @@
 package com.oracle.bedrock.deferred;
 
 import com.oracle.bedrock.Option;
+import com.oracle.bedrock.matchers.RecordingMatcher;
 import com.oracle.bedrock.options.Timeout;
 import com.oracle.bedrock.util.Duration;
 import com.oracle.bedrock.util.StopWatch;
@@ -56,15 +57,20 @@ public class RepetitivelyTest
     @Test
     public void shouldRepetitivelyAssertConstant()
     {
-        Duration  duration = Duration.of(5, TimeUnit.SECONDS);
+        Duration                  duration = Duration.of(5, TimeUnit.SECONDS);
+        RecordingMatcher<Integer> matcher  = RecordingMatcher.of(is(42));
 
-        StopWatch watch    = new StopWatch();
+        StopWatch                 watch    = new StopWatch();
 
         watch.start();
 
-        Repetitively.assertThat(42, is(42), Timeout.of(duration));
+        Repetitively.assertThat(42, matcher, Timeout.of(duration));
 
         watch.stop();
+
+        assertThat(matcher.attempted(), is(true));
+        assertThat(matcher.hasSucceeded(), is(true));
+        assertThat(matcher.hasFailed(), is(false));
 
         assertThat(watch.getElapsedTimeIn(TimeUnit.SECONDS),
                    greaterThanOrEqualTo((long) (duration.to(TimeUnit.SECONDS) * 0.95)));
@@ -77,20 +83,26 @@ public class RepetitivelyTest
     @Test
     public void shouldNotRepetitivelyAssertIncorrectConstant()
     {
-        Duration  duration = Duration.of(5, TimeUnit.SECONDS);
+        Duration                  duration = Duration.of(5, TimeUnit.SECONDS);
+        RecordingMatcher<Integer> matcher  = RecordingMatcher.of(is(1));
 
-        StopWatch watch    = new StopWatch();
+        StopWatch                 watch    = new StopWatch();
 
         watch.start();
 
         try
         {
-            Repetitively.assertThat(42, is(1), Timeout.of(duration));
+            Repetitively.assertThat(42, matcher, Timeout.of(duration));
 
             throw new IllegalStateException();
         }
         catch (AssertionError error)
         {
+            assertThat(matcher.attempted(), is(true));
+            assertThat(matcher.hasSucceeded(), is(false));
+            assertThat(matcher.hasFailed(), is(true));
+            assertThat(matcher.getFailureCount(), is(1));
+
             assertThat(watch.getElapsedTimeIn(TimeUnit.SECONDS), lessThan(1L));
         }
         catch (IllegalStateException e)

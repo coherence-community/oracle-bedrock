@@ -56,6 +56,9 @@ import static com.oracle.bedrock.deferred.DeferredHelper.valueOf;
  * Copyright (c) 2016. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
+ * @see Eventually
+ * @see Concurrently
+ *
  * @author Brian Oliver
  */
 public class Repetitively
@@ -170,6 +173,9 @@ public class Repetitively
         // the number of times successfully matched
         int matchCount = 0;
 
+        // the number of matches attempted
+        int attemptCount = 0;
+
         // determine the maximum time we can wait
         long remainingRetryDurationMS = maximumRetryDurationMS;
 
@@ -184,7 +190,7 @@ public class Repetitively
                 }
                 catch (InterruptedException e)
                 {
-                    throw new PermanentlyUnavailableException(deferred, e);
+                    throw new AssertionError("Interrupted while resolving " + deferred, e);
                 }
 
                 // reduce the remaining time
@@ -213,6 +219,9 @@ public class Repetitively
                 acquisitionDurationMS    = stopped - started;
                 remainingRetryDurationMS -= acquisitionDurationMS < 0 ? 0 : acquisitionDurationMS;
 
+                // count this attempt
+                attemptCount++;
+
                 if (matcher.matches(object))
                 {
                     // continue matching!
@@ -226,7 +235,8 @@ public class Repetitively
                     matcher.describeMismatch(object, description);
 
                     // throw an assertion with the error
-                    throw new AssertionError(description.toString() + " (succeeded " + matchCount + " time(s))");
+                    throw new AssertionError(description.toString() + " (attempted " + attemptCount
+                                             + " time(s), succeeded " + matchCount + " time(s))");
                 }
             }
             catch (PermanentlyUnavailableException e)

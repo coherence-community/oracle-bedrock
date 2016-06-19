@@ -53,6 +53,9 @@ import static com.oracle.bedrock.deferred.DeferredHelper.valueOf;
  * Copyright (c) 2013. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
+ * @see Repetitively
+ * @see Concurrently
+ *
  * @author Brian Oliver
  */
 public class Eventually
@@ -164,6 +167,7 @@ public class Eventually
                 {
                     cause = " (NotSerializableException thrown)";
                 }
+
                 error = new AssertionError((message == null ? "" : message + ": ") + "Failed to resolve a value for ["
                                                                                    + deferredMatch.getDeferred()
                                                                                    + "] to evaluate with matcher ["
