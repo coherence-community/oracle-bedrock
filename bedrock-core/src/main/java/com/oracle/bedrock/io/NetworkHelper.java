@@ -227,7 +227,7 @@ public class NetworkHelper
      *
      * @throws SocketException  when an {@link InetAddress} is not available
      */
-    public static InetAddress getInetAddress(Predicate<InetAddress> predicate) throws SocketException
+    public static InetAddress getInetAddress(Predicate<? super InetAddress> predicate) throws SocketException
     {
         for (NetworkInterface networkInterface : getNetworkInterfaces(Predicates.<NetworkInterface>always()))
         {
@@ -247,6 +247,38 @@ public class NetworkHelper
 
 
     /**
+     * Obtains the list of {@link InetAddress}es from those specified that satisfy a {@link Predicate}.
+     *
+     * @param predicate  the {@link InetAddress} {@link Predicate}
+     *
+     * @return a {@link List} of {@link InetAddress} matching the {@link Predicate} or an empty
+     *         list if no matching {@link InetAddress} can be found
+     */
+    public static List<InetAddress> getInetAddresses(Iterable<InetAddress>          addresses,
+                                                     Predicate<? super InetAddress> predicate)
+    {
+        LinkedList<InetAddress> addressList = new LinkedList<>();
+
+        for (InetAddress address : addresses)
+        {
+            try
+            {
+                if (predicate.test(address))
+                {
+                    addressList.add(address);
+                }
+            }
+            catch (Exception e)
+            {
+                // ignore the address if an exception occurred
+            }
+        }
+
+        return addressList;
+    }
+
+
+    /**
      * Obtains the list of {@link InetAddress}es (of the machine on which this code is executing)
      * that matches the specified {@link Predicate}.
      *
@@ -255,7 +287,7 @@ public class NetworkHelper
      * @return a {@link List} of {@link InetAddress} matching the {@link Predicate} or an empty
      *         list if no matching {@link InetAddress} can be found
      */
-    public static List<InetAddress> getInetAddresses(Predicate<InetAddress> predicate)
+    public static List<InetAddress> getInetAddresses(Predicate<? super InetAddress> predicate)
     {
         LinkedList<InetAddress> addressList = new LinkedList<>();
 
@@ -291,7 +323,7 @@ public class NetworkHelper
      *
      * @return  a list of {@link NetworkInterface}s
      */
-    public static List<NetworkInterface> getNetworkInterfaces(Predicate<NetworkInterface> predicate)
+    public static List<NetworkInterface> getNetworkInterfaces(Predicate<? super NetworkInterface> predicate)
     {
         ArrayList<NetworkInterface> networkInterfaces = new ArrayList<>();
 

@@ -27,6 +27,7 @@ package com.oracle.bedrock.runtime.java.profiles;
 
 import com.oracle.bedrock.Option;
 import com.oracle.bedrock.Options;
+import com.oracle.bedrock.io.NetworkHelper;
 import com.oracle.bedrock.runtime.Application;
 import com.oracle.bedrock.runtime.LocalPlatform;
 import com.oracle.bedrock.runtime.MetaClass;
@@ -416,7 +417,10 @@ public class RemoteDebugging implements Profile, Option
          */
         public TransportAddress(AvailablePortIterator ports)
         {
-            this(ports.getInetAddresses().iterator().next(), new Capture<>(ports));
+            // NOTE: Currently Java Debugging only supports IPv4 on the server-side so we must
+            // filter the AvailablePortIterator addresses into those that are IPv4
+            this(NetworkHelper.getInetAddresses(ports.getInetAddresses(), NetworkHelper.IPv4_ADDRESS).iterator().next(),
+                 new Capture<>(ports));
         }
 
 

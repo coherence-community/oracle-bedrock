@@ -30,6 +30,7 @@ import com.oracle.bedrock.junit.AbstractTest;
 
 import com.oracle.bedrock.runtime.LocalPlatform;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -66,6 +67,7 @@ public class ContainerMBeanServerBuilderTest extends AbstractTest
      */
     @SuppressWarnings("unchecked")
     @Test
+    @Ignore
     public void shouldStartMBeanServerAndConnectLocallyAndRemotely() throws Exception
     {
         MBeanServer        mBeanServer        = null;
