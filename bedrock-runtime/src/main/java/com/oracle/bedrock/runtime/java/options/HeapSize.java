@@ -64,14 +64,6 @@ public class HeapSize implements ComposableOption<HeapSize>, JvmOption
 
 
     /**
-     * The units of measure for the {@link HeapSize}.
-     */
-    public static enum Units {KB,
-                              MB,
-                              GB}
-
-
-    /**
      * Privately constructs a default {@link HeapSize}.
      */
     private HeapSize()
@@ -94,6 +86,55 @@ public class HeapSize implements ComposableOption<HeapSize>, JvmOption
         this.initialUnits = heapSize.initialUnits;
         this.maximum      = heapSize.maximum;
         this.maximumUnits = heapSize.maximumUnits;
+    }
+
+
+    /**
+     * The units of measure for the {@link HeapSize}.
+     */
+    public enum Units
+    {
+        /**
+         * The number of bytes in a Kibibyte (traditional Kilobyte).
+         */
+        KB((long) Math.pow(1024, 1)),
+
+        /**
+         * The number of bytes in a Mebibyte (traditional Megabyte).
+         */
+        MB((long) Math.pow(1024, 2)),
+
+        /**
+         * The number of bytes in a Gibibyte (traditional Megabyte).
+         */
+        GB((long) Math.pow(1024, 3));
+
+        /**
+         * The number of bytes in the a unit.
+         */
+        private long bytes;
+
+
+        /**
+         * Constructs an individual {@link Units}.
+         *
+         * @param bytes  the number of bytes in the unit
+         */
+        Units(long bytes)
+        {
+            this.bytes = bytes;
+        }
+
+
+        /**
+         * Obtains the number of bytes in a unit.
+         *
+         * @return the number of bytes
+         */
+        long getBytes()
+        {
+            return bytes;
+        }
     }
 
 
@@ -187,7 +228,7 @@ public class HeapSize implements ComposableOption<HeapSize>, JvmOption
      */
     public long getInitialSizeAs(Units units)
     {
-        return initial * (initialUnits.ordinal() ^ 10) / (units.ordinal() ^ 10);
+        return initial * initialUnits.getBytes() / units.getBytes();
     }
 
 
@@ -200,7 +241,7 @@ public class HeapSize implements ComposableOption<HeapSize>, JvmOption
      */
     public long getMaximumSizeAs(Units units)
     {
-        return maximum * (maximumUnits.ordinal() ^ 10) / (units.ordinal() ^ 10);
+        return maximum * maximumUnits.getBytes() / units.getBytes();
     }
 
 

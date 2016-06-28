@@ -55,4 +55,22 @@ public class HeapSizeTest
         assertThat(heapSize.getInitialSizeAs(HeapSize.Units.MB), is(128L));
         assertThat(heapSize.getMaximumSizeAs(HeapSize.Units.GB), is(1L));
     }
+
+
+    /**
+     * Ensure that {@link HeapSize}s compose initial and minimum values when provided to {@link Options}.
+     */
+    @Test
+    public void shouldUseComposeSameMinimumAndMaximumHeapSizes()
+    {
+        Options  options  = new Options(HeapSize.initial(1, HeapSize.Units.GB), HeapSize.maximum(1, HeapSize.Units.GB));
+
+        HeapSize heapSize = options.get(HeapSize.class);
+
+        assertThat(heapSize.getInitialSizeAs(HeapSize.Units.GB), is(1L));
+        assertThat(heapSize.getMaximumSizeAs(HeapSize.Units.GB), is(1L));
+
+        assertThat(heapSize.getInitialSizeAs(HeapSize.Units.KB), is(1048576L));
+        assertThat(heapSize.getMaximumSizeAs(HeapSize.Units.KB), is(1048576L));
+    }
 }
