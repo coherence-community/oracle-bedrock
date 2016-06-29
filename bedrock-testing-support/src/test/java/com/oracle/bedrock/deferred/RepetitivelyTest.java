@@ -36,6 +36,7 @@ import org.junit.Test;
 
 import java.util.concurrent.TimeUnit;
 
+import static com.oracle.bedrock.matchers.ConstantMatcher.constant;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.lessThan;
@@ -58,7 +59,7 @@ public class RepetitivelyTest
     public void shouldRepetitivelyAssertConstant()
     {
         Duration                  duration = Duration.of(5, TimeUnit.SECONDS);
-        RecordingMatcher<Integer> matcher  = RecordingMatcher.of(is(42));
+        RecordingMatcher<Integer> matcher  = RecordingMatcher.of(is(constant()));
 
         StopWatch                 watch    = new StopWatch();
 
