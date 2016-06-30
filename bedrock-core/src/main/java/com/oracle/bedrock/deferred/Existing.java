@@ -40,7 +40,7 @@ public class Existing<T> implements Deferred<T>
     /**
      * The object to return on {@link #get()}.
      */
-    private T object;
+    private Object object;
 
     /**
      * The type of the {@link Deferred}.
@@ -66,7 +66,7 @@ public class Existing<T> implements Deferred<T>
      * @param object         the {@link Object} (can't be <code>null</code>)
      * @param deferredClass  the {@link Class} of the {@link Deferred}
      */
-    public Existing(T        object,
+    public Existing(Object   object,
                     Class<T> deferredClass)
     {
         this.object        = object;
@@ -77,7 +77,7 @@ public class Existing<T> implements Deferred<T>
     @Override
     public T get() throws TemporarilyUnavailableException, PermanentlyUnavailableException
     {
-        return object;
+        return (T) object;
     }
 
 

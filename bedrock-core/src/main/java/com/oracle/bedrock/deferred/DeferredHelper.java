@@ -546,8 +546,8 @@ public class DeferredHelper
      * @return a recording dynamic proxy of the {@link Object} represented
      *         as the specified {@link Class}
      */
-    public static <T, O extends T> T invoking(O        object,
-                                              Class<T> specificClass)
+    public static <T, O> T invoking(O        object,
+                                    Class<T> specificClass)
     {
         return invoking(new Existing<T>(object, specificClass));
     }
