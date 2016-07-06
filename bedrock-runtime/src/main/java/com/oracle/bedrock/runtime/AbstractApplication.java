@@ -26,7 +26,7 @@
 package com.oracle.bedrock.runtime;
 
 import com.oracle.bedrock.Option;
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.annotations.Internal;
 import com.oracle.bedrock.extensible.AbstractExtensible;
 import com.oracle.bedrock.options.Diagnostics;
@@ -67,8 +67,8 @@ public abstract class AbstractApplication<P extends ApplicationProcess> extends 
     protected final Platform platform;
 
     /**
-     * The resolved display name for the  {@link Application}, based on the {@link Options} used
-     * to launch the {@link Application}.
+     * The resolved display name for the  {@link Application},
+     * based on the {@link OptionsByType} used to launch the {@link Application}.
      */
     protected final String displayName;
 
@@ -79,9 +79,9 @@ public abstract class AbstractApplication<P extends ApplicationProcess> extends 
     protected final P process;
 
     /**
-     * The {@link Options} used to launch the {@link Application}.
+     * The {@link OptionsByType} used to launch the {@link Application}.
      */
-    protected final Options options;
+    protected final OptionsByType optionsByType;
 
     /**
      * The {@link ApplicationConsole} for interacting with the {@link Application}.
@@ -112,30 +112,30 @@ public abstract class AbstractApplication<P extends ApplicationProcess> extends 
     /**
      * Construct an {@link AbstractApplication}.
      *
-     * @param platform  the {@link Platform} on which the {@link Application} was launched
-     * @param process   the underlying {@link ApplicationProcess} representing the {@link Application}
-     * @param options   the {@link Options} used to launch the {@link Application}
+     * @param platform       the {@link Platform} on which the {@link Application} was launched
+     * @param process        the underlying {@link ApplicationProcess} representing the {@link Application}
+     * @param optionsByType  the {@link OptionsByType} used to launch the {@link Application}
      */
-    public AbstractApplication(Platform platform,
-                               P        process,
-                               Options  options)
+    public AbstractApplication(Platform      platform,
+                               P             process,
+                               OptionsByType optionsByType)
     {
-        this.platform = platform;
-        this.process  = process;
-        this.options  = options;
+        this.platform      = platform;
+        this.process       = process;
+        this.optionsByType = optionsByType;
 
         // establish the default Timeout for the application
-        this.defaultTimeout = options.get(Timeout.class);
+        this.defaultTimeout = optionsByType.get(Timeout.class);
 
         // determine if diagnostics is enabled
-        boolean diagnosticsEnabled = options.get(Diagnostics.class).isEnabled();
+        boolean diagnosticsEnabled = optionsByType.get(Diagnostics.class).isEnabled();
 
         // resolve the application name, including the discriminator (if one is defined)
-        this.displayName = options.get(DisplayName.class).resolve(options);
+        this.displayName = optionsByType.get(DisplayName.class).resolve(optionsByType);
 
         // establish the application console
-        console = options.getOrDefault(ApplicationConsoleBuilder.class,
-                                       SystemApplicationConsole.builder()).build(displayName);
+        console = optionsByType.getOrDefault(ApplicationConsoleBuilder.class,
+                                             SystemApplicationConsole.builder()).build(displayName);
 
         // establish the standard input, output and error redirection threads for the application console
 
@@ -194,9 +194,9 @@ public abstract class AbstractApplication<P extends ApplicationProcess> extends 
 
 
     @Override
-    public Options getOptions()
+    public OptionsByType getOptions()
     {
-        return options;
+        return optionsByType;
     }
 
 
@@ -214,7 +214,7 @@ public abstract class AbstractApplication<P extends ApplicationProcess> extends 
     public void close(Option... options)
     {
         // determine the custom closing behavior for the application
-        Options closingOptions = new Options(options);
+        OptionsByType closingOptions = OptionsByType.of(options);
 
         // ------ notify any ApplicationListener-based Features (about closing) ------
 
@@ -365,7 +365,7 @@ public abstract class AbstractApplication<P extends ApplicationProcess> extends 
     public int waitFor(Option... options)
     {
         // include the application specific options for waiting
-        Options waitForOptions = new Options(getOptions().asArray()).addAll(options);
+        OptionsByType waitForOptions = OptionsByType.of(getOptions().asArray()).addAll(options);
 
         return process.waitFor(waitForOptions.asArray());
     }

@@ -26,7 +26,7 @@
 package com.oracle.bedrock.runtime.java.options;
 
 import com.oracle.bedrock.Option;
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.runtime.Platform;
 
 import java.util.Iterator;
@@ -39,7 +39,7 @@ import java.util.Iterator;
  * if they are an {@link Iterator}, the value of a System Property will be the next
  * value taken from the {@link Iterator}.   When the value is a
  * {@link ContextSensitiveValue}, the value will be based on a provided {@link Platform}
- * and {@link Options}.
+ * and {@link OptionsByType}.
  * <p>
  * Copyright (c) 2015. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
@@ -70,7 +70,7 @@ public class SystemProperty implements Option.Collectable
      *
      * @param name     the name of the {@link SystemProperty}
      * @param value    the value of the {@link SystemProperty}
-     * @param options  then {@link Options} for this {@link SystemProperty}
+     * @param options  then {@link Option}s for this {@link SystemProperty}
      */
     private SystemProperty(String    name,
                            Object    value,
@@ -86,7 +86,7 @@ public class SystemProperty implements Option.Collectable
      * Constructs a {@link SystemProperty} with no value.
      *
      * @param name     the name of the {@link SystemProperty}
-     * @param options  then {@link Options} for this {@link SystemProperty}
+     * @param options  then {@link Option}s for this {@link SystemProperty}
      *
      * @return a new {@link SystemProperty}
      */
@@ -102,7 +102,7 @@ public class SystemProperty implements Option.Collectable
      *
      * @param name     the name of the {@link SystemProperty}
      * @param value    the value of the {@link SystemProperty}
-     * @param options  then {@link Options} for this {@link SystemProperty}
+     * @param options  then {@link Option}s for this {@link SystemProperty}
      *
      * @return a new {@link SystemProperty}
      */
@@ -119,7 +119,7 @@ public class SystemProperty implements Option.Collectable
      *
      * @param name     the name of the {@link SystemProperty}
      * @param value    the value of the {@link SystemProperty}
-     * @param options  then {@link Options} for this {@link SystemProperty}
+     * @param options  then {@link Option}s for this {@link SystemProperty}
      *
      * @return a new {@link SystemProperty}
      */
@@ -134,9 +134,9 @@ public class SystemProperty implements Option.Collectable
     /**
      * Constructs a {@link SystemProperty}.
      *
-     * @param name     the name of the {@link SystemProperty}
-     * @param iterator the iterator that can provide values for the {@link SystemProperty}
-     * @param options  then {@link Options} for this {@link SystemProperty}
+     * @param name      the name of the {@link SystemProperty}
+     * @param iterator  the iterator that can provide values for the {@link SystemProperty}
+     * @param options   then {@link Option}s for this {@link SystemProperty}
      *
      * @return a new {@link SystemProperty}
      */
@@ -151,9 +151,9 @@ public class SystemProperty implements Option.Collectable
     /**
      * Constructs a {@link SystemProperty}.
      *
-     * @param name   the name of the {@link SystemProperty}
-     * @param object the values for the {@link SystemProperty}
-     * @param options  then {@link Options} for this {@link SystemProperty}
+     * @param name     the name of the {@link SystemProperty}
+     * @param object   the values for the {@link SystemProperty}
+     * @param options  then {@link Option}s for this {@link SystemProperty}
      *
      * @return a new {@link SystemProperty}
      */
@@ -188,13 +188,13 @@ public class SystemProperty implements Option.Collectable
 
 
     /**
-     * Obtain the {@link Option}s for this {@link SystemProperty}.
+     * Obtain the {@link OptionsByType}s for this {@link SystemProperty}.
      *
-     * @return  the {@link Option}s for this {@link SystemProperty}
+     * @return  the {@link OptionsByType}s for this {@link SystemProperty}
      */
-    public Options getOptions()
+    public OptionsByType getOptions()
     {
-        return new Options(options);
+        return OptionsByType.of(options);
     }
 
 
@@ -222,15 +222,15 @@ public class SystemProperty implements Option.Collectable
          * Obtains the value for the {@link SystemProperty}, possibly based on the provided
          * {@link Platform} and {@link Option}s.
          *
-         * @param name      the name of the {@link SystemProperty}
-         * @param platform  the {@link Platform} in which {@link SystemProperty} is being used.
-         * @param options   the {@link Options}
+         * @param name           the name of the {@link SystemProperty}
+         * @param platform       the {@link Platform} in which {@link SystemProperty} is being used.
+         * @param optionsByType  the {@link OptionsByType}
          *
          * @return the value
          */
-        Object resolve(String   name,
-                       Platform platform,
-                       Options  options);
+        Object resolve(String        name,
+                       Platform      platform,
+                       OptionsByType optionsByType);
     }
 
 
@@ -244,12 +244,12 @@ public class SystemProperty implements Option.Collectable
         /**
          * Called by a {@link SystemProperty} instance for whenever its value(s) are resolved.
          *
-         * @param name     the name of the argument (may be null if no name was specified)
-         * @param value    the resolved value of the system property
-         * @param options  the {@link Options} used to resolve the values
+         * @param name           the name of the argument (may be null if no name was specified)
+         * @param value          the resolved value of the system property
+         * @param optionsByType  the {@link OptionsByType} used to resolve the values
          */
-        void onResolve(String  name,
-                       String  value,
-                       Options options);
+        void onResolve(String        name,
+                       String        value,
+                       OptionsByType optionsByType);
     }
 }

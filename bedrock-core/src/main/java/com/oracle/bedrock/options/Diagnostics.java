@@ -26,7 +26,7 @@
 package com.oracle.bedrock.options;
 
 import com.oracle.bedrock.Option;
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 
 /**
  * An {@link Option} to define enabled Bedrock diagnostics.
@@ -120,7 +120,7 @@ public class Diagnostics implements Option
      *
      * @return  a disabled {@link Diagnostics}
      */
-    @Options.Default
+    @OptionsByType.Default
     public static Diagnostics disabled()
     {
         return new Diagnostics(false);

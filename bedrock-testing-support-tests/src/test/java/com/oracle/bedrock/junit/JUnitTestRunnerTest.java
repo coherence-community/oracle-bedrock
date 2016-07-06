@@ -25,7 +25,7 @@
 
 package com.oracle.bedrock.junit;
 
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.deferred.Eventually;
 import com.oracle.bedrock.junit.options.TestClasses;
 import com.oracle.bedrock.options.Decoration;
@@ -79,9 +79,9 @@ public class JUnitTestRunnerTest
 
         thread.start();
 
-        Options options = new Options(TestClasses.of(GoodTest.class), Decoration.of(listener));
+        OptionsByType optionsByType = OptionsByType.of(TestClasses.of(GoodTest.class), Decoration.of(listener));
 
-        runner.run(options);
+        runner.run(optionsByType);
 
         thread.join();
 

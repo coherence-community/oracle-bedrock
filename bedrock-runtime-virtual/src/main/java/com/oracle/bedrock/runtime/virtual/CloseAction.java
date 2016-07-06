@@ -26,7 +26,7 @@
 package com.oracle.bedrock.runtime.virtual;
 
 import com.oracle.bedrock.Option;
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 
 /**
  * An enum of different options for closing a Virtual Machine.
@@ -38,19 +38,29 @@ import com.oracle.bedrock.Options;
  */
 public enum CloseAction implements Option
 {
-    /** When close is called on the {@link VirtualPlatform} do nothing */
+    /**
+     * When close is called on the {@link VirtualPlatform} do nothing
+     */
     None,
 
-    /** When close is called on the {@link VirtualPlatform} shut down and destroy the VM */
+    /**
+     * When close is called on the {@link VirtualPlatform} shut down and destroy the VM
+     */
     Destroy,
 
-    /** When close is called on the {@link VirtualPlatform} simulate pressing the power button */
+    /**
+     * When close is called on the {@link VirtualPlatform} simulate pressing the power button
+     */
     PowerButton,
 
-    /** When close is called on the {@link VirtualPlatform} save the state of the VM and close */
+    /**
+     * When close is called on the {@link VirtualPlatform} save the state of the VM and close
+     */
     SaveState,
 
-    /** When close is called on the {@link VirtualPlatform} shutdown the VM */
-    @Options.Default
-    Shutdown;
+    /**
+     * When close is called on the {@link VirtualPlatform} shutdown the VM
+     */
+    @OptionsByType.Default
+    Shutdown
 }

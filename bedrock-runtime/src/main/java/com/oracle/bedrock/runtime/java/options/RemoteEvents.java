@@ -27,7 +27,7 @@ package com.oracle.bedrock.runtime.java.options;
 
 import com.oracle.bedrock.ComposableOption;
 import com.oracle.bedrock.Option;
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.runtime.concurrent.RemoteEventListener;
 import com.oracle.bedrock.runtime.concurrent.options.StreamName;
 
@@ -47,9 +47,9 @@ import java.util.function.BiConsumer;
 public class RemoteEvents implements ComposableOption<RemoteEvents>
 {
     /**
-     * The {@link HashMap} of {@link EventListener}s and {@link Option}s, organized by {@link StreamName}.
+     * The {@link HashMap} of {@link EventListener}s and {@link OptionsByType}s, organized by {@link StreamName}.
      */
-    private HashMap<StreamName, HashMap<RemoteEventListener, Options>> eventListeners;
+    private HashMap<StreamName, HashMap<RemoteEventListener, OptionsByType>> eventListeners;
 
 
     /**
@@ -64,18 +64,18 @@ public class RemoteEvents implements ComposableOption<RemoteEvents>
     /**
      * Internally adds a {@link RemoteEventListener} to this {@link RemoteEvents} option
      *
-     * @param listener  the {@link RemoteEventListener} to add
-     * @param options   the {@link Options} for the {@link RemoteEventListener}
+     * @param listener       the {@link RemoteEventListener} to add
+     * @param optionsByType  the {@link OptionsByType} for the {@link RemoteEventListener}
      */
     private void add(RemoteEventListener listener,
-                     Options             options)
+                     OptionsByType       optionsByType)
     {
-        StreamName streamName = options.get(StreamName.class);
+        StreamName streamName = optionsByType.get(StreamName.class);
 
-        HashMap<RemoteEventListener, Options> streamEventListeners = eventListeners.computeIfAbsent(streamName,
-                                                                                                    name -> new HashMap<>());
+        HashMap<RemoteEventListener, OptionsByType> streamEventListeners = eventListeners.computeIfAbsent(streamName,
+                                                                                                          name -> new HashMap<>());
 
-        streamEventListeners.put(listener, options);
+        streamEventListeners.put(listener, optionsByType);
     }
 
 
@@ -89,8 +89,8 @@ public class RemoteEvents implements ComposableOption<RemoteEvents>
         eventListeners.forEach(
             (streamName, remoteEventListenerMap) -> {
                 remoteEventListenerMap.forEach(
-                    (remoteEventListener, options) -> {
-                        consumer.accept(remoteEventListener, options.asArray());
+                    (remoteEventListener, optionsByType) -> {
+                        consumer.accept(remoteEventListener, optionsByType.asArray());
                     });
             });
     }
@@ -108,8 +108,8 @@ public class RemoteEvents implements ComposableOption<RemoteEvents>
         // add all of the other RemoteEvent listeners (these will overrider individual event listeners)
         other.eventListeners.forEach(((streamName, remoteEventListenerMap) -> {
                                           remoteEventListenerMap.forEach(
-                                              (remoteEventListener, options) -> {
-                                                  remoteEvents.add(remoteEventListener, options);
+                                              (remoteEventListener, optionsByType) -> {
+                                                  remoteEvents.add(remoteEventListener, optionsByType);
                                               });
                                       }));
 
@@ -130,7 +130,7 @@ public class RemoteEvents implements ComposableOption<RemoteEvents>
     {
         RemoteEvents remoteEvents = new RemoteEvents();
 
-        remoteEvents.add(remoteEventListener, Options.from(options));
+        remoteEvents.add(remoteEventListener, OptionsByType.of(options));
 
         return remoteEvents;
     }
@@ -141,7 +141,7 @@ public class RemoteEvents implements ComposableOption<RemoteEvents>
      *
      * @return an empty {@link RemoteEvents}
      */
-    @Options.Default
+    @OptionsByType.Default
     public static RemoteEvents none()
     {
         return new RemoteEvents();

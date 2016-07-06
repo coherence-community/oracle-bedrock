@@ -26,7 +26,7 @@
 package com.oracle.bedrock.runtime;
 
 import com.oracle.bedrock.Option;
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.annotations.Internal;
 import com.oracle.bedrock.runtime.console.SystemApplicationConsole;
 import com.oracle.bedrock.runtime.options.Discriminator;
@@ -85,7 +85,7 @@ public abstract class AbstractAssemblyBuilder<A extends Application, G extends A
         launchApplications(applications, infrastructure, options);
 
         // establish the assembly based on the applications
-        G assembly = createAssembly(applications, Options.from(options));
+        G assembly = createAssembly(applications, OptionsByType.of(options));
 
         return assembly;
     }
@@ -110,7 +110,7 @@ public abstract class AbstractAssemblyBuilder<A extends Application, G extends A
             for (int i = 1; i <= instanceCount; i++)
             {
                 // establish a new set of launch options for each application
-                Options launchOptions = new Options(characteristic.getOptions()).addAll(options);
+                OptionsByType launchOptions = OptionsByType.of(characteristic.getOptions()).addAll(options);
 
                 // include a discriminator for the application being launched
                 launchOptions.add(Discriminator.of(i));
@@ -137,13 +137,13 @@ public abstract class AbstractAssemblyBuilder<A extends Application, G extends A
     /**
      * Create an {@link Assembly} based on the specified collection of {@link Application}s.
      *
-     * @param applications  the collection of {@link Application}s.
-     * @param options       the shared / common {@link Options} used to launch the {@link Application}s
+     * @param applications   the collection of {@link Application}s.
+     * @param optionsByType  the {@link OptionsByType} used to launch the {@link Application}s
      *
      * @return An {@link Assembly} implementation.
      */
-    abstract protected G createAssembly(List<A> applications,
-                                        Options options);
+    abstract protected G createAssembly(List<A>       applications,
+                                        OptionsByType optionsByType);
 
 
     /**

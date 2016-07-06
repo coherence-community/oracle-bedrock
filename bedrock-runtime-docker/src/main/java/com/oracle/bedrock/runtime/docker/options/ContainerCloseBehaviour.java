@@ -26,7 +26,7 @@
 package com.oracle.bedrock.runtime.docker.options;
 
 import com.oracle.bedrock.Option;
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.runtime.docker.DockerContainer;
 
 import java.util.function.Consumer;
@@ -101,7 +101,7 @@ public class ContainerCloseBehaviour implements Option, Consumer<DockerContainer
      *
      * @return a {@link ContainerCloseBehaviour}
      */
-    @Options.Default
+    @OptionsByType.Default
     public static ContainerCloseBehaviour remove()
     {
         return new ContainerCloseBehaviour(((container) -> {

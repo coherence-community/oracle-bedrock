@@ -26,7 +26,7 @@
 package com.oracle.bedrock.runtime;
 
 import com.oracle.bedrock.Option;
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 
 /**
  * Helpers for {@link Profile}s.
@@ -43,11 +43,11 @@ public class Profiles
      *
      * @return an {@link Iterable}
      */
-    public static Options getProfiles()
+    public static OptionsByType getProfiles()
     {
-        final String ORACLE_TOOLS_PROFILE = "bedrock.profile.";
+        final String  ORACLE_TOOLS_PROFILE = "bedrock.profile.";
 
-        Options      profiles             = new Options();
+        OptionsByType profiles             = OptionsByType.empty();
 
         for (String name : System.getProperties().stringPropertyNames())
         {

@@ -26,7 +26,7 @@
 package com.oracle.bedrock.runtime.options;
 
 import com.oracle.bedrock.Option;
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.runtime.Application;
 
 import java.util.UUID;
@@ -66,22 +66,22 @@ public class DisplayName implements Option
 
 
     /**
-     * Resolves the {@link DisplayName} using the provided {@link Options}
+     * Resolves the {@link DisplayName} using the provided {@link OptionsByType}
      *
-     * @param options  the {@link Options}
+     * @param optionsByType  the {@link OptionsByType}
      *
      * @return  the name of the {@link DisplayName}
      */
-    public String resolve(Options options)
+    public String resolve(OptionsByType optionsByType)
     {
-        if (options == null)
+        if (optionsByType == null)
         {
             return name;
         }
         else
         {
             // include the discriminator in the name
-            Discriminator discriminator = options.get(Discriminator.class);
+            Discriminator discriminator = optionsByType.get(Discriminator.class);
 
             return discriminator == null ? name : name + "-" + discriminator.getValue();
         }
@@ -106,7 +106,7 @@ public class DisplayName implements Option
      *
      * @return a unique {@link DisplayName}
      */
-    @Options.Default
+    @OptionsByType.Default
     public static DisplayName autoGenerate()
     {
         return new DisplayName(null);

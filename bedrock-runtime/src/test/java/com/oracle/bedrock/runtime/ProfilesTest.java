@@ -25,17 +25,13 @@
 
 package com.oracle.bedrock.runtime;
 
-import com.oracle.bedrock.Options;
-
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.example.ExampleProfile;
-
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.nullValue;
-
 import static org.hamcrest.core.Is.is;
-
 import static org.junit.Assert.assertThat;
 
 /**
@@ -56,12 +52,12 @@ public class ProfilesTest
     {
         System.setProperty("bedrock.profile.example", "hello");
 
-        Options options = Profiles.getProfiles();
+        OptionsByType optionsByType = Profiles.getProfiles();
 
-        assertThat(options, is(not(nullValue())));
-        assertThat(options.asArray().length, is(1));
+        assertThat(optionsByType, is(not(nullValue())));
+        assertThat(optionsByType.asArray().length, is(1));
 
-        ExampleProfile profile = options.get(ExampleProfile.class);
+        ExampleProfile profile = optionsByType.get(ExampleProfile.class);
 
         assertThat(profile, is(not(nullValue())));
 

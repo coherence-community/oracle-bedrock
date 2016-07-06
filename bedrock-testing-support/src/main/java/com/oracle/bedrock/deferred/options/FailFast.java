@@ -26,7 +26,7 @@
 package com.oracle.bedrock.deferred.options;
 
 import com.oracle.bedrock.Option;
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.deferred.Concurrently;
 
 /**
@@ -50,7 +50,7 @@ public class FailFast implements Option
     /**
      * Constructs a {@link FailFast}.
      *
-     * @param enabled  should a {@link Concurrently.Assertion} fail-fast?
+     * @param enabled  should a {@link Concurrently.ConcurrentAssertion} fail-fast?
      */
     private FailFast(boolean enabled)
     {
@@ -86,7 +86,7 @@ public class FailFast implements Option
      *
      * @return a {@link FailFast}
      */
-    @Options.Default
+    @OptionsByType.Default
     public static FailFast disabled()
     {
         return new FailFast(false);

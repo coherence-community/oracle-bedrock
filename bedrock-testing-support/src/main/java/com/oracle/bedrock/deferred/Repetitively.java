@@ -26,7 +26,7 @@
 package com.oracle.bedrock.deferred;
 
 import com.oracle.bedrock.Option;
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.deferred.options.InitialDelay;
 import com.oracle.bedrock.deferred.options.MaximumRetryDelay;
 import com.oracle.bedrock.deferred.options.RetryFrequency;
@@ -153,7 +153,7 @@ public class Repetitively
                                       Option...          options) throws AssertionError
     {
         // determine the time-out and retry constraints
-        Options optionsByType = Options.from(options);
+        OptionsByType optionsByType = OptionsByType.of(options);
 
         long initialDelayDurationMS = optionsByType.getOrDefault(InitialDelay.class,
                                                                  InitialDelay.none()).to(TimeUnit.MILLISECONDS);

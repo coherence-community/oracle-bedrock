@@ -26,7 +26,7 @@
 package com.oracle.bedrock.table;
 
 import com.oracle.bedrock.Option;
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 
 import java.util.ArrayList;
 
@@ -48,9 +48,9 @@ public class Cell
     private ArrayList<String> lines;
 
     /**
-     * The formatting {@link Options} for the {@link Cell}.
+     * The formatting {@link OptionsByType} for the {@link Cell}.
      */
-    private Options options;
+    private OptionsByType optionsByType;
 
 
     /**
@@ -75,7 +75,7 @@ public class Cell
             }
         }
 
-        this.options = new Options();
+        this.optionsByType = OptionsByType.empty();
     }
 
 
@@ -87,7 +87,7 @@ public class Cell
         /**
          * {@link Cell} content should be left justified.
          */
-        @Options.Default
+        @OptionsByType.Default
         LEFT,
 
         /**
@@ -116,13 +116,13 @@ public class Cell
 
 
     /**
-     * Obtains the formatting {@link Options} for the {@link Cell}.
+     * Obtains the formatting {@link OptionsByType} for the {@link Cell}.
      *
-     * @return  the formatting {@link Options} for the {@link Cell}
+     * @return  the formatting {@link OptionsByType} for the {@link Cell}
      */
-    public Options getOptions()
+    public OptionsByType getOptions()
     {
-        return options;
+        return optionsByType;
     }
 
 
@@ -255,7 +255,7 @@ public class Cell
          *
          * @return  the standard {@link Separator}
          */
-        @Options.Default
+        @OptionsByType.Default
         public static Separator standard()
         {
             return STANDARD;
@@ -317,7 +317,7 @@ public class Cell
          *
          * @return  an automatic {@link Width}
          */
-        @Options.Default
+        @OptionsByType.Default
         public static Width autodetect()
         {
             return AUTODETECT;

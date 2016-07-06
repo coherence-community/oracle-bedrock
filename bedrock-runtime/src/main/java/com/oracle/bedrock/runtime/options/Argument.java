@@ -26,7 +26,7 @@
 package com.oracle.bedrock.runtime.options;
 
 import com.oracle.bedrock.Option;
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.lang.ExpressionEvaluator;
 import com.oracle.bedrock.runtime.Application;
 import com.oracle.bedrock.runtime.Platform;
@@ -178,13 +178,13 @@ public class Argument implements Option.Collectable
 
 
     /**
-     * Obtain the {@link Option}s for this {@link Argument}.
+     * Obtain the {@link OptionsByType}s for this {@link Argument}.
      *
-     * @return  the {@link Option}s for this {@link Argument}
+     * @return  the {@link OptionsByType}s for this {@link Argument}
      */
-    public Options getOptions()
+    public OptionsByType getOptions()
     {
-        return new Options(options);
+        return OptionsByType.of(options);
     }
 
 
@@ -198,15 +198,15 @@ public class Argument implements Option.Collectable
      * a {@link List} containing the Strings "bar1" and "bar2" the command line would contain
      * the values "-foo bar1 -foo bar2".
      *
-     * @param platform   the {@link Platform} that the {@link Argument} is being realized for
-     * @param evaluator  the {@link ExpressionEvaluator} to use for expression values
-     * @param options    the {@link Application} launch {@link Option}s
+     * @param platform       the {@link Platform} that the {@link Argument} is being realized for
+     * @param evaluator      the {@link ExpressionEvaluator} to use for expression values
+     * @param optionsByType  the {@link Application} launch {@link OptionsByType}s
      *
      * @return  the String representation of this {@link Argument}
      */
     public List<String> resolve(Platform            platform,
                                 ExpressionEvaluator evaluator,
-                                Options             options)
+                                OptionsByType       optionsByType)
     {
         if (value == null)
         {
@@ -221,7 +221,7 @@ public class Argument implements Option.Collectable
 
             for (Object argValue : ((Multiple) value).getValues())
             {
-                Object result = resolveValue(argValue, platform, evaluator, options);
+                Object result = resolveValue(argValue, platform, evaluator, optionsByType);
 
                 if (result != null)
                 {
@@ -231,7 +231,7 @@ public class Argument implements Option.Collectable
         }
         else
         {
-            Object result = resolveValue(value, platform, evaluator, options);
+            Object result = resolveValue(value, platform, evaluator, optionsByType);
 
             if (result != null)
             {
@@ -243,14 +243,14 @@ public class Argument implements Option.Collectable
             }
         }
 
-        Options                  argOptions = getOptions();
+        OptionsByType            argOptions = getOptions();
         Iterable<ResolveHandler> handlers   = argOptions.getInstancesOf(ResolveHandler.class);
 
         for (ResolveHandler handler : handlers)
         {
             try
             {
-                handler.onResolve(this.name, Collections.unmodifiableList(argList), options);
+                handler.onResolve(this.name, Collections.unmodifiableList(argList), optionsByType);
             }
             catch (Throwable t)
             {
@@ -265,13 +265,13 @@ public class Argument implements Option.Collectable
     private Object resolveValue(Object              argValue,
                                 Platform            platform,
                                 ExpressionEvaluator evaluator,
-                                Options             options)
+                                OptionsByType       optionsByType)
     {
         if (argValue instanceof Argument.ContextSensitiveArgument)
         {
             Argument.ContextSensitiveArgument contextSensitiveValue = (Argument.ContextSensitiveArgument) argValue;
 
-            argValue = contextSensitiveValue.resolve(platform, options);
+            argValue = contextSensitiveValue.resolve(platform, optionsByType);
         }
 
         if (argValue instanceof Iterator<?>)
@@ -421,13 +421,13 @@ public class Argument implements Option.Collectable
          * Obtains the value for the {@link Argument}, possibly based on the provided
          * {@link Platform} and {@link Option}s.
          *
-         * @param platform  the {@link Platform} in which {@link Argument} is being used
-         * @param options   the {@link Application} launch {@link Options}
+         * @param platform       the {@link Platform} in which {@link Argument} is being used
+         * @param optionsByType  the {@link Application} launch {@link OptionsByType}
          *
          * @return the value
          */
-        Object resolve(Platform platform,
-                       Options  options);
+        Object resolve(Platform      platform,
+                       OptionsByType optionsByType);
     }
 
 
@@ -441,13 +441,13 @@ public class Argument implements Option.Collectable
         /**
          * Called by an {@link Argument} whenever its value(s) are resolved.
          *
-         * @param name     the name of the argument (may be null if no name was specified)
-         * @param values   an immutable {@link List} of the resolved values
-         * @param options  the {@link Options} used to resolve the values
+         * @param name           the name of the argument (may be null if no name was specified)
+         * @param values         an immutable {@link List} of the resolved values
+         * @param optionsByType  the {@link OptionsByType} used to resolve the values
          */
-        void onResolve(String       name,
-                       List<String> values,
-                       Options      options);
+        void onResolve(String        name,
+                       List<String>  values,
+                       OptionsByType optionsByType);
     }
 
 

@@ -25,7 +25,7 @@
 
 package com.oracle.bedrock.runtime;
 
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.annotations.Internal;
 import com.oracle.bedrock.lang.StringHelper;
 import com.oracle.bedrock.runtime.options.Arguments;
@@ -79,7 +79,7 @@ public class SimpleApplicationLauncher implements ApplicationLauncher<Applicatio
     @Override
     public Application launch(Platform               platform,
                               MetaClass<Application> metaClass,
-                              Options                options)
+                              OptionsByType          optionsByType)
     {
         // establish the diagnostics output table
         Table diagnosticsTable = new Table();
@@ -94,7 +94,7 @@ public class SimpleApplicationLauncher implements ApplicationLauncher<Applicatio
         // ----- establish the launch Options for the Application -----
 
         // add the platform options
-        Options launchOptions = new Options(platform.getOptions()).addAll(options);
+        OptionsByType launchOptions = OptionsByType.of(platform.getOptions()).addAll(optionsByType);
 
         // add the meta-class options
         metaClass.onLaunching(platform, launchOptions);
@@ -256,7 +256,7 @@ public class SimpleApplicationLauncher implements ApplicationLauncher<Applicatio
             Constructor<? extends Application> constructor = ReflectionHelper.getCompatibleConstructor(applicationClass,
                                                                                                        platform.getClass(),
                                                                                                        LocalApplicationProcess.class,
-                                                                                                       Options.class);
+                                                                                                       OptionsByType.class);
 
             // create the application
             application = constructor.newInstance(platform, new LocalApplicationProcess(process), launchOptions);

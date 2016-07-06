@@ -25,7 +25,7 @@
 
 package com.oracle.bedrock.runtime.coherence;
 
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.runtime.AbstractAssemblyBuilder;
 import com.oracle.bedrock.runtime.AssemblyBuilder;
 
@@ -44,8 +44,8 @@ public class CoherenceClusterBuilder extends AbstractAssemblyBuilder<CoherenceCl
 {
     @Override
     protected CoherenceCluster createAssembly(List<CoherenceClusterMember> members,
-                                              Options                      options)
+                                              OptionsByType                optionsByType)
     {
-        return new CoherenceCluster(members, options);
+        return new CoherenceCluster(members, optionsByType);
     }
 }

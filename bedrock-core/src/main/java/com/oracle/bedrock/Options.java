@@ -25,31 +25,25 @@
 
 package com.oracle.bedrock;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import com.oracle.bedrock.annotations.Internal;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.Stack;
 
 /**
- * A collection of zero or more {@link Option}s, internally arranged as a map,
- * keyed by the concrete type of each {@link Option} in the collection.
+ * An internal implementation of an {@link OptionsByType}.
  * <p>
  * Copyright (c) 2014. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Brian Oliver
  */
-public class Options
+@Internal
+class Options implements OptionsByType
 {
     /**
      * A map of the {@link Options} values, keyed by their concrete class.
@@ -62,7 +56,7 @@ public class Options
      *
      * @param options the {@link Option}s being managed
      */
-    public Options(Option... options)
+    Options(Option... options)
     {
         this.options = new LinkedHashMap<>();
 
@@ -80,42 +74,17 @@ public class Options
      * A copy constructor that creates an {@link Options} containing all
      * of the {@link Option}s from the specified {@link Options} instance.
      *
-     * @param options the {@link Options} to copy
+     * @param optionsByType the {@link OptionsByType} to copy
      */
-    public Options(Options options)
+    Options(OptionsByType optionsByType)
     {
         this.options = new LinkedHashMap<>();
 
-        addAll(options);
+        addAll(optionsByType);
     }
 
 
-    /**
-     * Constructs a new {@link Options} instance based on the specified {@link Option}s.
-     *
-     * @param options  the {@link Option}s
-     *
-     * @return  a new {@link Options} containing the specified {@link Option}s
-     */
-    public static Options of(Option... options)
-    {
-        return new Options(options);
-    }
-
-
-    /**
-     * Obtains the {@link Option} for a specified concrete type from the collection.
-     *
-     * <p>Should the {@link Option} not exist in the collection, an attempt is made
-     * to determine a default value using {@link #getDefaultFor(Class, Object...)}.
-     *
-     * @param classOfOption  the concrete type of {@link Option} to obtain
-     * @param arguments      the optional arguments for determining the default
-     * @param <T>            the type of value
-     *
-     * @return the {@link Option} of the specified type or if undefined, the
-     *         suitable default value (or <code>null</code> if one can't be determined)
-     */
+    @Override
     public <T extends Option> T get(Class<T>  classOfOption,
                                     Object... arguments)
     {
@@ -139,18 +108,7 @@ public class Options
     }
 
 
-    /**
-     * Obtains the {@link Option} of a specified concrete type from the collection.  Should the type of
-     * {@link Option} not exist, the specified default is added to the collection and returned.
-     *
-     * @param <T>            the type of value
-     * @param <D>            the type of the default value
-     *
-     * @param classOfOption  the type of {@link Option} to obtain
-     * @param defaultOption  the {@link Option} to return if the specified type is not defined
-     *
-     * @return the option of the specified type or the default if it's not defined
-     */
+    @Override
     public <T extends Option, D extends T> T getOrDefault(Class<T> classOfOption,
                                                           D        defaultOption)
     {
@@ -174,29 +132,14 @@ public class Options
     }
 
 
-    /**
-     * Determines if an {@link Option} of the specified concrete type is in the
-     * collection.
-     *
-     * @param classOfOption the class of {@link Option}
-     *
-     * @return <code>true</code> if the class of {@link Option} is in the {@link Options}
-     * <code>false</code> otherwise
-     */
+    @Override
     public boolean contains(Class<? extends Option> classOfOption)
     {
         return get(classOfOption) != null;
     }
 
 
-    /**
-     * Determines if the specified {@link Option} (and type) is in the {@link Options}.
-     *
-     * @param option the {@link Option}
-     *
-     * @return <code>true</code> if the {@link Option} is defined,
-     * <code>false</code> otherwise
-     */
+    @Override
     public boolean contains(Option option)
     {
         Class<? extends Option> classOfOption = option.getClass();
@@ -205,15 +148,7 @@ public class Options
     }
 
 
-    /**
-     * Obtains an {@link Iterable} over all of the {@link Option}s in the collection
-     * that are an instance of the specified class.
-     *
-     * @param requiredClass the required class
-     * @param <O>           the type of option
-     *
-     * @return the options of the required class
-     */
+    @Override
     public <O> Iterable<O> getInstancesOf(Class<O> requiredClass)
     {
         ArrayList<O> result = new ArrayList<>();
@@ -238,11 +173,7 @@ public class Options
     }
 
 
-    /**
-     * Obtains the current collection of {@link Option}s as an array.
-     *
-     * @return an array of options
-     */
+    @Override
     public Option[] asArray()
     {
         Option[] aOptions = new Option[options.size()];
@@ -286,28 +217,7 @@ public class Options
     }
 
 
-    /**
-     * Constructs an {@link Options} collection given an array of {@link Option}s
-     *
-     * @param options the array of {@link Option}s
-     *
-     * @return an {@link Options} collection
-     */
-    @SafeVarargs
-    public static Options from(Option... options)
-    {
-        return new Options(options);
-    }
-
-
-    /**
-     * Adds an option to the collection, replacing an
-     * existing {@link Option} of the same concrete type if one exists.
-     *
-     * @param option the {@link Option} to add
-     *
-     * @return the {@link Options} to permit fluent-style method calls
-     */
+    @Override
     public Options add(Option option)
     {
         if (option == null)
@@ -321,7 +231,7 @@ public class Options
                 Option.Collectable collectable = (Option.Collectable) option;
 
                 // determine the type of Collector in which we'll collect the Collectable
-                Class<? extends Option> classOfCollector = getClassOf(collectable.getCollectorClass());
+                Class<? extends Option> classOfCollector = OptionsByType.getClassOf(collectable.getCollectorClass());
 
                 // attempt to locate an existing Collector
                 Option.Collector collector = (Option.Collector) options.get(classOfCollector);
@@ -350,7 +260,7 @@ public class Options
             else
             {
                 // determine the class of option
-                Class<? extends Option> classOfOption = getClassOf(option);
+                Class<? extends Option> classOfOption = OptionsByType.getClassOf(option);
 
                 // compose the option if it's composable
                 if (option instanceof ComposableOption)
@@ -371,17 +281,10 @@ public class Options
     }
 
 
-    /**
-     * Adds an {@link Option} to the collection if and only if an {@link Option} of the
-     * same type is not already present.
-     *
-     * @param option the {@link Option} to add
-     *
-     * @return the {@link Options} to permit fluent-style method calls
-     */
+    @Override
     public Options addIfAbsent(Option option)
     {
-        Class<? extends Option> classOfOption = getClassOf(option);
+        Class<? extends Option> classOfOption = OptionsByType.getClassOf(option);
 
         if (!options.containsKey(classOfOption))
         {
@@ -392,13 +295,7 @@ public class Options
     }
 
 
-    /**
-     * Adds an array of {@link Option}s to the collection.
-     *
-     * @param options the {@link Option}s to add
-     *
-     * @return the {@link Options} to permit fluent-style method calls
-     */
+    @Override
     public Options addAll(Option... options)
     {
         if (options != null)
@@ -413,15 +310,8 @@ public class Options
     }
 
 
-    /**
-     * Adds all of the {@link Options} in the specified {@link Options}
-     * to this collection.
-     *
-     * @param options the {@link Options} to add
-     *
-     * @return the {@link Options} to permit fluent-style method calls
-     */
-    public Options addAll(Options options)
+    @Override
+    public Options addAll(OptionsByType options)
     {
         for (Option option : options.asArray())
         {
@@ -432,15 +322,7 @@ public class Options
     }
 
 
-    /**
-     * Removes the specified type of {@link Option}
-     *
-     * @param classOfOption  the class of {@link Option}
-     * @param <T>            the type of the {@link Option}
-     *
-     * @return <code>true</code> if the {@link Option} was removed,
-     *         <code>false</code> otherwise
-     */
+    @Override
     public <T extends Option> boolean remove(Class<T> classOfOption)
     {
         if (classOfOption == null)
@@ -449,21 +331,14 @@ public class Options
         }
         else
         {
-            Option option = options.remove(getClassOf(classOfOption));
+            Option option = options.remove(OptionsByType.getClassOf(classOfOption));
 
             return option != null;
         }
     }
 
 
-    /**
-     * Removes the specific {@link Option}
-     *
-     * @param option the {@link Option} to remove
-     *
-     * @return <code>true</code> if the {@link Option} was removed,
-     * <code>false</code> otherwise, perhaps because it wasn't defined
-     */
+    @Override
     public boolean remove(Option option)
     {
         if (option == null)
@@ -477,7 +352,7 @@ public class Options
                 Option.Collectable collectable = (Option.Collectable) option;
 
                 // determine the type of Collector
-                Class<? extends Option> classOfCollector = getClassOf(collectable.getCollectorClass());
+                Class<? extends Option> classOfCollector = OptionsByType.getClassOf(collectable.getCollectorClass());
 
                 // attempt to locate an existing Collector
                 Option.Collector collector = (Option.Collector) options.get(classOfCollector);
@@ -499,7 +374,7 @@ public class Options
             }
             else
             {
-                Class<? extends Option> classOfOption  = getClassOf(option);
+                Class<? extends Option> classOfOption  = OptionsByType.getClassOf(option);
 
                 Option                  existingOption = get(classOfOption);
 
@@ -515,92 +390,6 @@ public class Options
                 }
             }
         }
-    }
-
-
-    /**
-     * Obtains the concrete type that directly implements / extends the specified {@link Option}.
-     *
-     * @param option the {@link Option}
-     *
-     * @return the concrete {@link Class} that directly extends / implements the {@link Option} interface
-     * or <code>null</code> if the {@link Option} is <code>null</code>
-     */
-    public static Class<? extends Option> getClassOf(Option option)
-    {
-        return option == null ? null : getClassOf(option.getClass());
-    }
-
-
-    /**
-     * Obtains the concrete type that directly implements / extends the {@link Option} interface,
-     * implemented by the specified class.
-     *
-     * @param classOfOption the class that somehow implements the {@link Option} interface
-     *
-     * @return the concrete {@link Class} that directly extends / implements the {@link Option} interface
-     * or <code>null</code> if the specified {@link Class} doesn't implement {@link Option}
-     */
-    public static Class<? extends Option> getClassOf(Class<?> classOfOption)
-    {
-        // the hierarchy of classes we've visited
-        // (so that we can traverse it later to find non-abstract classes)
-        Stack<Class<?>> hierarchy = new Stack<>();
-
-        while (classOfOption != null)
-        {
-            // remember the current class
-            hierarchy.push(classOfOption);
-
-            for (Class<?> interfaceClass : classOfOption.getInterfaces())
-            {
-                if (Option.class.equals(interfaceClass)
-                    || ComposableOption.class.equals(interfaceClass)
-                    || Option.Collector.class.equals(interfaceClass))
-                {
-                    // when the Option/ComposableOption is directly implemented by a class,
-                    // we return the first non-abstract class in the hierarchy.
-                    while (classOfOption != null
-                           && Modifier.isAbstract(classOfOption.getModifiers())
-                           &&!classOfOption.isInterface())
-                    {
-                        classOfOption = hierarchy.isEmpty() ? null : hierarchy.pop();
-                    }
-
-                    return (Class<? extends Option>) classOfOption;
-                }
-                else if (Option.class.isAssignableFrom(interfaceClass))
-                {
-                    // ensure that we have a concrete class in our hierarchy
-                    while (classOfOption != null
-                           && Modifier.isAbstract(classOfOption.getModifiers())
-                           &&!classOfOption.isInterface())
-                    {
-                        classOfOption = hierarchy.isEmpty() ? null : hierarchy.pop();
-                    }
-
-                    if (classOfOption == null)
-                    {
-                        // when the hierarchy is entirely abstract, we can't determine a concrete Option type
-                        return null;
-                    }
-                    else
-                    {
-                        // when the Option is a super class of an interface,
-                        // we return the interface that's directly extending it.
-
-                        // TODO: we should search to find the interface that is directly
-                        // extending Option (that is not a ComposableOption),
-                        // and not just assume that the interfaceClass is directly implementing it
-                        return (Class<Option>) interfaceClass;
-                    }
-                }
-            }
-
-            classOfOption = classOfOption.getSuperclass();
-        }
-
-        return null;
     }
 
 
@@ -697,71 +486,5 @@ public class Options
 
         // couldn't find a default so let's return null
         return null;
-    }
-
-
-    /**
-     * Defines how an {@link Options} collection may automatically determine a
-     * suitable default value for a specific class of option at runtime
-     * when the said option does not exist in an {@link Options} collection.
-     *
-     * For example, the {@link Default} annotation can be used to specify that
-     * a public static no-args method can be used to determine a default value.
-     * <pre><code>
-     * public class Color {
-     *     ...
-     *     &#64;Options.Default
-     *     public static Color getDefault() {
-     *         ...
-     *     }
-     *     ...
-     * }
-     * </code></pre>
-     *
-     * Similarly, the {@link Default} annotation can be used to specify a
-     * public static field to use for determining a default value.
-     * <pre><code>
-     * public class Color {
-     *     ...
-     *     &#64;Options.Default
-     *     public static Color BLUE = ...;
-     *     ...
-     * }
-     * </code></pre>
-     *
-     * Alternatively, the {@link Default} annotation can be used to specify that
-     * the public no-args constructor for a public class may be used for
-     * constructing a default value.
-     * <pre><code>
-     * public class Color {
-     *     ...
-     *     &#64;Options.Default
-     *     public Color() {
-     *         ...
-     *     }
-     *     ...
-     * }
-     * </code></pre>
-     *
-     * Lastly when used with an enum, the {@link Default} annotation
-     * can be used to specify the default enum constant.
-     * <pre><code>
-     * public enum Color {
-     *     RED,
-     *
-     *     GREEN,
-     *
-     *     &#64;Options.Default
-     *     BLUE;   // blue is the default color
-     * }
-     * </code></pre>
-     *
-     * @see Options#get(Class, Object...)
-     */
-    @Documented
-    @Retention(RetentionPolicy.RUNTIME)
-    @Target({ElementType.CONSTRUCTOR, ElementType.FIELD, ElementType.METHOD})
-    public @interface Default
-    {
     }
 }

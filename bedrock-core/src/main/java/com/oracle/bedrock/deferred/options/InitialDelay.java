@@ -26,7 +26,7 @@
 package com.oracle.bedrock.deferred.options;
 
 import com.oracle.bedrock.Option;
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.deferred.Ensured;
 import com.oracle.bedrock.util.Duration;
 
@@ -126,7 +126,7 @@ public class InitialDelay implements Option
      *
      * @return  a {@link InitialDelay}
      */
-    @Options.Default
+    @OptionsByType.Default
     public static InitialDelay none()
     {
         return new InitialDelay(Duration.ZERO);

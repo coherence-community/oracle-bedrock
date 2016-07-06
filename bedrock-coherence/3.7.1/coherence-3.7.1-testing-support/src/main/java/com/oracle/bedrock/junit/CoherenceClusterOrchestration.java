@@ -26,7 +26,7 @@
 package com.oracle.bedrock.junit;
 
 import com.oracle.bedrock.Option;
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.deferred.Eventually;
 import com.oracle.bedrock.runtime.LocalPlatform;
 import com.oracle.bedrock.runtime.Platform;
@@ -88,29 +88,29 @@ public class CoherenceClusterOrchestration extends ExternalResource
     private LocalPlatform platform;
 
     /**
-     * The {@link Options} to use as a basis for constructing a variety of {@link CoherenceClusterMember}s.
+     * The {@link OptionsByType} to use as a basis for constructing a variety of {@link CoherenceClusterMember}s.
      */
-    private Options commonMemberOptions;
+    private OptionsByType commonMemberOptions;
 
     /**
-     * The {@link Options} to use as a basis for constructing storage-enabled {@link CoherenceClusterMember}s.
+     * The {@link OptionsByType} to use as a basis for constructing storage-enabled {@link CoherenceClusterMember}s.
      */
-    private Options storageMemberOptions;
+    private OptionsByType storageMemberOptions;
 
     /**
-     * The {@link Options} to use as a basis for constructing proxy {@link CoherenceClusterMember}s.
+     * The {@link OptionsByType} to use as a basis for constructing proxy {@link CoherenceClusterMember}s.
      */
-    private Options proxyMemberOptions;
+    private OptionsByType proxyMemberOptions;
 
     /**
-     * The {@link Options} to use when creating the {@link CoherenceCluster}.
+     * The {@link OptionsByType} to use when creating the {@link CoherenceCluster}.
      */
-    private Options clusterCreationOptions;
+    private OptionsByType clusterCreationOptions;
 
     /**
-     * The {@link Options} to use when closing the {@link CoherenceCluster}.
+     * The {@link OptionsByType} to use when closing the {@link CoherenceCluster}.
      */
-    private Options clusterClosingOptions;
+    private OptionsByType clusterClosingOptions;
 
     /**
      * The {@link CoherenceCluster} established by the orchestrator.
@@ -154,7 +154,7 @@ public class CoherenceClusterOrchestration extends ExternalResource
         this.extendPort = new Capture<>(platform.getAvailablePorts());
 
         // establish a common member options on which to base storage enabled and proxy members
-        this.commonMemberOptions = new Options();
+        this.commonMemberOptions = OptionsByType.empty();
 
         // establish the common server schema address and port details
         String hostAddress = platform.getLoopbackAddress().getHostAddress();
@@ -176,15 +176,15 @@ public class CoherenceClusterOrchestration extends ExternalResource
         this.commonMemberOptions.add(SystemApplicationConsole.builder());
 
         // by default we don't have any special options for storage or proxy members
-        this.storageMemberOptions = new Options();
-        this.proxyMemberOptions   = new Options();
+        this.storageMemberOptions = OptionsByType.empty();
+        this.proxyMemberOptions   = OptionsByType.empty();
 
         // by default we don't have a cluster
         this.cluster = null;
 
         // by default the creation and closing options aren't set
-        this.clusterCreationOptions = new Options();
-        this.clusterClosingOptions  = new Options();
+        this.clusterCreationOptions = OptionsByType.empty();
+        this.clusterClosingOptions  = OptionsByType.empty();
 
         // by default we have no sessions
         this.sessions = new HashMap<>();
@@ -216,14 +216,14 @@ public class CoherenceClusterOrchestration extends ExternalResource
         CoherenceClusterBuilder clusterBuilder = new CoherenceClusterBuilder();
 
         // define the options for the storage enabled members of the cluster
-        Options storageServerOptions = createStorageEnabledMemberOptions();
+        OptionsByType storageServerOptions = createStorageEnabledMemberOptions();
 
         storageServerOptions.addAll(clusterCreationOptions);
 
         clusterBuilder.include(storageMemberCount, CoherenceClusterMember.class, storageServerOptions.asArray());
 
         // define the schema for the proxy enabled members of the cluster
-        Options proxyServerOptions = createProxyServerOptions();
+        OptionsByType proxyServerOptions = createProxyServerOptions();
 
         proxyServerOptions.addAll(clusterCreationOptions);
 
@@ -279,33 +279,33 @@ public class CoherenceClusterOrchestration extends ExternalResource
     }
 
 
-    protected Options createStorageEnabledMemberOptions()
+    protected OptionsByType createStorageEnabledMemberOptions()
     {
         // define the options for the storage enabled members of the cluster
-        Options options = new Options(commonMemberOptions);
+        OptionsByType optionsByType = OptionsByType.of(commonMemberOptions);
 
-        options.add(DisplayName.of("storage"));
-        options.add(RoleName.of("storage"));
-        options.add(LocalStorage.enabled());
+        optionsByType.add(DisplayName.of("storage"));
+        optionsByType.add(RoleName.of("storage"));
+        optionsByType.add(LocalStorage.enabled());
 
-        options.addAll(storageMemberOptions);
+        optionsByType.addAll(storageMemberOptions);
 
-        return options;
+        return optionsByType;
     }
 
 
-    protected Options createProxyServerOptions()
+    protected OptionsByType createProxyServerOptions()
     {
-        Options options = new Options(commonMemberOptions);
+        OptionsByType optionsByType = OptionsByType.of(commonMemberOptions);
 
-        options.add(DisplayName.of("proxy"));
-        options.add(RoleName.of("proxy"));
-        options.add(LocalStorage.disabled());
-        options.add(SystemProperty.of("tangosol.coherence.extend.enabled", true));
+        optionsByType.add(DisplayName.of("proxy"));
+        optionsByType.add(RoleName.of("proxy"));
+        optionsByType.add(LocalStorage.disabled());
+        optionsByType.add(SystemProperty.of("tangosol.coherence.extend.enabled", true));
 
-        options.addAll(proxyMemberOptions);
+        optionsByType.addAll(proxyMemberOptions);
 
-        return options;
+        return optionsByType;
     }
 
 
@@ -320,7 +320,7 @@ public class CoherenceClusterOrchestration extends ExternalResource
      */
     public CoherenceClusterOrchestration withClosingOptions(Option... options)
     {
-        this.clusterClosingOptions = new Options(options);
+        this.clusterClosingOptions = OptionsByType.of(options);
 
         return this;
     }
@@ -336,7 +336,7 @@ public class CoherenceClusterOrchestration extends ExternalResource
      */
     public CoherenceClusterOrchestration withBuilderOptions(Option... options)
     {
-        this.clusterCreationOptions = new Options(options);
+        this.clusterCreationOptions = OptionsByType.of(options);
 
         return this;
     }
@@ -436,12 +436,12 @@ public class CoherenceClusterOrchestration extends ExternalResource
 
         if (session == null)
         {
-            Options options = new Options(commonMemberOptions);
+            OptionsByType optionsByType = OptionsByType.of(commonMemberOptions);
 
-            options.add(RoleName.of("client"));
-            options.add(LocalStorage.disabled());
+            optionsByType.add(RoleName.of("client"));
+            optionsByType.add(LocalStorage.disabled());
 
-            session = builder.build(platform, this, options.asArray());
+            session = builder.build(platform, this, optionsByType);
 
             sessions.put(builder, session);
         }

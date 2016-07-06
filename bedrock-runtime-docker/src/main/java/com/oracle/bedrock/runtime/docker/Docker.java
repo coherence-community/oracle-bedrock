@@ -26,7 +26,7 @@
 package com.oracle.bedrock.runtime.docker;
 
 import com.oracle.bedrock.Option;
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.runtime.Application;
 import com.oracle.bedrock.runtime.LocalPlatform;
 import com.oracle.bedrock.runtime.Platform;
@@ -933,7 +933,7 @@ public class Docker implements Option
      *
      * @return a new {@link Docker}
      */
-    @Options.Default
+    @OptionsByType.Default
     public static Docker auto()
     {
         List<EnvironmentVariable> environmentVariables = new ArrayList<>();
@@ -981,7 +981,7 @@ public class Docker implements Option
                                  DockerMachine machine,
                                  Option...     options)
     {
-        Options                   machineOptions       = new Options(options);
+        OptionsByType             machineOptions       = OptionsByType.of(options);
         List<EnvironmentVariable> environmentVariables = machine.environmentFor(machineName);
         String dockerHost =
             environmentVariables.stream().filter((envVar) -> envVar.getName().equals(ENV_DOCKER_HOST)).findFirst()

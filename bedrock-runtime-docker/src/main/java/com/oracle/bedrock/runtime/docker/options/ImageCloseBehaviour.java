@@ -26,7 +26,7 @@
 package com.oracle.bedrock.runtime.docker.options;
 
 import com.oracle.bedrock.Option;
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.runtime.docker.DockerImage;
 
 import java.util.function.Consumer;
@@ -90,7 +90,7 @@ public class ImageCloseBehaviour implements Option, Consumer<DockerImage>
      *
      * @return an {@link ImageCloseBehaviour}
      */
-    @Options.Default
+    @OptionsByType.Default
     public static ImageCloseBehaviour remove()
     {
         return new ImageCloseBehaviour(DockerImage::remove);

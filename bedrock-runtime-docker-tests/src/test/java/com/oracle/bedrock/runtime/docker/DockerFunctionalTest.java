@@ -26,13 +26,12 @@
 package com.oracle.bedrock.runtime.docker;
 
 import applications.SocketEchoServer;
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.deferred.Eventually;
 import com.oracle.bedrock.options.Timeout;
 import com.oracle.bedrock.runtime.Application;
 import com.oracle.bedrock.runtime.LocalPlatform;
 import com.oracle.bedrock.runtime.console.CapturingApplicationConsole;
-import com.oracle.bedrock.runtime.options.Console;
 import com.oracle.bedrock.runtime.docker.commands.Build;
 import com.oracle.bedrock.runtime.docker.commands.Run;
 import com.oracle.bedrock.runtime.docker.machine.DockerMachine;
@@ -44,6 +43,7 @@ import com.oracle.bedrock.runtime.java.options.SystemProperties;
 import com.oracle.bedrock.runtime.java.options.SystemProperty;
 import com.oracle.bedrock.runtime.network.AvailablePortIterator;
 import com.oracle.bedrock.runtime.options.Argument;
+import com.oracle.bedrock.runtime.options.Console;
 import com.oracle.bedrock.runtime.options.Ports;
 import com.oracle.bedrock.runtime.options.WorkingDirectory;
 import com.oracle.bedrock.runtime.remote.RemotePlatform;
@@ -283,7 +283,7 @@ public class DockerFunctionalTest extends AbstractFunctionalTest
             Eventually.assertThat(server, SocketEchoServer.IS_LISTENING, is(true));
 
             // ----- obtain the server applications Options -----
-            Options serverOptions = server.getOptions();
+            OptionsByType serverOptions = server.getOptions();
 
             // ----- obtain the server applications System properties -----
             SystemProperties serverProperties = serverOptions.get(SystemProperties.class);

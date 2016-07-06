@@ -25,12 +25,12 @@
 
 package com.oracle.bedrock.runtime.docker.commands;
 
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.runtime.Application;
 import com.oracle.bedrock.runtime.Platform;
 import com.oracle.bedrock.runtime.docker.DockerImage;
 import com.oracle.bedrock.runtime.options.Argument;
 import com.oracle.bedrock.runtime.options.Arguments;
-import com.oracle.bedrock.Options;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
@@ -39,13 +39,11 @@ import java.net.URL;
 import java.util.List;
 
 import static org.hamcrest.CoreMatchers.is;
-
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.sameInstance;
 import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInAnyOrder;
 import static org.hamcrest.collection.IsIterableContainingInOrder.contains;
-
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -63,7 +61,7 @@ public class BuildTest extends AbstractCommandTest
     @Test
     public void shouldUseDefaultBuild() throws Exception
     {
-        Build build = Build.fromDockerFile().withTags("foo");
+        Build        build     = Build.fromDockerFile().withTags("foo");
 
         List<String> arguments = resolveArguments(build);
 
@@ -76,7 +74,7 @@ public class BuildTest extends AbstractCommandTest
     @Test
     public void shouldUseSpecfiedDockefile() throws Exception
     {
-        Build build = Build.fromDockerFile("MyFile").withTags("foo");
+        Build        build     = Build.fromDockerFile("MyFile").withTags("foo");
 
         List<String> arguments = resolveArguments(build);
 
@@ -93,7 +91,7 @@ public class BuildTest extends AbstractCommandTest
         List<String> before = resolveArguments(build1);
         Build        build2 = build1.alwaysPull();
 
-        assertThat(build1, is (not(sameInstance(build2))));
+        assertThat(build1, is(not(sameInstance(build2))));
 
         List<String> arguments1 = resolveArguments(build1);
         List<String> arguments2 = resolveArguments(build2);
@@ -113,7 +111,7 @@ public class BuildTest extends AbstractCommandTest
         List<String> before = resolveArguments(build1);
         Build        build2 = build1.buildArgs("A", "B");
 
-        assertThat(build1, is (not(sameInstance(build2))));
+        assertThat(build1, is(not(sameInstance(build2))));
 
         List<String> arguments1 = resolveArguments(build1);
         List<String> arguments2 = resolveArguments(build2);
@@ -133,7 +131,7 @@ public class BuildTest extends AbstractCommandTest
         List<String> before = resolveArguments(build1);
         Build        build2 = build1.buildContextAt(new File("/tmp/test"));
 
-        assertThat(build1, is (not(sameInstance(build2))));
+        assertThat(build1, is(not(sameInstance(build2))));
 
         List<String> arguments1 = resolveArguments(build1);
         List<String> arguments2 = resolveArguments(build2);
@@ -155,7 +153,7 @@ public class BuildTest extends AbstractCommandTest
         List<String> before = resolveArguments(build1);
         Build        build2 = build1.buildContextAt(new URL("http://tmp/test"));
 
-        assertThat(build1, is (not(sameInstance(build2))));
+        assertThat(build1, is(not(sameInstance(build2))));
 
         List<String> arguments1 = resolveArguments(build1);
         List<String> arguments2 = resolveArguments(build2);
@@ -177,7 +175,7 @@ public class BuildTest extends AbstractCommandTest
         List<String> before = resolveArguments(build1);
         Build        build2 = build1.cgroupParent("my-parent");
 
-        assertThat(build1, is (not(sameInstance(build2))));
+        assertThat(build1, is(not(sameInstance(build2))));
 
         List<String> arguments1 = resolveArguments(build1);
         List<String> arguments2 = resolveArguments(build2);
@@ -197,7 +195,7 @@ public class BuildTest extends AbstractCommandTest
         List<String> before = resolveArguments(build1);
         Build        build2 = build1.cpuPeriod(99);
 
-        assertThat(build1, is (not(sameInstance(build2))));
+        assertThat(build1, is(not(sameInstance(build2))));
 
         List<String> arguments1 = resolveArguments(build1);
         List<String> arguments2 = resolveArguments(build2);
@@ -217,7 +215,7 @@ public class BuildTest extends AbstractCommandTest
         List<String> before = resolveArguments(build1);
         Build        build2 = build1.cpuQuota(123);
 
-        assertThat(build1, is (not(sameInstance(build2))));
+        assertThat(build1, is(not(sameInstance(build2))));
 
         List<String> arguments1 = resolveArguments(build1);
         List<String> arguments2 = resolveArguments(build2);
@@ -237,7 +235,7 @@ public class BuildTest extends AbstractCommandTest
         List<String> before = resolveArguments(build1);
         Build        build2 = build1.cpuSetCPUs("bar");
 
-        assertThat(build1, is (not(sameInstance(build2))));
+        assertThat(build1, is(not(sameInstance(build2))));
 
         List<String> arguments1 = resolveArguments(build1);
         List<String> arguments2 = resolveArguments(build2);
@@ -257,7 +255,7 @@ public class BuildTest extends AbstractCommandTest
         List<String> before = resolveArguments(build1);
         Build        build2 = build1.cpuSetMems("bar");
 
-        assertThat(build1, is (not(sameInstance(build2))));
+        assertThat(build1, is(not(sameInstance(build2))));
 
         List<String> arguments1 = resolveArguments(build1);
         List<String> arguments2 = resolveArguments(build2);
@@ -277,7 +275,7 @@ public class BuildTest extends AbstractCommandTest
         List<String> before = resolveArguments(build1);
         Build        build2 = build1.cpuShares(true);
 
-        assertThat(build1, is (not(sameInstance(build2))));
+        assertThat(build1, is(not(sameInstance(build2))));
 
         List<String> arguments1 = resolveArguments(build1);
         List<String> arguments2 = resolveArguments(build2);
@@ -297,7 +295,7 @@ public class BuildTest extends AbstractCommandTest
         List<String> before = resolveArguments(build1);
         Build        build2 = build1.cpuShares(false);
 
-        assertThat(build1, is (not(sameInstance(build2))));
+        assertThat(build1, is(not(sameInstance(build2))));
 
         List<String> arguments1 = resolveArguments(build1);
         List<String> arguments2 = resolveArguments(build2);
@@ -315,7 +313,7 @@ public class BuildTest extends AbstractCommandTest
         List<String> before = resolveArguments(build1);
         Build        build2 = build1.disableContentTrust();
 
-        assertThat(build1, is (not(sameInstance(build2))));
+        assertThat(build1, is(not(sameInstance(build2))));
 
         List<String> arguments1 = resolveArguments(build1);
         List<String> arguments2 = resolveArguments(build2);
@@ -335,8 +333,7 @@ public class BuildTest extends AbstractCommandTest
         List<String> before = resolveArguments(build1);
         Build        build2 = build1.enableContentTrust();
 
-        assertThat(build1, is (not(sameInstance(build2))));
-
+        assertThat(build1, is(not(sameInstance(build2))));
 
         List<String> arguments1 = resolveArguments(build1);
         List<String> arguments2 = resolveArguments(build2);
@@ -356,7 +353,7 @@ public class BuildTest extends AbstractCommandTest
         List<String> before = resolveArguments(build1);
         Build        build2 = build1.dockerFileName("MyFile");
 
-        assertThat(build1, is (not(sameInstance(build2))));
+        assertThat(build1, is(not(sameInstance(build2))));
 
         List<String> arguments1 = resolveArguments(build1);
         List<String> arguments2 = resolveArguments(build2);
@@ -376,8 +373,7 @@ public class BuildTest extends AbstractCommandTest
         List<String> before = resolveArguments(build1);
         Build        build2 = build1.forceRM(true);
 
-        assertThat(build1, is (not(sameInstance(build2))));
-
+        assertThat(build1, is(not(sameInstance(build2))));
 
         List<String> arguments1 = resolveArguments(build1);
         List<String> arguments2 = resolveArguments(build2);
@@ -397,8 +393,7 @@ public class BuildTest extends AbstractCommandTest
         List<String> before = resolveArguments(build1);
         Build        build2 = build1.forceRM(false);
 
-        assertThat(build1, is (not(sameInstance(build2))));
-
+        assertThat(build1, is(not(sameInstance(build2))));
 
         List<String> arguments1 = resolveArguments(build1);
         List<String> arguments2 = resolveArguments(build2);
@@ -416,8 +411,7 @@ public class BuildTest extends AbstractCommandTest
         List<String> before = resolveArguments(build1);
         Build        build2 = build1.isolation("bar");
 
-        assertThat(build1, is (not(sameInstance(build2))));
-
+        assertThat(build1, is(not(sameInstance(build2))));
 
         List<String> arguments1 = resolveArguments(build1);
         List<String> arguments2 = resolveArguments(build2);
@@ -437,8 +431,7 @@ public class BuildTest extends AbstractCommandTest
         List<String> before = resolveArguments(build1);
         Build        build2 = build1.labels("bar1", "bar2");
 
-        assertThat(build1, is (not(sameInstance(build2))));
-
+        assertThat(build1, is(not(sameInstance(build2))));
 
         List<String> arguments1 = resolveArguments(build1);
         List<String> arguments2 = resolveArguments(build2);
@@ -458,8 +451,7 @@ public class BuildTest extends AbstractCommandTest
         List<String> before = resolveArguments(build1);
         Build        build2 = build1.memory("bar");
 
-        assertThat(build1, is (not(sameInstance(build2))));
-
+        assertThat(build1, is(not(sameInstance(build2))));
 
         List<String> arguments1 = resolveArguments(build1);
         List<String> arguments2 = resolveArguments(build2);
@@ -479,8 +471,7 @@ public class BuildTest extends AbstractCommandTest
         List<String> before = resolveArguments(build1);
         Build        build2 = build1.memorySwap("bar");
 
-        assertThat(build1, is (not(sameInstance(build2))));
-
+        assertThat(build1, is(not(sameInstance(build2))));
 
         List<String> arguments1 = resolveArguments(build1);
         List<String> arguments2 = resolveArguments(build2);
@@ -500,8 +491,7 @@ public class BuildTest extends AbstractCommandTest
         List<String> before = resolveArguments(build1);
         Build        build2 = build1.noCache(true);
 
-        assertThat(build1, is (not(sameInstance(build2))));
-
+        assertThat(build1, is(not(sameInstance(build2))));
 
         List<String> arguments1 = resolveArguments(build1);
         List<String> arguments2 = resolveArguments(build2);
@@ -521,8 +511,7 @@ public class BuildTest extends AbstractCommandTest
         List<String> before = resolveArguments(build1);
         Build        build2 = build1.noCache(false);
 
-        assertThat(build1, is (not(sameInstance(build2))));
-
+        assertThat(build1, is(not(sameInstance(build2))));
 
         List<String> arguments1 = resolveArguments(build1);
         List<String> arguments2 = resolveArguments(build2);
@@ -540,8 +529,7 @@ public class BuildTest extends AbstractCommandTest
         List<String> before = resolveArguments(build1);
         Build        build2 = build1.quiet(true);
 
-        assertThat(build1, is (not(sameInstance(build2))));
-
+        assertThat(build1, is(not(sameInstance(build2))));
 
         List<String> arguments1 = resolveArguments(build1);
         List<String> arguments2 = resolveArguments(build2);
@@ -561,8 +549,7 @@ public class BuildTest extends AbstractCommandTest
         List<String> before = resolveArguments(build1);
         Build        build2 = build1.quiet(false);
 
-        assertThat(build1, is (not(sameInstance(build2))));
-
+        assertThat(build1, is(not(sameInstance(build2))));
 
         List<String> arguments1 = resolveArguments(build1);
         List<String> arguments2 = resolveArguments(build2);
@@ -580,8 +567,7 @@ public class BuildTest extends AbstractCommandTest
         List<String> before = resolveArguments(build1);
         Build        build2 = build1.removeIntermidiateContainers(true);
 
-        assertThat(build1, is (not(sameInstance(build2))));
-
+        assertThat(build1, is(not(sameInstance(build2))));
 
         List<String> arguments1 = resolveArguments(build1);
         List<String> arguments2 = resolveArguments(build2);
@@ -601,8 +587,7 @@ public class BuildTest extends AbstractCommandTest
         List<String> before = resolveArguments(build1);
         Build        build2 = build1.shmSize("A", "B", "C");
 
-        assertThat(build1, is (not(sameInstance(build2))));
-
+        assertThat(build1, is(not(sameInstance(build2))));
 
         List<String> arguments1 = resolveArguments(build1);
         List<String> arguments2 = resolveArguments(build2);
@@ -622,8 +607,7 @@ public class BuildTest extends AbstractCommandTest
         List<String> before = resolveArguments(build1);
         Build        build2 = build1.ulimit("A", "B", "C");
 
-        assertThat(build1, is (not(sameInstance(build2))));
-
+        assertThat(build1, is(not(sameInstance(build2))));
 
         List<String> arguments1 = resolveArguments(build1);
         List<String> arguments2 = resolveArguments(build2);
@@ -643,8 +627,7 @@ public class BuildTest extends AbstractCommandTest
         List<String> before = resolveArguments(build1);
         Build        build2 = build1.withTags("A", "B", "C");
 
-        assertThat(build1, is (not(sameInstance(build2))));
-
+        assertThat(build1, is(not(sameInstance(build2))));
 
         List<String> arguments1 = resolveArguments(build1);
         List<String> arguments2 = resolveArguments(build2);
@@ -664,8 +647,7 @@ public class BuildTest extends AbstractCommandTest
         List<String> before = resolveArguments(build1);
         Build        build2 = build1.withCommandArguments(Argument.of("--test1"), Argument.of("--test2"));
 
-        assertThat(build1, is (not(sameInstance(build2))));
-
+        assertThat(build1, is(not(sameInstance(build2))));
 
         List<String> arguments1 = resolveArguments(build1);
         List<String> arguments2 = resolveArguments(build2);
@@ -681,12 +663,12 @@ public class BuildTest extends AbstractCommandTest
     @Test
     public void shouldImmutablyRemoveArguments() throws Exception
     {
-        Build        build1 = Build.fromDockerFile().withTags("foo").withCommandArguments(Argument.of("--test1"), Argument.of("--test2"));
+        Build build1 = Build.fromDockerFile().withTags("foo").withCommandArguments(Argument.of("--test1"),
+                                                                                   Argument.of("--test2"));
         List<String> before = resolveArguments(build1);
         Build        build2 = build1.withoutCommandArguments(Argument.of("--test1"), Argument.of("--test2"));
 
-        assertThat(build1, is (not(sameInstance(build2))));
-
+        assertThat(build1, is(not(sameInstance(build2))));
 
         List<String> arguments1 = resolveArguments(build1);
         List<String> arguments2 = resolveArguments(build2);
@@ -702,12 +684,13 @@ public class BuildTest extends AbstractCommandTest
     @Test
     public void shouldAddImageAsFeature() throws Exception
     {
-        Platform    platform    = mock(Platform.class);
-        Application application = mock(Application.class);
-        Options     options     = new Options(Arguments.of(Argument.of("--tag=foo"), Argument.of("--tag=bar")));
-        Build       build       = Build.fromDockerFile().withTags("foo", "bar");
+        Platform      platform      = mock(Platform.class);
+        Application   application   = mock(Application.class);
+        OptionsByType optionsByType = OptionsByType.of(Arguments.of(Argument.of("--tag=foo"),
+                                                                    Argument.of("--tag=bar")));
+        Build build = Build.fromDockerFile().withTags("foo", "bar");
 
-        build.onLaunched(platform, application, options);
+        build.onLaunched(platform, application, optionsByType);
 
         ArgumentCaptor<DockerImage> captor = ArgumentCaptor.forClass(DockerImage.class);
 

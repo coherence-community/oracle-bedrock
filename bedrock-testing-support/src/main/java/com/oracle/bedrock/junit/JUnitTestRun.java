@@ -25,7 +25,7 @@
 
 package com.oracle.bedrock.junit;
 
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.runtime.Platform;
 import com.oracle.bedrock.runtime.java.JavaApplication;
 import com.oracle.bedrock.runtime.java.options.ClassName;
@@ -45,9 +45,9 @@ public interface JUnitTestRun extends JavaApplication
     /**
      * Start execution of the JUnit test suite.
      *
-     * @param options  the {@link Options} controlling the test execution
+     * @param optionsByType  the {@link OptionsByType} controlling the test execution
      */
-    void startTests(Options options);
+    void startTests(OptionsByType optionsByType);
 
 
     /**
@@ -58,32 +58,32 @@ public interface JUnitTestRun extends JavaApplication
         /**
          * Constructs a {@link MetaClass} for a {@link JavaApplication}.
          */
-        @Options.Default
+        @OptionsByType.Default
         public MetaClass()
         {
         }
 
 
         @Override
-        public Class<? extends JavaApplication> getImplementationClass(Platform platform,
-                                                                       Options  options)
+        public Class<? extends JavaApplication> getImplementationClass(Platform      platform,
+                                                                       OptionsByType optionsByType)
         {
             return SimpleJUnitTestRun.class;
         }
 
 
         @Override
-        public void onLaunching(Platform platform,
-                                Options  options)
+        public void onLaunching(Platform      platform,
+                                OptionsByType optionsByType)
         {
-            options.add(ClassName.of(JUnitTestRunner.class));
-            options.addIfAbsent(DisplayName.of("JUnit"));
+            optionsByType.add(ClassName.of(JUnitTestRunner.class));
+            optionsByType.addIfAbsent(DisplayName.of("JUnit"));
         }
 
 
         @Override
-        public void onLaunch(Platform platform,
-                             Options  options)
+        public void onLaunch(Platform      platform,
+                             OptionsByType optionsByType)
         {
             // there's nothing to do before launching the application
         }
@@ -92,13 +92,13 @@ public interface JUnitTestRun extends JavaApplication
         @Override
         public void onLaunched(Platform        platform,
                                JavaApplication application,
-                               Options         options)
+                               OptionsByType   optionsByType)
         {
             JUnitTestRun jUnitTestRun = application.get(JUnitTestRun.class);
 
             if (jUnitTestRun != null)
             {
-                jUnitTestRun.startTests(options);
+                jUnitTestRun.startTests(optionsByType);
             }
         }
     }

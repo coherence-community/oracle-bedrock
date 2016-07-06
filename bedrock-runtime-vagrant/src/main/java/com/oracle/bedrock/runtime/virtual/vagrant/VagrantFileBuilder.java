@@ -26,7 +26,7 @@
 package com.oracle.bedrock.runtime.virtual.vagrant;
 
 import com.oracle.bedrock.Option;
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.runtime.remote.options.HostName;
 
 import java.io.File;
@@ -48,15 +48,15 @@ public interface VagrantFileBuilder
      * Creates a Vagrant File containing Vagrant Configuration at the name and location specified by the
      * provided {@link File}, returning the public {@link HostName} detected during creation of the file.
      *
-     * @param file     the {@link File} in which the Vagrant Configuration will be written
-     * @param options  the {@link Option}s for creating the file
+     * @param file           the {@link File} in which the Vagrant Configuration will be written
+     * @param optionsByType  the {@link OptionsByType} for creating the file
      *
      * @return the detected {@link HostName} (when available)
      *
      * @throws IOException  when the {@link File} could not be created
      */
-    Optional<HostName> create(File    file,
-                              Options options) throws IOException;
+    Optional<HostName> create(File          file,
+                              OptionsByType optionsByType) throws IOException;
 
 
     /**

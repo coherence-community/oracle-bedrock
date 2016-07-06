@@ -26,7 +26,7 @@
 package com.oracle.bedrock.runtime.options;
 
 import com.oracle.bedrock.Option;
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.runtime.Infrastructure;
 import com.oracle.bedrock.runtime.LocalPlatform;
 import com.oracle.bedrock.runtime.Platform;
@@ -61,7 +61,7 @@ public interface PlatformPredicate extends Predicate<Platform>, Option
      *
      * @return a {@link PlatformPredicate}
      */
-    @Options.Default
+    @OptionsByType.Default
     static PlatformPredicate any()
     {
         return platform -> true;

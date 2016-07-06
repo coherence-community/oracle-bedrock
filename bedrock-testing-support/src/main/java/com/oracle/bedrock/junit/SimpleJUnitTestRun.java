@@ -25,7 +25,7 @@
 
 package com.oracle.bedrock.junit;
 
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.runtime.Application;
 import com.oracle.bedrock.runtime.ApplicationProcess;
 import com.oracle.bedrock.runtime.Platform;
@@ -60,20 +60,20 @@ public class SimpleJUnitTestRun extends SimpleJavaApplication implements JUnitTe
     /**
      * Create a {@link SimpleJUnitTestRun} application.
      *
-     * @param platform  the {@link Platform} on which the {@link Application} was launched
-     * @param process   the underlying {@link ApplicationProcess} representing the {@link Application}
-     * @param options   the {@link Options} used to launch the {@link Application}
+     * @param platform       the {@link Platform} on which the {@link Application} was launched
+     * @param process        the underlying {@link ApplicationProcess} representing the {@link Application}
+     * @param optionsByType  the {@link OptionsByType} used to launch the {@link Application}
      */
     public SimpleJUnitTestRun(Platform               platform,
                               JavaApplicationProcess process,
-                              Options                options)
+                              OptionsByType          optionsByType)
     {
-        super(platform, process, options);
+        super(platform, process, optionsByType);
 
         runListeners = new ArrayList<>();
 
         // Add any listeners from the options
-        for (JUnitTestListener listener : options.getInstancesOf(JUnitTestListener.class))
+        for (JUnitTestListener listener : optionsByType.getInstancesOf(JUnitTestListener.class))
         {
             runListeners.add(listener);
         }
@@ -96,9 +96,9 @@ public class SimpleJUnitTestRun extends SimpleJavaApplication implements JUnitTe
 
 
     @Override
-    public void startTests(Options options)
+    public void startTests(OptionsByType optionsByType)
     {
-        submit(new JUnitTestRunner.StartTests(options));
+        submit(new JUnitTestRunner.StartTests(optionsByType));
     }
 
 

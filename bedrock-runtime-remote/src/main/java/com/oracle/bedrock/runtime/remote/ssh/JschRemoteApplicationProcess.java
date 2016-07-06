@@ -28,7 +28,7 @@ package com.oracle.bedrock.runtime.remote.ssh;
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.Session;
 import com.oracle.bedrock.Option;
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.options.Timeout;
 import com.oracle.bedrock.runtime.Application;
 import com.oracle.bedrock.runtime.ApplicationProcess;
@@ -149,13 +149,13 @@ public class JschRemoteApplicationProcess implements RemoteApplicationProcess
             }
             else
             {
-                int     status        = channel.getExitStatus();
+                int           status        = channel.getExitStatus();
 
-                Options optionsMap    = new Options(options);
+                OptionsByType optionsByType = OptionsByType.of(options);
 
-                Timeout timeout       = optionsMap.get(Timeout.class);
+                Timeout       timeout       = optionsByType.get(Timeout.class);
 
-                long    timeRemaining = timeout.to(TimeUnit.MILLISECONDS);
+                long          timeRemaining = timeout.to(TimeUnit.MILLISECONDS);
 
                 while (status == -1 && timeRemaining >= 0)
                 {

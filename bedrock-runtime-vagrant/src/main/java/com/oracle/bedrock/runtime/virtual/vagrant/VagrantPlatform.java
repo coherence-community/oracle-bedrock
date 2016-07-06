@@ -26,15 +26,15 @@
 package com.oracle.bedrock.runtime.virtual.vagrant;
 
 import com.oracle.bedrock.Option;
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.options.Timeout;
 import com.oracle.bedrock.runtime.Application;
 import com.oracle.bedrock.runtime.LocalPlatform;
 import com.oracle.bedrock.runtime.Platform;
-import com.oracle.bedrock.runtime.options.Console;
 import com.oracle.bedrock.runtime.console.PipedApplicationConsole;
 import com.oracle.bedrock.runtime.options.Argument;
 import com.oracle.bedrock.runtime.options.Arguments;
+import com.oracle.bedrock.runtime.options.Console;
 import com.oracle.bedrock.runtime.options.DisplayName;
 import com.oracle.bedrock.runtime.options.Executable;
 import com.oracle.bedrock.runtime.options.WorkingDirectory;
@@ -216,11 +216,11 @@ public class VagrantPlatform extends VirtualPlatform
     @Override
     public void close(Option... closeOptions) throws IOException
     {
-        Options options = new Options(getOptions()).addAll(getDefaultOptions());
+        OptionsByType optionsByType = OptionsByType.of(getOptions()).addAll(getDefaultOptions());
 
-        options.addAll(closeOptions);
+        optionsByType.addAll(closeOptions);
 
-        CloseAction action = options.getOrDefault(CloseAction.class, CloseAction.Destroy);
+        CloseAction action = optionsByType.getOrDefault(CloseAction.class, CloseAction.Destroy);
 
         switch (action)
         {
@@ -229,22 +229,22 @@ public class VagrantPlatform extends VirtualPlatform
 
         case Destroy :
         case PowerButton :
-            options.add(Arguments.of("destroy", "--force"));
+            optionsByType.add(Arguments.of("destroy", "--force"));
             break;
 
         case Shutdown :
-            options.add(Argument.of("halt"));
+            optionsByType.add(Argument.of("halt"));
             break;
 
         case SaveState :
-            options.add(Argument.of("suspend"));
+            optionsByType.add(Argument.of("suspend"));
             break;
 
         default :
             throw new IllegalArgumentException("Unsupported CloseAction " + action);
         }
 
-        execute(options);
+        execute(optionsByType);
     }
 
 
@@ -255,7 +255,7 @@ public class VagrantPlatform extends VirtualPlatform
      */
     public void start()
     {
-        Options options = getDefaultOptions().add(Argument.of("up"));
+        OptionsByType options = getDefaultOptions().add(Argument.of("up"));
 
         execute(options);
 
@@ -299,12 +299,13 @@ public class VagrantPlatform extends VirtualPlatform
      */
     protected Properties detectSSH()
     {
-        Options       options  = getDefaultOptions().add(Argument.of("ssh-config"));
+        OptionsByType optionsByType = getDefaultOptions().add(Argument.of("ssh-config"));
 
-        LocalPlatform platform = LocalPlatform.get();
+        LocalPlatform platform      = LocalPlatform.get();
 
         try (PipedApplicationConsole console = new PipedApplicationConsole();
-            Application application = platform.launch(Application.class, options.add(Console.of(console)).asArray()))
+            Application application = platform.launch(Application.class,
+                                                      optionsByType.add(Console.of(console)).asArray()))
         {
             application.waitFor();
             application.close();
@@ -356,16 +357,16 @@ public class VagrantPlatform extends VirtualPlatform
 
 
     /**
-     * Execute the application defined by the specified {@link Options}.
+     * Execute the application defined by the specified {@link OptionsByType}.
      *
-     * @param options  the {@link Options}
+     * @param optionsByType  the {@link OptionsByType}
      */
-    protected void execute(Options options)
+    protected void execute(OptionsByType optionsByType)
     {
         LocalPlatform platform = LocalPlatform.get();
-        Timeout       timeout  = options.getOrDefault(Timeout.class, Timeout.after(5, TimeUnit.MINUTES));
+        Timeout       timeout  = optionsByType.getOrDefault(Timeout.class, Timeout.after(5, TimeUnit.MINUTES));
 
-        try (Application application = platform.launch(Application.class, options.asArray()))
+        try (Application application = platform.launch(Application.class, optionsByType.asArray()))
         {
             application.waitFor(timeout);
         }
@@ -377,16 +378,16 @@ public class VagrantPlatform extends VirtualPlatform
 
 
     /**
-     * Options the default {@link Options} to use when launching Vagrant.
+     * Options the default {@link OptionsByType} to use when launching Vagrant.
      *
-     * @return the default {@link Options}
+     * @return the default {@link OptionsByType}
      */
-    protected Options getDefaultOptions()
+    protected OptionsByType getDefaultOptions()
     {
-        return new Options(Executable.named(vagrantCommand),
-                           WorkingDirectory.at(workingDirectory),
-                           Timeout.after(5, TimeUnit.MINUTES),
-                           DisplayName.of("Vagrant"));
+        return OptionsByType.of(Executable.named(vagrantCommand),
+                                WorkingDirectory.at(workingDirectory),
+                                Timeout.after(5, TimeUnit.MINUTES),
+                                DisplayName.of("Vagrant"));
     }
 
 

@@ -25,37 +25,27 @@
 
 package com.oracle.bedrock.runtime.options;
 
-import com.oracle.bedrock.Options;
-
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.options.Decoration;
 import com.oracle.bedrock.options.Variable;
-
 import com.oracle.bedrock.runtime.LocalPlatform;
 import com.oracle.bedrock.runtime.Platform;
-
 import org.junit.Test;
-
 import org.mockito.ArgumentCaptor;
-
-import static com.oracle.bedrock.runtime.options.Argument.of;
-
-import static org.hamcrest.CoreMatchers.is;
-
-import static org.hamcrest.collection.IsEmptyIterable.emptyIterable;
-
-import static org.hamcrest.collection.IsIterableContainingInOrder.contains;
-
-import static org.junit.Assert.assertThat;
-
-import static org.mockito.Matchers.same;
-
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+
+import static com.oracle.bedrock.runtime.options.Argument.of;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.collection.IsEmptyIterable.emptyIterable;
+import static org.hamcrest.collection.IsIterableContainingInOrder.contains;
+import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.same;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 /**
  * Unit tests for the {@link Arguments} class.
@@ -162,54 +152,54 @@ public class ArgumentsTest
     @Test
     public void shouldAddArgumentsAsOptions() throws Exception
     {
-        Options options = new Options();
+        OptionsByType optionsByType = OptionsByType.empty();
 
-        assertThat(options.get(Arguments.class).resolve(null, null), is(emptyIterable()));
+        assertThat(optionsByType.get(Arguments.class).resolve(null, null), is(emptyIterable()));
 
-        options.add(of("1"));
+        optionsByType.add(of("1"));
 
-        assertThat(options.get(Arguments.class).resolve(null, null), contains("1"));
+        assertThat(optionsByType.get(Arguments.class).resolve(null, null), contains("1"));
 
-        options.add(of("2"));
+        optionsByType.add(of("2"));
 
-        assertThat(options.get(Arguments.class).resolve(null, null), contains("1", "2"));
+        assertThat(optionsByType.get(Arguments.class).resolve(null, null), contains("1", "2"));
     }
 
 
     @Test
     public void shouldRemoveArgumentsAsOption() throws Exception
     {
-        Options options = new Options();
+        OptionsByType optionsByType = OptionsByType.empty();
 
-        options.add(of("1"));
-        options.add(of("2"));
-        options.add(of("3"));
+        optionsByType.add(of("1"));
+        optionsByType.add(of("2"));
+        optionsByType.add(of("3"));
 
-        options.remove(of("2"));
+        optionsByType.remove(of("2"));
 
-        assertThat(options.get(Arguments.class).resolve(null, null), contains("1", "3"));
+        assertThat(optionsByType.get(Arguments.class).resolve(null, null), contains("1", "3"));
     }
 
 
     @Test
     public void shouldEvaluateObject() throws Exception
     {
-        Options options = new Options();
+        OptionsByType optionsByType = OptionsByType.empty();
 
-        options.add(of(123));
+        optionsByType.add(of(123));
 
-        assertThat(options.get(Arguments.class).resolve(null, null), contains("123"));
+        assertThat(optionsByType.get(Arguments.class).resolve(null, null), contains("123"));
     }
 
 
     @Test
     public void shouldEvaluateIterator() throws Exception
     {
-        Options options = new Options();
+        OptionsByType optionsByType = OptionsByType.empty();
 
-        options.add(of(Collections.singletonList(123).iterator()));
+        optionsByType.add(of(Collections.singletonList(123).iterator()));
 
-        assertThat(options.get(Arguments.class).resolve(null, null), contains("123"));
+        assertThat(optionsByType.get(Arguments.class).resolve(null, null), contains("123"));
     }
 
 
@@ -219,29 +209,29 @@ public class ArgumentsTest
         Argument.ContextSensitiveArgument value = new Argument.ContextSensitiveArgument()
         {
             @Override
-            public Object resolve(Platform platform,
-                                  Options  options)
+            public Object resolve(Platform      platform,
+                                  OptionsByType optionsByType)
             {
                 return "123";
             }
         };
 
-        Options options = new Options();
+        OptionsByType optionsByType = OptionsByType.empty();
 
-        options.add(of(value));
+        optionsByType.add(of(value));
 
-        assertThat(options.get(Arguments.class).resolve(LocalPlatform.get(), options), contains("123"));
+        assertThat(optionsByType.get(Arguments.class).resolve(LocalPlatform.get(), optionsByType), contains("123"));
     }
 
 
     @Test
     public void shouldEvaluateExpression() throws Exception
     {
-        Options options = new Options();
+        OptionsByType optionsByType = OptionsByType.empty();
 
-        options.add(Argument.of("${foo}"));
+        optionsByType.add(Argument.of("${foo}"));
 
-        assertThat(options.get(Arguments.class).resolve(null, new Options(Variable.with("foo", "bar"))),
+        assertThat(optionsByType.get(Arguments.class).resolve(null, OptionsByType.of(Variable.with("foo", "bar"))),
                    contains("bar"));
     }
 
@@ -249,43 +239,43 @@ public class ArgumentsTest
     @Test
     public void shouldRealizeArgumentWithNameAndSpaceSeparator() throws Exception
     {
-        Options options = new Options();
+        OptionsByType optionsByType = OptionsByType.empty();
 
-        options.add(Argument.of("foo", "bar"));
+        optionsByType.add(Argument.of("foo", "bar"));
 
-        assertThat(options.get(Arguments.class).resolve(null, null), contains("foo", "bar"));
+        assertThat(optionsByType.get(Arguments.class).resolve(null, null), contains("foo", "bar"));
     }
 
 
     @Test
     public void shouldRealizeArgumentWithNameAndEqualsSeparator() throws Exception
     {
-        Options options = new Options();
+        OptionsByType optionsByType = OptionsByType.empty();
 
-        options.add(Argument.of("foo", "bar").withSeparator('='));
+        optionsByType.add(Argument.of("foo", "bar").withSeparator('='));
 
-        assertThat(options.get(Arguments.class).resolve(null, null), contains("foo=bar"));
+        assertThat(optionsByType.get(Arguments.class).resolve(null, null), contains("foo=bar"));
     }
 
 
     @Test
     public void shouldRemoveAllNamedArgs() throws Exception
     {
-        Options options = new Options();
+        OptionsByType optionsByType = OptionsByType.empty();
 
-        options.add(Argument.of("A", "A1"));
-        options.add(Argument.of("A", "A2"));
-        options.add(Argument.of("A", "A3"));
-        options.add(Argument.of("B", "B1"));
-        options.add(Argument.of("B", "B2"));
-        options.add(Argument.of("B", "B3"));
-        options.add(Argument.of("C1"));
-        options.add(Argument.of("C2"));
+        optionsByType.add(Argument.of("A", "A1"));
+        optionsByType.add(Argument.of("A", "A2"));
+        optionsByType.add(Argument.of("A", "A3"));
+        optionsByType.add(Argument.of("B", "B1"));
+        optionsByType.add(Argument.of("B", "B2"));
+        optionsByType.add(Argument.of("B", "B3"));
+        optionsByType.add(Argument.of("C1"));
+        optionsByType.add(Argument.of("C2"));
 
-        assertThat(options.get(Arguments.class).resolve(null, null),
+        assertThat(optionsByType.get(Arguments.class).resolve(null, null),
                    contains("A", "A1", "A", "A2", "A", "A3", "B", "B1", "B", "B2", "B", "B3", "C1", "C2"));
 
-        Arguments arguments = options.get(Arguments.class).withoutNamed("B");
+        Arguments arguments = optionsByType.get(Arguments.class).withoutNamed("B");
 
         assertThat(arguments.resolve(null, null), contains("A", "A1", "A", "A2", "A", "A3", "C1", "C2"));
     }
@@ -294,21 +284,21 @@ public class ArgumentsTest
     @Test
     public void shouldRemoveAllNamedArgsWhereNameIsNull() throws Exception
     {
-        Options options = new Options();
+        OptionsByType optionsByType = OptionsByType.empty();
 
-        options.add(Argument.of("A", "A1"));
-        options.add(Argument.of("A", "A2"));
-        options.add(Argument.of("A", "A3"));
-        options.add(Argument.of("B", "B1"));
-        options.add(Argument.of("B", "B2"));
-        options.add(Argument.of("B", "B3"));
-        options.add(Argument.of("C1"));
-        options.add(Argument.of("C2"));
+        optionsByType.add(Argument.of("A", "A1"));
+        optionsByType.add(Argument.of("A", "A2"));
+        optionsByType.add(Argument.of("A", "A3"));
+        optionsByType.add(Argument.of("B", "B1"));
+        optionsByType.add(Argument.of("B", "B2"));
+        optionsByType.add(Argument.of("B", "B3"));
+        optionsByType.add(Argument.of("C1"));
+        optionsByType.add(Argument.of("C2"));
 
-        assertThat(options.get(Arguments.class).resolve(null, null),
+        assertThat(optionsByType.get(Arguments.class).resolve(null, null),
                    contains("A", "A1", "A", "A2", "A", "A3", "B", "B1", "B", "B2", "B", "B3", "C1", "C2"));
 
-        Arguments arguments = options.get(Arguments.class).withoutNamed(null);
+        Arguments arguments = optionsByType.get(Arguments.class).withoutNamed(null);
 
         assertThat(arguments.resolve(null, null),
                    contains("A", "A1", "A", "A2", "A", "A3", "B", "B1", "B", "B2", "B", "B3"));
@@ -318,14 +308,14 @@ public class ArgumentsTest
     @Test
     public void shouldReplaceArgument() throws Exception
     {
-        Options options = new Options();
+        OptionsByType optionsByType = OptionsByType.empty();
 
-        options.add(Argument.of("A1", "A1"));
-        options.add(Argument.of("A2", "A21"));
-        options.add(Argument.of("A2", "A22"));
-        options.add(Argument.of("A3", "A3"));
+        optionsByType.add(Argument.of("A1", "A1"));
+        optionsByType.add(Argument.of("A2", "A21"));
+        optionsByType.add(Argument.of("A2", "A22"));
+        optionsByType.add(Argument.of("A3", "A3"));
 
-        Arguments arguments = options.get(Arguments.class).replace("A2", "changed");
+        Arguments arguments = optionsByType.get(Arguments.class).replace("A2", "changed");
 
         assertThat(arguments.resolve(null, null), contains("A1", "A1", "A2", "changed", "A2", "A22", "A3", "A3"));
     }
@@ -334,14 +324,14 @@ public class ArgumentsTest
     @Test
     public void shouldReplaceArgumentWhenNameIsNull() throws Exception
     {
-        Options options = new Options();
+        OptionsByType optionsByType = OptionsByType.empty();
 
-        options.add(Argument.of("A1", "A1"));
-        options.add(Argument.of("A21"));
-        options.add(Argument.of("A22"));
-        options.add(Argument.of("A3", "A3"));
+        optionsByType.add(Argument.of("A1", "A1"));
+        optionsByType.add(Argument.of("A21"));
+        optionsByType.add(Argument.of("A22"));
+        optionsByType.add(Argument.of("A3", "A3"));
 
-        Arguments arguments = options.get(Arguments.class).replace(null, "changed");
+        Arguments arguments = optionsByType.get(Arguments.class).replace(null, "changed");
 
         assertThat(arguments.resolve(null, null), contains("A1", "A1", "changed", "A22", "A3", "A3"));
     }
@@ -350,24 +340,24 @@ public class ArgumentsTest
     @Test
     public void shouldCallResolveHandlers() throws Exception
     {
-        Argument.ResolveHandler handler1 = mock(Argument.ResolveHandler.class);
-        Argument.ResolveHandler handler2 = mock(Argument.ResolveHandler.class);
-        Argument.ResolveHandler handler3 = mock(Argument.ResolveHandler.class);
-        Options                 options  = new Options();
+        Argument.ResolveHandler handler1      = mock(Argument.ResolveHandler.class);
+        Argument.ResolveHandler handler2      = mock(Argument.ResolveHandler.class);
+        Argument.ResolveHandler handler3      = mock(Argument.ResolveHandler.class);
+        OptionsByType           optionsByType = OptionsByType.empty();
 
-        options.add(Argument.of("foo", "foo-value", Decoration.of(handler1), Decoration.of(handler2)));
+        optionsByType.add(Argument.of("foo", "foo-value", Decoration.of(handler1), Decoration.of(handler2)));
 
-        options.add(Argument.of("bar",
-                                new Argument.Multiple("bar1", "bar2"),
-                                Decoration.of(handler1),
-                                Decoration.of(handler3)));
+        optionsByType.add(Argument.of("bar",
+                                      new Argument.Multiple("bar1", "bar2"),
+                                      Decoration.of(handler1),
+                                      Decoration.of(handler3)));
 
-        options.get(Arguments.class).resolve(LocalPlatform.get(), options);
+        optionsByType.get(Arguments.class).resolve(LocalPlatform.get(), optionsByType);
 
         ArgumentCaptor<String> names1  = ArgumentCaptor.forClass(String.class);
         ArgumentCaptor<List>   values1 = ArgumentCaptor.forClass(List.class);
 
-        verify(handler1, times(2)).onResolve(names1.capture(), values1.capture(), same(options));
+        verify(handler1, times(2)).onResolve(names1.capture(), values1.capture(), same(optionsByType));
 
         assertThat(names1.getAllValues(), contains("foo", "bar"));
         assertThat(((List<String>) values1.getAllValues().get(0)), contains("foo-value"));
@@ -376,7 +366,7 @@ public class ArgumentsTest
         ArgumentCaptor<String> names2  = ArgumentCaptor.forClass(String.class);
         ArgumentCaptor<List>   values2 = ArgumentCaptor.forClass(List.class);
 
-        verify(handler2, times(1)).onResolve(names2.capture(), values2.capture(), same(options));
+        verify(handler2, times(1)).onResolve(names2.capture(), values2.capture(), same(optionsByType));
 
         assertThat(names2.getAllValues(), contains("foo"));
         assertThat(((List<String>) values2.getAllValues().get(0)), contains("foo-value"));
@@ -384,7 +374,7 @@ public class ArgumentsTest
         ArgumentCaptor<String> names3  = ArgumentCaptor.forClass(String.class);
         ArgumentCaptor<List>   values3 = ArgumentCaptor.forClass(List.class);
 
-        verify(handler3, times(1)).onResolve(names3.capture(), values3.capture(), same(options));
+        verify(handler3, times(1)).onResolve(names3.capture(), values3.capture(), same(optionsByType));
 
         assertThat(names3.getAllValues(), contains("bar"));
         assertThat(((List<String>) values3.getAllValues().get(0)), contains("bar1", "bar2"));

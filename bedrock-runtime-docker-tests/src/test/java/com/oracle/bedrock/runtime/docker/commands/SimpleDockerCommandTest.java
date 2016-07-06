@@ -25,10 +25,10 @@
 
 package com.oracle.bedrock.runtime.docker.commands;
 
-import com.oracle.bedrock.runtime.options.Argument;
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.options.Timeout;
 import com.oracle.bedrock.runtime.LocalPlatform;
+import com.oracle.bedrock.runtime.options.Argument;
 import org.junit.Test;
 
 import java.util.Collections;
@@ -36,13 +36,11 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.CoreMatchers.is;
-
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.sameInstance;
 import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInAnyOrder;
 import static org.hamcrest.collection.IsIterableContainingInOrder.contains;
-
 import static org.junit.Assert.assertThat;
 
 /**
@@ -60,30 +58,29 @@ public class SimpleDockerCommandTest extends AbstractCommandTest
     {
         SimpleDockerCommand command = SimpleDockerCommand.of("run");
 
-        List<String>        arguments = command.getCommandArguments()
-                                               .resolve(LocalPlatform.get(), new Options());
+        List<String> arguments      = command.getCommandArguments().resolve(LocalPlatform.get(), OptionsByType.empty());
 
         assertThat(arguments, is(Collections.singletonList("run")));
     }
 
+
     @Test
     public void shouldOnlyHaveArguments() throws Exception
     {
-        SimpleDockerCommand command = SimpleDockerCommand.of("run")
-                                            .withCommandArguments(Argument.of("Foo"))
-                                            .withCommandArguments(Argument.of("Bar"));
+        SimpleDockerCommand command =
+            SimpleDockerCommand.of("run").withCommandArguments(Argument.of("Foo"))
+            .withCommandArguments(Argument.of("Bar"));
 
-        List<String>        arguments = command.getCommandArguments()
-                                               .resolve(LocalPlatform.get(), new Options());
+        List<String> arguments = command.getCommandArguments().resolve(LocalPlatform.get(), OptionsByType.empty());
 
         assertThat(arguments, contains("run", "Foo", "Bar"));
     }
 
+
     @Test
     public void shouldSetTimeout() throws Exception
     {
-        SimpleDockerCommand command = SimpleDockerCommand.of("run")
-                                            .timeoutAfter(1, TimeUnit.MINUTES);
+        SimpleDockerCommand command = SimpleDockerCommand.of("run").timeoutAfter(1, TimeUnit.MINUTES);
 
         Timeout             timeout = command.getTimeout();
 
@@ -99,7 +96,7 @@ public class SimpleDockerCommandTest extends AbstractCommandTest
         List<String>        before   = resolveArguments(command1);
         SimpleDockerCommand command2 = command1.withCommandArguments(Argument.of("--test1"), Argument.of("--test2"));
 
-        assertThat(command1, is (not(sameInstance(command2))));
+        assertThat(command1, is(not(sameInstance(command2))));
 
         List<String> arguments1 = resolveArguments(command1);
         List<String> arguments2 = resolveArguments(command2);
@@ -115,12 +112,12 @@ public class SimpleDockerCommandTest extends AbstractCommandTest
     @Test
     public void shouldImmutablyRemoveArguments() throws Exception
     {
-        SimpleDockerCommand command1  = SimpleDockerCommand.of("foo")
-                                                    .withCommandArguments(Argument.of("--test1"), Argument.of("--test2"));
-        List<String>        before    = resolveArguments(command1);
-        SimpleDockerCommand command2  = command1.withoutCommandArguments(Argument.of("--test1"), Argument.of("--test2"));
+        SimpleDockerCommand command1 = SimpleDockerCommand.of("foo").withCommandArguments(Argument.of("--test1"),
+                                                                                          Argument.of("--test2"));
+        List<String>        before   = resolveArguments(command1);
+        SimpleDockerCommand command2 = command1.withoutCommandArguments(Argument.of("--test1"), Argument.of("--test2"));
 
-        assertThat(command1, is (not(sameInstance(command2))));
+        assertThat(command1, is(not(sameInstance(command2))));
 
         List<String> arguments1 = resolveArguments(command1);
         List<String> arguments2 = resolveArguments(command2);

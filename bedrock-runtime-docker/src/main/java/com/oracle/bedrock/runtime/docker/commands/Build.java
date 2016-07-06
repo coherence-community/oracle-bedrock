@@ -25,7 +25,7 @@
 
 package com.oracle.bedrock.runtime.docker.commands;
 
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.options.Timeout;
 import com.oracle.bedrock.runtime.Application;
 import com.oracle.bedrock.runtime.Platform;
@@ -613,8 +613,8 @@ public class Build extends AbstractDockerCommand<Build>
 
 
     @Override
-    public void onLaunch(Platform platform,
-                         Options  options)
+    public void onLaunch(Platform      platform,
+                         OptionsByType optionsByType)
     {
         // set the Image build timeout
         Timeout timeout = getTimeout();
@@ -625,22 +625,22 @@ public class Build extends AbstractDockerCommand<Build>
             timeout = DEFAULT_TIMEOUT;
         }
 
-        options.addIfAbsent(timeout);
+        optionsByType.addIfAbsent(timeout);
 
         // call super to add all of the command arguments
-        super.onLaunch(platform, options);
+        super.onLaunch(platform, optionsByType);
 
         // add the context location, which is the last argument in the chain
-        options.add(Argument.of(contextLocation));
+        optionsByType.add(Argument.of(contextLocation));
     }
 
 
     @Override
-    public void onLaunched(Platform    platform,
-                           Application application,
-                           Options     options)
+    public void onLaunched(Platform      platform,
+                           Application   application,
+                           OptionsByType optionsByType)
     {
-        Arguments arguments = options.get(Arguments.class);
+        Arguments arguments = optionsByType.get(Arguments.class);
         String    tagPrefix = "--tag=";
         int       prefixLen = tagPrefix.length();
 
@@ -649,7 +649,7 @@ public class Build extends AbstractDockerCommand<Build>
             .filter((tagArg) -> tagArg.startsWith(tagPrefix)).map((tagArg) -> tagArg.substring(prefixLen))
             .collect(Collectors.toList());
 
-        DockerImage image = new DockerImage(tags, options);
+        DockerImage image = new DockerImage(tags, optionsByType);
 
         application.add(image);
     }

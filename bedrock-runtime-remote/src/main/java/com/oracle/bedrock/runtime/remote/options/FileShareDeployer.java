@@ -26,7 +26,7 @@
 package com.oracle.bedrock.runtime.remote.options;
 
 import com.oracle.bedrock.Option;
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.runtime.Platform;
 import com.oracle.bedrock.runtime.options.PlatformSeparators;
 import com.oracle.bedrock.runtime.remote.DeploymentArtifact;
@@ -63,18 +63,18 @@ public abstract class FileShareDeployer implements Deployer
     private String remoteShareName;
 
     /**
-     * The {@link Options} to use to control the deployer.
+     * The {@link OptionsByType} to use to control the deployer.
      */
-    private Options options;
+    private OptionsByType optionsByType;
 
 
     /**
      * Create a {@link FileShareDeployer} that uses the
      * specified local and remote file share to deploy artifacts.
      *
-     * @param localShareName  the name of the file share on the local platform
-     * @param remoteShareName the name of the file share eon the remote platform
-     * @param options         the {@link Option}s to control the deployer
+     * @param localShareName   the name of the file share on the local platform
+     * @param remoteShareName  the name of the file share eon the remote platform
+     * @param options          the {@link Option}s to control the deployer
      */
     protected FileShareDeployer(String    localShareName,
                                 String    remoteShareName,
@@ -82,7 +82,7 @@ public abstract class FileShareDeployer implements Deployer
     {
         this.localShareName  = localShareName;
         this.remoteShareName = remoteShareName;
-        this.options         = new Options(options);
+        this.optionsByType   = OptionsByType.of(options);
     }
 
 
@@ -104,10 +104,11 @@ public abstract class FileShareDeployer implements Deployer
                        Platform                 platform,
                        Option...                deploymentOptions)
     {
-        Options combinedOptions = new Options(platform == null ? null : platform.getOptions().asArray());
-        Table   deploymentTable = new Table();
+        OptionsByType combinedOptions = platform == null
+                                        ? OptionsByType.empty() : OptionsByType.of(platform.getOptions());
+        Table deploymentTable = new Table();
 
-        combinedOptions.addAll(options.asArray());
+        combinedOptions.addAll(optionsByType);
         combinedOptions.addAll(deploymentOptions);
 
         PlatformSeparators separators      = combinedOptions.get(PlatformSeparators.class);
@@ -173,7 +174,7 @@ public abstract class FileShareDeployer implements Deployer
             }
         }
 
-        Table diagnosticsTable = options.get(Table.class);
+        Table diagnosticsTable = optionsByType.get(Table.class);
 
         if (diagnosticsTable != null)
         {
@@ -186,18 +187,18 @@ public abstract class FileShareDeployer implements Deployer
      * Perform the copy of the {@link DeploymentArtifact} from the remote share location
      * to the final target location.
      *
-     * @param source            the file to copy in the remote share folder
-     * @param destination       the remote location to copy the artifact to
-     * @param platform          the {@link Platform} to perform the remote copy on
-     * @param deploymentOptions the {@link Option}s to control the deployment
+     * @param source             the file to copy in the remote share folder
+     * @param destination        the remote location to copy the artifact to
+     * @param platform           the {@link Platform} to perform the remote copy on
+     * @param deploymentOptions  the {@link OptionsByType}s to control the deployment
      *
      * @return true it the file on the remote share was copied and needs to be cleaned up
      *         or false if it was moved and no clean-up is required.
      *
      * @throws IOException  when the remote copy fails
      */
-    protected abstract boolean performRemoteCopy(String   source,
-                                                 String   destination,
-                                                 Platform platform,
-                                                 Options  deploymentOptions) throws IOException;
+    protected abstract boolean performRemoteCopy(String        source,
+                                                 String        destination,
+                                                 Platform      platform,
+                                                 OptionsByType deploymentOptions) throws IOException;
 }

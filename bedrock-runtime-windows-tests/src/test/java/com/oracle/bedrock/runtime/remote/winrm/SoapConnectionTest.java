@@ -26,51 +26,39 @@
 package com.oracle.bedrock.runtime.remote.winrm;
 
 import com.microsoft.wsman.shell.CommandResponse;
-
-import com.oracle.bedrock.Options;
-
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.options.HttpProxy;
-
 import com.oracle.bedrock.runtime.remote.http.HttpBasedAuthentication;
-
 import org.junit.Test;
-
 import org.mockito.ArgumentCaptor;
-
 import org.w3c.soap.envelope.Body;
 import org.w3c.soap.envelope.Envelope;
 import org.w3c.soap.envelope.Fault;
 import org.w3c.soap.envelope.Header;
 
-import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.CoreMatchers.sameInstance;
-
-import static org.junit.Assert.assertThat;
-
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Matchers.same;
-
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
+import javax.xml.bind.Marshaller;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-
 import java.net.HttpURLConnection;
 import java.net.URL;
-
 import java.util.Collections;
 import java.util.List;
 
-import javax.xml.bind.Marshaller;
+import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.CoreMatchers.sameInstance;
+import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Matchers.same;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * Tests for {@link SoapConnection}.
@@ -100,7 +88,9 @@ public class SoapConnectionTest
         HttpBasedAuthentication authentication = mock(HttpBasedAuthentication.class);
         HttpURLConnection       httpConnection = mock(HttpURLConnection.class);
 
-        when(authentication.openConnection(any(URL.class), anyString(), any(Options.class))).thenReturn(httpConnection);
+        when(authentication.openConnection(any(URL.class),
+                                           anyString(),
+                                           any(OptionsByType.class))).thenReturn(httpConnection);
 
         SoapConnection realConnection = new SoapConnection("oracle.com", 80, "/foo", useName, authentication)
         {
@@ -116,7 +106,7 @@ public class SoapConnectionTest
 
         connection.send(envelope);
 
-        verify(authentication).openConnection(eq(url), eq(useName), any(Options.class));
+        verify(authentication).openConnection(eq(url), eq(useName), any(OptionsByType.class));
         verify(connection).send(same(envelope), same(httpConnection));
     }
 

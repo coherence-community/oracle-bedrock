@@ -26,7 +26,7 @@
 package com.oracle.bedrock.runtime.java;
 
 import com.oracle.bedrock.Option;
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.annotations.Internal;
 import com.oracle.bedrock.deferred.AbstractDeferred;
 import com.oracle.bedrock.deferred.PermanentlyUnavailableException;
@@ -119,9 +119,9 @@ public class LocalJavaApplicationLauncher<A extends JavaApplication> implements 
 
 
     @Override
-    public A launch(Platform     platform,
-                    MetaClass<A> metaClass,
-                    Options      options)
+    public A launch(Platform      platform,
+                    MetaClass<A>  metaClass,
+                    OptionsByType optionsByType)
     {
         // establish the diagnostics output table
         Table diagnosticsTable = new Table();
@@ -136,13 +136,13 @@ public class LocalJavaApplicationLauncher<A extends JavaApplication> implements 
         // ----- establish the launch Options for the Application -----
 
         // add the platform options
-        Options launchOptions = new Options(platform.getOptions().asArray());
+        OptionsByType launchOptions = OptionsByType.of(platform.getOptions().asArray());
 
         // add the meta-class options
         metaClass.onLaunching(platform, launchOptions);
 
         // add the launch specific options
-        launchOptions.addAll(options);
+        launchOptions.addAll(optionsByType);
 
         // ----- establish an identity for the application -----
 

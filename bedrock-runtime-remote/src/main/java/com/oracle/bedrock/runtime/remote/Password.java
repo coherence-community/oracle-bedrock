@@ -27,7 +27,7 @@ package com.oracle.bedrock.runtime.remote;
 
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.Session;
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.options.HttpProxy;
 import com.oracle.bedrock.runtime.remote.http.HttpAuthenticationType;
 import com.oracle.bedrock.runtime.remote.http.HttpBasedAuthentication;
@@ -86,13 +86,13 @@ public class Password implements Authentication, JSchBasedAuthentication, HttpBa
 
 
     @Override
-    public HttpURLConnection openConnection(URL     url,
-                                            String  userName,
-                                            Options options) throws IOException
+    public HttpURLConnection openConnection(URL           url,
+                                            String        userName,
+                                            OptionsByType optionsByType) throws IOException
     {
-        HttpAuthenticationType authType = options.getOrDefault(HttpAuthenticationType.class,
-                                                               HttpAuthenticationType.Basic);
-        HttpProxy         proxy = options.getOrDefault(HttpProxy.class, HttpProxy.none());
+        HttpAuthenticationType authType = optionsByType.getOrDefault(HttpAuthenticationType.class,
+                                                                     HttpAuthenticationType.Basic);
+        HttpProxy         proxy = optionsByType.getOrDefault(HttpProxy.class, HttpProxy.none());
         HttpURLConnection connection;
 
         switch (authType)

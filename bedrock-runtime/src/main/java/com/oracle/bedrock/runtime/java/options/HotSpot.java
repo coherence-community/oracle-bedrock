@@ -25,7 +25,7 @@
 
 package com.oracle.bedrock.runtime.java.options;
 
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 
 import java.util.Collections;
 
@@ -48,7 +48,7 @@ public class HotSpot
         CLIENT;
 
         @Override
-        public Iterable<String> resolve(Options options)
+        public Iterable<String> resolve(OptionsByType optionsByType)
         {
             return Collections.singletonList("-" + this.name().toLowerCase());
         }

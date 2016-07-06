@@ -25,29 +25,26 @@
 
 package com.oracle.bedrock.runtime.java.container;
 
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.junit.AbstractTest;
 import com.oracle.bedrock.runtime.concurrent.callable.RemoteCallableStaticMethod;
 import com.oracle.bedrock.runtime.java.ContainerBasedJavaApplicationLauncher;
-import com.oracle.bedrock.Options;
-
 import org.junit.Before;
 import org.junit.Test;
-
-import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.nullValue;
-
-import static org.hamcrest.collection.IsArrayContainingInOrder.arrayContaining;
-
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
+
+import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.nullValue;
+import static org.hamcrest.collection.IsArrayContainingInOrder.arrayContaining;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * Functional Tests for {@link ContainerBasedJavaApplicationLauncher.ContainerBasedJavaApplicationProcess}es.
@@ -84,16 +81,18 @@ public class ContainerBasedJavaApplicationProcessTest extends AbstractTest
         String               methodName  = InvocationTracingApplication.METHOD_STATIC_MAIN;
         List<String>         arguments   = Arrays.asList("1", "2");
 
-        try (ContainerBasedJavaApplicationLauncher.ContainerBasedJavaApplicationProcess process = new ContainerBasedJavaApplicationLauncher.ContainerBasedJavaApplicationProcess(classLoader,
-                                                                                                     new ContainerBasedJavaApplicationLauncher
-                                                                                                         .StandardController(className,
-                                                                                                             arguments),
-                                                                                                     new Properties()))
+        try (ContainerBasedJavaApplicationLauncher.ContainerBasedJavaApplicationProcess process =
+            new ContainerBasedJavaApplicationLauncher.ContainerBasedJavaApplicationProcess(classLoader,
+                                                                                           new ContainerBasedJavaApplicationLauncher
+                                                                                               .StandardController(className,
+                                                                                                   arguments),
+                                                                                           new Properties()))
         {
-            process.start(new Options());
+            process.start(OptionsByType.empty());
             process.waitFor();
 
-            Iterator<InvocationTracingApplication.MethodInvocation> iterator = InvocationTracingApplication.getMethodInvocations().iterator();
+            Iterator<InvocationTracingApplication.MethodInvocation> iterator =
+                InvocationTracingApplication.getMethodInvocations().iterator();
 
             assertTrue(iterator.hasNext());
 
@@ -117,21 +116,22 @@ public class ContainerBasedJavaApplicationProcessTest extends AbstractTest
     {
         ContainerClassLoader             classLoader = ContainerClassLoader.newInstance("shouldStartCustomApplication");
 
-        String                           className  = InvocationTracingApplication.class.getCanonicalName();
-        String                           methodName = InvocationTracingApplication.METHOD_STATIC_START;
-        List<String>                     arguments  = Arrays.asList("1", "2", "3");
-        RemoteCallableStaticMethod<Void> callable   = new RemoteCallableStaticMethod<>(className, methodName, arguments);
+        String                           className   = InvocationTracingApplication.class.getCanonicalName();
+        String                           methodName  = InvocationTracingApplication.METHOD_STATIC_START;
+        List<String>                     arguments   = Arrays.asList("1", "2", "3");
+        RemoteCallableStaticMethod<Void> callable = new RemoteCallableStaticMethod<>(className, methodName, arguments);
 
         try (ContainerBasedJavaApplicationLauncher.ContainerBasedJavaApplicationProcess process =
             new ContainerBasedJavaApplicationLauncher.ContainerBasedJavaApplicationProcess(classLoader,
-                                                                                          new ContainerBasedJavaApplicationLauncher
-                                                                                              .CustomController(callable),
-                                                                                          new Properties()))
+                                                                                           new ContainerBasedJavaApplicationLauncher
+                                                                                               .CustomController(callable),
+                                                                                           new Properties()))
         {
-            process.start(new Options());
+            process.start(OptionsByType.empty());
             process.waitFor();
 
-            Iterator<InvocationTracingApplication.MethodInvocation> iterator = InvocationTracingApplication.getMethodInvocations().iterator();
+            Iterator<InvocationTracingApplication.MethodInvocation> iterator =
+                InvocationTracingApplication.getMethodInvocations().iterator();
 
             assertTrue(iterator.hasNext());
 
@@ -162,14 +162,15 @@ public class ContainerBasedJavaApplicationProcessTest extends AbstractTest
 
         try (ContainerBasedJavaApplicationLauncher.ContainerBasedJavaApplicationProcess process =
             new ContainerBasedJavaApplicationLauncher.ContainerBasedJavaApplicationProcess(classLoader,
-                                                                                          new ContainerBasedJavaApplicationLauncher
-                                                                                              .CustomController(callable),
-                                                                                          new Properties()))
+                                                                                           new ContainerBasedJavaApplicationLauncher
+                                                                                               .CustomController(callable),
+                                                                                           new Properties()))
         {
-            process.start(new Options());
+            process.start(OptionsByType.empty());
             process.waitFor();
 
-            Iterator<InvocationTracingApplication.MethodInvocation> iterator = InvocationTracingApplication.getMethodInvocations().iterator();
+            Iterator<InvocationTracingApplication.MethodInvocation> iterator =
+                InvocationTracingApplication.getMethodInvocations().iterator();
 
             assertTrue(iterator.hasNext());
 
@@ -200,18 +201,19 @@ public class ContainerBasedJavaApplicationProcessTest extends AbstractTest
 
         try (ContainerBasedJavaApplicationLauncher.ContainerBasedJavaApplicationProcess process =
             new ContainerBasedJavaApplicationLauncher.ContainerBasedJavaApplicationProcess(classLoader,
-                                                                                          new ContainerBasedJavaApplicationLauncher
-                                                                                              .CustomController(null,
-                                                                                                                callable),
-                                                                                          new Properties()))
+                                                                                           new ContainerBasedJavaApplicationLauncher
+                                                                                               .CustomController(null,
+                                                                                                   callable),
+                                                                                           new Properties()))
         {
-            process.start(new Options());
+            process.start(OptionsByType.empty());
 
             assertFalse(InvocationTracingApplication.getMethodInvocations().iterator().hasNext());
 
             process.close();
 
-            Iterator<InvocationTracingApplication.MethodInvocation> iterator = InvocationTracingApplication.getMethodInvocations().iterator();
+            Iterator<InvocationTracingApplication.MethodInvocation> iterator =
+                InvocationTracingApplication.getMethodInvocations().iterator();
 
             assertTrue(iterator.hasNext());
 
@@ -240,11 +242,11 @@ public class ContainerBasedJavaApplicationProcessTest extends AbstractTest
 
         try (ContainerBasedJavaApplicationLauncher.ContainerBasedJavaApplicationProcess process =
             new ContainerBasedJavaApplicationLauncher.ContainerBasedJavaApplicationProcess(classLoader,
-                                                                                          new ContainerBasedJavaApplicationLauncher
-                                                                                              .CustomController(callable),
-                                                                                          new Properties()))
+                                                                                           new ContainerBasedJavaApplicationLauncher
+                                                                                               .CustomController(callable),
+                                                                                           new Properties()))
         {
-            process.start(new Options());
+            process.start(OptionsByType.empty());
             process.waitFor();
 
             fail("Should not have started the process");

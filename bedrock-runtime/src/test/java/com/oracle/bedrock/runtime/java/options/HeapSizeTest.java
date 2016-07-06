@@ -25,7 +25,7 @@
 
 package com.oracle.bedrock.runtime.java.options;
 
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 import org.junit.Test;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -42,15 +42,15 @@ import static org.hamcrest.core.Is.is;
 public class HeapSizeTest
 {
     /**
-     * Ensure that {@link HeapSize}s are composed when provided to {@link Options}.
+     * Ensure that {@link HeapSize}s are composed when provided to {@link OptionsByType}.
      */
     @Test
     public void shouldComposeHeapSizes()
     {
-        Options  options = new Options(HeapSize.initial(128, HeapSize.Units.MB),
-                                       HeapSize.maximum(1, HeapSize.Units.GB));
+        OptionsByType optionsByType = OptionsByType.of(HeapSize.initial(128, HeapSize.Units.MB),
+                                                       HeapSize.maximum(1, HeapSize.Units.GB));
 
-        HeapSize heapSize = options.get(HeapSize.class);
+        HeapSize heapSize = optionsByType.get(HeapSize.class);
 
         assertThat(heapSize.getInitialSizeAs(HeapSize.Units.MB), is(128L));
         assertThat(heapSize.getMaximumSizeAs(HeapSize.Units.GB), is(1L));
@@ -58,14 +58,15 @@ public class HeapSizeTest
 
 
     /**
-     * Ensure that {@link HeapSize}s compose initial and minimum values when provided to {@link Options}.
+     * Ensure that {@link HeapSize}s compose initial and minimum values when provided to {@link OptionsByType}.
      */
     @Test
     public void shouldUseComposeSameMinimumAndMaximumHeapSizes()
     {
-        Options  options  = new Options(HeapSize.initial(1, HeapSize.Units.GB), HeapSize.maximum(1, HeapSize.Units.GB));
+        OptionsByType optionsByType = OptionsByType.of(HeapSize.initial(1, HeapSize.Units.GB),
+                                                       HeapSize.maximum(1, HeapSize.Units.GB));
 
-        HeapSize heapSize = options.get(HeapSize.class);
+        HeapSize heapSize = optionsByType.get(HeapSize.class);
 
         assertThat(heapSize.getInitialSizeAs(HeapSize.Units.GB), is(1L));
         assertThat(heapSize.getMaximumSizeAs(HeapSize.Units.GB), is(1L));

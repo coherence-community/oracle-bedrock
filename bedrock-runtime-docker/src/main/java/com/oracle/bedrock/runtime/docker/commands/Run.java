@@ -25,7 +25,7 @@
 
 package com.oracle.bedrock.runtime.docker.commands;
 
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.runtime.Application;
 import com.oracle.bedrock.runtime.Platform;
 import com.oracle.bedrock.runtime.docker.DockerContainer;
@@ -1690,21 +1690,21 @@ public class Run extends AbstractDockerCommand<Run>
 
 
     @Override
-    public void onLaunch(Platform platform,
-                         Options  options)
+    public void onLaunch(Platform      platform,
+                         OptionsByType optionsByType)
     {
         // Build up the command in the form "run [options...] image-name [args...]"
 
         // 1. Capture any Arguments already set in the options as these will become
         // container argument (the [args...] part)
-        Arguments currentArguments = options.get(Arguments.class);
+        Arguments currentArguments = optionsByType.get(Arguments.class);
 
         // 2. call super to add all of the command arguments, the "run [options...]" part
-        super.onLaunch(platform, options);
+        super.onLaunch(platform, optionsByType);
 
         // 3. add any environment variable arguments (--env=name=value) part of the [options...] arguments
         EnvironmentVariables envVars   = EnvironmentVariables.custom().with(this.environmentVariables);
-        Properties           variables = envVars.realize(platform, options.asArray());
+        Properties           variables = envVars.realize(platform, optionsByType.asArray());
 
         variables.entrySet().stream().map(
             (entry) -> {
@@ -1714,20 +1714,20 @@ public class Run extends AbstractDockerCommand<Run>
                 }
 
                 return entry.getKey() + "=" + entry.getValue();
-            }).map((value) -> Argument.of("--env", value)).forEach(options::add);
+            }).map((value) -> Argument.of("--env", value)).forEach(optionsByType::add);
 
         // 4. The next parameter is the image name
-        options.add(imageArgument);
+        optionsByType.add(imageArgument);
 
         // 5. finally add back any command line args to form the command line for the container the [args...] part
-        currentArguments.forEach(options::add);
+        currentArguments.forEach(optionsByType::add);
     }
 
 
     @Override
-    public void onLaunched(Platform    platform,
-                           Application application,
-                           Options     options)
+    public void onLaunched(Platform      platform,
+                           Application   application,
+                           OptionsByType optionsByType)
     {
         // Pull the container name out of the command line arguments by looking for the --name argument
         String name = getCommandArguments().stream().filter((arg) -> arg.getName() != null
@@ -1735,7 +1735,7 @@ public class Run extends AbstractDockerCommand<Run>
                                                                      .map((arg) -> String.valueOf(arg.getValue()))
                                                                      .findFirst().orElse(null);
 
-        DockerContainer container = new DockerContainer(name, options);
+        DockerContainer container = new DockerContainer(name, optionsByType);
 
         application.add(container);
     }

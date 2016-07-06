@@ -26,7 +26,7 @@
 package com.oracle.bedrock.runtime;
 
 import com.oracle.bedrock.Option;
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.annotations.Internal;
 import com.oracle.bedrock.runtime.options.DisplayName;
 
@@ -53,31 +53,31 @@ import com.oracle.bedrock.runtime.options.DisplayName;
 public interface ApplicationLauncher<A extends Application>
 {
     /**
-     * Launches an {@link Application} on the {@link Platform} using the provided {@link Option}s.
+     * Launches an {@link Application} on the {@link Platform} using the provided {@link OptionsByType}s.
      *
-     * @param platform   the {@link Platform} the {@link Application} is being launched on
-     * @param metaClass  the {@link MetaClass} of the {@link Application}
-     * @param options    the {@link Options} for launching the {@link Application}
+     * @param platform       the {@link Platform} the {@link Application} is being launched on
+     * @param metaClass      the {@link MetaClass} of the {@link Application}
+     * @param optionsByType  the {@link OptionsByType} for launching the {@link Application}
      *
      * @return an {@link Application} representing the application launched by the {@link ApplicationLauncher}
      *
      * @throws RuntimeException when a problem occurs while launching the application
      */
-    A launch(Platform     platform,
-             MetaClass<A> metaClass,
-             Options      options);
+    A launch(Platform      platform,
+             MetaClass<A>  metaClass,
+             OptionsByType optionsByType);
 
 
     /**
      * Obtain the {@link DisplayName} for the {@link Application}, defaulting to something sensible
-     * based on the provided {@link Options} if not defined.
+     * based on the provided {@link OptionsByType} if not defined.
      *
-     * @param options  the {@link Options}
+     * @param optionsByType  the {@link OptionsByType}
      *
      * @return a {@link DisplayName}
      */
-    default DisplayName getDisplayName(Options options)
+    default DisplayName getDisplayName(OptionsByType optionsByType)
     {
-        return options.get(DisplayName.class);
+        return optionsByType.get(DisplayName.class);
     }
 }

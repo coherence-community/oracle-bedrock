@@ -25,7 +25,7 @@
 
 package com.oracle.bedrock.runtime.docker.commands;
 
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.runtime.Platform;
 import com.oracle.bedrock.runtime.options.Argument;
 import com.oracle.bedrock.runtime.options.Arguments;
@@ -168,17 +168,17 @@ public abstract class CommandWithArgumentList<C extends CommandWithArgumentList>
      * On launching add the {@link Argument}s to the
      * end of the command line arguments.
      *
-     * @param platform   the {@link Platform} launching the command
-     * @param options    the {@link Options}  for the command
+     * @param platform       the {@link Platform} launching the command
+     * @param optionsByType  the {@link OptionsByType}  for the command
      */
     @Override
-    public void onLaunch(Platform platform,
-                         Options  options)
+    public void onLaunch(Platform      platform,
+                         OptionsByType optionsByType)
     {
         // call super to add all of the command's arguments
-        super.onLaunch(platform, options);
+        super.onLaunch(platform, optionsByType);
 
         // add this class's arguments to the end of the arguments list
-        argumentList.forEach(options::add);
+        argumentList.forEach(optionsByType::add);
     }
 }

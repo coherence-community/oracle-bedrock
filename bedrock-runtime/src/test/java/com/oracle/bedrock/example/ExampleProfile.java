@@ -26,7 +26,7 @@
 package com.oracle.bedrock.example;
 
 import com.oracle.bedrock.Option;
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.runtime.Application;
 import com.oracle.bedrock.runtime.MetaClass;
 import com.oracle.bedrock.runtime.Platform;
@@ -53,7 +53,7 @@ public class ExampleProfile implements Profile, Option
      *
      * @param parameters  the parameters for the {@link ExampleProfile}
      */
-    @Options.Default
+    @OptionsByType.Default
     public ExampleProfile(String parameters)
     {
         this.parameters = parameters;
@@ -72,25 +72,25 @@ public class ExampleProfile implements Profile, Option
 
 
     @Override
-    public void onLaunching(Platform  platform,
-                            MetaClass metaClass,
-                            Options   options)
+    public void onLaunching(Platform      platform,
+                            MetaClass     metaClass,
+                            OptionsByType optionsByType)
     {
     }
 
 
     @Override
-    public void onLaunched(Platform    platform,
-                           Application application,
-                           Options     options)
+    public void onLaunched(Platform      platform,
+                           Application   application,
+                           OptionsByType optionsByType)
     {
     }
 
 
     @Override
-    public void onClosing(Platform    platform,
-                          Application application,
-                          Options     options)
+    public void onClosing(Platform      platform,
+                          Application   application,
+                          OptionsByType optionsByType)
     {
     }
 }

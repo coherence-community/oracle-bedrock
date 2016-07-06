@@ -26,7 +26,7 @@
 package com.oracle.bedrock.junit.options;
 
 import com.oracle.bedrock.Option;
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.junit.TestClassPredicate;
 import com.oracle.bedrock.runtime.java.ClassPath;
 import org.junit.runner.Description;
@@ -242,7 +242,7 @@ public abstract class TestClasses implements Option.Collectable, Option, Seriali
      *
      * @return  an empty set of test classes
      */
-    @Options.Default
+    @OptionsByType.Default
     public static TestClasses empty()
     {
         return new TestClasses()

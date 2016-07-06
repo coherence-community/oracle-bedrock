@@ -26,7 +26,7 @@
 package com.oracle.bedrock.runtime.options;
 
 import com.oracle.bedrock.Option;
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.lang.ExpressionEvaluator;
 import com.oracle.bedrock.runtime.Platform;
 
@@ -77,13 +77,13 @@ public class WorkingDirectory implements Option
     /**
      * Resolve and obtain the {@link File} representing the working directory to use for an application.
      *
-     * @param platform         the {@link Platform} that the application will run on
-     * @param options          the {@link Options} to use
+     * @param platform       the {@link Platform} that the application will run on
+     * @param optionsByType  the {@link OptionsByType} to use
      *
      * @return  the {@link File} pointing to the working directory to use for an application
      */
-    public File resolve(Platform platform,
-                        Options  options)
+    public File resolve(Platform      platform,
+                        OptionsByType optionsByType)
     {
         if (workingDirectory == null)
         {
@@ -95,13 +95,13 @@ public class WorkingDirectory implements Option
             return (File) workingDirectory;
         }
 
-        DisplayName         displayName   = options.get(DisplayName.class);
+        DisplayName         displayName   = optionsByType.get(DisplayName.class);
 
-        Discriminator       discriminator = options.get(Discriminator.class);
+        Discriminator       discriminator = optionsByType.get(Discriminator.class);
 
-        ExpressionEvaluator evaluator     = new ExpressionEvaluator(options);
+        ExpressionEvaluator evaluator     = new ExpressionEvaluator(optionsByType);
 
-        evaluator.defineVariable("applicationName", displayName.resolve(options));
+        evaluator.defineVariable("applicationName", displayName.resolve(optionsByType));
         evaluator.defineVariable("displayName", displayName.resolve(null));
 
         if (discriminator != null)
@@ -118,7 +118,7 @@ public class WorkingDirectory implements Option
             WorkingDirectory.ContextSensitiveDirectoryName contextSensitiveValue =
                 (WorkingDirectory.ContextSensitiveDirectoryName) directoryValue;
 
-            directoryValue = contextSensitiveValue.resolve(platform, options);
+            directoryValue = contextSensitiveValue.resolve(platform, optionsByType);
         }
 
         if (directoryValue instanceof Iterator<?>)
@@ -167,19 +167,20 @@ public class WorkingDirectory implements Option
         ContextSensitiveDirectoryName name = new ContextSensitiveDirectoryName()
         {
             @Override
-            public Object resolve(Platform platform,
-                                  Options  options)
+            public Object resolve(Platform      platform,
+                                  OptionsByType optionsByType)
             {
-                DisplayName        displayName          = options.get(DisplayName.class);
-                PlatformSeparators separators           = options.get(PlatformSeparators.class);
-                String             sanitizedDisplayName = separators.asSanitizedFileName(displayName.resolve(options));
-                Calendar           now                  = Calendar.getInstance();
+                DisplayName        displayName = optionsByType.get(DisplayName.class);
+                PlatformSeparators separators  = optionsByType.get(PlatformSeparators.class);
+                String sanitizedDisplayName    = separators.asSanitizedFileName(displayName.resolve(optionsByType));
+                Calendar           now         = Calendar.getInstance();
                 String temporaryDirectoryName = String.format("%1$s-%2$tY%2$tm%2$td-%2$tH%2$tM%2$tS-%2$tL",
                                                               sanitizedDisplayName,
                                                               now);
 
-                TemporaryDirectory defaultTemp        = TemporaryDirectory.at(separators.getFileSeparator() + "tmp");
-                TemporaryDirectory temporaryDirectory = options.getOrDefault(TemporaryDirectory.class, defaultTemp);
+                TemporaryDirectory defaultTemp = TemporaryDirectory.at(separators.getFileSeparator() + "tmp");
+                TemporaryDirectory temporaryDirectory = optionsByType.getOrDefault(TemporaryDirectory.class,
+                                                                                   defaultTemp);
 
                 return new File(temporaryDirectory.get().toFile(), temporaryDirectoryName);
             }
@@ -234,13 +235,13 @@ public class WorkingDirectory implements Option
         ContextSensitiveDirectoryName name = new ContextSensitiveDirectoryName()
         {
             @Override
-            public Object resolve(Platform platform,
-                                  Options  options)
+            public Object resolve(Platform      platform,
+                                  OptionsByType optionsByType)
             {
-                DisplayName        displayName          = options.get(DisplayName.class);
-                PlatformSeparators separators           = options.get(PlatformSeparators.class);
-                String             sanitizedDisplayName = separators.asSanitizedFileName(displayName.resolve(options));
-                File               parentFile = (parent != null) ? parent : new File(System.getProperty("user.dir"));
+                DisplayName        displayName = optionsByType.get(DisplayName.class);
+                PlatformSeparators separators  = optionsByType.get(PlatformSeparators.class);
+                String sanitizedDisplayName    = separators.asSanitizedFileName(displayName.resolve(optionsByType));
+                File               parentFile  = (parent != null) ? parent : new File(System.getProperty("user.dir"));
 
                 return new File(parentFile, sanitizedDisplayName);
             }
@@ -260,12 +261,12 @@ public class WorkingDirectory implements Option
          * Obtains the value for the working directory, possibly based on the provided {@link Platform}
          * and {@link Option}s.
          *
-         * @param platform  the {@link Platform} in which {@link Argument} is being used.
-         * @param options   the {@link Options} to control directory creation
+         * @param platform       the {@link Platform} in which {@link Argument} is being used.
+         * @param optionsByType  the {@link OptionsByType} to control directory creation
          *
          * @return the value
          */
-        Object resolve(Platform platform,
-                       Options  options);
+        Object resolve(Platform      platform,
+                       OptionsByType optionsByType);
     }
 }

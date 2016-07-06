@@ -27,7 +27,7 @@ package com.oracle.bedrock.runtime.coherence.options;
 
 import com.oracle.bedrock.ComposableOption;
 import com.oracle.bedrock.Option;
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.runtime.Application;
 import com.oracle.bedrock.runtime.MetaClass;
 import com.oracle.bedrock.runtime.Platform;
@@ -130,39 +130,39 @@ public class Pof implements Profile, ComposableOption<Pof>
 
 
     @Override
-    public void onLaunching(Platform  platform,
-                            MetaClass metaClass,
-                            Options   options)
+    public void onLaunching(Platform      platform,
+                            MetaClass     metaClass,
+                            OptionsByType optionsByType)
     {
-        SystemProperties systemProperties = options.get(SystemProperties.class);
+        SystemProperties systemProperties = optionsByType.get(SystemProperties.class);
 
         if (systemProperties != null && configUri != null)
         {
-            options.add(SystemProperty.of(PROPERTY_CONFIG, configUri));
+            optionsByType.add(SystemProperty.of(PROPERTY_CONFIG, configUri));
 
             // when a configuration is defined, we automatically enabled pof
-            options.add(SystemProperty.of(PROPERTY_ENABLED, true));
+            optionsByType.add(SystemProperty.of(PROPERTY_ENABLED, true));
         }
 
         if (systemProperties != null && enabled != null)
         {
-            options.add(SystemProperty.of(PROPERTY_ENABLED, enabled));
+            optionsByType.add(SystemProperty.of(PROPERTY_ENABLED, enabled));
         }
     }
 
 
     @Override
-    public void onLaunched(Platform    platform,
-                           Application application,
-                           Options     options)
+    public void onLaunched(Platform      platform,
+                           Application   application,
+                           OptionsByType optionsByType)
     {
     }
 
 
     @Override
-    public void onClosing(Platform    platform,
-                          Application application,
-                          Options     options)
+    public void onClosing(Platform      platform,
+                          Application   application,
+                          OptionsByType optionsByType)
     {
     }
 

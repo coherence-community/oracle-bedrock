@@ -25,10 +25,10 @@
 
 package com.oracle.bedrock.runtime.docker;
 
-import com.oracle.bedrock.runtime.Platform;
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.runtime.Application;
 import com.oracle.bedrock.runtime.MetaClass;
+import com.oracle.bedrock.runtime.Platform;
 import com.oracle.bedrock.runtime.docker.commands.Inspect;
 import com.oracle.bedrock.runtime.docker.commands.Remove;
 import com.oracle.bedrock.runtime.docker.options.ImageCloseBehaviour;
@@ -68,7 +68,7 @@ public class DockerImageTest
     @Test
     public void shouldHaveCorrectTags() throws Exception
     {
-        DockerImage image = new DockerImage(Arrays.asList("foo", "bar"), new Options());
+        DockerImage image = new DockerImage(Arrays.asList("foo", "bar"), OptionsByType.empty());
 
         assertThat(image.getTags(), contains("foo", "bar"));
     }
@@ -77,7 +77,7 @@ public class DockerImageTest
     @Test
     public void shouldHaveCorrectFirstTag() throws Exception
     {
-        DockerImage image = new DockerImage(Arrays.asList("foo", "bar"), new Options());
+        DockerImage image = new DockerImage(Arrays.asList("foo", "bar"), OptionsByType.empty());
 
         assertThat(image.getFirstTag(), is("foo"));
     }
@@ -86,9 +86,9 @@ public class DockerImageTest
     @Test
     public void shouldHaveCorrectOptions() throws Exception
     {
-        Docker      docker  = Docker.auto();
-        Options     options = new Options(docker);
-        DockerImage image   = new DockerImage(Arrays.asList("foo", "bar"), options);
+        Docker        docker        = Docker.auto();
+        OptionsByType optionsByType = OptionsByType.of(docker);
+        DockerImage   image         = new DockerImage(Arrays.asList("foo", "bar"), optionsByType);
 
         assertThat(image.getOptions(), is(notNullValue()));
         assertThat(image.getOptions().get(Docker.class), is(sameInstance(docker)));
@@ -107,25 +107,25 @@ public class DockerImageTest
     @Test(expected = IllegalArgumentException.class)
     public void shouldNotAllowNullTags() throws Exception
     {
-        new DockerImage(null, new Options());
+        new DockerImage(null, OptionsByType.empty());
     }
 
 
     @Test(expected = IllegalArgumentException.class)
     public void shouldNotAllowEmptyTags() throws Exception
     {
-        new DockerImage(Collections.emptyList(), new Options());
+        new DockerImage(Collections.emptyList(), OptionsByType.empty());
     }
 
 
     @Test
     public void shouldGetDocker() throws Exception
     {
-        Docker      docker  = Docker.auto();
-        Options     options = new Options(docker);
-        DockerImage image   = new DockerImage(Arrays.asList("foo", "bar"), options);
+        Docker        docker        = Docker.auto();
+        OptionsByType optionsByType = OptionsByType.of(docker);
+        DockerImage   image         = new DockerImage(Arrays.asList("foo", "bar"), optionsByType);
 
-        Docker      result  = image.getDockerEnvironment();
+        Docker        result        = image.getDockerEnvironment();
 
         assertThat(result, is(sameInstance(docker)));
     }
@@ -136,7 +136,7 @@ public class DockerImageTest
     {
         Platform    platform    = mock(Platform.class);
         Application application = mock(Application.class);
-        DockerImage image       = new DockerImage(Arrays.asList("foo", "bar"), new Options());
+        DockerImage image       = new DockerImage(Arrays.asList("foo", "bar"), OptionsByType.empty());
 
         when(application.getPlatform()).thenReturn(platform);
 
@@ -149,17 +149,17 @@ public class DockerImageTest
     @Test
     public void shouldCreateInspectCommand() throws Exception
     {
-        Platform    platform = mock(Platform.class);
-        Options     options  = new Options();
-        DockerImage image    = new DockerImage(Arrays.asList("foo", "bar"), new Options());
-        Inspect     inspect  = image.createInspectCommand();
+        Platform      platform      = mock(Platform.class);
+        OptionsByType optionsByType = OptionsByType.empty();
+        DockerImage   image         = new DockerImage(Arrays.asList("foo", "bar"), OptionsByType.empty());
+        Inspect       inspect       = image.createInspectCommand();
 
         assertThat(inspect, is(notNullValue()));
 
-        inspect.onLaunch(platform, options);
+        inspect.onLaunch(platform, optionsByType);
 
-        Arguments    arguments = options.get(Arguments.class);
-        List<String> values    = arguments.resolve(mock(Platform.class), new Options());
+        Arguments    arguments = optionsByType.get(Arguments.class);
+        List<String> values    = arguments.resolve(mock(Platform.class), OptionsByType.empty());
 
         assertThat(values, contains("inspect", "--type=image", "foo", "bar"));
     }
@@ -174,7 +174,7 @@ public class DockerImageTest
         Application inspectApp  = mock(Application.class, "Inspect");
         Inspect     inspect     = mock(Inspect.class);
 
-        DockerImage image       = new DockerImage(Arrays.asList("foo", "bar"), new Options(docker));
+        DockerImage image       = new DockerImage(Arrays.asList("foo", "bar"), OptionsByType.of(docker));
         DockerImage imageSpy    = spy(image);
 
         when(application.getPlatform()).thenReturn(platform);
@@ -191,7 +191,7 @@ public class DockerImageTest
     @Test(expected = IllegalStateException.class)
     public void shouldNotInspectIfNoApplication() throws Exception
     {
-        DockerImage image = new DockerImage(Arrays.asList("foo", "bar"), new Options());
+        DockerImage image = new DockerImage(Arrays.asList("foo", "bar"), OptionsByType.empty());
 
         image.inspect();
     }
@@ -205,7 +205,7 @@ public class DockerImageTest
         Application application = mock(Application.class, "App");
         Application removeApp   = mock(Application.class, "Inspect");
 
-        DockerImage image       = new DockerImage(Arrays.asList("foo"), new Options(docker));
+        DockerImage image       = new DockerImage(Arrays.asList("foo"), OptionsByType.of(docker));
 
         when(application.getPlatform()).thenReturn(platform);
         when(platform.launch(any(MetaClass.class), anyVararg())).thenReturn(removeApp);
@@ -222,12 +222,12 @@ public class DockerImageTest
 
         assertThat(remove, is(notNullValue()));
 
-        Options options = new Options();
+        OptionsByType optionsByType = OptionsByType.empty();
 
-        remove.onLaunch(platform, options);
+        remove.onLaunch(platform, optionsByType);
 
-        Arguments    arguments = options.get(Arguments.class);
-        List<String> values    = arguments.resolve(mock(Platform.class), new Options());
+        Arguments    arguments = optionsByType.get(Arguments.class);
+        List<String> values    = arguments.resolve(mock(Platform.class), OptionsByType.empty());
 
         assertThat(values, contains("rmi", "foo"));
     }
@@ -236,7 +236,7 @@ public class DockerImageTest
     @Test(expected = IllegalStateException.class)
     public void shouldNotRemoveIfNoApplication() throws Exception
     {
-        DockerImage image = new DockerImage(Arrays.asList("foo", "bar"), new Options());
+        DockerImage image = new DockerImage(Arrays.asList("foo", "bar"), OptionsByType.empty());
 
         image.remove();
     }
@@ -245,10 +245,10 @@ public class DockerImageTest
     @Test
     public void shouldCloseWithNullApplication() throws Exception
     {
-        DockerImage         image     = new DockerImage(Arrays.asList("foo", "bar"), new Options());
+        DockerImage         image     = new DockerImage(Arrays.asList("foo", "bar"), OptionsByType.empty());
         ImageCloseBehaviour behaviour = mock(ImageCloseBehaviour.class);
 
-        image.onClosed(null, new Options(behaviour));
+        image.onClosed(null, OptionsByType.of(behaviour));
 
         verify(behaviour).accept(same(image));
     }
@@ -258,13 +258,13 @@ public class DockerImageTest
     public void shouldCloseWithApplicationAndUseOverridingBehaviour() throws Exception
     {
         Application         application       = mock(Application.class);
-        DockerImage         image             = new DockerImage(Arrays.asList("foo", "bar"), new Options());
+        DockerImage         image             = new DockerImage(Arrays.asList("foo", "bar"), OptionsByType.empty());
         ImageCloseBehaviour behaviourApp      = mock(ImageCloseBehaviour.class, "1");
         ImageCloseBehaviour behaviourOverride = mock(ImageCloseBehaviour.class, "2");
 
-        when(application.getOptions()).thenReturn(new Options(behaviourApp));
+        when(application.getOptions()).thenReturn(OptionsByType.of(behaviourApp));
 
-        image.onClosed(application, new Options(behaviourOverride));
+        image.onClosed(application, OptionsByType.of(behaviourOverride));
 
         verify(behaviourApp, never()).accept(same(image));
         verify(behaviourOverride).accept(same(image));
@@ -275,12 +275,12 @@ public class DockerImageTest
     public void shouldCloseWithApplicationAndUseApplicationCloseBehaviour() throws Exception
     {
         Application         application  = mock(Application.class);
-        DockerImage         image        = new DockerImage(Arrays.asList("foo", "bar"), new Options());
+        DockerImage         image        = new DockerImage(Arrays.asList("foo", "bar"), OptionsByType.empty());
         ImageCloseBehaviour behaviourApp = mock(ImageCloseBehaviour.class);
 
-        when(application.getOptions()).thenReturn(new Options(behaviourApp));
+        when(application.getOptions()).thenReturn(OptionsByType.of(behaviourApp));
 
-        image.onClosed(application, new Options());
+        image.onClosed(application, OptionsByType.empty());
 
         verify(behaviourApp).accept(same(image));
     }

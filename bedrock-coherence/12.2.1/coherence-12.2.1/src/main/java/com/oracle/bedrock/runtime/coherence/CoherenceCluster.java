@@ -25,7 +25,7 @@
 
 package com.oracle.bedrock.runtime.coherence;
 
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.runtime.AbstractAssembly;
 import com.oracle.bedrock.runtime.Assembly;
 import com.oracle.bedrock.runtime.coherence.callables.GetAutoStartServiceNames;
@@ -53,12 +53,12 @@ public class CoherenceCluster extends AbstractAssembly<CoherenceClusterMember>
      * Constructs a {@link CoherenceCluster} given a list of {@link CoherenceClusterMember}s.
      *
      * @param members  the {@link CoherenceClusterMember}s
-     * @param options  the shared / common {@link Options} used to launch the {@link CoherenceClusterMember}s
+     * @param optionsByType  the shared / common {@link OptionsByType} used to launch the {@link CoherenceClusterMember}s
      */
     public CoherenceCluster(List<? extends CoherenceClusterMember> members,
-                            Options                                options)
+                            OptionsByType                          optionsByType)
     {
-        super(members, options);
+        super(members, optionsByType);
     }
 
 

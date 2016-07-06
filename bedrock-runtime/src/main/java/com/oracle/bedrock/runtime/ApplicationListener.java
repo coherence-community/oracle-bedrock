@@ -25,7 +25,7 @@
 
 package com.oracle.bedrock.runtime;
 
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 
 /**
  * A listener for {@link Application} life-cycle events.
@@ -39,21 +39,21 @@ public interface ApplicationListener<A extends Application>
     /**
      * Called prior to an {@link Application} being closed.
      *
-     * @param application  the {@link Application} being closed
-     * @param options      the {@link Options} to use
+     * @param application    the {@link Application} being closed
+     * @param optionsByType  the {@link OptionsByType} to use
      */
-    public void onClosing(A       application,
-                          Options options);
+    public void onClosing(A             application,
+                          OptionsByType optionsByType);
 
 
     /**
      * Called after an {@link Application} was closed.
      *
-     * @param application  the {@link Application} that was closed
-     * @param options      the {@link Options} to use
+     * @param application    the {@link Application} that was closed
+     * @param optionsByType  the {@link OptionsByType} to use
      */
-    public void onClosed(A       application,
-                         Options options);
+    public void onClosed(A             application,
+                         OptionsByType optionsByType);
 
 
     /**

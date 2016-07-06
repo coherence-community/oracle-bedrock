@@ -26,7 +26,7 @@
 package com.oracle.bedrock.deferred;
 
 import com.oracle.bedrock.Option;
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.deferred.options.FailFast;
 import com.oracle.bedrock.deferred.options.InitialDelay;
 import com.oracle.bedrock.deferred.options.MaximumRetryDelay;
@@ -262,9 +262,9 @@ public class Concurrently
         private final Matcher<? super T> matcher;
 
         /**
-         * The {@link Options}.
+         * The {@link OptionsByType}.
          */
-        private final Options options;
+        private final OptionsByType optionsByType;
 
         /**
          * The {@link Thread} that created this {@link ConcurrentAssertion}.
@@ -309,7 +309,7 @@ public class Concurrently
             this.message                        = message;
             this.deferred                       = deferred;
             this.matcher                        = matcher;
-            this.options                        = Options.from(options);
+            this.optionsByType                  = OptionsByType.of(options);
 
             this.creatingThread                 = Thread.currentThread();
             this.assertionError                 = null;
@@ -367,7 +367,7 @@ public class Concurrently
             {
                 while (!closing)
                 {
-                    Repetitively.assertThat(message, deferred, matcher, options.asArray());
+                    Repetitively.assertThat(message, deferred, matcher, optionsByType.asArray());
                 }
             }
             catch (AssertionError e)
@@ -380,7 +380,7 @@ public class Concurrently
                 {
                     assertionError = e;
 
-                    if (options.get(FailFast.class).isEnabled())
+                    if (optionsByType.get(FailFast.class).isEnabled())
                     {
                         // attempt to interrupt the thread that created the ConcurrentAssertion
                         creatingThread.interrupt();

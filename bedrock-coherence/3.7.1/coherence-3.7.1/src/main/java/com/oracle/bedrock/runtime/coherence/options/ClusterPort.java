@@ -26,7 +26,7 @@
 package com.oracle.bedrock.runtime.coherence.options;
 
 import com.oracle.bedrock.Option;
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.runtime.Application;
 import com.oracle.bedrock.runtime.LocalPlatform;
 import com.oracle.bedrock.runtime.MetaClass;
@@ -154,9 +154,9 @@ public class ClusterPort implements Profile, Option
 
 
     @Override
-    public void onLaunching(Platform  platform,
-                            MetaClass metaClass,
-                            Options   options)
+    public void onLaunching(Platform      platform,
+                            MetaClass     metaClass,
+                            OptionsByType optionsByType)
     {
         if (ports != null &&!ports.hasNext())
         {
@@ -164,7 +164,7 @@ public class ClusterPort implements Profile, Option
         }
         else
         {
-            SystemProperties systemProperties = options.get(SystemProperties.class);
+            SystemProperties systemProperties = optionsByType.get(SystemProperties.class);
 
             if (systemProperties != null)
             {
@@ -187,24 +187,24 @@ public class ClusterPort implements Profile, Option
                     port = ports.next();
                 }
 
-                options.add(SystemProperty.of(PROPERTY, port));
+                optionsByType.add(SystemProperty.of(PROPERTY, port));
             }
         }
     }
 
 
     @Override
-    public void onLaunched(Platform    platform,
-                           Application application,
-                           Options     options)
+    public void onLaunched(Platform      platform,
+                           Application   application,
+                           OptionsByType optionsByType)
     {
     }
 
 
     @Override
-    public void onClosing(Platform    platform,
-                          Application application,
-                          Options     options)
+    public void onClosing(Platform      platform,
+                          Application   application,
+                          OptionsByType optionsByType)
     {
     }
 

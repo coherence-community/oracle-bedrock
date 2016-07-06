@@ -27,18 +27,18 @@ package com.oracle.bedrock.jprofiler;
 
 import applications.WaitingApplication;
 import com.oracle.bedrock.Option;
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.deferred.Eventually;
 import com.oracle.bedrock.runtime.LocalPlatform;
 import com.oracle.bedrock.runtime.MetaClass;
 import com.oracle.bedrock.runtime.Platform;
 import com.oracle.bedrock.runtime.concurrent.RemoteCallable;
 import com.oracle.bedrock.runtime.console.CapturingApplicationConsole;
-import com.oracle.bedrock.runtime.options.Console;
 import com.oracle.bedrock.runtime.java.JavaApplication;
 import com.oracle.bedrock.runtime.java.options.ClassName;
 import com.oracle.bedrock.runtime.java.options.Freeform;
 import com.oracle.bedrock.runtime.java.options.Freeforms;
+import com.oracle.bedrock.runtime.options.Console;
 import org.junit.After;
 import org.junit.Assume;
 import org.junit.ClassRule;
@@ -87,19 +87,19 @@ public class JprofilerProfileTest
     @Test
     public void shouldCreateEnabledProfileWithDefaultAddress() throws Exception
     {
-        Platform         platform  = LocalPlatform.get();
-        MetaClass        metaClass = new JavaApplication.MetaClass();
-        Options          options   = new Options();
+        Platform         platform      = LocalPlatform.get();
+        MetaClass        metaClass     = new JavaApplication.MetaClass();
+        OptionsByType    optionsByType = OptionsByType.empty();
 
-        JprofilerProfile profile   = JprofilerProfile.enabled("mylib");
+        JprofilerProfile profile       = JprofilerProfile.enabled("mylib");
 
         assertThat(profile.isEnabled(), is(true));
 
-        profile.onLaunching(platform, metaClass, options);
+        profile.onLaunching(platform, metaClass, optionsByType);
 
-        assertAgentString(options, "-agentpath:mylib=", "port=8849");
+        assertAgentString(optionsByType, "-agentpath:mylib=", "port=8849");
 
-        JprofilerProfile.ListenAddress address = options.get(JprofilerProfile.ListenAddress.class);
+        JprofilerProfile.ListenAddress address = optionsByType.get(JprofilerProfile.ListenAddress.class);
 
         assertThat(address.getInetAddress(), is(nullValue()));
         assertThat(address.getPort().get(), is(8849));
@@ -109,124 +109,124 @@ public class JprofilerProfileTest
     @Test
     public void shouldCreateEnabledNoWaitProfile() throws Exception
     {
-        Platform         platform  = LocalPlatform.get();
-        MetaClass        metaClass = new JavaApplication.MetaClass();
-        Options          options   = new Options();
+        Platform         platform      = LocalPlatform.get();
+        MetaClass        metaClass     = new JavaApplication.MetaClass();
+        OptionsByType    optionsByType = OptionsByType.empty();
 
-        JprofilerProfile profile   = JprofilerProfile.enabledNoWait("mylib");
+        JprofilerProfile profile       = JprofilerProfile.enabledNoWait("mylib");
 
         assertThat(profile.isEnabled(), is(true));
 
-        profile.onLaunching(platform, metaClass, options);
+        profile.onLaunching(platform, metaClass, optionsByType);
 
-        assertAgentString(options, "-agentpath:mylib=", "port=8849", "nowait");
+        assertAgentString(optionsByType, "-agentpath:mylib=", "port=8849", "nowait");
     }
 
 
     @Test
     public void shouldAddNoWait() throws Exception
     {
-        Platform         platform  = LocalPlatform.get();
-        MetaClass        metaClass = new JavaApplication.MetaClass();
-        Options          options   = new Options();
+        Platform         platform      = LocalPlatform.get();
+        MetaClass        metaClass     = new JavaApplication.MetaClass();
+        OptionsByType    optionsByType = OptionsByType.empty();
 
-        JprofilerProfile profile   = JprofilerProfile.enabled("mylib").noWait();
+        JprofilerProfile profile       = JprofilerProfile.enabled("mylib").noWait();
 
-        profile.onLaunching(platform, metaClass, options);
+        profile.onLaunching(platform, metaClass, optionsByType);
 
-        assertAgentString(options, "-agentpath:mylib=", "port=8849", "nowait");
+        assertAgentString(optionsByType, "-agentpath:mylib=", "port=8849", "nowait");
     }
 
 
     @Test
     public void shouldAddVerbose() throws Exception
     {
-        Platform         platform  = LocalPlatform.get();
-        MetaClass        metaClass = new JavaApplication.MetaClass();
-        Options          options   = new Options();
+        Platform         platform      = LocalPlatform.get();
+        MetaClass        metaClass     = new JavaApplication.MetaClass();
+        OptionsByType    optionsByType = OptionsByType.empty();
 
-        JprofilerProfile profile   = JprofilerProfile.enabled("mylib").verbose(true);
+        JprofilerProfile profile       = JprofilerProfile.enabled("mylib").verbose(true);
 
-        profile.onLaunching(platform, metaClass, options);
+        profile.onLaunching(platform, metaClass, optionsByType);
 
-        assertAgentString(options, "-agentpath:mylib=", "port=8849", "verbose-instr");
+        assertAgentString(optionsByType, "-agentpath:mylib=", "port=8849", "verbose-instr");
     }
 
 
     @Test
     public void shouldSetSamplingStack() throws Exception
     {
-        Platform         platform  = LocalPlatform.get();
-        MetaClass        metaClass = new JavaApplication.MetaClass();
-        Options          options   = new Options();
+        Platform         platform      = LocalPlatform.get();
+        MetaClass        metaClass     = new JavaApplication.MetaClass();
+        OptionsByType    optionsByType = OptionsByType.empty();
 
-        JprofilerProfile profile   = JprofilerProfile.enabled("mylib").samplingStack(1234);
+        JprofilerProfile profile       = JprofilerProfile.enabled("mylib").samplingStack(1234);
 
-        profile.onLaunching(platform, metaClass, options);
+        profile.onLaunching(platform, metaClass, optionsByType);
 
-        assertAgentString(options, "-agentpath:mylib=", "port=8849", "samplingstack=1234");
+        assertAgentString(optionsByType, "-agentpath:mylib=", "port=8849", "samplingstack=1234");
     }
 
 
     @Test
     public void shouldSetDefaultSamplingStack() throws Exception
     {
-        Platform         platform  = LocalPlatform.get();
-        MetaClass        metaClass = new JavaApplication.MetaClass();
-        Options          options   = new Options();
+        Platform         platform      = LocalPlatform.get();
+        MetaClass        metaClass     = new JavaApplication.MetaClass();
+        OptionsByType    optionsByType = OptionsByType.empty();
 
-        JprofilerProfile profile   = JprofilerProfile.enabled("mylib").samplingStack(1234).defaultSamplingStack();
+        JprofilerProfile profile       = JprofilerProfile.enabled("mylib").samplingStack(1234).defaultSamplingStack();
 
-        profile.onLaunching(platform, metaClass, options);
+        profile.onLaunching(platform, metaClass, optionsByType);
 
-        assertAgentString(options, "-agentpath:mylib=", "port=8849");
+        assertAgentString(optionsByType, "-agentpath:mylib=", "port=8849");
     }
 
 
     @Test
     public void shouldSetStack() throws Exception
     {
-        Platform         platform  = LocalPlatform.get();
-        MetaClass        metaClass = new JavaApplication.MetaClass();
-        Options          options   = new Options();
+        Platform         platform      = LocalPlatform.get();
+        MetaClass        metaClass     = new JavaApplication.MetaClass();
+        OptionsByType    optionsByType = OptionsByType.empty();
 
-        JprofilerProfile profile   = JprofilerProfile.enabled("mylib").stack(1234);
+        JprofilerProfile profile       = JprofilerProfile.enabled("mylib").stack(1234);
 
-        profile.onLaunching(platform, metaClass, options);
+        profile.onLaunching(platform, metaClass, optionsByType);
 
-        assertAgentString(options, "-agentpath:mylib=", "port=8849", "stack=1234");
+        assertAgentString(optionsByType, "-agentpath:mylib=", "port=8849", "stack=1234");
     }
 
 
     @Test
     public void shouldSetDefaultStack() throws Exception
     {
-        Platform         platform  = LocalPlatform.get();
-        MetaClass        metaClass = new JavaApplication.MetaClass();
-        Options          options   = new Options();
+        Platform         platform      = LocalPlatform.get();
+        MetaClass        metaClass     = new JavaApplication.MetaClass();
+        OptionsByType    optionsByType = OptionsByType.empty();
 
-        JprofilerProfile profile   = JprofilerProfile.enabled("mylib").stack(1234).defaultStack();
+        JprofilerProfile profile       = JprofilerProfile.enabled("mylib").stack(1234).defaultStack();
 
-        profile.onLaunching(platform, metaClass, options);
+        profile.onLaunching(platform, metaClass, optionsByType);
 
-        assertAgentString(options, "-agentpath:mylib=", "port=8849");
+        assertAgentString(optionsByType, "-agentpath:mylib=", "port=8849");
     }
 
 
     @Test
     public void shouldCreateDisabledProfile() throws Exception
     {
-        Platform         platform  = LocalPlatform.get();
-        MetaClass        metaClass = new JavaApplication.MetaClass();
-        Options          options   = new Options();
+        Platform         platform      = LocalPlatform.get();
+        MetaClass        metaClass     = new JavaApplication.MetaClass();
+        OptionsByType    optionsByType = OptionsByType.empty();
 
-        JprofilerProfile profile   = JprofilerProfile.disabled();
+        JprofilerProfile profile       = JprofilerProfile.disabled();
 
         assertThat(profile.isEnabled(), is(false));
 
-        profile.onLaunching(platform, metaClass, options);
+        profile.onLaunching(platform, metaClass, optionsByType);
 
-        Freeforms freeforms = options.get(Freeforms.class);
+        Freeforms freeforms = optionsByType.get(Freeforms.class);
 
         assertThat(freeforms, is(notNullValue()));
         assertThat(freeforms.iterator().hasNext(), is(false));
@@ -236,51 +236,51 @@ public class JprofilerProfileTest
     @Test
     public void shouldAddJniInterception() throws Exception
     {
-        Platform         platform  = LocalPlatform.get();
-        MetaClass        metaClass = new JavaApplication.MetaClass();
-        Options          options   = new Options();
+        Platform         platform      = LocalPlatform.get();
+        MetaClass        metaClass     = new JavaApplication.MetaClass();
+        OptionsByType    optionsByType = OptionsByType.empty();
 
-        JprofilerProfile profile   = JprofilerProfile.enabled("mylib").jniInterception(true);
+        JprofilerProfile profile       = JprofilerProfile.enabled("mylib").jniInterception(true);
 
-        profile.onLaunching(platform, metaClass, options);
+        profile.onLaunching(platform, metaClass, optionsByType);
 
-        assertAgentString(options, "-agentpath:mylib=", "port=8849", "jniInterception");
+        assertAgentString(optionsByType, "-agentpath:mylib=", "port=8849", "jniInterception");
     }
 
 
     @Test
     public void shouldSetListenMode() throws Exception
     {
-        Platform         platform  = LocalPlatform.get();
-        MetaClass        metaClass = new JavaApplication.MetaClass();
-        Options          options   = new Options();
+        Platform         platform      = LocalPlatform.get();
+        MetaClass        metaClass     = new JavaApplication.MetaClass();
+        OptionsByType    optionsByType = OptionsByType.empty();
 
-        JprofilerProfile profile   = JprofilerProfile.enabled("mylib").listenMode();
+        JprofilerProfile profile       = JprofilerProfile.enabled("mylib").listenMode();
 
-        profile.onLaunching(platform, metaClass, options);
+        profile.onLaunching(platform, metaClass, optionsByType);
 
-        assertAgentString(options, "-agentpath:mylib=", "port=8849");
+        assertAgentString(optionsByType, "-agentpath:mylib=", "port=8849");
     }
 
 
     @Test
     public void shouldSetListenModeWithSpecificAddress() throws Exception
     {
-        Platform                       platform    = LocalPlatform.get();
-        MetaClass                      metaClass   = new JavaApplication.MetaClass();
-        Options                        options     = new Options();
+        Platform                       platform      = LocalPlatform.get();
+        MetaClass                      metaClass     = new JavaApplication.MetaClass();
+        OptionsByType                  optionsByType = OptionsByType.empty();
 
-        InetAddress                    inetAddress = InetAddress.getLocalHost();
-        int                            port        = 9000;
-        JprofilerProfile.ListenAddress address     = new JprofilerProfile.ListenAddress(inetAddress, port);
+        InetAddress                    inetAddress   = InetAddress.getLocalHost();
+        int                            port          = 9000;
+        JprofilerProfile.ListenAddress address       = new JprofilerProfile.ListenAddress(inetAddress, port);
 
-        JprofilerProfile               profile     = JprofilerProfile.enabled("mylib").listenMode(address);
+        JprofilerProfile               profile       = JprofilerProfile.enabled("mylib").listenMode(address);
 
-        profile.onLaunching(platform, metaClass, options);
+        profile.onLaunching(platform, metaClass, optionsByType);
 
-        assertAgentString(options, "-agentpath:mylib=", "address=" + inetAddress.getHostName(), "port=" + port);
+        assertAgentString(optionsByType, "-agentpath:mylib=", "address=" + inetAddress.getHostName(), "port=" + port);
 
-        JprofilerProfile.ListenAddress result = options.get(JprofilerProfile.ListenAddress.class);
+        JprofilerProfile.ListenAddress result = optionsByType.get(JprofilerProfile.ListenAddress.class);
 
         assertThat(result, is(address));
     }
@@ -289,47 +289,47 @@ public class JprofilerProfileTest
     @Test
     public void shouldSetOfflineModeWithFileAndSession() throws Exception
     {
-        Platform         platform  = LocalPlatform.get();
-        MetaClass        metaClass = new JavaApplication.MetaClass();
-        Options          options   = new Options();
+        Platform         platform      = LocalPlatform.get();
+        MetaClass        metaClass     = new JavaApplication.MetaClass();
+        OptionsByType    optionsByType = OptionsByType.empty();
 
-        File             file      = new File("config.xml");
-        int              session   = 1234;
-        JprofilerProfile profile   = JprofilerProfile.enabled("mylib").offlineMode(file, session);
+        File             file          = new File("config.xml");
+        int              session       = 1234;
+        JprofilerProfile profile       = JprofilerProfile.enabled("mylib").offlineMode(file, session);
 
-        profile.onLaunching(platform, metaClass, options);
+        profile.onLaunching(platform, metaClass, optionsByType);
 
-        assertAgentString(options, "-agentpath:mylib=offline", "id=1234", "nowait", "config=config.xml");
+        assertAgentString(optionsByType, "-agentpath:mylib=offline", "id=1234", "nowait", "config=config.xml");
     }
 
 
     @Test
     public void shouldSetOfflineModeWithSession() throws Exception
     {
-        Platform         platform  = LocalPlatform.get();
-        MetaClass        metaClass = new JavaApplication.MetaClass();
-        Options          options   = new Options();
+        Platform         platform      = LocalPlatform.get();
+        MetaClass        metaClass     = new JavaApplication.MetaClass();
+        OptionsByType    optionsByType = OptionsByType.empty();
 
-        int              session   = 1234;
-        JprofilerProfile profile   = JprofilerProfile.enabled("mylib").offlineMode(session);
+        int              session       = 1234;
+        JprofilerProfile profile       = JprofilerProfile.enabled("mylib").offlineMode(session);
 
-        profile.onLaunching(platform, metaClass, options);
+        profile.onLaunching(platform, metaClass, optionsByType);
 
-        assertAgentString(options, "-agentpath:mylib=offline", "id=1234", "nowait");
+        assertAgentString(optionsByType, "-agentpath:mylib=offline", "id=1234", "nowait");
     }
 
 
-    public void assertAgentString(Options   options,
-                                  String    agent,
-                                  String... expectedValues)
+    public void assertAgentString(OptionsByType optionsByType,
+                                  String        agent,
+                                  String...     expectedValues)
     {
-        Freeforms freeforms = options.get(Freeforms.class);
+        Freeforms freeforms = optionsByType.get(Freeforms.class);
 
         assertThat(freeforms, is(notNullValue()));
         assertThat(freeforms.iterator().hasNext(), is(true));
 
         Freeform         freeform = freeforms.iterator().next();
-        Iterator<String> iterator = freeform.resolve(options).iterator();
+        Iterator<String> iterator = freeform.resolve(optionsByType).iterator();
 
         assertThat(iterator.hasNext(), is(true));
 
@@ -383,7 +383,7 @@ public class JprofilerProfileTest
         // The console to capture application output to verify JProfiler starts
         CapturingApplicationConsole console       = new CapturingApplicationConsole();
 
-        Options                     launchOptions = new Options(options);
+        OptionsByType               launchOptions = OptionsByType.of(options);
 
         launchOptions.add(Console.of(console));
 

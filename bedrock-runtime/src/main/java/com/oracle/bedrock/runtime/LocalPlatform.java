@@ -25,7 +25,7 @@
 
 package com.oracle.bedrock.runtime;
 
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.io.NetworkHelper;
 import com.oracle.bedrock.runtime.concurrent.RemoteCallable;
 import com.oracle.bedrock.runtime.concurrent.RemoteChannel;
@@ -160,11 +160,11 @@ public class LocalPlatform extends AbstractPlatform
 
 
     @Override
-    protected <A extends Application, B extends ApplicationLauncher<A>> B getApplicationLauncher(MetaClass<A> metaClass,
-                                                                                                 Options      options)
+    protected <A extends Application, B extends ApplicationLauncher<A>> B getApplicationLauncher(MetaClass<A>  metaClass,
+                                                                                                 OptionsByType optionsByType)
                                                                                                  throws UnsupportedOperationException
     {
-        Class<? extends A> applicationClass = metaClass.getImplementationClass(this, options);
+        Class<? extends A> applicationClass = metaClass.getImplementationClass(this, optionsByType);
 
         if (JavaApplication.class.isAssignableFrom(applicationClass))
         {

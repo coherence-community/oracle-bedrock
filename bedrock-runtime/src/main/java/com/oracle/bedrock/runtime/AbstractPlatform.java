@@ -26,7 +26,7 @@
 package com.oracle.bedrock.runtime;
 
 import com.oracle.bedrock.Option;
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.annotations.Internal;
 import com.oracle.bedrock.extensible.AbstractExtensible;
 
@@ -47,9 +47,9 @@ public abstract class AbstractPlatform extends AbstractExtensible implements Pla
     private String name;
 
     /**
-     * The {@link Options} for the {@link Platform}.
+     * The {@link OptionsByType} for the {@link Platform}.
      */
-    private Options options;
+    private OptionsByType optionsByType;
 
 
     /**
@@ -63,8 +63,8 @@ public abstract class AbstractPlatform extends AbstractExtensible implements Pla
     {
         super();
 
-        this.name    = name;
-        this.options = new Options(options);
+        this.name          = name;
+        this.optionsByType = OptionsByType.of(options);
     }
 
 
@@ -76,9 +76,9 @@ public abstract class AbstractPlatform extends AbstractExtensible implements Pla
 
 
     @Override
-    public Options getOptions()
+    public OptionsByType getOptions()
     {
-        return options;
+        return optionsByType;
     }
 
 
@@ -87,7 +87,7 @@ public abstract class AbstractPlatform extends AbstractExtensible implements Pla
                                             Option...    options)
     {
         // establish the initial launch options based on those defined by the platform
-        Options launchOptions = new Options(getOptions().asArray());
+        OptionsByType launchOptions = OptionsByType.of(getOptions().asArray());
 
         // include the options specified when this method was called
         launchOptions.addAll(options);
@@ -110,21 +110,21 @@ public abstract class AbstractPlatform extends AbstractExtensible implements Pla
 
     /**
      * Obtains the {@link ApplicationLauncher} for the given {@link Application} {@link MetaClass} and launch
-     * {@link Options}.
+     * {@link OptionsByType}.
      *
-     * @param metaClass         the {@link MetaClass} for the {@link Application}
-     * @param options           the launch {@link Options} for the {@link Application}
+     * @param metaClass      the {@link MetaClass} for the {@link Application}
+     * @param optionsByType  the launch {@link OptionsByType} for the {@link Application}
      *
-     * @param <A>               the type of the {@link Application}
-     * @param <B>               the type of the {@link ApplicationLauncher}
+     * @param <A>            the type of the {@link Application}
+     * @param <B>            the type of the {@link ApplicationLauncher}
      *
      * @throws UnsupportedOperationException  when an {@link ApplicationLauncher} for the specified {@link Application}
-     *                                        {@link Class} and {@link MetaClass} with the provided {@link Options}
+     *                                        {@link Class} and {@link MetaClass} with the provided {@link OptionsByType}
      *                                        is unavailable and/or unsupported
      * @return  an {@link ApplicationLauncher} capable of launching the {@link Class} of {@link Application}
      */
     abstract protected <A extends Application,
-                        B extends ApplicationLauncher<A>> B getApplicationLauncher(MetaClass<A> metaClass,
-                                                                                   Options      options)
+                        B extends ApplicationLauncher<A>> B getApplicationLauncher(MetaClass<A>  metaClass,
+                                                                                   OptionsByType optionsByType)
                                                                                    throws UnsupportedOperationException;
 }

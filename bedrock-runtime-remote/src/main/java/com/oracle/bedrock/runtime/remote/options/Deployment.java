@@ -26,7 +26,7 @@
 package com.oracle.bedrock.runtime.remote.options;
 
 import com.oracle.bedrock.Option;
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.runtime.Application;
 import com.oracle.bedrock.runtime.Platform;
 import com.oracle.bedrock.runtime.remote.DeploymentArtifact;
@@ -49,14 +49,14 @@ public interface Deployment extends Option
     /**
      * Obtain the {@link DeploymentArtifact}s to deploy.
      *
-     * @param platform  the {@link Platform} on which the {@link Application} will be deployed
-     * @param options   the {@link Options} for realizing the {@link Application}
+     * @param platform       the {@link Platform} on which the {@link Application} will be deployed
+     * @param optionsByType  the {@link OptionsByType} for realizing the {@link Application}
      *
      * @return  a {@link List} of {@link DeploymentArtifact}s
      *
      * @throws FileNotFoundException  when a {@link DeploymentArtifact} cannot be found
      * @throws IOException            when a {@link DeploymentArtifact} fail to be created/accessed
      */
-    List<DeploymentArtifact> getDeploymentArtifacts(Platform platform,
-                                                    Options  options) throws IOException;
+    List<DeploymentArtifact> getDeploymentArtifacts(Platform      platform,
+                                                    OptionsByType optionsByType) throws IOException;
 }

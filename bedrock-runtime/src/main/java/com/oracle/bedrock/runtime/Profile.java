@@ -26,7 +26,7 @@
 package com.oracle.bedrock.runtime;
 
 import com.oracle.bedrock.Option;
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 
 /**
  * Often implemented by {@link Option} classes, {@link Profile}s provide a mechanism to
@@ -42,41 +42,41 @@ public interface Profile
 {
     /**
      * Invoked by a {@link Platform} prior to an {@link Application} being launched,
-     * allowing a {@link Profile} to prepare and customize the specified {@link Options}, based
+     * allowing a {@link Profile} to prepare and customize the specified {@link OptionsByType}, based
      * on the {@link MetaClass} if necessary.
      *
-     * @param platform   the {@link Platform}
-     * @param metaClass  the {@link MetaClass}
-     * @param options    the {@link Options}
+     * @param platform       the {@link Platform}
+     * @param metaClass      the {@link MetaClass}
+     * @param optionsByType  the {@link OptionsByType}
      */
-    void onLaunching(Platform  platform,
-                     MetaClass metaClass,
-                     Options   options);
+    void onLaunching(Platform      platform,
+                     MetaClass     metaClass,
+                     OptionsByType optionsByType);
 
 
     /**
      * Invoked by a {@link Platform} after an {@link Application} has been launched using the
-     * specified {@link Options}, but before the {@link Application} is returned to the
+     * specified {@link OptionsByType}, but before the {@link Application} is returned to the
      * {@link Thread} that requested the {@link Application} to be launched.
      *
-     * @param platform      the {@link Platform}
-     * @param application   the {@link Application}
-     * @param options       the {@link Options}
+     * @param platform       the {@link Platform}
+     * @param application    the {@link Application}
+     * @param optionsByType  the {@link OptionsByType}
      */
-    void onLaunched(Platform    platform,
-                    Application application,
-                    Options     options);
+    void onLaunched(Platform      platform,
+                    Application   application,
+                    OptionsByType optionsByType);
 
 
     /**
      * Invoked by an {@link Application} prior to it being closed for the specified
-     * {@link Platform}, when it was launched with the provided {@link Options}.
+     * {@link Platform}, when it was launched with the provided {@link OptionsByType}.
      *
-     * @param platform      the {@link Platform}
-     * @param application  the {@link Application}
-     * @param options      the {@link Options}
+     * @param platform       the {@link Platform}
+     * @param application    the {@link Application}
+     * @param optionsByType  the {@link OptionsByType}
      */
-    void onClosing(Platform    platform,
-                   Application application,
-                   Options     options);
+    void onClosing(Platform      platform,
+                   Application   application,
+                   OptionsByType optionsByType);
 }

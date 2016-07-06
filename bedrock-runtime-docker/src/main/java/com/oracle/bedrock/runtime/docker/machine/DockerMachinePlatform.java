@@ -26,7 +26,7 @@
 package com.oracle.bedrock.runtime.docker.machine;
 
 import com.oracle.bedrock.Option;
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.runtime.docker.Docker;
 import com.oracle.bedrock.runtime.docker.DockerPlatform;
 import com.oracle.bedrock.runtime.remote.Password;
@@ -103,9 +103,10 @@ public class DockerMachinePlatform extends DockerPlatform implements Closeable
      */
     public RemotePlatform getRemotePlatform(Option... options)
     {
-        String      name            = getName();
-        InetAddress address         = machine.getAddress(name);
-        Options     platformOptions = this.getOptions().add(StrictHostChecking.disabled()).addAll(options);
+        String      name    = getName();
+        InetAddress address = machine.getAddress(name);
+        OptionsByType platformOptions =
+            OptionsByType.of(this.getOptions()).add(StrictHostChecking.disabled()).addAll(options);
 
         return new RemotePlatform(name, address, "docker", new Password("tcuser"), platformOptions.asArray());
     }
@@ -131,7 +132,7 @@ public class DockerMachinePlatform extends DockerPlatform implements Closeable
      */
     public void close(Option... options)
     {
-        Options               closeOptions = new Options(this.getOptions()).addAll(options);
+        OptionsByType         closeOptions = OptionsByType.of(getOptions()).addAll(options);
         MachineCloseBehaviour behaviour    = closeOptions.get(MachineCloseBehaviour.class);
 
         behaviour.accept(this);

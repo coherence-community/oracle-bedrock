@@ -26,7 +26,7 @@
 package com.oracle.bedrock.runtime.java.options;
 
 import com.oracle.bedrock.Option;
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 
 /**
  * Represents a Java Virtual Machine specific {@link Option}.
@@ -41,9 +41,9 @@ public interface JvmOption extends Option
     /**
      * Obtains the values for the {@link JvmOption}.
      *
-     * @param options  {@link Options} to be used for resolving the values.
+     * @param optionsByType  {@link OptionsByType} to be used for resolving the values.
      *
      * @return the values for the {@link JvmOption}
      */
-    Iterable<String> resolve(Options options);
+    Iterable<String> resolve(OptionsByType optionsByType);
 }

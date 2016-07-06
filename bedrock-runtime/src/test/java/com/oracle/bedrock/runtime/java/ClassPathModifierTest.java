@@ -25,7 +25,7 @@
 
 package com.oracle.bedrock.runtime.java;
 
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -58,9 +58,9 @@ public class ClassPathModifierTest
     @Test
     public void shouldFindNoneOption() throws Exception
     {
-        ClassPathModifier none     = ClassPathModifier.none();
-        Options           options  = new Options(none);
-        ClassPathModifier modifier = options.get(ClassPathModifier.class);
+        ClassPathModifier none          = ClassPathModifier.none();
+        OptionsByType     optionsByType = OptionsByType.of(none);
+        ClassPathModifier modifier      = optionsByType.get(ClassPathModifier.class);
 
         assertThat(modifier, is(sameInstance(none)));
     }
@@ -69,9 +69,9 @@ public class ClassPathModifierTest
     @Test
     public void shouldFindCygwinOption() throws Exception
     {
-        ClassPathModifier cygwin   = ClassPathModifier.forCygwin();
-        Options           options  = new Options(cygwin);
-        ClassPathModifier modifier = options.get(ClassPathModifier.class);
+        ClassPathModifier cygwin        = ClassPathModifier.forCygwin();
+        OptionsByType     optionsByType = OptionsByType.of(cygwin);
+        ClassPathModifier modifier      = optionsByType.get(ClassPathModifier.class);
 
         assertThat(modifier, is(sameInstance(cygwin)));
     }

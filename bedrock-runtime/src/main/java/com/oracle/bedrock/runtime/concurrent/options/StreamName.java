@@ -26,7 +26,7 @@
 package com.oracle.bedrock.runtime.concurrent.options;
 
 import com.oracle.bedrock.Option;
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.runtime.concurrent.RemoteEvent;
 
 /**
@@ -92,7 +92,7 @@ public class StreamName implements Option
      *
      * @return a default {@link StreamName}
      */
-    @Options.Default
+    @OptionsByType.Default
     public static StreamName automatic()
     {
         return new StreamName(null);

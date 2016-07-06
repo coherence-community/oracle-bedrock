@@ -25,7 +25,7 @@
 
 package com.oracle.bedrock.runtime.docker;
 
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.extensible.Extensible;
 import com.oracle.bedrock.extensible.Feature;
 import com.oracle.bedrock.runtime.Application;
@@ -55,9 +55,9 @@ public class DockerContainer implements Feature, ApplicationListener<Application
     private final String name;
 
     /**
-     * The {@link Options} used to run this container
+     * The {@link OptionsByType} used to run this container
      */
-    private final Options options;
+    private final OptionsByType optionsByType;
 
     /**
      * The {@link Application} used to run this container.
@@ -75,19 +75,19 @@ public class DockerContainer implements Feature, ApplicationListener<Application
     /**
      * Create a {@link DockerContainer}.
      *
-     * @param name     the name of the container
-     * @param options  the {@link Options} used to run the container
+     * @param name           the name of the container
+     * @param optionsByType  the {@link OptionsByType} used to run the container
      */
-    public DockerContainer(String  name,
-                           Options options)
+    public DockerContainer(String        name,
+                           OptionsByType optionsByType)
     {
         if (name == null || name.trim().isEmpty())
         {
             throw new IllegalArgumentException("The container name cannot be null or empty String");
         }
 
-        this.name    = name;
-        this.options = options == null ? new Options() : new Options(options);
+        this.name          = name;
+        this.optionsByType = optionsByType == null ? OptionsByType.empty() : OptionsByType.of(optionsByType);
     }
 
 
@@ -114,13 +114,13 @@ public class DockerContainer implements Feature, ApplicationListener<Application
 
 
     /**
-     * Obtain the {@link Options} used to run this container.
+     * Obtain the {@link OptionsByType} used to run this container.
      *
-     * @return  the {@link Options} used to run this container
+     * @return  the {@link OptionsByType} used to run this container
      */
-    public Options getOptions()
+    public OptionsByType getOptions()
     {
-        return options;
+        return optionsByType;
     }
 
 
@@ -131,7 +131,7 @@ public class DockerContainer implements Feature, ApplicationListener<Application
      */
     public Docker getDockerEnvironment()
     {
-        return options.get(Docker.class);
+        return optionsByType.get(Docker.class);
     }
 
 
@@ -235,7 +235,7 @@ public class DockerContainer implements Feature, ApplicationListener<Application
             throw new IllegalStateException("No Platform is available, is this container a feature of an Application");
         }
 
-        Docker docker = options.get(Docker.class);
+        Docker docker = optionsByType.get(Docker.class);
 
         try (Application app = platform.launch(Stop.containers(name), docker))
         {
@@ -264,7 +264,7 @@ public class DockerContainer implements Feature, ApplicationListener<Application
             throw new IllegalStateException("No Platform is available, is this container a feature of an Application");
         }
 
-        Docker                 docker = options.get(Docker.class);
+        Docker                 docker = optionsByType.get(Docker.class);
         Remove.RemoveContainer removeCommand;
 
         if (force)
@@ -306,27 +306,27 @@ public class DockerContainer implements Feature, ApplicationListener<Application
 
 
     @Override
-    public void onClosing(Application application,
-                          Options     options)
+    public void onClosing(Application   application,
+                          OptionsByType optionsByType)
     {
         // there is nothing to do here
     }
 
 
     @Override
-    public void onClosed(Application application,
-                         Options     options)
+    public void onClosed(Application   application,
+                         OptionsByType optionsByType)
     {
-        Options closingOptions;
+        OptionsByType closingOptions;
 
         if (application != null)
         {
-            closingOptions = new Options(application.getOptions());
-            closingOptions.addAll(options);
+            closingOptions = OptionsByType.of(application.getOptions());
+            closingOptions.addAll(optionsByType);
         }
         else
         {
-            closingOptions = options;
+            closingOptions = optionsByType;
         }
 
         ContainerCloseBehaviour behaviour = closingOptions.get(ContainerCloseBehaviour.class);

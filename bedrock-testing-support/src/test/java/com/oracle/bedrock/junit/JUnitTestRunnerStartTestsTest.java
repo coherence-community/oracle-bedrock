@@ -26,7 +26,7 @@
 package com.oracle.bedrock.junit;
 
 import com.oracle.bedrock.Option;
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
@@ -51,22 +51,22 @@ public class JUnitTestRunnerStartTestsTest
     @Test
     public void shouldStartTests() throws Exception
     {
-        Option                     opt1       = new DummyOptionOne();
-        Option                     opt2       = new DummyOptionTwo();
-        Option                     opt3       = new DummyOptionThree();
-        Options                    options    = new Options(opt1, opt2, opt3);
-        JUnitTestRunner            runner     = mock(JUnitTestRunner.class);
-        JUnitTestRunner.StartTests startTests = new JUnitTestRunner.StartTests(options);
+        Option                     opt1          = new DummyOptionOne();
+        Option                     opt2          = new DummyOptionTwo();
+        Option                     opt3          = new DummyOptionThree();
+        OptionsByType              optionsByType = OptionsByType.of(opt1, opt2, opt3);
+        JUnitTestRunner            runner        = mock(JUnitTestRunner.class);
+        JUnitTestRunner.StartTests startTests    = new JUnitTestRunner.StartTests(optionsByType);
 
         startTests.setRunner(runner);
 
         startTests.call();
 
-        ArgumentCaptor<Options> captor = ArgumentCaptor.forClass(Options.class);
+        ArgumentCaptor<OptionsByType> captor = ArgumentCaptor.forClass(OptionsByType.class);
 
         verify(runner).run(captor.capture());
 
-        Options arg = captor.getValue();
+        OptionsByType arg = captor.getValue();
 
         assertThat(arg.asArray(), is(arrayContainingInAnyOrder(opt1, opt2)));
     }
@@ -76,7 +76,7 @@ public class JUnitTestRunnerStartTestsTest
      * Class description
      *
      * @version        Enter version here..., 16/05/06
-     * @author         Enter your name here...    
+     * @author         Enter your name here...
      */
     public static class DummyOptionOne implements Option, Serializable
     {
@@ -87,7 +87,7 @@ public class JUnitTestRunnerStartTestsTest
      * Class description
      *
      * @version        Enter version here..., 16/05/06
-     * @author         Enter your name here...    
+     * @author         Enter your name here...
      */
     public static class DummyOptionThree implements Option
     {
@@ -98,7 +98,7 @@ public class JUnitTestRunnerStartTestsTest
      * Class description
      *
      * @version        Enter version here..., 16/05/06
-     * @author         Enter your name here...    
+     * @author         Enter your name here...
      */
     public static class DummyOptionTwo implements Option, Serializable
     {

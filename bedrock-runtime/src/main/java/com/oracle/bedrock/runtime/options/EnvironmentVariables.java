@@ -26,7 +26,7 @@
 package com.oracle.bedrock.runtime.options;
 
 import com.oracle.bedrock.Option;
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.lang.ExpressionEvaluator;
 import com.oracle.bedrock.runtime.Platform;
 
@@ -154,7 +154,7 @@ public class EnvironmentVariables implements Option.Collector<EnvironmentVariabl
      *
      * @return an {@link EnvironmentVariables}
      */
-    @Options.Default
+    @OptionsByType.Default
     public static EnvironmentVariables inherited()
     {
         return new EnvironmentVariables(Source.ThisApplication);
@@ -204,19 +204,19 @@ public class EnvironmentVariables implements Option.Collector<EnvironmentVariabl
      * {@link EnvironmentVariable.ContextSensitiveValue#getValue(String, Platform, Option...)} is called
      * to resolve the value.
      *
-     * @param platform        the target {@link Platform} for the returned {@link Properties}
-     * @param realizeOptions  the {@link Option}s for realizing the {@link Properties}
+     * @param platform  the target {@link Platform} for the returned {@link Properties}
+     * @param options   the {@link Option}s for realizing the {@link Properties}
      *
      * @return a new {@link Properties} instance
      */
     public Properties realize(Platform  platform,
-                              Option... realizeOptions)
+                              Option... options)
     {
-        Options             options    = new Options(realizeOptions);
+        OptionsByType       optionsByType = OptionsByType.of(options);
 
-        ExpressionEvaluator evaluator  = new ExpressionEvaluator(options);
+        ExpressionEvaluator evaluator     = new ExpressionEvaluator(optionsByType);
 
-        Properties          properties = new Properties();
+        Properties          properties    = new Properties();
 
         for (EnvironmentVariable variable : this.variables.values())
         {
@@ -230,7 +230,7 @@ public class EnvironmentVariables implements Option.Collector<EnvironmentVariabl
                     EnvironmentVariable.ContextSensitiveValue contextSensitiveValue =
                         (EnvironmentVariable.ContextSensitiveValue) value;
 
-                    value = contextSensitiveValue.getValue(name, platform, realizeOptions);
+                    value = contextSensitiveValue.getValue(name, platform, options);
                 }
 
                 if (value instanceof Iterator<?>)

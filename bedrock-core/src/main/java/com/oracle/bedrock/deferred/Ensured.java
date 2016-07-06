@@ -26,7 +26,7 @@
 package com.oracle.bedrock.deferred;
 
 import com.oracle.bedrock.Option;
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.deferred.options.InitialDelay;
 import com.oracle.bedrock.deferred.options.MaximumRetryDelay;
 import com.oracle.bedrock.deferred.options.RetryFrequency;
@@ -121,7 +121,7 @@ public class Ensured<T> implements Deferred<T>
         this.deferred = deferred instanceof Ensured ? ((Ensured<T>) deferred).getDeferred() : deferred;
 
         // determine the timeout constraints based on the provided options
-        Options optionsByType = Options.from(options);
+        OptionsByType optionsByType = OptionsByType.of(options);
 
         this.initialDelayDurationMS = optionsByType.getOrDefault(InitialDelay.class,
                                                                  InitialDelay.none()).to(TimeUnit.MILLISECONDS);

@@ -25,7 +25,7 @@
 
 package com.oracle.bedrock.runtime.java;
 
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.annotations.Internal;
 import com.oracle.bedrock.runtime.ApplicationLauncher;
 import com.oracle.bedrock.runtime.java.options.ClassName;
@@ -43,13 +43,13 @@ import com.oracle.bedrock.runtime.options.DisplayName;
 public interface JavaApplicationLauncher<A extends JavaApplication> extends ApplicationLauncher<A>
 {
     @Override
-    default DisplayName getDisplayName(Options options)
+    default DisplayName getDisplayName(OptionsByType optionsByType)
     {
-        ClassName className = options.get(ClassName.class);
+        ClassName className = optionsByType.get(ClassName.class);
 
         if (className == null)
         {
-            return options.get(DisplayName.class);
+            return optionsByType.get(DisplayName.class);
         }
         else
         {
@@ -61,11 +61,11 @@ public interface JavaApplicationLauncher<A extends JavaApplication> extends Appl
 
             if (shortClassName.isEmpty())
             {
-                return options.get(DisplayName.class);
+                return optionsByType.get(DisplayName.class);
             }
             else
             {
-                return options.getOrDefault(DisplayName.class, DisplayName.of(shortClassName));
+                return optionsByType.getOrDefault(DisplayName.class, DisplayName.of(shortClassName));
             }
         }
     }

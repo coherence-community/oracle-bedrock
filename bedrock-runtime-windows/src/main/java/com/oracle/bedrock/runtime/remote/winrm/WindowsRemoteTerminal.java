@@ -25,15 +25,13 @@
 
 package com.oracle.bedrock.runtime.remote.winrm;
 
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.runtime.Application;
+import com.oracle.bedrock.runtime.options.WorkingDirectory;
 import com.oracle.bedrock.runtime.remote.AbstractRemoteTerminal;
 import com.oracle.bedrock.runtime.remote.RemoteApplicationProcess;
 import com.oracle.bedrock.runtime.remote.RemotePlatform;
 import com.oracle.bedrock.runtime.remote.RemoteTerminal;
-import com.oracle.bedrock.Options;
-
-import com.oracle.bedrock.runtime.options.WorkingDirectory;
-
 import com.oracle.bedrock.table.Table;
 
 import java.util.Arrays;
@@ -58,6 +56,7 @@ public class WindowsRemoteTerminal extends AbstractRemoteTerminal
      */
     private static Logger LOGGER = Logger.getLogger(WindowsRemoteTerminal.class.getName());
 
+
     /**
      * Create a Windows remote shell that will connect to the WinRM
      * service running on the {@link RemotePlatform}.
@@ -73,33 +72,32 @@ public class WindowsRemoteTerminal extends AbstractRemoteTerminal
     @SuppressWarnings("unchecked")
     public RemoteApplicationProcess launch(Launchable                   launchable,
                                            Class<? extends Application> applicationClass,
-                                           Options                      options)
+                                           OptionsByType                optionsByType)
     {
         try
         {
             // ----- establish the application command line to execute -----
 
             // determine the command to execute remotely
-            String       command = launchable.getCommandToExecute(getRemotePlatform(), options);
+            String       command = launchable.getCommandToExecute(getRemotePlatform(), optionsByType);
 
-            List<String> args    = launchable.getCommandLineArguments(getRemotePlatform(), options);
+            List<String> args    = launchable.getCommandLineArguments(getRemotePlatform(), optionsByType);
 
             // ----- establish the remote application process to represent the remote application -----
 
             WindowsSession   session          = createSession();
 
-            WorkingDirectory workingDirectory = options.get(WorkingDirectory.class);
+            WorkingDirectory workingDirectory = optionsByType.get(WorkingDirectory.class);
 
-            session.connect(workingDirectory.resolve(getRemotePlatform(), options).toString(),
-                            launchable.getEnvironmentVariables(getRemotePlatform(), options));
+            session.connect(workingDirectory.resolve(getRemotePlatform(), optionsByType).toString(),
+                            launchable.getEnvironmentVariables(getRemotePlatform(), optionsByType));
 
             // establish a RemoteApplicationProcess representing the remote application
             WindowsRemoteApplicationProcess process = new WindowsRemoteApplicationProcess(session);
 
             // ----- start the remote application -----
 
-
-            Table diagnosticsTable = options.get(Table.class);
+            Table diagnosticsTable = optionsByType.get(Table.class);
 
             if (diagnosticsTable != null && LOGGER.isLoggable(Level.INFO))
             {
@@ -124,8 +122,8 @@ public class WindowsRemoteTerminal extends AbstractRemoteTerminal
 
 
     @Override
-    public void makeDirectories(String  directoryName,
-                                Options options)
+    public void makeDirectories(String        directoryName,
+                                OptionsByType optionsByType)
     {
         try (WindowsSession session = createSession())
         {
@@ -150,9 +148,9 @@ public class WindowsRemoteTerminal extends AbstractRemoteTerminal
     }
 
 
-    public void moveFile(String  source,
-                         String  destination,
-                         Options options)
+    public void moveFile(String        source,
+                         String        destination,
+                         OptionsByType optionsByType)
     {
         try (WindowsSession session = createSession())
         {

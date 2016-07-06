@@ -25,14 +25,21 @@
 
 package com.oracle.bedrock.runtime.remote.winrm;
 
-import com.microsoft.wsman.shell.*;
-
-import com.oracle.bedrock.runtime.remote.Authentication;
+import com.microsoft.wsman.shell.CommandLine;
+import com.microsoft.wsman.shell.CommandResponse;
+import com.microsoft.wsman.shell.DesiredStreamType;
+import com.microsoft.wsman.shell.EnvironmentVariable;
+import com.microsoft.wsman.shell.EnvironmentVariableList;
+import com.microsoft.wsman.shell.Receive;
+import com.microsoft.wsman.shell.ReceiveResponse;
+import com.microsoft.wsman.shell.Send;
+import com.microsoft.wsman.shell.ShellType;
+import com.microsoft.wsman.shell.Signal;
+import com.microsoft.wsman.shell.StreamType;
 import com.oracle.bedrock.Option;
-import com.oracle.bedrock.Options;
-
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.lang.StringHelper;
-
+import com.oracle.bedrock.runtime.remote.Authentication;
 import org.dmtf.wsman.AttributableDuration;
 import org.dmtf.wsman.AttributableURI;
 import org.dmtf.wsman.MaxEnvelopeSizeType;
@@ -40,11 +47,9 @@ import org.dmtf.wsman.OptionSet;
 import org.dmtf.wsman.OptionType;
 import org.dmtf.wsman.SelectorSetType;
 import org.dmtf.wsman.SelectorType;
-
 import org.w3c.soap.envelope.Body;
 import org.w3c.soap.envelope.Envelope;
 import org.w3c.soap.envelope.Header;
-
 import org.xmlsoap.ws.addressing.AttributedURI;
 import org.xmlsoap.ws.addressing.EndpointReferenceType;
 
@@ -52,7 +57,6 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-
 import java.util.Collection;
 import java.util.List;
 import java.util.Properties;
@@ -125,9 +129,9 @@ public class WindowsSession implements Closeable
     public static final String WSMAN_PATH = "/wsman";
 
     /**
-     * The set of {@link Options} to use to control the session
+     * The set of {@link OptionsByType} to use to control the session
      */
-    private Options options;
+    private OptionsByType optionsByType;
 
     /**
      * The {@link SoapConnection} instance to use to send SOAP messages
@@ -165,8 +169,8 @@ public class WindowsSession implements Closeable
     public WindowsSession(SoapConnection connection,
                           Option...      options)
     {
-        this.connection = connection;
-        this.options    = new Options(options);
+        this.connection    = connection;
+        this.optionsByType = OptionsByType.of(options);
     }
 
 
@@ -201,6 +205,7 @@ public class WindowsSession implements Closeable
     {
         return connection;
     }
+
 
     /**
      * Obtain the ID of the WinRM shell being used by this session.
@@ -375,8 +380,9 @@ public class WindowsSession implements Closeable
             throw new IllegalStateException("Already connected to shell " + shellReferenceId);
         }
 
-        WindowsShellOptions shellOptions = options.getOrDefault(WindowsShellOptions.class, WindowsShellOptions.basic());
-        ShellType           shellType    = ObjectFactories.SHELL.createShellType();
+        WindowsShellOptions shellOptions = optionsByType.getOrDefault(WindowsShellOptions.class,
+                                                                      WindowsShellOptions.basic());
+        ShellType shellType = ObjectFactories.SHELL.createShellType();
 
         if (workingDirectory == null || workingDirectory.isEmpty())
         {
@@ -498,13 +504,14 @@ public class WindowsSession implements Closeable
     }
 
 
-    protected OutputStreamConnector createOutputStreamConnector(OutputStream stdOut, OutputStream stdErr)
+    protected OutputStreamConnector createOutputStreamConnector(OutputStream stdOut,
+                                                                OutputStream stdErr)
     {
         return new OutputStreamConnector(this, stdOut, stdErr);
     }
 
 
-    protected InputStreamConnector createInputStreamConnector(InputStream  stdIn)
+    protected InputStreamConnector createInputStreamConnector(InputStream stdIn)
     {
         return new InputStreamConnector(this, stdIn);
     }
@@ -657,7 +664,8 @@ public class WindowsSession implements Closeable
 
         resourceURI.setValue(URI_WINRM_RESOURCE);
 
-        WindowsSoapOptions  soapOptions     = options.getOrDefault(WindowsSoapOptions.class, WindowsSoapOptions.basic());
+        WindowsSoapOptions soapOptions = optionsByType.getOrDefault(WindowsSoapOptions.class,
+                                                                    WindowsSoapOptions.basic());
 
         MaxEnvelopeSizeType maxEnvelopeSize = ObjectFactories.WSMAN.createMaxEnvelopeSizeType();
 

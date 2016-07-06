@@ -26,7 +26,7 @@
 package com.oracle.bedrock.runtime.virtual.vagrant;
 
 import com.oracle.bedrock.Option;
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.runtime.options.OperatingSystem;
 import com.oracle.bedrock.runtime.remote.options.HostName;
 import com.oracle.bedrock.runtime.virtual.vagrant.options.BoxName;
@@ -68,9 +68,9 @@ class OptionsBasedVagrantFileBuilder implements VagrantFileBuilder
     public static final String CONFIG_VM_BOX_CHECK_UPDATE = ".vm.box_check_update";
 
     /**
-     * The {@link Options} to be used for creating the {@link VagrantFileBuilder}.
+     * The {@link OptionsByType} to be used for creating the {@link VagrantFileBuilder}.
      */
-    private Options options;
+    private OptionsByType optionsByType;
 
 
     /**
@@ -82,26 +82,26 @@ class OptionsBasedVagrantFileBuilder implements VagrantFileBuilder
      */
     OptionsBasedVagrantFileBuilder(Option... options)
     {
-        this.options = new Options(options);
+        this.optionsByType = OptionsByType.of(options);
 
-        BoxName   boxName   = this.options.get(BoxName.class);
-        UpdateBox updateBox = this.options.get(UpdateBox.class);
+        BoxName   boxName   = this.optionsByType.get(BoxName.class);
+        UpdateBox updateBox = this.optionsByType.get(UpdateBox.class);
 
         // TODO: assert a boxname has been provided?
 
         // configure some default properties based on options
-        this.options.add(VagrantProperty.of(CONFIG_VM_BOX, boxName.get()));
-        this.options.add(VagrantProperty.of(CONFIG_VM_BOX_CHECK_UPDATE, updateBox.isEnabled()));
+        this.optionsByType.add(VagrantProperty.of(CONFIG_VM_BOX, boxName.get()));
+        this.optionsByType.add(VagrantProperty.of(CONFIG_VM_BOX_CHECK_UPDATE, updateBox.isEnabled()));
     }
 
 
     @Override
-    public Optional<HostName> create(File    file,
-                                     Options createOptions) throws IOException
+    public Optional<HostName> create(File          file,
+                                     OptionsByType createOptions) throws IOException
     {
         try (PrintWriter writer = new PrintWriter(file))
         {
-            Options vagrantOptions = new Options(this.options).addAll(createOptions);
+            OptionsByType vagrantOptions = OptionsByType.of(this.optionsByType).addAll(createOptions);
 
             // ----- output the header -----
             writer.println("# -*- mode: ruby -*-");

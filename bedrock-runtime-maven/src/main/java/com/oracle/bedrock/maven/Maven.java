@@ -26,7 +26,7 @@
 package com.oracle.bedrock.maven;
 
 import com.oracle.bedrock.ComposableOption;
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.runtime.Application;
 import com.oracle.bedrock.runtime.MetaClass;
 import com.oracle.bedrock.runtime.Platform;
@@ -179,15 +179,15 @@ public class Maven implements Profile, ComposableOption<Maven>
 
     /**
      * Obtain the Maven {@link Settings} for this {@link Maven}
-     * given the specified {@link Platform} and {@link Options}.
+     * given the specified {@link Platform} and {@link OptionsByType}.
      *
-     * @param platform  the {@link Platform} on which an {@link Application} will be launched
-     * @param options   the launch {@link Options}
+     * @param platform       the {@link Platform} on which an {@link Application} will be launched
+     * @param optionsByType  the launch {@link OptionsByType}
      *
      * @return  a new {@link Settings}
      */
-    private Settings getSettings(Platform platform,
-                                 Options  options)
+    private Settings getSettings(Platform      platform,
+                                 OptionsByType optionsByType)
     {
         SettingsBuilder                settingsBuilder = new DefaultSettingsBuilderFactory().newInstance();
 
@@ -251,11 +251,11 @@ public class Maven implements Profile, ComposableOption<Maven>
 
 
     @Override
-    public void onLaunching(Platform  platform,
-                            MetaClass metaClass,
-                            Options   options)
+    public void onLaunching(Platform      platform,
+                            MetaClass     metaClass,
+                            OptionsByType optionsByType)
     {
-        PlatformSeparators separators = options.get(PlatformSeparators.class);
+        PlatformSeparators separators = optionsByType.get(PlatformSeparators.class);
 
         // define the global settings location if it's not defined
         if (globalSettingsFile == null)
@@ -282,7 +282,7 @@ public class Maven implements Profile, ComposableOption<Maven>
         }
 
         // acquire the Maven Settings for the profile
-        Settings settings = getSettings(platform, options);
+        Settings settings = getSettings(platform, optionsByType);
 
         // ----- establish the repository system using the settings -----
         RepositorySystem system = newRepositorySystem();
@@ -354,7 +354,7 @@ public class Maven implements Profile, ComposableOption<Maven>
             // add the additional ClassPaths (when defined)
             classPath = additionalClassPath == null ? classPath : new ClassPath(classPath, additionalClassPath);
 
-            options.add(classPath);
+            optionsByType.add(classPath);
         }
         catch (Exception e)
         {
@@ -364,18 +364,18 @@ public class Maven implements Profile, ComposableOption<Maven>
 
 
     @Override
-    public void onLaunched(Platform    platform,
-                           Application application,
-                           Options     options)
+    public void onLaunched(Platform      platform,
+                           Application   application,
+                           OptionsByType optionsByType)
     {
         // nothing to do after launch
     }
 
 
     @Override
-    public void onClosing(Platform    platform,
-                          Application application,
-                          Options     options)
+    public void onClosing(Platform      platform,
+                          Application   application,
+                          OptionsByType optionsByType)
     {
         // nothing to do before closing
     }
@@ -537,7 +537,7 @@ public class Maven implements Profile, ComposableOption<Maven>
      *
      * @return  a {@link Maven} {@link Profile}
      */
-    @Options.Default
+    @OptionsByType.Default
     public static Maven autoDetect()
     {
         return new Maven(null, null, null, null, null, null);

@@ -27,7 +27,7 @@ package com.oracle.bedrock.runtime.virtual.vagrant.options;
 
 import com.oracle.bedrock.ComposableOption;
 import com.oracle.bedrock.Option;
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.runtime.virtual.vagrant.VagrantPlatform;
 
 import java.io.PrintWriter;
@@ -75,7 +75,7 @@ public class VagrantConfigurations implements ComposableOption<VagrantConfigurat
      *
      * @return an empty {@link VagrantConfigurations}
      */
-    @Options.Default
+    @OptionsByType.Default
     public static VagrantConfigurations none()
     {
         return new VagrantConfigurations();

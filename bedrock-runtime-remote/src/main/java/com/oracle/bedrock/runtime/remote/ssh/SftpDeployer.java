@@ -30,7 +30,7 @@ import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import com.jcraft.jsch.SftpException;
 import com.oracle.bedrock.Option;
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.runtime.Platform;
 import com.oracle.bedrock.runtime.options.PlatformSeparators;
 import com.oracle.bedrock.runtime.remote.Authentication;
@@ -106,14 +106,14 @@ public class SftpDeployer implements Deployer
         String            hostName        = remotePlatform.getAddress().getHostName();
         int               port            = remotePlatform.getPort();
 
-        // Create the deplpyment options
-        Options options = new Options();
+        // Create the deployment options
+        OptionsByType optionsByType = OptionsByType.empty();
 
         // Add the Platform options
-        options.addAll(platform.getOptions().asArray());
+        optionsByType.addAll(platform.getOptions());
 
         // Override with specified Options
-        options.addAll(deploymentOptions);
+        optionsByType.addAll(deploymentOptions);
 
         // initially there's no session
         Session session = null;
@@ -121,12 +121,17 @@ public class SftpDeployer implements Deployer
         try
         {
             // Obtain the connected JSch Session
-            session = sessionFactory.createSession(hostName, port, userName, authentication, socketFactory, options);
+            session = sessionFactory.createSession(hostName,
+                                                   port,
+                                                   userName,
+                                                   authentication,
+                                                   socketFactory,
+                                                   optionsByType);
 
             // ----- deploy remote application artifacts (using sftp) -----
 
             // determine the separators for the platform
-            PlatformSeparators separators = options.get(PlatformSeparators.class);
+            PlatformSeparators separators = optionsByType.get(PlatformSeparators.class);
 
             if (artifactsToDeploy.size() > 0)
             {
@@ -197,7 +202,7 @@ public class SftpDeployer implements Deployer
                                                String.format("%.3f s", time));
                     }
 
-                    Table diagnosticsTable = options.get(Table.class);
+                    Table diagnosticsTable = optionsByType.get(Table.class);
 
                     if (diagnosticsTable != null)
                     {

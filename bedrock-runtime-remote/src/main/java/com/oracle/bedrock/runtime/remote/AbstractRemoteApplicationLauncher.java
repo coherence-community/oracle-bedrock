@@ -25,7 +25,7 @@
 
 package com.oracle.bedrock.runtime.remote;
 
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.annotations.Internal;
 import com.oracle.bedrock.lang.ExpressionEvaluator;
 import com.oracle.bedrock.options.Variable;
@@ -87,9 +87,9 @@ public abstract class AbstractRemoteApplicationLauncher<A extends Application> i
 
 
     @Override
-    public A launch(Platform     platform,
-                    MetaClass<A> metaClass,
-                    Options      options)
+    public A launch(Platform      platform,
+                    MetaClass<A>  metaClass,
+                    OptionsByType optionsByType)
     {
         // establish the diagnostics output table
         Table diagnosticsTable = new Table();
@@ -104,7 +104,7 @@ public abstract class AbstractRemoteApplicationLauncher<A extends Application> i
         // ----- establish the launch Options for the Application -----
 
         // add the platform options
-        Options launchOptions = new Options(platform.getOptions()).addAll(options);
+        OptionsByType launchOptions = OptionsByType.of(platform.getOptions()).addAll(optionsByType);
 
         // add the meta-class options
         metaClass.onLaunching(platform, launchOptions);
@@ -252,7 +252,7 @@ public abstract class AbstractRemoteApplicationLauncher<A extends Application> i
             Constructor<? extends A> constructor = ReflectionHelper.getCompatibleConstructor(applicationClass,
                                                                                              platform.getClass(),
                                                                                              process.getClass(),
-                                                                                             Options.class);
+                                                                                             OptionsByType.class);
 
             // create the application
             application = constructor.newInstance(platform, process, launchOptions);
@@ -292,21 +292,21 @@ public abstract class AbstractRemoteApplicationLauncher<A extends Application> i
 
 
     /**
-     * Prepares the launch {@link Options} prior to being used to launch an {@link Application}.
+     * Prepares the launch {@link OptionsByType} prior to being used to launch an {@link Application}.
      *
-     * @param options  the launch {@link Options}
+     * @param optionsByType  the launch {@link OptionsByType}
      */
-    abstract protected void onLaunching(Options options);
+    abstract protected void onLaunching(OptionsByType optionsByType);
 
 
     /**
      * Prepares the {@link Application} after it was launched for use.
      *
-     * @param application  the launched {@link Application}
-     * @param options      the launch {@link Options}
+     * @param application    the launched {@link Application}
+     * @param optionsByType  the launch {@link OptionsByType}
      */
-    abstract protected void onLaunched(A       application,
-                                       Options options);
+    abstract protected void onLaunched(A             application,
+                                       OptionsByType optionsByType);
 
 
     /**
@@ -324,16 +324,16 @@ public abstract class AbstractRemoteApplicationLauncher<A extends Application> i
 
 
     @Override
-    public String getCommandToExecute(Platform platform,
-                                      Options  options)
+    public String getCommandToExecute(Platform      platform,
+                                      OptionsByType optionsByType)
     {
-        return options.get(Executable.class).getName();
+        return optionsByType.get(Executable.class).getName();
     }
 
 
     @Override
-    public List<String> getCommandLineArguments(Platform platform,
-                                                Options  options)
+    public List<String> getCommandLineArguments(Platform      platform,
+                                                OptionsByType optionsByType)
     {
         ArrayList<String> arguments = new ArrayList<>();
 
@@ -347,7 +347,7 @@ public abstract class AbstractRemoteApplicationLauncher<A extends Application> i
                 String propertyValue = System.getProperty(propertyName);
 
                 // evaluate any expressions in the property value
-                ExpressionEvaluator evaluator = new ExpressionEvaluator(options.get(Variables.class));
+                ExpressionEvaluator evaluator = new ExpressionEvaluator(optionsByType.get(Variables.class));
 
                 propertyValue = evaluator.evaluate(propertyValue, String.class);
 
@@ -355,7 +355,7 @@ public abstract class AbstractRemoteApplicationLauncher<A extends Application> i
             }
         }
 
-        List<String> argList = options.get(Arguments.class).resolve(platform, options);
+        List<String> argList = optionsByType.get(Arguments.class).resolve(platform, optionsByType);
 
         arguments.addAll(argList);
 
@@ -364,13 +364,13 @@ public abstract class AbstractRemoteApplicationLauncher<A extends Application> i
 
 
     @Override
-    public Properties getEnvironmentVariables(Platform platform,
-                                              Options  options)
+    public Properties getEnvironmentVariables(Platform      platform,
+                                              OptionsByType optionsByType)
     {
-        Table diagnosticsTable = options.get(Table.class);
-        EnvironmentVariables environmentVariables = options.getOrDefault(EnvironmentVariables.class,
-                                                                         EnvironmentVariables.of(EnvironmentVariables
-                                                                             .Source.TargetPlatform));
+        Table diagnosticsTable = optionsByType.get(Table.class);
+        EnvironmentVariables environmentVariables = optionsByType.getOrDefault(EnvironmentVariables.class,
+                                                                               EnvironmentVariables.of(EnvironmentVariables
+                                                                                   .Source.TargetPlatform));
 
         Properties variables = new Properties();
 
@@ -404,7 +404,7 @@ public abstract class AbstractRemoteApplicationLauncher<A extends Application> i
         }
 
         // add the optionally defined environment variables
-        variables.putAll(environmentVariables.realize(platform, options.asArray()));
+        variables.putAll(environmentVariables.realize(platform, optionsByType.asArray()));
 
         if (variables.size() > 0 && diagnosticsTable != null)
         {

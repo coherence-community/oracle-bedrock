@@ -26,7 +26,7 @@
 package com.oracle.bedrock.runtime.virtual.vagrant.options;
 
 import com.oracle.bedrock.Option;
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -91,7 +91,7 @@ public class VagrantProvisioners implements Option.Collector<VagrantProvisioner,
      *
      * @return an empty {@link VagrantProvisioners}
      */
-    @Options.Default
+    @OptionsByType.Default
     public static VagrantProvisioners none()
     {
         return new VagrantProvisioners();

@@ -26,7 +26,7 @@
 package com.oracle.bedrock.runtime.java;
 
 import com.oracle.bedrock.Option;
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.annotations.Internal;
 import com.oracle.bedrock.options.Variable;
 import com.oracle.bedrock.runtime.ApplicationListener;
@@ -159,9 +159,9 @@ public class ContainerBasedJavaApplicationLauncher<A extends JavaApplication> im
 //     }
 
     @Override
-    public A launch(Platform     platform,
-                    MetaClass<A> metaClass,
-                    Options      options)
+    public A launch(Platform      platform,
+                    MetaClass<A>  metaClass,
+                    OptionsByType optionsByType)
     {
         // establish the diagnostics output table
         Table diagnosticsTable = new Table();
@@ -176,13 +176,13 @@ public class ContainerBasedJavaApplicationLauncher<A extends JavaApplication> im
         // ----- establish the launch Options for the Application -----
 
         // add the platform options
-        Options launchOptions = new Options(platform.getOptions().asArray());
+        OptionsByType launchOptions = OptionsByType.of(platform.getOptions().asArray());
 
         // add the meta-class options
         metaClass.onLaunching(platform, launchOptions);
 
         // add the launch specific options
-        launchOptions.addAll(options);
+        launchOptions.addAll(optionsByType);
 
         // ----- establish an identity for the application -----
 
@@ -497,12 +497,12 @@ public class ContainerBasedJavaApplicationLauncher<A extends JavaApplication> im
          * @param containerClassLoader  the {@link ContainerClassLoader} used to isolate the application
          * @param pipedOutputStream     the {@link PipedOutputStream} for sending request to the application
          * @param pipedInputStream      the {@link PipedInputStream} for recieving requests from the application
-         * @param options               the {@link Options} being used to launch the application
+         * @param optionsByType         the {@link OptionsByType} being used to launch the application
          */
         void configure(ContainerClassLoader containerClassLoader,
                        PipedOutputStream    pipedOutputStream,
                        PipedInputStream     pipedInputStream,
-                       Options              options);
+                       OptionsByType        optionsByType);
     }
 
 
@@ -695,9 +695,9 @@ public class ContainerBasedJavaApplicationLauncher<A extends JavaApplication> im
         /**
          * Starts the application.
          *
-         * @param options  the options to use when starting the application
+         * @param optionsByType  the {@link OptionsByType} to use when starting the application
          */
-        public void start(Options options)
+        public void start(OptionsByType optionsByType)
         {
             if (applicationController == null)
             {
@@ -708,7 +708,7 @@ public class ContainerBasedJavaApplicationLauncher<A extends JavaApplication> im
                 applicationController.configure(containerClassLoader,
                                                 inboundChannelOutputStream,
                                                 outboundChannelInputStream,
-                                                options);
+                                                optionsByType);
 
                 channel.open();
 
@@ -830,7 +830,6 @@ public class ContainerBasedJavaApplicationLauncher<A extends JavaApplication> im
             {
                 return channel.raise(event, options);
             }
-
         }
     }
 
@@ -913,7 +912,7 @@ public class ContainerBasedJavaApplicationLauncher<A extends JavaApplication> im
         public void configure(ContainerClassLoader containerClassLoader,
                               PipedOutputStream    pipedOutputStream,
                               PipedInputStream     pipedInputStream,
-                              Options              options)
+                              OptionsByType        optionsByType)
         {
             ContainerBasedJavaApplicationLauncher.configureRemoteChannel(containerClassLoader,
                                                                          pipedOutputStream,
@@ -947,7 +946,7 @@ public class ContainerBasedJavaApplicationLauncher<A extends JavaApplication> im
         public void configure(ContainerClassLoader containerClassLoader,
                               PipedOutputStream    pipedOutputStream,
                               PipedInputStream     pipedInputStream,
-                              Options              options)
+                              OptionsByType        optionsByType)
         {
             ContainerBasedJavaApplicationLauncher.configureRemoteChannel(containerClassLoader,
                                                                          pipedOutputStream,
@@ -1034,7 +1033,7 @@ public class ContainerBasedJavaApplicationLauncher<A extends JavaApplication> im
         public void configure(ContainerClassLoader containerClassLoader,
                               PipedOutputStream    pipedOutputStream,
                               PipedInputStream     pipedInputStream,
-                              Options              options)
+                              OptionsByType        optionsByType)
         {
             ContainerBasedJavaApplicationLauncher.configureRemoteChannel(containerClassLoader,
                                                                          pipedOutputStream,

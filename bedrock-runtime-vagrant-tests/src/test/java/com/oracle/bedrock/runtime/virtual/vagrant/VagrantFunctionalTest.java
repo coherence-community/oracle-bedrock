@@ -64,6 +64,7 @@ public class VagrantFunctionalTest
     @ClassRule
     public static TemporaryFolder temporaryFolder = new TemporaryFolder();
 
+
     /**
      * Check Vagrant is installed.
      * If not installed then skip all further tests
@@ -84,14 +85,12 @@ public class VagrantFunctionalTest
     @Test
     public void shouldCreateVagrantPlatformFromOptions() throws Exception
     {
-        File               vmRoot  = temporaryFolder.newFolder();
+        File vmRoot = temporaryFolder.newFolder();
         VagrantFileBuilder builder = VagrantFileBuilder.from(BoxName.of("oracle/java8"),
                                                              UpdateBox.no(),
                                                              HostOnlyNetwork.of("192.168.56.211"));
 
-        try (VagrantPlatform platform = new VagrantPlatform("VM-1",
-                                                            builder,
-                                                            WorkingDirectory.at(vmRoot)))
+        try (VagrantPlatform platform = new VagrantPlatform("VM-1", builder, WorkingDirectory.at(vmRoot)))
         {
             InetAddress address = platform.getAddress();
 
@@ -104,13 +103,13 @@ public class VagrantFunctionalTest
     @Test
     public void shouldCreateMultipleVagrantPlatformsFromOptions() throws Exception
     {
-        File               vmRoot  = temporaryFolder.newFolder();
+        File vmRoot = temporaryFolder.newFolder();
         VagrantFileBuilder builder = VagrantFileBuilder.from(BoxName.of("oracle/java8"),
                                                              UpdateBox.no(),
                                                              HostOnlyNetwork.startingAt("192.168.56.220"));
 
         try (VagrantPlatform platform1 = new VagrantPlatform("VM-2", builder, WorkingDirectory.subDirectoryOf(vmRoot));
-             VagrantPlatform platform2 = new VagrantPlatform("VM-3", builder, WorkingDirectory.subDirectoryOf(vmRoot)))
+            VagrantPlatform platform2 = new VagrantPlatform("VM-3", builder, WorkingDirectory.subDirectoryOf(vmRoot)))
         {
             HostName hostName1 = platform1.getOptions().get(HostName.class);
             HostName hostName2 = platform2.getOptions().get(HostName.class);

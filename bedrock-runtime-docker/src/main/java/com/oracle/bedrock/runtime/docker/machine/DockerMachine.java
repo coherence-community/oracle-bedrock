@@ -26,17 +26,17 @@
 package com.oracle.bedrock.runtime.docker.machine;
 
 import com.oracle.bedrock.Option;
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.lang.StringHelper;
 import com.oracle.bedrock.options.Timeout;
 import com.oracle.bedrock.runtime.Application;
 import com.oracle.bedrock.runtime.LocalPlatform;
 import com.oracle.bedrock.runtime.Platform;
 import com.oracle.bedrock.runtime.console.CapturingApplicationConsole;
-import com.oracle.bedrock.runtime.options.Console;
 import com.oracle.bedrock.runtime.docker.DockerPlatform;
 import com.oracle.bedrock.runtime.options.Argument;
 import com.oracle.bedrock.runtime.options.Arguments;
+import com.oracle.bedrock.runtime.options.Console;
 import com.oracle.bedrock.runtime.options.EnvironmentVariable;
 
 import javax.json.Json;
@@ -314,8 +314,8 @@ public class DockerMachine
     public DockerMachinePlatform create(String    machineName,
                                         Option... options)
     {
-        Options createOptions = new Options(options);
-        Timeout timeout       = createOptions.getOrDefault(Timeout.class, Timeout.after(5, TimeUnit.MINUTES));
+        OptionsByType createOptions = OptionsByType.of(options);
+        Timeout       timeout       = createOptions.getOrDefault(Timeout.class, Timeout.after(5, TimeUnit.MINUTES));
 
         try (Application create = launch("create", options))
         {
@@ -325,7 +325,7 @@ public class DockerMachine
             }
         }
 
-        Options platformOptions = new Options(options);
+        OptionsByType platformOptions = OptionsByType.of(options);
 
         platformOptions.remove(Arguments.class);
 
@@ -337,21 +337,21 @@ public class DockerMachine
      * Execute the specified DockerMachine command.
      *
      * @param command  the command to execute
-     * @param opts     the {@link Options} to use
+     * @param options  the {@link Option}s to use
      *
      * @return  the {@link Application} executing the command
      */
     public Application launch(String    command,
-                              Option... opts)
+                              Option... options)
     {
-        Options   options    = new Options(opts);
-        Arguments arguments  = options.get(Arguments.class);
+        OptionsByType optionsByType = OptionsByType.of(options);
+        Arguments     arguments     = optionsByType.get(Arguments.class);
 
-        Arguments launchArgs = this.arguments.with(Argument.of(command)).with(arguments);
+        Arguments     launchArgs    = this.arguments.with(Argument.of(command)).with(arguments);
 
-        options.add(launchArgs);
+        optionsByType.add(launchArgs);
 
-        return clientPlatform.launch(this.command, options.asArray());
+        return clientPlatform.launch(this.command, optionsByType.asArray());
     }
 
 

@@ -26,7 +26,7 @@
 package com.oracle.bedrock.runtime.coherence.options;
 
 import com.oracle.bedrock.Option;
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.runtime.Application;
 import com.oracle.bedrock.runtime.MetaClass;
 import com.oracle.bedrock.runtime.Platform;
@@ -101,31 +101,31 @@ public class ClusterName implements Profile, Option
 
 
     @Override
-    public void onLaunching(Platform  platform,
-                            MetaClass metaClass,
-                            Options   options)
+    public void onLaunching(Platform      platform,
+                            MetaClass     metaClass,
+                            OptionsByType optionsByType)
     {
-        SystemProperties systemProperties = options.get(SystemProperties.class);
+        SystemProperties systemProperties = optionsByType.get(SystemProperties.class);
 
         if (systemProperties != null)
         {
-            options.add(SystemProperty.of(PROPERTY, name));
+            optionsByType.add(SystemProperty.of(PROPERTY, name));
         }
     }
 
 
     @Override
-    public void onLaunched(Platform    platform,
-                           Application application,
-                           Options     options)
+    public void onLaunched(Platform      platform,
+                           Application   application,
+                           OptionsByType optionsByType)
     {
     }
 
 
     @Override
-    public void onClosing(Platform    platform,
-                          Application application,
-                          Options     options)
+    public void onClosing(Platform      platform,
+                          Application   application,
+                          OptionsByType optionsByType)
     {
     }
 

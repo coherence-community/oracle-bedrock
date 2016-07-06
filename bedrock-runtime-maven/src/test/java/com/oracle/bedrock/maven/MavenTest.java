@@ -25,7 +25,7 @@
 
 package com.oracle.bedrock.maven;
 
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.runtime.LocalPlatform;
 import com.oracle.bedrock.runtime.MetaClass;
 import com.oracle.bedrock.runtime.java.ClassPath;
@@ -56,17 +56,17 @@ public class MavenTest
     @Test
     public void shouldResolveSingleArtifact()
     {
-        LocalPlatform platform  = LocalPlatform.get();
-        MetaClass     metaClass = new JavaApplication.MetaClass();
-        Options       options   = new Options();
+        LocalPlatform platform      = LocalPlatform.get();
+        MetaClass     metaClass     = new JavaApplication.MetaClass();
+        OptionsByType optionsByType = OptionsByType.empty();
 
-        options.add(Maven.artifact("org.hamcrest:hamcrest-library:jar:1.3"));
+        optionsByType.add(Maven.artifact("org.hamcrest:hamcrest-library:jar:1.3"));
 
-        Maven maven = options.get(Maven.class);
+        Maven maven = optionsByType.get(Maven.class);
 
-        maven.onLaunching(platform, metaClass, options);
+        maven.onLaunching(platform, metaClass, optionsByType);
 
-        ClassPath classPath = options.getOrDefault(ClassPath.class, null);
+        ClassPath classPath = optionsByType.getOrDefault(ClassPath.class, null);
 
         assertThat(classPath, is(not(nullValue())));
         assertThat(classPath.size(), is(2));
@@ -81,17 +81,17 @@ public class MavenTest
     @Test
     public void shouldResolveSingleArtifactWithTransitiveDependency()
     {
-        LocalPlatform platform  = LocalPlatform.get();
-        MetaClass     metaClass = new JavaApplication.MetaClass();
-        Options       options   = new Options();
+        LocalPlatform platform      = LocalPlatform.get();
+        MetaClass     metaClass     = new JavaApplication.MetaClass();
+        OptionsByType optionsByType = OptionsByType.empty();
 
-        options.add(Maven.artifact("junit:junit:jar:4.12"));
+        optionsByType.add(Maven.artifact("junit:junit:jar:4.12"));
 
-        Maven maven = options.get(Maven.class);
+        Maven maven = optionsByType.get(Maven.class);
 
-        maven.onLaunching(platform, metaClass, options);
+        maven.onLaunching(platform, metaClass, optionsByType);
 
-        ClassPath classPath = options.getOrDefault(ClassPath.class, null);
+        ClassPath classPath = optionsByType.getOrDefault(ClassPath.class, null);
 
         assertThat(classPath, is(not(nullValue())));
         assertThat(classPath.size(), is(2));
@@ -107,19 +107,19 @@ public class MavenTest
     @Test
     public void shouldIncludeAdditionalClassPaths() throws IOException
     {
-        LocalPlatform platform  = LocalPlatform.get();
-        MetaClass     metaClass = new JavaApplication.MetaClass();
-        Options       options   = new Options();
+        LocalPlatform platform      = LocalPlatform.get();
+        MetaClass     metaClass     = new JavaApplication.MetaClass();
+        OptionsByType optionsByType = OptionsByType.empty();
 
-        options.addAll(Maven.artifact("junit:junit:jar:4.12"),
-                       Maven.include(ClassPath.ofClass(MavenTest.class)),
-                       Maven.include(ClassPath.ofResource("example-resource.txt")));
+        optionsByType.addAll(Maven.artifact("junit:junit:jar:4.12"),
+                             Maven.include(ClassPath.ofClass(MavenTest.class)),
+                             Maven.include(ClassPath.ofResource("example-resource.txt")));
 
-        Maven maven = options.get(Maven.class);
+        Maven maven = optionsByType.get(Maven.class);
 
-        maven.onLaunching(platform, metaClass, options);
+        maven.onLaunching(platform, metaClass, optionsByType);
 
-        ClassPath classPath = options.getOrDefault(ClassPath.class, null);
+        ClassPath classPath = optionsByType.getOrDefault(ClassPath.class, null);
 
         assertThat(classPath, is(not(nullValue())));
         assertThat(classPath.size(), is(3));

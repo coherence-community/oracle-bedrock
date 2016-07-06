@@ -25,11 +25,10 @@
 
 package com.oracle.bedrock.runtime.java.options;
 
-import com.oracle.bedrock.runtime.java.ClassPath;
 import com.oracle.bedrock.Option;
-import com.oracle.bedrock.Options;
-
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.lang.ExpressionEvaluator;
+import com.oracle.bedrock.runtime.java.ClassPath;
 
 import java.util.Collections;
 
@@ -122,7 +121,7 @@ public class JavaAgent implements JvmOption, Option.Collectable
 
 
     @Override
-    public Iterable<String> resolve(Options options)
+    public Iterable<String> resolve(OptionsByType optionsByType)
     {
         String resolvedParameters;
 
@@ -132,12 +131,12 @@ public class JavaAgent implements JvmOption, Option.Collectable
         }
         else
         {
-            ExpressionEvaluator evaluator = new ExpressionEvaluator(options);
+            ExpressionEvaluator evaluator = new ExpressionEvaluator(optionsByType);
 
             resolvedParameters = "=" + evaluator.evaluate(parameters, String.class);
         }
 
-        String agent = "-javaagent:" + path.toString(options) + resolvedParameters;
+        String agent = "-javaagent:" + path.toString(optionsByType) + resolvedParameters;
 
         return Collections.singletonList(agent);
     }

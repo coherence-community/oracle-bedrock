@@ -26,7 +26,7 @@
 package com.oracle.bedrock.runtime.docker;
 
 import com.oracle.bedrock.Option;
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.runtime.AbstractPlatform;
 import com.oracle.bedrock.runtime.Application;
 import com.oracle.bedrock.runtime.ApplicationLauncher;
@@ -141,7 +141,7 @@ public class DockerPlatform extends AbstractPlatform
                                             Option...    options)
     {
         // establish the initial launch options based on those defined by the platform
-        Options launchOptions = new Options(getOptions().asArray());
+        OptionsByType launchOptions = OptionsByType.of(getOptions());
 
         // include the options specified when this method was called
         launchOptions.addAll(options);
@@ -170,11 +170,11 @@ public class DockerPlatform extends AbstractPlatform
 
 
     @Override
-    protected <A extends Application, B extends ApplicationLauncher<A>> B getApplicationLauncher(MetaClass<A> metaClass,
-                                                                                                 Options      options)
+    protected <A extends Application, B extends ApplicationLauncher<A>> B getApplicationLauncher(MetaClass<A>  metaClass,
+                                                                                                 OptionsByType optionsByType)
                                                                                                  throws UnsupportedOperationException
     {
-        Class<? extends A> applicationClass = metaClass.getImplementationClass(this, options);
+        Class<? extends A> applicationClass = metaClass.getImplementationClass(this, optionsByType);
 
         if (JavaApplication.class.isAssignableFrom(applicationClass))
         {

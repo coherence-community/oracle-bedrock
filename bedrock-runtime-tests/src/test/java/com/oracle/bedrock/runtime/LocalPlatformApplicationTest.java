@@ -25,28 +25,21 @@
 
 package com.oracle.bedrock.runtime;
 
-import com.oracle.bedrock.runtime.options.Console;
-import com.oracle.bedrock.runtime.options.Argument;
-import com.oracle.bedrock.runtime.options.DisplayName;
-import com.oracle.bedrock.runtime.options.ErrorStreamRedirection;
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.junit.AbstractTest;
-
 import com.oracle.bedrock.options.Decoration;
 import com.oracle.bedrock.options.Diagnostics;
-
 import com.oracle.bedrock.runtime.console.PipedApplicationConsole;
-
+import com.oracle.bedrock.runtime.options.Argument;
+import com.oracle.bedrock.runtime.options.Console;
+import com.oracle.bedrock.runtime.options.DisplayName;
+import com.oracle.bedrock.runtime.options.ErrorStreamRedirection;
 import com.oracle.bedrock.runtime.options.Executable;
-
 import org.junit.Test;
-
 import org.mockito.Mockito;
 
 import static org.hamcrest.core.Is.is;
-
 import static org.hamcrest.core.StringContains.containsString;
-
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
 
@@ -142,8 +135,8 @@ public class LocalPlatformApplicationTest extends AbstractTest
 
             application.close();
 
-            Mockito.verify(listener, Mockito.times(1)).onClosing(Mockito.same(application), any(Options.class));
-            Mockito.verify(listener, Mockito.times(1)).onClosed(Mockito.same(application), any(Options.class));
+            Mockito.verify(listener, Mockito.times(1)).onClosing(Mockito.same(application), any(OptionsByType.class));
+            Mockito.verify(listener, Mockito.times(1)).onClosed(Mockito.same(application), any(OptionsByType.class));
 
             int exitCode = application.exitValue();
 

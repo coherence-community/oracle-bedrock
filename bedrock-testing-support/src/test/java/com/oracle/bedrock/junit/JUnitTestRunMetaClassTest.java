@@ -25,7 +25,7 @@
 
 package com.oracle.bedrock.junit;
 
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.runtime.java.JavaApplication;
 import com.oracle.bedrock.runtime.java.options.ClassName;
 import com.oracle.bedrock.runtime.options.DisplayName;
@@ -63,12 +63,12 @@ public class JUnitTestRunMetaClassTest
     @Test
     public void shouldSetCLassName() throws Exception
     {
-        JUnitTestRun.MetaClass metaClass = new JUnitTestRun.MetaClass();
-        Options                options   = new Options();
+        JUnitTestRun.MetaClass metaClass     = new JUnitTestRun.MetaClass();
+        OptionsByType          optionsByType = OptionsByType.empty();
 
-        metaClass.onLaunching(null, options);
+        metaClass.onLaunching(null, optionsByType);
 
-        ClassName className = options.get(ClassName.class);
+        ClassName className = optionsByType.get(ClassName.class);
 
         assertThat(className, is(notNullValue()));
         assertThat(className.getName(), is(JUnitTestRunner.class.getCanonicalName()));
@@ -78,12 +78,12 @@ public class JUnitTestRunMetaClassTest
     @Test
     public void shouldSetDisplayNameIfNotAlreadySet() throws Exception
     {
-        JUnitTestRun.MetaClass metaClass = new JUnitTestRun.MetaClass();
-        Options                options   = new Options();
+        JUnitTestRun.MetaClass metaClass     = new JUnitTestRun.MetaClass();
+        OptionsByType          optionsByType = OptionsByType.empty();
 
-        metaClass.onLaunching(null, options);
+        metaClass.onLaunching(null, optionsByType);
 
-        DisplayName displayName = options.get(DisplayName.class);
+        DisplayName displayName = optionsByType.get(DisplayName.class);
 
         assertThat(displayName, is(notNullValue()));
     }
@@ -92,13 +92,13 @@ public class JUnitTestRunMetaClassTest
     @Test
     public void shouldNotOverwriteDisplayName() throws Exception
     {
-        JUnitTestRun.MetaClass metaClass   = new JUnitTestRun.MetaClass();
-        DisplayName            displayName = DisplayName.of("Foo");
-        Options                options     = new Options(displayName);
+        JUnitTestRun.MetaClass metaClass     = new JUnitTestRun.MetaClass();
+        DisplayName            displayName   = DisplayName.of("Foo");
+        OptionsByType          optionsByType = OptionsByType.of(displayName);
 
-        metaClass.onLaunching(null, options);
+        metaClass.onLaunching(null, optionsByType);
 
-        DisplayName result = options.get(DisplayName.class);
+        DisplayName result = optionsByType.get(DisplayName.class);
 
         assertThat(result, is(sameInstance(displayName)));
     }
@@ -107,13 +107,13 @@ public class JUnitTestRunMetaClassTest
     @Test
     public void shouldDoNothingAfterLaunchForNonJUnitApplication() throws Exception
     {
-        JavaApplication        application = mock(JavaApplication.class);
-        Options                options     = new Options();
-        JUnitTestRun.MetaClass metaClass   = new JUnitTestRun.MetaClass();
+        JavaApplication        application   = mock(JavaApplication.class);
+        OptionsByType          optionsByType = OptionsByType.empty();
+        JUnitTestRun.MetaClass metaClass     = new JUnitTestRun.MetaClass();
 
         when(application.get(JUnitTestRun.class)).thenReturn(null);
 
-        metaClass.onLaunched(null, application, options);
+        metaClass.onLaunched(null, application, optionsByType);
 
         verify(application).get(JUnitTestRun.class);
         verifyNoMoreInteractions(application);
@@ -123,15 +123,15 @@ public class JUnitTestRunMetaClassTest
     @Test
     public void shouldStartTests() throws Exception
     {
-        JavaApplication        application = mock(JavaApplication.class);
-        JUnitTestRun           testRun     = mock(JUnitTestRun.class);
-        Options                options     = new Options();
-        JUnitTestRun.MetaClass metaClass   = new JUnitTestRun.MetaClass();
+        JavaApplication        application   = mock(JavaApplication.class);
+        JUnitTestRun           testRun       = mock(JUnitTestRun.class);
+        OptionsByType          optionsByType = OptionsByType.empty();
+        JUnitTestRun.MetaClass metaClass     = new JUnitTestRun.MetaClass();
 
         when(application.get(JUnitTestRun.class)).thenReturn(testRun);
 
-        metaClass.onLaunched(null, application, options);
+        metaClass.onLaunched(null, application, optionsByType);
 
-        verify(testRun).startTests(options);
+        verify(testRun).startTests(optionsByType);
     }
 }

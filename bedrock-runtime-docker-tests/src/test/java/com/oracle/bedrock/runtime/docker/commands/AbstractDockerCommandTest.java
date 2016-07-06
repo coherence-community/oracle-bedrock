@@ -25,6 +25,8 @@
 
 package com.oracle.bedrock.runtime.docker.commands;
 
+import com.oracle.bedrock.OptionsByType;
+import com.oracle.bedrock.options.Timeout;
 import com.oracle.bedrock.runtime.LocalPlatform;
 import com.oracle.bedrock.runtime.SimpleApplication;
 import com.oracle.bedrock.runtime.docker.Docker;
@@ -33,8 +35,6 @@ import com.oracle.bedrock.runtime.options.Arguments;
 import com.oracle.bedrock.runtime.options.EnvironmentVariable;
 import com.oracle.bedrock.runtime.options.EnvironmentVariables;
 import com.oracle.bedrock.runtime.options.Executable;
-import com.oracle.bedrock.Options;
-import com.oracle.bedrock.options.Timeout;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -44,12 +44,9 @@ import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.CoreMatchers.is;
-
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.collection.IsIterableContainingInOrder.contains;
-
 import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.mock;
 
 /**
  * Tests for {@link AbstractDockerCommand}.
@@ -61,6 +58,9 @@ import static org.mockito.Mockito.mock;
  */
 public class AbstractDockerCommandTest
 {
+    /**
+     * Field description
+     */
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
 
@@ -70,7 +70,7 @@ public class AbstractDockerCommandTest
     {
         AbstractDockerCommand command   = new CommandStub("foo");
         Arguments             arguments = command.getCommandArguments();
-        List<String>          argList   = arguments.resolve(LocalPlatform.get(), new Options());
+        List<String>          argList   = arguments.resolve(LocalPlatform.get(), OptionsByType.empty());
 
         assertThat(argList, contains("foo"));
     }
@@ -81,7 +81,7 @@ public class AbstractDockerCommandTest
     {
         AbstractDockerCommand command   = new CommandStub("foo");
 
-        Class implClass = command.getImplementationClass(LocalPlatform.get(), new Options());
+        Class                 implClass = command.getImplementationClass(LocalPlatform.get(), OptionsByType.empty());
 
         assertThat(implClass, is(notNullValue()));
         assertThat(SimpleApplication.class.equals(implClass), is(true));
@@ -91,8 +91,7 @@ public class AbstractDockerCommandTest
     @Test
     public void shouldSetTimeout() throws Exception
     {
-        AbstractDockerCommand command = new CommandStub("run")
-                                            .timeoutAfter(1, TimeUnit.MINUTES);
+        AbstractDockerCommand command = new CommandStub("run").timeoutAfter(1, TimeUnit.MINUTES);
 
         Timeout               timeout = command.getTimeout();
 
@@ -116,13 +115,13 @@ public class AbstractDockerCommandTest
     @Test
     public void shouldSetExecutableOnFinalize() throws Exception
     {
-        Docker                docker  = Docker.auto();
-        Options               options = new Options(docker);
-        AbstractDockerCommand command = new CommandStub("foo");
+        Docker                docker        = Docker.auto();
+        OptionsByType         optionsByType = OptionsByType.of(docker);
+        AbstractDockerCommand command       = new CommandStub("foo");
 
-        command.onLaunch(LocalPlatform.get(), options);
+        command.onLaunch(LocalPlatform.get(), optionsByType);
 
-        Executable executable = options.get(Executable.class);
+        Executable executable = optionsByType.get(Executable.class);
 
         assertThat(executable, is(notNullValue()));
         assertThat(executable.getName(), is(docker.getDockerExecutable()));
@@ -132,15 +131,16 @@ public class AbstractDockerCommandTest
     @Test
     public void shouldAddEnvironmentArgsBeforeCommandNameOnFinalize() throws Exception
     {
-        Docker                docker     = Docker.auto().withCommandOptions(Argument.of("env1"), Argument.of("env2"));
-        Arguments             existing   = Arguments.of(Argument.of("should-not-be-present"));
-        Options               options    = new Options(docker, existing);
-        AbstractDockerCommand command    = new CommandStub("foo");
+        Docker                docker        = Docker.auto().withCommandOptions(Argument.of("env1"),
+                                                                               Argument.of("env2"));
+        Arguments             existing      = Arguments.of(Argument.of("should-not-be-present"));
+        OptionsByType         optionsByType = OptionsByType.of(docker, existing);
+        AbstractDockerCommand command       = new CommandStub("foo");
 
-        command.onLaunch(LocalPlatform.get(), options);
+        command.onLaunch(LocalPlatform.get(), optionsByType);
 
-        Arguments    arguments = options.get(Arguments.class);
-        List<String> argList   = arguments.resolve(LocalPlatform.get(), options);
+        Arguments    arguments = optionsByType.get(Arguments.class);
+        List<String> argList   = arguments.resolve(LocalPlatform.get(), optionsByType);
 
         assertThat(argList, contains("env1", "env2", "foo"));
     }
@@ -149,14 +149,14 @@ public class AbstractDockerCommandTest
     @Test
     public void shouldAddEnvironmentVariablesOnFinalize() throws Exception
     {
-        Docker                docker     = Docker.auto().withEnvironmentVariables(EnvironmentVariable.of("foo", "foo1"),
-                                                                                  EnvironmentVariable.of("bar", "bar1"));
-        Options               options    = new Options(docker);
-        AbstractDockerCommand command    = new CommandStub("foo");
+        Docker docker = Docker.auto().withEnvironmentVariables(EnvironmentVariable.of("foo", "foo1"),
+                                                               EnvironmentVariable.of("bar", "bar1"));
+        OptionsByType         optionsByType = OptionsByType.of(docker);
+        AbstractDockerCommand command       = new CommandStub("foo");
 
-        command.onLaunch(LocalPlatform.get(), options);
+        command.onLaunch(LocalPlatform.get(), optionsByType);
 
-        EnvironmentVariables env  = options.get(EnvironmentVariables.class);
+        EnvironmentVariables env  = optionsByType.get(EnvironmentVariables.class);
         Properties           vars = env.realize(LocalPlatform.get());
 
         assertThat(vars.get("foo"), is("foo1"));
@@ -166,15 +166,29 @@ public class AbstractDockerCommandTest
 
     static class CommandStub extends AbstractDockerCommand<CommandStub>
     {
+        /**
+         * Constructs ...
+         *
+         *
+         * @param commandArguments
+         */
+        public CommandStub(Arguments commandArguments)
+        {
+            super(commandArguments);
+        }
+
+
+        /**
+         * Constructs ...
+         *
+         *
+         * @param command
+         */
         public CommandStub(String command)
         {
             super(command);
         }
 
-        public CommandStub(Arguments commandArguments)
-        {
-            super(commandArguments);
-        }
 
         @Override
         public CommandStub withCommandArguments(Argument... args)

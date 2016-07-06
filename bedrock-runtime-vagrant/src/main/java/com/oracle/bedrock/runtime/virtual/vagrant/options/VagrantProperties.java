@@ -26,7 +26,7 @@
 package com.oracle.bedrock.runtime.virtual.vagrant.options;
 
 import com.oracle.bedrock.Option;
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 
 import java.io.PrintWriter;
 import java.util.Collections;
@@ -54,7 +54,7 @@ public class VagrantProperties implements Option.Collector<VagrantProperty, Vagr
     /**
      * Constructs an empty {@link VagrantProperties}.
      */
-    @Options.Default
+    @OptionsByType.Default
     public VagrantProperties()
     {
         this.properties = new LinkedHashMap<>();

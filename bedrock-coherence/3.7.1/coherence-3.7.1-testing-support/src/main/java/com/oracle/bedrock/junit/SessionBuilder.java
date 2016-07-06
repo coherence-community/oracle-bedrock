@@ -25,7 +25,7 @@
 
 package com.oracle.bedrock.junit;
 
-import com.oracle.bedrock.Option;
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.runtime.LocalPlatform;
 import com.tangosol.net.ConfigurableCacheFactory;
 import net.sf.cglib.core.Local;
@@ -46,12 +46,12 @@ public interface SessionBuilder
      *
      * @param platform       the {@link Local} on which the {@link ConfigurableCacheFactory} will be established
      * @param orchestration  the {@link CoherenceClusterOrchestration} establishing the session
-     * @param options        the {@link Option}s on which to base the
+     * @param optionsByType  the {@link OptionsByType}s on which to base the
      *                       newly created {@link ConfigurableCacheFactory}
      *
      * @return a {@link ConfigurableCacheFactory}
      */
     ConfigurableCacheFactory build(LocalPlatform                 platform,
                                    CoherenceClusterOrchestration orchestration,
-                                   Option...                     options);
+                                   OptionsByType                 optionsByType);
 }

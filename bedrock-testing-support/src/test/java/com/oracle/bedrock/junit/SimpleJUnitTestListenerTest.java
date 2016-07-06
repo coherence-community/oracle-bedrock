@@ -26,7 +26,7 @@
 package com.oracle.bedrock.junit;
 
 import com.oracle.bedrock.Option;
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 import org.junit.Test;
 
 import java.util.Properties;
@@ -198,9 +198,9 @@ public class SimpleJUnitTestListenerTest
 
         assertThat(option, is(notNullValue()));
 
-        Options                     options  = new Options(option);
+        OptionsByType               optionsByType = OptionsByType.of(option);
 
-        Iterable<JUnitTestListener> iterable = options.getInstancesOf(JUnitTestListener.class);
+        Iterable<JUnitTestListener> iterable      = optionsByType.getInstancesOf(JUnitTestListener.class);
 
         assertThat(iterable, contains(listener));
     }

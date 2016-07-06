@@ -26,7 +26,7 @@
 package com.oracle.bedrock.runtime.options;
 
 import com.oracle.bedrock.Option;
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 
 /**
  * An {@link Option} to define if the standard error stream should be redirected
@@ -121,7 +121,7 @@ public class ErrorStreamRedirection implements Option
      *
      * @return  a disabled {@link ErrorStreamRedirection}
      */
-    @Options.Default
+    @OptionsByType.Default
     public static ErrorStreamRedirection disabled()
     {
         return new ErrorStreamRedirection(false);

@@ -26,7 +26,7 @@
 package com.oracle.bedrock.runtime.concurrent;
 
 import com.oracle.bedrock.Option;
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.annotations.Internal;
 import com.oracle.bedrock.lang.ThreadFactories;
 import com.oracle.bedrock.runtime.concurrent.options.StreamName;
@@ -369,8 +369,8 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
     {
         if (isOpen())
         {
-            Options submitOptions = Options.from(options);
-            RemoteChannel.AcknowledgeWhen acknowledge = submitOptions.getOrDefault(AcknowledgeWhen.class,
+            OptionsByType optionsByType = OptionsByType.of(options);
+            RemoteChannel.AcknowledgeWhen acknowledge = optionsByType.getOrDefault(AcknowledgeWhen.class,
                                                                                    AcknowledgeWhen.PROCESSED);
             CallableOperation operation = new CallableOperation(callable, acknowledge);
 
@@ -389,8 +389,8 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
     {
         if (isOpen())
         {
-            Options                       submitOptions = Options.from(options);
-            RemoteChannel.AcknowledgeWhen acknowledge   = submitOptions.get(AcknowledgeWhen.class);
+            OptionsByType                 optionsByType = OptionsByType.of(options);
+            RemoteChannel.AcknowledgeWhen acknowledge   = optionsByType.get(AcknowledgeWhen.class);
             RunnableOperation             operation     = new RunnableOperation(runnable, acknowledge);
 
             return sendOperation(operation, acknowledge);
@@ -408,10 +408,10 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
     {
         if (isOpen())
         {
-            Options                       raiseOptions = Options.from(options);
-            RemoteChannel.AcknowledgeWhen acknowledge  = raiseOptions.get(AcknowledgeWhen.class);
-            StreamName                    streamName   = raiseOptions.get(StreamName.class);
-            EventOperation                operation    = new EventOperation(streamName, event, acknowledge);
+            OptionsByType                 optionsByType = OptionsByType.of(options);
+            RemoteChannel.AcknowledgeWhen acknowledge   = optionsByType.get(AcknowledgeWhen.class);
+            StreamName                    streamName    = optionsByType.get(StreamName.class);
+            EventOperation                operation     = new EventOperation(streamName, event, acknowledge);
 
             return sendOperation(operation, acknowledge);
         }

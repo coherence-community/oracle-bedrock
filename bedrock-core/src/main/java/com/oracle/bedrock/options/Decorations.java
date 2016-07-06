@@ -26,7 +26,7 @@
 package com.oracle.bedrock.options;
 
 import com.oracle.bedrock.Option;
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -53,7 +53,7 @@ public class Decorations implements Option.Collector<Decoration, Decorations>
     /**
      * Constructs an empty {@link Decorations}.
      */
-    @Options.Default
+    @OptionsByType.Default
     public Decorations()
     {
         this.decorations = new LinkedHashSet<>();

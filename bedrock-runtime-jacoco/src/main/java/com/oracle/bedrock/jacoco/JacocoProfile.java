@@ -26,7 +26,7 @@
 package com.oracle.bedrock.jacoco;
 
 import com.oracle.bedrock.Option;
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.runtime.Application;
 import com.oracle.bedrock.runtime.MetaClass;
 import com.oracle.bedrock.runtime.Platform;
@@ -59,7 +59,7 @@ public class JacocoProfile implements Profile, Option
      *
      * @param parameters   the parameters provided to the {@link JacocoProfile}
      */
-    @Options.Default
+    @OptionsByType.Default
     public JacocoProfile(String parameters)
     {
         this.parameters = parameters;
@@ -67,12 +67,12 @@ public class JacocoProfile implements Profile, Option
 
 
     @Override
-    public void onLaunching(Platform  platform,
-                            MetaClass metaClass,
-                            Options   options)
+    public void onLaunching(Platform      platform,
+                            MetaClass     metaClass,
+                            OptionsByType optionsByType)
     {
         if (metaClass != null
-            && JavaApplication.class.isAssignableFrom(metaClass.getImplementationClass(platform, options)))
+            && JavaApplication.class.isAssignableFrom(metaClass.getImplementationClass(platform, optionsByType)))
         {
             try
             {
@@ -82,7 +82,7 @@ public class JacocoProfile implements Profile, Option
                 // define a JavaAgent for JaCoCo
                 JavaAgent javaAgent = JavaAgent.using(jacocoPath.toString(), parameters);
 
-                options.add(javaAgent);
+                optionsByType.add(javaAgent);
             }
             catch (Exception e)
             {
@@ -92,18 +92,18 @@ public class JacocoProfile implements Profile, Option
 
 
     @Override
-    public void onLaunched(Platform    platform,
-                           Application application,
-                           Options     options)
+    public void onLaunched(Platform      platform,
+                           Application   application,
+                           OptionsByType optionsByType)
     {
         // there's nothing to after an application has been realized
     }
 
 
     @Override
-    public void onClosing(Platform    platform,
-                          Application application,
-                          Options     options)
+    public void onClosing(Platform      platform,
+                          Application   application,
+                          OptionsByType optionsByType)
     {
         // prior to closing a JavaApplication we request the JaCoCo telemetry to be dumped
         if (application instanceof JavaApplication)

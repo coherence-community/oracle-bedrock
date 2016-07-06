@@ -25,7 +25,7 @@
 
 package com.oracle.bedrock.runtime.coherence;
 
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.runtime.Platform;
 import com.oracle.bedrock.runtime.coherence.options.LocalHost;
 import com.oracle.bedrock.runtime.coherence.options.MachineName;
@@ -180,42 +180,42 @@ public interface CoherenceClusterMember extends JavaApplication
         /**
          * Constructs a {@link MetaClass} for a {@link CoherenceClusterMember}.
          */
-        @Options.Default
+        @OptionsByType.Default
         public MetaClass()
         {
         }
 
 
         @Override
-        public Class<? extends CoherenceClusterMember> getImplementationClass(Platform platform,
-                                                                              Options  options)
+        public Class<? extends CoherenceClusterMember> getImplementationClass(Platform      platform,
+                                                                              OptionsByType optionsByType)
         {
             return CoherenceCacheServer.class;
         }
 
 
         @Override
-        public void onLaunching(Platform platform,
-                                Options  options)
+        public void onLaunching(Platform      platform,
+                                OptionsByType optionsByType)
         {
             // automatically define the default cache server as the default class
-            options.addIfAbsent(ClassName.of(DEFAULT_CACHE_SERVER_CLASSNAME));
+            optionsByType.addIfAbsent(ClassName.of(DEFAULT_CACHE_SERVER_CLASSNAME));
 
             // automatically define IPv4
-            options.addIfAbsent(IPv4Preferred.yes());
+            optionsByType.addIfAbsent(IPv4Preferred.yes());
 
             // cache servers are always headless
-            options.add(Headless.enabled());
+            optionsByType.add(Headless.enabled());
 
-            SystemProperties systemProperties = options.get(SystemProperties.class);
+            SystemProperties systemProperties = optionsByType.get(SystemProperties.class);
 
             systemProperties = systemProperties.addIfAbsent(SystemProperty.of(LocalHost.PROPERTY,
                                                                               new SystemProperty.ContextSensitiveValue()
                                                                               {
                                                                                   @Override
-                                                                                  public Object resolve(String   name,
-                                                                                                        Platform platform,
-                                                                                                        Options  options)
+                                                                                  public Object resolve(String        name,
+                                                                                                        Platform      platform,
+                                                                                                        OptionsByType optionsByType)
                                                                                   {
                                                                                       if (platform
                                                                                           instanceof RemotePlatform)
@@ -244,9 +244,9 @@ public interface CoherenceClusterMember extends JavaApplication
                                                                               new SystemProperty.ContextSensitiveValue()
                                                                               {
                                                                                   @Override
-                                                                                  public Object resolve(String   name,
-                                                                                                        Platform platform,
-                                                                                                        Options  options)
+                                                                                  public Object resolve(String        name,
+                                                                                                        Platform      platform,
+                                                                                                        OptionsByType optionsByType)
                                                                                   {
                                                                                       if (platform
                                                                                           instanceof RemotePlatform)
@@ -261,13 +261,13 @@ public interface CoherenceClusterMember extends JavaApplication
                                                                               }));
 
             // update the system properties as it may have been modified
-            options.add(systemProperties);
+            optionsByType.add(systemProperties);
         }
 
 
         @Override
-        public void onLaunch(Platform platform,
-                             Options  options)
+        public void onLaunch(Platform      platform,
+                             OptionsByType optionsByType)
         {
             // there's nothing to do before launching the application
         }
@@ -276,7 +276,7 @@ public interface CoherenceClusterMember extends JavaApplication
         @Override
         public void onLaunched(Platform               platform,
                                CoherenceClusterMember member,
-                               Options                options)
+                               OptionsByType          optionsByType)
         {
             // nothing to do after launch
         }
@@ -306,9 +306,10 @@ public interface CoherenceClusterMember extends JavaApplication
         public void configure(ContainerClassLoader containerClassLoader,
                               PipedOutputStream    pipedOutputStream,
                               PipedInputStream     pipedInputStream,
-                              Options              options)
+                              OptionsByType        optionsByType)
         {
-            ClassName className = options.getOrDefault(ClassName.class, ClassName.of(DEFAULT_CACHE_SERVER_CLASSNAME));
+            ClassName className = optionsByType.getOrDefault(ClassName.class,
+                                                             ClassName.of(DEFAULT_CACHE_SERVER_CLASSNAME));
 
             ContainerBasedJavaApplicationLauncher.configureRemoteChannel(containerClassLoader,
                                                                          pipedOutputStream,

@@ -26,7 +26,7 @@
 package com.oracle.bedrock.runtime;
 
 import com.oracle.bedrock.Option;
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.extensible.Extensible;
 import com.oracle.bedrock.options.Timeout;
 import com.oracle.bedrock.runtime.options.ApplicationClosingBehavior;
@@ -145,14 +145,14 @@ public interface Application extends Extensible, Closeable
 
 
     /**
-     * Obtains the configured {@link Options} for the {@link Application}.
+     * Obtains the configured {@link OptionsByType} for the {@link Application}.
      * <p>
-     * <strong>Changes to the {@link Options} may not be recognized
+     * <strong>Changes to the {@link OptionsByType} may not be recognized
      * or used by the {@link Application} after it was realized.</strong>
      *
-     * @return the {@link Options}
+     * @return the {@link OptionsByType}
      */
-    Options getOptions();
+    OptionsByType getOptions();
 
 
     /**
@@ -163,40 +163,40 @@ public interface Application extends Extensible, Closeable
         /**
          * Constructs a {@link MetaClass} for a {@link Application}.
          */
-        @Options.Default
+        @OptionsByType.Default
         public MetaClass()
         {
         }
 
 
         @Override
-        public Class<? extends Application> getImplementationClass(Platform platform,
-                                                                   Options  options)
+        public Class<? extends Application> getImplementationClass(Platform      platform,
+                                                                   OptionsByType optionsByType)
         {
             return SimpleApplication.class;
         }
 
 
         @Override
-        public void onLaunching(Platform platform,
-                                Options  options)
+        public void onLaunching(Platform      platform,
+                                OptionsByType optionsByType)
         {
             // there's nothing to do before launching the application
         }
 
 
         @Override
-        public void onLaunch(Platform platform,
-                             Options  options)
+        public void onLaunch(Platform      platform,
+                             OptionsByType optionsByType)
         {
             // there's nothing to do before launching the application
         }
 
 
         @Override
-        public void onLaunched(Platform    platform,
-                               Application application,
-                               Options     options)
+        public void onLaunched(Platform      platform,
+                               Application   application,
+                               OptionsByType optionsByType)
         {
             // there's nothing to do after launching the application
         }

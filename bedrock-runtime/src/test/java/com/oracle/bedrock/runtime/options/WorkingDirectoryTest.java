@@ -25,22 +25,18 @@
 
 package com.oracle.bedrock.runtime.options;
 
-import com.oracle.bedrock.Options;
-
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.runtime.LocalPlatform;
 import com.oracle.bedrock.runtime.Platform;
-
 import org.junit.Test;
+
+import java.io.File;
+import java.util.Arrays;
+import java.util.Iterator;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
-
 import static org.junit.Assert.assertThat;
-
-import java.io.File;
-
-import java.util.Arrays;
-import java.util.Iterator;
 
 /**
  * Unit tests for the {@link WorkingDirectory} class.
@@ -52,8 +48,8 @@ import java.util.Iterator;
  */
 public class WorkingDirectoryTest
 {
-    private Platform platform = LocalPlatform.get();
-    private Options  options  = new Options();
+    private Platform      platform      = LocalPlatform.get();
+    private OptionsByType optionsByType = OptionsByType.empty();
 
 
     @Test
@@ -66,7 +62,7 @@ public class WorkingDirectoryTest
         assertThat(workingDirectory, is(notNullValue()));
         assertThat(workingDirectory.getValue(), is((Object) file));
 
-        assertThat(workingDirectory.resolve(platform, options), is(file));
+        assertThat(workingDirectory.resolve(platform, optionsByType), is(file));
     }
 
 
@@ -80,7 +76,7 @@ public class WorkingDirectoryTest
 
         assertThat(workingDirectory, is(notNullValue()));
 
-        assertThat(workingDirectory.resolve(platform, options), is(current));
+        assertThat(workingDirectory.resolve(platform, optionsByType), is(current));
     }
 
 
@@ -94,7 +90,7 @@ public class WorkingDirectoryTest
         assertThat(workingDirectory, is(notNullValue()));
         assertThat(workingDirectory.getValue(), is((Object) "/foo"));
 
-        assertThat(workingDirectory.resolve(platform, options), is(file));
+        assertThat(workingDirectory.resolve(platform, optionsByType), is(file));
     }
 
 
@@ -108,7 +104,7 @@ public class WorkingDirectoryTest
 
         assertThat(workingDirectory, is(notNullValue()));
 
-        assertThat(workingDirectory.resolve(platform, options), is(current));
+        assertThat(workingDirectory.resolve(platform, optionsByType), is(current));
     }
 
 
@@ -123,7 +119,7 @@ public class WorkingDirectoryTest
 
         File expected = new File(file, "myapp");
 
-        assertThat(workingDirectory.resolve(platform, new Options(DisplayName.of("myapp"))), is(expected));
+        assertThat(workingDirectory.resolve(platform, OptionsByType.of(DisplayName.of("myapp"))), is(expected));
     }
 
 
@@ -138,7 +134,7 @@ public class WorkingDirectoryTest
 
         File expected = new File(current, "myapp");
 
-        assertThat(workingDirectory.resolve(platform, new Options(DisplayName.of("myapp"))), is(expected));
+        assertThat(workingDirectory.resolve(platform, OptionsByType.of(DisplayName.of("myapp"))), is(expected));
     }
 
 
@@ -151,7 +147,7 @@ public class WorkingDirectoryTest
 
         assertThat(workingDirectory, is(notNullValue()));
 
-        assertThat(workingDirectory.resolve(platform, options), is(file));
+        assertThat(workingDirectory.resolve(platform, optionsByType), is(file));
     }
 
 
@@ -162,7 +158,7 @@ public class WorkingDirectoryTest
 
         assertThat(workingDirectory, is(notNullValue()));
 
-        File file = workingDirectory.resolve(platform, options);
+        File file = workingDirectory.resolve(platform, optionsByType);
 
         assertThat(file, is(notNullValue()));
     }
@@ -175,7 +171,7 @@ public class WorkingDirectoryTest
 
         assertThat(workingDirectory, is(notNullValue()));
 
-        File file = workingDirectory.resolve(platform, new Options(DisplayName.of("MyApp")));
+        File file = workingDirectory.resolve(platform, OptionsByType.of(DisplayName.of("MyApp")));
 
         assertThat(file, is(new File("/tmp/Local/MyApp")));
     }
@@ -190,8 +186,8 @@ public class WorkingDirectoryTest
 
         assertThat(workingDirectory, is(notNullValue()));
 
-        File file1 = workingDirectory.resolve(platform, options);
-        File file2 = workingDirectory.resolve(platform, options);
+        File file1 = workingDirectory.resolve(platform, optionsByType);
+        File file2 = workingDirectory.resolve(platform, optionsByType);
 
         assertThat(file1, is(new File("/foo")));
         assertThat(file2, is(new File("/bar")));

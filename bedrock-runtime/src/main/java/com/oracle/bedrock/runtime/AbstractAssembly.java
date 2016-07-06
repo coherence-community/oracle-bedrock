@@ -26,7 +26,7 @@
 package com.oracle.bedrock.runtime;
 
 import com.oracle.bedrock.Option;
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.annotations.Internal;
 import com.oracle.bedrock.deferred.DeferredPredicate;
 import com.oracle.bedrock.runtime.options.Discriminator;
@@ -86,24 +86,24 @@ public abstract class AbstractAssembly<A extends Application> implements Assembl
     protected AtomicInteger applicationCount;
 
     /**
-     * The {@link Options} used for constructing the {@link Assembly}.
+     * The {@link OptionsByType} used for constructing the {@link Assembly}.
      */
-    protected Options options;
+    protected OptionsByType optionsByType;
 
 
     /**
      * Constructs an {@link AbstractAssembly} given a list of {@link Application}s.
      *
-     * @param applications  the {@link Application}s in the {@link Assembly}.
-     * @param options       the {@link Options} used to launch the {@link Application}s
+     * @param applications   the {@link Application}s in the {@link Assembly}.
+     * @param optionsByType  the {@link OptionsByType} used to launch the {@link Application}s
      */
     public AbstractAssembly(List<? extends A> applications,
-                            Options           options)
+                            OptionsByType     optionsByType)
     {
         this.applications     = new CopyOnWriteArrayList<>();
         this.isClosed         = new AtomicBoolean(false);
         this.applicationCount = new AtomicInteger(applications.size());
-        this.options          = options;
+        this.optionsByType    = optionsByType;
 
         // add the applications to the assembly
         for (A application : applications)
@@ -296,11 +296,11 @@ public abstract class AbstractAssembly<A extends Application> implements Assembl
         ArrayList<A> launchedApplications = new ArrayList<>();
 
         // determine the base expanding options
-        Options expandingOptions = new Options(options);
+        OptionsByType expandingOptions = OptionsByType.of(options);
 
         for (int i = 0; i < count; i++)
         {
-            Options launchOptions = new Options(expandingOptions);
+            OptionsByType launchOptions = OptionsByType.of(expandingOptions);
 
             // create a discriminator for the new application
             launchOptions.add(Discriminator.of(applicationCount.incrementAndGet()));
@@ -335,14 +335,14 @@ public abstract class AbstractAssembly<A extends Application> implements Assembl
 
     /**
      * Called prior to the {@link Assembly} closing and relaunching the specified {@link Application}
-     * using the provided {@link Options}.  When called the {@link Application} has yet
+     * using the provided {@link OptionsByType}.  When called the {@link Application} has yet
      * to be closed.
      *
-     * @param application  the {@link Application} to be relaunched
-     * @param options      the {@link Options} provided for relaunching
+     * @param application    the {@link Application} to be relaunched
+     * @param optionsByType  the {@link OptionsByType} provided for relaunching
      */
-    protected void onRelaunching(A       application,
-                                 Options options)
+    protected void onRelaunching(A             application,
+                                 OptionsByType optionsByType)
     {
         // by default there's nothing to do prior to relaunching an application
     }
@@ -351,13 +351,13 @@ public abstract class AbstractAssembly<A extends Application> implements Assembl
     /**
      * Called prior to the {@link Assembly} relaunching the now closed {@link Application} on the
      * specified {@link Platform}, allowing an implementation to override and customize the provided
-     * {@link Options}, arguments and properties.
+     * {@link OptionsByType}, arguments and properties.
      *
-     * @param platform   the {@link Platform}
-     * @param options    the {@link Options}
+     * @param platform       the {@link Platform}
+     * @param optionsByType  the {@link OptionsByType}
      */
-    protected void onRelaunching(Platform platform,
-                                 Options  options)
+    protected void onRelaunching(Platform      platform,
+                                 OptionsByType optionsByType)
     {
         // by default there's nothing to do prior to relaunching an application
     }
@@ -365,15 +365,15 @@ public abstract class AbstractAssembly<A extends Application> implements Assembl
 
     /**
      * Called after the {@link Assembly} has relaunched the {@link Application} using the
-     * provided {@link Options}.
+     * provided {@link OptionsByType}.
      *
-     * @param original   the original (now closed) {@link Application}
-     * @param restarted  the restarted {@link Application}
-     * @param options    the launch {@link Options}
+     * @param original       the original (now closed) {@link Application}
+     * @param restarted      the restarted {@link Application}
+     * @param optionsByType  the launch {@link OptionsByType}
      */
-    protected void onRelaunched(A       original,
-                                A       restarted,
-                                Options options)
+    protected void onRelaunched(A             original,
+                                A             restarted,
+                                OptionsByType optionsByType)
     {
         // by default there's nothing to do after relaunching an application
     }
@@ -396,12 +396,12 @@ public abstract class AbstractAssembly<A extends Application> implements Assembl
                 if (remove(application))
                 {
                     // obtain some information about the application before closing it
-                    Platform platform           = application.getPlatform();
-                    Options  applicationOptions = application.getOptions();
+                    Platform      platform           = application.getPlatform();
+                    OptionsByType applicationOptions = application.getOptions();
 
                     // establish the launch options
                     // (based on the application and specified options)
-                    Options launchOptions = new Options(applicationOptions).addAll(options);
+                    OptionsByType launchOptions = OptionsByType.of(applicationOptions).addAll(options);
 
                     // notify the assembly that the application is about to be relaunched
                     onRelaunching(application, launchOptions);
@@ -442,9 +442,9 @@ public abstract class AbstractAssembly<A extends Application> implements Assembl
             });
 
         // finally ensure the stability of the assembly (if required)
-        Options                      launchOptions      = Options.from(options);
+        OptionsByType                optionsByType      = OptionsByType.of(options);
 
-        StabilityPredicate<Assembly> stabilityPredicate = launchOptions.getOrDefault(StabilityPredicate.class, null);
+        StabilityPredicate<Assembly> stabilityPredicate = optionsByType.getOrDefault(StabilityPredicate.class, null);
 
         if (stabilityPredicate != null)
         {
@@ -501,8 +501,8 @@ public abstract class AbstractAssembly<A extends Application> implements Assembl
 
 
     @Override
-    public void onClosing(A       application,
-                          Options options)
+    public void onClosing(A             application,
+                          OptionsByType optionsByType)
     {
         if (!isClosed())
         {
@@ -514,8 +514,8 @@ public abstract class AbstractAssembly<A extends Application> implements Assembl
 
 
     @Override
-    public void onClosed(A       application,
-                         Options options)
+    public void onClosed(A             application,
+                         OptionsByType optionsByType)
     {
         // SKIP: nothing to do when an application is closed
     }

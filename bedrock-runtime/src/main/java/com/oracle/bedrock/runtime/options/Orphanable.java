@@ -26,7 +26,7 @@
 package com.oracle.bedrock.runtime.options;
 
 import com.oracle.bedrock.Option;
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.runtime.Application;
 
 /**
@@ -123,7 +123,7 @@ public class Orphanable implements Option
      *
      * @return  a disabled {@link Orphanable}
      */
-    @Options.Default
+    @OptionsByType.Default
     public static Orphanable disabled()
     {
         return new Orphanable(false);

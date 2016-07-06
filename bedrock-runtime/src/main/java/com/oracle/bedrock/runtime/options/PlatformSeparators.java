@@ -26,7 +26,7 @@
 package com.oracle.bedrock.runtime.options;
 
 import com.oracle.bedrock.Option;
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.runtime.LocalPlatform;
 import com.oracle.bedrock.runtime.Platform;
 
@@ -232,7 +232,7 @@ public class PlatformSeparators implements Option
      *
      * @return the current {@link Platform} {@link PlatformSeparators}
      */
-    @Options.Default
+    @OptionsByType.Default
     public static PlatformSeparators autoDetect()
     {
         return new PlatformSeparators(File.separator, File.pathSeparator, System.lineSeparator());

@@ -26,7 +26,7 @@
 package com.oracle.bedrock.runtime.virtual.vagrant.options;
 
 import com.oracle.bedrock.Option;
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.runtime.remote.options.HostName;
 import com.oracle.bedrock.runtime.virtual.vagrant.VagrantPlatform;
 
@@ -109,7 +109,7 @@ public class Networks implements Option.Collector<Network, Networks>
      *
      * @return an empty {@link Networks}
      */
-    @Options.Default
+    @OptionsByType.Default
     public static Networks none()
     {
         return new Networks();

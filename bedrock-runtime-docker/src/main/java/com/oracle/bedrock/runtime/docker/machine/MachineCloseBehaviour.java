@@ -26,7 +26,7 @@
 package com.oracle.bedrock.runtime.docker.machine;
 
 import com.oracle.bedrock.Option;
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.runtime.docker.DockerContainer;
 import com.oracle.bedrock.runtime.docker.options.ImageCloseBehaviour;
 
@@ -135,7 +135,7 @@ public class MachineCloseBehaviour implements Option, Consumer<DockerMachinePlat
      *
      * @return a {@link MachineCloseBehaviour}
      */
-    @Options.Default
+    @OptionsByType.Default
     public static MachineCloseBehaviour remove()
     {
         return new MachineCloseBehaviour(MachineCloseBehaviour::remove);

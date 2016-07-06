@@ -26,7 +26,7 @@
 package com.oracle.bedrock.runtime;
 
 import com.oracle.bedrock.Option;
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.runtime.options.PlatformPredicate;
 
 /**
@@ -71,11 +71,11 @@ public interface Infrastructure
         return (options -> {
 
             // obtain the PlatformPredicate (just in case one has been provided)
-                    Options platformOptions = Options.from(options);
+                    OptionsByType optionsByType = OptionsByType.of(options);
 
                     // assume using the LocalPlatform if there's no predicate
-                    PlatformPredicate predicate = platformOptions.getOrDefault(PlatformPredicate.class,
-                                                                               PlatformPredicate.isLocal());
+                    PlatformPredicate predicate = optionsByType.getOrDefault(PlatformPredicate.class,
+                                                                             PlatformPredicate.isLocal());
 
                     // only return the LocalPlatform if the predicate matches
                     return predicate.test(LocalPlatform.get()) ? LocalPlatform.get() : null;

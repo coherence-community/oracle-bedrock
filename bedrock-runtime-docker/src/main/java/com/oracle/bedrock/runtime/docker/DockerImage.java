@@ -25,7 +25,7 @@
 
 package com.oracle.bedrock.runtime.docker;
 
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.extensible.Extensible;
 import com.oracle.bedrock.extensible.Feature;
 import com.oracle.bedrock.runtime.Application;
@@ -56,9 +56,9 @@ public class DockerImage implements Feature, ApplicationListener<Application>
     private final List<String> tags;
 
     /**
-     * The {@link Options} used to build this image.
+     * The {@link OptionsByType} used to build this image.
      */
-    private final Options options;
+    private final OptionsByType optionsByType;
 
     /**
      * The {@link Application} used to build this image
@@ -76,19 +76,19 @@ public class DockerImage implements Feature, ApplicationListener<Application>
     /**
      * Create a {@link DockerImage}.
      *
-     * @param tags     the tags to identify this image
-     * @param options  the {@link Options} used to build this image
+     * @param tags           the tags to identify this image
+     * @param optionsByType  the {@link OptionsByType} used to build this image
      */
-    public DockerImage(List<String> tags,
-                       Options      options)
+    public DockerImage(List<String>  tags,
+                       OptionsByType optionsByType)
     {
         if (tags == null || tags.isEmpty())
         {
             throw new IllegalArgumentException("The image tags cannot be null or empty List");
         }
 
-        this.tags    = tags;
-        this.options = options == null ? new Options() : new Options(options);
+        this.tags          = tags;
+        this.optionsByType = optionsByType == null ? OptionsByType.empty() : OptionsByType.of(optionsByType);
     }
 
 
@@ -99,13 +99,13 @@ public class DockerImage implements Feature, ApplicationListener<Application>
 
 
     /**
-     * Obtain the {@link Options} used to build this image.
+     * Obtain the {@link OptionsByType} used to build this image.
      *
-     * @return  the {@link Options} used to build this image
+     * @return  the {@link OptionsByType} used to build this image
      */
-    public Options getOptions()
+    public OptionsByType getOptions()
     {
-        return options;
+        return optionsByType;
     }
 
 
@@ -138,7 +138,7 @@ public class DockerImage implements Feature, ApplicationListener<Application>
      */
     public Docker getDockerEnvironment()
     {
-        return options.get(Docker.class);
+        return optionsByType.get(Docker.class);
     }
 
 
@@ -220,27 +220,27 @@ public class DockerImage implements Feature, ApplicationListener<Application>
 
 
     @Override
-    public void onClosing(Application application,
-                          Options     options)
+    public void onClosing(Application   application,
+                          OptionsByType optionsByType)
     {
         // there is nothing to do here
     }
 
 
     @Override
-    public void onClosed(Application application,
-                         Options     options)
+    public void onClosed(Application   application,
+                         OptionsByType optionsByType)
     {
-        Options closingOptions;
+        OptionsByType closingOptions;
 
         if (application != null)
         {
-            closingOptions = new Options(application.getOptions());
-            closingOptions.addAll(options);
+            closingOptions = OptionsByType.of(application.getOptions());
+            closingOptions.addAll(optionsByType);
         }
         else
         {
-            closingOptions = options;
+            closingOptions = optionsByType;
         }
 
         ImageCloseBehaviour behaviour = closingOptions.get(ImageCloseBehaviour.class);

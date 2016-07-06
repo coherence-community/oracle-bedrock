@@ -26,7 +26,7 @@
 package com.oracle.bedrock.runtime.java;
 
 import com.oracle.bedrock.Option;
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.annotations.Internal;
 import com.oracle.bedrock.runtime.AbstractApplication;
 import com.oracle.bedrock.runtime.Application;
@@ -63,15 +63,15 @@ public abstract class AbstractJavaApplication<P extends JavaApplicationProcess> 
     /**
      * Constructs a {@link AbstractJavaApplication}.
      *
-     * @param platform  the {@link Platform} on which the {@link Application} was launched
-     * @param process   the underlying {@link ApplicationProcess} representing the {@link Application}
-     * @param options   the {@link Options} used to launch the {@link Application}
+     * @param platform       the {@link Platform} on which the {@link Application} was launched
+     * @param process        the underlying {@link ApplicationProcess} representing the {@link Application}
+     * @param optionsByType  the {@link OptionsByType} used to launch the {@link Application}
      */
-    public AbstractJavaApplication(Platform platform,
-                                   P        process,
-                                   Options  options)
+    public AbstractJavaApplication(Platform      platform,
+                                   P             process,
+                                   OptionsByType optionsByType)
     {
-        super(platform, process, options);
+        super(platform, process, optionsByType);
     }
 
 

@@ -26,7 +26,7 @@
 package com.oracle.bedrock.runtime.remote.options;
 
 import com.oracle.bedrock.Option;
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.runtime.remote.RemotePlatform;
 
 /**
@@ -111,7 +111,7 @@ public class StrictHostChecking implements Option
      *
      * @return  an enabled {@link StrictHostChecking}
      */
-    @Options.Default
+    @OptionsByType.Default
     public static StrictHostChecking enabled()
     {
         return new StrictHostChecking(true);

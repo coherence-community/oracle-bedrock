@@ -26,7 +26,7 @@
 package com.oracle.bedrock.runtime.concurrent;
 
 import com.oracle.bedrock.Option;
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.annotations.Experimental;
 import com.oracle.bedrock.runtime.concurrent.options.StreamName;
 
@@ -71,7 +71,7 @@ public interface RemoteChannel extends Closeable
          * The {@link CompletableFuture} returned by the {@link RemoteChannel#raise(RemoteEvent, Option...)}
          * will be completed when the event has been raised.
          */
-        @Options.Default
+        @OptionsByType.Default
         SENT,
 
         /**

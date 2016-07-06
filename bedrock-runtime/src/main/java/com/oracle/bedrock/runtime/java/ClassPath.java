@@ -26,7 +26,7 @@
 package com.oracle.bedrock.runtime.java;
 
 import com.oracle.bedrock.Option;
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.lang.StringHelper;
 import com.oracle.bedrock.runtime.options.PlatformSeparators;
 import com.oracle.bedrock.table.Table;
@@ -306,15 +306,15 @@ public class ClassPath implements Iterable<String>, Tabular, Option
      * Note:  The returned String may contain spaces in which case the caller should
      * appropriate double-quote the String for their appropriate Platform.
      *
-     * @param options  the {@link Options} for converting the {@link ClassPath} into a String
+     * @param optionsByType  the {@link OptionsByType} for converting the {@link ClassPath} into a String
      *
      * @return the Java class-path
      */
-    public String toString(Options options)
+    public String toString(OptionsByType optionsByType)
     {
         StringBuilder      builder       = new StringBuilder();
-        PlatformSeparators separators    = options.get(PlatformSeparators.class);
-        ClassPathModifier  modifier      = options.get(ClassPathModifier.class);
+        PlatformSeparators separators    = optionsByType.get(PlatformSeparators.class);
+        ClassPathModifier  modifier      = optionsByType.get(ClassPathModifier.class);
         String             pathSeparator = separators.getPathSeparator();
 
         for (String path : paths)
@@ -343,13 +343,13 @@ public class ClassPath implements Iterable<String>, Tabular, Option
      * Note:  The returned String may contain spaces in which case the caller should
      * appropriate double-quote the String for their appropriate Platform.
      *
-     * @param options   the {@link Options}
+     * @param options   the {@link Option}s
      *
      * @return the Java class-path
      */
     public String toString(Option... options)
     {
-        return toString(new Options(options));
+        return toString(OptionsByType.of(options));
     }
 
 
@@ -673,7 +673,7 @@ public class ClassPath implements Iterable<String>, Tabular, Option
      *
      * @return a {@link ClassPath} representing the System java.class.path property.
      */
-    @Options.Default
+    @OptionsByType.Default
     public static ClassPath ofSystem()
     {
         return new ClassPath(System.getProperty("java.class.path"));

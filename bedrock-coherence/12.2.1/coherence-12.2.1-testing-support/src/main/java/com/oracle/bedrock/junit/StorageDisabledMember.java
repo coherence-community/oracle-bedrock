@@ -25,8 +25,7 @@
 
 package com.oracle.bedrock.junit;
 
-import com.oracle.bedrock.Option;
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.runtime.LocalPlatform;
 import com.oracle.bedrock.runtime.MetaClass;
 import com.oracle.bedrock.runtime.Profile;
@@ -53,31 +52,29 @@ public class StorageDisabledMember implements SessionBuilder
     @Override
     public ConfigurableCacheFactory build(LocalPlatform                 platform,
                                           CoherenceClusterOrchestration orchestration,
-                                          Option...                     options)
+                                          OptionsByType                 optionsByType)
     {
         // ----- establish the options for launching a local storage-disabled member -----
-        Options launchOptions = new Options(options);
-
-        launchOptions.add(RoleName.of("client"));
-        launchOptions.add(LocalStorage.disabled());
-        launchOptions.addIfAbsent(CacheConfig.of("coherence-cache-config.xml"));
+        optionsByType.add(RoleName.of("client"));
+        optionsByType.add(LocalStorage.disabled());
+        optionsByType.addIfAbsent(CacheConfig.of("coherence-cache-config.xml"));
 
         // ----- notify the Profiles that we're about to launch an application -----
 
         MetaClass<CoherenceClusterMember> metaClass = new CoherenceClusterMember.MetaClass();
 
-        for (Profile profile : launchOptions.getInstancesOf(Profile.class))
+        for (Profile profile : optionsByType.getInstancesOf(Profile.class))
         {
-            profile.onLaunching(platform, metaClass, launchOptions);
+            profile.onLaunching(platform, metaClass, optionsByType);
         }
 
         // ----- create local system properties based on those defined by the launch options -----
 
         // modify the current system properties to include/override those in the schema
         com.oracle.bedrock.runtime.java.options.SystemProperties systemProperties =
-            launchOptions.get(com.oracle.bedrock.runtime.java.options.SystemProperties.class);
+            optionsByType.get(com.oracle.bedrock.runtime.java.options.SystemProperties.class);
 
-        Properties properties = systemProperties.resolve(platform, launchOptions);
+        Properties properties = systemProperties.resolve(platform, optionsByType);
 
         for (String propertyName : properties.stringPropertyNames())
         {
@@ -86,7 +83,7 @@ public class StorageDisabledMember implements SessionBuilder
 
         // create the session
         ConfigurableCacheFactory session =
-            new ScopedCacheFactoryBuilder().getConfigurableCacheFactory(launchOptions.get(CacheConfig.class).getUri(),
+            new ScopedCacheFactoryBuilder().getConfigurableCacheFactory(optionsByType.get(CacheConfig.class).getUri(),
                                                                         getClass().getClassLoader());
 
         // as this is a cluster member we have to join the cluster

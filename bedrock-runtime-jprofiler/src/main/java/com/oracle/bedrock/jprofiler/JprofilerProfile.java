@@ -26,7 +26,7 @@
 package com.oracle.bedrock.jprofiler;
 
 import com.oracle.bedrock.Option;
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.runtime.Application;
 import com.oracle.bedrock.runtime.MetaClass;
 import com.oracle.bedrock.runtime.Platform;
@@ -430,12 +430,12 @@ public class JprofilerProfile implements Profile, Option
 
 
     @Override
-    public void onLaunching(Platform  platform,
-                            MetaClass metaClass,
-                            Options   options)
+    public void onLaunching(Platform      platform,
+                            MetaClass     metaClass,
+                            OptionsByType optionsByType)
     {
         if (metaClass != null
-            && JavaApplication.class.isAssignableFrom(metaClass.getImplementationClass(platform, options))
+            && JavaApplication.class.isAssignableFrom(metaClass.getImplementationClass(platform, optionsByType))
             && isEnabled())
         {
             StringBuilder agentLib = new StringBuilder("-agentpath:").append(agentLibraryFile).append('=');
@@ -452,7 +452,7 @@ public class JprofilerProfile implements Profile, Option
             else
             {
                 ListenAddress address = this.listenAddress == null
-                                        ? options.get(ListenAddress.class) : this.listenAddress;
+                                        ? optionsByType.get(ListenAddress.class) : this.listenAddress;
 
                 if (address == null)
                 {
@@ -469,7 +469,7 @@ public class JprofilerProfile implements Profile, Option
                 agentLib.append(",port=").append(address.getPort().get()).append(startSuspended ? "" : ",nowait");
 
                 // replace the TransportAddress with the one we've resolved / created
-                options.add(address);
+                optionsByType.add(address);
             }
 
             if (verbose)
@@ -493,29 +493,29 @@ public class JprofilerProfile implements Profile, Option
             }
 
             // add the agent as a Freeform JvmOption
-            options.add(new Freeform(agentLib.toString()));
+            optionsByType.add(new Freeform(agentLib.toString()));
 
             // disable waiting for the application to start if we're in suspend mode
             if (startSuspended)
             {
-                options.add(WaitToStart.disabled());
+                optionsByType.add(WaitToStart.disabled());
             }
         }
     }
 
 
     @Override
-    public void onLaunched(Platform    platform,
-                           Application application,
-                           Options     options)
+    public void onLaunched(Platform      platform,
+                           Application   application,
+                           OptionsByType optionsByType)
     {
     }
 
 
     @Override
-    public void onClosing(Platform    platform,
-                          Application application,
-                          Options     options)
+    public void onClosing(Platform      platform,
+                          Application   application,
+                          OptionsByType optionsByType)
     {
     }
 
@@ -545,7 +545,7 @@ public class JprofilerProfile implements Profile, Option
      *
      * @return an enabled {@link JprofilerProfile}
      */
-    @Options.Default
+    @OptionsByType.Default
     public static JprofilerProfile enabledNoWait(String agentLibraryFile)
     {
         return new JprofilerProfile(true, agentLibraryFile, null, false, null, 0, false, false, false, null, null);

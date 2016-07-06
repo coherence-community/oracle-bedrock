@@ -26,7 +26,7 @@
 package com.oracle.bedrock.runtime.java.options;
 
 import com.oracle.bedrock.Option;
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.lang.ExpressionEvaluator;
 import com.oracle.bedrock.runtime.Platform;
 import com.oracle.bedrock.runtime.java.JavaApplication;
@@ -94,7 +94,7 @@ public class SystemProperties implements Option.Collector<SystemProperty, System
     /**
      * Constructs an empty {@link SystemProperties}.
      */
-    @Options.Default
+    @OptionsByType.Default
     public SystemProperties()
     {
         this.properties = new LinkedHashMap<>();
@@ -375,18 +375,18 @@ public class SystemProperties implements Option.Collector<SystemProperty, System
      * If the value of a {@link SystemProperty} is defined as an {@link Iterator}, the next value from the
      * said {@link Iterator} will be used as a value for the returned property.  If the value of a
      * {@link SystemProperty} is defined as a {@link SystemProperty.ContextSensitiveValue}, the
-     * {@link SystemProperty.ContextSensitiveValue#resolve(String, Platform, Options)} is called
+     * {@link SystemProperty.ContextSensitiveValue#resolve(String, Platform, OptionsByType)} is called
      * to resolve the value.
      *
-     * @param platform  the target {@link Platform} for the returned {@link Properties}
-     * @param options   the {@link Options} for resolving the {@link Properties}
+     * @param platform       the target {@link Platform} for the returned {@link Properties}
+     * @param optionsByType  the {@link OptionsByType} for resolving the {@link Properties}
      *
      * @return a new {@link Properties} instance
      */
-    public Properties resolve(Platform platform,
-                              Options  options)
+    public Properties resolve(Platform      platform,
+                              OptionsByType optionsByType)
     {
-        ExpressionEvaluator evaluator  = new ExpressionEvaluator(options);
+        ExpressionEvaluator evaluator  = new ExpressionEvaluator(optionsByType);
 
         Properties          properties = new Properties();
 
@@ -402,7 +402,7 @@ public class SystemProperties implements Option.Collector<SystemProperty, System
                     SystemProperty.ContextSensitiveValue contextSensitiveValue =
                         (SystemProperty.ContextSensitiveValue) value;
 
-                    value = contextSensitiveValue.resolve(name, platform, options);
+                    value = contextSensitiveValue.resolve(name, platform, optionsByType);
                 }
 
                 if (value instanceof Iterator<?>)
@@ -432,7 +432,7 @@ public class SystemProperties implements Option.Collector<SystemProperty, System
                         expression = result == null ? "" : result.toString();
                     }
 
-                    Options propertyOptions = property.getOptions();
+                    OptionsByType propertyOptions = property.getOptions();
                     Iterable<SystemProperty.ResolveHandler> handlers =
                         propertyOptions.getInstancesOf(SystemProperty.ResolveHandler.class);
 
@@ -440,7 +440,7 @@ public class SystemProperties implements Option.Collector<SystemProperty, System
                     {
                         try
                         {
-                            handler.onResolve(name, expression, options);
+                            handler.onResolve(name, expression, optionsByType);
                         }
                         catch (Throwable t)
                         {

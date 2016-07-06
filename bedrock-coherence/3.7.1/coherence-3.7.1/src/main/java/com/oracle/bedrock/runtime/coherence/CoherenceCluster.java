@@ -25,7 +25,7 @@
 
 package com.oracle.bedrock.runtime.coherence;
 
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.runtime.AbstractAssembly;
 import com.oracle.bedrock.runtime.Assembly;
 import com.oracle.bedrock.runtime.coherence.callables.GetAutoStartServiceNames;
@@ -60,12 +60,12 @@ public class CoherenceCluster extends AbstractAssembly<CoherenceClusterMember>
      * Constructs a {@link CoherenceCluster} given a list of {@link CoherenceClusterMember}s.
      *
      * @param members  the {@link CoherenceClusterMember}s
-     * @param options  the shared / common {@link Options} used to launch the {@link CoherenceClusterMember}s
+     * @param optionsByType  the shared / common {@link OptionsByType} used to launch the {@link CoherenceClusterMember}s
      */
     public CoherenceCluster(List<? extends CoherenceClusterMember> members,
-                            Options                                options)
+                            OptionsByType                          optionsByType)
     {
-        super(members, options);
+        super(members, optionsByType);
     }
 
 
@@ -122,7 +122,7 @@ public class CoherenceCluster extends AbstractAssembly<CoherenceClusterMember>
 
     @Override
     protected void onRelaunching(CoherenceClusterMember application,
-                                 Options                options)
+                                 OptionsByType          optionsByType)
     {
         // TODO: get the current MemberUID and record it (or make the application remember it)
     }
@@ -131,7 +131,7 @@ public class CoherenceCluster extends AbstractAssembly<CoherenceClusterMember>
     @Override
     protected void onRelaunched(CoherenceClusterMember original,
                                 CoherenceClusterMember restarted,
-                                Options                options)
+                                OptionsByType          optionsByType)
     {
         // TODO: assert that the original member UID is no longer in the cluster
 

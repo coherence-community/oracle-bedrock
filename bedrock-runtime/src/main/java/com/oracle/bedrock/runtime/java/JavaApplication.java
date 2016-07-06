@@ -26,7 +26,7 @@
 package com.oracle.bedrock.runtime.java;
 
 import com.oracle.bedrock.Option;
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.options.Timeout;
 import com.oracle.bedrock.runtime.Application;
 import com.oracle.bedrock.runtime.Platform;
@@ -105,12 +105,12 @@ public interface JavaApplication extends Application, RemoteChannel
      * @param <T>       the type of the result
      * @return          the value from the {@link RemoteCallable}
      */
-    public default <T> T invoke(RemoteCallable<T> callable,
-                                Option...         options)
+    default <T> T invoke(RemoteCallable<T> callable,
+                         Option...         options)
     {
         // determine the timeout
-        Options              invokeOptions = new Options(options);
-        Timeout              timeout       = invokeOptions.getOrDefault(Timeout.class, getOptions().get(Timeout.class));
+        OptionsByType        optionsByType = OptionsByType.of(options);
+        Timeout              timeout       = optionsByType.getOrDefault(Timeout.class, getOptions().get(Timeout.class));
 
         CompletableFuture<T> future        = submit(callable, options);
 
@@ -157,31 +157,31 @@ public interface JavaApplication extends Application, RemoteChannel
         /**
          * Constructs a {@link MetaClass} for a {@link JavaApplication}.
          */
-        @Options.Default
+        @OptionsByType.Default
         public MetaClass()
         {
         }
 
 
         @Override
-        public Class<? extends JavaApplication> getImplementationClass(Platform platform,
-                                                                       Options  options)
+        public Class<? extends JavaApplication> getImplementationClass(Platform      platform,
+                                                                       OptionsByType optionsByType)
         {
             return SimpleJavaApplication.class;
         }
 
 
         @Override
-        public void onLaunch(Platform platform,
-                             Options  options)
+        public void onLaunch(Platform      platform,
+                             OptionsByType optionsByType)
         {
             // there's nothing to do before launching the application
         }
 
 
         @Override
-        public void onLaunching(Platform platform,
-                                Options  options)
+        public void onLaunching(Platform      platform,
+                                OptionsByType optionsByType)
         {
             // there's nothing to do before launching the application
         }
@@ -190,7 +190,7 @@ public interface JavaApplication extends Application, RemoteChannel
         @Override
         public void onLaunched(Platform        platform,
                                JavaApplication application,
-                               Options         options)
+                               OptionsByType   optionsByType)
         {
             // there's nothing to do after launching the application
         }

@@ -25,10 +25,10 @@
 
 package com.oracle.bedrock.runtime.docker.commands;
 
+import com.oracle.bedrock.OptionsByType;
+import com.oracle.bedrock.runtime.LocalPlatform;
 import com.oracle.bedrock.runtime.Platform;
 import com.oracle.bedrock.runtime.options.Arguments;
-import com.oracle.bedrock.Options;
-import com.oracle.bedrock.runtime.LocalPlatform;
 
 import java.util.List;
 
@@ -44,13 +44,13 @@ public abstract class AbstractCommandTest
 {
     public List<String> resolveArguments(AbstractDockerCommand<?> command)
     {
-        Platform platform = LocalPlatform.get();
-        Options  options  = new Options();
+        Platform      platform      = LocalPlatform.get();
+        OptionsByType optionsByType = OptionsByType.empty();
 
-        command.onLaunch(platform, options);
+        command.onLaunch(platform, optionsByType);
 
-        Arguments arguments = options.get(Arguments.class);
+        Arguments arguments = optionsByType.get(Arguments.class);
 
-        return arguments.resolve(platform, options);
+        return arguments.resolve(platform, optionsByType);
     }
 }

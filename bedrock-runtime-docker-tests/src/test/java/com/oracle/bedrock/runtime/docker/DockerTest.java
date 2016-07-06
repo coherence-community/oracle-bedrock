@@ -25,7 +25,7 @@
 
 package com.oracle.bedrock.runtime.docker;
 
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.runtime.Application;
 import com.oracle.bedrock.runtime.LocalPlatform;
 import com.oracle.bedrock.runtime.docker.options.DockerDefaultBaseImages;
@@ -38,12 +38,10 @@ import java.util.List;
 import java.util.Properties;
 
 import static org.hamcrest.CoreMatchers.is;
-
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.sameInstance;
 import static org.hamcrest.collection.IsIterableContainingInOrder.contains;
 import static org.hamcrest.collection.IsMapContaining.hasEntry;
-
 import static org.junit.Assert.assertThat;
 
 /**
@@ -65,7 +63,7 @@ public class DockerTest
         assertThat(docker.getDaemonAddress(), is(host));
 
         Arguments    arguments = Arguments.of(docker.getArguments());
-        List<String> resolved  = arguments.resolve(LocalPlatform.get(), new Options());
+        List<String> resolved  = arguments.resolve(LocalPlatform.get(), OptionsByType.empty());
 
         assertThat(resolved, contains(Docker.ARG_HOST + "=" + host));
     }
@@ -114,7 +112,7 @@ public class DockerTest
         Docker                  docker        = Docker.auto();
         DockerDefaultBaseImages defaultImages = DockerDefaultBaseImages.defaultImages();
 
-        String imageName = docker.getBaseImage(Application.class);
+        String                  imageName     = docker.getBaseImage(Application.class);
 
         assertThat(imageName, is(defaultImages.getBaseImage(Application.class)));
     }
@@ -317,15 +315,15 @@ public class DockerTest
 
     private List<String> resolveArguments(Docker docker)
     {
-        Arguments    arguments1 = Arguments.of(docker.getArguments());
+        Arguments arguments1 = Arguments.of(docker.getArguments());
 
-        return arguments1.resolve(LocalPlatform.get(), new Options());
+        return arguments1.resolve(LocalPlatform.get(), OptionsByType.empty());
     }
+
 
     private Properties resolveEnvironment(Docker docker)
     {
-        EnvironmentVariables variables = EnvironmentVariables.custom()
-                                                 .with(docker.getEnvironmentVariables());
+        EnvironmentVariables variables = EnvironmentVariables.custom().with(docker.getEnvironmentVariables());
 
         return variables.realize(LocalPlatform.get());
     }

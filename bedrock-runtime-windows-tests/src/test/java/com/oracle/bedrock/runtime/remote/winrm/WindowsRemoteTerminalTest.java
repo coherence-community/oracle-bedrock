@@ -25,36 +25,28 @@
 
 package com.oracle.bedrock.runtime.remote.winrm;
 
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.runtime.remote.Authentication;
-import com.oracle.bedrock.runtime.remote.RemotePlatform;
-import com.oracle.bedrock.Options;
-
 import com.oracle.bedrock.runtime.remote.Password;
+import com.oracle.bedrock.runtime.remote.RemotePlatform;
 import com.oracle.bedrock.runtime.remote.http.HttpBasedAuthentication;
-
 import org.junit.Test;
-
 import org.mockito.InOrder;
+
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.InetAddress;
+import java.util.Arrays;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.sameInstance;
-
 import static org.junit.Assert.assertThat;
-
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
-
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-
-import java.io.InputStream;
-import java.io.OutputStream;
-
-import java.net.InetAddress;
-
-import java.util.Arrays;
 
 /**
  * Tests for {@link WindowsRemoteTerminal}.
@@ -102,7 +94,7 @@ public class WindowsRemoteTerminalTest
         Authentication authentication = new Password("secret");
         String         hostName       = "foo.com";
         int            port           = 1234;
-        Options        options        = new Options();
+        OptionsByType  optionsByType  = OptionsByType.empty();
         WindowsSession session        = mock(WindowsSession.class);
 
         RemotePlatform platform       = mock(RemotePlatform.class);
@@ -114,7 +106,7 @@ public class WindowsRemoteTerminalTest
 
         WindowsRemoteTerminal shell = new WindowsRemoteTerminalStub(platform, session);
 
-        shell.makeDirectories("dir1\\dir2", options);
+        shell.makeDirectories("dir1\\dir2", optionsByType);
 
         InOrder inOrder = inOrder(session);
 

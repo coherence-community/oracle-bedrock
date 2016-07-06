@@ -26,7 +26,7 @@
 package com.oracle.bedrock.runtime;
 
 import com.oracle.bedrock.Option;
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.runtime.options.PlatformPredicate;
 
 import java.util.ArrayList;
@@ -83,11 +83,11 @@ public class StaticInfrastructure implements Infrastructure
     @Override
     public Platform getPlatform(Option... options)
     {
-        Options            platformOptions = Options.from(options);
+        OptionsByType      optionsByType = OptionsByType.of(options);
 
-        PlatformPredicate  predicate = platformOptions.getOrDefault(PlatformPredicate.class, PlatformPredicate.any());
+        PlatformPredicate  predicate     = optionsByType.getOrDefault(PlatformPredicate.class, PlatformPredicate.any());
 
-        Optional<Platform> platform        = platforms.stream().filter(predicate).unordered().findFirst();
+        Optional<Platform> platform      = platforms.stream().filter(predicate).unordered().findFirst();
 
         return platform.isPresent() ? platform.get() : null;
     }

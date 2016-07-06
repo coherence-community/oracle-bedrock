@@ -26,7 +26,7 @@
 package com.oracle.bedrock.runtime;
 
 import com.oracle.bedrock.Option;
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 
 /**
  * Defines meta-information about the {@link Class} of an {@link Application}.
@@ -48,53 +48,53 @@ public interface MetaClass<A extends Application>
      * This is the type of {@link Class} that will be returned by {@link Platform#launch(Class, Option...)}
      * for the {@link Application}.
      *
-     * @param platform  the {@link Platform} on which the {@link Application} will be launched
-     * @param options   the {@link Options} provided for launching the {@link Application}
+     * @param platform       the {@link Platform} on which the {@link Application} will be launched
+     * @param optionsByType  the {@link OptionsByType} provided for launching the {@link Application}
      *
      * @return the {@link Class} of {@link Application}
      */
-    Class<? extends A> getImplementationClass(Platform platform,
-                                              Options  options);
+    Class<? extends A> getImplementationClass(Platform      platform,
+                                              OptionsByType optionsByType);
 
 
     /**
      * Invoked by a {@link Platform} prior to an {@link Application} being launched,
-     * allowing a {@link MetaClass} to prepare and customize the specified {@link Options}.
+     * allowing a {@link MetaClass} to prepare and customize the specified {@link OptionsByType}.
      *
-     * @param platform   the {@link Platform}
-     * @param options    the {@link Options}
+     * @param platform       the {@link Platform}
+     * @param optionsByType  the {@link OptionsByType}
      */
-    void onLaunching(Platform platform,
-                     Options  options);
+    void onLaunching(Platform      platform,
+                     OptionsByType optionsByType);
 
 
     /**
      * Invoked by a {@link Platform} prior to an {@link Application} being launched,
      * but <strong>after</strong> all {@link Option} preparations have taken place, eg: by previous
-     * calls to {@link #onLaunching(Platform, Options)} and other onLaunching methods, thus
+     * calls to {@link #onLaunching(Platform, OptionsByType)} and other onLaunching methods, thus
      * allowing a {@link MetaClass} one final chance to customize launch configuration and behavior
      * of an {@link Application}.
      *
-     * @param platform   the {@link Platform}
-     * @param options    the final set of {@link Options} that will be used to launch
-     *                   the {@link Application}.
+     * @param platform       the {@link Platform}
+     * @param optionsByType  the final set of {@link OptionsByType} that will be used to launch
+     *                       the {@link Application}.
      */
-    void onLaunch(Platform platform,
-                  Options  options);
+    void onLaunch(Platform      platform,
+                  OptionsByType optionsByType);
 
 
     /**
      * Invoked by a {@link Platform} after an {@link Application} has been launched using the
-     * specified {@link Options}, but before the {@link Application} is returned to the
+     * specified {@link OptionsByType}, but before the {@link Application} is returned to the
      * {@link Thread} that requested the {@link Application}.
      *
-     * @param platform      the {@link Platform}
-     * @param application   the {@link Application}
-     * @param options       the {@link Options}
+     * @param platform       the {@link Platform}
+     * @param application    the {@link Application}
+     * @param optionsByType  the {@link OptionsByType}
      */
-    void onLaunched(Platform platform,
-                    A        application,
-                    Options  options);
+    void onLaunched(Platform      platform,
+                    A             application,
+                    OptionsByType optionsByType);
 
 
     /**

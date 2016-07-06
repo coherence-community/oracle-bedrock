@@ -25,7 +25,7 @@
 
 package com.oracle.bedrock.runtime.java.options;
 
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.options.Decoration;
 import com.oracle.bedrock.runtime.LocalPlatform;
 import org.junit.Test;
@@ -51,21 +51,21 @@ public class SystemPropertiesTest
     @Test
     public void shouldCallResolveHandlers() throws Exception
     {
-        SystemProperty.ResolveHandler handler1 = mock(SystemProperty.ResolveHandler.class);
-        SystemProperty.ResolveHandler handler2 = mock(SystemProperty.ResolveHandler.class);
-        SystemProperty.ResolveHandler handler3 = mock(SystemProperty.ResolveHandler.class);
-        Options                       options  = new Options();
+        SystemProperty.ResolveHandler handler1      = mock(SystemProperty.ResolveHandler.class);
+        SystemProperty.ResolveHandler handler2      = mock(SystemProperty.ResolveHandler.class);
+        SystemProperty.ResolveHandler handler3      = mock(SystemProperty.ResolveHandler.class);
+        OptionsByType                 optionsByType = OptionsByType.empty();
 
-        options.add(SystemProperty.of("foo", "foo-value", Decoration.of(handler1), Decoration.of(handler2)));
+        optionsByType.add(SystemProperty.of("foo", "foo-value", Decoration.of(handler1), Decoration.of(handler2)));
 
-        options.add(SystemProperty.of("bar", "bar-value", Decoration.of(handler1), Decoration.of(handler3)));
+        optionsByType.add(SystemProperty.of("bar", "bar-value", Decoration.of(handler1), Decoration.of(handler3)));
 
-        options.get(SystemProperties.class).resolve(LocalPlatform.get(), options);
+        optionsByType.get(SystemProperties.class).resolve(LocalPlatform.get(), optionsByType);
 
         ArgumentCaptor<String> names1  = ArgumentCaptor.forClass(String.class);
         ArgumentCaptor<String> values1 = ArgumentCaptor.forClass(String.class);
 
-        verify(handler1, times(2)).onResolve(names1.capture(), values1.capture(), same(options));
+        verify(handler1, times(2)).onResolve(names1.capture(), values1.capture(), same(optionsByType));
 
         assertThat(names1.getAllValues(), contains("foo", "bar"));
         assertThat(values1.getAllValues(), contains("foo-value", "bar-value"));
@@ -73,7 +73,7 @@ public class SystemPropertiesTest
         ArgumentCaptor<String> names2  = ArgumentCaptor.forClass(String.class);
         ArgumentCaptor<String> values2 = ArgumentCaptor.forClass(String.class);
 
-        verify(handler2, times(1)).onResolve(names2.capture(), values2.capture(), same(options));
+        verify(handler2, times(1)).onResolve(names2.capture(), values2.capture(), same(optionsByType));
 
         assertThat(names2.getAllValues(), contains("foo"));
         assertThat(values2.getAllValues(), contains("foo-value"));
@@ -81,7 +81,7 @@ public class SystemPropertiesTest
         ArgumentCaptor<String> names3  = ArgumentCaptor.forClass(String.class);
         ArgumentCaptor<String> values3 = ArgumentCaptor.forClass(String.class);
 
-        verify(handler3, times(1)).onResolve(names3.capture(), values3.capture(), same(options));
+        verify(handler3, times(1)).onResolve(names3.capture(), values3.capture(), same(optionsByType));
 
         assertThat(names3.getAllValues(), contains("bar"));
         assertThat(values3.getAllValues(), contains("bar-value"));

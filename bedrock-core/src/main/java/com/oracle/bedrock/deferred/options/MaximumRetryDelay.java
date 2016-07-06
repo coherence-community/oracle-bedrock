@@ -26,7 +26,7 @@
 package com.oracle.bedrock.deferred.options;
 
 import com.oracle.bedrock.Option;
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.deferred.Ensured;
 import com.oracle.bedrock.util.Duration;
 
@@ -129,7 +129,7 @@ public class MaximumRetryDelay implements Option
      *
      * @return  a {@link MaximumRetryDelay}
      */
-    @Options.Default
+    @OptionsByType.Default
     public static MaximumRetryDelay standard()
     {
         return new MaximumRetryDelay(Duration.of(1, TimeUnit.SECONDS));

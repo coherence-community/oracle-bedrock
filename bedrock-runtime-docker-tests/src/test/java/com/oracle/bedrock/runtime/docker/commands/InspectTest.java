@@ -25,13 +25,13 @@
 
 package com.oracle.bedrock.runtime.docker.commands;
 
-import com.oracle.bedrock.runtime.Platform;
 import com.oracle.bedrock.Option;
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.runtime.Application;
 import com.oracle.bedrock.runtime.ApplicationConsole;
 import com.oracle.bedrock.runtime.ApplicationConsoleBuilder;
 import com.oracle.bedrock.runtime.MetaClass;
+import com.oracle.bedrock.runtime.Platform;
 import com.oracle.bedrock.runtime.docker.Docker;
 import com.oracle.bedrock.runtime.options.Argument;
 import org.junit.Test;
@@ -229,24 +229,31 @@ public class InspectTest extends AbstractCommandTest
     {
         private Application application;
 
+
+        /**
+         * Constructs ...
+         *
+         *
+         * @param application
+         */
         public LaunchAnswer(Application application)
         {
             this.application = application;
         }
 
+
         @Override
         public Application answer(InvocationOnMock invocation) throws Throwable
         {
-            Options options = new Options();
+            OptionsByType optionsByType = OptionsByType.empty();
 
-            Arrays.stream(invocation.getArguments())
-                  .filter(arg -> arg instanceof Option)
-                  .forEach(arg -> options.add((Option) arg));
+            Arrays.stream(invocation.getArguments()).filter(arg -> arg
+                          instanceof Option).forEach(arg -> optionsByType.add((Option) arg));
 
-            ApplicationConsoleBuilder builder = options.get(ApplicationConsoleBuilder.class);
-            ApplicationConsole console = builder.build("Foo");
+            ApplicationConsoleBuilder builder = optionsByType.get(ApplicationConsoleBuilder.class);
+            ApplicationConsole        console = builder.build("Foo");
 
-            PrintWriter writer = console.getOutputWriter();
+            PrintWriter               writer  = console.getOutputWriter();
 
             writer.println("[{\"Id\": \"foo-id\"}]");
             writer.flush();

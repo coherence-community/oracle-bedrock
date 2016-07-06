@@ -25,33 +25,18 @@
 
 package com.oracle.bedrock.runtime.remote.http;
 
-import com.oracle.bedrock.runtime.Platform;
-import com.oracle.bedrock.runtime.remote.options.Deployer;
-import com.oracle.bedrock.Options;
-
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.runtime.LocalPlatform;
-
+import com.oracle.bedrock.runtime.Platform;
 import com.oracle.bedrock.runtime.remote.DeploymentArtifact;
+import com.oracle.bedrock.runtime.remote.options.Deployer;
 import com.oracle.bedrock.runtime.remote.winrm.AbstractWindowsTest;
-
 import org.junit.Assume;
 import org.junit.Test;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.sameInstance;
-
-import static org.hamcrest.Matchers.greaterThanOrEqualTo;
-
-import static org.junit.Assert.assertThat;
-
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-
 import java.io.File;
-
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
-
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -59,6 +44,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.sameInstance;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 /**
  * Functional tests for the {@link PowerShellHttpDeployer}.
@@ -73,25 +65,25 @@ public class PowerShellHttpDeployerTest extends AbstractWindowsHttpDeployerTest
     @Test
     public void shouldFindInOptions() throws Exception
     {
-        Deployer deployer = new PowerShellHttpDeployer();
-        Options  options  = new Options(deployer);
+        Deployer      deployer      = new PowerShellHttpDeployer();
+        OptionsByType optionsByType = OptionsByType.of(deployer);
 
-        assertThat(options.get(Deployer.class), is(sameInstance(deployer)));
+        assertThat(optionsByType.get(Deployer.class), is(sameInstance(deployer)));
     }
 
 
     @Test
     public void shouldDeployEmptyArtifacts() throws Exception
     {
-        Map<String, DeploymentArtifact> artifacts   = new HashMap<>();
-        String                          destination = "/foo";
-        Platform                        platform    = mock(Platform.class);
-        InetSocketAddress               address     = new InetSocketAddress(InetAddress.getLocalHost(), 1234);
-        Options                         options     = new Options();
+        Map<String, DeploymentArtifact> artifacts        = new HashMap<>();
+        String                          destination      = "/foo";
+        Platform                        platform         = mock(Platform.class);
+        InetSocketAddress               address          = new InetSocketAddress(InetAddress.getLocalHost(), 1234);
+        OptionsByType                   optionsByType    = OptionsByType.empty();
 
         PowerShellHttpDeployer          deploymentMethod = new PowerShellHttpDeployer();
 
-        deploymentMethod.deployAllArtifacts(artifacts, destination, platform, address, options);
+        deploymentMethod.deployAllArtifacts(artifacts, destination, platform, address, optionsByType);
 
         verifyNoMoreInteractions(platform);
     }
@@ -103,11 +95,11 @@ public class PowerShellHttpDeployerTest extends AbstractWindowsHttpDeployerTest
         String                 destination      = "/foo";
         Platform               platform         = mock(Platform.class);
         InetSocketAddress      address          = new InetSocketAddress(InetAddress.getLocalHost(), 1234);
-        Options                options          = new Options();
+        OptionsByType          optionsByType    = OptionsByType.empty();
 
         PowerShellHttpDeployer deploymentMethod = new PowerShellHttpDeployer();
 
-        deploymentMethod.deployAllArtifacts(null, destination, platform, address, options);
+        deploymentMethod.deployAllArtifacts(null, destination, platform, address, optionsByType);
     }
 
 

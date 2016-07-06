@@ -25,12 +25,11 @@
 
 package com.oracle.bedrock.runtime.remote.ssh;
 
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.runtime.Platform;
 import com.oracle.bedrock.runtime.remote.AbstractRemoteTest;
 import com.oracle.bedrock.runtime.remote.DeploymentArtifact;
 import com.oracle.bedrock.runtime.remote.options.Deployer;
-import com.oracle.bedrock.Options;
-
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -53,18 +52,23 @@ import static org.junit.Assert.assertThat;
  */
 public class SftpDeployerTest extends AbstractRemoteTest
 {
+    /**
+     * Field description
+     */
     @ClassRule
     public static TemporaryFolder temporaryFolder = new TemporaryFolder();
+
 
     @Test
     public void shouldFindAsDeploymentMethodInOptions() throws Exception
     {
-        Deployer sftp    = new SftpDeployer();
-        Options  options = new Options(sftp);
-        Deployer result  = options.get(Deployer.class);
+        Deployer      sftp          = new SftpDeployer();
+        OptionsByType optionsByType = OptionsByType.of(sftp);
+        Deployer      result        = optionsByType.get(Deployer.class);
 
         assertThat(result, is(sameInstance(sftp)));
     }
+
 
     @Test
     public void shouldDeployFiles() throws Exception
@@ -85,5 +89,4 @@ public class SftpDeployerTest extends AbstractRemoteTest
         assertThat(new File(defaultDir, source.getName()).exists(), is(true));
         assertThat(new File(root, "temp.txt").exists(), is(true));
     }
-
 }

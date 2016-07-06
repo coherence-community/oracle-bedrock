@@ -26,7 +26,7 @@
 package com.oracle.bedrock.junit;
 
 import com.oracle.bedrock.Option;
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.junit.options.TestClasses;
 import com.oracle.bedrock.options.Decoration;
 import com.oracle.bedrock.runtime.Platform;
@@ -65,13 +65,13 @@ public class SimpleJUnitTestRunTest
     @Test
     public void shouldAddListenersFromOptions() throws Exception
     {
-        Platform                platform  = mock(Platform.class);
-        JavaApplicationProcess  process   = mock(JavaApplicationProcess.class);
-        SimpleJUnitTestListener listener1 = new SimpleJUnitTestListener();
-        SimpleJUnitTestListener listener2 = new SimpleJUnitTestListener();
-        Options                 options   = new Options(listener1.asOption(), listener2.asOption());
+        Platform                platform      = mock(Platform.class);
+        JavaApplicationProcess  process       = mock(JavaApplicationProcess.class);
+        SimpleJUnitTestListener listener1     = new SimpleJUnitTestListener();
+        SimpleJUnitTestListener listener2     = new SimpleJUnitTestListener();
+        OptionsByType           optionsByType = OptionsByType.of(listener1.asOption(), listener2.asOption());
 
-        try (SimpleJUnitTestRun application = new SimpleJUnitTestRun(platform, process, options))
+        try (SimpleJUnitTestRun application = new SimpleJUnitTestRun(platform, process, optionsByType))
         {
             assertThat(application.getRunListeners(), containsInAnyOrder(listener1, listener2));
         }
@@ -81,14 +81,14 @@ public class SimpleJUnitTestRunTest
     @Test
     public void shouldStartTests() throws Exception
     {
-        Platform               platform = mock(Platform.class);
-        JavaApplicationProcess process  = mock(JavaApplicationProcess.class);
-        Options                options  = new Options();
+        Platform               platform      = mock(Platform.class);
+        JavaApplicationProcess process       = mock(JavaApplicationProcess.class);
+        OptionsByType          optionsByType = OptionsByType.empty();
 
-        try (SimpleJUnitTestRun application = new SimpleJUnitTestRun(platform, process, options))
+        try (SimpleJUnitTestRun application = new SimpleJUnitTestRun(platform, process, optionsByType))
         {
             TestClasses        testClasses = TestClasses.empty();
-            Options            testOptions = new Options(testClasses);
+            OptionsByType      testOptions = OptionsByType.of(testClasses);
             SimpleJUnitTestRun spyApp      = spy(application);
 
             doReturn(null).when(spyApp).submit(any(RemoteCallable.class), anyVararg());
@@ -281,16 +281,16 @@ public class SimpleJUnitTestRunTest
     public void fireEvent(JUnitTestListener.Event event,
                           JUnitTestListener...    listeners) throws Exception
     {
-        Platform               platform = mock(Platform.class);
-        JavaApplicationProcess process  = mock(JavaApplicationProcess.class);
-        Options                options  = new Options();
+        Platform               platform      = mock(Platform.class);
+        JavaApplicationProcess process       = mock(JavaApplicationProcess.class);
+        OptionsByType          optionsByType = OptionsByType.empty();
 
         for (JUnitTestListener listener : listeners)
         {
-            options.add(Decoration.of(listener));
+            optionsByType.add(Decoration.of(listener));
         }
 
-        try (SimpleJUnitTestRun application = new SimpleJUnitTestRun(platform, process, options))
+        try (SimpleJUnitTestRun application = new SimpleJUnitTestRun(platform, process, optionsByType))
         {
             ArgumentCaptor<RemoteEventListener> captorListener = ArgumentCaptor.forClass(RemoteEventListener.class);
             ArgumentCaptor<Option>              captorOptions  = ArgumentCaptor.forClass(Option.class);

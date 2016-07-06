@@ -26,7 +26,7 @@
 package com.oracle.bedrock.runtime.remote.options;
 
 import com.oracle.bedrock.Option;
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.runtime.Platform;
 import com.oracle.bedrock.runtime.remote.DeploymentArtifact;
 
@@ -61,8 +61,9 @@ public class CustomDeployment implements Deployment
 
 
     @Override
-    public List<DeploymentArtifact> getDeploymentArtifacts(Platform platform,
-                                                           Options  options) throws FileNotFoundException, IOException
+    public List<DeploymentArtifact> getDeploymentArtifacts(Platform      platform,
+                                                           OptionsByType optionsByType)
+                                                               throws FileNotFoundException, IOException
     {
         return artifactsToDeploy;
     }

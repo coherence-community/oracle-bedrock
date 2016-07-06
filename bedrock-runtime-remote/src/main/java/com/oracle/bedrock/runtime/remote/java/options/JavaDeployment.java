@@ -26,7 +26,7 @@
 package com.oracle.bedrock.runtime.remote.java.options;
 
 import com.oracle.bedrock.Option;
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.io.FileHelper;
 import com.oracle.bedrock.runtime.Platform;
 import com.oracle.bedrock.runtime.java.ClassPath;
@@ -152,8 +152,9 @@ public class JavaDeployment implements Deployment
 
 
     @Override
-    public List<DeploymentArtifact> getDeploymentArtifacts(Platform platform,
-                                                           Options  options) throws FileNotFoundException, IOException
+    public List<DeploymentArtifact> getDeploymentArtifacts(Platform      platform,
+                                                           OptionsByType optionsByType)
+                                                               throws FileNotFoundException, IOException
     {
         ArrayList<DeploymentArtifact> deploymentArtifacts = new ArrayList<DeploymentArtifact>();
         File                          javaHomeFile        = new File(System.getProperty("java.home"));
@@ -167,7 +168,7 @@ public class JavaDeployment implements Deployment
         if (autoDeployEnabled)
         {
             // we'll use the class-path option to work out what to deploy
-            ClassPath classPath = options.get(ClassPath.class);
+            ClassPath classPath = optionsByType.get(ClassPath.class);
 
             for (String path : classPath)
             {

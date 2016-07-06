@@ -26,7 +26,7 @@
 package com.oracle.bedrock.runtime.options;
 
 import com.oracle.bedrock.Option;
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.lang.ExpressionEvaluator;
 import com.oracle.bedrock.runtime.Platform;
 
@@ -66,30 +66,30 @@ public class Arguments implements Option.Collector<Argument, Arguments>
      * If the value of a {@link Argument} is defined as an {@link Iterator}, the next value from the
      * said {@link Iterator} will be used as a argument value. If the value of a {@link Argument} is
      * defined as a {@link Argument.ContextSensitiveArgument}, the
-     * {@link Argument.ContextSensitiveArgument#resolve(Platform, Options)} method is called
+     * {@link Argument.ContextSensitiveArgument#resolve(Platform, OptionsByType)} method is called
      * to resolve the value.
      *
-     * @param platform  the target {@link Platform} for the returned {@link List} of arguments
-     * @param options   the {@link Option}s for realizing the {@link List} of arguments
+     * @param platform       the target {@link Platform} for the returned {@link List} of arguments
+     * @param optionsByType  the {@link OptionsByType}s for realizing the {@link List} of arguments
      *
      * @return a new {@link List} of application command line arguments
      */
-    public List<String> resolve(Platform platform,
-                                Options  options)
+    public List<String> resolve(Platform      platform,
+                                OptionsByType optionsByType)
     {
-        if (options == null)
+        if (optionsByType == null)
         {
-            options = new Options();
+            optionsByType = OptionsByType.empty();
         }
 
-        ExpressionEvaluator evaluator = new ExpressionEvaluator(options);
+        ExpressionEvaluator evaluator = new ExpressionEvaluator(optionsByType);
         List<String>        argList   = new ArrayList<>();
 
         for (Argument argument : this.arguments)
         {
             String       name      = argument.getName();
             char         separator = argument.getSeparator();
-            List<String> values    = argument.resolve(platform, evaluator, options);
+            List<String> values    = argument.resolve(platform, evaluator, optionsByType);
 
             if (name != null &&!name.isEmpty())
             {
@@ -485,7 +485,7 @@ public class Arguments implements Option.Collector<Argument, Arguments>
      *
      * @return  an empty {@link Arguments} instance
      */
-    @Options.Default
+    @OptionsByType.Default
     public static Arguments empty()
     {
         return EMPTY;

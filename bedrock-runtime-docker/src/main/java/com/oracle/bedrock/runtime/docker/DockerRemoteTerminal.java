@@ -26,7 +26,7 @@
 package com.oracle.bedrock.runtime.docker;
 
 import com.oracle.bedrock.Option;
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.extensible.AbstractExtensible;
 import com.oracle.bedrock.extensible.Feature;
 import com.oracle.bedrock.io.FileHelper;
@@ -38,7 +38,6 @@ import com.oracle.bedrock.runtime.ApplicationProcess;
 import com.oracle.bedrock.runtime.MetaClass;
 import com.oracle.bedrock.runtime.Platform;
 import com.oracle.bedrock.runtime.Profile;
-import com.oracle.bedrock.runtime.options.Console;
 import com.oracle.bedrock.runtime.console.EventsApplicationConsole;
 import com.oracle.bedrock.runtime.console.NullApplicationConsole;
 import com.oracle.bedrock.runtime.docker.commands.Build;
@@ -51,6 +50,7 @@ import com.oracle.bedrock.runtime.docker.options.DockerfileDeployer;
 import com.oracle.bedrock.runtime.docker.options.ImageCloseBehaviour;
 import com.oracle.bedrock.runtime.java.ClassPathModifier;
 import com.oracle.bedrock.runtime.options.Arguments;
+import com.oracle.bedrock.runtime.options.Console;
 import com.oracle.bedrock.runtime.options.Discriminator;
 import com.oracle.bedrock.runtime.options.DisplayName;
 import com.oracle.bedrock.runtime.options.PlatformSeparators;
@@ -129,7 +129,7 @@ public class DockerRemoteTerminal implements RemoteTerminal, Deployer
         try
         {
             this.platform           = platform;
-            this.tmpFolder          = WorkingDirectory.temporaryDirectory().resolve(platform, Options.of());
+            this.tmpFolder          = WorkingDirectory.temporaryDirectory().resolve(platform, OptionsByType.empty());
             this.deployer           = new DockerfileDeployer(tmpFolder.getCanonicalPath());
             this.dockerFileCommands = new ArrayList<>();
         }
@@ -163,12 +163,11 @@ public class DockerRemoteTerminal implements RemoteTerminal, Deployer
      * Write any mkdir commands to the Dockerfile
      *
      * @param directoryName  the directory to create
-     * @param options        the {@link Options} controlling
-     *                       the build of the Dockerfile
+     * @param optionsByType  the {@link OptionsByType} controlling the build of the Dockerfile
      */
     @Override
-    public void makeDirectories(String  directoryName,
-                                Options options)
+    public void makeDirectories(String        directoryName,
+                                OptionsByType optionsByType)
     {
         dockerFileCommands.add("RUN mkdir -p " + directoryName);
     }
@@ -177,11 +176,11 @@ public class DockerRemoteTerminal implements RemoteTerminal, Deployer
     @Override
     public RemoteApplicationProcess launch(Launchable                   launchable,
                                            Class<? extends Application> applicationClass,
-                                           Options                      options)
+                                           OptionsByType                optionsByType)
     {
         String imageTag      = UUID.randomUUID().toString();
         String containerName = UUID.randomUUID().toString();
-        Docker docker        = options.get(Docker.class);
+        Docker docker        = optionsByType.get(Docker.class);
         String baseImage     = docker.getBaseImage(applicationClass);
 
         if (baseImage == null || baseImage.trim().isEmpty())
@@ -193,18 +192,18 @@ public class DockerRemoteTerminal implements RemoteTerminal, Deployer
         {
             InetAddress localAddress = docker.getValidLocalAddress();
 
-            options.add(Variable.with("local.address", localAddress.getHostAddress()));
+            optionsByType.add(Variable.with("local.address", localAddress.getHostAddress()));
 
             Files.createDirectories(tmpFolder.toPath());
 
             // Write the Dockerfile
-            File dockerFile = writeDockerFile(launchable, baseImage, options);
+            File dockerFile = writeDockerFile(launchable, baseImage, optionsByType);
 
             // build image
-            DockerImage image = createImage(imageTag, dockerFile, docker, options);
+            DockerImage image = createImage(imageTag, dockerFile, docker, optionsByType);
 
             // run the container
-            ApplicationProcess containerProcess = runContainer(containerName, launchable, image, docker, options);
+            ApplicationProcess containerProcess = runContainer(containerName, launchable, image, docker, optionsByType);
 
             if (containerProcess instanceof RemoteApplicationProcess)
             {
@@ -234,23 +233,23 @@ public class DockerRemoteTerminal implements RemoteTerminal, Deployer
     /**
      * Write a Dockerfile that can be used to run the application.
      *
-     * @param launchable  the {@link RemoteTerminal.Launchable} to use
-     * @param baseImage   the name of the base image to use in the Dockerfile FROM statement
-     * @param options     the {@link Options} to use
+     * @param launchable     the {@link RemoteTerminal.Launchable} to use
+     * @param baseImage      the name of the base image to use in the Dockerfile FROM statement
+     * @param optionsByType  the {@link OptionsByType} to use
      *
      * @return  the {@link File} representing the Dockerfile created
      *
      * @throws IOException  if there is an error writing the Dockerfile
      */
-    protected File writeDockerFile(Launchable launchable,
-                                   String     baseImage,
-                                   Options    options) throws IOException
+    protected File writeDockerFile(Launchable    launchable,
+                                   String        baseImage,
+                                   OptionsByType optionsByType) throws IOException
     {
-        WorkingDirectory workingDirectory     = options.get(WorkingDirectory.class);
-        File             workingDirectoryFile = workingDirectory.resolve(platform, options);
+        WorkingDirectory workingDirectory     = optionsByType.get(WorkingDirectory.class);
+        File             workingDirectoryFile = workingDirectory.resolve(platform, optionsByType);
         String           dockerFileName       = "Dockerfile";
         File             dockerFile           = new File(tmpFolder, dockerFileName);
-        Properties       variables            = launchable.getEnvironmentVariables(platform, options);
+        Properties       variables            = launchable.getEnvironmentVariables(platform, optionsByType);
 
         for (String variableName : variables.stringPropertyNames())
         {
@@ -299,23 +298,23 @@ public class DockerRemoteTerminal implements RemoteTerminal, Deployer
      * The image will contain all of the required artifacts to run the application.
      * The image will be tagged with a random UUID.
      *
-     * @param imageTag    the tag to apply to the image
-     * @param dockerFile  the Dockerfile to use to build the image
-     * @param docker      the {@link Docker} environment to use
-     * @param options     the {@link Options} to use
+     * @param imageTag       the tag to apply to the image
+     * @param dockerFile     the Dockerfile to use to build the image
+     * @param docker         the {@link Docker} environment to use
+     * @param optionsByType  the {@link OptionsByType} to use
      *
      * @return  a {@link DockerImage} representing the built image
      */
-    protected DockerImage createImage(String  imageTag,
-                                      File    dockerFile,
-                                      Docker  docker,
-                                      Options options)
+    protected DockerImage createImage(String        imageTag,
+                                      File          dockerFile,
+                                      Docker        docker,
+                                      OptionsByType optionsByType)
     {
         LOGGER.log(Level.INFO, "Building Docker Image...");
 
-        DisplayName displayName    = options.getOrDefault(DisplayName.class, DisplayName.of(""));
+        DisplayName displayName    = optionsByType.getOrDefault(DisplayName.class, DisplayName.of(""));
         String      dockerFileName = dockerFile.getName();
-        Timeout     timeout        = options.getOrDefault(Timeout.class, Build.DEFAULT_TIMEOUT);
+        Timeout     timeout        = optionsByType.getOrDefault(Timeout.class, Build.DEFAULT_TIMEOUT);
 
         try (Application application =
             platform.launch(Build.fromDockerFile(dockerFileName).withTags(imageTag).labels("oracle.bedrock.image=true")
@@ -357,49 +356,49 @@ public class DockerRemoteTerminal implements RemoteTerminal, Deployer
      * @param launchable     the {@link RemoteTerminal.Launchable} that will give the command to execute
      * @param image          the image to use to run the container
      * @param docker         the {@link Docker} environment to use
-     * @param options        the {@link Options} to use
+     * @param optionsByType  the {@link OptionsByType} to use
      *
      * @return  a {@link DockerContainer} representing the running image
      */
-    protected ApplicationProcess runContainer(String      containerName,
-                                              Launchable  launchable,
-                                              DockerImage image,
-                                              Docker      docker,
-                                              Options     options)
+    protected ApplicationProcess runContainer(String        containerName,
+                                              Launchable    launchable,
+                                              DockerImage   image,
+                                              Docker        docker,
+                                              OptionsByType optionsByType)
     {
-        Timeout          timeout              = options.get(Timeout.class);
-        WorkingDirectory workingDirectory     = options.get(WorkingDirectory.class);
-        String           workingDirectoryName = workingDirectory.resolve(platform, options).toString();
+        Timeout          timeout              = optionsByType.get(Timeout.class);
+        WorkingDirectory workingDirectory     = optionsByType.get(WorkingDirectory.class);
+        String           workingDirectoryName = workingDirectory.resolve(platform, optionsByType).toString();
 
-        options.add(PlatformSeparators.forUnix());
-        options.add(new CPModifier(workingDirectoryName));
+        optionsByType.add(PlatformSeparators.forUnix());
+        optionsByType.add(new CPModifier(workingDirectoryName));
 
         // ----- give the container a random UUID as a name -----
-        DisplayName displayName = options.getOrDefault(DisplayName.class, DisplayName.of("Container"));
+        DisplayName displayName = optionsByType.getOrDefault(DisplayName.class, DisplayName.of("Container"));
 
         // ----- create the arguments to pass to the container as the command to execute
-        String    command       = launchable.getCommandToExecute(platform, options);
-        List<?>   args          = launchable.getCommandLineArguments(platform, options);
+        String    command       = launchable.getCommandToExecute(platform, optionsByType);
+        List<?>   args          = launchable.getCommandLineArguments(platform, optionsByType);
         Arguments containerArgs = Arguments.of(command).with(args);
 
         // ----- get any captured ports to map -----
-        Ports         ports    = options.get(Ports.class);
+        Ports         ports    = optionsByType.get(Ports.class);
         List<Integer> portList = ports.getPorts().stream().map(Ports.Port::getActualPort).collect(Collectors.toList());
 
         // ----- create the Run command -----
         Run runCommand = Run.image(image,
                                    containerName).interactive().net(docker.getDefaultNetworkName())
                                    .hostName(containerName).env(launchable.getEnvironmentVariables(platform,
-                                                                                                   options))
+                                                                                                   optionsByType))
                                                                                                    .publish(portList)
                                                                                                    .autoRemove();
 
-        Options containerOptions = new Options(options).addAll(displayName,
-                                                               docker,
-                                                               WorkingDirectory.at(tmpFolder),
-                                                               ContainerCloseBehaviour.none(),
-                                                               ImageCloseBehaviour.remove(),
-                                                               containerArgs);
+        OptionsByType containerOptions = OptionsByType.of(optionsByType).addAll(displayName,
+                                                                                docker,
+                                                                                WorkingDirectory.at(tmpFolder),
+                                                                                ContainerCloseBehaviour.none(),
+                                                                                ImageCloseBehaviour.remove(),
+                                                                                containerArgs);
 
         // ----- start the application to capture Docker events so that we know when the container is in the running state -----
         EventsApplicationConsole.CountDownListener latch     = new EventsApplicationConsole.CountDownListener(1);
@@ -419,8 +418,8 @@ public class DockerRemoteTerminal implements RemoteTerminal, Deployer
             FeatureAddingProfile profile   = new FeatureAddingProfile(image, container);
 
             // ----- add the container and default close behaviour to the options
-            options.add(profile);
-            options.add(ImageCloseBehaviour.remove());
+            optionsByType.add(profile);
+            optionsByType.add(ImageCloseBehaviour.remove());
 
             // ----- wait for the container state to be running -----
 
@@ -455,8 +454,8 @@ public class DockerRemoteTerminal implements RemoteTerminal, Deployer
                                                    }).collect(Collectors.toList());
 
                 // ----- update the options with the correctly mapped ports -----
-                options.remove(Ports.class);
-                options.add(Ports.of(mappedPorts));
+                optionsByType.remove(Ports.class);
+                optionsByType.add(Ports.of(mappedPorts));
             }
 
             // ----- return the process from the container application -----
@@ -588,25 +587,25 @@ public class DockerRemoteTerminal implements RemoteTerminal, Deployer
         private final ApplicationProcess process;
 
         /**
-         * The {@link Options} used to launch the {@link Application}.
+         * The {@link OptionsByType} used to launch the {@link Application}.
          */
-        private final Options options;
+        private final OptionsByType optionsByType;
 
 
         /**
          * Constructs a {@link ContainerApplication}
          *
-         * @param platform  the {@link Platform} on which the {@link Application} was launched
-         * @param process   the underlying {@link ApplicationProcess} representing the {@link Application}
-         * @param options   the {@link Options} used to launch the {@link Application}
+         * @param platform       the {@link Platform} on which the {@link Application} was launched
+         * @param process        the underlying {@link ApplicationProcess} representing the {@link Application}
+         * @param optionsByType  the {@link OptionsByType} used to launch the {@link Application}
          */
         public ContainerApplication(Platform           platform,
                                     ApplicationProcess process,
-                                    Options            options)
+                                    OptionsByType      optionsByType)
         {
-            this.platform = platform;
-            this.process  = process;
-            this.options  = options;
+            this.platform      = platform;
+            this.process       = process;
+            this.optionsByType = optionsByType;
         }
 
 
@@ -678,9 +677,9 @@ public class DockerRemoteTerminal implements RemoteTerminal, Deployer
 
 
         @Override
-        public Options getOptions()
+        public OptionsByType getOptions()
         {
-            return options;
+            return optionsByType;
         }
     }
 
@@ -709,48 +708,48 @@ public class DockerRemoteTerminal implements RemoteTerminal, Deployer
 
 
         @Override
-        public Class<ContainerApplication> getImplementationClass(Platform platform,
-                                                                  Options  options)
+        public Class<ContainerApplication> getImplementationClass(Platform      platform,
+                                                                  OptionsByType optionsByType)
         {
             return ContainerApplication.class;
         }
 
 
         @Override
-        public void onLaunching(Platform platform,
-                                Options  options)
+        public void onLaunching(Platform      platform,
+                                OptionsByType optionsByType)
         {
-            runCommand.onLaunching(platform, options);
+            runCommand.onLaunching(platform, optionsByType);
         }
 
 
         @Override
-        public void onLaunch(Platform platform,
-                             Options  options)
+        public void onLaunch(Platform      platform,
+                             OptionsByType optionsByType)
         {
-            runCommand.onLaunch(platform, options);
+            runCommand.onLaunch(platform, optionsByType);
         }
 
 
         @Override
         public void onLaunched(Platform             platform,
                                ContainerApplication application,
-                               Options              options)
+                               OptionsByType        optionsByType)
         {
-            runCommand.onLaunched(platform, application, options);
+            runCommand.onLaunched(platform, application, optionsByType);
         }
     }
 
 
     /**
      * A {@link Profile} that is added to an {@link Application}s
-     * {@link Options} and will when {@link #onLaunched(Platform, Application, Options)}
+     * {@link OptionsByType} and will when {@link #onLaunched(Platform, Application, OptionsByType)}
      * is called add various {@link Feature}s to the {@link Application}
      */
     private class FeatureAddingProfile implements Profile, Option
     {
         /**
-         * The {@link Feature}s to ass
+         * The {@link Feature}s to add
          */
         private Feature[] features;
 
@@ -767,27 +766,27 @@ public class DockerRemoteTerminal implements RemoteTerminal, Deployer
 
 
         @Override
-        public void onLaunching(Platform  platform,
-                                MetaClass metaClass,
-                                Options   options)
+        public void onLaunching(Platform      platform,
+                                MetaClass     metaClass,
+                                OptionsByType optionsByType)
         {
             // there is nothing to do here
         }
 
 
         @Override
-        public void onLaunched(Platform    platform,
-                               Application application,
-                               Options     options)
+        public void onLaunched(Platform      platform,
+                               Application   application,
+                               OptionsByType optionsByType)
         {
             Arrays.stream(features).forEach(application::add);
         }
 
 
         @Override
-        public void onClosing(Platform    platform,
-                              Application application,
-                              Options     options)
+        public void onClosing(Platform      platform,
+                              Application   application,
+                              OptionsByType optionsByType)
         {
             // there is nothing to do here
         }

@@ -25,7 +25,7 @@
 
 package com.oracle.bedrock.runtime.remote;
 
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.annotations.Internal;
 import com.oracle.bedrock.runtime.Application;
 import com.oracle.bedrock.runtime.Platform;
@@ -47,11 +47,11 @@ public interface RemoteTerminal
 {
     /**
      * Launches an {@link Application}, represented as a {@link RemoteApplicationProcess},
-     * according to the information provided by the {@link Launchable} and specified {@link Options}.
+     * according to the information provided by the {@link Launchable} and specified {@link OptionsByType}.
      *
      * @param launchable        the {@link Launchable} defining how to launch the {@link Application}
      * @param applicationClass  the {@link Class} of the {@link Application} being launched
-     * @param options           the {@link Options} to use when launching the {@link Application}
+     * @param optionsByType     the {@link OptionsByType} to use when launching the {@link Application}
      *
      * @return an {@link RemoteApplicationProcess} representing the launched {@link Application}
      *
@@ -59,17 +59,17 @@ public interface RemoteTerminal
      */
     RemoteApplicationProcess launch(Launchable                   launchable,
                                     Class<? extends Application> applicationClass,
-                                    Options                      options);
+                                    OptionsByType                optionsByType);
 
 
     /**
      * Ensure that the specified directory exists on the {@link RemotePlatform}.
      *
      * @param directoryName  the directory to create
-     * @param options        the {@link Options}
+     * @param optionsByType  the {@link OptionsByType}
      */
-    void makeDirectories(String  directoryName,
-                         Options options);
+    void makeDirectories(String        directoryName,
+                         OptionsByType optionsByType);
 
 
     /**
@@ -81,36 +81,36 @@ public interface RemoteTerminal
         /**
          * Obtains the command to launch an {@link Application} using a {@link RemoteTerminal}.
          *
-         * @param platform  the {@link Platform}
-         * @param options   the {@link Options}
+         * @param platform       the {@link Platform}
+         * @param optionsByType  the {@link OptionsByType}
          *
          * @return  the command
          */
-        String getCommandToExecute(Platform platform,
-                                   Options  options);
+        String getCommandToExecute(Platform      platform,
+                                   OptionsByType optionsByType);
 
 
         /**
          * Obtains the command line arguments when launching an {@link Application} using a {@link RemoteTerminal}.
          *
-         * @param platform  the {@link Platform}
-         * @param options   the {@link Options}
+         * @param platform       the {@link Platform}
+         * @param optionsByType  the {@link OptionsByType}
          *
          * @return  the command line arguments to use when launching the {@link Application}
          */
-        List<String> getCommandLineArguments(Platform platform,
-                                             Options  options);
+        List<String> getCommandLineArguments(Platform      platform,
+                                             OptionsByType optionsByType);
 
 
         /**
          * Obtains the environment variables to use when launching an {@link Application} using a {@link RemoteTerminal}.
          *
          * @param platform  the {@link Platform}
-         * @param options   the {@link Options}
+         * @param optionsByType   the {@link OptionsByType}
          *
          * @return  a {@link Properties} representing the required remote environment variables
          */
-        Properties getEnvironmentVariables(Platform platform,
-                                           Options  options);
+        Properties getEnvironmentVariables(Platform      platform,
+                                           OptionsByType optionsByType);
     }
 }

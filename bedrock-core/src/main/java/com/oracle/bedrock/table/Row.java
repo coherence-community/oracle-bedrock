@@ -26,7 +26,7 @@
 package com.oracle.bedrock.table;
 
 import com.oracle.bedrock.Option;
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -48,9 +48,9 @@ public class Row implements Iterable<Cell>
     private ArrayList<Cell> cells;
 
     /**
-     * The formatting {@link Options} for the {@link Row}.
+     * The formatting {@link OptionsByType} for the {@link Row}.
      */
-    private Options options;
+    private OptionsByType optionsByType;
 
 
     /**
@@ -70,7 +70,7 @@ public class Row implements Iterable<Cell>
             }
         }
 
-        this.options = new Options();
+        this.optionsByType = OptionsByType.empty();
     }
 
 
@@ -135,13 +135,13 @@ public class Row implements Iterable<Cell>
 
 
     /**
-     * Obtains the formatting {@link Options} for the {@link Row}.
+     * Obtains the formatting {@link OptionsByType} for the {@link Row}.
      *
-     * @return  the formatting {@link Options} for the {@link Row}
+     * @return  the formatting {@link OptionsByType} for the {@link Row}
      */
-    public Options getOptions()
+    public OptionsByType getOptions()
     {
-        return options;
+        return optionsByType;
     }
 
 

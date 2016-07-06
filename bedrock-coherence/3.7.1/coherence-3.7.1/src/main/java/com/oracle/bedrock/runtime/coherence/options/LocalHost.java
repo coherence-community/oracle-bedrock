@@ -26,7 +26,7 @@
 package com.oracle.bedrock.runtime.coherence.options;
 
 import com.oracle.bedrock.Option;
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.runtime.Application;
 import com.oracle.bedrock.runtime.MetaClass;
 import com.oracle.bedrock.runtime.Platform;
@@ -201,9 +201,9 @@ public class LocalHost implements Profile, Option
 
 
     @Override
-    public void onLaunching(Platform  platform,
-                            MetaClass metaClass,
-                            Options   options)
+    public void onLaunching(Platform      platform,
+                            MetaClass     metaClass,
+                            OptionsByType optionsByType)
     {
         if (ports != null &&!ports.hasNext())
         {
@@ -211,28 +211,28 @@ public class LocalHost implements Profile, Option
         }
         else
         {
-            SystemProperties systemProperties = options.get(SystemProperties.class);
+            SystemProperties systemProperties = optionsByType.get(SystemProperties.class);
 
             if (systemProperties != null)
             {
                 if (address == null && ports == null)
                 {
                     // setup local-only mode
-                    options.add(SystemProperty.of(PROPERTY, InetAddress.getLoopbackAddress().getHostAddress()));
+                    optionsByType.add(SystemProperty.of(PROPERTY, InetAddress.getLoopbackAddress().getHostAddress()));
 
                     // set TTL to 0
-                    options.add(SystemProperty.of("tangosol.coherence.ttl", "0"));
+                    optionsByType.add(SystemProperty.of("tangosol.coherence.ttl", "0"));
                 }
                 else
                 {
                     if (address != null)
                     {
-                        options.add(SystemProperty.of(PROPERTY, address));
+                        optionsByType.add(SystemProperty.of(PROPERTY, address));
                     }
 
                     if (ports != null)
                     {
-                        options.add(SystemProperty.of(PROPERTY_PORT, ports.next()));
+                        optionsByType.add(SystemProperty.of(PROPERTY_PORT, ports.next()));
                     }
                 }
             }
@@ -241,17 +241,17 @@ public class LocalHost implements Profile, Option
 
 
     @Override
-    public void onLaunched(Platform    platform,
-                           Application application,
-                           Options     options)
+    public void onLaunched(Platform      platform,
+                           Application   application,
+                           OptionsByType optionsByType)
     {
     }
 
 
     @Override
-    public void onClosing(Platform    platform,
-                          Application application,
-                          Options     options)
+    public void onClosing(Platform      platform,
+                          Application   application,
+                          OptionsByType optionsByType)
     {
     }
 

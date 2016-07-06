@@ -26,7 +26,7 @@
 package com.oracle.bedrock.runtime.java.options;
 
 import com.oracle.bedrock.ComposableOption;
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 
 import java.util.ArrayList;
 
@@ -143,7 +143,7 @@ public class HeapSize implements ComposableOption<HeapSize>, JvmOption
      *
      * @return  the default {@link HeapSize}
      */
-    @Options.Default
+    @OptionsByType.Default
     public static HeapSize useDefaults()
     {
         return new HeapSize();
@@ -246,7 +246,7 @@ public class HeapSize implements ComposableOption<HeapSize>, JvmOption
 
 
     @Override
-    public Iterable<String> resolve(Options options)
+    public Iterable<String> resolve(OptionsByType optionsByType)
     {
         ArrayList<String> values = new ArrayList<>(2);
 
@@ -342,7 +342,7 @@ public class HeapSize implements ComposableOption<HeapSize>, JvmOption
     {
         StringBuilder builder = new StringBuilder();
 
-        for (String value : resolve(new Options()))
+        for (String value : resolve(OptionsByType.empty()))
         {
             if (builder.length() > 0)
             {

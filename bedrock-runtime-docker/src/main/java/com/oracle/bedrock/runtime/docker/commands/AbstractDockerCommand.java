@@ -25,7 +25,7 @@
 
 package com.oracle.bedrock.runtime.docker.commands;
 
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.options.Timeout;
 import com.oracle.bedrock.runtime.Application;
 import com.oracle.bedrock.runtime.MetaClass;
@@ -89,51 +89,51 @@ public abstract class AbstractDockerCommand<C extends AbstractDockerCommand> imp
 
 
     @Override
-    public Class<? extends Application> getImplementationClass(Platform platform,
-                                                               Options  options)
+    public Class<? extends Application> getImplementationClass(Platform      platform,
+                                                               OptionsByType optionsByType)
     {
         return SimpleApplication.class;
     }
 
 
     @Override
-    public void onLaunching(Platform platform,
-                            Options  options)
+    public void onLaunching(Platform      platform,
+                            OptionsByType optionsByType)
     {
         // there is nothing to do here
     }
 
 
     @Override
-    public void onLaunch(Platform platform,
-                         Options  options)
+    public void onLaunch(Platform      platform,
+                         OptionsByType optionsByType)
     {
-        Docker    environment = options.get(Docker.class);
+        Docker    environment = optionsByType.get(Docker.class);
         Arguments arguments   = Arguments.of(environment.getArguments()).with(commandArguments);
 
         // Set the executable name to "docker"
-        options.add(Executable.named(environment.getDockerExecutable()));
+        optionsByType.add(Executable.named(environment.getDockerExecutable()));
 
         // Add the environment variables from the Docker environment
-        environment.getEnvironmentVariables().forEach(options::add);
+        environment.getEnvironmentVariables().forEach(optionsByType::add);
 
         // Set the arguments to the environment arguments plus this commands arguments
-        options.add(arguments);
+        optionsByType.add(arguments);
 
         // set the timeout if not already set
         Timeout timeout = getTimeout();
 
         if (timeout != null)
         {
-            options.addIfAbsent(timeout);
+            optionsByType.addIfAbsent(timeout);
         }
     }
 
 
     @Override
-    public void onLaunched(Platform    platform,
-                           Application application,
-                           Options     options)
+    public void onLaunched(Platform      platform,
+                           Application   application,
+                           OptionsByType optionsByType)
     {
         // there is nothing to do here
     }

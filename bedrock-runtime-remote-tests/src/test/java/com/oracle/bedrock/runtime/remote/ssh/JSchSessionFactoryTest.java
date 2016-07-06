@@ -27,27 +27,20 @@ package com.oracle.bedrock.runtime.remote.ssh;
 
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.Session;
-
+import com.oracle.bedrock.OptionsByType;
+import com.oracle.bedrock.options.Timeout;
 import com.oracle.bedrock.runtime.remote.AbstractRemoteTest;
 import com.oracle.bedrock.runtime.remote.options.StrictHostChecking;
-import com.oracle.bedrock.Options;
-
-import com.oracle.bedrock.options.Timeout;
-
 import org.junit.Assume;
 import org.junit.Test;
-
 import org.mockito.ArgumentCaptor;
 
 import java.util.Properties;
-
 import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.sameInstance;
-
 import static org.junit.Assert.assertThat;
-
 import static org.mockito.Matchers.same;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -63,21 +56,24 @@ import static org.mockito.Mockito.when;
  */
 public class JSchSessionFactoryTest extends AbstractRemoteTest
 {
-
     @Test
     public void shouldObtainSession() throws Exception
     {
         Assume.assumeThat("Test ignored as private key file does not exist", privateKeyFileExists(), is(true));
 
         JSchSocketFactory  socketFactory = new JSchSocketFactory();
-        Options            options       = new Options(StrictHostChecking.disabled());
+        OptionsByType      optionsByType = OptionsByType.of(StrictHostChecking.disabled());
         JSchSessionFactory factory       = new JSchSessionFactory();
         Session            session       = null;
 
         try
         {
-            session = factory.createSession(getRemoteHostName(), 22, getRemoteUserName(),
-                                            getRemoteAuthentication(), socketFactory, options);
+            session = factory.createSession(getRemoteHostName(),
+                                            22,
+                                            getRemoteUserName(),
+                                            getRemoteAuthentication(),
+                                            socketFactory,
+                                            optionsByType);
 
             assertThat(session.isConnected(), is(true));
         }
@@ -90,6 +86,7 @@ public class JSchSessionFactoryTest extends AbstractRemoteTest
         }
     }
 
+
     @Test
     public void shouldConfigureAuthentication() throws Exception
     {
@@ -98,7 +95,7 @@ public class JSchSessionFactoryTest extends AbstractRemoteTest
         int                     port          = 1234;
         String                  userName      = "Larry";
         JSch                    jSch          = mock(JSch.class);
-        Options                 options       = new Options();
+        OptionsByType           optionsByType = OptionsByType.empty();
         JSchBasedAuthentication auth          = mock(JSchBasedAuthentication.class);
         Session                 session       = mock(Session.class);
 
@@ -106,13 +103,19 @@ public class JSchSessionFactoryTest extends AbstractRemoteTest
 
         JSchSessionFactory factory = new JSchSessionFactory(jSch);
 
-        Session            result  = factory.createSession(hostName, port, userName, auth, socketFactory, options);
+        Session            result  = factory.createSession(hostName,
+                                                           port,
+                                                           userName,
+                                                           auth,
+                                                           socketFactory,
+                                                           optionsByType);
 
         assertThat(result, is(sameInstance(session)));
 
         verify(auth).configureFramework(jSch);
         verify(auth).configureSession(session);
     }
+
 
     @Test
     public void shouldConfigureSession() throws Exception
@@ -122,7 +125,7 @@ public class JSchSessionFactoryTest extends AbstractRemoteTest
         int                     port          = 1234;
         String                  userName      = "Larry";
         JSch                    jSch          = mock(JSch.class);
-        Options                 options       = new Options();
+        OptionsByType           optionsByType = OptionsByType.empty();
         JSchBasedAuthentication auth          = mock(JSchBasedAuthentication.class);
         Session                 session       = mock(Session.class);
 
@@ -130,7 +133,12 @@ public class JSchSessionFactoryTest extends AbstractRemoteTest
 
         JSchSessionFactory factory = new JSchSessionFactory(jSch);
 
-        Session            result  = factory.createSession(hostName, port, userName, auth, socketFactory, options);
+        Session            result  = factory.createSession(hostName,
+                                                           port,
+                                                           userName,
+                                                           auth,
+                                                           socketFactory,
+                                                           optionsByType);
 
         assertThat(result, is(sameInstance(session)));
 
@@ -140,6 +148,7 @@ public class JSchSessionFactoryTest extends AbstractRemoteTest
         verify(session).connect();
     }
 
+
     @Test
     public void shouldEnableStrictHostCheckingByDefault() throws Exception
     {
@@ -148,7 +157,7 @@ public class JSchSessionFactoryTest extends AbstractRemoteTest
         int                     port          = 1234;
         String                  userName      = "Larry";
         JSch                    jSch          = mock(JSch.class);
-        Options                 options       = new Options();
+        OptionsByType           optionsByType = OptionsByType.empty();
         JSchBasedAuthentication auth          = mock(JSchBasedAuthentication.class);
         Session                 session       = mock(Session.class);
 
@@ -156,16 +165,24 @@ public class JSchSessionFactoryTest extends AbstractRemoteTest
 
         JSchSessionFactory factory = new JSchSessionFactory(jSch);
 
-        Session            result  = factory.createSession(hostName, port, userName, auth, socketFactory, options);
+        Session            result  = factory.createSession(hostName,
+                                                           port,
+                                                           userName,
+                                                           auth,
+                                                           socketFactory,
+                                                           optionsByType);
 
         assertThat(result, is(sameInstance(session)));
 
         ArgumentCaptor<Properties> configCaptor = ArgumentCaptor.forClass(Properties.class);
+
         verify(session).setConfig(configCaptor.capture());
 
         Properties configuration = configCaptor.getValue();
+
         assertThat(configuration.getProperty("StrictHostKeyChecking"), is("yes"));
     }
+
 
     @Test
     public void shouldEnableStrictHostChecking() throws Exception
@@ -175,7 +192,7 @@ public class JSchSessionFactoryTest extends AbstractRemoteTest
         int                     port          = 1234;
         String                  userName      = "Larry";
         JSch                    jSch          = mock(JSch.class);
-        Options                 options       = new Options(StrictHostChecking.enabled());
+        OptionsByType           optionsByType = OptionsByType.of(StrictHostChecking.enabled());
         JSchBasedAuthentication auth          = mock(JSchBasedAuthentication.class);
         Session                 session       = mock(Session.class);
 
@@ -183,16 +200,24 @@ public class JSchSessionFactoryTest extends AbstractRemoteTest
 
         JSchSessionFactory factory = new JSchSessionFactory(jSch);
 
-        Session            result  = factory.createSession(hostName, port, userName, auth, socketFactory, options);
+        Session            result  = factory.createSession(hostName,
+                                                           port,
+                                                           userName,
+                                                           auth,
+                                                           socketFactory,
+                                                           optionsByType);
 
         assertThat(result, is(sameInstance(session)));
 
         ArgumentCaptor<Properties> configCaptor = ArgumentCaptor.forClass(Properties.class);
+
         verify(session).setConfig(configCaptor.capture());
 
         Properties configuration = configCaptor.getValue();
+
         assertThat(configuration.getProperty("StrictHostKeyChecking"), is("yes"));
     }
+
 
     @Test
     public void shouldDisableStrictHostChecking() throws Exception
@@ -202,7 +227,7 @@ public class JSchSessionFactoryTest extends AbstractRemoteTest
         int                     port          = 1234;
         String                  userName      = "Larry";
         JSch                    jSch          = mock(JSch.class);
-        Options                 options       = new Options(StrictHostChecking.disabled());
+        OptionsByType           optionsByType = OptionsByType.of(StrictHostChecking.disabled());
         JSchBasedAuthentication auth          = mock(JSchBasedAuthentication.class);
         Session                 session       = mock(Session.class);
 
@@ -210,14 +235,21 @@ public class JSchSessionFactoryTest extends AbstractRemoteTest
 
         JSchSessionFactory factory = new JSchSessionFactory(jSch);
 
-        Session            result  = factory.createSession(hostName, port, userName, auth, socketFactory, options);
+        Session            result  = factory.createSession(hostName,
+                                                           port,
+                                                           userName,
+                                                           auth,
+                                                           socketFactory,
+                                                           optionsByType);
 
         assertThat(result, is(sameInstance(session)));
 
         ArgumentCaptor<Properties> configCaptor = ArgumentCaptor.forClass(Properties.class);
+
         verify(session).setConfig(configCaptor.capture());
 
         Properties configuration = configCaptor.getValue();
+
         assertThat(configuration.getProperty("StrictHostKeyChecking"), is("no"));
     }
 }

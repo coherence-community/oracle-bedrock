@@ -26,7 +26,7 @@
 package com.oracle.bedrock.junit;
 
 import com.oracle.bedrock.Option;
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.junit.options.TestClasses;
 import com.oracle.bedrock.junit.options.Tests;
 import com.oracle.bedrock.options.Decoration;
@@ -89,9 +89,9 @@ public class JUnitTestRunner implements Runnable
     private final Object MONITOR = new Object();
 
     /**
-     * The set of {@link Options} controlling the test run
+     * The set of {@link OptionsByType} controlling the test run
      */
-    private Options options;
+    private OptionsByType optionsByType;
 
 
     /**
@@ -169,7 +169,7 @@ public class JUnitTestRunner implements Runnable
                     channel.raise(JUnitTestListener.Event.junitStarted(), STREAM_NAME);
                 }
 
-                runTests(this.options);
+                runTests(this.optionsByType);
             }
             catch (Throwable e)
             {
@@ -267,19 +267,19 @@ public class JUnitTestRunner implements Runnable
 
 
     /**
-     * Run the tests specified by the given {@link Options}.
+     * Run the tests specified by the given {@link OptionsByType}.
      *
-     * @param testOptions  the {@link Options} controlling the test run
+     * @param optionsByType  the {@link OptionsByType} controlling the test run
      */
-    private void runTests(Options testOptions)
+    private void runTests(OptionsByType optionsByType)
     {
         // If the options are null there is nothing to do
-        if (testOptions == null)
+        if (optionsByType == null)
         {
             return;
         }
 
-        Tests tests = testOptions.get(Tests.class);
+        Tests tests = optionsByType.get(Tests.class);
 
         // If there are no tests to execute then return
         if (tests.isEmpty())
@@ -294,7 +294,7 @@ public class JUnitTestRunner implements Runnable
         jUnitCore.addListener(result.createListener());
         jUnitCore.addListener(listener);
 
-        for (RunListener runListener : testOptions.getInstancesOf(RunListener.class))
+        for (RunListener runListener : optionsByType.getInstancesOf(RunListener.class))
         {
             jUnitCore.addListener(runListener);
         }
@@ -328,11 +328,11 @@ public class JUnitTestRunner implements Runnable
 
     /**
      * Wait until the {@link JUnitTestRunner} is in the {@link State#Waiting} state
-     * and then start a test run using the specified {@link Options}.
+     * and then start a test run using the specified {@link OptionsByType}.
      *
-     * @param options  the {@link Options} controlling the test run
+     * @param optionsByType  the {@link OptionsByType} controlling the test run
      */
-    public void run(Options options)
+    public void run(OptionsByType optionsByType)
     {
         synchronized (MONITOR)
         {
@@ -350,8 +350,8 @@ public class JUnitTestRunner implements Runnable
 
             if (state == State.Waiting)
             {
-                this.options = options;
-                this.state   = State.Running;
+                this.optionsByType = optionsByType;
+                this.state         = State.Running;
 
                 MONITOR.notifyAll();
             }
@@ -714,12 +714,12 @@ public class JUnitTestRunner implements Runnable
          * Create a {@link StartTests} runnable with the
          * specified options.
          *
-         * @param options  the {@link Option}s to use
+         * @param optionsByType  the {@link OptionsByType}s to use
          */
-        public StartTests(Options options)
+        public StartTests(OptionsByType optionsByType)
         {
             List<Option>           list          = new ArrayList<>();
-            Iterable<Serializable> serializables = options.getInstancesOf(Serializable.class);
+            Iterable<Serializable> serializables = optionsByType.getInstancesOf(Serializable.class);
 
             serializables.forEach((opt) -> list.add(opt instanceof Option ? (Option) opt : Decoration.of(opt)));
 
@@ -748,7 +748,7 @@ public class JUnitTestRunner implements Runnable
                 runner = JUnitTestRunner.INSTANCE;
             }
 
-            runner.run(new Options(options));
+            runner.run(OptionsByType.of(options));
 
             return true;
         }

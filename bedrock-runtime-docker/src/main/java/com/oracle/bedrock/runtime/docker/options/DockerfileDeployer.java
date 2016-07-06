@@ -26,7 +26,7 @@
 package com.oracle.bedrock.runtime.docker.options;
 
 import com.oracle.bedrock.Option;
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.runtime.Platform;
 import com.oracle.bedrock.runtime.remote.options.Deployer;
 import com.oracle.bedrock.runtime.remote.options.FileShareDeployer;
@@ -59,7 +59,7 @@ public class DockerfileDeployer extends FileShareDeployer
      * Construct a new {@link DockerfileDeployer}.
      *
      * @param workingDirectory  the folder to copy the artifacts to
-     * @param options           the {@link Options} controlling the Dockerfile
+     * @param options           the {@link Option}s controlling the Dockerfile
      */
     public DockerfileDeployer(String    workingDirectory,
                               Option... options)
@@ -73,18 +73,18 @@ public class DockerfileDeployer extends FileShareDeployer
     /**
      * Write an ADD statement for the specified artifact.
      *
-     * @param source       the file to add
-     * @param destination  the remote location to copy the artifact to in the Dockerfile
-     * @param platform     the {@link Platform} to perform
-     * @param options      the {@link Option}s to control the deployment
+     * @param source         the file to add
+     * @param destination    the remote location to copy the artifact to in the Dockerfile
+     * @param platform       the {@link Platform} to perform
+     * @param optionsByType  the {@link OptionsByType} to control the deployment
      *
      * @return  this method always returns true
      */
     @Override
-    protected boolean performRemoteCopy(String   source,
-                                        String   destination,
-                                        Platform platform,
-                                        Options  options)
+    protected boolean performRemoteCopy(String        source,
+                                        String        destination,
+                                        Platform      platform,
+                                        OptionsByType optionsByType)
     {
         File   sourceFile = new File(source);
         String sourceName = sourceFile.getName();

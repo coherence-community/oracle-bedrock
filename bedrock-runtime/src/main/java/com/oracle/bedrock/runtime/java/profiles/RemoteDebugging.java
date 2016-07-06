@@ -26,7 +26,7 @@
 package com.oracle.bedrock.runtime.java.profiles;
 
 import com.oracle.bedrock.Option;
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.io.NetworkHelper;
 import com.oracle.bedrock.runtime.Application;
 import com.oracle.bedrock.runtime.LocalPlatform;
@@ -74,7 +74,7 @@ public class RemoteDebugging implements Profile, Option
      * An optional {@link TransportAddress} to use for {@link RemoteDebugging}.
      *
      * If it's not provided (null), the {@link RemoteDebugging} profile will attempt to resolve
-     * one from the provided {@link Options} and if that's not available, it will a port
+     * one from the provided {@link OptionsByType} and if that's not available, it will a port
      * decided by the underlying {@link Platform}.
      */
     private TransportAddress transportAddress;
@@ -164,15 +164,15 @@ public class RemoteDebugging implements Profile, Option
 
 
     @Override
-    public void onLaunching(Platform  platform,
-                            MetaClass metaClass,
-                            Options   options)
+    public void onLaunching(Platform      platform,
+                            MetaClass     metaClass,
+                            OptionsByType optionsByType)
     {
         if (enabled)
         {
             // determine the TransportAddress to use
             TransportAddress transportAddress = this.transportAddress == null
-                                                ? options.get(TransportAddress.class) : this.transportAddress;
+                                                ? optionsByType.get(TransportAddress.class) : this.transportAddress;
 
             // create one if one hasn't been provided
             if (transportAddress == null)
@@ -183,7 +183,7 @@ public class RemoteDebugging implements Profile, Option
                     transportAddress = new TransportAddress(LocalPlatform.get().getAvailablePorts());
 
                     // add the TransportAddress as an Option
-                    options.add(transportAddress);
+                    optionsByType.add(transportAddress);
 
                 }
                 else
@@ -214,32 +214,32 @@ public class RemoteDebugging implements Profile, Option
                                             address);
 
             // replace the TransportAddress with the one we've resolved / created
-            options.add(transportAddress);
+            optionsByType.add(transportAddress);
 
             // add the agent as a Freeform JvmOption
-            options.add(new Freeform(agentlib));
+            optionsByType.add(new Freeform(agentlib));
 
             // disable waiting for the application to start if we're in suspend mode
             if (startSuspended)
             {
-                options.add(WaitToStart.disabled());
+                optionsByType.add(WaitToStart.disabled());
             }
         }
     }
 
 
     @Override
-    public void onLaunched(Platform    platform,
-                           Application application,
-                           Options     options)
+    public void onLaunched(Platform      platform,
+                           Application   application,
+                           OptionsByType optionsByType)
     {
     }
 
 
     @Override
-    public void onClosing(Platform    platform,
-                          Application application,
-                          Options     options)
+    public void onClosing(Platform      platform,
+                          Application   application,
+                          OptionsByType optionsByType)
     {
     }
 
@@ -382,7 +382,7 @@ public class RemoteDebugging implements Profile, Option
      *
      * @return  a {@link RemoteDebugging} {@link Option}
      */
-    @Options.Default
+    @OptionsByType.Default
     public static RemoteDebugging autoDetect()
     {
         return new RemoteDebugging(JavaVirtualMachine.get().shouldEnableRemoteDebugging(),

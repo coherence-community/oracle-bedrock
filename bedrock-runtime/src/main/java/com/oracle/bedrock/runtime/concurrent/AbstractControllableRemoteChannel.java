@@ -26,7 +26,7 @@
 package com.oracle.bedrock.runtime.concurrent;
 
 import com.oracle.bedrock.Option;
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.annotations.Internal;
 import com.oracle.bedrock.runtime.concurrent.options.StreamName;
 
@@ -129,9 +129,9 @@ public abstract class AbstractControllableRemoteChannel implements ControllableR
     public void addListener(RemoteEventListener listener,
                             Option...           options)
     {
-        Options    listenerOptions = Options.from(options);
+        OptionsByType optionsByType = OptionsByType.of(options);
 
-        StreamName streamName      = listenerOptions.get(StreamName.class);
+        StreamName    streamName    = optionsByType.get(StreamName.class);
 
         eventListenersByStreamName.compute(streamName,
             (name, eventListeners) -> {
@@ -151,9 +151,9 @@ public abstract class AbstractControllableRemoteChannel implements ControllableR
     public void removeListener(RemoteEventListener listener,
                                Option...           options)
     {
-        Options    listenerOptions = Options.from(options);
+        OptionsByType optionsByType = OptionsByType.of(options);
 
-        StreamName streamName      = listenerOptions.get(StreamName.class);
+        StreamName    streamName    = optionsByType.get(StreamName.class);
 
         eventListenersByStreamName.computeIfPresent(streamName,
             (name, eventListeners) -> {

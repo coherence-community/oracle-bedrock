@@ -25,7 +25,7 @@
 
 package com.oracle.bedrock.runtime.remote;
 
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.annotations.Internal;
 import com.oracle.bedrock.runtime.ApplicationLauncher;
 import com.oracle.bedrock.runtime.SimpleApplication;
@@ -50,7 +50,7 @@ public class SimpleRemoteApplicationLauncher extends AbstractRemoteApplicationLa
 
 
     @Override
-    protected void onLaunching(Options options)
+    protected void onLaunching(OptionsByType optionsByType)
     {
         // by default there's nothing to do on launching
     }
@@ -58,7 +58,7 @@ public class SimpleRemoteApplicationLauncher extends AbstractRemoteApplicationLa
 
     @Override
     protected void onLaunched(SimpleApplication application,
-                              Options           options)
+                              OptionsByType     optionsByType)
     {
         // by default there's nothing to do once launched
     }

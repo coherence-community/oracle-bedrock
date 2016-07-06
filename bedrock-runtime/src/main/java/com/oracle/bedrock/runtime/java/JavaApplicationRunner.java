@@ -203,7 +203,7 @@ public class JavaApplicationRunner
     /**
      * {@link JavaApplicationRunner} entry point.
      * <p>
-     * Usage:  java JavaApplicationLauncher ApplicationClassName [args]
+     * Usage:  java JavaApplicationRunner ApplicationClassName [args]
      * <p>
      * Where:  ApplicationClassName is the fully-qualified-class-name of the
      *                              application to run (this class must

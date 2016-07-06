@@ -26,7 +26,7 @@
 package com.oracle.bedrock.runtime.remote.winrm;
 
 import com.oracle.bedrock.Option;
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.options.HttpProxy;
 import com.oracle.bedrock.runtime.remote.Authentication;
 import com.oracle.bedrock.runtime.remote.http.HttpBasedAuthentication;
@@ -76,9 +76,9 @@ public class SoapConnection
     private final HttpBasedAuthentication authentication;
 
     /**
-     * The set of {@link Options} to use to control the session
+     * The {@link OptionsByType} to use to control the session
      */
-    private final Options options;
+    private final OptionsByType optionsByType;
 
     /**
      * The JAXB context to use for handling the SOAP messages.
@@ -114,8 +114,8 @@ public class SoapConnection
                           Authentication authentication,
                           Option...      options)
     {
-        this.userName = userName;
-        this.options  = new Options(options);
+        this.userName      = userName;
+        this.optionsByType = OptionsByType.of(options);
 
         if (authentication instanceof HttpBasedAuthentication)
         {
@@ -235,13 +235,13 @@ public class SoapConnection
 
         if (authentication == null)
         {
-            HttpProxy proxy = options.getOrDefault(HttpProxy.class, HttpProxy.none());
+            HttpProxy proxy = optionsByType.getOrDefault(HttpProxy.class, HttpProxy.none());
 
             httpConnection = proxy.openConnection(this.url);
         }
         else
         {
-            httpConnection = authentication.openConnection(this.url, userName, options);
+            httpConnection = authentication.openConnection(this.url, userName, optionsByType);
         }
 
         return send(envelope, httpConnection);

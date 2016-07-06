@@ -28,7 +28,7 @@ package com.oracle.bedrock.runtime.remote.ssh;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.options.Timeout;
 import com.oracle.bedrock.runtime.remote.Authentication;
 import com.oracle.bedrock.runtime.remote.options.StrictHostChecking;
@@ -82,7 +82,7 @@ public class JSchSessionFactory
      * @param hostName        the host name of the remote host to connect to
      * @param port            the port on the remote host to connect to
      * @param socketFactory   the {@link JSchSocketFactory} to use
-     * @param options         the {@link Options} to use to control the session
+     * @param optionsByType   the {@link OptionsByType} to use to control the session
      *
      * @return a {@link Session} connected to the specified remote host
      *
@@ -93,7 +93,7 @@ public class JSchSessionFactory
                                  String            userName,
                                  Authentication    authentication,
                                  JSchSocketFactory socketFactory,
-                                 Options           options) throws JSchException
+                                 OptionsByType     optionsByType) throws JSchException
     {
         // allow the authentication to configure the framework
         if (authentication instanceof JSchBasedAuthentication)
@@ -111,7 +111,7 @@ public class JSchSessionFactory
         session.setDaemonThread(true);
 
         // determine the timeout
-        Timeout timeout   = options.getOrDefault(Timeout.class, Timeout.autoDetect());
+        Timeout timeout   = optionsByType.getOrDefault(Timeout.class, Timeout.autoDetect());
         int     timeoutMS = (int) timeout.getDuration().to(TimeUnit.MILLISECONDS);
 
         // set the default session timeouts (in milliseconds)
@@ -127,7 +127,7 @@ public class JSchSessionFactory
         Properties config = new Properties();
 
         // are we to use strict-host-checking? (when it's not defined it's enabled it by default)
-        StrictHostChecking strictHostChecking = options.get(StrictHostChecking.class);
+        StrictHostChecking strictHostChecking = optionsByType.get(StrictHostChecking.class);
 
         config.put("StrictHostKeyChecking", strictHostChecking.isEnabled() ? "yes" : "no");
         session.setConfig(config);

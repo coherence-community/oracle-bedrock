@@ -28,18 +28,14 @@ package com.oracle.bedrock.runtime.remote.winrm;
 import com.microsoft.wsman.shell.CommandStateType;
 import com.microsoft.wsman.shell.ReceiveResponse;
 import com.microsoft.wsman.shell.StreamType;
-
 import com.oracle.bedrock.Option;
-import com.oracle.bedrock.Options;
-
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.options.Timeout;
 
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.OutputStream;
-
 import java.util.concurrent.TimeUnit;
-
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -56,6 +52,16 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class OutputStreamConnector extends Thread implements Closeable
 {
     /**
+     * Flag indicating that the process loop should continue to run
+     */
+    private final AtomicBoolean run = new AtomicBoolean(true);
+
+    /**
+     * The exit code of the remote process
+     */
+    private Integer exitCode = null;
+
+    /**
      * The {@link WindowsSession} running the remote command process.
      */
     private final WindowsSession session;
@@ -69,16 +75,6 @@ public class OutputStreamConnector extends Thread implements Closeable
      * The {@link OutputStream} to write the process stderr stream to.
      */
     private OutputStream stdErr;
-
-    /**
-     * Flag indicating that the process loop should continue to run
-     */
-    private final AtomicBoolean run = new AtomicBoolean(true);
-
-    /**
-     * The exit code of the remote process
-     */
-    private Integer exitCode = null;
 
 
     /**
@@ -173,9 +169,9 @@ public class OutputStreamConnector extends Thread implements Closeable
                 return exitCode;
             }
 
-            Options optionsMap = new Options(options);
+            OptionsByType optionsByType = OptionsByType.of(options);
 
-            Timeout timeout    = optionsMap.get(Timeout.class);
+            Timeout       timeout       = optionsByType.get(Timeout.class);
 
             try
             {

@@ -26,7 +26,7 @@
 package com.oracle.bedrock.deferred.options;
 
 import com.oracle.bedrock.Option;
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.deferred.Ensured;
 import com.oracle.bedrock.util.Duration;
 import com.oracle.bedrock.util.ExponentialIterator;
@@ -104,7 +104,7 @@ public class RetryFrequency implements Option
      *
      * @return  a {@link RetryFrequency}
      */
-    @Options.Default
+    @OptionsByType.Default
     public static RetryFrequency standard()
     {
         return every(250, TimeUnit.MILLISECONDS);

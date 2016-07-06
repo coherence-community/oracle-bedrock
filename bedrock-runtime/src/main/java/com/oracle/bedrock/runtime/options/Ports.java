@@ -27,7 +27,7 @@ package com.oracle.bedrock.runtime.options;
 
 import com.oracle.bedrock.ComposableOption;
 import com.oracle.bedrock.Option;
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.options.Decoration;
 import com.oracle.bedrock.runtime.java.options.SystemProperties;
 import com.oracle.bedrock.runtime.java.options.SystemProperty;
@@ -165,7 +165,7 @@ public class Ports implements ComposableOption<Ports>
      *
      * @return  a default empty {@link Ports}
      */
-    @Options.Default
+    @OptionsByType.Default
     public static Ports empty()
     {
         return new Ports(Collections.emptyMap());
@@ -311,13 +311,13 @@ public class Ports implements ComposableOption<Ports>
 
 
         @Override
-        public void onResolve(String  name,
-                              String  value,
-                              Options options)
+        public void onResolve(String        name,
+                              String        value,
+                              OptionsByType optionsByType)
         {
             try
             {
-                options.add(Ports.of(new Port(name, Integer.parseInt(value))));
+                optionsByType.add(Ports.of(new Port(name, Integer.parseInt(value))));
             }
             catch (NumberFormatException e)
             {
@@ -327,15 +327,15 @@ public class Ports implements ComposableOption<Ports>
 
 
         @Override
-        public void onResolve(String       name,
-                              List<String> values,
-                              Options      options)
+        public void onResolve(String        name,
+                              List<String>  values,
+                              OptionsByType optionsByType)
         {
             for (String value : values)
             {
                 try
                 {
-                    options.add(Ports.of(new Port(name, Integer.parseInt(value))));
+                    optionsByType.add(Ports.of(new Port(name, Integer.parseInt(value))));
                 }
                 catch (NumberFormatException e)
                 {

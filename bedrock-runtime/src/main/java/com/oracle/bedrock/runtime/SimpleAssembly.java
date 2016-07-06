@@ -25,7 +25,7 @@
 
 package com.oracle.bedrock.runtime;
 
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.annotations.Internal;
 
 import java.util.List;
@@ -47,10 +47,10 @@ public class SimpleAssembly<A extends Application> extends AbstractAssembly<A>
      * Constructs a {@link SimpleAssembly}
      *
      * @param applications  the {@link Application}s for the {@link Assembly}
-     * @param options       the shared / common {@link Options} used to launch the {@link Application}s
+     * @param options       the shared / common {@link OptionsByType} used to launch the {@link Application}s
      */
     public SimpleAssembly(List<? extends A> applications,
-                          Options           options)
+                          OptionsByType     options)
     {
         super(applications, options);
     }

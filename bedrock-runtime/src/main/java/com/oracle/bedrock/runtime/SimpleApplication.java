@@ -25,7 +25,7 @@
 
 package com.oracle.bedrock.runtime;
 
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 
 /**
  * A {@link SimpleApplication} is a simple implementation of an {@link Application}.
@@ -40,14 +40,14 @@ public class SimpleApplication extends AbstractApplication<ApplicationProcess>
     /**
      * Constructs a {@link SimpleApplication}
      *
-     * @param platform  the {@link Platform} on which the {@link Application} was launched
-     * @param process   the underlying {@link ApplicationProcess} representing the {@link Application}
-     * @param options   the {@link Options} used to launch the {@link Application}
+     * @param platform       the {@link Platform} on which the {@link Application} was launched
+     * @param process        the underlying {@link ApplicationProcess} representing the {@link Application}
+     * @param optionsByType  the {@link OptionsByType} used to launch the {@link Application}
      */
     public SimpleApplication(Platform           platform,
                              ApplicationProcess process,
-                             Options            options)
+                             OptionsByType      optionsByType)
     {
-        super(platform, process, options);
+        super(platform, process, optionsByType);
     }
 }

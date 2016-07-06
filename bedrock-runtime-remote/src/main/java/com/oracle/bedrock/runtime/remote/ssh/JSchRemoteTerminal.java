@@ -29,7 +29,7 @@ import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.lang.StringHelper;
 import com.oracle.bedrock.options.Variable;
 import com.oracle.bedrock.runtime.Application;
@@ -98,7 +98,7 @@ public class JSchRemoteTerminal extends AbstractRemoteTerminal
     @Override
     public RemoteApplicationProcess launch(Launchable                   launchable,
                                            Class<? extends Application> applicationClass,
-                                           Options                      options)
+                                           OptionsByType                optionsByType)
     {
         // acquire the remote platform on which to launch the application
         RemotePlatform platform = getRemotePlatform();
@@ -117,24 +117,24 @@ public class JSchRemoteTerminal extends AbstractRemoteTerminal
                                                    platform.getUserName(),
                                                    platform.getAuthentication(),
                                                    socketFactory,
-                                                   options);
+                                                   optionsByType);
 
             ChannelExec execChannel = (ChannelExec) session.openChannel("exec");
 
             // (re)define the "local.address" variable so that we can use for resolving the platform
-            options.add(Variable.with("local.address", socketFactory.getLastLocalAddress().getHostAddress()));
+            optionsByType.add(Variable.with("local.address", socketFactory.getLastLocalAddress().getHostAddress()));
 
             // ----- establish the remote environment variables -----
 
             String environmentVariables = "";
 
             // get the remote environment variables for the remote application
-            Properties variables = launchable.getEnvironmentVariables(platform, options);
+            Properties variables = launchable.getEnvironmentVariables(platform, optionsByType);
 
             // determine the format to use for setting variables
             String format;
 
-            Shell  shell = options.getOrDefault(Shell.class, Shell.isUnknown());
+            Shell  shell = optionsByType.getOrDefault(Shell.class, Shell.isUnknown());
 
             switch (shell.getType())
             {
@@ -165,22 +165,23 @@ public class JSchRemoteTerminal extends AbstractRemoteTerminal
             // ----- establish the application command line to execute -----
 
             // determine the command to execute remotely
-            String        executableName = launchable.getCommandToExecute(platform, options);
+            String        executableName = launchable.getCommandToExecute(platform, optionsByType);
             StringBuilder command        = new StringBuilder(executableName);
 
             // add the arguments
-            List<String> arguments = launchable.getCommandLineArguments(platform, options);
+            List<String> arguments = launchable.getCommandLineArguments(platform, optionsByType);
 
             for (String arg : arguments)
             {
                 command.append(" ").append(arg);
             }
 
-            WorkingDirectory workingDirectory = options.get(WorkingDirectory.class);
+            WorkingDirectory workingDirectory = optionsByType.get(WorkingDirectory.class);
 
             // the actual remote command must include changing to the remote directory
             String remoteCommand = environmentVariables + String.format("cd %s ; %s",
-                                                                        workingDirectory.resolve(platform, options),
+                                                                        workingDirectory.resolve(platform,
+                                                                                                 optionsByType),
                                                                         command);
 
             execChannel.setCommand(remoteCommand);
@@ -192,7 +193,7 @@ public class JSchRemoteTerminal extends AbstractRemoteTerminal
 
             // ----- start the remote application -----
 
-            Table diagnosticsTable = options.get(Table.class);
+            Table diagnosticsTable = optionsByType.get(Table.class);
 
             if (diagnosticsTable != null && LOGGER.isLoggable(Level.INFO))
             {
@@ -223,8 +224,8 @@ public class JSchRemoteTerminal extends AbstractRemoteTerminal
 
 
     @Override
-    public void makeDirectories(String  directoryName,
-                                Options options)
+    public void makeDirectories(String        directoryName,
+                                OptionsByType optionsByType)
     {
         Session session = null;
 
@@ -242,7 +243,7 @@ public class JSchRemoteTerminal extends AbstractRemoteTerminal
                                                    platform.getUserName(),
                                                    platform.getAuthentication(),
                                                    socketFactory,
-                                                   options);
+                                                   optionsByType);
 
             ChannelExec execChannel = (ChannelExec) session.openChannel("exec");
 
@@ -268,9 +269,9 @@ public class JSchRemoteTerminal extends AbstractRemoteTerminal
     }
 
 
-    public void moveFile(String  source,
-                         String  destination,
-                         Options options)
+    public void moveFile(String        source,
+                         String        destination,
+                         OptionsByType optionsByType)
     {
         Session session = null;
 
@@ -288,7 +289,7 @@ public class JSchRemoteTerminal extends AbstractRemoteTerminal
                                                    platform.getUserName(),
                                                    platform.getAuthentication(),
                                                    socketFactory,
-                                                   options);
+                                                   optionsByType);
 
             ChannelExec execChannel = (ChannelExec) session.openChannel("exec");
             String      moveCommand = String.format("mv %s %s", source, destination);

@@ -26,7 +26,7 @@
 package com.oracle.bedrock.runtime.options;
 
 import com.oracle.bedrock.Option;
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 
 /**
  * An {@link Option} to specify an {@link OperatingSystem}.
@@ -91,7 +91,7 @@ public class OperatingSystem implements Option
      *
      * @return a the current {@link OperatingSystem}
      */
-    @Options.Default
+    @OptionsByType.Default
     public static OperatingSystem autoDetect()
     {
         return new OperatingSystem(System.getProperty("os.name"));

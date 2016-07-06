@@ -26,7 +26,7 @@
 package com.oracle.bedrock.runtime;
 
 import com.oracle.bedrock.Option;
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.annotations.Internal;
 import com.oracle.bedrock.deferred.DeferredHelper;
 import com.oracle.bedrock.options.Timeout;
@@ -173,9 +173,9 @@ public class LocalApplicationProcess implements ApplicationProcess
     @Override
     public int waitFor(Option... options)
     {
-        Options optionsMap = new Options(options);
+        OptionsByType optionsByType = OptionsByType.of(options);
 
-        Timeout timeout    = optionsMap.get(Timeout.class);
+        Timeout       timeout       = optionsByType.get(Timeout.class);
 
         DeferredHelper.ensure(eventually(invoking(this).exitValue()), within(timeout));
 

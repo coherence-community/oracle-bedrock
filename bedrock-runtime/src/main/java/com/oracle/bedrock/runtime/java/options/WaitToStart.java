@@ -26,7 +26,7 @@
 package com.oracle.bedrock.runtime.java.options;
 
 import com.oracle.bedrock.Option;
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.runtime.Platform;
 import com.oracle.bedrock.runtime.java.JavaApplication;
 
@@ -76,7 +76,7 @@ public class WaitToStart implements Option
      *
      * @return a {@link WaitToStart}
      */
-    @Options.Default
+    @OptionsByType.Default
     public static WaitToStart enabled()
     {
         return new WaitToStart(true);

@@ -26,7 +26,7 @@
 package com.oracle.bedrock.options;
 
 import com.oracle.bedrock.Option;
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.util.Duration;
 
 import java.util.concurrent.TimeUnit;
@@ -126,7 +126,7 @@ public class Timeout implements Option
      *
      * @return  the default {@link Timeout}
      */
-    @Options.Default
+    @OptionsByType.Default
     public static Timeout autoDetect()
     {
         return new Timeout(Duration.of(1, TimeUnit.MINUTES));

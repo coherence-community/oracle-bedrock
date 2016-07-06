@@ -26,8 +26,7 @@
 package com.oracle.bedrock.runtime.java.options;
 
 import com.oracle.bedrock.Option;
-import com.oracle.bedrock.Options;
-
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.lang.ExpressionEvaluator;
 
 import java.util.ArrayList;
@@ -78,9 +77,9 @@ public class Freeform implements JvmOption, Option.Collectable
 
 
     @Override
-    public Iterable<String> resolve(Options options)
+    public Iterable<String> resolve(OptionsByType optionsByType)
     {
-        ExpressionEvaluator evaluator = new ExpressionEvaluator(options);
+        ExpressionEvaluator evaluator = new ExpressionEvaluator(optionsByType);
 
         ArrayList<String>   result    = new ArrayList<>(values.size());
 

@@ -1,9 +1,9 @@
 /*
- * File: OptionsTest.java
+ * File: OptionsByTypeTest.java
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * The contents of this file are subject to the terms and conditions of 
+ * The contents of this file are subject to the terms and conditions of
  * the Common Development and Distribution License 1.0 (the "License").
  *
  * You may not use this file except in compliance with the License.
@@ -24,40 +24,35 @@
  */
 
 import com.oracle.bedrock.Option;
-import com.oracle.bedrock.Options;
-
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.options.Decoration;
 import com.oracle.bedrock.options.Timeout;
-
 import org.junit.Test;
-
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.CoreMatchers.nullValue;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-
-import static org.hamcrest.core.Is.is;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
-
 import java.util.concurrent.TimeUnit;
 
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.CoreMatchers.nullValue;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.core.Is.is;
+
 /**
- * Unit tests for {@link Options}.
+ * Unit tests for {@link OptionsByType}.
  * <p>
  * Copyright (c) 2014. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Brian Oliver
  */
-public class OptionsTest
+public class OptionsByTypeTest
 {
     /**
-     * A simple {@link Option} using a {@link Options.Default}
+     * A simple {@link Option} using a {@link OptionsByType.Default}
      * annotation on a enum.
      */
     public enum Meal implements Option
@@ -65,14 +60,14 @@ public class OptionsTest
         TOAST,
         SOUP,
         STEAK,
-        @Options.Default
+        @OptionsByType.Default
         CHICKEN,
         FISH
     }
 
 
     /**
-     * A simple {@link Option} using a {@link Options.Default}
+     * A simple {@link Option} using a {@link OptionsByType.Default}
      * annotation on a static attribute.
      */
     public enum Device implements Option
@@ -86,13 +81,13 @@ public class OptionsTest
         /**
          * Field description
          */
-        @Options.Default
+        @OptionsByType.Default
         public static Device DEFAULT = FLOPPY;
     }
 
 
     /**
-     * A simple {@link Option} using a {@link Options.Default}
+     * A simple {@link Option} using a {@link OptionsByType.Default}
      * annotation on a static getter method.
      */
     public enum Duration implements Option
@@ -101,7 +96,7 @@ public class OptionsTest
         MINUTE,
         HOUR;
 
-        @Options.Default
+        @OptionsByType.Default
         public static Duration getDefault()
         {
             return SECOND;
@@ -115,9 +110,9 @@ public class OptionsTest
     @Test
     public void shouldGetOptionWithDefault()
     {
-        Options options = new Options();
+        OptionsByType optionsByType = OptionsByType.empty();
 
-        assertThat(options.get(Timeout.class), is(Timeout.autoDetect()));
+        assertThat(optionsByType.get(Timeout.class), is(Timeout.autoDetect()));
     }
 
 
@@ -127,13 +122,13 @@ public class OptionsTest
     @Test
     public void shouldReturnSameDefaultInstance()
     {
-        Options options = new Options();
+        OptionsByType optionsByType = OptionsByType.empty();
 
-        Timeout timeout = options.get(Timeout.class);
+        Timeout       timeout       = optionsByType.get(Timeout.class);
 
         assertThat(timeout, is(Timeout.autoDetect()));
 
-        assertThat(options.get(Timeout.class), equalTo(timeout));
+        assertThat(optionsByType.get(Timeout.class), equalTo(timeout));
     }
 
 
@@ -143,11 +138,11 @@ public class OptionsTest
     @Test
     public void shouldAddAndGetSpecificOption()
     {
-        Timeout option  = Timeout.after(5, TimeUnit.MINUTES);
+        Timeout       timeout       = Timeout.after(5, TimeUnit.MINUTES);
 
-        Options options = new Options(option);
+        OptionsByType optionsByType = OptionsByType.of(timeout);
 
-        assertThat(options.get(Timeout.class), is(option));
+        assertThat(optionsByType.get(Timeout.class), is(timeout));
     }
 
 
@@ -157,15 +152,15 @@ public class OptionsTest
     @Test
     public void shouldReplaceAndGetSpecificOption()
     {
-        Timeout option      = Timeout.after(5, TimeUnit.MINUTES);
+        Timeout       timeout       = Timeout.after(5, TimeUnit.MINUTES);
 
-        Options options     = new Options(option);
+        OptionsByType optionsByType = OptionsByType.of(timeout);
 
-        Timeout otherOption = Timeout.after(1, TimeUnit.SECONDS);
+        Timeout       otherTimeout  = Timeout.after(1, TimeUnit.SECONDS);
 
-        options.add(otherOption);
+        optionsByType.add(otherTimeout);
 
-        assertThat(options.get(Timeout.class), is(otherOption));
+        assertThat(optionsByType.get(Timeout.class), is(otherTimeout));
     }
 
 
@@ -175,15 +170,15 @@ public class OptionsTest
     @Test
     public void shouldNotReplaceAndGetSpecificOption()
     {
-        Timeout option      = Timeout.after(5, TimeUnit.MINUTES);
+        Timeout       timeout       = Timeout.after(5, TimeUnit.MINUTES);
 
-        Options options     = new Options(option);
+        OptionsByType optionsByType = OptionsByType.of(timeout);
 
-        Timeout otherOption = Timeout.after(1, TimeUnit.SECONDS);
+        Timeout       otherTimeout  = Timeout.after(1, TimeUnit.SECONDS);
 
-        options.addIfAbsent(otherOption);
+        optionsByType.addIfAbsent(otherTimeout);
 
-        assertThat(options.get(Timeout.class), is(option));
+        assertThat(optionsByType.get(Timeout.class), is(timeout));
     }
 
 
@@ -193,17 +188,17 @@ public class OptionsTest
     @Test
     public void shouldRemoveASpecificOption()
     {
-        Timeout option  = Timeout.after(5, TimeUnit.MINUTES);
+        Timeout       timeout       = Timeout.after(5, TimeUnit.MINUTES);
 
-        Options options = new Options(option);
+        OptionsByType optionsByType = OptionsByType.of(timeout);
 
-        assertThat(options.get(Timeout.class), is(option));
+        assertThat(optionsByType.get(Timeout.class), is(timeout));
 
-        assertThat(options.remove(Timeout.class), is(true));
-        assertThat(options.remove(Timeout.class), is(false));
+        assertThat(optionsByType.remove(Timeout.class), is(true));
+        assertThat(optionsByType.remove(Timeout.class), is(false));
 
         // the timeout should now be the default
-        assertThat(options.get(Timeout.class), is(Timeout.autoDetect()));
+        assertThat(optionsByType.get(Timeout.class), is(Timeout.autoDetect()));
     }
 
 
@@ -215,9 +210,9 @@ public class OptionsTest
     @Test
     public void shouldDetermineDirectlyImplementedOptionClass()
     {
-        Timeout option      = Timeout.after(5, TimeUnit.MINUTES);
+        Timeout timeout     = Timeout.after(5, TimeUnit.MINUTES);
 
-        Class   optionClass = Options.getClassOf(option);
+        Class   optionClass = OptionsByType.getClassOf(timeout);
 
         assertThat(optionClass.equals(Timeout.class), is(true));
     }
@@ -234,7 +229,7 @@ public class OptionsTest
     {
         Enhanced option      = new Enhanced();
 
-        Class    optionClass = Options.getClassOf(option);
+        Class    optionClass = OptionsByType.getClassOf(option);
 
         assertThat(optionClass.equals(EnhancedOption.class), is(true));
     }
@@ -251,7 +246,7 @@ public class OptionsTest
     {
         ExtendedEnhanced option      = new ExtendedEnhanced();
 
-        Class            optionClass = Options.getClassOf(option);
+        Class            optionClass = OptionsByType.getClassOf(option);
 
         assertThat(optionClass.equals(EnhancedOption.class), is(true));
         assertThat(optionClass.equals(ExtendedEnhanced.class), is(false));
@@ -266,179 +261,179 @@ public class OptionsTest
     @Test
     public void shouldNotDetermineAbstractOptionClass()
     {
-        Class optionClass = Options.getClassOf(AbstractEnhanced.class);
+        Class optionClass = OptionsByType.getClassOf(AbstractEnhanced.class);
 
         assertThat(optionClass, is(nullValue()));
     }
 
 
     /**
-     * Ensure that we can create {@link Options} and request an option
+     * Ensure that we can create {@link OptionsByType} and request an option
      */
     @Test
     public void shouldCreateAndRequestAnOption()
     {
-        Timeout timeout = Timeout.after(5, TimeUnit.MINUTES);
+        Timeout       timeout       = Timeout.after(5, TimeUnit.MINUTES);
 
-        Options options = Options.from(timeout);
+        OptionsByType optionsByType = OptionsByType.of(timeout);
 
-        assertThat(options.get(Timeout.class), is(timeout));
+        assertThat(optionsByType.get(Timeout.class), is(timeout));
     }
 
 
     /**
-     * Ensure that {@link Options} maintain a set by concrete type.
+     * Ensure that {@link OptionsByType} maintain a set by concrete type.
      */
     @Test
     public void shouldMaintainASetByConcreteType()
     {
-        Timeout fiveMinutes = Timeout.after(5, TimeUnit.MINUTES);
-        Timeout oneSecond   = Timeout.after(1, TimeUnit.SECONDS);
+        Timeout       fiveMinutes   = Timeout.after(5, TimeUnit.MINUTES);
+        Timeout       oneSecond     = Timeout.after(1, TimeUnit.SECONDS);
 
-        Options options     = Options.from(fiveMinutes, oneSecond);
+        OptionsByType optionsByType = OptionsByType.of(fiveMinutes, oneSecond);
 
-        assertThat(options.get(Timeout.class), is(oneSecond));
+        assertThat(optionsByType.get(Timeout.class), is(oneSecond));
     }
 
 
     /**
-     * Ensure that {@link Options} can return a default using a
-     * static method annotated with {@link Options.Default}.
+     * Ensure that {@link OptionsByType} can return a default using a
+     * static method annotated with {@link OptionsByType.Default}.
      */
     @Test
     public void shouldDetermineDefaultUsingAnnotatedStaticMethod()
     {
-        Options options = new Options();
+        OptionsByType optionsByType = OptionsByType.empty();
 
-        assertThat(options.get(Duration.class), is(Duration.getDefault()));
+        assertThat(optionsByType.get(Duration.class), is(Duration.getDefault()));
     }
 
 
     /**
-     * Ensure that {@link Options} can return a default using a
-     * static field annotated with {@link Options.Default}.
+     * Ensure that {@link OptionsByType} can return a default using a
+     * static field annotated with {@link OptionsByType.Default}.
      */
     @Test
     public void shouldDetermineDefaultUsingAnnotatedStaticField()
     {
-        Options options = new Options();
+        OptionsByType optionsByType = OptionsByType.empty();
 
-        assertThat(options.get(Device.class), is(Device.DEFAULT));
+        assertThat(optionsByType.get(Device.class), is(Device.DEFAULT));
     }
 
 
     /**
-     * Ensure that {@link Options} can return a default using an
-     * enum annotated with {@link Options.Default}.
+     * Ensure that {@link OptionsByType} can return a default using an
+     * enum annotated with {@link OptionsByType.Default}.
      */
     @Test
     public void shouldDetermineDefaultUsingAnnotatedEnum()
     {
-        Options options = new Options();
+        OptionsByType optionsByType = OptionsByType.empty();
 
-        assertThat(options.get(Meal.class), is(Meal.CHICKEN));
+        assertThat(optionsByType.get(Meal.class), is(Meal.CHICKEN));
     }
 
 
     /**
-     * Ensure that {@link Options} can return a default using a
-     * constructor annotated with {@link Options.Default}.
+     * Ensure that {@link OptionsByType} can return a default using a
+     * constructor annotated with {@link OptionsByType.Default}.
      */
     @Test
     public void shouldDetermineDefaultUsingAnnotatedConstructor()
     {
-        Options options = new Options();
+        OptionsByType optionsByType = OptionsByType.empty();
 
-        assertThat(options.get(Beverage.class).toString(), is("Beer"));
+        assertThat(optionsByType.get(Beverage.class).toString(), is("Beer"));
     }
 
 
     /**
-     * Ensure that {@link Options} can collect a single collectable,
+     * Ensure that {@link OptionsByType} can collect a single collectable,
      * including creating a collector.
      */
     @Test
     public void shouldCollectASingleCollectable()
     {
-        Options options = new Options(new Message("Hello"));
+        OptionsByType optionsByType = OptionsByType.of(new Message("Hello"));
 
-        assertThat(options.get(Message.class), is(nullValue()));
-        assertThat(options.get(Messages.class), is(not(nullValue())));
-        assertThat(options.get(Messages.class).get(), is("Hello"));
+        assertThat(optionsByType.get(Message.class), is(nullValue()));
+        assertThat(optionsByType.get(Messages.class), is(not(nullValue())));
+        assertThat(optionsByType.get(Messages.class).get(), is("Hello"));
     }
 
 
     /**
-     * Ensure that {@link Options} can collect a multiple collectables,
+     * Ensure that {@link OptionsByType} can collect a multiple collectables,
      * including creating a collector.
      */
     @Test
     public void shouldCollectMultipleCollectables()
     {
-        Options options = new Options(new Message("Hello"), new Message("G'day"));
+        OptionsByType optionsByType = OptionsByType.of(new Message("Hello"), new Message("G'day"));
 
-        assertThat(options.get(Message.class), is(nullValue()));
-        assertThat(options.get(Messages.class), is(not(nullValue())));
-        assertThat(options.get(Messages.class).get(), is("Hello, G'day"));
+        assertThat(optionsByType.get(Message.class), is(nullValue()));
+        assertThat(optionsByType.get(Messages.class), is(not(nullValue())));
+        assertThat(optionsByType.get(Messages.class).get(), is("Hello, G'day"));
     }
 
 
     /**
-     * Ensure that {@link Options} can discard a single collectable.
+     * Ensure that {@link OptionsByType} can discard a single collectable.
      */
     @Test
     public void shouldDiscardASingleCollectable()
     {
-        Options options = new Options(new Message("Hello"));
+        OptionsByType optionsByType = OptionsByType.of(new Message("Hello"));
 
-        assertThat(options.get(Message.class), is(nullValue()));
-        assertThat(options.get(Messages.class), is(not(nullValue())));
-        assertThat(options.get(Messages.class).get(), is("Hello"));
+        assertThat(optionsByType.get(Message.class), is(nullValue()));
+        assertThat(optionsByType.get(Messages.class), is(not(nullValue())));
+        assertThat(optionsByType.get(Messages.class).get(), is("Hello"));
 
-        options.remove(new Message("Hello"));
+        optionsByType.remove(new Message("Hello"));
 
-        assertThat(options.get(Message.class), is(nullValue()));
-        assertThat(options.get(Messages.class), is(not(nullValue())));
-        assertThat(options.get(Messages.class).get(), is(""));
+        assertThat(optionsByType.get(Message.class), is(nullValue()));
+        assertThat(optionsByType.get(Messages.class), is(not(nullValue())));
+        assertThat(optionsByType.get(Messages.class).get(), is(""));
     }
 
 
     /**
-     * Ensure that {@link Options} can discard a multiple collectables
+     * Ensure that {@link OptionsByType} can discard a multiple collectables
      */
     @Test
     public void shouldDiscardMultipleCollectables()
     {
-        Options options = new Options(new Message("Hello"), new Message("G'day"));
+        OptionsByType optionsByType = OptionsByType.of(new Message("Hello"), new Message("G'day"));
 
-        assertThat(options.get(Message.class), is(nullValue()));
-        assertThat(options.get(Messages.class), is(not(nullValue())));
-        assertThat(options.get(Messages.class).get(), is("Hello, G'day"));
+        assertThat(optionsByType.get(Message.class), is(nullValue()));
+        assertThat(optionsByType.get(Messages.class), is(not(nullValue())));
+        assertThat(optionsByType.get(Messages.class).get(), is("Hello, G'day"));
 
-        options.remove(new Message("G'day"));
-        options.remove(new Message("Hello"));
+        optionsByType.remove(new Message("G'day"));
+        optionsByType.remove(new Message("Hello"));
 
-        assertThat(options.get(Message.class), is(nullValue()));
-        assertThat(options.get(Messages.class), is(not(nullValue())));
-        assertThat(options.get(Messages.class).get(), is(""));
+        assertThat(optionsByType.get(Message.class), is(nullValue()));
+        assertThat(optionsByType.get(Messages.class), is(not(nullValue())));
+        assertThat(optionsByType.get(Messages.class).get(), is(""));
     }
 
 
     /**
-     * Ensure that {@link Options} iterate over collectables.
+     * Ensure that {@link OptionsByType} iterate over collectables.
      */
     @Test
     public void shouldIterateOverCollectables()
     {
-        Options options = new Options(new Message("Hello"), new Message("G'day"));
+        OptionsByType optionsByType = OptionsByType.of(new Message("Hello"), new Message("G'day"));
 
-        assertThat(options.get(Message.class), is(nullValue()));
-        assertThat(options.get(Messages.class), is(not(nullValue())));
-        assertThat(options.get(Messages.class).get(), is("Hello, G'day"));
+        assertThat(optionsByType.get(Message.class), is(nullValue()));
+        assertThat(optionsByType.get(Messages.class), is(not(nullValue())));
+        assertThat(optionsByType.get(Messages.class).get(), is("Hello, G'day"));
 
         HashSet<Message> messages = new HashSet<>();
 
-        for (Message message : options.getInstancesOf(Message.class))
+        for (Message message : optionsByType.getInstancesOf(Message.class))
         {
             messages.add(message);
         }
@@ -450,28 +445,28 @@ public class OptionsTest
 
 
     /**
-     * Ensure that we can add {@link Decoration}s to {@link Options}.
+     * Ensure that we can add {@link Decoration}s to {@link OptionsByType}.
      */
     @Test
     public void shouldAddAnRemoveDecorations()
     {
-        Options         options     = new Options().add(Decoration.of("hello")).add(Decoration.of("world"));
+        OptionsByType   optionsByType = OptionsByType.empty().add(Decoration.of("hello")).add(Decoration.of("world"));
 
-        HashSet<String> decorations = new HashSet<>();
+        HashSet<String> decorations   = new HashSet<>();
 
-        for (String string : options.getInstancesOf(String.class))
+        for (String string : optionsByType.getInstancesOf(String.class))
         {
             decorations.add(string);
         }
 
         assertThat(decorations.size(), is(2));
 
-        options.remove(Decoration.of("hello"));
-        options.remove(Decoration.of("world"));
+        optionsByType.remove(Decoration.of("hello"));
+        optionsByType.remove(Decoration.of("world"));
 
         decorations = new HashSet<>();
 
-        for (String string : options.getInstancesOf(String.class))
+        for (String string : optionsByType.getInstancesOf(String.class))
         {
             decorations.add(string);
         }
@@ -497,7 +492,7 @@ public class OptionsTest
 
 
     /**
-     * A simple {@link Option} using a {@link Options.Default}
+     * A simple {@link Option} using a {@link OptionsByType.Default}
      * annotation on a public no-args constructor.
      */
     public static class Beverage implements Option
@@ -506,7 +501,7 @@ public class OptionsTest
          * Constructs ...
          *
          */
-        @Options.Default
+        @OptionsByType.Default
         public Beverage()
         {
         }
@@ -609,7 +604,7 @@ public class OptionsTest
          * Constructs ...
          *
          */
-        @Options.Default
+        @OptionsByType.Default
         public Messages()
         {
             this.messageList = new ArrayList<>();

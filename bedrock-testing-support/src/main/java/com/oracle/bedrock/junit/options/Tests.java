@@ -26,7 +26,7 @@
 package com.oracle.bedrock.junit.options;
 
 import com.oracle.bedrock.Option;
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -134,7 +134,7 @@ public class Tests implements Option.Collector<TestClasses, Tests>
      *
      * @return  an empty {@link Tests} implementation
      */
-    @Options.Default
+    @OptionsByType.Default
     public static Tests none()
     {
         return new Tests(Collections.emptyList());

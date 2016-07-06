@@ -26,7 +26,7 @@
 package com.oracle.bedrock.runtime.java.options;
 
 import com.oracle.bedrock.Option;
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 
 import java.util.Collections;
 import java.util.Iterator;
@@ -51,7 +51,7 @@ public class JavaAgents implements Option.Collector<JavaAgent, JavaAgents>
     /**
      * Constructs an empty {@link JavaAgents}.
      */
-    @Options.Default
+    @OptionsByType.Default
     public JavaAgents()
     {
         this.agents = new LinkedHashSet<>();

@@ -26,7 +26,7 @@
 package com.oracle.bedrock.table;
 
 import com.oracle.bedrock.Option;
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -52,9 +52,9 @@ public class Table implements Iterable<Row>, Option
     private ArrayList<Row> rows;
 
     /**
-     * The formatting {@link Options} for the {@link Table}.
+     * The formatting {@link OptionsByType} for the {@link Table}.
      */
-    private Options options;
+    private OptionsByType optionsByType;
 
 
     /**
@@ -74,7 +74,7 @@ public class Table implements Iterable<Row>, Option
             }
         }
 
-        this.options = new Options();
+        this.optionsByType = OptionsByType.empty();
     }
 
 
@@ -102,13 +102,13 @@ public class Table implements Iterable<Row>, Option
 
 
     /**
-     * Obtain the formatting {@link Options} for the {@link Table}.
+     * Obtain the formatting {@link OptionsByType} for the {@link Table}.
      *
-     * @return  the formatting {@link Options} for the {@link Table}
+     * @return  the formatting {@link OptionsByType} for the {@link Table}
      */
-    public Options getOptions()
+    public OptionsByType getOptions()
     {
-        return options;
+        return optionsByType;
     }
 
 
@@ -210,7 +210,7 @@ public class Table implements Iterable<Row>, Option
     public String toString()
     {
         // determine the Cell Separator
-        Cell.Separator cellSeparator = options.get(Cell.Separator.class);
+        Cell.Separator cellSeparator = optionsByType.get(Cell.Separator.class);
 
         // -----------------------------------
         // determine the maximum widths of the cells each row in the table
@@ -235,10 +235,10 @@ public class Table implements Iterable<Row>, Option
 
                 // determine the width of the cell
                 // (use the width is defined by the cell, then the row, then the table)
-                Cell.Width width = options.getOrDefault(Cell.Width.class,
-                                                        row.getOptions().getOrDefault(Cell.Width.class,
-                                                                                      this.getOptions()
-                                                                                      .get(Cell.Width.class)));
+                Cell.Width width = optionsByType.getOrDefault(Cell.Width.class,
+                                                              row.getOptions().getOrDefault(Cell.Width.class,
+                                                                                            this.getOptions()
+                                                                                            .get(Cell.Width.class)));
 
                 int cellWidth;
 
@@ -262,7 +262,7 @@ public class Table implements Iterable<Row>, Option
 
         // -----------------------------------
         // sort the rows (when a Row.Comparator has been provided)
-        Row.Comparator comparator  = options.get(Row.Comparator.class);
+        Row.Comparator comparator  = optionsByType.get(Row.Comparator.class);
 
         Row[]          orderedRows = new Row[rows.size()];
 

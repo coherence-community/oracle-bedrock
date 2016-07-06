@@ -26,7 +26,7 @@
 package com.oracle.bedrock.runtime.java;
 
 import com.oracle.bedrock.Option;
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 
 /**
  * An {@link Option} to define modifications that can be
@@ -107,7 +107,7 @@ public class ClassPathModifier implements Option
      * @return a ClassPathModifier that performs no modification
      *         on a class path String
      */
-    @Options.Default
+    @OptionsByType.Default
     public static ClassPathModifier none()
     {
         return new ClassPathModifier(true);

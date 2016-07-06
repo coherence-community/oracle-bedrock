@@ -26,7 +26,7 @@
 package com.oracle.bedrock.runtime.virtual.vagrant.options;
 
 import com.oracle.bedrock.Option;
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 
 /**
  * An {@link Option} to specify a Vagrant Box should up updated prior to starting.
@@ -97,7 +97,7 @@ public class UpdateBox implements Option
      *
      * @return  an {@link UpdateBox}
      */
-    @Options.Default
+    @OptionsByType.Default
     public static UpdateBox no()
     {
         return enabled(false);

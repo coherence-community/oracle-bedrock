@@ -25,7 +25,7 @@
 
 package com.oracle.bedrock.runtime.coherence;
 
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.runtime.Application;
 import com.oracle.bedrock.runtime.ApplicationProcess;
 import com.oracle.bedrock.runtime.Platform;
@@ -69,15 +69,15 @@ public abstract class AbstractCoherenceClusterMember extends AbstractJavaApplica
     /**
      * Constructs an {@link AbstractCoherenceClusterMember}.
      *
-     * @param platform  the {@link Platform} on which the {@link Application} was launched
-     * @param process   the underlying {@link ApplicationProcess} representing the {@link Application}
-     * @param options   the {@link Options} used to launch the {@link Application}
+     * @param platform       the {@link Platform} on which the {@link Application} was launched
+     * @param process        the underlying {@link ApplicationProcess} representing the {@link Application}
+     * @param optionsByType  the {@link OptionsByType} used to launch the {@link Application}
      */
     public AbstractCoherenceClusterMember(Platform               platform,
                                           JavaApplicationProcess process,
-                                          Options                options)
+                                          OptionsByType          optionsByType)
     {
-        super(platform, process, options);
+        super(platform, process, optionsByType);
     }
 
 

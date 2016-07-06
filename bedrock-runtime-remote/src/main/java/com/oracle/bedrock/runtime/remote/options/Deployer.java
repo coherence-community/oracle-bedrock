@@ -26,7 +26,6 @@
 package com.oracle.bedrock.runtime.remote.options;
 
 import com.oracle.bedrock.Option;
-import com.oracle.bedrock.Options;
 import com.oracle.bedrock.runtime.Platform;
 import com.oracle.bedrock.runtime.remote.DeploymentArtifact;
 
@@ -51,7 +50,7 @@ public interface Deployer extends Option
      * @param remoteDirectory    the target directory to deploy the {@link DeploymentArtifact}s to if no
      *                           destination is specified for a {@link DeploymentArtifact}
      * @param platform           the target {@link Platform} to deploy the {@link DeploymentArtifact}s to
-     * @param deploymentOptions  the {@link Options} that can be applied to control the deployment
+     * @param deploymentOptions  the {@link Option}s that can be applied to control the deployment
      */
     void deploy(List<DeploymentArtifact> artifactsToDeploy,
                 String                   remoteDirectory,

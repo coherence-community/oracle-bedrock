@@ -25,7 +25,7 @@
 
 package com.oracle.bedrock.runtime.virtual.vagrant;
 
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.runtime.remote.options.HostName;
 
 import java.io.BufferedReader;
@@ -65,8 +65,8 @@ class URLBasedVagrantFileBuilder implements VagrantFileBuilder
 
 
     @Override
-    public Optional<HostName> create(File    file,
-                                     Options createOptions) throws IOException
+    public Optional<HostName> create(File          file,
+                                     OptionsByType createOptions) throws IOException
     {
         try (PrintWriter writer = new PrintWriter(file))
         {

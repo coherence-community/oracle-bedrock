@@ -26,7 +26,7 @@
 package com.oracle.bedrock.runtime.remote.java;
 
 import com.oracle.bedrock.Option;
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.annotations.Internal;
 import com.oracle.bedrock.deferred.AbstractDeferred;
 import com.oracle.bedrock.deferred.PermanentlyUnavailableException;
@@ -137,31 +137,31 @@ public class RemoteJavaApplicationLauncher extends AbstractRemoteApplicationLaun
 
 
     @Override
-    protected void onLaunching(Options options)
+    protected void onLaunching(OptionsByType optionsByType)
     {
         // ----- establish default Profiles for this Platform (and Builder) -----
 
         // java applications can automatically detect the following profiles
-        options.get(RemoteDebugging.class);
-        options.get(CommercialFeatures.class);
+        optionsByType.get(RemoteDebugging.class);
+        optionsByType.get(CommercialFeatures.class);
 
         // ----- determine the remote classpath based on the deployment option -----
 
-        JavaDeployment deployment = (JavaDeployment) options.get(Deployment.class);
+        JavaDeployment deployment = (JavaDeployment) optionsByType.get(Deployment.class);
 
         if (deployment == null)
         {
             // when no deployment is specified we assume automatic
             deployment = JavaDeployment.automatic();
 
-            options.addIfAbsent(deployment);
+            optionsByType.addIfAbsent(deployment);
         }
 
         if (deployment.isAutoDeployEnabled())
         {
             // determine the PlatformSeparators (assume unix if not defined)
-            PlatformSeparators separators = options.getOrDefault(PlatformSeparators.class,
-                                                                 PlatformSeparators.forUnix());
+            PlatformSeparators separators = optionsByType.getOrDefault(PlatformSeparators.class,
+                                                                       PlatformSeparators.forUnix());
 
             // when an automatic deployment is specified,
             // we use our modified class-path
@@ -174,12 +174,12 @@ public class RemoteJavaApplicationLauncher extends AbstractRemoteApplicationLaun
         else
         {
             // when a non-automatic deployment is specified we use the specified class path
-            remoteClassPath = options.get(ClassPath.class);
+            remoteClassPath = optionsByType.get(ClassPath.class);
         }
 
         // register the defined RemoteEventListeners before the application starts so they can
         // immediately start receiving RemoteEvents
-        RemoteEvents remoteEvents = options.get(RemoteEvents.class);
+        RemoteEvents remoteEvents = optionsByType.get(RemoteEvents.class);
 
         remoteEvents.forEach((remoteEventListener, listenerOptions) -> remoteChannel.addListener(remoteEventListener,
                                                                                                  listenerOptions));
@@ -188,7 +188,7 @@ public class RemoteJavaApplicationLauncher extends AbstractRemoteApplicationLaun
 
     @Override
     protected void onLaunched(JavaApplication application,
-                              Options         options)
+                              OptionsByType   optionsByType)
     {
         // ----- enhance the application with java-specific features -----
 
@@ -201,11 +201,11 @@ public class RemoteJavaApplicationLauncher extends AbstractRemoteApplicationLaun
 
         // ensure that the application connects back to the server to
         // know that the application has started
-        WaitToStart waitToStart = options.get(WaitToStart.class);
+        WaitToStart waitToStart = optionsByType.get(WaitToStart.class);
 
         if (waitToStart.isEnabled())
         {
-            Timeout                              timeout = options.get(Timeout.class);
+            Timeout                              timeout = optionsByType.get(Timeout.class);
 
             final SocketBasedRemoteChannelServer server  = remoteChannel;
 
@@ -237,14 +237,14 @@ public class RemoteJavaApplicationLauncher extends AbstractRemoteApplicationLaun
 
 
     @Override
-    public Properties getEnvironmentVariables(Platform platform,
-                                              Options  options)
+    public Properties getEnvironmentVariables(Platform      platform,
+                                              OptionsByType optionsByType)
     {
-        Properties properties = super.getEnvironmentVariables(platform, options);
+        Properties properties = super.getEnvironmentVariables(platform, optionsByType);
 
         // ----- establish the java home -----
 
-        JavaHome javaHome = options.get(JavaHome.class);
+        JavaHome javaHome = optionsByType.get(JavaHome.class);
 
         if (javaHome != null)
         {
@@ -256,17 +256,17 @@ public class RemoteJavaApplicationLauncher extends AbstractRemoteApplicationLaun
 
 
     @Override
-    public String getCommandToExecute(Platform platform,
-                                      Options  options)
+    public String getCommandToExecute(Platform      platform,
+                                      OptionsByType optionsByType)
     {
         StringBuilder commandBuilder = new StringBuilder();
 
         // ----- establish the command to start java -----
 
-        JavaHome javaHome = options.get(JavaHome.class);
+        JavaHome javaHome = optionsByType.get(JavaHome.class);
 
         // determine the Executable, defaulting to "java" if not defined
-        Executable executable = options.getOrDefault(Executable.class, Executable.named("java"));
+        Executable executable = optionsByType.getOrDefault(Executable.class, Executable.named("java"));
 
         if (javaHome == null)
         {
@@ -276,8 +276,8 @@ public class RemoteJavaApplicationLauncher extends AbstractRemoteApplicationLaun
         else
         {
             // determine the PlatformSeparators (assume unix if not defined)
-            PlatformSeparators separators = options.getOrDefault(PlatformSeparators.class,
-                                                                 PlatformSeparators.forUnix());
+            PlatformSeparators separators = optionsByType.getOrDefault(PlatformSeparators.class,
+                                                                       PlatformSeparators.forUnix());
 
             // when we have a java home, we prefix the executable name with the java.home/bin/
             String javaHomePath   = javaHome.get().trim();
@@ -295,7 +295,7 @@ public class RemoteJavaApplicationLauncher extends AbstractRemoteApplicationLaun
 
             commandBuilder.append(StringHelper.doubleQuoteIfNecessary(javaExecutable));
 
-            Table diagnosticsTable = options.get(Table.class);
+            Table diagnosticsTable = optionsByType.get(Table.class);
 
             if (diagnosticsTable != null)
             {
@@ -309,8 +309,8 @@ public class RemoteJavaApplicationLauncher extends AbstractRemoteApplicationLaun
 
 
     @Override
-    public List<String> getCommandLineArguments(Platform platform,
-                                                Options  options)
+    public List<String> getCommandLineArguments(Platform      platform,
+                                                OptionsByType optionsByType)
     {
         ArrayList<String> arguments = new ArrayList<>();
 
@@ -324,7 +324,7 @@ public class RemoteJavaApplicationLauncher extends AbstractRemoteApplicationLaun
         // establish the URI for this (the parent) process
         String              parentURI       = "//${local.address}:" + remoteChannel.getPort();
 
-        ExpressionEvaluator evaluator       = new ExpressionEvaluator(options);
+        ExpressionEvaluator evaluator       = new ExpressionEvaluator(optionsByType);
         String              parentUriString = evaluator.evaluate(parentURI, String.class);
 
         arguments.add("-D" + Settings.PARENT_URI + "=" + parentUriString);
@@ -332,7 +332,7 @@ public class RemoteJavaApplicationLauncher extends AbstractRemoteApplicationLaun
         systemPropertiesTable.addRow(Settings.PARENT_URI, parentUriString);
 
         // add Orphanable configuration
-        Orphanable orphanable = options.get(Orphanable.class);
+        Orphanable orphanable = optionsByType.get(Orphanable.class);
 
         arguments.add("-D" + Settings.ORPHANABLE + "=" + orphanable.isOrphanable());
         systemPropertiesTable.addRow(Settings.ORPHANABLE, Boolean.toString(orphanable.isOrphanable()));
@@ -342,12 +342,12 @@ public class RemoteJavaApplicationLauncher extends AbstractRemoteApplicationLaun
         // set the remote classpath (it must be quoted to prevent wildcard expansion)
         arguments.add("-cp");
 
-        ClassPathModifier modifier  = options.getOrDefault(ClassPathModifier.class, ClassPathModifier.none());
-        String            classPath = modifier.applyQuotes(remoteClassPath.toString(options.asArray()));
+        ClassPathModifier modifier  = optionsByType.getOrDefault(ClassPathModifier.class, ClassPathModifier.none());
+        String            classPath = modifier.applyQuotes(remoteClassPath.toString(optionsByType.asArray()));
 
         arguments.add(classPath);
 
-        Table diagnosticsTable = options.get(Table.class);
+        Table diagnosticsTable = optionsByType.get(Table.class);
 
         if (diagnosticsTable != null)
         {
@@ -360,9 +360,9 @@ public class RemoteJavaApplicationLauncher extends AbstractRemoteApplicationLaun
 
         // ----- establish Java Virtual Machine options -----
 
-        for (JvmOption jvmOption : options.getInstancesOf(JvmOption.class))
+        for (JvmOption jvmOption : optionsByType.getInstancesOf(JvmOption.class))
         {
-            for (String value : jvmOption.resolve(options))
+            for (String value : jvmOption.resolve(optionsByType))
             {
                 arguments.add(value);
             }
@@ -370,7 +370,7 @@ public class RemoteJavaApplicationLauncher extends AbstractRemoteApplicationLaun
 
         // ----- establish the system properties for the java application -----
 
-        systemProperties = options.get(SystemProperties.class).resolve(platform, options);
+        systemProperties = optionsByType.get(SystemProperties.class).resolve(platform, optionsByType);
 
         for (String propertyName : systemProperties.stringPropertyNames())
         {
@@ -433,7 +433,7 @@ public class RemoteJavaApplicationLauncher extends AbstractRemoteApplicationLaun
         arguments.add(applicationLauncherClassName);
 
         // set the Java application class name we need to launch
-        ClassName className = options.get(ClassName.class);
+        ClassName className = optionsByType.get(ClassName.class);
 
         if (className == null)
         {
@@ -452,10 +452,10 @@ public class RemoteJavaApplicationLauncher extends AbstractRemoteApplicationLaun
 
         // ----- included the java arguments to the command -----
 
-        List<String> argList = options.get(Arguments.class).resolve(platform, options);
+        List<String> argList = optionsByType.get(Arguments.class).resolve(platform, optionsByType);
 
         // Set the actual arguments used back into the options
-        options.add(Arguments.of(argList));
+        optionsByType.add(Arguments.of(argList));
 
         for (String argument : argList)
         {

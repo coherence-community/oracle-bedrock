@@ -26,7 +26,7 @@
 package com.oracle.bedrock.runtime;
 
 import com.oracle.bedrock.Option;
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.runtime.options.Executable;
 import com.oracle.bedrock.runtime.options.PlatformPredicate;
 
@@ -75,20 +75,20 @@ public interface Platform extends Infrastructure
 
 
     /**
-     * Obtains the {@link Options} configured for the {@link Platform}.
+     * Obtains the {@link OptionsByType} configured for the {@link Platform}.
      * <p>
-     * <strong>Changes to the {@link Options} may not be recognized
+     * <strong>Changes to the {@link OptionsByType} may not be recognized
      * or used by the {@link Platform} after it was created.</strong>
      *
-     * @return the {@link Options}
+     * @return the {@link OptionsByType}
      */
-    Options getOptions();
+    OptionsByType getOptions();
 
 
     @Override
     default Platform getPlatform(Option... options)
     {
-        Options           platformOptions = Options.from(options);
+        OptionsByType     platformOptions = OptionsByType.of(options);
 
         PlatformPredicate predicate       = platformOptions.get(PlatformPredicate.class);
 
@@ -109,10 +109,10 @@ public interface Platform extends Infrastructure
                                Option... options)
     {
         // add the program as a launch option
-        Options launchOptions = new Options(options).add(Executable.named(executable));
+        OptionsByType optionsByType = OptionsByType.of(options).add(Executable.named(executable));
 
         // launch as an Application.class
-        return launch(Application.class, launchOptions.asArray());
+        return launch(Application.class, optionsByType.asArray());
     }
 
 

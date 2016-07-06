@@ -25,7 +25,8 @@
 
 package com.oracle.bedrock.lang;
 
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
+import com.oracle.bedrock.annotations.Internal;
 import com.oracle.bedrock.options.Variable;
 import com.oracle.bedrock.options.Variables;
 
@@ -45,6 +46,7 @@ import java.util.regex.Pattern;
  * @see Variable
  * @see Variables
  */
+@Internal
 public class ExpressionEvaluator
 {
     /**
@@ -64,13 +66,13 @@ public class ExpressionEvaluator
 
 
     /**
-     * Constructs an {@link ExpressionEvaluator} based on the specified {@link Options}.
+     * Constructs an {@link ExpressionEvaluator} based on the specified {@link OptionsByType}.
      *
-     * @param options  the {@link Options}
+     * @param optionsByType  the {@link OptionsByType}
      */
-    public ExpressionEvaluator(Options options)
+    public ExpressionEvaluator(OptionsByType optionsByType)
     {
-        this(options.get(Variables.class));
+        this(optionsByType.get(Variables.class));
     }
 
 

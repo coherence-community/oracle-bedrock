@@ -25,9 +25,9 @@
 
 package com.oracle.bedrock.junit.options;
 
-import com.oracle.bedrock.Options;
-import com.oracle.bedrock.junit.MyOtherTest;
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.junit.JUnit4Test;
+import com.oracle.bedrock.junit.MyOtherTest;
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -48,9 +48,9 @@ public class TestsTest
     @Test
     public void shouldWorkAsAnOption() throws Exception
     {
-        TestClasses tests   = TestClasses.of(JUnit4Test.class);
-        Options     options = new Options(tests);
-        Tests       result  = options.get(Tests.class);
+        TestClasses   tests         = TestClasses.of(JUnit4Test.class);
+        OptionsByType optionsByType = OptionsByType.of(tests);
+        Tests         result        = optionsByType.get(Tests.class);
 
         assertThat(result, is(notNullValue()));
         assertThat(result, contains(tests));
@@ -60,20 +60,21 @@ public class TestsTest
     @Test
     public void shouldHaveEmptyTestsAsDefaultOption() throws Exception
     {
-        Options options = new Options();
-        Tests   result  = options.get(Tests.class);
+        OptionsByType optionsByType = OptionsByType.empty();
+        Tests         result        = optionsByType.get(Tests.class);
 
         assertThat(result, is(notNullValue()));
         assertThat(result.iterator().hasNext(), is(false));
     }
 
+
     @Test
     public void shouldAddMultipleSpecifiedTestClasses() throws Exception
     {
-        TestClasses first   = TestClasses.of(JUnit4Test.class);
-        TestClasses second  = TestClasses.of(MyOtherTest.class);
-        Options     options = new Options(first, second);
-        Tests       result  = options.get(Tests.class);
+        TestClasses   first         = TestClasses.of(JUnit4Test.class);
+        TestClasses   second        = TestClasses.of(MyOtherTest.class);
+        OptionsByType optionsByType = OptionsByType.of(first, second);
+        Tests         result        = optionsByType.get(Tests.class);
 
         assertThat(result, is(notNullValue()));
         assertThat(result, contains(first, second));
@@ -83,17 +84,15 @@ public class TestsTest
     @Test
     public void shouldRemoveSpecificTestClass() throws Exception
     {
-        TestClasses first   = TestClasses.of(JUnit4Test.class);
-        TestClasses second  = TestClasses.of(MyOtherTest.class);
-        Options     options = new Options(first, second);
+        TestClasses   first         = TestClasses.of(JUnit4Test.class);
+        TestClasses   second        = TestClasses.of(MyOtherTest.class);
+        OptionsByType optionsByType = OptionsByType.of(first, second);
 
-        options.remove(TestClasses.of(JUnit4Test.class));
+        optionsByType.remove(TestClasses.of(JUnit4Test.class));
 
-        Tests result = options.get(Tests.class);
+        Tests result = optionsByType.get(Tests.class);
 
         assertThat(result, is(notNullValue()));
         assertThat(result, contains(second));
     }
-
-
 }

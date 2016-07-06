@@ -25,10 +25,10 @@
 
 package com.oracle.bedrock.runtime.docker;
 
-import com.oracle.bedrock.runtime.Platform;
-import com.oracle.bedrock.Options;
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.runtime.Application;
 import com.oracle.bedrock.runtime.MetaClass;
+import com.oracle.bedrock.runtime.Platform;
 import com.oracle.bedrock.runtime.docker.commands.Inspect;
 import com.oracle.bedrock.runtime.docker.commands.Remove;
 import com.oracle.bedrock.runtime.docker.commands.Stop;
@@ -70,7 +70,7 @@ public class DockerContainerTest
     @Test
     public void shouldHaveCorrectName() throws Exception
     {
-        DockerContainer container = new DockerContainer("foo", new Options());
+        DockerContainer container = new DockerContainer("foo", OptionsByType.empty());
 
         assertThat(container.getName(), is("foo"));
     }
@@ -79,9 +79,9 @@ public class DockerContainerTest
     @Test
     public void shouldHaveCorrectOptions() throws Exception
     {
-        Docker          docker    = Docker.auto();
-        Options         options   = new Options(docker);
-        DockerContainer container = new DockerContainer("foo", options);
+        Docker          docker        = Docker.auto();
+        OptionsByType   optionsByType = OptionsByType.of(docker);
+        DockerContainer container     = new DockerContainer("foo", optionsByType);
 
         assertThat(container.getOptions(), is(notNullValue()));
         assertThat(container.getOptions().get(Docker.class), is(sameInstance(docker)));
@@ -100,18 +100,18 @@ public class DockerContainerTest
     @Test(expected = IllegalArgumentException.class)
     public void shouldNotAllowNullName() throws Exception
     {
-        new DockerContainer(null, new Options());
+        new DockerContainer(null, OptionsByType.empty());
     }
 
 
     @Test
     public void shouldGetDocker() throws Exception
     {
-        Docker          docker    = Docker.auto();
-        Options         options   = new Options(docker);
-        DockerContainer container = new DockerContainer("foo", options);
+        Docker          docker        = Docker.auto();
+        OptionsByType   optionsByType = OptionsByType.of(docker);
+        DockerContainer container     = new DockerContainer("foo", optionsByType);
 
-        Docker          result    = container.getDockerEnvironment();
+        Docker          result        = container.getDockerEnvironment();
 
         assertThat(result, is(sameInstance(docker)));
     }
@@ -120,10 +120,10 @@ public class DockerContainerTest
     @Test
     public void shouldAddAsFeature() throws Exception
     {
-        Platform    platform    = mock(Platform.class);
-        Application application = mock(Application.class);
+        Platform        platform    = mock(Platform.class);
+        Application     application = mock(Application.class);
 
-        DockerContainer container   = new DockerContainer("foo", new Options());
+        DockerContainer container   = new DockerContainer("foo", OptionsByType.empty());
 
         when(application.getPlatform()).thenReturn(platform);
 
@@ -136,17 +136,17 @@ public class DockerContainerTest
     @Test
     public void shouldCreateInspectCommand() throws Exception
     {
-        Platform        platform  = mock(Platform.class);
-        Options         options   = new Options();
-        DockerContainer container = new DockerContainer("foo", new Options());
-        Inspect         inspect   = container.createInspectCommand();
+        Platform        platform      = mock(Platform.class);
+        OptionsByType   optionsByType = OptionsByType.empty();
+        DockerContainer container     = new DockerContainer("foo", OptionsByType.empty());
+        Inspect         inspect       = container.createInspectCommand();
 
         assertThat(inspect, is(notNullValue()));
 
-        inspect.onLaunch(platform, options);
+        inspect.onLaunch(platform, optionsByType);
 
-        Arguments    arguments = options.get(Arguments.class);
-        List<String> values    = arguments.resolve(mock(Platform.class), new Options());
+        Arguments    arguments = optionsByType.get(Arguments.class);
+        List<String> values    = arguments.resolve(mock(Platform.class), OptionsByType.empty());
 
         assertThat(values, contains("inspect", "--type=container", "foo"));
     }
@@ -161,7 +161,7 @@ public class DockerContainerTest
         Application     inspectApp   = mock(Application.class, "Inspect");
         Inspect         inspect      = mock(Inspect.class);
 
-        DockerContainer container    = new DockerContainer("foo", new Options(docker));
+        DockerContainer container    = new DockerContainer("foo", OptionsByType.of(docker));
         DockerContainer containerSpy = spy(container);
 
         when(application.getPlatform()).thenReturn(platform);
@@ -186,7 +186,7 @@ public class DockerContainerTest
         Application     inspectApp   = mock(Application.class, "Inspect");
         Inspect         inspect      = mock(Inspect.class);
 
-        DockerContainer container    = new DockerContainer("foo", new Options(docker));
+        DockerContainer container    = new DockerContainer("foo", OptionsByType.of(docker));
         DockerContainer containerSpy = spy(container);
 
         when(application.getPlatform()).thenReturn(platform);
@@ -205,7 +205,7 @@ public class DockerContainerTest
     @Test(expected = IllegalStateException.class)
     public void shouldNotInspectIfNoApplication() throws Exception
     {
-        DockerContainer container = new DockerContainer("foo", new Options());
+        DockerContainer container = new DockerContainer("foo", OptionsByType.of());
 
         container.inspect();
     }
@@ -219,7 +219,7 @@ public class DockerContainerTest
         Application     application = mock(Application.class, "App");
         Application     removeApp   = mock(Application.class, "Inspect");
 
-        DockerContainer container   = new DockerContainer("foo", new Options(docker));
+        DockerContainer container   = new DockerContainer("foo", OptionsByType.of(docker));
 
         when(application.getPlatform()).thenReturn(platform);
         when(platform.launch(any(MetaClass.class), anyVararg())).thenReturn(removeApp);
@@ -232,15 +232,15 @@ public class DockerContainerTest
 
         verify(platform).launch(captor.capture(), anyVararg());
 
-        Options                options = new Options();
-        Remove.RemoveContainer remove  = (Remove.RemoveContainer) captor.getValue();
+        OptionsByType          optionsByType = OptionsByType.empty();
+        Remove.RemoveContainer remove        = (Remove.RemoveContainer) captor.getValue();
 
         assertThat(remove, is(notNullValue()));
 
-        remove.onLaunch(platform, options);
+        remove.onLaunch(platform, optionsByType);
 
-        Arguments    arguments = options.get(Arguments.class);
-        List<String> values    = arguments.resolve(mock(Platform.class), new Options());
+        Arguments    arguments = optionsByType.get(Arguments.class);
+        List<String> values    = arguments.resolve(mock(Platform.class), OptionsByType.empty());
 
         assertThat(values, contains("rm", "foo"));
     }
@@ -254,7 +254,7 @@ public class DockerContainerTest
         Application     application = mock(Application.class, "App");
         Application     removeApp   = mock(Application.class, "Inspect");
 
-        DockerContainer container   = new DockerContainer("foo", new Options(docker));
+        DockerContainer container   = new DockerContainer("foo", OptionsByType.of(docker));
 
         when(application.getPlatform()).thenReturn(platform);
         when(platform.launch(any(MetaClass.class), anyVararg())).thenReturn(removeApp);
@@ -267,15 +267,15 @@ public class DockerContainerTest
 
         verify(platform).launch(captor.capture(), anyVararg());
 
-        Options                options = new Options();
-        Remove.RemoveContainer remove  = (Remove.RemoveContainer) captor.getValue();
+        OptionsByType          optionsByType = OptionsByType.empty();
+        Remove.RemoveContainer remove        = (Remove.RemoveContainer) captor.getValue();
 
         assertThat(remove, is(notNullValue()));
 
-        remove.onLaunch(platform, options);
+        remove.onLaunch(platform, optionsByType);
 
-        Arguments    arguments = options.get(Arguments.class);
-        List<String> values    = arguments.resolve(mock(Platform.class), new Options());
+        Arguments    arguments = optionsByType.get(Arguments.class);
+        List<String> values    = arguments.resolve(mock(Platform.class), OptionsByType.empty());
 
         assertThat(values, contains("rm", "--force", "foo"));
     }
@@ -284,7 +284,7 @@ public class DockerContainerTest
     @Test(expected = IllegalStateException.class)
     public void shouldNotRemoveIfNoApplication() throws Exception
     {
-        DockerContainer container = new DockerContainer("foo", new Options());
+        DockerContainer container = new DockerContainer("foo", OptionsByType.empty());
 
         container.remove(true);
     }
@@ -298,7 +298,7 @@ public class DockerContainerTest
         Application     application = mock(Application.class, "App");
         Application     removeApp   = mock(Application.class, "Inspect");
 
-        DockerContainer container   = new DockerContainer("foo", new Options(docker));
+        DockerContainer container   = new DockerContainer("foo", OptionsByType.of(docker));
 
         when(application.getPlatform()).thenReturn(platform);
         when(platform.launch(any(MetaClass.class), anyVararg())).thenReturn(removeApp);
@@ -311,15 +311,15 @@ public class DockerContainerTest
 
         verify(platform).launch(captor.capture(), anyVararg());
 
-        Options options = new Options();
-        Stop    stop    = (Stop) captor.getValue();
+        OptionsByType optionsByType = OptionsByType.empty();
+        Stop          stop          = (Stop) captor.getValue();
 
         assertThat(stop, is(notNullValue()));
 
-        stop.onLaunch(platform, options);
+        stop.onLaunch(platform, optionsByType);
 
-        Arguments    arguments = options.get(Arguments.class);
-        List<String> values    = arguments.resolve(mock(Platform.class), new Options());
+        Arguments    arguments = optionsByType.get(Arguments.class);
+        List<String> values    = arguments.resolve(mock(Platform.class), OptionsByType.empty());
 
         assertThat(values, contains("stop", "foo"));
     }
@@ -328,7 +328,7 @@ public class DockerContainerTest
     @Test(expected = IllegalStateException.class)
     public void shouldNotStopIfNoApplication() throws Exception
     {
-        DockerContainer container = new DockerContainer("foo", new Options());
+        DockerContainer container = new DockerContainer("foo", OptionsByType.empty());
 
         container.stop();
     }
@@ -337,10 +337,10 @@ public class DockerContainerTest
     @Test
     public void shouldCloseWithNullApplication() throws Exception
     {
-        DockerContainer         container = new DockerContainer("foo", new Options());
+        DockerContainer         container = new DockerContainer("foo", OptionsByType.empty());
         ContainerCloseBehaviour behaviour = mock(ContainerCloseBehaviour.class);
 
-        container.onClosed(null, new Options(behaviour));
+        container.onClosed(null, OptionsByType.of(behaviour));
 
         verify(behaviour).accept(same(container));
     }
@@ -350,13 +350,13 @@ public class DockerContainerTest
     public void shouldCloseWithApplicationAndUseOverridingBehaviour() throws Exception
     {
         Application             application       = mock(Application.class);
-        DockerContainer         container         = new DockerContainer("foo", new Options());
+        DockerContainer         container         = new DockerContainer("foo", OptionsByType.empty());
         ContainerCloseBehaviour behaviourApp      = mock(ContainerCloseBehaviour.class, "1");
         ContainerCloseBehaviour behaviourOverride = mock(ContainerCloseBehaviour.class, "2");
 
-        when(application.getOptions()).thenReturn(new Options(behaviourApp));
+        when(application.getOptions()).thenReturn(OptionsByType.of(behaviourApp));
 
-        container.onClosed(application, new Options(behaviourOverride));
+        container.onClosed(application, OptionsByType.of(behaviourOverride));
 
         verify(behaviourApp, never()).accept(same(container));
         verify(behaviourOverride).accept(same(container));
@@ -367,12 +367,12 @@ public class DockerContainerTest
     public void shouldCloseWithApplicationAndUseApplicationCloseBehaviour() throws Exception
     {
         Application             application  = mock(Application.class);
-        DockerContainer         container    = new DockerContainer("foo", new Options());
+        DockerContainer         container    = new DockerContainer("foo", OptionsByType.empty());
         ContainerCloseBehaviour behaviourApp = mock(ContainerCloseBehaviour.class);
 
-        when(application.getOptions()).thenReturn(new Options(behaviourApp));
+        when(application.getOptions()).thenReturn(OptionsByType.of(behaviourApp));
 
-        container.onClosed(application, new Options());
+        container.onClosed(application, OptionsByType.empty());
 
         verify(behaviourApp).accept(same(container));
     }
