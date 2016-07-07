@@ -1,0 +1,73 @@
+<!-- 
+	File: test-extend-proxy-config.xml
+ 
+ 	DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ 	
+	The contents of this file are subject to the terms and conditions of 
+	the Common Development and Distribution License 1.0 (the "License").
+
+	You may not use this file except in compliance with the License.
+
+	You can obtain a copy of the License by consulting the LICENSE.txt file
+	distributed with this file, or by consulting https://oss.oracle.com/licenses/CDDL
+
+	See the License for the specific language governing permissions
+	and limitations under the License.
+
+	When distributing the software, include this License Header Notice in each
+	file and include the License file LICENSE.txt.
+
+	MODIFICATIONS:
+	If applicable, add the following below the License Header, with the fields
+	enclosed by brackets [] replaced by your own identifying information:
+	"Portions Copyright [year] [name of copyright owner]"
+	
+	Copyright (c) 2012. All Rights Reserved. Oracle Corporation.
+    Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
+ -->
+<cache-config
+	xmlns="http://xmlns.oracle.com/coherence/coherence-cache-config"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://xmlns.oracle.com/coherence/coherence-cache-config coherence-cache-config.xsd">
+
+    <defaults>
+        <serializer>pof</serializer>
+        <socket-provider system-property="tangosol.coherence.socketprovider">system</socket-provider>
+    </defaults>
+
+    <caching-scheme-mapping>
+        <cache-mapping>
+            <cache-name>*</cache-name>
+            <scheme-name>distributed-scheme</scheme-name>
+        </cache-mapping>
+    </caching-scheme-mapping>
+
+    <caching-schemes>
+        <distributed-scheme>
+            <scheme-name>distributed-scheme</scheme-name>
+            <service-name>distributed-service</service-name>
+            <backing-map-scheme>
+                <local-scheme>
+                    <unit-calculator>BINARY</unit-calculator>
+                </local-scheme>
+            </backing-map-scheme>
+            <autostart>true</autostart>
+        </distributed-scheme>
+
+        <proxy-scheme>
+            <service-name>ExtendTcpProxyService</service-name>
+            <thread-count>5</thread-count>
+            <acceptor-config>
+                <tcp-acceptor>
+                    <local-address>
+                        <address system-property="extend.proxy.host">localhost</address>
+                        <port system-property="coherence.extend.port">10000</port>
+                    </local-address>
+                </tcp-acceptor>
+            </acceptor-config>
+            <autostart>true</autostart>
+        </proxy-scheme>
+
+    </caching-schemes>
+
+</cache-config>

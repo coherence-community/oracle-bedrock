@@ -201,6 +201,30 @@ public class Decorations implements Option.Collector<Decoration, Decorations>
     }
 
 
+    /**
+     * Obtains an instance contained with in a {@link Decoration} that
+     * implements the specified {@link Class}.
+     *
+     * @param requiredClass  the required {@link Class}
+     * @param <T>            the type of the {@link Class}
+     *
+     * @return  the instance or <code>null</code> if a {@link Decoration} containing an
+     *          instance of the specified type can't be found
+     */
+    public <T> T get(Class<T> requiredClass)
+    {
+        for (Decoration decoration : decorations)
+        {
+            if (requiredClass.isInstance(decoration.get()))
+            {
+                return (T) decoration.get();
+            }
+        }
+
+        return null;
+    }
+
+
     @Override
     public Decorations with(Decoration decoration)
     {

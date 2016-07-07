@@ -1,5 +1,5 @@
 /*
- * File: ExtendClient.java
+ * File: StorageDisabledMember.java
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
@@ -31,55 +31,35 @@ import com.oracle.bedrock.runtime.MetaClass;
 import com.oracle.bedrock.runtime.Profile;
 import com.oracle.bedrock.runtime.coherence.CoherenceClusterMember;
 import com.oracle.bedrock.runtime.coherence.options.CacheConfig;
-import com.oracle.bedrock.runtime.coherence.options.Clustering;
 import com.oracle.bedrock.runtime.coherence.options.LocalHost;
 import com.oracle.bedrock.runtime.coherence.options.LocalStorage;
 import com.oracle.bedrock.runtime.coherence.options.RoleName;
-import com.oracle.bedrock.runtime.java.options.SystemProperty;
+import com.tangosol.net.CacheFactory;
 import com.tangosol.net.ConfigurableCacheFactory;
 import com.tangosol.net.ScopedCacheFactoryBuilder;
 
 import java.util.Properties;
 
 /**
- * A {@link SessionBuilder} for Coherence *Extend Clients.
+ * A {@link SessionBuilder} for Coherence Storage Disabled Members.
  * <p>
  * Copyright (c) 2015. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Brian Oliver
  */
-public class ExtendClient implements SessionBuilder
+public class StorageDisabledMember implements SessionBuilder
 {
-    /**
-     * The Coherence Cache Configuration URI to use for the {@link ExtendClient}.
-     */
-    private String cacheConfigURI;
-
-
-    /**
-     * Creates an {@link ExtendClient} for the specified Cache Configuration URI.
-     *
-     * @param cacheConfigURI the cache configuration URI
-     */
-    public ExtendClient(String cacheConfigURI)
-    {
-        this.cacheConfigURI = cacheConfigURI;
-    }
-
-
     @Override
     public ConfigurableCacheFactory build(LocalPlatform                 platform,
                                           CoherenceClusterOrchestration orchestration,
                                           OptionsByType                 optionsByType)
     {
-        // ----- establish the options for launching a local extend-based member -----
-        optionsByType.add(RoleName.of("extend-client"));
-        optionsByType.add(Clustering.disabled());
+        // ----- establish the options for launching a local storage-disabled member -----
+        optionsByType.add(RoleName.of("client"));
         optionsByType.add(LocalStorage.disabled());
         optionsByType.add(LocalHost.only());
-        optionsByType.add(SystemProperty.of("tangosol.coherence.extend.enabled", true));
-        optionsByType.add(CacheConfig.of(cacheConfigURI));
+        optionsByType.addIfAbsent(CacheConfig.of("coherence-cache-config.xml"));
 
         // ----- notify the Profiles that we're about to launch an application -----
 
@@ -104,8 +84,12 @@ public class ExtendClient implements SessionBuilder
         }
 
         // create the session
-        ConfigurableCacheFactory session = new ScopedCacheFactoryBuilder().getConfigurableCacheFactory(cacheConfigURI,
-                                                                                                       getClass().getClassLoader());
+        ConfigurableCacheFactory session =
+            new ScopedCacheFactoryBuilder().getConfigurableCacheFactory(optionsByType.get(CacheConfig.class).getUri(),
+                                                                        getClass().getClassLoader());
+
+        // as this is a cluster member we have to join the cluster
+        CacheFactory.ensureCluster();
 
         return session;
     }
@@ -114,26 +98,13 @@ public class ExtendClient implements SessionBuilder
     @Override
     public boolean equals(Object other)
     {
-        if (this == other)
-        {
-            return true;
-        }
-
-        if (!(other instanceof ExtendClient))
-        {
-            return false;
-        }
-
-        ExtendClient that = (ExtendClient) other;
-
-        return cacheConfigURI.equals(that.cacheConfigURI);
-
+        return other instanceof StorageDisabledMember;
     }
 
 
     @Override
     public int hashCode()
     {
-        return cacheConfigURI.hashCode();
+        return StorageDisabledMember.class.hashCode();
     }
 }

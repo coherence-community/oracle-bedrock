@@ -26,6 +26,8 @@
 package com.oracle.bedrock.runtime.coherence;
 
 import com.oracle.bedrock.OptionsByType;
+import com.oracle.bedrock.options.Decoration;
+import com.oracle.bedrock.options.Decorations;
 import com.oracle.bedrock.runtime.AbstractAssembly;
 import com.oracle.bedrock.runtime.Assembly;
 import com.oracle.bedrock.runtime.coherence.callables.GetAutoStartServiceNames;
@@ -38,6 +40,13 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.function.Predicate;
+
+import static com.oracle.bedrock.deferred.DeferredHelper.ensure;
+import static com.oracle.bedrock.deferred.DeferredHelper.eventually;
+import static com.oracle.bedrock.deferred.DeferredHelper.invoking;
+import static com.oracle.bedrock.predicate.Predicates.contains;
+import static com.oracle.bedrock.predicate.Predicates.doesNotContain;
+import static com.oracle.bedrock.predicate.Predicates.greaterThan;
 
 /**
  * An {@link Assembly} that represents a collection of {@link CoherenceClusterMember}s.
@@ -63,7 +72,8 @@ public class CoherenceCluster extends AbstractAssembly<CoherenceClusterMember>
 
 
     /**
-     * Obtains the current number of {@link CoherenceClusterMember}s in the {@link CoherenceCluster}.
+     * Obtains the current number of {@link CoherenceClusterMember}s in the underlying
+     * {@link CoherenceCluster} by asking a {@link CoherenceClusterMember}.
      *
      * @return the current number of {@link CoherenceClusterMember}s
      */
@@ -124,6 +134,47 @@ public class CoherenceCluster extends AbstractAssembly<CoherenceClusterMember>
         Iterator<CoherenceClusterMember> members = iterator();
 
         return members.hasNext() ? members.next().getCache(cacheName, keyClass, valueClass) : null;
+    }
+
+
+    @Override
+    protected void onRelaunching(CoherenceClusterMember member,
+                                 OptionsByType          optionsByType)
+    {
+        // get the current MemberUID and record it (or make the application remember it)
+        UID memberUID = member.getLocalMemberUID();
+
+        // add the member as a decoration to the OptionsByType
+        optionsByType.add(Decoration.of(memberUID));
+    }
+
+
+    @Override
+    protected void onRelaunched(CoherenceClusterMember original,
+                                CoherenceClusterMember restarted,
+                                OptionsByType          optionsByType)
+    {
+        // ensure that the original member UID is no longer in the cluster
+        Decorations decorations       = optionsByType.get(Decorations.class);
+
+        UID         originalMemberUID = decorations.get(UID.class);
+
+        if (originalMemberUID != null)
+        {
+            // ensure that the restarted member is in the member set of the cluster
+            ensure(eventually(invoking(this).getClusterMemberUIDs()), doesNotContain(originalMemberUID));
+        }
+
+        // ensure the restarted member has joined the cluster
+        // (without doing this the local member id returned below may be different from
+        // the one when the member joins the cluster)
+        ensure(eventually(invoking(restarted).getClusterSize()), greaterThan(1));
+
+        // determine the UID of the restarted member
+        UID restartedMemberUID = restarted.getLocalMemberUID();
+
+        // ensure that the restarted member is in the member set of the cluster
+        ensure(eventually(invoking(this).getClusterMemberUIDs()), contains(restartedMemberUID));
     }
 
 
