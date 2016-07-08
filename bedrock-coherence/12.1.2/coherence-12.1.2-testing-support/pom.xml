@@ -30,6 +30,22 @@
         </dependency>
 
         <dependency>
+            <groupId>com.oracle.bedrock.coherence</groupId>
+            <artifactId>coherence-3.7.1-testing-support</artifactId>
+            <version>${project.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.oracle.coherence</groupId>
+                    <artifactId>coherence</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.oracle.bedrock.coherence</groupId>
+                    <artifactId>coherence-3.7.1</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
             <groupId>com.oracle.bedrock</groupId>
             <artifactId>bedrock-testing-support</artifactId>
             <version>${project.version}</version>
@@ -41,4 +57,40 @@
             <version>${junit.version}</version>
         </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>${maven.shade.plugin.version}</version>
+                <configuration>
+                    <!-- only include the previous version of coherence -->
+                    <artifactSet>
+                        <includes>
+                            <include>com.oracle.bedrock.coherence:coherence-3.7.1-testing-support</include>
+                        </includes>
+                    </artifactSet>
+
+                    <!-- exclude meta-inf and certain classes -->
+                    <filters>
+                        <filter>
+                            <artifact>com.oracle.bedrock.coherence:coherence-3.7.1-testing-support</artifact>
+                            <excludes>
+                                <exclude>META-INF/**</exclude>
+                            </excludes>
+                        </filter>
+                    </filters>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 </project>

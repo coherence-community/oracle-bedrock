@@ -16,6 +16,7 @@
     <modules>
         <module>3.7.1</module>
         <module>12.1.2</module>
+        <module>12.1.3</module>
         <module>12.2.1</module>
     </modules>
 </project>

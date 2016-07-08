@@ -1,5 +1,5 @@
 /*
- * File: SessionBuilders.java
+ * File: ContainerBasedCoherenceCacheServerTest.java
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
@@ -23,38 +23,35 @@
  * "Portions Copyright [year] [name of copyright owner]"
  */
 
-package com.oracle.bedrock.junit;
+package com.oracle.bedrock.runtime.coherence;
+
+import com.oracle.bedrock.runtime.Platform;
+import com.oracle.bedrock.runtime.java.ContainerBasedJavaApplicationLauncher;
+import com.oracle.bedrock.runtime.java.JavaVirtualMachine;
+import org.junit.Ignore;
 
 /**
- * A helper class for creating various types of {@link SessionBuilder}s.
+ * Functional Test for {@link CoherenceCacheServer}s using a {@link ContainerBasedJavaApplicationLauncher}.
  * <p>
- * Copyright (c) 2015. All Rights Reserved. Oracle Corporation.<br>
+ * Copyright (c) 2014. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Brian Oliver
  */
-public class SessionBuilders
+public class ContainerBasedCoherenceCacheServerTest extends AbstractCoherenceCacheServerTest
 {
-    /**
-     * Constructs a {@link SessionBuilder} for a Storage Disabled Member.
-     *
-     * @return a {@link SessionBuilder}
-     */
-    public static SessionBuilder storageDisabledMember()
+    @Override
+    public Platform getPlatform()
     {
-        return new StorageDisabledMember();
+        return JavaVirtualMachine.get();
     }
 
 
-    /**
-     * Constructs a {@link SessionBuilder} for a *Extend Client.
-     *
-     * @param cacheConfigURI  the Cache Configuration URI
-     *
-     * @return a {@link SessionBuilder}
-     */
-    public static SessionBuilder extendClient(String cacheConfigURI)
+    @Override
+    @Ignore
+    public void shouldStartStopMultipleTimes()
     {
-        return new ExtendClient(cacheConfigURI);
+        // we skip this test as performing fast starting/stopping in
+        // container is not supported for Coherence 3.7.1.x
     }
 }

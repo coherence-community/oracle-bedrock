@@ -127,10 +127,14 @@ public class CoherenceClusterOrchestration extends ExternalResource
      */
     private HashMap<SessionBuilder, ConfigurableCacheFactory> sessions;
 
-    // the Coherence Cluster Port
+    /**
+     * The cluster port.
+     */
     private Capture<Integer> clusterPort;
 
-    // the Coherence *Extend port
+    /**
+     * The extend port.
+     */
     private Capture<Integer> extendPort;
 
 

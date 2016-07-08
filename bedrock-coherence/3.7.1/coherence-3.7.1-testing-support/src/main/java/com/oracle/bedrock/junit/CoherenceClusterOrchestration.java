@@ -420,6 +420,9 @@ public class CoherenceClusterOrchestration extends ExternalResource
      * Obtains a session (represented as a {@link ConfigurableCacheFactory} against the
      * orchestrated Coherence Cluster for interacting with Coherence.
      * <p>
+     * Only a single session may be created by a {@link CoherenceClusterOrchestration}
+     * against an orchestrated {@link CoherenceCluster}.
+     * <p>
      * Attempts to request a session multiple times with the same {@link SessionBuilder}
      * will return the same session.
      *
@@ -432,6 +435,9 @@ public class CoherenceClusterOrchestration extends ExternalResource
      */
     public synchronized ConfigurableCacheFactory getSessionFor(SessionBuilder builder)
     {
+        // restore the system properties (as the session needs to start cleanly)
+        com.oracle.bedrock.util.SystemProperties.replaceWith(systemProperties);
+
         ConfigurableCacheFactory session = sessions.get(builder);
 
         if (session == null)
