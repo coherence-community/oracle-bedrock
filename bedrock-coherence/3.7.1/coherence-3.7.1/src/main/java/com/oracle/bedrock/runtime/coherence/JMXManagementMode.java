@@ -31,7 +31,6 @@ import com.oracle.bedrock.runtime.Application;
 import com.oracle.bedrock.runtime.MetaClass;
 import com.oracle.bedrock.runtime.Platform;
 import com.oracle.bedrock.runtime.Profile;
-import com.oracle.bedrock.runtime.java.features.JmxFeature;
 import com.oracle.bedrock.runtime.java.options.SystemProperties;
 import com.oracle.bedrock.runtime.java.options.SystemProperty;
 
@@ -131,9 +130,6 @@ public enum JMXManagementMode implements Option, Profile
         if (systemProperties != null)
         {
             optionsByType.add(SystemProperty.of(PROPERTY, toSystemProperty()));
-
-            // automatically enable remote jmx management
-            optionsByType.add(SystemProperty.of(JmxFeature.SUN_MANAGEMENT_JMXREMOTE, "true"));
         }
     }
 

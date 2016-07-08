@@ -37,6 +37,7 @@ import com.oracle.bedrock.extensible.Extensible;
 import com.oracle.bedrock.extensible.Feature;
 import com.oracle.bedrock.options.Timeout;
 import com.oracle.bedrock.runtime.java.JavaApplication;
+import com.oracle.bedrock.runtime.java.profiles.JmxProfile;
 
 import javax.management.MBeanInfo;
 import javax.management.ObjectInstance;
@@ -357,5 +358,67 @@ public class JmxFeature extends AbstractFeature
         {
             throw new PermanentlyUnavailableException(getDeferredJMXConnector(), e);
         }
+    }
+
+
+    /**
+     * Obtains a {@link JmxProfile} that configures Remote Java Management Extensions (JMX)
+     * for the current platform, <strong>without</strong> authentication and ssl.
+     *
+     * @return a {@link JmxProfile}
+     *
+     * @see JmxProfile#enabled()
+     */
+    public static JmxProfile enabled()
+    {
+        return JmxProfile.enabled();
+    }
+
+
+    /**
+     * Obtains a {@link JmxProfile} that configures {@link JmxFeature#SUN_MANAGEMENT_JMXREMOTE_AUTHENTICATE}
+     * system property.
+     *
+     * @param enabled  to enable / disable authentication
+     *
+     * @return a {@link JmxProfile}
+     *
+     * @see JmxProfile#authentication(boolean)
+     */
+    public static JmxProfile authentication(boolean enabled)
+    {
+        return JmxProfile.authentication(enabled);
+    }
+
+
+    /**
+     * Obtains a {@link JmxProfile} that configures {@link JmxFeature#SUN_MANAGEMENT_JMXREMOTE_SSL}
+     * system property.
+     *
+     * @param enabled  to enable / disable ssl
+     *
+     * @return a {@link JmxProfile}
+     *
+     * @see JmxProfile#ssl(boolean)
+     */
+    public static JmxProfile ssl(boolean enabled)
+    {
+        return JmxProfile.ssl(enabled);
+    }
+
+
+    /**
+     * Obtains a {@link JmxProfile} that configures {@link JavaApplication#JAVA_RMI_SERVER_HOSTNAME}
+     * system property.
+     *
+     * @param hostname  the desired hostname configuration
+     *
+     * @return a {@link JmxProfile}
+     *
+     * @see JmxProfile#hostname(String)
+     */
+    public static JmxProfile hostname(String hostname)
+    {
+        return JmxProfile.hostname(hostname);
     }
 }

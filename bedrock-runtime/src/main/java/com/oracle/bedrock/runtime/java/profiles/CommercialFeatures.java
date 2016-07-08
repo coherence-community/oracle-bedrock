@@ -141,7 +141,7 @@ public class CommercialFeatures implements Profile, Option
         }
         catch (Throwable t)
         {
-            System.err.println("Error trying to determine commercial feaures status - " + t.getMessage());
+            System.err.println("Error trying to determine commercial features status - " + t.getMessage());
 
             return disabled();
         }

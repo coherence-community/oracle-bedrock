@@ -45,7 +45,6 @@ import com.oracle.bedrock.runtime.concurrent.options.StreamName;
 import com.oracle.bedrock.runtime.console.SystemApplicationConsole;
 import com.oracle.bedrock.runtime.java.features.JmxFeature;
 import com.oracle.bedrock.runtime.java.options.ClassName;
-import com.oracle.bedrock.runtime.java.options.SystemProperty;
 import com.oracle.bedrock.runtime.network.AvailablePortIterator;
 import com.oracle.bedrock.runtime.options.Discriminator;
 import com.oracle.bedrock.util.Capture;
@@ -104,13 +103,7 @@ public abstract class AbstractCoherenceCacheServerTest extends AbstractTest
                                                            LocalHost.only(),
                                                            RoleName.of("test-role"),
                                                            SiteName.of("test-site"),
-                                                           SystemProperty.of(JmxFeature.SUN_MANAGEMENT_JMXREMOTE_PORT,
-                                                                             availablePorts),
-                                                           SystemProperty.of(JmxFeature.SUN_MANAGEMENT_JMXREMOTE_SSL,
-                                                                             "false"),
-                                                           SystemProperty.of(JmxFeature
-                                                               .SUN_MANAGEMENT_JMXREMOTE_AUTHENTICATE,
-                                                                             "false"),
+                                                           JmxFeature.enabled(),
                                                            JMXManagementMode.LOCAL_ONLY))
 
         {
