@@ -38,6 +38,7 @@ import com.oracle.bedrock.runtime.console.SystemApplicationConsole;
 import com.oracle.bedrock.runtime.java.JavaApplicationLauncher;
 import com.oracle.bedrock.runtime.java.options.SystemProperty;
 import com.oracle.bedrock.runtime.network.AvailablePortIterator;
+import com.oracle.bedrock.runtime.options.Console;
 import com.oracle.bedrock.runtime.options.DisplayName;
 import com.oracle.bedrock.runtime.options.StabilityPredicate;
 import com.oracle.bedrock.util.Capture;
@@ -331,6 +332,42 @@ public abstract class AbstractCoherenceClusterBuilderTest extends AbstractTest
         {
             e.printStackTrace();
             Assert.fail();
+        }
+    }
+
+
+    /**
+     * Ensure we can clone {@link CoherenceClusterMember}s in a {@link CoherenceCluster}.
+     */
+    @Test
+    public void shouldCloneMembersOfACluster()
+    {
+        final int               CLUSTER_SIZE   = 2;
+
+        AvailablePortIterator   availablePorts = LocalPlatform.get().getAvailablePorts();
+        ClusterPort             clusterPort    = ClusterPort.of(new Capture<>(availablePorts));
+        String                  clusterName    = "Cloning" + getClass().getSimpleName();
+        CoherenceClusterBuilder builder        = new CoherenceClusterBuilder();
+
+        builder.include(CLUSTER_SIZE,
+                        CoherenceClusterMember.class,
+                        DisplayName.of("DCS"),
+                        clusterPort,
+                        ClusterName.of(clusterName),
+                        LocalHost.only(),
+                        Console.system());
+
+        try (CoherenceCluster cluster = builder.build())
+        {
+            assertThat(invoking(cluster).getClusterSize(), is(CLUSTER_SIZE));
+
+            cluster.limit(1).clone(1);
+
+            assertThat(invoking(cluster).getClusterSize(), is(CLUSTER_SIZE + 1));
+
+            cluster.unordered().limit(2).clone(2);
+
+            assertThat(invoking(cluster).getClusterSize(), is(CLUSTER_SIZE + 5));
         }
     }
 }

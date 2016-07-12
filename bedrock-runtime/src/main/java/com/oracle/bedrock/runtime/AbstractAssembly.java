@@ -242,7 +242,6 @@ public abstract class AbstractAssembly<A extends Application> implements Assembl
             // notify the assembly implementation that it has expanded
             onExpanded(Collections.singletonList(application));
         }
-
     }
 
 
@@ -322,8 +321,9 @@ public abstract class AbstractAssembly<A extends Application> implements Assembl
 
     /**
      * Called when the {@link Assembly} is first created and after the
-     * {@link #expand(int, Platform, Class, Option...)} and {@link #add(Application)} methods
-     * have increased the number of {@link Application}s in the {@link Assembly}.
+     * {@link #expand(int, Platform, Class, Option...)}, {@link #add(Application)} and
+     * {@link #clone(int, Option...)} methods have increased the number of {@link Application}s
+     * in the {@link Assembly}.
      *
      * @param applications  the newly added {@link Application}s to the {@link Assembly}
      */
@@ -447,12 +447,53 @@ public abstract class AbstractAssembly<A extends Application> implements Assembl
                     onRelaunched(application, relaunchedApplication, launchOptions);
 
                     // add the application to the assembly
+                    // (this will notify the assembly of the new application)
                     add(relaunchedApplication);
                 }
             });
+    }
 
-        // notify the assembly of the change
-        onChanged(OptionsByType.of(optionsByType).addAll(options));
+
+    /**
+     * Creates the specified number of "clones" of the specified {@link Application}s using the
+     * provided override {@link Option}s.
+     *
+     * @param applications  the {@link Application}s to clone
+     * @param count         the number of clones of each application
+     * @param options       the override {@link Option}s
+     */
+    protected void clone(List<? extends A> applications,
+                         int               count,
+                         Option...         options)
+    {
+        // close and relaunch each application one at a time
+        applications.forEach(
+            application -> {
+
+                for (int i = 0; i < count; i++)
+                {
+                    // obtain some information about the application
+                    Platform      platform           = application.getPlatform();
+                    OptionsByType applicationOptions = application.getOptions();
+
+                    // establish the launch options
+                    // (based on the application and specified options)
+                    OptionsByType launchOptions = OptionsByType.of(applicationOptions).addAll(options);
+
+                    // we use a new discriminator
+                    launchOptions.add(Discriminator.of(applicationCount.incrementAndGet()));
+
+                    // we'll create the same class of application
+                    Class<A> applicationClass = (Class<A>) application.getClass();
+
+                    // launch the clone
+                    A clonedApplication = platform.launch(applicationClass, launchOptions.asArray());
+
+                    // add the application to the assembly
+                    // (this will notify the assembly of the new application)
+                    add(clonedApplication);
+                }
+            });
     }
 
 
@@ -641,6 +682,14 @@ public abstract class AbstractAssembly<A extends Application> implements Assembl
     }
 
 
+    @Override
+    public void clone(int       count,
+                      Option... options)
+    {
+        stream().clone(count, options);
+    }
+
+
     /**
      * An internal implementation of an {@link ApplicationStream} that
      * adapts a regular {@link Stream} of {@link Application}s into an
@@ -781,6 +830,18 @@ public abstract class AbstractAssembly<A extends Application> implements Assembl
 
             // have the assembly relaunch these applications with the provided options
             AbstractAssembly.this.relaunch(applications, options);
+        }
+
+
+        @Override
+        public void clone(int       count,
+                          Option... options)
+        {
+            // collect the applications we need to clone
+            List<A> applications = stream.collect(Collectors.toList());
+
+            // have the assembly clone these applications with the provided options
+            AbstractAssembly.this.clone(applications, count, options);
         }
     }
 }

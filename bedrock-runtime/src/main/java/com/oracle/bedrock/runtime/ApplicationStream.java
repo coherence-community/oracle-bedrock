@@ -202,6 +202,21 @@ public interface ApplicationStream<T extends Application>
 
 
     /**
+     * Launches the specified number of "clones" of each {@link Application} in the {@link ApplicationStream}
+     * using the {@link Platform} and {@link Option}s that where originally used to launch said {@link Application}s,
+     * adding each of the newly launched {@link Application}s to the {@link Assembly} that created the
+     * {@link ApplicationStream}.
+     * <p>
+     * The optionally specified {@link Option}s may be used to override those defined by the {@link Application}s
+     * when originally launched.
+     *
+     * @param options  the override {@link Option}s
+     */
+    void clone(int       count,
+               Option... options);
+
+
+    /**
      * Returns an {@link ApplicationStream} consisting of the {@link Application}s in this
      * {@link ApplicationStream} but unordered in manner.  The resulting {@link ApplicationStream}
      * will consist of the same {@link Application}s but in a randomized order.
