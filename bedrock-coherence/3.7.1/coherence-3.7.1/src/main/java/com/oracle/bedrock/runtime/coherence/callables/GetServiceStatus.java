@@ -76,29 +76,38 @@ public class GetServiceStatus implements RemoteCallable<ServiceStatus>
             {
                 SafeDistributedCacheService distributedCacheService = (SafeDistributedCacheService) service;
                 PartitionedService partitionedService = (PartitionedService) distributedCacheService.getService();
-                int                         backupStrength          = (Integer) partitionedService.getBackupStrength();
 
-                switch (backupStrength)
+                // the service may be initializing and thus we might fail asking it for information
+                try
                 {
-                case 0 :
-                    return ServiceStatus.ORPHANED;
+                    int backupStrength = (Integer) partitionedService.getBackupStrength();
 
-                case 1 :
-                    return ServiceStatus.ENDANGERED;
+                    switch (backupStrength)
+                    {
+                    case 0 :
+                        return ServiceStatus.ORPHANED;
 
-                case 2 :
-                    return ServiceStatus.NODE_SAFE;
+                    case 1 :
+                        return ServiceStatus.ENDANGERED;
 
-                case 3 :
-                    return ServiceStatus.MACHINE_SAFE;
+                    case 2 :
+                        return ServiceStatus.NODE_SAFE;
 
-                case 4 :
-                    return ServiceStatus.RACK_SAFE;
+                    case 3 :
+                        return ServiceStatus.MACHINE_SAFE;
 
-                case 5 :
-                    return ServiceStatus.SITE_SAFE;
+                    case 4 :
+                        return ServiceStatus.RACK_SAFE;
 
-                default :
+                    case 5 :
+                        return ServiceStatus.SITE_SAFE;
+
+                    default :
+                        return ServiceStatus.UNKNOWN;
+                    }
+                }
+                catch (Exception e)
+                {
                     return ServiceStatus.UNKNOWN;
                 }
             }
