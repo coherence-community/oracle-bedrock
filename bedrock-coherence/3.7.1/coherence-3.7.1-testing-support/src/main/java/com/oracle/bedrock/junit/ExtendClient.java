@@ -36,10 +36,14 @@ import com.oracle.bedrock.runtime.coherence.options.LocalHost;
 import com.oracle.bedrock.runtime.coherence.options.LocalStorage;
 import com.oracle.bedrock.runtime.coherence.options.RoleName;
 import com.oracle.bedrock.runtime.java.options.SystemProperty;
+import com.oracle.bedrock.table.Cell;
+import com.oracle.bedrock.table.Table;
 import com.tangosol.net.ConfigurableCacheFactory;
 import com.tangosol.net.ScopedCacheFactoryBuilder;
 
 import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * A {@link SessionBuilder} for Coherence *Extend Clients.
@@ -51,6 +55,11 @@ import java.util.Properties;
  */
 public class ExtendClient implements SessionBuilder
 {
+    /**
+     * The {@link Logger} for this class.
+     */
+    private static Logger LOGGER = Logger.getLogger(ExtendClient.class.getName());
+
     /**
      * The Coherence Cache Configuration URI to use for the {@link ExtendClient}.
      */
@@ -73,7 +82,14 @@ public class ExtendClient implements SessionBuilder
                                           CoherenceClusterOrchestration orchestration,
                                           OptionsByType                 optionsByType)
     {
+        // ----- establish the diagnostics output table -----
+
+        Table diagnosticsTable = new Table();
+
+        diagnosticsTable.getOptions().add(Table.orderByColumn(0));
+
         // ----- establish the options for launching a local extend-based member -----
+
         optionsByType.add(RoleName.of("extend-client"));
         optionsByType.add(Clustering.disabled());
         optionsByType.add(LocalStorage.disabled());
@@ -96,12 +112,38 @@ public class ExtendClient implements SessionBuilder
         com.oracle.bedrock.runtime.java.options.SystemProperties systemProperties =
             optionsByType.get(com.oracle.bedrock.runtime.java.options.SystemProperties.class);
 
-        Properties properties = systemProperties.resolve(platform, optionsByType);
+        Properties properties            = systemProperties.resolve(platform, optionsByType);
+
+        Table      systemPropertiesTable = new Table();
+
+        systemPropertiesTable.getOptions().add(Table.orderByColumn(0));
+        systemPropertiesTable.getOptions().add(Cell.Separator.of(""));
+        systemPropertiesTable.getOptions().add(Cell.DisplayNull.asEmptyString());
 
         for (String propertyName : properties.stringPropertyNames())
         {
-            System.setProperty(propertyName, properties.getProperty(propertyName));
+            String propertyValue = properties.getProperty(propertyName);
+
+            systemPropertiesTable.addRow(propertyName + (System.getProperties().containsKey(propertyName) ? "*" : ""),
+                                         propertyValue);
+
+            System.setProperty(propertyName, propertyValue.isEmpty() ? "" : propertyValue);
         }
+
+        diagnosticsTable.addRow("System Properties", systemPropertiesTable.toString());
+
+        // ----- output the diagnostics -----
+
+        if (LOGGER.isLoggable(Level.INFO))
+        {
+            LOGGER.log(Level.INFO,
+                       "Bedrock Diagnostics: Starting *Extend Client...\n"
+                       + "------------------------------------------------------------------------\n"
+                       + diagnosticsTable.toString() + "\n"
+                       + "------------------------------------------------------------------------\n");
+        }
+
+        // ----- establish the session -----
 
         // create the session
         ConfigurableCacheFactory session = new ScopedCacheFactoryBuilder().getConfigurableCacheFactory(cacheConfigURI,
