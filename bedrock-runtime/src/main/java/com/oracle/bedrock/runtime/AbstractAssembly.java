@@ -329,7 +329,8 @@ public abstract class AbstractAssembly<A extends Application> implements Assembl
      */
     protected void onExpanded(List<? extends A> applications)
     {
-        // by default there's nothing to do after expanding an assembly
+        // notify the assembly of the change
+        onChanged(optionsByType);
     }
 
 
@@ -359,7 +360,8 @@ public abstract class AbstractAssembly<A extends Application> implements Assembl
     protected void onRelaunching(Platform      platform,
                                  OptionsByType optionsByType)
     {
-        // by default there's nothing to do prior to relaunching an application
+        // notify the assembly of the change
+        onChanged(optionsByType);
     }
 
 
@@ -375,7 +377,27 @@ public abstract class AbstractAssembly<A extends Application> implements Assembl
                                 A             restarted,
                                 OptionsByType optionsByType)
     {
-        // by default there's nothing to do after relaunching an application
+        // notify the assembly of the change
+        onChanged(optionsByType);
+    }
+
+
+    /**
+     * Called after the {@link Assembly} {@link Application}s have been added or removed.
+     *
+     * @param optionsByType  the {@link OptionsByType} used for the change
+     */
+    protected void onChanged(OptionsByType optionsByType)
+    {
+        // ensure the stability of the assembly after it was changed
+        StabilityPredicate<Assembly> stabilityPredicate = optionsByType.getOrDefault(StabilityPredicate.class, null);
+
+        if (stabilityPredicate != null)
+        {
+            DeferredPredicate deferredPredicate = new DeferredPredicate<>(this, stabilityPredicate.get());
+
+            ensure(eventually(deferredPredicate), is(true));
+        }
     }
 
 
@@ -409,18 +431,6 @@ public abstract class AbstractAssembly<A extends Application> implements Assembl
                     // close the application (using the options)
                     application.close(options);
 
-                    // ensure the stability of the assembly (if required)
-                    StabilityPredicate<Assembly> stabilityPredicate =
-                        launchOptions.getOrDefault(StabilityPredicate.class,
-                                                   null);
-
-                    if (stabilityPredicate != null)
-                    {
-                        DeferredPredicate deferredPredicate = new DeferredPredicate<>(this, stabilityPredicate.get());
-
-                        ensure(eventually(deferredPredicate), is(true));
-                    }
-
                     // we use a new discriminator
                     launchOptions.add(Discriminator.of(applicationCount.incrementAndGet()));
 
@@ -441,17 +451,8 @@ public abstract class AbstractAssembly<A extends Application> implements Assembl
                 }
             });
 
-        // finally ensure the stability of the assembly (if required)
-        OptionsByType                optionsByType      = OptionsByType.of(options);
-
-        StabilityPredicate<Assembly> stabilityPredicate = optionsByType.getOrDefault(StabilityPredicate.class, null);
-
-        if (stabilityPredicate != null)
-        {
-            DeferredPredicate deferredPredicate = new DeferredPredicate<>(this, stabilityPredicate.get());
-
-            ensure(eventually(deferredPredicate), is(true));
-        }
+        // notify the assembly of the change
+        onChanged(OptionsByType.of(optionsByType).addAll(options));
     }
 
 

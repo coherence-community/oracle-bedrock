@@ -33,7 +33,6 @@ import com.oracle.bedrock.runtime.Platform;
 import com.oracle.bedrock.runtime.coherence.CoherenceCluster;
 import com.oracle.bedrock.runtime.coherence.CoherenceClusterBuilder;
 import com.oracle.bedrock.runtime.coherence.CoherenceClusterMember;
-import com.oracle.bedrock.runtime.coherence.callables.GetAutoStartServiceNames;
 import com.oracle.bedrock.runtime.coherence.options.ClusterName;
 import com.oracle.bedrock.runtime.coherence.options.ClusterPort;
 import com.oracle.bedrock.runtime.coherence.options.LocalHost;
@@ -56,7 +55,6 @@ import org.junit.runners.model.Statement;
 
 import java.util.HashMap;
 import java.util.Properties;
-import java.util.Set;
 
 import static com.oracle.bedrock.deferred.DeferredHelper.invoking;
 import static org.hamcrest.core.Is.is;
@@ -238,16 +236,6 @@ public class CoherenceClusterOrchestration extends ExternalResource
 
         // ensure that the cluster has been orchestrated correctly
         Eventually.assertThat(invoking(cluster).getClusterSize(), is(preferredClusterSize));
-
-        // ensure that all services marked as autostart on the proxy have started
-        CoherenceClusterMember proxyServer     = cluster.get("proxy-1");
-
-        Set<String>            setServiceNames = proxyServer.invoke(new GetAutoStartServiceNames());
-
-        for (String sServiceName : setServiceNames)
-        {
-            Eventually.assertThat(invoking(proxyServer).isServiceRunning(sServiceName), is(true));
-        }
 
         // let the super-class perform it's initialization
         super.before();

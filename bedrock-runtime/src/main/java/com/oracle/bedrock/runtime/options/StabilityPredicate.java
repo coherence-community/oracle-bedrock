@@ -26,6 +26,7 @@
 package com.oracle.bedrock.runtime.options;
 
 import com.oracle.bedrock.Option;
+import com.oracle.bedrock.predicate.Predicates;
 import com.oracle.bedrock.runtime.Assembly;
 
 import java.util.function.Predicate;
@@ -74,6 +75,20 @@ public class StabilityPredicate<A extends Assembly> implements Option
     public static <A extends Assembly> StabilityPredicate<A> of(Predicate<A> predicate)
     {
         return new StabilityPredicate<>(predicate);
+    }
+
+
+    /**
+     * Obtains a {@link StabilityPredicate} that succeeds immediately without checking
+     * any {@link Assembly} conditions.
+     *
+     * @param <A>  the type of the {@link Assembly}
+     *
+     * @return a {@link StabilityPredicate}
+     */
+    public static <A extends Assembly> StabilityPredicate<A> none()
+    {
+        return new StabilityPredicate<>(Predicates.always());
     }
 
 

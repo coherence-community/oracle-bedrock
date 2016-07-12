@@ -146,6 +146,9 @@ public class CoherenceCluster extends AbstractAssembly<CoherenceClusterMember>
 
         // add the member as a decoration to the OptionsByType
         optionsByType.add(Decoration.of(memberUID));
+
+        // notify the assembly of the change
+        onChanged(optionsByType);
     }
 
 
@@ -175,6 +178,9 @@ public class CoherenceCluster extends AbstractAssembly<CoherenceClusterMember>
 
         // ensure that the restarted member is in the member set of the cluster
         ensure(eventually(invoking(this).getClusterMemberUIDs()), contains(restartedMemberUID));
+
+        // notify the assembly of the change
+        onChanged(optionsByType);
     }
 
 

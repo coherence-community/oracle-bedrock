@@ -28,6 +28,7 @@ package com.oracle.bedrock.runtime.coherence;
 import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.runtime.AbstractAssemblyBuilder;
 import com.oracle.bedrock.runtime.AssemblyBuilder;
+import com.oracle.bedrock.runtime.options.StabilityPredicate;
 
 import java.util.List;
 
@@ -46,6 +47,9 @@ public class CoherenceClusterBuilder extends AbstractAssemblyBuilder<CoherenceCl
     protected CoherenceCluster createAssembly(List<CoherenceClusterMember> members,
                                               OptionsByType                optionsByType)
     {
+        // introduce a StabilityPredicate
+        optionsByType.addIfAbsent(StabilityPredicate.of(CoherenceCluster.Predicates.autoStartServicesSafe()));
+
         return new CoherenceCluster(members, optionsByType);
     }
 }
