@@ -160,8 +160,8 @@ public class RemoteJavaApplicationLauncher extends AbstractRemoteApplicationLaun
         if (deployment.isAutoDeployEnabled())
         {
             // determine the PlatformSeparators (assume unix if not defined)
-            PlatformSeparators separators = optionsByType.getOrDefault(PlatformSeparators.class,
-                                                                       PlatformSeparators.forUnix());
+            PlatformSeparators separators = optionsByType.getOrSetDefault(PlatformSeparators.class,
+                                                                          PlatformSeparators.forUnix());
 
             // when an automatic deployment is specified,
             // we use our modified class-path
@@ -266,7 +266,7 @@ public class RemoteJavaApplicationLauncher extends AbstractRemoteApplicationLaun
         JavaHome javaHome = optionsByType.get(JavaHome.class);
 
         // determine the Executable, defaulting to "java" if not defined
-        Executable executable = optionsByType.getOrDefault(Executable.class, Executable.named("java"));
+        Executable executable = optionsByType.getOrSetDefault(Executable.class, Executable.named("java"));
 
         if (javaHome == null)
         {
@@ -276,8 +276,8 @@ public class RemoteJavaApplicationLauncher extends AbstractRemoteApplicationLaun
         else
         {
             // determine the PlatformSeparators (assume unix if not defined)
-            PlatformSeparators separators = optionsByType.getOrDefault(PlatformSeparators.class,
-                                                                       PlatformSeparators.forUnix());
+            PlatformSeparators separators = optionsByType.getOrSetDefault(PlatformSeparators.class,
+                                                                          PlatformSeparators.forUnix());
 
             // when we have a java home, we prefix the executable name with the java.home/bin/
             String javaHomePath   = javaHome.get().trim();
@@ -342,7 +342,7 @@ public class RemoteJavaApplicationLauncher extends AbstractRemoteApplicationLaun
         // set the remote classpath (it must be quoted to prevent wildcard expansion)
         arguments.add("-cp");
 
-        ClassPathModifier modifier  = optionsByType.getOrDefault(ClassPathModifier.class, ClassPathModifier.none());
+        ClassPathModifier modifier  = optionsByType.getOrSetDefault(ClassPathModifier.class, ClassPathModifier.none());
         String            classPath = modifier.applyQuotes(remoteClassPath.toString(optionsByType.asArray()));
 
         arguments.add(classPath);

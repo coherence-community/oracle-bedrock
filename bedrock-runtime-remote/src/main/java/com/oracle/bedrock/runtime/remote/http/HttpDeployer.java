@@ -425,7 +425,7 @@ public abstract class HttpDeployer implements Deployer
             httpExchange.getResponseHeaders().set("Content-type", "application/octet-stream");
             httpExchange.sendResponseHeaders(200, 0);
 
-            BufferSize bufferSize  = optionsByType.getOrDefault(BufferSize.class, new BufferSize(1000000));
+            BufferSize bufferSize  = optionsByType.getOrSetDefault(BufferSize.class, new BufferSize(1000000));
             int        bufferBytes = bufferSize.getBufferSize();
 
             byte[]     buff        = new byte[bufferBytes];

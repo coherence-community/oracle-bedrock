@@ -122,8 +122,8 @@ public class VagrantPlatform extends VirtualPlatform
 
         // ----- establish the working directory for the platform -----
 
-        WorkingDirectory directory = getOptions().getOrDefault(WorkingDirectory.class,
-                                                               WorkingDirectory.subDirectoryOf(new File(".")));
+        WorkingDirectory directory = getOptions().getOrSetDefault(WorkingDirectory.class,
+                                                                  WorkingDirectory.subDirectoryOf(new File(".")));
 
         File base = directory.resolve(this, getOptions());
 

@@ -235,7 +235,7 @@ public class SoapConnection
 
         if (authentication == null)
         {
-            HttpProxy proxy = optionsByType.getOrDefault(HttpProxy.class, HttpProxy.none());
+            HttpProxy proxy = optionsByType.getOrSetDefault(HttpProxy.class, HttpProxy.none());
 
             httpConnection = proxy.openConnection(this.url);
         }

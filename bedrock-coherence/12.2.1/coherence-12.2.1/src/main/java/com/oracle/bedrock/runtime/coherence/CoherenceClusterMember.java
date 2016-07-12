@@ -336,8 +336,8 @@ public interface CoherenceClusterMember extends JavaApplication
                               PipedInputStream     pipedInputStream,
                               OptionsByType        optionsByType)
         {
-            ClassName className = optionsByType.getOrDefault(ClassName.class,
-                                                             ClassName.of(DEFAULT_CACHE_SERVER_CLASSNAME));
+            ClassName className = optionsByType.getOrSetDefault(ClassName.class,
+                                                                ClassName.of(DEFAULT_CACHE_SERVER_CLASSNAME));
 
             ContainerBasedJavaApplicationLauncher.configureRemoteChannel(containerClassLoader,
                                                                          pipedOutputStream,

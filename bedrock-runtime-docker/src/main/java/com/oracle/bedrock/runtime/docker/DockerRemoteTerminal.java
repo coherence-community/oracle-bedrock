@@ -312,9 +312,9 @@ public class DockerRemoteTerminal implements RemoteTerminal, Deployer
     {
         LOGGER.log(Level.INFO, "Building Docker Image...");
 
-        DisplayName displayName    = optionsByType.getOrDefault(DisplayName.class, DisplayName.of(""));
+        DisplayName displayName    = optionsByType.getOrSetDefault(DisplayName.class, DisplayName.of(""));
         String      dockerFileName = dockerFile.getName();
-        Timeout     timeout        = optionsByType.getOrDefault(Timeout.class, Build.DEFAULT_TIMEOUT);
+        Timeout     timeout        = optionsByType.getOrSetDefault(Timeout.class, Build.DEFAULT_TIMEOUT);
 
         try (Application application =
             platform.launch(Build.fromDockerFile(dockerFileName).withTags(imageTag).labels("oracle.bedrock.image=true")
@@ -374,7 +374,7 @@ public class DockerRemoteTerminal implements RemoteTerminal, Deployer
         optionsByType.add(new CPModifier(workingDirectoryName));
 
         // ----- give the container a random UUID as a name -----
-        DisplayName displayName = optionsByType.getOrDefault(DisplayName.class, DisplayName.of("Container"));
+        DisplayName displayName = optionsByType.getOrSetDefault(DisplayName.class, DisplayName.of("Container"));
 
         // ----- create the arguments to pass to the container as the command to execute
         String    command       = launchable.getCommandToExecute(platform, optionsByType);

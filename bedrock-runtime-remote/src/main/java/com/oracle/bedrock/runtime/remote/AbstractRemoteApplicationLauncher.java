@@ -180,8 +180,8 @@ public abstract class AbstractRemoteApplicationLauncher<A extends Application> i
         PlatformSeparators separators = launchOptions.get(PlatformSeparators.class);
 
         // assume the remote directory is the working directory
-        WorkingDirectory workingDirectory = launchOptions.getOrDefault(WorkingDirectory.class,
-                                                                       WorkingDirectory.temporaryDirectory());
+        WorkingDirectory workingDirectory = launchOptions.getOrSetDefault(WorkingDirectory.class,
+                                                                          WorkingDirectory.temporaryDirectory());
         File remoteDirectoryFile = workingDirectory.resolve(platform, launchOptions);
 
         if (remoteDirectoryFile == null)
@@ -200,15 +200,15 @@ public abstract class AbstractRemoteApplicationLauncher<A extends Application> i
         }
 
         // Obtain the RemoteShell that will be used to launch the process
-        RemoteTerminalBuilder terminalBuilder = launchOptions.getOrDefault(RemoteTerminalBuilder.class,
-                                                                           RemoteTerminals.ssh());
+        RemoteTerminalBuilder terminalBuilder = launchOptions.getOrSetDefault(RemoteTerminalBuilder.class,
+                                                                              RemoteTerminals.ssh());
         RemoteTerminal terminal = terminalBuilder.build(platform);
 
         // create the working directory
         terminal.makeDirectories(remoteDirectory, launchOptions);
 
         // Deploy any artifacts required
-        Deployer deployer = launchOptions.getOrDefault(Deployer.class, new SftpDeployer());
+        Deployer deployer = launchOptions.getOrSetDefault(Deployer.class, new SftpDeployer());
 
         deployer.deploy(artifactsToDeploy, remoteDirectory, platform, launchOptions.asArray());
 
@@ -368,9 +368,9 @@ public abstract class AbstractRemoteApplicationLauncher<A extends Application> i
                                               OptionsByType optionsByType)
     {
         Table diagnosticsTable = optionsByType.get(Table.class);
-        EnvironmentVariables environmentVariables = optionsByType.getOrDefault(EnvironmentVariables.class,
-                                                                               EnvironmentVariables.of(EnvironmentVariables
-                                                                                   .Source.TargetPlatform));
+        EnvironmentVariables environmentVariables = optionsByType.getOrSetDefault(EnvironmentVariables.class,
+                                                                                  EnvironmentVariables.of(EnvironmentVariables
+                                                                                      .Source.TargetPlatform));
 
         Properties variables = new Properties();
 

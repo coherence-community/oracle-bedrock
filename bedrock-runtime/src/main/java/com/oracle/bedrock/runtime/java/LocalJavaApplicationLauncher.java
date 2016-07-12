@@ -176,7 +176,7 @@ public class LocalJavaApplicationLauncher<A extends JavaApplication> implements 
         // ----- establish the underlying ProcessBuilder -----
 
         // determine the Executable, defaulting to "java" if not defined
-        Executable executable = launchOptions.getOrDefault(Executable.class, Executable.named("java"));
+        Executable executable = launchOptions.getOrSetDefault(Executable.class, Executable.named("java"));
 
         // we'll use the native operating system process builder to create
         // and manage the local application process
@@ -185,8 +185,8 @@ public class LocalJavaApplicationLauncher<A extends JavaApplication> implements 
         // ----- establish the working directory -----
 
         // set the working directory for the Process
-        WorkingDirectory workingDirectory = launchOptions.getOrDefault(WorkingDirectory.class,
-                                                                       WorkingDirectory.currentDirectory());
+        WorkingDirectory workingDirectory = launchOptions.getOrSetDefault(WorkingDirectory.class,
+                                                                          WorkingDirectory.currentDirectory());
 
         File directory = workingDirectory.resolve(platform, launchOptions);
 

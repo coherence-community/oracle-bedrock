@@ -118,9 +118,9 @@ public class SimpleApplicationLauncher implements ApplicationLauncher<Applicatio
         // ----- determine the display name for the application -----
 
         // ensure there's a display name
-        DisplayName displayName = launchOptions.getOrDefault(DisplayName.class,
-                                                             DisplayName.of(launchOptions.get(Executable.class)
-                                                             .getName()));
+        DisplayName displayName = launchOptions.getOrSetDefault(DisplayName.class,
+                                                                DisplayName.of(launchOptions.get(Executable.class)
+                                                                .getName()));
 
         // ---- establish the underlying ProcessBuilder -----
 
@@ -139,8 +139,8 @@ public class SimpleApplicationLauncher implements ApplicationLauncher<Applicatio
         // ----- establish the working directory -----
 
         // set the working directory for the Process
-        WorkingDirectory workingDirectory = launchOptions.getOrDefault(WorkingDirectory.class,
-                                                                       WorkingDirectory.currentDirectory());
+        WorkingDirectory workingDirectory = launchOptions.getOrSetDefault(WorkingDirectory.class,
+                                                                          WorkingDirectory.currentDirectory());
         File directory = workingDirectory.resolve(platform, launchOptions);
 
         // Set the resolved working directory back into the options

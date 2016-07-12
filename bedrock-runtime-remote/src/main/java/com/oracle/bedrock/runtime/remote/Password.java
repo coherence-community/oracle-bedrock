@@ -90,9 +90,9 @@ public class Password implements Authentication, JSchBasedAuthentication, HttpBa
                                             String        userName,
                                             OptionsByType optionsByType) throws IOException
     {
-        HttpAuthenticationType authType = optionsByType.getOrDefault(HttpAuthenticationType.class,
-                                                                     HttpAuthenticationType.Basic);
-        HttpProxy         proxy = optionsByType.getOrDefault(HttpProxy.class, HttpProxy.none());
+        HttpAuthenticationType authType = optionsByType.getOrSetDefault(HttpAuthenticationType.class,
+                                                                        HttpAuthenticationType.Basic);
+        HttpProxy         proxy = optionsByType.getOrSetDefault(HttpProxy.class, HttpProxy.none());
         HttpURLConnection connection;
 
         switch (authType)

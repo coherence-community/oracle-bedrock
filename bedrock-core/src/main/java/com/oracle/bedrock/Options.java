@@ -120,6 +120,28 @@ class Options implements OptionsByType
         {
             T option = (T) options.get(classOfOption);
 
+            if (option == null)
+            {
+                option = defaultOption;
+            }
+
+            return option;
+        }
+    }
+
+
+    @Override
+    public <T extends Option, D extends T> T getOrSetDefault(Class<T> classOfOption,
+                                                             D        defaultOption)
+    {
+        if (classOfOption == null)
+        {
+            return null;
+        }
+        else
+        {
+            T option = (T) options.get(classOfOption);
+
             if (option == null && defaultOption != null)
             {
                 option = defaultOption;

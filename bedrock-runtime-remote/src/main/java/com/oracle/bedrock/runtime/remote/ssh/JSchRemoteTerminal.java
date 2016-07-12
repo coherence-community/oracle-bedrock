@@ -134,7 +134,7 @@ public class JSchRemoteTerminal extends AbstractRemoteTerminal
             // determine the format to use for setting variables
             String format;
 
-            Shell  shell = optionsByType.getOrDefault(Shell.class, Shell.isUnknown());
+            Shell  shell = optionsByType.getOrSetDefault(Shell.class, Shell.isUnknown());
 
             switch (shell.getType())
             {

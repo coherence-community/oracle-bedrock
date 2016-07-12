@@ -380,8 +380,8 @@ public class WindowsSession implements Closeable
             throw new IllegalStateException("Already connected to shell " + shellReferenceId);
         }
 
-        WindowsShellOptions shellOptions = optionsByType.getOrDefault(WindowsShellOptions.class,
-                                                                      WindowsShellOptions.basic());
+        WindowsShellOptions shellOptions = optionsByType.getOrSetDefault(WindowsShellOptions.class,
+                                                                         WindowsShellOptions.basic());
         ShellType shellType = ObjectFactories.SHELL.createShellType();
 
         if (workingDirectory == null || workingDirectory.isEmpty())
@@ -664,8 +664,8 @@ public class WindowsSession implements Closeable
 
         resourceURI.setValue(URI_WINRM_RESOURCE);
 
-        WindowsSoapOptions soapOptions = optionsByType.getOrDefault(WindowsSoapOptions.class,
-                                                                    WindowsSoapOptions.basic());
+        WindowsSoapOptions soapOptions = optionsByType.getOrSetDefault(WindowsSoapOptions.class,
+                                                                       WindowsSoapOptions.basic());
 
         MaxEnvelopeSizeType maxEnvelopeSize = ObjectFactories.WSMAN.createMaxEnvelopeSizeType();
 

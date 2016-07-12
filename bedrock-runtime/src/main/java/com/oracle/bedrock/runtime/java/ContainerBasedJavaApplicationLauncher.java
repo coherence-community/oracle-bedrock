@@ -264,9 +264,10 @@ public class ContainerBasedJavaApplicationLauncher<A extends JavaApplication> im
 
             // determine the ApplicationController to use to control the process in the container
             // (either an ApplicationController provided as an Option or use the MetaClass if it's appropriate)
-            ApplicationController controller = launchOptions.getOrDefault(ApplicationController.class,
-                                                                          metaClass instanceof ApplicationController
-                                                                          ? (ApplicationController) metaClass : null);
+            ApplicationController controller = launchOptions.getOrSetDefault(ApplicationController.class,
+                                                                             metaClass instanceof ApplicationController
+                                                                             ? (ApplicationController) metaClass
+                                                                             : null);
 
             if (controller == null)
             {

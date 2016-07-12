@@ -134,8 +134,8 @@ public abstract class AbstractApplication<P extends ApplicationProcess> extends 
         this.displayName = optionsByType.get(DisplayName.class).resolve(optionsByType);
 
         // establish the application console
-        console = optionsByType.getOrDefault(ApplicationConsoleBuilder.class,
-                                             SystemApplicationConsole.builder()).build(displayName);
+        console = optionsByType.getOrSetDefault(ApplicationConsoleBuilder.class,
+                                                SystemApplicationConsole.builder()).build(displayName);
 
         // establish the standard input, output and error redirection threads for the application console
 

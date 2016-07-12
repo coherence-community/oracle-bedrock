@@ -87,7 +87,8 @@ public interface OptionsByType
      * Obtains the {@link Option} for a specified concrete type from the collection.
      *
      * <p>Should the {@link Option} not exist in the collection, an attempt is made
-     * to determine an annotated {@link Default}.
+     * to determine an annotated {@link Default}.  If determined, the default value
+     * will be <strong>added</strong> to the collection.
      *
      * @param classOfOption  the concrete type of {@link Option} to obtain
      * @param arguments      the optional arguments for determining the default
@@ -102,7 +103,8 @@ public interface OptionsByType
 
     /**
      * Obtains the {@link Option} of a specified concrete type from the collection.  Should the type of
-     * {@link Option} not exist, the specified default is added to the collection and returned.
+     * {@link Option} not exist, the specified default is returned <strong>without modifying</strong>
+     * the collection.
      *
      * @param <T>            the type of value
      * @param <D>            the type of the default value
@@ -114,6 +116,22 @@ public interface OptionsByType
      */
     <T extends Option, D extends T> T getOrDefault(Class<T> classOfOption,
                                                    D        defaultOption);
+
+
+    /**
+     * Obtains the {@link Option} of a specified concrete type from the collection.  Should the type of
+     * {@link Option} not exist, the specified default is <strong>added</strong> to the collection and returned.
+     *
+     * @param <T>            the type of value
+     * @param <D>            the type of the default value
+     *
+     * @param classOfOption  the type of {@link Option} to obtain
+     * @param defaultOption  the {@link Option} to return if the specified type is not defined
+     *
+     * @return the option of the specified type or the default if it's not defined
+     */
+    <T extends Option, D extends T> T getOrSetDefault(Class<T> classOfOption,
+                                                      D        defaultOption);
 
 
     /**

@@ -315,7 +315,7 @@ public class DockerMachine
                                         Option... options)
     {
         OptionsByType createOptions = OptionsByType.of(options);
-        Timeout       timeout       = createOptions.getOrDefault(Timeout.class, Timeout.after(5, TimeUnit.MINUTES));
+        Timeout       timeout       = createOptions.getOrSetDefault(Timeout.class, Timeout.after(5, TimeUnit.MINUTES));
 
         try (Application create = launch("create", options))
         {
