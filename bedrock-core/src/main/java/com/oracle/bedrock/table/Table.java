@@ -235,16 +235,32 @@ public class Table implements Iterable<Row>, Option
 
                 // determine the width of the cell
                 // (use the width is defined by the cell, then the row, then the table)
-                Cell.Width width = optionsByType.getOrDefault(Cell.Width.class,
-                                                              row.getOptions().getOrDefault(Cell.Width.class,
-                                                                                            this.getOptions()
-                                                                                            .get(Cell.Width.class)));
+                Cell.Width width = cell.getOptions().getOrDefault(Cell.Width.class,
+                                                                  row.getOptions().getOrDefault(Cell.Width.class,
+                                                                                                this.getOptions()
+                                                                                                .get(Cell
+                                                                                                    .Width.class)));
 
                 int cellWidth;
 
                 if (width.isAutoDetect())
                 {
                     cellWidth = cell.width();
+
+                    if (cell.containsNull())
+                    {
+                        // determine how null values will be displayed for the cell
+                        Cell.DisplayNull displayNull = cell.getOptions().getOrDefault(Cell.DisplayNull.class,
+                                                                                      row.getOptions()
+                                                                                      .getOrDefault(Cell
+                                                                                          .DisplayNull.class,
+                                                                                                    this.getOptions()
+                                                                                                    .get(Cell
+                                                                                                        .DisplayNull.class)));
+
+                        // ensure the cell width is large enough to display null values
+                        cellWidth = Math.max(cellWidth, displayNull.getValue().length());
+                    }
                 }
                 else
                 {
@@ -342,6 +358,20 @@ public class Table implements Iterable<Row>, Option
 
                         // justify the cell content
                         String content = cell.getLine(line);
+
+                        if (content == null)
+                        {
+                            // determine how null values will be displayed for the cell
+                            Cell.DisplayNull displayNull = cell.getOptions().getOrDefault(Cell.DisplayNull.class,
+                                                                                          row.getOptions()
+                                                                                          .getOrDefault(Cell
+                                                                                              .DisplayNull.class,
+                                                                                                        this.getOptions()
+                                                                                                        .get(Cell
+                                                                                                            .DisplayNull.class)));
+
+                            content = displayNull.getValue();
+                        }
 
                         justifiedContent = justification.format(content, cellWidths.get(cellIndex));
 

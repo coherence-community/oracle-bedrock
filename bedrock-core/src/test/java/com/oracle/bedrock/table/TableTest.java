@@ -194,6 +194,9 @@ public class TableTest
     }
 
 
+    /**
+     * Ensure we can output a {@link Table} containing content with justification.
+     */
     @Test
     public void shouldTestATable()
     {
@@ -212,6 +215,26 @@ public class TableTest
         table.getRow(1).getCell(3).getOptions().add(Cell.Justification.RIGHT);
 
         table.getOptions().add(Table.orderByColumn(0));
+
+        System.out.println(table);
+    }
+
+
+    /**
+     * Ensure we can output a {@link Table} containing <code>null</code>.
+     */
+    @Test
+    public void shouldOutputNullCellContent()
+    {
+        Table table = new Table();
+
+        table.addRow("Column 1", "Column 2", "Column 3");
+        table.addRow(null, "", null);
+        table.addRow("", null, "");
+        table.addRow(null, null, "");
+        table.addRow("", null, null);
+
+        table.getOptions().add(Cell.DisplayNull.asNull());
 
         System.out.println(table);
     }

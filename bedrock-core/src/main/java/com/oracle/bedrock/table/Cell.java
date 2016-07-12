@@ -62,20 +62,26 @@ public class Cell
      */
     public Cell(String... lines)
     {
-        this.lines = new ArrayList<>();
+        this.lines         = new ArrayList<>();
+        this.optionsByType = OptionsByType.empty();
 
         if (lines != null)
         {
             for (String content : lines)
             {
-                for (String line : content.split("\\n\\r|\\n"))
+                if (content == null)
                 {
-                    this.lines.add(line);
+                    this.lines.add(null);
+                }
+                else
+                {
+                    for (String line : content.split("\\n\\r|\\n"))
+                    {
+                        this.lines.add(line);
+                    }
                 }
             }
         }
-
-        this.optionsByType = OptionsByType.empty();
     }
 
 
@@ -156,13 +162,33 @@ public class Cell
     {
         for (String line : lines)
         {
-            if (line.length() > 0 &&!line.trim().isEmpty())
+            if (line == null || line.length() > 0 &&!line.trim().isEmpty())
             {
                 return false;
             }
         }
 
         return true;
+    }
+
+
+    /**
+     * Determines if the {@link Cell} contains one or more <code>null</code> values.
+     *
+     * @return <code>true</code> if the {@link Cell} contains one or more <code>null</code> values,
+     *         <code>false</code> otherwise
+     */
+    public boolean containsNull()
+    {
+        for (String line : lines)
+        {
+            if (line == null)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
 
@@ -189,7 +215,7 @@ public class Cell
 
         for (String line : lines)
         {
-            if (line.length() > maximum)
+            if (line != null && line.length() > maximum)
             {
                 maximum = line.length();
             }
@@ -200,7 +226,81 @@ public class Cell
 
 
     /**
-     * A {@link Table} {@link Option} to define the separator to use between {@link Cell}s in a {@link Row}.
+     * An {@link Option} to define how <code>null</code> is displayed when provided as
+     * {@link Cell} content.
+     */
+    public static class DisplayNull implements Option
+    {
+        /**
+         * The value to use when encountering a <code>null</code> value
+         * provided as {@link Cell} content.
+         */
+        private String value;
+
+
+        /**
+         * Constructs a {@link DisplayNull} with a specific value.
+         *
+         * @param value  the value
+         */
+        private DisplayNull(String value)
+        {
+            this.value = value;
+        }
+
+
+        /**
+         * Obtains the value to use for displaying <code>null</code> {@link Cell} content.
+         *
+         * @return the value
+         */
+        public String getValue()
+        {
+            return value;
+        }
+
+
+        /**
+         * Obtains a {@link DisplayNull} with a specific value
+         *
+         * @param value  the value
+         *
+         * @return a {@link DisplayNull}
+         */
+        public static DisplayNull as(String value)
+        {
+            return new DisplayNull(value);
+        }
+
+
+        /**
+         * Obtains a {@link DisplayNull} that displays <code>null</code> content
+         * as an empty {@link String}.
+         *
+         * @return a {@link DisplayNull}
+         */
+        @OptionsByType.Default
+        public static DisplayNull asEmptyString()
+        {
+            return new DisplayNull("");
+        }
+
+
+        /**
+         * Obtains a {@link DisplayNull} that displays <code>null</code> content
+         * as the {@link String} "null" (without quotes)
+         *
+         * @return a {@link DisplayNull}
+         */
+        public static DisplayNull asNull()
+        {
+            return new DisplayNull("null");
+        }
+    }
+
+
+    /**
+     * An {@link Option} to define the separator to use between {@link Cell}s in a {@link Row}.
      */
     public static class Separator implements Option
     {
