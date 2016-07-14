@@ -431,9 +431,6 @@ public abstract class AbstractAssembly<A extends Application> implements Assembl
                     // close the application (using the options)
                     application.close(options);
 
-                    // we use a new discriminator
-                    launchOptions.add(Discriminator.of(applicationCount.incrementAndGet()));
-
                     // notify the assembly we're about to relaunch an application
                     onRelaunching(platform, launchOptions);
 
