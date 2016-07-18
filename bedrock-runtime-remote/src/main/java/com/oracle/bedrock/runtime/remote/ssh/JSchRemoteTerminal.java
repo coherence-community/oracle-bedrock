@@ -30,6 +30,7 @@ import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import com.oracle.bedrock.OptionsByType;
+import com.oracle.bedrock.Version;
 import com.oracle.bedrock.lang.StringHelper;
 import com.oracle.bedrock.options.Variable;
 import com.oracle.bedrock.runtime.Application;
@@ -200,7 +201,7 @@ public class JSchRemoteTerminal extends AbstractRemoteTerminal
                 diagnosticsTable.addRow("Application Executable ", executableName);
 
                 LOGGER.log(Level.INFO,
-                           "Bedrock Diagnostics: Starting Application...\n"
+                           "Oracle Bedrock " + Version.get() + ": Starting Application...\n"
                            + "------------------------------------------------------------------------\n"
                            + diagnosticsTable.toString() + "\n"
                            + "------------------------------------------------------------------------\n");

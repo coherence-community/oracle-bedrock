@@ -26,6 +26,7 @@
 package com.oracle.bedrock.junit;
 
 import com.oracle.bedrock.OptionsByType;
+import com.oracle.bedrock.Version;
 import com.oracle.bedrock.runtime.LocalPlatform;
 import com.oracle.bedrock.runtime.MetaClass;
 import com.oracle.bedrock.runtime.Profile;
@@ -116,7 +117,7 @@ public class StorageDisabledMember implements SessionBuilder
         if (LOGGER.isLoggable(Level.INFO))
         {
             LOGGER.log(Level.INFO,
-                       "Bedrock Diagnostics: Starting Storage Disabled Member...\n"
+                       "Oracle Bedrock " + Version.get() + ": Starting Storage Disabled Member...\n"
                        + "------------------------------------------------------------------------\n"
                        + diagnosticsTable.toString() + "\n"
                        + "------------------------------------------------------------------------\n");

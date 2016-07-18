@@ -26,6 +26,7 @@
 package com.oracle.bedrock.runtime;
 
 import com.oracle.bedrock.OptionsByType;
+import com.oracle.bedrock.Version;
 import com.oracle.bedrock.annotations.Internal;
 import com.oracle.bedrock.lang.StringHelper;
 import com.oracle.bedrock.runtime.options.Arguments;
@@ -224,7 +225,7 @@ public class SimpleApplicationLauncher implements ApplicationLauncher<Applicatio
         if (LOGGER.isLoggable(Level.INFO))
         {
             LOGGER.log(Level.INFO,
-                       "Bedrock Diagnostics: Starting Application...\n"
+                       "Oracle Bedrock " + Version.get() + ": Starting Application...\n"
                        + "------------------------------------------------------------------------\n"
                        + diagnosticsTable.toString() + "\n"
                        + "------------------------------------------------------------------------\n");

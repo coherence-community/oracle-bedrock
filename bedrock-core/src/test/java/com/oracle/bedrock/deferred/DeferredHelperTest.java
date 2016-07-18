@@ -26,24 +26,21 @@
 package com.oracle.bedrock.deferred;
 
 import org.hamcrest.Matchers;
-
 import org.junit.Assert;
 import org.junit.Test;
 
-import static com.oracle.bedrock.deferred.DeferredHelper.deferred;
-import static com.oracle.bedrock.deferred.DeferredHelper.eventually;
-import static com.oracle.bedrock.deferred.DeferredHelper.invoking;
-import static com.oracle.bedrock.deferred.DeferredHelper.valueOf;
-
-import static org.hamcrest.CoreMatchers.is;
-
-import static org.hamcrest.Matchers.arrayWithSize;
-
-import static org.junit.Assert.assertThat;
-
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
+
+import static com.oracle.bedrock.deferred.DeferredHelper.ensure;
+import static com.oracle.bedrock.deferred.DeferredHelper.future;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.Matchers.arrayWithSize;
+import static org.junit.Assert.assertThat;
 
 /**
  * Unit tests for the {@link DeferredHelper}.
@@ -158,6 +155,51 @@ public class DeferredHelperTest
         Deferred<Status> deferred = DeferredHelper.eventually(DeferredHelper.invoking(this).getStatus(s));
 
         assertThat(deferred.get(), Matchers.is(Status.ON));
+    }
+
+
+    /**
+     * Ensure we can defer a {@link java.util.concurrent.Future}.
+     */
+    @Test
+    public void shouldDeferAFuture()
+    {
+        // create a Java Future
+        java.util.concurrent.Future<String> stringFuture = new java.util.concurrent.Future<String>()
+        {
+            @Override
+            public boolean cancel(boolean mayInterruptIfRunning)
+            {
+                return false;
+            }
+
+            @Override
+            public boolean isCancelled()
+            {
+                return false;
+            }
+
+            @Override
+            public boolean isDone()
+            {
+                return true;
+            }
+
+            @Override
+            public String get() throws InterruptedException, ExecutionException
+            {
+                return "Hello";
+            }
+
+            @Override
+            public String get(long     timeout,
+                              TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException
+            {
+                return "Hello";
+            }
+        };
+
+        Assert.assertThat(ensure(future(String.class, stringFuture)), is("Hello"));
     }
 
 

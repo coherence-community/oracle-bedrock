@@ -23,8 +23,8 @@
  * "Portions Copyright [year] [name of copyright owner]"
  */
 
-import com.oracle.bedrock.Option;
-import com.oracle.bedrock.OptionsByType;
+package com.oracle.bedrock;
+
 import com.oracle.bedrock.options.Decoration;
 import com.oracle.bedrock.options.Timeout;
 import org.junit.Test;
