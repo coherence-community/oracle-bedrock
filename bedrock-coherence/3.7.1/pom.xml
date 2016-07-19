@@ -15,7 +15,7 @@
     <name>Bedrock for Coherence 3.7.1 Project</name>
 
     <properties>
-        <coherence.version>3.7.1.14</coherence.version>
+        <coherence.version>3.7.1.15</coherence.version>
     </properties>
 
     <modules>
