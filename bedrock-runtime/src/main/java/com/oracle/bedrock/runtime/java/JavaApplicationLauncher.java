@@ -65,7 +65,7 @@ public interface JavaApplicationLauncher<A extends JavaApplication> extends Appl
             }
             else
             {
-                return optionsByType.getOrDefault(DisplayName.class, DisplayName.of(shortClassName));
+                return optionsByType.getOrSetDefault(DisplayName.class, DisplayName.of(shortClassName));
             }
         }
     }
