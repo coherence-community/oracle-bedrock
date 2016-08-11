@@ -65,6 +65,9 @@
                 <artifactId>maven-shade-plugin</artifactId>
                 <version>${maven.shade.plugin.version}</version>
                 <configuration>
+                    <!-- create shades sources -->
+                    <createSourcesJar>true</createSourcesJar>
+
                     <!-- only include the previous version of coherence -->
                     <artifactSet>
                         <includes>
