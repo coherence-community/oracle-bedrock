@@ -175,6 +175,10 @@ public class CoherenceCluster extends AbstractAssembly<CoherenceClusterMember>
         static Predicate<CoherenceCluster> autoStartServicesSafe()
         {
             return (cluster) -> {
+
+                       // determine the cluster size so we can determine what's a valid status
+                       int clusterSize = cluster.getClusterSize();
+
                        for (CoherenceClusterMember member : cluster)
                        {
                            Set<String> setServiceNames = member.invoke(new GetAutoStartServiceNames());
@@ -183,7 +187,7 @@ public class CoherenceCluster extends AbstractAssembly<CoherenceClusterMember>
                            {
                                ServiceStatus status = member.invoke(new GetServiceStatus(sServiceName));
 
-                               if (status == ServiceStatus.ENDANGERED
+                               if ((clusterSize > 1 && status == ServiceStatus.ENDANGERED)
                                    || status == ServiceStatus.ORPHANED
                                    || status == ServiceStatus.STOPPED
                                    || status == ServiceStatus.UNKNOWN)
