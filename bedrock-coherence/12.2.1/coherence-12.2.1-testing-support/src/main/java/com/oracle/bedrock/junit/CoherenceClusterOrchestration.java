@@ -39,12 +39,12 @@ import com.oracle.bedrock.runtime.coherence.options.ClusterPort;
 import com.oracle.bedrock.runtime.coherence.options.LocalStorage;
 import com.oracle.bedrock.runtime.coherence.options.Multicast;
 import com.oracle.bedrock.runtime.coherence.options.RoleName;
-import com.oracle.bedrock.runtime.console.SystemApplicationConsole;
 import com.oracle.bedrock.runtime.java.options.Headless;
 import com.oracle.bedrock.runtime.java.options.HeapSize;
 import com.oracle.bedrock.runtime.java.options.HotSpot;
 import com.oracle.bedrock.runtime.java.options.SystemProperty;
 import com.oracle.bedrock.runtime.options.ApplicationClosingBehavior;
+import com.oracle.bedrock.runtime.options.Console;
 import com.oracle.bedrock.runtime.options.DisplayName;
 import com.oracle.bedrock.util.Capture;
 import com.tangosol.net.CacheFactory;
@@ -173,7 +173,7 @@ public class CoherenceClusterOrchestration extends ExternalResource
         this.commonMemberOptions.add(HeapSize.of(256, HeapSize.Units.MB, 1024, HeapSize.Units.MB));
 
         // by default we'll use the SystemApplicationConsole
-        this.commonMemberOptions.add(SystemApplicationConsole.builder());
+        this.commonMemberOptions.add(Console.system());
 
         // by default we don't have any special options for storage or proxy members
         this.storageMemberOptions = OptionsByType.empty();
@@ -242,7 +242,7 @@ public class CoherenceClusterOrchestration extends ExternalResource
         // ensure that all services marked as autostart on the proxy have started
         CoherenceClusterMember proxyServer     = cluster.get("proxy-1");
 
-        Set<String> setServiceNames = proxyServer.invoke(new GetAutoStartServiceNames());
+        Set<String>            setServiceNames = proxyServer.invoke(new GetAutoStartServiceNames());
 
         for (String sServiceName : setServiceNames)
         {

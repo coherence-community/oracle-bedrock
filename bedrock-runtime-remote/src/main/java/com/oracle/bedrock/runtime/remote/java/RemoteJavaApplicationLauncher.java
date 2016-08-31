@@ -381,8 +381,6 @@ public class RemoteJavaApplicationLauncher extends AbstractRemoteApplicationLaun
                 // evaluate the property value
                 String propertyValue = systemProperties.getProperty(propertyName);
 
-                propertyValue = evaluator.evaluate(propertyValue, String.class);
-
                 // build the actual system property command line argument
                 StringBuilder propertyBuilder = new StringBuilder();
 

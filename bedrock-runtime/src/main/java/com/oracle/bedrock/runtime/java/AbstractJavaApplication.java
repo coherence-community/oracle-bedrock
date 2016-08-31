@@ -98,7 +98,7 @@ public abstract class AbstractJavaApplication<P extends JavaApplicationProcess> 
 
     @Override
     public <T> CompletableFuture<T> submit(RemoteCallable<T> callable,
-                                           Option...         options)
+                                           Option...         options) throws IllegalStateException
     {
         return process.submit(callable, options);
     }

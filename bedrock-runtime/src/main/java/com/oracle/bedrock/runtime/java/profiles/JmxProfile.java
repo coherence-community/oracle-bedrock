@@ -112,7 +112,7 @@ public class JmxProfile implements Profile, ComposableOption<JmxProfile>
         SystemProperties systemProperties = optionsByType.get(SystemProperties.class);
 
         // ----- configure remote jmx -----
-        systemProperties = systemProperties.add(SystemProperty.of(JmxFeature.SUN_MANAGEMENT_JMXREMOTE));
+        systemProperties = systemProperties.addIfAbsent(SystemProperty.of(JmxFeature.SUN_MANAGEMENT_JMXREMOTE));
 
         // ----- configure the host name system property for RMI connectivity -----
         if (hostName.isPresent())

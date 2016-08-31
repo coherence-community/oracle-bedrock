@@ -30,6 +30,7 @@ import org.hamcrest.Factory;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
 
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -109,7 +110,100 @@ public class MapMatcher<K, V> extends TypeSafeMatcher<Map<? extends K, ? extends
     public void describeMismatchSafely(Map<? extends K, ? extends V> map,
                                        Description                   mismatchDescription)
     {
-        mismatchDescription.appendText("map was ").appendValueList("[", ", ", "]", map.entrySet());
+        if (this.map != null && map == null)
+        {
+            mismatchDescription.appendText("The provided map was null (but the matching map wasn't)");
+        }
+        else if (this.map == null && map != null)
+        {
+            mismatchDescription.appendText("The provided map was not null (but the matching map was)");
+        }
+        else
+        {
+            // compare the two maps to determine the differences
+            HashSet<K> missingKeys     = new HashSet<>();
+            HashSet<K> additionalKeys  = new HashSet<>();
+            HashSet<K> nonMatchingKeys = new HashSet<>();
+
+            for (K k : this.map.keySet())
+            {
+                if (map.containsKey(k))
+                {
+                    V thisValue = this.map.get(k);
+                    V thatValue = map.get(k);
+
+                    if (thisValue != thatValue
+                        || thisValue == null && thatValue != null
+                        || thisValue != null && thatValue == null
+                        ||!thisValue.equals(thatValue))
+                    {
+                        nonMatchingKeys.add(k);
+                    }
+                }
+                else
+                {
+                    missingKeys.add(k);
+                }
+            }
+
+            for (K k : map.keySet())
+            {
+                if (this.map.containsKey(k))
+                {
+                    V thisValue = this.map.get(k);
+                    V thatValue = map.get(k);
+
+                    if (thisValue != thatValue
+                        || thisValue == null && thatValue != null
+                        || thisValue != null && thatValue == null
+                        ||!thisValue.equals(thatValue))
+                    {
+                        nonMatchingKeys.add(k);
+                    }
+                }
+                else
+                {
+                    additionalKeys.add(k);
+                }
+            }
+
+            if (this.map.size() == map.size())
+            {
+                mismatchDescription.appendText("Both maps are the same size, each containing " + map.size()
+                                               + " entries");
+            }
+            else
+            {
+                mismatchDescription.appendText("Each map has a different size.  The matcher map contains "
+                                               + this.map.size() + " entries.  The provided map contains " + map.size()
+                                               + " entries.");
+            }
+
+            if (!missingKeys.isEmpty())
+            {
+                mismatchDescription.appendText("The provided map is missing the keys ").appendValueList("[",
+                                                                                                        ", ",
+                                                                                                        "]",
+                                                                                                        missingKeys);
+            }
+
+            if (!additionalKeys.isEmpty())
+            {
+                mismatchDescription.appendText("The provided map additionally contains the keys ").appendValueList("[",
+                                                                                                                   ", ",
+                                                                                                                   "]",
+                                                                                                                   additionalKeys);
+            }
+
+            if (!nonMatchingKeys.isEmpty())
+            {
+                mismatchDescription.appendText("The following entries in the provided map don't match the matching map ")
+                .appendValueList("[",
+                                 ", ",
+                                 "]",
+                                 nonMatchingKeys);
+            }
+        }
     }
 
 

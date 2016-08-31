@@ -25,41 +25,33 @@
 
 package com.oracle.bedrock.runtime.remote.ssh;
 
-import com.oracle.bedrock.runtime.remote.RemotePlatform;
 import com.oracle.bedrock.runtime.Application;
-
-import com.oracle.bedrock.runtime.console.SystemApplicationConsole;
-
 import com.oracle.bedrock.runtime.java.JavaApplication;
 import com.oracle.bedrock.runtime.java.options.ClassName;
-
 import com.oracle.bedrock.runtime.options.Argument;
 import com.oracle.bedrock.runtime.options.Arguments;
+import com.oracle.bedrock.runtime.options.Console;
 import com.oracle.bedrock.runtime.options.DisplayName;
 import com.oracle.bedrock.runtime.options.Executable;
-
 import com.oracle.bedrock.runtime.remote.AbstractRemoteTest;
 import com.oracle.bedrock.runtime.remote.DeploymentArtifact;
+import com.oracle.bedrock.runtime.remote.RemotePlatform;
 import com.oracle.bedrock.runtime.remote.java.applications.SleepingApplication;
 import com.oracle.bedrock.runtime.remote.options.Deployer;
-
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-
 import org.junit.rules.TemporaryFolder;
-
-import static org.hamcrest.CoreMatchers.is;
-
-import static org.junit.Assert.assertThat;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.PrintWriter;
-
 import java.util.Collections;
 import java.util.List;
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
 
 /**
  * Functional tests for {@link JSchFileShareDeployer}.
@@ -94,7 +86,7 @@ public class JSchFileShareDeployerTest extends AbstractRemoteTest
                                                Executable.named("ln"),
                                                Arguments.of("-s", localShare, remoteShare),
                                                DisplayName.of("Link"),
-                                               SystemApplicationConsole.builder()))
+                                               Console.system()))
         {
             app.waitFor();
         }
@@ -174,7 +166,7 @@ public class JSchFileShareDeployerTest extends AbstractRemoteTest
                                                            JSchFileShareDeployer.sshFileShareDeployer(localShare,
                                                                                                       remoteShare),
                                                            DisplayName.of("Java"),
-                                                           SystemApplicationConsole.builder()))
+                                                           Console.system()))
         {
             assertThat(application.waitFor(), is(0));
 

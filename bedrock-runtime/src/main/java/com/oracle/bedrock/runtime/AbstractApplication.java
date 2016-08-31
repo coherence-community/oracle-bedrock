@@ -34,6 +34,7 @@ import com.oracle.bedrock.options.Timeout;
 import com.oracle.bedrock.runtime.console.SystemApplicationConsole;
 import com.oracle.bedrock.runtime.java.container.Container;
 import com.oracle.bedrock.runtime.options.ApplicationClosingBehavior;
+import com.oracle.bedrock.runtime.options.Console;
 import com.oracle.bedrock.runtime.options.DisplayName;
 
 import java.io.BufferedInputStream;
@@ -134,8 +135,7 @@ public abstract class AbstractApplication<P extends ApplicationProcess> extends 
         this.displayName = optionsByType.get(DisplayName.class).resolve(optionsByType);
 
         // establish the application console
-        console = optionsByType.getOrSetDefault(ApplicationConsoleBuilder.class,
-                                                SystemApplicationConsole.builder()).build(displayName);
+        console = optionsByType.getOrSetDefault(ApplicationConsoleBuilder.class, Console.system()).build(displayName);
 
         // establish the standard input, output and error redirection threads for the application console
 

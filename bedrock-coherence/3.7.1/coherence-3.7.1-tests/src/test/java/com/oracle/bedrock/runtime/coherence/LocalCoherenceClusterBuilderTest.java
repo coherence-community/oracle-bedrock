@@ -33,11 +33,11 @@ import com.oracle.bedrock.runtime.coherence.options.ClusterPort;
 import com.oracle.bedrock.runtime.coherence.options.LocalHost;
 import com.oracle.bedrock.runtime.coherence.options.LocalStorage;
 import com.oracle.bedrock.runtime.concurrent.runnable.RuntimeExit;
-import com.oracle.bedrock.runtime.console.SystemApplicationConsole;
 import com.oracle.bedrock.runtime.java.ClassPath;
 import com.oracle.bedrock.runtime.java.LocalJavaApplicationLauncher;
 import com.oracle.bedrock.runtime.java.options.JavaAgent;
 import com.oracle.bedrock.runtime.network.AvailablePortIterator;
+import com.oracle.bedrock.runtime.options.Console;
 import com.oracle.bedrock.runtime.options.DisplayName;
 import com.oracle.bedrock.util.Capture;
 import org.jacoco.agent.rt.RT;
@@ -114,7 +114,7 @@ public class LocalCoherenceClusterBuilderTest extends AbstractCoherenceClusterBu
                         javaAgent,
                         RuntimeExit.withExitCode(0));
 
-        try (CoherenceCluster cluster = builder.build(SystemApplicationConsole.builder()))
+        try (CoherenceCluster cluster = builder.build(Console.system()))
         {
             // ensure the cluster size is as expected
             assertThat(invoking(cluster).getClusterSize(), is(3));

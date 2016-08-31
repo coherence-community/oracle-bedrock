@@ -28,10 +28,10 @@ package com.oracle.bedrock.runtime.remote.http;
 import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.runtime.LocalPlatform;
 import com.oracle.bedrock.runtime.Platform;
-import com.oracle.bedrock.runtime.console.SystemApplicationConsole;
 import com.oracle.bedrock.runtime.java.JavaApplication;
 import com.oracle.bedrock.runtime.java.options.ClassName;
 import com.oracle.bedrock.runtime.options.Argument;
+import com.oracle.bedrock.runtime.options.Console;
 import com.oracle.bedrock.runtime.remote.DeploymentArtifact;
 import com.oracle.bedrock.runtime.remote.RemotePlatform;
 import com.oracle.bedrock.runtime.remote.java.applications.SleepingApplication;
@@ -244,7 +244,7 @@ public class CurlHttpDeployerTest extends AbstractHttpDeployerTest
                                                            ClassName.of(SleepingApplication.class),
                                                            Argument.of("3"),
                                                            HttpDeployer.curlAt(curl),
-                                                           SystemApplicationConsole.builder()))
+                                                           Console.system()))
         {
             assertThat(application.waitFor(), is(0));
 

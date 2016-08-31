@@ -28,13 +28,13 @@ package com.oracle.bedrock.junit.options;
 import com.oracle.bedrock.junit.AbstractJUnit4Test;
 import com.oracle.bedrock.junit.JUnit3Suite;
 import com.oracle.bedrock.junit.JUnit3Test;
-import com.oracle.bedrock.junit.RunWithAnnotatedTest;
-import com.oracle.bedrock.runtime.console.SystemApplicationConsole;
-import com.oracle.bedrock.runtime.java.ClassPath;
-import com.oracle.bedrock.runtime.options.Argument;
 import com.oracle.bedrock.junit.JUnit4Test;
+import com.oracle.bedrock.junit.RunWithAnnotatedTest;
 import com.oracle.bedrock.runtime.Application;
 import com.oracle.bedrock.runtime.LocalPlatform;
+import com.oracle.bedrock.runtime.java.ClassPath;
+import com.oracle.bedrock.runtime.options.Argument;
+import com.oracle.bedrock.runtime.options.Console;
 import com.oracle.bedrock.runtime.options.WorkingDirectory;
 import org.junit.ClassRule;
 import org.junit.Test;
@@ -62,6 +62,13 @@ import static org.junit.Assert.assertThat;
  */
 public class TestClassesClassPathClassesTest
 {
+    /**
+     *Field description
+     */
+    @ClassRule
+    public static TemporaryFolder temporaryFolder = new TemporaryFolder();
+
+
     @Test
     public void shouldNotLoadAbstractClass() throws Exception
     {
@@ -73,6 +80,7 @@ public class TestClassesClassPathClassesTest
         assertThat(classes, is(notNullValue()));
         assertThat(classes.isEmpty(), is(true));
     }
+
 
     @Test
     public void shouldLoadJUnit3TestClass() throws Exception
@@ -180,15 +188,15 @@ public class TestClassesClassPathClassesTest
 
     private File createJar(Class<?>... classes) throws Exception
     {
-        File   content = createClassesFolder(classes);
-        File   jar     = new File(content, "test.jar");
+        File content = createClassesFolder(classes);
+        File jar     = new File(content, "test.jar");
 
         try (Application app = LocalPlatform.get().launch("jar",
                                                           Argument.of("-cvf"),
                                                           Argument.of("test.jar"),
                                                           Argument.of("."),
                                                           WorkingDirectory.at(content),
-                                                          SystemApplicationConsole.builder()))
+                                                          Console.system()))
         {
             app.waitFor();
         }
@@ -205,12 +213,13 @@ public class TestClassesClassPathClassesTest
 
         for (Class<?> cls : classes)
         {
-            URL  location = cls.getProtectionDomain().getCodeSource().getLocation();
-            Path path     = Paths.get(location.toURI());
+            URL    location    = cls.getProtectionDomain().getCodeSource().getLocation();
+            Path   path        = Paths.get(location.toURI());
 
             String packageName = cls.getPackage().getName().replace(".", File.separator);
 
-            Path sourcePath  = Paths.get(path.toString(), cls.getCanonicalName().replace(".", File.separator) + ".class");
+            Path sourcePath = Paths.get(path.toString(),
+                                        cls.getCanonicalName().replace(".", File.separator) + ".class");
             Path contentPath = Paths.get(content.getCanonicalPath(), packageName);
             Path targetPath  = Paths.get(contentPath.toString(), cls.getSimpleName() + ".class");
 
@@ -221,7 +230,4 @@ public class TestClassesClassPathClassesTest
 
         return content;
     }
-
-    @ClassRule
-    public static TemporaryFolder temporaryFolder = new TemporaryFolder();
 }

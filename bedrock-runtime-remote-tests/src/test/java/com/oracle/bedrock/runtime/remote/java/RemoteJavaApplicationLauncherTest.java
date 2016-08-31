@@ -25,33 +25,32 @@
 
 package com.oracle.bedrock.runtime.remote.java;
 
-import com.oracle.bedrock.runtime.Platform;
-import com.oracle.bedrock.runtime.concurrent.options.StreamName;
-import com.oracle.bedrock.runtime.concurrent.runnable.RuntimeExit;
-import com.oracle.bedrock.runtime.concurrent.runnable.RuntimeHalt;
-import com.oracle.bedrock.runtime.java.JavaApplication;
-import com.oracle.bedrock.runtime.java.options.RemoteEvents;
-import com.oracle.bedrock.runtime.remote.RemotePlatform;
 import com.oracle.bedrock.deferred.Eventually;
 import com.oracle.bedrock.runtime.Application;
 import com.oracle.bedrock.runtime.LocalPlatform;
+import com.oracle.bedrock.runtime.Platform;
 import com.oracle.bedrock.runtime.concurrent.RemoteEvent;
 import com.oracle.bedrock.runtime.concurrent.RemoteEventListener;
 import com.oracle.bedrock.runtime.concurrent.callable.GetSystemProperty;
+import com.oracle.bedrock.runtime.concurrent.options.StreamName;
+import com.oracle.bedrock.runtime.concurrent.runnable.RuntimeExit;
+import com.oracle.bedrock.runtime.concurrent.runnable.RuntimeHalt;
 import com.oracle.bedrock.runtime.console.CapturingApplicationConsole;
-import com.oracle.bedrock.runtime.options.Console;
-import com.oracle.bedrock.runtime.console.SystemApplicationConsole;
+import com.oracle.bedrock.runtime.java.JavaApplication;
 import com.oracle.bedrock.runtime.java.options.ClassName;
 import com.oracle.bedrock.runtime.java.options.IPv4Preferred;
 import com.oracle.bedrock.runtime.java.options.JavaHome;
+import com.oracle.bedrock.runtime.java.options.RemoteEvents;
 import com.oracle.bedrock.runtime.java.options.SystemProperty;
 import com.oracle.bedrock.runtime.java.profiles.RemoteDebugging;
 import com.oracle.bedrock.runtime.options.Argument;
+import com.oracle.bedrock.runtime.options.Console;
 import com.oracle.bedrock.runtime.options.DisplayName;
 import com.oracle.bedrock.runtime.options.Executable;
 import com.oracle.bedrock.runtime.options.PlatformSeparators;
 import com.oracle.bedrock.runtime.options.WorkingDirectory;
 import com.oracle.bedrock.runtime.remote.AbstractRemoteTest;
+import com.oracle.bedrock.runtime.remote.RemotePlatform;
 import com.oracle.bedrock.runtime.remote.java.applications.EventingApplication;
 import com.oracle.bedrock.runtime.remote.java.applications.SleepingApplication;
 import com.oracle.bedrock.util.Capture;
@@ -109,7 +108,7 @@ public class RemoteJavaApplicationLauncherTest extends AbstractRemoteTest
         try (JavaApplication application = platform.launch(JavaApplication.class,
                                                            ClassName.of(SleepingApplication.class),
                                                            Argument.of("3"),
-                                                           SystemApplicationConsole.builder()))
+                                                           Console.system()))
         {
             assertThat(application.waitFor(), is(0));
 
@@ -132,7 +131,7 @@ public class RemoteJavaApplicationLauncherTest extends AbstractRemoteTest
                                                            ClassName.of(SleepingApplication.class),
                                                            Argument.of("3"),
                                                            JavaHome.at(System.getProperty("java.home")),
-                                                           SystemApplicationConsole.builder()))
+                                                           Console.system()))
         {
             assertThat(application.waitFor(), is(0));
 

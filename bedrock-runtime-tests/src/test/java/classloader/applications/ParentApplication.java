@@ -26,13 +26,10 @@
 package classloader.applications;
 
 import com.oracle.bedrock.runtime.LocalPlatform;
-
-import com.oracle.bedrock.runtime.console.SystemApplicationConsole;
-
 import com.oracle.bedrock.runtime.java.JavaApplication;
 import com.oracle.bedrock.runtime.java.options.ClassName;
 import com.oracle.bedrock.runtime.java.options.SystemProperty;
-
+import com.oracle.bedrock.runtime.options.Console;
 import com.oracle.bedrock.runtime.options.DisplayName;
 import com.oracle.bedrock.runtime.options.Orphanable;
 
@@ -69,7 +66,7 @@ public class ParentApplication
                                                                       SystemProperty.of("server.port",
                                                                                         System.getProperty("server.port")),
                                                                       Orphanable.enabled(Boolean.getBoolean("orphan.children")),
-                                                                      SystemApplicationConsole.builder()))
+                                                                      Console.system()))
         {
             application.waitFor();
         }

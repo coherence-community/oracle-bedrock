@@ -675,7 +675,7 @@ public class LocalJavaApplicationLauncher<A extends JavaApplication> implements 
 
         @Override
         public <T> CompletableFuture<T> submit(RemoteCallable<T> callable,
-                                               Option...         options)
+                                               Option...         options) throws IllegalStateException
         {
             return remoteExecutor.submit(callable, options);
         }

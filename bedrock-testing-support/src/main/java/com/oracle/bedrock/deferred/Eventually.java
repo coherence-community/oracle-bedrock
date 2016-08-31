@@ -33,6 +33,7 @@ import com.oracle.bedrock.options.Timeout;
 import com.oracle.bedrock.runtime.concurrent.RemoteCallable;
 import com.oracle.bedrock.runtime.java.JavaApplication;
 import org.hamcrest.Matcher;
+import org.hamcrest.StringDescription;
 
 import java.io.NotSerializableException;
 import java.util.concurrent.TimeUnit;
@@ -182,9 +183,15 @@ public class Eventually
                     cause = ", (Deferred was not retried as it was a simple value)";
                 }
 
+                // ask the matcher to describe the matching problem
+                StringDescription description = new StringDescription();
+
+                matcher.describeMismatch(deferredMatch.getLastUsedMatchValue(), description);
+
+                // create the assertion
                 error = new AssertionError((message == null ? "" : message + ": ") + "Matcher [" + matcher
                     + "] failed to match last resolved value [" + deferredMatch.getLastUsedMatchValue() + "] for ["
-                    + deferredMatch.getDeferred() + "]" + cause);
+                    + deferredMatch.getDeferred() + "]" + cause + " due to " + description.toString());
                 error.initCause(e);
             }
 

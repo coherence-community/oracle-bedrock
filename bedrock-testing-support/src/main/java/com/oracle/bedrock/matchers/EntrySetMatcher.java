@@ -113,14 +113,18 @@ public class EntrySetMatcher<K, V> extends TypeSafeMatcher<Set<Map.Entry<K, V>>>
     public void describeMismatchSafely(Set<Map.Entry<K, V>> entries,
                                        Description          mismatchDescription)
     {
-        mismatchDescription.appendText("entries were ").appendValueList("[", ", ", "]", entries);
+        MapMatcher<K, V> matcher = (MapMatcher<K, V>) MapMatcher.sameAs(map, valueEquivalence);
+
+        matcher.describeMismatchSafely(mapOf(entries), mismatchDescription);
     }
 
 
     @Override
     public void describeTo(Description description)
     {
-        description.appendText("entries ").appendValueList("[", ", ", "]", map.entrySet());
+        MapMatcher<K, V> matcher = (MapMatcher<K, V>) MapMatcher.sameAs(map, valueEquivalence);
+
+        matcher.describeTo(description);
     }
 
 

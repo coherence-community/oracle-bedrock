@@ -34,7 +34,6 @@ import com.oracle.bedrock.runtime.coherence.options.ClusterPort;
 import com.oracle.bedrock.runtime.coherence.options.LocalHost;
 import com.oracle.bedrock.runtime.coherence.options.LocalStorage;
 import com.oracle.bedrock.runtime.coherence.options.WellKnownAddress;
-import com.oracle.bedrock.runtime.console.SystemApplicationConsole;
 import com.oracle.bedrock.runtime.java.JavaApplicationLauncher;
 import com.oracle.bedrock.runtime.java.options.SystemProperty;
 import com.oracle.bedrock.runtime.network.AvailablePortIterator;
@@ -91,7 +90,7 @@ public abstract class AbstractCoherenceClusterBuilderTest extends AbstractTest
                         LocalHost.only(),
                         ClusterName.of("Storage-Only"));
 
-        try (CoherenceCluster cluster = builder.build(SystemApplicationConsole.builder()))
+        try (CoherenceCluster cluster = builder.build(Console.system()))
         {
             assertThat(invoking(cluster).getClusterSize(), is(CLUSTER_SIZE));
         }
@@ -134,7 +133,7 @@ public abstract class AbstractCoherenceClusterBuilderTest extends AbstractTest
                         LocalStorage.disabled(),
                         SystemProperty.of("coherence.extend.port", availablePorts));
 
-        try (CoherenceCluster cluster = builder.build(SystemApplicationConsole.builder()))
+        try (CoherenceCluster cluster = builder.build(Console.system()))
         {
             // ensure the cluster size is as expected
             assertThat(invoking(cluster).getClusterSize(), is(3));
@@ -194,7 +193,7 @@ public abstract class AbstractCoherenceClusterBuilderTest extends AbstractTest
                                LocalHost.of(localHost, wkaPort),
                                clusterPort);
 
-        try (CoherenceCluster cluster = clusterBuilder.build(SystemApplicationConsole.builder()))
+        try (CoherenceCluster cluster = clusterBuilder.build(Console.system()))
         {
             assertThat(invoking(cluster).getClusterSize(), is(desiredClusterSize));
         }
@@ -228,15 +227,14 @@ public abstract class AbstractCoherenceClusterBuilderTest extends AbstractTest
                         clusterPort,
                         ClusterName.of(clusterName),
                         LocalHost.only(),
-                        SystemApplicationConsole.builder());
+                        Console.system());
 
         try (CoherenceCluster cluster = builder.build())
         {
             assertThat(invoking(cluster).getClusterSize(), is(CLUSTER_SIZE));
 
             StabilityPredicate<CoherenceCluster> predicate =
-                StabilityPredicate.of(c -> c.findAny().get().getServiceStatus("DistributedCache")
-                                           == ServiceStatus.NODE_SAFE);
+                StabilityPredicate.of(CoherenceCluster.Predicates.autoStartServicesSafe());
 
             cluster.filter(member -> member.isServiceRunning("ProxyService")).relaunch();
 
@@ -275,7 +273,7 @@ public abstract class AbstractCoherenceClusterBuilderTest extends AbstractTest
 
         builder.include(CLUSTER_SIZE, CoherenceClusterMember.class, clusterPort, ClusterName.of("Access"));
 
-        try (CoherenceCluster cluster = builder.build(SystemApplicationConsole.builder()))
+        try (CoherenceCluster cluster = builder.build(Console.system()))
         {
             assertThat(invoking(cluster).getClusterSize(), is(CLUSTER_SIZE));
 
@@ -315,7 +313,7 @@ public abstract class AbstractCoherenceClusterBuilderTest extends AbstractTest
                         ClusterName.of("Access"),
                         DisplayName.of("DCS"));
 
-        try (CoherenceCluster cluster = builder.build(SystemApplicationConsole.builder()))
+        try (CoherenceCluster cluster = builder.build(Console.system()))
         {
             assertThat(invoking(cluster).getClusterSize(), is(CLUSTER_SIZE));
 

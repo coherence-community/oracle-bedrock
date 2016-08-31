@@ -28,7 +28,7 @@ package com.oracle.bedrock.runtime;
 import com.oracle.bedrock.Option;
 import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.annotations.Internal;
-import com.oracle.bedrock.runtime.console.SystemApplicationConsole;
+import com.oracle.bedrock.runtime.options.Console;
 import com.oracle.bedrock.runtime.options.Discriminator;
 
 import java.util.LinkedList;
@@ -116,7 +116,7 @@ public abstract class AbstractAssemblyBuilder<A extends Application, G extends A
                 launchOptions.add(Discriminator.of(i));
 
                 // ensure there's at least a system console
-                launchOptions.addIfAbsent(SystemApplicationConsole.builder());
+                launchOptions.addIfAbsent(Console.system());
 
                 // finalize the launching options
                 Option[] launchingOptions = launchOptions.asArray();

@@ -45,10 +45,10 @@ import com.oracle.bedrock.runtime.coherence.options.SiteName;
 import com.oracle.bedrock.runtime.concurrent.RemoteEvent;
 import com.oracle.bedrock.runtime.concurrent.RemoteEventListener;
 import com.oracle.bedrock.runtime.concurrent.options.StreamName;
-import com.oracle.bedrock.runtime.console.SystemApplicationConsole;
 import com.oracle.bedrock.runtime.java.features.JmxFeature;
 import com.oracle.bedrock.runtime.java.options.ClassName;
 import com.oracle.bedrock.runtime.network.AvailablePortIterator;
+import com.oracle.bedrock.runtime.options.Console;
 import com.oracle.bedrock.runtime.options.Discriminator;
 import com.oracle.bedrock.util.Capture;
 import com.tangosol.net.NamedCache;
@@ -140,7 +140,7 @@ public abstract class AbstractCoherenceCacheServerTest extends AbstractTest
                                                            ClusterPort.automatic(),
                                                            LocalHost.only(),
                                                            Diagnostics.enabled(),
-                                                           SystemApplicationConsole.builder()))
+                                                           Console.system()))
         {
             assertThat(server, new GetLocalMemberId(), is(1));
             assertThat(server, new GetClusterSize(), is(1));
@@ -173,7 +173,7 @@ public abstract class AbstractCoherenceCacheServerTest extends AbstractTest
                                                                SiteName.of("test-site"),
                                                                Diagnostics.enabled(),
                                                                Discriminator.of(i),
-                                                               SystemApplicationConsole.builder()))
+                                                               Console.system()))
             {
                 assertThat(invoking(server).getClusterSize(), is(1));
                 assertThat(server.getRoleName(), is("test-role"));
@@ -197,7 +197,7 @@ public abstract class AbstractCoherenceCacheServerTest extends AbstractTest
                                                            OperationalOverride.of("test-operational-override.xml"),
                                                            LocalHost.only(),
                                                            Diagnostics.enabled(),
-                                                           SystemApplicationConsole.builder()))
+                                                           Console.system()))
         {
             assertThat(server, new GetLocalMemberId(), is(1));
             assertThat(server, new GetClusterSize(), is(1));
@@ -220,7 +220,7 @@ public abstract class AbstractCoherenceCacheServerTest extends AbstractTest
                                                            ClusterPort.from(availablePorts),
                                                            LocalHost.only(),
                                                            CacheConfig.of("test-autostart-services-cache-config.xml"),
-                                                           SystemApplicationConsole.builder(),
+                                                           Console.system(),
                                                            Diagnostics.enabled()))
         {
             assertThat(server, new GetLocalMemberId(), is(1));
@@ -247,7 +247,7 @@ public abstract class AbstractCoherenceCacheServerTest extends AbstractTest
         try (CoherenceCacheServer server = platform.launch(CoherenceCacheServer.class,
                                                            ClusterPort.automatic(),
                                                            LocalHost.only(),
-                                                           SystemApplicationConsole.builder()))
+                                                           Console.system()))
         {
             assertThat(server, new GetLocalMemberId(), is(1));
             assertThat(server, new GetClusterSize(), is(1));
@@ -367,7 +367,7 @@ public abstract class AbstractCoherenceCacheServerTest extends AbstractTest
                                                            ClassName.of(CustomServer.class),
                                                            ClusterPort.automatic(),
                                                            LocalHost.only(),
-                                                           SystemApplicationConsole.builder()))
+                                                           Console.system()))
         {
             server.addListener(listener, StreamName.of("Foo"));
 

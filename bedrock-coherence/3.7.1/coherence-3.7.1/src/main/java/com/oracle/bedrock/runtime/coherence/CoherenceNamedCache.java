@@ -25,6 +25,7 @@
 
 package com.oracle.bedrock.runtime.coherence;
 
+import com.oracle.bedrock.runtime.Assembly;
 import com.oracle.bedrock.runtime.concurrent.callable.RemoteCallableStaticMethod;
 import com.oracle.bedrock.runtime.concurrent.callable.RemoteMethodInvocation;
 import com.oracle.bedrock.util.ReflectionHelper;
@@ -44,6 +45,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
@@ -63,6 +65,12 @@ class CoherenceNamedCache implements NamedCache
      * that this {@link CoherenceNamedCache} represents.
      */
     private CoherenceClusterMember member;
+
+    /**
+     * The {@link Optional} {@link CoherenceCluster} that owns the {@link CoherenceClusterMember}.
+     * (this is optional as the {@link CoherenceClusterMember} may not have been defined as part of a cluster).
+     */
+    private Optional<CoherenceCluster> cluster;
 
     /**
      * The name of the {@link NamedCache}.
@@ -97,6 +105,12 @@ class CoherenceNamedCache implements NamedCache
                                                                    "getCache",
                                                                    cacheName);
         this.interceptor = new NamedCacheMethodInterceptor();
+
+        // determine the CoherenceCluster that the CoherenceClusterMember is part of
+        Assembly assembly = member.get(Assembly.class);
+
+        this.cluster = assembly instanceof CoherenceCluster
+                       ? Optional.of((CoherenceCluster) assembly) : Optional.empty();
     }
 
 
@@ -117,16 +131,41 @@ class CoherenceNamedCache implements NamedCache
 
         interceptor.onBeforeRemoteInvocation(method, arguments);
 
-        // submit the remote method invocation
-        CompletableFuture future = member.submit(new RemoteMethodInvocation(producer,
-                                                                            methodName,
-                                                                            arguments,
-                                                                            interceptor));
-
         try
         {
+            // submit the remote method invocation
+            CompletableFuture future = member.submit(new RemoteMethodInvocation(producer,
+                                                                                methodName,
+                                                                                arguments,
+                                                                                interceptor));
+
             // intercept the result after the remote invocation
             interceptor.onAfterRemoteInvocation(method, arguments, future.get());
+        }
+        catch (IllegalStateException e)
+        {
+            if (cluster.isPresent())
+            {
+                Optional<CoherenceClusterMember> optional = cluster.get().findAny();
+
+                if (optional.isPresent())
+                {
+                    this.member = optional.get();
+
+                    // retry the request
+                    remotelyInvoke(methodName, arguments);
+                }
+                else
+                {
+                    // we just re-throw if there's no equivalent member in a cluster
+                    throw e;
+                }
+            }
+            else
+            {
+                // we just re-throw if the member is not part of a cluster
+                throw e;
+            }
         }
         catch (RuntimeException e)
         {
@@ -161,16 +200,41 @@ class CoherenceNamedCache implements NamedCache
 
         interceptor.onBeforeRemoteInvocation(method, arguments);
 
-        // submit the remote method invocation
-        CompletableFuture future = member.submit(new RemoteMethodInvocation(producer,
-                                                                            methodName,
-                                                                            arguments,
-                                                                            interceptor));
-
         try
         {
+            // submit the remote method invocation
+            CompletableFuture future = member.submit(new RemoteMethodInvocation(producer,
+                                                                                methodName,
+                                                                                arguments,
+                                                                                interceptor));
+
             // intercept the result after the remote invocation
             return (T) interceptor.onAfterRemoteInvocation(method, arguments, future.get());
+        }
+        catch (IllegalStateException e)
+        {
+            if (cluster.isPresent())
+            {
+                Optional<CoherenceClusterMember> optional = cluster.get().findAny();
+
+                if (optional.isPresent())
+                {
+                    this.member = optional.get();
+
+                    // retry the request
+                    return remotelyInvoke(methodName, returnType, arguments);
+                }
+                else
+                {
+                    // we just re-throw if there's no equivalent member in a cluster
+                    throw e;
+                }
+            }
+            else
+            {
+                // we just re-throw if the member is not part of a cluster
+                throw e;
+            }
         }
         catch (RuntimeException e)
         {

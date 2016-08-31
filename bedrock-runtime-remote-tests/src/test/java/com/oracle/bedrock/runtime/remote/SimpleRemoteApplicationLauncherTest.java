@@ -26,7 +26,6 @@
 package com.oracle.bedrock.runtime.remote;
 
 import com.oracle.bedrock.runtime.Application;
-import com.oracle.bedrock.runtime.console.SystemApplicationConsole;
 import com.oracle.bedrock.runtime.options.Argument;
 import com.oracle.bedrock.runtime.options.Console;
 import com.oracle.bedrock.runtime.remote.options.CustomDeployment;
@@ -54,7 +53,7 @@ public class SimpleRemoteApplicationLauncherTest extends AbstractRemoteTest
     @Test
     public void shouldLaunchSimpleApplicationRemotely() throws Exception
     {
-        RemotePlatform platform    = getRemotePlatform();
+        RemotePlatform platform = getRemotePlatform();
 
         try (Application application = platform.launch("ls", Argument.of("-la"), Console.system()))
         {
@@ -80,7 +79,7 @@ public class SimpleRemoteApplicationLauncherTest extends AbstractRemoteTest
 
         try (Application application = platform.launch("ls",
                                                        Argument.of("-la"),
-                                                       SystemApplicationConsole.builder(),
+                                                       Console.system(),
                                                        CustomDeployment.including(new DeploymentArtifact(testFile))))
         {
             assertThat(application.waitFor(), is(0));
