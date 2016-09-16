@@ -28,6 +28,7 @@ package com.oracle.bedrock.runtime.remote;
 import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.annotations.Internal;
 import com.oracle.bedrock.lang.ExpressionEvaluator;
+import com.oracle.bedrock.options.Decoration;
 import com.oracle.bedrock.options.Variable;
 import com.oracle.bedrock.options.Variables;
 import com.oracle.bedrock.runtime.Application;
@@ -165,10 +166,7 @@ public abstract class AbstractRemoteApplicationLauncher<A extends Application> i
         {
             try
             {
-                for (DeploymentArtifact deploymentArtifact : deployment.getDeploymentArtifacts(platform, launchOptions))
-                {
-                    artifactsToDeploy.add(deploymentArtifact);
-                }
+                artifactsToDeploy.addAll(deployment.getDeploymentArtifacts(platform, launchOptions));
             }
             catch (Exception e)
             {
@@ -207,10 +205,46 @@ public abstract class AbstractRemoteApplicationLauncher<A extends Application> i
         // create the working directory
         terminal.makeDirectories(remoteDirectory, launchOptions);
 
-        // Deploy any artifacts required
+        // deploy any artifacts required
         Deployer deployer = launchOptions.getOrSetDefault(Deployer.class, new SftpDeployer());
 
-        deployer.deploy(artifactsToDeploy, remoteDirectory, platform, launchOptions.asArray());
+        DeployedArtifacts deployedArtifacts = deployer.deploy(artifactsToDeploy,
+                                                              remoteDirectory,
+                                                              platform,
+                                                              launchOptions.asArray());
+
+        // add the remote directory as something to clean up
+        deployedArtifacts.add(remoteDirectoryFile);
+
+        if (!deployedArtifacts.isEmpty())
+        {
+            // when we've deployed artifacts we need to add a listener to clean them up
+            launchOptions.add(Decoration.of(new ApplicationListener<A>()
+                                            {
+                                                @Override
+                                                public void onClosing(A             application,
+                                                                      OptionsByType optionsByType)
+                                                {
+                                                    // nothing to do on closing
+                                                }
+
+                                                @Override
+                                                public void onClosed(A             application,
+                                                                     OptionsByType optionsByType)
+                                                {
+                                                    // undeploy the deployed artifacts
+                                                    deployer.undeploy(deployedArtifacts,
+                                                                      platform,
+                                                                      launchOptions.asArray());
+                                                }
+
+                                                @Override
+                                                public void onLaunched(A application)
+                                                {
+                                                    // nothing to do after launching
+                                                }
+                                            }));
+        }
 
         // Realize the application arguments
         Arguments    arguments = launchOptions.get(Arguments.class);
@@ -244,7 +278,7 @@ public abstract class AbstractRemoteApplicationLauncher<A extends Application> i
         ApplicationProcess process = adapt(remoteProcess);
 
         // create the Application based on the RemoteApplicationProcess
-        A application = null;
+        A application;
 
         try
         {

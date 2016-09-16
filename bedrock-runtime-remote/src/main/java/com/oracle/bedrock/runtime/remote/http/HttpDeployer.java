@@ -28,9 +28,16 @@ package com.oracle.bedrock.runtime.remote.http;
 import com.oracle.bedrock.Option;
 import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.io.NetworkHelper;
+import com.oracle.bedrock.lang.StringHelper;
+import com.oracle.bedrock.runtime.Application;
 import com.oracle.bedrock.runtime.LocalPlatform;
 import com.oracle.bedrock.runtime.Platform;
+import com.oracle.bedrock.runtime.console.CapturingApplicationConsole;
+import com.oracle.bedrock.runtime.options.Argument;
+import com.oracle.bedrock.runtime.options.DisplayName;
+import com.oracle.bedrock.runtime.options.Executable;
 import com.oracle.bedrock.runtime.options.PlatformSeparators;
+import com.oracle.bedrock.runtime.remote.DeployedArtifacts;
 import com.oracle.bedrock.runtime.remote.DeploymentArtifact;
 import com.oracle.bedrock.runtime.remote.options.Deployer;
 import com.oracle.bedrock.table.Table;
@@ -191,14 +198,16 @@ public abstract class HttpDeployer implements Deployer
 
 
     @Override
-    public void deploy(List<DeploymentArtifact> artifactsToDeploy,
-                       String                   remoteDirectory,
-                       Platform                 platform,
-                       Option...                deploymentOptions)
+    public DeployedArtifacts deploy(List<DeploymentArtifact> artifactsToDeploy,
+                                    String                   remoteDirectory,
+                                    Platform                 platform,
+                                    Option...                deploymentOptions)
     {
+        DeployedArtifacts deployedArtifacts = new DeployedArtifacts();
+
         if (artifactsToDeploy == null || artifactsToDeploy.isEmpty())
         {
-            return;
+            return deployedArtifacts;
         }
 
         OptionsByType optionsByType = OptionsByType.empty();
@@ -219,7 +228,12 @@ public abstract class HttpDeployer implements Deployer
 
             server = createServer(executor, artifactMap);
 
-            deployAllArtifacts(artifactMap, remoteDirectory, platform, server.getAddress(), optionsByType);
+            deployAllArtifacts(artifactMap,
+                               remoteDirectory,
+                               platform,
+                               server.getAddress(),
+                               optionsByType,
+                               deployedArtifacts);
         }
         finally
         {
@@ -234,6 +248,8 @@ public abstract class HttpDeployer implements Deployer
                 executor.shutdownNow();
             }
         }
+
+        return deployedArtifacts;
     }
 
 
@@ -246,12 +262,14 @@ public abstract class HttpDeployer implements Deployer
      * @param platform           the remote {@link Platform} to deploy to
      * @param httpServerAddress  the {@link InetSocketAddress} the HTTP server is listening on
      * @param optionsByType      the {@link OptionsByType}s to use
+     * @param deployedArtifacts  the {@link DeployedArtifacts}
      */
     protected void deployAllArtifacts(Map<String, DeploymentArtifact> artifacts,
                                       String                          remoteDirectory,
                                       Platform                        platform,
                                       InetSocketAddress               httpServerAddress,
-                                      OptionsByType                   optionsByType)
+                                      OptionsByType                   optionsByType,
+                                      DeployedArtifacts               deployedArtifacts)
     {
         if (artifacts == null || artifacts.isEmpty())
         {
@@ -297,6 +315,9 @@ public abstract class HttpDeployer implements Deployer
 
                 deployArtifact(sourceURL, targetFileName, platform);
 
+                // add the file as a deployed artifact
+                deployedArtifacts.add(new File(targetFileName));
+
                 double time = (System.currentTimeMillis() - start) / 1000.0d;
 
                 deploymentTable.addRow(sourceFile.toString(), destinationFileName, String.format("%.3f s", time));
@@ -306,6 +327,47 @@ public abstract class HttpDeployer implements Deployer
         {
             throw new RuntimeException("Error deploying artifacts", e);
         }
+    }
+
+
+    @Override
+    public DeployedArtifacts undeploy(DeployedArtifacts deployedArtifacts,
+                                      Platform          platform,
+                                      Option...         deploymentOptions)
+    {
+        DeployedArtifacts failedArtifacts = new DeployedArtifacts();
+
+        for (File file : deployedArtifacts)
+        {
+            CapturingApplicationConsole console = new CapturingApplicationConsole();
+
+            try (Application application = platform.launch(Application.class,
+                                                           Executable.named("rm"),
+                                                           Argument.of(StringHelper.doubleQuoteIfNecessary(file.toString())),
+                                                           DisplayName.of("Undeploy")))
+            {
+                if (application.waitFor() != 0)
+                {
+                    StringBuilder message =
+                        new StringBuilder("Error undeploying ").append(file.toString()).append(" - rm returned ")
+                        .append(application.exitValue()).append("\n").append("rm output:");
+
+                    for (String line : console.getCapturedOutputLines())
+                    {
+                        message.append(line);
+                    }
+
+                    for (String line : console.getCapturedErrorLines())
+                    {
+                        message.append(line);
+                    }
+
+                    failedArtifacts.add(file);
+                }
+            }
+        }
+
+        return failedArtifacts;
     }
 
 

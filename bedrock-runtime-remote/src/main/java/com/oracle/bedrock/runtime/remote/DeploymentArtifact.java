@@ -29,7 +29,7 @@ import java.io.File;
 
 /**
  * Defines an {@link File} artifact to be deployed to a remote server,
- * optionally as a specific {@link File} or destination.
+ * optionally at a specific {@link File} or destination.
  * <p>
  * Copyright (c) 2014. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.

@@ -27,33 +27,53 @@ package com.oracle.bedrock.runtime.remote.options;
 
 import com.oracle.bedrock.Option;
 import com.oracle.bedrock.runtime.Platform;
+import com.oracle.bedrock.runtime.remote.DeployedArtifacts;
 import com.oracle.bedrock.runtime.remote.DeploymentArtifact;
 
+import java.io.File;
 import java.util.List;
 
 /**
- * A {@link Deployer} is able to deploy
- * a collection of {@link DeploymentArtifact}s using
- * a specific file transfer method.
+ * A {@link Deployer} is able to deploy and undeploy {@link DeploymentArtifact}s to and from
+ * a specified {@link Platform} using a specific type of file transfer.
  * <p>
  * Copyright (c) 2015. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Jonathan Knight
+ * @author Brian Oliver
  */
 public interface Deployer extends Option
 {
     /**
-     * Deploy the list of {@link DeploymentArtifact}s to the specified {@link Platform}.
+     * Deploy the list of {@link DeploymentArtifact}s to the specified {@link Platform}, returning the
+     * {@link DeployedArtifacts} representing the actual {@link File}s deployed and their location.
      *
      * @param artifactsToDeploy  the {@link DeploymentArtifact}s to deploy
      * @param remoteDirectory    the target directory to deploy the {@link DeploymentArtifact}s to if no
      *                           destination is specified for a {@link DeploymentArtifact}
      * @param platform           the target {@link Platform} to deploy the {@link DeploymentArtifact}s to
      * @param deploymentOptions  the {@link Option}s that can be applied to control the deployment
+     *
+     * @return the {@link DeployedArtifacts}
      */
-    void deploy(List<DeploymentArtifact> artifactsToDeploy,
-                String                   remoteDirectory,
-                Platform                 platform,
-                Option...                deploymentOptions);
+    DeployedArtifacts deploy(List<DeploymentArtifact> artifactsToDeploy,
+                             String                   remoteDirectory,
+                             Platform                 platform,
+                             Option...                deploymentOptions);
+
+
+    /**
+     * Undeploy the {@link DeployedArtifacts} on the specified {@link Platform}, returning the
+     * {@link DeployedArtifacts} that were not undeployed successfully.
+     *
+     * @param deployedArtifacts  the {@link DeployedArtifacts} to undeploy
+     * @param platform           the {@link Platform}
+     * @param deploymentOptions  the {@link Option}s used for deployment and undeployment
+     *
+     * @return  the {@link DeployedArtifacts} that were failed to undeploy
+     */
+    DeployedArtifacts undeploy(DeployedArtifacts deployedArtifacts,
+                               Platform          platform,
+                               Option...         deploymentOptions);
 }

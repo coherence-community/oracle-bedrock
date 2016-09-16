@@ -34,6 +34,7 @@ import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.runtime.Platform;
 import com.oracle.bedrock.runtime.options.PlatformSeparators;
 import com.oracle.bedrock.runtime.remote.Authentication;
+import com.oracle.bedrock.runtime.remote.DeployedArtifacts;
 import com.oracle.bedrock.runtime.remote.DeploymentArtifact;
 import com.oracle.bedrock.runtime.remote.RemotePlatform;
 import com.oracle.bedrock.runtime.remote.options.Deployer;
@@ -83,14 +84,16 @@ public class SftpDeployer implements Deployer
 
 
     @Override
-    public void deploy(List<DeploymentArtifact> artifactsToDeploy,
-                       String                   remoteDirectory,
-                       Platform                 platform,
-                       Option...                deploymentOptions)
+    public DeployedArtifacts deploy(List<DeploymentArtifact> artifactsToDeploy,
+                                    String                   remoteDirectory,
+                                    Platform                 platform,
+                                    Option...                deploymentOptions)
     {
+        DeployedArtifacts deployedArtifacts = new DeployedArtifacts();
+
         if (artifactsToDeploy == null || artifactsToDeploy.isEmpty())
         {
-            return;
+            return deployedArtifacts;
         }
 
         if (!(platform instanceof RemotePlatform))
@@ -152,6 +155,9 @@ public class SftpDeployer implements Deployer
                     {
                         // the remote directory does not exist so attempt to create it
                         sftpChannel.mkdir(remoteDirectory);
+
+                        // add the directory as something to clean up
+                        deployedArtifacts.add(new File(remoteDirectory));
                     }
 
                     // copy deployment artifacts into the remote server
@@ -169,6 +175,9 @@ public class SftpDeployer implements Deployer
                         {
                             sftpChannel.cd(remoteDirectory);
                             destinationFileName = sourceFile.getName();
+
+                            // add the file as a deployed artifact
+                            deployedArtifacts.add(new File(remoteDirectory, destinationFileName));
                         }
                         else
                         {
@@ -188,6 +197,9 @@ public class SftpDeployer implements Deployer
                             sftpChannel.cd(dirName);
 
                             destinationFileName = destinationFile.getName();
+
+                            // add the file as a deployed artifact
+                            deployedArtifacts.add(new File(dirName, destinationFileName));
                         }
 
                         // copy the source artifact to the destination file
@@ -234,5 +246,114 @@ public class SftpDeployer implements Deployer
                 session.disconnect();
             }
         }
+
+        return deployedArtifacts;
+    }
+
+
+    @Override
+    public DeployedArtifacts undeploy(DeployedArtifacts deployedArtifacts,
+                                      Platform          platform,
+                                      Option...         deploymentOptions)
+    {
+        DeployedArtifacts failedArtifacts = new DeployedArtifacts();
+
+        if (!(platform instanceof RemotePlatform))
+        {
+            throw new IllegalArgumentException("The platform parameter must be an instance of RemotePlatform");
+        }
+
+        JSchSocketFactory socketFactory  = new JSchSocketFactory();
+        RemotePlatform    remotePlatform = (RemotePlatform) platform;
+        String            userName       = remotePlatform.getUserName();
+        Authentication    authentication = remotePlatform.getAuthentication();
+        String            hostName       = remotePlatform.getAddress().getHostName();
+        int               port           = remotePlatform.getPort();
+
+        // create the deployment options
+        OptionsByType optionsByType = OptionsByType.empty();
+
+        // add the Platform options
+        optionsByType.addAll(platform.getOptions());
+
+        // override with specified Options
+        optionsByType.addAll(deploymentOptions);
+
+        // initially there's no session
+        Session session = null;
+
+        try
+        {
+            // obtain the connected JSch Session
+            session = sessionFactory.createSession(hostName,
+                                                   port,
+                                                   userName,
+                                                   authentication,
+                                                   socketFactory,
+                                                   optionsByType);
+
+            // ----- undeploy remote application artifacts (using sftp) -----
+
+            if (deployedArtifacts.size() > 0)
+            {
+                ChannelSftp sftpChannel = null;
+
+                try
+                {
+                    // open an sftp channel that we can use to copy over the artifacts
+                    sftpChannel = (ChannelSftp) session.openChannel("sftp");
+                    sftpChannel.connect(session.getTimeout());
+
+                    for (File file : deployedArtifacts)
+                    {
+                        try
+                        {
+                            System.out.println("Undeploying File: " + file.toString());
+
+                            // attempt to delete the file
+                            sftpChannel.rm(file.toString());
+                        }
+                        catch (SftpException exception)
+                        {
+                            try
+                            {
+                                System.out.println("Undeploying Directory: " + file.toString());
+
+                                // attempt to remove the file as a directory
+                                sftpChannel.rmdir(file.toString());
+                            }
+                            catch (SftpException e)
+                            {
+                                System.out.println("Failed to undeploying: " + file.toString() + " due to " + e.toString());
+                                e.printStackTrace();
+
+                                failedArtifacts.add(file);
+                            }
+                        }
+                    }
+                }
+                finally
+                {
+                    if (sftpChannel != null)
+                    {
+                        sftpChannel.disconnect();
+                    }
+                }
+            }
+
+        }
+        catch (JSchException e)
+        {
+            throw new RuntimeException("Failed to undeploy application", e);
+        }
+        finally
+        {
+            if (session != null)
+            {
+                session.disconnect();
+            }
+        }
+
+        return failedArtifacts;
     }
 }

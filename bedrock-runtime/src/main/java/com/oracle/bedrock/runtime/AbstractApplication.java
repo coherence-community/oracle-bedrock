@@ -45,6 +45,7 @@ import java.io.InterruptedIOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.Reader;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * A base implementation of an {@link Application}.
@@ -109,6 +110,11 @@ public abstract class AbstractApplication<P extends ApplicationProcess> extends 
      */
     private Timeout defaultTimeout;
 
+    /**
+     * Is the {@link Application} considered closed and no longer usable?
+     */
+    private AtomicBoolean closed;
+
 
     /**
      * Construct an {@link AbstractApplication}.
@@ -124,6 +130,8 @@ public abstract class AbstractApplication<P extends ApplicationProcess> extends 
         this.platform      = platform;
         this.process       = process;
         this.optionsByType = optionsByType;
+
+        this.closed        = new AtomicBoolean(false);
 
         // establish the default Timeout for the application
         this.defaultTimeout = optionsByType.get(Timeout.class);
@@ -213,144 +221,147 @@ public abstract class AbstractApplication<P extends ApplicationProcess> extends 
     @Override
     public void close(Option... options)
     {
-        // determine the custom closing behavior for the application
-        OptionsByType closingOptions = OptionsByType.of(options);
-
-        // ------ notify any ApplicationListener-based Features (about closing) ------
-
-        for (ApplicationListener listener : getInstancesOf(ApplicationListener.class))
+        if (closed.compareAndSet(false, true))
         {
-            listener.onClosing(this, closingOptions);
-        }
+            // determine the custom closing behavior for the application
+            OptionsByType closingOptions = OptionsByType.of(options);
 
-        // ----- notify the Profiles that the application is closing -----
+            // ------ notify any ApplicationListener-based Features (about closing) ------
 
-        for (Profile profile : getOptions().getInstancesOf(Profile.class))
-        {
-            profile.onClosing(platform, this, getOptions());
-        }
+            for (ApplicationListener listener : getInstancesOf(ApplicationListener.class))
+            {
+                listener.onClosing(this, closingOptions);
+            }
 
-        // ------ notify ApplicationListeners-based Options (about closing) ------
+            // ----- notify the Profiles that the application is closing -----
 
-        for (ApplicationListener listener : getOptions().getInstancesOf(ApplicationListener.class))
-        {
-            listener.onClosing(this, closingOptions);
-        }
+            for (Profile profile : getOptions().getInstancesOf(Profile.class))
+            {
+                profile.onClosing(platform, this, getOptions());
+            }
 
-        // ------ perform any necessary ApplicationClosingBehaviors ------
+            // ------ notify ApplicationListeners-based Options (about closing) ------
 
-        // determine the default closing behavior (defined for the application options)
-        ApplicationClosingBehavior defaultClosingBehavior = getOptions().get(ApplicationClosingBehavior.class);
+            for (ApplicationListener listener : getOptions().getInstancesOf(ApplicationListener.class))
+            {
+                listener.onClosing(this, closingOptions);
+            }
 
-        // determine the required closing behavior
-        ApplicationClosingBehavior closingBehavior = closingOptions.getOrDefault(ApplicationClosingBehavior.class,
-                                                                                 defaultClosingBehavior);
+            // ------ perform any necessary ApplicationClosingBehaviors ------
 
-        if (closingBehavior != null)
-        {
+            // determine the default closing behavior (defined for the application options)
+            ApplicationClosingBehavior defaultClosingBehavior = getOptions().get(ApplicationClosingBehavior.class);
+
+            // determine the required closing behavior
+            ApplicationClosingBehavior closingBehavior = closingOptions.getOrDefault(ApplicationClosingBehavior.class,
+                                                                                     defaultClosingBehavior);
+
+            if (closingBehavior != null)
+            {
+                try
+                {
+                    closingBehavior.onBeforeClosing(this, options);
+                }
+                catch (Exception e)
+                {
+                    // we ignore any issues that occurred due to closing behaviors
+
+                    // TODO: if diagnostics are enabled we should output the exception
+                }
+            }
+
+            // ------ close the process ------
+
+            // close the process
+            process.close();
+
+            // ------ clean up ------
+
+            // terminate the thread that is writing to the process standard in
             try
             {
-                closingBehavior.onBeforeClosing(this, options);
+                stdinThread.interrupt();
             }
             catch (Exception e)
             {
-                // we ignore any issues that occurred due to closing behaviors
-
-                // TODO: if diagnostics are enabled we should output the exception
+                // nothing to do here as we don't care
             }
-        }
 
-        // ------ close the process ------
+            // terminate the thread that is reading from the process standard out
+            try
+            {
+                stdoutThread.interrupt();
+            }
+            catch (Exception e)
+            {
+                // nothing to do here as we don't care
+            }
 
-        // close the process
-        process.close();
+            try
+            {
+                stdoutThread.join();
+            }
+            catch (InterruptedException e)
+            {
+                // nothing to do here as we don't care
+            }
 
-        // ------ clean up ------
+            // terminate the thread that is reading from the process standard err
+            try
+            {
+                stderrThread.interrupt();
+            }
+            catch (Exception e)
+            {
+                // nothing to do here as we don't care
+            }
 
-        // terminate the thread that is writing to the process standard in
-        try
-        {
-            stdinThread.interrupt();
-        }
-        catch (Exception e)
-        {
-            // nothing to do here as we don't care
-        }
+            try
+            {
+                stderrThread.join();
+            }
+            catch (InterruptedException e)
+            {
+                // nothing to do here as we don't care
+            }
 
-        // terminate the thread that is reading from the process standard out
-        try
-        {
-            stdoutThread.interrupt();
-        }
-        catch (Exception e)
-        {
-            // nothing to do here as we don't care
-        }
+            try
+            {
+                console.close();
+            }
+            catch (Exception e)
+            {
+                // nothing to do here as we don't care
+            }
 
-        try
-        {
-            stdoutThread.join();
-        }
-        catch (InterruptedException e)
-        {
-            // nothing to do here as we don't care
-        }
+            try
+            {
+                // wait for the application to terminate
+                waitFor(options);
+            }
+            catch (RuntimeException e)
+            {
+                // nothing to do here as we don't care
+            }
 
-        // terminate the thread that is reading from the process standard err
-        try
-        {
-            stderrThread.interrupt();
-        }
-        catch (Exception e)
-        {
-            // nothing to do here as we don't care
-        }
+            // ------ notify ApplicationListeners-based Options (about being closed) ------
 
-        try
-        {
-            stderrThread.join();
-        }
-        catch (InterruptedException e)
-        {
-            // nothing to do here as we don't care
-        }
+            for (ApplicationListener listener : getOptions().getInstancesOf(ApplicationListener.class))
+            {
+                listener.onClosed(this, closingOptions);
+            }
 
-        try
-        {
-            console.close();
+            // ------ notify ApplicationListener-based Features (about being closed) ------
+
+            for (ApplicationListener listener : getInstancesOf(ApplicationListener.class))
+            {
+                listener.onClosed(this, closingOptions);
+            }
+
+            // ----- remove all of the features -----
+
+            removeAllFeatures();
         }
-        catch (Exception e)
-        {
-            // nothing to do here as we don't care
-        }
-
-        try
-        {
-            // wait for the application to terminate
-            waitFor(options);
-        }
-        catch (RuntimeException e)
-        {
-            // nothing to do here as we don't care
-        }
-
-        // ------ notify ApplicationListeners-based Options (about being closed) ------
-
-        for (ApplicationListener listener : getOptions().getInstancesOf(ApplicationListener.class))
-        {
-            listener.onClosed(this, closingOptions);
-        }
-
-        // ------ notify ApplicationListener-based Features (about being closed) ------
-
-        for (ApplicationListener listener : getInstancesOf(ApplicationListener.class))
-        {
-            listener.onClosed(this, closingOptions);
-        }
-
-        // ----- remove all of the features -----
-
-        removeAllFeatures();
     }
 
 

@@ -28,6 +28,7 @@ package com.oracle.bedrock.runtime.remote.http;
 import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.runtime.LocalPlatform;
 import com.oracle.bedrock.runtime.Platform;
+import com.oracle.bedrock.runtime.remote.DeployedArtifacts;
 import com.oracle.bedrock.runtime.remote.DeploymentArtifact;
 import com.oracle.bedrock.runtime.remote.options.Deployer;
 import com.oracle.bedrock.runtime.remote.winrm.AbstractWindowsTest;
@@ -75,15 +76,21 @@ public class PowerShellHttpDeployerTest extends AbstractWindowsHttpDeployerTest
     @Test
     public void shouldDeployEmptyArtifacts() throws Exception
     {
-        Map<String, DeploymentArtifact> artifacts        = new HashMap<>();
-        String                          destination      = "/foo";
-        Platform                        platform         = mock(Platform.class);
-        InetSocketAddress               address          = new InetSocketAddress(InetAddress.getLocalHost(), 1234);
-        OptionsByType                   optionsByType    = OptionsByType.empty();
+        Map<String, DeploymentArtifact> artifacts         = new HashMap<>();
+        String                          destination       = "/foo";
+        Platform                        platform          = mock(Platform.class);
+        InetSocketAddress               address           = new InetSocketAddress(InetAddress.getLocalHost(), 1234);
+        OptionsByType                   optionsByType     = OptionsByType.empty();
 
-        PowerShellHttpDeployer          deploymentMethod = new PowerShellHttpDeployer();
+        PowerShellHttpDeployer          deploymentMethod  = new PowerShellHttpDeployer();
+        DeployedArtifacts               deployedArtifacts = new DeployedArtifacts();
 
-        deploymentMethod.deployAllArtifacts(artifacts, destination, platform, address, optionsByType);
+        deploymentMethod.deployAllArtifacts(artifacts,
+                                            destination,
+                                            platform,
+                                            address,
+                                            optionsByType,
+                                            deployedArtifacts);
 
         verifyNoMoreInteractions(platform);
     }
@@ -92,14 +99,15 @@ public class PowerShellHttpDeployerTest extends AbstractWindowsHttpDeployerTest
     @Test
     public void shouldDeployNullArtifacts() throws Exception
     {
-        String                 destination      = "/foo";
-        Platform               platform         = mock(Platform.class);
-        InetSocketAddress      address          = new InetSocketAddress(InetAddress.getLocalHost(), 1234);
-        OptionsByType          optionsByType    = OptionsByType.empty();
+        String                 destination       = "/foo";
+        Platform               platform          = mock(Platform.class);
+        InetSocketAddress      address           = new InetSocketAddress(InetAddress.getLocalHost(), 1234);
+        OptionsByType          optionsByType     = OptionsByType.empty();
 
-        PowerShellHttpDeployer deploymentMethod = new PowerShellHttpDeployer();
+        PowerShellHttpDeployer deploymentMethod  = new PowerShellHttpDeployer();
+        DeployedArtifacts      deployedArtifacts = new DeployedArtifacts();
 
-        deploymentMethod.deployAllArtifacts(null, destination, platform, address, optionsByType);
+        deploymentMethod.deployAllArtifacts(null, destination, platform, address, optionsByType, deployedArtifacts);
     }
 
 

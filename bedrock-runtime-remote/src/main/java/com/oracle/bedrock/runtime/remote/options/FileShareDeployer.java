@@ -29,6 +29,7 @@ import com.oracle.bedrock.Option;
 import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.runtime.Platform;
 import com.oracle.bedrock.runtime.options.PlatformSeparators;
+import com.oracle.bedrock.runtime.remote.DeployedArtifacts;
 import com.oracle.bedrock.runtime.remote.DeploymentArtifact;
 import com.oracle.bedrock.table.Table;
 
@@ -99,11 +100,13 @@ public abstract class FileShareDeployer implements Deployer
 
 
     @Override
-    public void deploy(List<DeploymentArtifact> artifactsToDeploy,
-                       String                   remoteDirectory,
-                       Platform                 platform,
-                       Option...                deploymentOptions)
+    public DeployedArtifacts deploy(List<DeploymentArtifact> artifactsToDeploy,
+                                    String                   remoteDirectory,
+                                    Platform                 platform,
+                                    Option...                deploymentOptions)
     {
+        DeployedArtifacts deployedArtifacts = new DeployedArtifacts();
+
         OptionsByType combinedOptions = platform == null
                                         ? OptionsByType.empty() : OptionsByType.of(platform.getOptions());
         Table deploymentTable = new Table();
@@ -162,6 +165,9 @@ public abstract class FileShareDeployer implements Deployer
                     }
                 }
 
+                // add the file as a deployed artifact
+                deployedArtifacts.add(new File(destination));
+
                 double time = (System.currentTimeMillis() - start) / 1000.0d;
 
                 deploymentTable.addRow(sourceFile.toString(),
@@ -180,6 +186,31 @@ public abstract class FileShareDeployer implements Deployer
         {
             diagnosticsTable.addRow("Application Deployments ", deploymentTable.toString());
         }
+
+        return deployedArtifacts;
+    }
+
+
+    @Override
+    public DeployedArtifacts undeploy(DeployedArtifacts deployedArtifacts,
+                                      Platform          platform,
+                                      Option...         deploymentOptions)
+    {
+        DeployedArtifacts failedArtifacts = new DeployedArtifacts();
+
+        for (File file : deployedArtifacts)
+        {
+            try
+            {
+                file.delete();
+            }
+            catch (Exception e)
+            {
+                failedArtifacts.add(file);
+            }
+        }
+
+        return failedArtifacts;
     }
 
 

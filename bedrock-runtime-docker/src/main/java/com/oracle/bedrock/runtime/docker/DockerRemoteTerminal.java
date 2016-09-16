@@ -57,6 +57,7 @@ import com.oracle.bedrock.runtime.options.DisplayName;
 import com.oracle.bedrock.runtime.options.PlatformSeparators;
 import com.oracle.bedrock.runtime.options.Ports;
 import com.oracle.bedrock.runtime.options.WorkingDirectory;
+import com.oracle.bedrock.runtime.remote.DeployedArtifacts;
 import com.oracle.bedrock.runtime.remote.DeploymentArtifact;
 import com.oracle.bedrock.runtime.remote.RemoteApplicationProcess;
 import com.oracle.bedrock.runtime.remote.RemoteTerminal;
@@ -142,21 +143,31 @@ public class DockerRemoteTerminal implements RemoteTerminal, Deployer
 
 
     @Override
-    public void deploy(List<DeploymentArtifact> artifactsToDeploy,
-                       String                   remoteDirectory,
-                       Platform                 platform,
-                       Option...                deploymentOptions)
+    public DeployedArtifacts deploy(List<DeploymentArtifact> artifactsToDeploy,
+                                    String                   remoteDirectory,
+                                    Platform                 platform,
+                                    Option...                deploymentOptions)
     {
         try
         {
             Files.createDirectories(tmpFolder.toPath());
             LOGGER.log(Level.INFO, "Deploying to " + tmpFolder);
-            this.deployer.deploy(artifactsToDeploy, remoteDirectory, platform, deploymentOptions);
+
+            return this.deployer.deploy(artifactsToDeploy, remoteDirectory, platform, deploymentOptions);
         }
         catch (IOException e)
         {
             throw new RuntimeException("Error deploying artifacts", e);
         }
+    }
+
+
+    @Override
+    public DeployedArtifacts undeploy(DeployedArtifacts deployedArtifacts,
+                                      Platform          platform,
+                                      Option...         deploymentOptions)
+    {
+        return this.deployer.undeploy(deployedArtifacts, platform, deploymentOptions);
     }
 
 

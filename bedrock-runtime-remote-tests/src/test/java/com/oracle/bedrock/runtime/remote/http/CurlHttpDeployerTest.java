@@ -32,6 +32,7 @@ import com.oracle.bedrock.runtime.java.JavaApplication;
 import com.oracle.bedrock.runtime.java.options.ClassName;
 import com.oracle.bedrock.runtime.options.Argument;
 import com.oracle.bedrock.runtime.options.Console;
+import com.oracle.bedrock.runtime.remote.DeployedArtifacts;
 import com.oracle.bedrock.runtime.remote.DeploymentArtifact;
 import com.oracle.bedrock.runtime.remote.RemotePlatform;
 import com.oracle.bedrock.runtime.remote.java.applications.SleepingApplication;
@@ -80,15 +81,21 @@ public class CurlHttpDeployerTest extends AbstractHttpDeployerTest
     @Test
     public void shouldDeployEmptyArtifacts() throws Exception
     {
-        Map<String, DeploymentArtifact> artifacts        = new HashMap<>();
-        String                          destination      = "/foo";
-        Platform                        platform         = mock(Platform.class);
-        InetSocketAddress               address          = new InetSocketAddress(InetAddress.getLocalHost(), 1234);
-        OptionsByType                   optionsByType    = OptionsByType.empty();
+        Map<String, DeploymentArtifact> artifacts         = new HashMap<>();
+        String                          destination       = "/foo";
+        Platform                        platform          = mock(Platform.class);
+        InetSocketAddress               address           = new InetSocketAddress(InetAddress.getLocalHost(), 1234);
+        OptionsByType                   optionsByType     = OptionsByType.empty();
 
-        CurlHttpDeployer                deploymentMethod = new CurlHttpDeployer();
+        CurlHttpDeployer                deploymentMethod  = new CurlHttpDeployer();
+        DeployedArtifacts               deployedArtifacts = new DeployedArtifacts();
 
-        deploymentMethod.deployAllArtifacts(artifacts, destination, platform, address, optionsByType);
+        deploymentMethod.deployAllArtifacts(artifacts,
+                                            destination,
+                                            platform,
+                                            address,
+                                            optionsByType,
+                                            deployedArtifacts);
 
         verifyNoMoreInteractions(platform);
     }
@@ -97,14 +104,15 @@ public class CurlHttpDeployerTest extends AbstractHttpDeployerTest
     @Test
     public void shouldDeployNullArtifacts() throws Exception
     {
-        String            destination      = "/foo";
-        Platform          platform         = mock(Platform.class);
-        InetSocketAddress address          = new InetSocketAddress(InetAddress.getLocalHost(), 1234);
-        OptionsByType     optionsByType    = OptionsByType.empty();
+        String            destination       = "/foo";
+        Platform          platform          = mock(Platform.class);
+        InetSocketAddress address           = new InetSocketAddress(InetAddress.getLocalHost(), 1234);
+        OptionsByType     optionsByType     = OptionsByType.empty();
 
-        CurlHttpDeployer  deploymentMethod = new CurlHttpDeployer();
+        CurlHttpDeployer  deploymentMethod  = new CurlHttpDeployer();
+        DeployedArtifacts deployedArtifacts = new DeployedArtifacts();
 
-        deploymentMethod.deployAllArtifacts(null, destination, platform, address, optionsByType);
+        deploymentMethod.deployAllArtifacts(null, destination, platform, address, optionsByType, deployedArtifacts);
     }
 
 
