@@ -25,7 +25,10 @@
 
 package com.oracle.bedrock.runtime.coherence;
 
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.junit.AbstractTest;
+import com.oracle.bedrock.options.Decoration;
+import com.oracle.bedrock.runtime.ApplicationListener;
 import com.oracle.bedrock.runtime.LocalPlatform;
 import com.oracle.bedrock.runtime.Platform;
 import com.oracle.bedrock.runtime.coherence.options.CacheConfig;
@@ -49,6 +52,7 @@ import java.util.HashSet;
 
 import static com.oracle.bedrock.deferred.DeferredHelper.invoking;
 import static com.oracle.bedrock.deferred.Eventually.assertThat;
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.greaterThan;
 
@@ -366,6 +370,61 @@ public abstract class AbstractCoherenceClusterBuilderTest extends AbstractTest
             cluster.unordered().limit(2).clone(2);
 
             assertThat(invoking(cluster).getClusterSize(), is(CLUSTER_SIZE + 5));
+        }
+    }
+
+
+    /**
+     * Ensure we clean up an unsuccessfully created {@link CoherenceCluster}.
+     */
+    @Test
+    public void shouldAvoidPartialClusterCreation()
+    {
+        AvailablePortIterator   availablePorts = LocalPlatform.get().getAvailablePorts();
+        ClusterPort             clusterPort    = ClusterPort.of(new Capture<>(availablePorts));
+
+        CoherenceClusterBuilder builder        = new CoherenceClusterBuilder();
+
+        // these two should start
+        builder.include(2, CoherenceClusterMember.class, clusterPort, LocalHost.only(), ClusterName.of("Storage-Only"));
+
+        // this one will start but fail as the listener raises an exception
+        builder.include(1,
+                        CoherenceClusterMember.class,
+                        clusterPort,
+                        LocalHost.only(),
+                        ClusterName.of("Storage-Only"),
+                        Decoration.of(new ApplicationListener<CoherenceClusterMember>()
+                                      {
+                                          @Override
+                                          public void onClosing(CoherenceClusterMember application,
+                                                                OptionsByType          optionsByType)
+                                          {
+                                              // do nothing
+                                          }
+
+                                          @Override
+                                          public void onClosed(CoherenceClusterMember application,
+                                                               OptionsByType          optionsByType)
+                                          {
+                                              // do nothing
+                                          }
+
+                                          @Override
+                                          public void onLaunched(CoherenceClusterMember application)
+                                          {
+                                              throw new IllegalStateException("Let's not start this application");
+                                          }
+                                      }));
+
+        try (CoherenceCluster cluster = builder.build(Console.system()))
+        {
+            Assert.fail("The cluster should not have started");
+        }
+        catch (RuntimeException e)
+        {
+            Assert.assertThat(e.getMessage(),
+                              containsString("Automatically closed 2 of the successfully created applications out of the 3 that were meant to be created"));
         }
     }
 }

@@ -33,6 +33,7 @@ import com.oracle.bedrock.runtime.options.Discriminator;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * A base implementation of an {@link AssemblyBuilder}.
@@ -102,34 +103,60 @@ public abstract class AbstractAssemblyBuilder<A extends Application, G extends A
                                       Infrastructure infrastructure,
                                       Option...      options)
     {
-        for (Characteristics characteristic : characteristics)
+        // attempt to launch the applications using the specified infrastructure
+        try
         {
-            int                instanceCount    = characteristic.getCount();
-            Class<? extends A> applicationClass = characteristic.getApplicationClass();
-
-            for (int i = 1; i <= instanceCount; i++)
+            for (Characteristics characteristic : characteristics)
             {
-                // establish a new set of launch options for each application
-                OptionsByType launchOptions = OptionsByType.of(characteristic.getOptions()).addAll(options);
+                int                instanceCount    = characteristic.getCount();
+                Class<? extends A> applicationClass = characteristic.getApplicationClass();
 
-                // include a discriminator for the application being launched
-                launchOptions.add(Discriminator.of(i));
+                for (int i = 1; i <= instanceCount; i++)
+                {
+                    // establish a new set of launch options for each application
+                    OptionsByType launchOptions = OptionsByType.of(characteristic.getOptions()).addAll(options);
 
-                // ensure there's at least a system console
-                launchOptions.addIfAbsent(Console.system());
+                    // include a discriminator for the application being launched
+                    launchOptions.add(Discriminator.of(i));
 
-                // finalize the launching options
-                Option[] launchingOptions = launchOptions.asArray();
+                    // ensure there's at least a system console
+                    launchOptions.addIfAbsent(Console.system());
 
-                // determine the platform
-                Platform platform = infrastructure.getPlatform(launchingOptions);
+                    // finalize the launching options
+                    Option[] launchingOptions = launchOptions.asArray();
 
-                // launch the application
-                A application = platform.launch(applicationClass, launchingOptions);
+                    // determine the platform
+                    Platform platform = infrastructure.getPlatform(launchingOptions);
 
-                // add the application to the assembly
-                applications.add(application);
+                    // launch the application
+                    A application = platform.launch(applicationClass, launchingOptions);
+
+                    // add the application to the assembly
+                    applications.add(application);
+                }
             }
+        }
+        catch (Throwable throwable)
+        {
+            // ensure all recently launched applications are shutdown to prevent applications staying around
+            for (A application : applications)
+            {
+                try
+                {
+                    application.close();
+                }
+                catch (Throwable t)
+                {
+                    // we ignore any issues when the application fails to close
+                }
+            }
+
+            throw new RuntimeException("Failed to create " + this.getClass().getSimpleName()
+                                       + ". Automatically closed " + applications.size()
+                                       + " of the successfully created applications out of the "
+                                       + characteristics.stream().collect(Collectors.summingInt(c -> c.count))
+                                       + " that were meant to be created.",
+                                       throwable);
         }
     }
 
