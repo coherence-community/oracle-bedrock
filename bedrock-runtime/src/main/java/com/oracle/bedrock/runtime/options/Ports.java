@@ -186,10 +186,7 @@ public class Ports implements ComposableOption<Ports>
 
 
     /**
-     * Class description
-     *
-     * @version        Enter version here..., 16/05/06
-     * @author         Enter your name here...
+     * An individual port.
      */
     public static class Port
     {
@@ -199,11 +196,10 @@ public class Ports implements ComposableOption<Ports>
 
 
         /**
-         * Constructs ...
+         * Constructs a {@link Port}.
          *
-         *
-         * @param name
-         * @param actualPort
+         * @param name        the name of the {@link Port}
+         * @param actualPort  the port
          */
         public Port(String name,
                     int    actualPort)
@@ -213,12 +209,11 @@ public class Ports implements ComposableOption<Ports>
 
 
         /**
-         * Constructs ...
+         * Constructs a {@link Port}.
          *
-         *
-         * @param name
-         * @param actualPort
-         * @param mappedPort
+         * @param name        the name of the {@link Port}
+         * @param actualPort  the port
+         * @param mappedPort  the mapped port
          */
         public Port(String name,
                     int    actualPort,

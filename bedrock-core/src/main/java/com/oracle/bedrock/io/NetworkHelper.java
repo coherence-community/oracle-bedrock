@@ -249,6 +249,7 @@ public class NetworkHelper
     /**
      * Obtains the list of {@link InetAddress}es from those specified that satisfy a {@link Predicate}.
      *
+     * @param addresses  the {@link InetAddress}es to search
      * @param predicate  the {@link InetAddress} {@link Predicate}
      *
      * @return a {@link List} of {@link InetAddress} matching the {@link Predicate} or an empty

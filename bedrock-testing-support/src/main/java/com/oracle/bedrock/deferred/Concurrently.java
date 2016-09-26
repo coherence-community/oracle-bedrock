@@ -105,6 +105,9 @@ public class Concurrently
      * @param matcher  the {@link Matcher} for the value
      * @param options  the {@link Option}s for the assertion
      *
+     * @return an {@link Concurrent.Assertion} to be used to determine the current success
+     *         of the concurrent assertion
+     *
      * @throws AssertionError if the assertion fails
      */
     public static <T> Concurrent.Assertion assertThat(T                  value,
@@ -127,6 +130,9 @@ public class Concurrently
      * @param message   the message for the AssertionError (<code>null</code> ok)
      * @param value     the value
      * @param matcher   the {@link Matcher} for the value
+     *
+     * @return an {@link Concurrent.Assertion} to be used to determine the current success
+     *         of the concurrent assertion
      *
      * @throws AssertionError if the assertion fails
      */
@@ -151,6 +157,9 @@ public class Concurrently
      * @param value    the value
      * @param matcher  the {@link Matcher} for the value
      * @param options  the {@link Option}s
+     *
+     * @return an {@link Concurrent.Assertion} to be used to determine the current success
+     *         of the concurrent assertion
      *
      * @throws AssertionError if the assertion fails
      */

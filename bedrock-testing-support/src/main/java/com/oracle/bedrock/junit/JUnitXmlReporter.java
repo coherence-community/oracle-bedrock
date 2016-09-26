@@ -45,8 +45,7 @@ import java.util.TreeSet;
 public class JUnitXmlReporter extends JUnitReporter
 {
     /**
-     * Constructs ...
-     *
+     * Constructs a {@link JUnitXmlReporter}.
      */
     public JUnitXmlReporter()
     {
@@ -55,10 +54,9 @@ public class JUnitXmlReporter extends JUnitReporter
 
 
     /**
-     * Constructs ...
+     * Constructs a {@link JUnitXmlReporter}.
      *
-     *
-     * @param reportFolder
+     * @param reportFolder  the report folder
      */
     public JUnitXmlReporter(File reportFolder)
     {

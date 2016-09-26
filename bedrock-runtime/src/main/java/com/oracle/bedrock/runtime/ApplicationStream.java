@@ -210,6 +210,7 @@ public interface ApplicationStream<T extends Application>
      * The optionally specified {@link Option}s may be used to override those defined by the {@link Application}s
      * when originally launched.
      *
+     * @param count    the number of clones to create
      * @param options  the override {@link Option}s
      */
     void clone(int       count,

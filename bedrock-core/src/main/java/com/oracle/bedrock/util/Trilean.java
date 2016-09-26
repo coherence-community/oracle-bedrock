@@ -28,7 +28,7 @@ package com.oracle.bedrock.util;
 /**
  * A enum for representing three-state logic values.
  *
- * @seealso https://en.wikipedia.org/wiki/Three-valued_logic
+ * For more information, see <a href="https://en.wikipedia.org/wiki/Three-valued_logic">Three Valued Logic</a>.
  * <p>
  * Copyright (c) 2016. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.

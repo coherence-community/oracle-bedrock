@@ -27,12 +27,13 @@ package com.oracle.bedrock.deferred.options;
 
 import com.oracle.bedrock.Option;
 import com.oracle.bedrock.OptionsByType;
+import com.oracle.bedrock.deferred.Concurrent;
 import com.oracle.bedrock.deferred.Concurrently;
 
 /**
  * An {@link Option} indicating if a {@link Concurrently} created
- * {@link Concurrently.Assertion} will fail-fast by interrupting the {@link Thread}
- * that requested the concurrent assertion when the {@link Concurrently.Assertion} fails.
+ * assertion will fail-fast by interrupting the {@link Thread}
+ * that requested the concurrent assertion.
  * <p>
  * Copyright (c) 2016. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
@@ -42,7 +43,7 @@ import com.oracle.bedrock.deferred.Concurrently;
 public class FailFast implements Option
 {
     /**
-     * Should a {@link Concurrently.Assertion} fail fast?
+     * Should a {@link Concurrent.Assertion} fail fast?
      */
     private final boolean enabled;
 
@@ -50,7 +51,7 @@ public class FailFast implements Option
     /**
      * Constructs a {@link FailFast}.
      *
-     * @param enabled  should a {@link Concurrently.ConcurrentAssertion} fail-fast?
+     * @param enabled  should a {@link Concurrent.Assertion} fail-fast?
      */
     private FailFast(boolean enabled)
     {
