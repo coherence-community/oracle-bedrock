@@ -22,7 +22,7 @@ For example:  To Launch a "HelloWorld" Java Application on the current classpath
     LocalPlatform platform = LocalPlatform.get();
 
     try (JavaApplication application = platform.launch(JavaApplication.class,
-                                                       ClassName.of(HelloWorld.class)) {
+                                                       ClassName.of(HelloWorld.class))) {
 
         // potentially do something with the application ...
 
