@@ -118,7 +118,7 @@ public class JmxProfile implements Profile, ComposableOption<JmxProfile>
         if (hostName.isPresent())
         {
             systemProperties = systemProperties.addIfAbsent(SystemProperty.of(JavaApplication.JAVA_RMI_SERVER_HOSTNAME,
-                                                                              hostName));
+                                                                              hostName.get()));
         }
         else
         {
