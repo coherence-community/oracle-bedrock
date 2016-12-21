@@ -51,7 +51,16 @@ public class ContainerBasedCoherenceClusterBuilderTest extends AbstractCoherence
     @Ignore
     public void shouldPerformRollingRestartOfCluster()
     {
-        // we skip this test as performing a rolling restart in single JVM
-        // container is not supported for Coherence
+        // we skip this test as membership starting/stopping events and
+        // recovery is not supported in a single JVM
+    }
+
+
+    @Override
+    @Ignore
+    public void shouldFailOverNamedCache()
+    {
+        // we skip this test as membership starting/stopping events and
+        // recovery is not supported in a single JVM
     }
 }

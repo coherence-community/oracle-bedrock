@@ -75,19 +75,19 @@ class CoherenceNamedCache implements NamedCache
     /**
      * The name of the {@link NamedCache}.
      */
-    private String cacheName;
+    private final String cacheName;
 
     /**
      * The {@link RemoteCallableStaticMethod} to use in the
      * {@link CoherenceClusterMember} to acquire the {@link NamedCache}.
      */
-    private RemoteCallableStaticMethod<NamedCache> producer;
+    private final RemoteCallableStaticMethod<NamedCache> producer;
 
     /**
      * The {@link RemoteMethodInvocation.Interceptor} to use for intercepting
      * and transforming remote method invocations.
      */
-    private RemoteMethodInvocation.Interceptor interceptor;
+    private final RemoteMethodInvocation.Interceptor interceptor;
 
 
     /**
@@ -115,84 +115,17 @@ class CoherenceNamedCache implements NamedCache
 
 
     /**
-     * Invoke the specified void method remotely in the {@link CoherenceClusterMember} on the
-     * {@link NamedCache} provided by the {@link #producer}.
-     *
-     * @param methodName  the name of the method
-     * @param arguments   the arguments for the method
-     *
-     * @throws RuntimeException  if any exception occurs remotely
-     */
-    protected void remotelyInvoke(String    methodName,
-                                  Object... arguments)
-    {
-        // notify the interceptor that we're about make a remote invocation
-        Method method = ReflectionHelper.getCompatibleMethod(NamedCache.class, methodName, arguments);
-
-        interceptor.onBeforeRemoteInvocation(method, arguments);
-
-        try
-        {
-            // submit the remote method invocation
-            CompletableFuture future = member.submit(new RemoteMethodInvocation(producer,
-                                                                                methodName,
-                                                                                arguments,
-                                                                                interceptor));
-
-            // intercept the result after the remote invocation
-            interceptor.onAfterRemoteInvocation(method, arguments, future.get());
-        }
-        catch (IllegalStateException e)
-        {
-            if (cluster.isPresent())
-            {
-                Optional<CoherenceClusterMember> optional = cluster.get().findAny();
-
-                if (optional.isPresent())
-                {
-                    this.member = optional.get();
-
-                    // retry the request
-                    remotelyInvoke(methodName, arguments);
-                }
-                else
-                {
-                    // we just re-throw if there's no equivalent member in a cluster
-                    throw e;
-                }
-            }
-            else
-            {
-                // we just re-throw if the member is not part of a cluster
-                throw e;
-            }
-        }
-        catch (RuntimeException e)
-        {
-            // re-throw runtime exceptions
-            throw e;
-        }
-        catch (Exception e)
-        {
-            throw new RuntimeException("Failed to execute " + methodName + " with arguments "
-                                       + Arrays.toString(arguments),
-                                       interceptor.onRemoteInvocationException(method, arguments, e));
-        }
-    }
-
-
-    /**
      * Invoke the specified method remotely in the {@link CoherenceClusterMember} on the
      * {@link NamedCache} provided by the {@link #producer}.
      *
      * @param methodName  the name of the method
-     * @param returnType  the expected return type from the method
      * @param arguments   the arguments for the method
+     *
+     * @return the result of the remote method execution
      *
      * @throws RuntimeException  if any exception occurs remotely
      */
     protected <T> T remotelyInvoke(String    methodName,
-                                   Class<T>  returnType,
                                    Object... arguments)
     {
         // notify the interceptor that we're about make a remote invocation
@@ -200,51 +133,73 @@ class CoherenceNamedCache implements NamedCache
 
         interceptor.onBeforeRemoteInvocation(method, arguments);
 
-        try
-        {
-            // submit the remote method invocation
-            CompletableFuture future = member.submit(new RemoteMethodInvocation(producer,
-                                                                                methodName,
-                                                                                arguments,
-                                                                                interceptor));
+        int retryCount = 0;
 
-            // intercept the result after the remote invocation
-            return (T) interceptor.onAfterRemoteInvocation(method, arguments, future.get());
-        }
-        catch (IllegalStateException e)
+        // we try the request until we've run out of operational cluster members
+        while (retryCount < (cluster.isPresent() ? cluster.get().count() : 1))
         {
-            if (cluster.isPresent())
+            // we'll need to choose a new member to perform the request when the current one is no longer operational
+            // or we have to retry
+            boolean chooseNewMember = !member.isOperational() || retryCount > 0;
+
+            if (chooseNewMember)
             {
-                Optional<CoherenceClusterMember> optional = cluster.get().findAny();
-
-                if (optional.isPresent())
+                if (cluster.isPresent())
                 {
-                    this.member = optional.get();
+                    Optional<CoherenceClusterMember> optional = cluster.get().findAny();
 
-                    // retry the request
-                    return remotelyInvoke(methodName, returnType, arguments);
+                    if (optional.isPresent())
+                    {
+                        this.member = optional.get();
+                    }
+                    else
+                    {
+                        // there's no longer a member we can use
+                        throw new IllegalStateException("The underlying Cluster no longer has available Cluster Members to perform the request ["
+                                                        + methodName + "]");
+                    }
                 }
                 else
                 {
-                    // we just re-throw if there's no equivalent member in a cluster
-                    throw e;
+                    // we just re-throw if the member is not part of a cluster
+                    throw new IllegalStateException("The underlying Cluster Member [" + member.getName()
+                                                    + "] is no longer available to perform the request [" + methodName
+                                                    + "]");
                 }
             }
-            else
+
+            try
             {
-                // we just re-throw if the member is not part of a cluster
+                // submit the remote method invocation
+                CompletableFuture future = member.submit(new RemoteMethodInvocation(producer,
+                                                                                    methodName,
+                                                                                    arguments,
+                                                                                    interceptor));
+
+                // intercept the result after the remote invocation
+                return (T) interceptor.onAfterRemoteInvocation(method, arguments, future.get());
+            }
+            catch (IllegalStateException e)
+            {
+                // retry the request with a different cluster member when the request when the submission fails
+                retryCount++;
+            }
+            catch (RuntimeException e)
+            {
+                // re-throw runtime exceptions
                 throw e;
             }
+            catch (Exception e)
+            {
+                throw new RuntimeException("Failed to execute [" + methodName + "] with arguments "
+                                           + Arrays.toString(arguments),
+                                           interceptor.onRemoteInvocationException(method, arguments, e));
+            }
+
         }
-        catch (RuntimeException e)
-        {
-            // re-throw runtime exceptions
-            throw e;
-        }
-        catch (Exception e)
-        {
-            throw new RuntimeException(interceptor.onRemoteInvocationException(method, arguments, e));
-        }
+
+        throw new IllegalStateException("Failed to perform request [" + methodName + "] using [" + retryCount
+                                        + "] Cluster Members");
     }
 
 
@@ -265,7 +220,7 @@ class CoherenceNamedCache implements NamedCache
     @Override
     public boolean isActive()
     {
-        return remotelyInvoke("isActive", Boolean.class);
+        return remotelyInvoke("isActive");
     }
 
 
@@ -288,14 +243,14 @@ class CoherenceNamedCache implements NamedCache
                       Object value,
                       long   expiry)
     {
-        return remotelyInvoke("put", Object.class, key, value, expiry);
+        return remotelyInvoke("put", key, value, expiry);
     }
 
 
     @Override
     public Map getAll(Collection keys)
     {
-        return remotelyInvoke("getAll", Map.class, keys);
+        return remotelyInvoke("getAll", keys);
     }
 
 
@@ -303,21 +258,21 @@ class CoherenceNamedCache implements NamedCache
     public boolean lock(Object key,
                         long   duration)
     {
-        return remotelyInvoke("lock", Boolean.class, key, duration);
+        return remotelyInvoke("lock", key, duration);
     }
 
 
     @Override
     public boolean lock(Object key)
     {
-        return remotelyInvoke("lock", Boolean.class, key);
+        return remotelyInvoke("lock", key);
     }
 
 
     @Override
     public boolean unlock(Object key)
     {
-        return remotelyInvoke("unlock", Boolean.class, key);
+        return remotelyInvoke("unlock", key);
     }
 
 
@@ -325,7 +280,7 @@ class CoherenceNamedCache implements NamedCache
     public Object invoke(Object         key,
                          EntryProcessor processor)
     {
-        return remotelyInvoke("invoke", Object.class, key, processor);
+        return remotelyInvoke("invoke", key, processor);
     }
 
 
@@ -333,7 +288,7 @@ class CoherenceNamedCache implements NamedCache
     public Map invokeAll(Collection     keys,
                          EntryProcessor processor)
     {
-        return remotelyInvoke("invokeAll", Map.class, keys, processor);
+        return remotelyInvoke("invokeAll", keys, processor);
     }
 
 
@@ -341,7 +296,7 @@ class CoherenceNamedCache implements NamedCache
     public Map invokeAll(Filter         filter,
                          EntryProcessor processor)
     {
-        return remotelyInvoke("invokeAll", Map.class, filter, processor);
+        return remotelyInvoke("invokeAll", filter, processor);
     }
 
 
@@ -349,7 +304,7 @@ class CoherenceNamedCache implements NamedCache
     public Object aggregate(Collection      collection,
                             EntryAggregator aggregator)
     {
-        return remotelyInvoke("aggregate", Object.class, collection, aggregator);
+        return remotelyInvoke("aggregate", collection, aggregator);
     }
 
 
@@ -357,7 +312,7 @@ class CoherenceNamedCache implements NamedCache
     public Object aggregate(Filter          filter,
                             EntryAggregator aggregator)
     {
-        return remotelyInvoke("aggregate", Object.class, filter, aggregator);
+        return remotelyInvoke("aggregate", filter, aggregator);
     }
 
 
@@ -412,14 +367,14 @@ class CoherenceNamedCache implements NamedCache
     @Override
     public Set keySet(Filter filter)
     {
-        return remotelyInvoke("keySet", Set.class, filter);
+        return remotelyInvoke("keySet", filter);
     }
 
 
     @Override
     public Set entrySet(Filter filter)
     {
-        return remotelyInvoke("entrySet", Set.class, filter);
+        return remotelyInvoke("entrySet", filter);
     }
 
 
@@ -427,7 +382,7 @@ class CoherenceNamedCache implements NamedCache
     public Set entrySet(Filter     filter,
                         Comparator comparator)
     {
-        return remotelyInvoke("entrySet", Set.class, filter, comparator);
+        return remotelyInvoke("entrySet", filter, comparator);
     }
 
 
@@ -450,35 +405,35 @@ class CoherenceNamedCache implements NamedCache
     @Override
     public int size()
     {
-        return remotelyInvoke("size", Integer.class);
+        return remotelyInvoke("size");
     }
 
 
     @Override
     public boolean isEmpty()
     {
-        return remotelyInvoke("isEmpty", Boolean.class);
+        return remotelyInvoke("isEmpty");
     }
 
 
     @Override
     public boolean containsKey(Object key)
     {
-        return remotelyInvoke("containsKey", Boolean.class, key);
+        return remotelyInvoke("containsKey", key);
     }
 
 
     @Override
     public boolean containsValue(Object value)
     {
-        return remotelyInvoke("containsValue", Boolean.class, value);
+        return remotelyInvoke("containsValue", value);
     }
 
 
     @Override
     public Object get(Object key)
     {
-        return remotelyInvoke("get", Object.class, key);
+        return remotelyInvoke("get", key);
     }
 
 
@@ -486,14 +441,14 @@ class CoherenceNamedCache implements NamedCache
     public Object put(Object key,
                       Object value)
     {
-        return remotelyInvoke("put", Object.class, key, value);
+        return remotelyInvoke("put", key, value);
     }
 
 
     @Override
     public Object remove(Object key)
     {
-        return remotelyInvoke("remove", Object.class, key);
+        return remotelyInvoke("remove", key);
     }
 
 
@@ -514,21 +469,21 @@ class CoherenceNamedCache implements NamedCache
     @Override
     public Set keySet()
     {
-        return remotelyInvoke("keySet", Set.class);
+        return remotelyInvoke("keySet");
     }
 
 
     @Override
     public Collection values()
     {
-        return remotelyInvoke("values", Collection.class);
+        return remotelyInvoke("values");
     }
 
 
     @Override
     public Set<Map.Entry> entrySet()
     {
-        return remotelyInvoke("entrySet", Set.class);
+        return remotelyInvoke("entrySet");
     }
 
 

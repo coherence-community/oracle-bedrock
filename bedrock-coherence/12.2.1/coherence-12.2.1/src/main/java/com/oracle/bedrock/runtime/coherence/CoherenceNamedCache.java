@@ -131,136 +131,99 @@ class CoherenceNamedCache<K, V> implements NamedCache<K, V>
 
 
     /**
-     * Invoke the specified void method remotely in the {@link CoherenceClusterMember} on the
-     * {@link NamedCache} provided by the {@link #producer}.
-     *
-     * @param methodName  the name of the method
-     * @param arguments   the arguments for the method
-     *
-     * @throws RuntimeException  if any exception occurs remotely
-     */
-    protected void remotelyInvoke(String    methodName,
-                                  Object... arguments)
-    {
-        // notify the interceptor that we're about make a remote invocation
-        Method method = ReflectionHelper.getCompatibleMethod(NamedCache.class, methodName, arguments);
-
-        interceptor.onBeforeRemoteInvocation(method, arguments);
-
-        try
-        {
-            // submit the remote method invocation
-            CompletableFuture future = member.submit(new RemoteMethodInvocation(producer,
-                                                                                methodName,
-                                                                                arguments,
-                                                                                interceptor));
-
-            // intercept the result after the remote invocation
-            interceptor.onAfterRemoteInvocation(method, arguments, future.get());
-        }
-        catch (IllegalStateException e)
-        {
-            if (cluster.isPresent())
-            {
-                Optional<CoherenceClusterMember> optional = cluster.get().findAny();
-
-                if (optional.isPresent())
-                {
-                    this.member = optional.get();
-
-                    // retry the request
-                    remotelyInvoke(methodName, arguments);
-                }
-                else
-                {
-                    // we just re-throw if there's no equivalent member in a cluster
-                    throw e;
-                }
-            }
-            else
-            {
-                // we just re-throw if the member is not part of a cluster
-                throw e;
-            }
-        }
-        catch (RuntimeException e)
-        {
-            // re-throw runtime exceptions
-            throw e;
-        }
-        catch (Exception e)
-        {
-            throw new RuntimeException("Failed to execute " + methodName + " with arguments "
-                                       + Arrays.toString(arguments),
-                                       interceptor.onRemoteInvocationException(method, arguments, e));
-        }
-    }
-
-
-    /**
      * Invoke the specified method remotely in the {@link CoherenceClusterMember} on the
      * {@link NamedCache} provided by the {@link #producer}.
      *
      * @param methodName  the name of the method
-     * @param returnType  the expected return type from the method
      * @param arguments   the arguments for the method
+     *
+     * @return the result of the remote method execution
      *
      * @throws RuntimeException  if any exception occurs remotely
      */
     protected <T> T remotelyInvoke(String    methodName,
-                                   Class<T>  returnType,
                                    Object... arguments)
     {
         // notify the interceptor that we're about make a remote invocation
         Method method = ReflectionHelper.getCompatibleMethod(NamedCache.class, methodName, arguments);
 
-        interceptor.onBeforeRemoteInvocation(method, arguments);
-
-        try
+        if (method == null)
         {
-            // submit the remote method invocation
-            CompletableFuture future = member.submit(new RemoteMethodInvocation(producer,
-                                                                                methodName,
-                                                                                arguments,
-                                                                                interceptor));
-
-            // intercept the result after the remote invocation
-            return (T) interceptor.onAfterRemoteInvocation(method, arguments, future.get());
+            throw new UnsupportedOperationException("Unable to locate method [" + methodName + "] with arguments ["
+                                                    + Arrays.toString(arguments) + "] on NamedCache interface");
         }
-        catch (IllegalStateException e)
+        else
         {
-            if (cluster.isPresent())
+            interceptor.onBeforeRemoteInvocation(method, arguments);
+        }
+
+        int retryCount = 0;
+
+        // we try the request until we've run out of operational cluster members
+        while (retryCount < (cluster.isPresent() ? cluster.get().count() : 1))
+        {
+            // we'll need to choose a new member to perform the request when the current one is no longer operational
+            // or we have to retry
+            boolean chooseNewMember = !member.isOperational() || retryCount > 0;
+
+            if (chooseNewMember)
             {
-                Optional<CoherenceClusterMember> optional = cluster.get().findAny();
-
-                if (optional.isPresent())
+                if (cluster.isPresent())
                 {
-                    this.member = optional.get();
+                    Optional<CoherenceClusterMember> optional = cluster.get().findAny();
 
-                    // retry the request
-                    return remotelyInvoke(methodName, returnType, arguments);
+                    if (optional.isPresent())
+                    {
+                        this.member = optional.get();
+                    }
+                    else
+                    {
+                        // there's no longer a member we can use
+                        throw new IllegalStateException("The underlying Cluster no longer has available Cluster Members to perform the request ["
+                                                        + methodName + "]");
+                    }
                 }
                 else
                 {
-                    // we just re-throw if there's no equivalent member in a cluster
-                    throw e;
+                    // we just re-throw if the member is not part of a cluster
+                    throw new IllegalStateException("The underlying Cluster Member [" + member.getName()
+                                                    + "] is no longer available to perform the request [" + methodName
+                                                    + "]");
                 }
             }
-            else
+
+            try
             {
-                // we just re-throw if the member is not part of a cluster
+                // submit the remote method invocation
+                CompletableFuture future = member.submit(new RemoteMethodInvocation(producer,
+                                                                                    methodName,
+                                                                                    arguments,
+                                                                                    interceptor));
+
+                // intercept the result after the remote invocation
+                return (T) interceptor.onAfterRemoteInvocation(method, arguments, future.get());
+            }
+            catch (IllegalStateException e)
+            {
+                // retry the request with a different cluster member when the request when the submission fails
+                retryCount++;
+            }
+            catch (RuntimeException e)
+            {
+                // re-throw runtime exceptions
                 throw e;
             }
+            catch (Exception e)
+            {
+                throw new RuntimeException("Failed to execute [" + methodName + "] with arguments "
+                                           + Arrays.toString(arguments),
+                                           interceptor.onRemoteInvocationException(method, arguments, e));
+            }
+
         }
-        catch (RuntimeException e)
-        {
-            // re-throw runtime exceptions
-            throw e;
-        }
-        catch (Exception e)
-        {
-            throw new RuntimeException(interceptor.onRemoteInvocationException(method, arguments, e));
-        }
+
+        throw new IllegalStateException("Failed to perform request [" + methodName + "] using [" + retryCount
+                                        + "] Cluster Members");
     }
 
 
@@ -281,7 +244,7 @@ class CoherenceNamedCache<K, V> implements NamedCache<K, V>
     @Override
     public boolean isActive()
     {
-        return remotelyInvoke("isActive", Boolean.class);
+        return remotelyInvoke("isActive");
     }
 
 
@@ -304,14 +267,14 @@ class CoherenceNamedCache<K, V> implements NamedCache<K, V>
                  V    value,
                  long expiry)
     {
-        return remotelyInvoke("put", valueClass, key, value, expiry);
+        return remotelyInvoke("put", key, value, expiry);
     }
 
 
     @Override
     public Map<K, V> getAll(java.util.Collection<? extends K> keys)
     {
-        return remotelyInvoke("getAll", Map.class, keys);
+        return remotelyInvoke("getAll", keys);
     }
 
 
@@ -319,21 +282,21 @@ class CoherenceNamedCache<K, V> implements NamedCache<K, V>
     public boolean lock(Object key,
                         long   duration)
     {
-        return remotelyInvoke("lock", Boolean.class, key, duration);
+        return remotelyInvoke("lock", key, duration);
     }
 
 
     @Override
     public boolean lock(Object key)
     {
-        return remotelyInvoke("lock", Boolean.class, key);
+        return remotelyInvoke("lock", key);
     }
 
 
     @Override
     public boolean unlock(Object key)
     {
-        return remotelyInvoke("unlock", Boolean.class, key);
+        return remotelyInvoke("unlock", key);
     }
 
 
@@ -341,7 +304,7 @@ class CoherenceNamedCache<K, V> implements NamedCache<K, V>
     public <R> R invoke(K                       key,
                         EntryProcessor<K, V, R> processor)
     {
-        return (R) remotelyInvoke("invoke", Object.class, key, processor);
+        return (R) remotelyInvoke("invoke", key, processor);
     }
 
 
@@ -349,7 +312,7 @@ class CoherenceNamedCache<K, V> implements NamedCache<K, V>
     public <R> Map<K, R> invokeAll(Collection<? extends K> keys,
                                    EntryProcessor<K, V, R> processor)
     {
-        return remotelyInvoke("invokeAll", Map.class, keys, processor);
+        return remotelyInvoke("invokeAll", keys, processor);
     }
 
 
@@ -357,7 +320,7 @@ class CoherenceNamedCache<K, V> implements NamedCache<K, V>
     public <R> Map<K, R> invokeAll(Filter                  filter,
                                    EntryProcessor<K, V, R> processor)
     {
-        return remotelyInvoke("invokeAll", Map.class, filter, processor);
+        return remotelyInvoke("invokeAll", filter, processor);
     }
 
 
@@ -365,7 +328,7 @@ class CoherenceNamedCache<K, V> implements NamedCache<K, V>
     public <R> R aggregate(Collection<? extends K>                  keys,
                            EntryAggregator<? super K, ? super V, R> aggregator)
     {
-        return (R) remotelyInvoke("aggregate", Object.class, keys, aggregator);
+        return (R) remotelyInvoke("aggregate", keys, aggregator);
     }
 
 
@@ -373,7 +336,7 @@ class CoherenceNamedCache<K, V> implements NamedCache<K, V>
     public <R> R aggregate(Filter                                   filter,
                            EntryAggregator<? super K, ? super V, R> aggregator)
     {
-        return (R) remotelyInvoke("aggregate", Object.class, filter, aggregator);
+        return (R) remotelyInvoke("aggregate", filter, aggregator);
     }
 
 
@@ -428,14 +391,14 @@ class CoherenceNamedCache<K, V> implements NamedCache<K, V>
     @Override
     public Set<K> keySet(Filter filter)
     {
-        return remotelyInvoke("keySet", Set.class, filter);
+        return remotelyInvoke("keySet", filter);
     }
 
 
     @Override
     public Set<Map.Entry<K, V>> entrySet(Filter filter)
     {
-        return remotelyInvoke("entrySet", Set.class, filter);
+        return remotelyInvoke("entrySet", filter);
     }
 
 
@@ -443,7 +406,7 @@ class CoherenceNamedCache<K, V> implements NamedCache<K, V>
     public Set<Map.Entry<K, V>> entrySet(Filter     filter,
                                          Comparator comparator)
     {
-        return remotelyInvoke("entrySet", Set.class, filter, comparator);
+        return remotelyInvoke("entrySet", filter, comparator);
     }
 
 
@@ -466,35 +429,35 @@ class CoherenceNamedCache<K, V> implements NamedCache<K, V>
     @Override
     public int size()
     {
-        return remotelyInvoke("size", Integer.class);
+        return remotelyInvoke("size");
     }
 
 
     @Override
     public boolean isEmpty()
     {
-        return remotelyInvoke("isEmpty", Boolean.class);
+        return remotelyInvoke("isEmpty");
     }
 
 
     @Override
     public boolean containsKey(Object key)
     {
-        return remotelyInvoke("containsKey", Boolean.class, key);
+        return remotelyInvoke("containsKey", key);
     }
 
 
     @Override
     public boolean containsValue(Object value)
     {
-        return remotelyInvoke("containsValue", Boolean.class, value);
+        return remotelyInvoke("containsValue", value);
     }
 
 
     @Override
     public V get(Object key)
     {
-        return remotelyInvoke("get", valueClass, key);
+        return remotelyInvoke("get", key);
     }
 
 
@@ -502,14 +465,14 @@ class CoherenceNamedCache<K, V> implements NamedCache<K, V>
     public V put(K key,
                  V value)
     {
-        return (V) remotelyInvoke("put", valueClass, key, value);
+        return (V) remotelyInvoke("put", key, value);
     }
 
 
     @Override
     public V remove(Object key)
     {
-        return (V) remotelyInvoke("remove", valueClass, key);
+        return (V) remotelyInvoke("remove", key);
     }
 
 
@@ -537,21 +500,21 @@ class CoherenceNamedCache<K, V> implements NamedCache<K, V>
     @Override
     public Set<K> keySet()
     {
-        return remotelyInvoke("keySet", Set.class);
+        return remotelyInvoke("keySet");
     }
 
 
     @Override
     public Collection<V> values()
     {
-        return remotelyInvoke("values", Collection.class);
+        return remotelyInvoke("values");
     }
 
 
     @Override
     public Set<Map.Entry<K, V>> entrySet()
     {
-        return remotelyInvoke("entrySet", Set.class);
+        return remotelyInvoke("entrySet");
     }
 
 
