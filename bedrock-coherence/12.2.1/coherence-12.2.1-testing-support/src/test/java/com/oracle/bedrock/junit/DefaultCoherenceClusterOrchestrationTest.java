@@ -60,7 +60,7 @@ public class DefaultCoherenceClusterOrchestrationTest
     @Test
     public void shouldFormDefaultCluster()
     {
-        Assert.assertThat(orchestration.getCluster().getClusterSize(), is(3));
+        Assert.assertThat(orchestration.getCluster().getClusterSize(), is(2));
     }
 
 
@@ -75,7 +75,7 @@ public class DefaultCoherenceClusterOrchestrationTest
 
         NamedCache               cache   = session.ensureCache("dist-example", null);
 
-        Eventually.assertThat(orchestration.getCluster().getClusterSize(), is(4));
+        Eventually.assertThat(orchestration.getCluster().getClusterSize(), is(3));
 
         cache.put("message", "hello world");
 
@@ -96,7 +96,7 @@ public class DefaultCoherenceClusterOrchestrationTest
 
         NamedCache cache = session.ensureCache("dist-example", null);
 
-        Assert.assertThat(orchestration.getCluster().getClusterSize(), is(3));
+        Assert.assertThat(orchestration.getCluster().getClusterSize(), is(2));
 
         cache.put("message", "hello world");
 

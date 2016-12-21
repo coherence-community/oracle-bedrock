@@ -97,11 +97,6 @@ public class CoherenceClusterOrchestration extends ExternalResource
     private OptionsByType storageMemberOptions;
 
     /**
-     * The {@link OptionsByType} to use as a basis for constructing proxy {@link CoherenceClusterMember}s.
-     */
-    private OptionsByType proxyMemberOptions;
-
-    /**
      * The {@link OptionsByType} to use when creating the {@link CoherenceCluster}.
      */
     private OptionsByType clusterCreationOptions;
@@ -132,11 +127,6 @@ public class CoherenceClusterOrchestration extends ExternalResource
      */
     private Capture<Integer> clusterPort;
 
-    /**
-     * The extend port.
-     */
-    private Capture<Integer> extendPort;
-
 
     /**
      * Constructs a {@link CoherenceClusterOrchestration}.
@@ -149,9 +139,6 @@ public class CoherenceClusterOrchestration extends ExternalResource
         // establish a Cluster port
         this.clusterPort = new Capture<>(platform.getAvailablePorts());
 
-        // establish the Extend port (is the same as the cluster port)
-        this.extendPort = clusterPort;
-
         // establish a common member options on which to base storage enabled and proxy members
         this.commonMemberOptions = OptionsByType.empty();
 
@@ -163,10 +150,6 @@ public class CoherenceClusterOrchestration extends ExternalResource
         this.commonMemberOptions.add(ClusterPort.of(clusterPort));
         this.commonMemberOptions.add(Multicast.ttl(0));
 
-        // we also define the proxy configuration (this will only be used if it's enabled)
-        this.commonMemberOptions.add(SystemProperty.of("tangosol.coherence.extend.address", hostAddress));
-        this.commonMemberOptions.add(SystemProperty.of("tangosol.coherence.extend.port", extendPort));
-
         // establish default java process configuration
         this.commonMemberOptions.add(Headless.enabled());
         this.commonMemberOptions.add(HotSpot.Mode.SERVER);
@@ -175,9 +158,8 @@ public class CoherenceClusterOrchestration extends ExternalResource
         // by default we'll use the SystemApplicationConsole
         this.commonMemberOptions.add(Console.system());
 
-        // by default we don't have any special options for storage or proxy members
+        // by default we don't have any special options for storage members
         this.storageMemberOptions = OptionsByType.empty();
-        this.proxyMemberOptions   = OptionsByType.empty();
 
         // by default we don't have a cluster
         this.cluster = null;
@@ -222,32 +204,8 @@ public class CoherenceClusterOrchestration extends ExternalResource
 
         clusterBuilder.include(storageMemberCount, CoherenceClusterMember.class, storageServerOptions.asArray());
 
-        // define the schema for the proxy enabled members of the cluster
-        OptionsByType proxyServerOptions = createProxyServerOptions();
-
-        proxyServerOptions.addAll(clusterCreationOptions);
-
-        int proxyMemberCount = 1;
-
-        clusterBuilder.include(proxyMemberCount, CoherenceClusterMember.class, proxyServerOptions.asArray());
-
-        int preferredClusterSize = storageMemberCount + proxyMemberCount;
-
         // establish the cluster
         cluster = clusterBuilder.build();
-
-        // ensure that the cluster has been orchestrated correctly
-        Eventually.assertThat(invoking(cluster).getClusterSize(), is(preferredClusterSize));
-
-        // ensure that all services marked as autostart on the proxy have started
-        CoherenceClusterMember proxyServer     = cluster.get("proxy-1");
-
-        Set<String>            setServiceNames = proxyServer.invoke(new GetAutoStartServiceNames());
-
-        for (String sServiceName : setServiceNames)
-        {
-            Eventually.assertThat(invoking(proxyServer).isServiceRunning(sServiceName), is(true));
-        }
 
         // let's ensure that we don't have a local cluster member
         CacheFactory.setCacheFactoryBuilder(null);
@@ -298,21 +256,6 @@ public class CoherenceClusterOrchestration extends ExternalResource
         optionsByType.add(LocalStorage.enabled());
 
         optionsByType.addAll(storageMemberOptions);
-
-        return optionsByType;
-    }
-
-
-    protected OptionsByType createProxyServerOptions()
-    {
-        OptionsByType optionsByType = OptionsByType.of(commonMemberOptions);
-
-        optionsByType.add(DisplayName.of("proxy"));
-        optionsByType.add(RoleName.of("proxy"));
-        optionsByType.add(LocalStorage.disabled());
-        optionsByType.add(SystemProperty.of("tangosol.coherence.extend.enabled", true));
-
-        optionsByType.addAll(proxyMemberOptions);
 
         return optionsByType;
     }
@@ -404,22 +347,6 @@ public class CoherenceClusterOrchestration extends ExternalResource
     public CoherenceClusterOrchestration withStorageMemberOptions(Option... options)
     {
         storageMemberOptions.addAll(options);
-
-        return this;
-    }
-
-
-    /**
-     * Adds the specified {@link Option}s to the {@link CoherenceClusterOrchestration} for
-     * launching all proxy server {@link CoherenceClusterMember}s.
-     *
-     * @param options  the {@link Option}s for proxy server {@link CoherenceClusterMember}s
-     *
-     * @return  the {@link CoherenceClusterOrchestration}
-     */
-    public CoherenceClusterOrchestration withProxyMemberOptions(Option... options)
-    {
-        proxyMemberOptions.addAll(options);
 
         return this;
     }

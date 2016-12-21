@@ -1,9 +1,9 @@
 /*
- * File: CustomCoherenceClusterOrchestrationTest.java
+ * File: SingletonCoherenceClusterOrchestrationTest.java
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * The contents of this file are subject to the terms and conditions of 
+ * The contents of this file are subject to the terms and conditions of
  * the Common Development and Distribution License 1.0 (the "License").
  *
  * You may not use this file except in compliance with the License.
@@ -27,8 +27,8 @@ package com.oracle.bedrock.junit;
 
 import com.oracle.bedrock.runtime.coherence.CoherenceCluster;
 import com.oracle.bedrock.runtime.coherence.CoherenceClusterMember;
+import com.oracle.bedrock.runtime.coherence.options.ClusterName;
 import com.oracle.bedrock.runtime.java.options.SystemProperty;
-import com.oracle.bedrock.runtime.options.StabilityPredicate;
 import org.junit.ClassRule;
 import org.junit.Test;
 
@@ -37,27 +37,27 @@ import java.util.TreeSet;
 
 import static org.hamcrest.collection.IsIterableContainingInOrder.contains;
 import static org.hamcrest.core.Is.is;
-import static org.hamcrest.core.IsNull.notNullValue;
 import static org.junit.Assert.assertThat;
 
 /**
  * Functional Tests for the {@link CoherenceClusterOrchestration}.
  * <p>
- * Copyright (c) 2015. All Rights Reserved. Oracle Corporation.<br>
+ * Copyright (c) 2016. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Brian Oliver
  */
-public class CustomCoherenceClusterOrchestrationTest
+public class SingletonCoherenceClusterOrchestrationTest
 {
     /**
      * A {@link CoherenceClusterOrchestration} for a default {@link CoherenceCluster}.
      */
     @ClassRule
     public static CoherenceClusterOrchestration orchestration =
-        new CoherenceClusterOrchestration().setStorageMemberCount(3)
-        .withStorageMemberOptions(SystemProperty.of("test.property",
-                                                    "storageMember"));
+        new CoherenceClusterOrchestration()
+                .setStorageMemberCount(1)
+                .withOptions(ClusterName.of("SingletonCluster"))
+                .withStorageMemberOptions(SystemProperty.of("test.property", "storageMember"));
 
 
     /**
@@ -74,7 +74,7 @@ public class CustomCoherenceClusterOrchestrationTest
             setNames.add(member.getName());
         }
 
-        assertThat(setNames, contains("storage-1", "storage-2", "storage-3"));
+        assertThat(setNames, contains("storage-1"));
     }
 
 
@@ -85,31 +85,5 @@ public class CustomCoherenceClusterOrchestrationTest
         {
             assertThat(member.getSystemProperty("test.property"), is("storageMember"));
         }
-    }
-
-
-    @Test
-    public void shouldPerformRollingRestart() throws Exception
-    {
-        CoherenceCluster cluster = orchestration.getCluster();
-
-        // we must ensure all auto-start services are safe
-        StabilityPredicate stabilityPredicate =
-            StabilityPredicate.of(CoherenceCluster.Predicates.autoStartServicesSafe());
-
-        // only restart storage enabled members
-        cluster.filter(member -> member.getName().startsWith("storage")).relaunch(stabilityPredicate);
-
-        CoherenceClusterMember member1 = cluster.get("storage-1");
-        CoherenceClusterMember member2 = cluster.get("storage-2");
-        CoherenceClusterMember member3 = cluster.get("storage-3");
-
-        assertThat(member1, is(notNullValue()));
-        assertThat(member2, is(notNullValue()));
-        assertThat(member3, is(notNullValue()));
-
-        assertThat(member1.getLocalMemberId(), is(4));
-        assertThat(member2.getLocalMemberId(), is(5));
-        assertThat(member3.getLocalMemberId(), is(6));
     }
 }
