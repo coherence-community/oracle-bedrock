@@ -35,6 +35,7 @@ import com.oracle.bedrock.runtime.coherence.callables.GetServiceStatus;
 import com.tangosol.net.NamedCache;
 import com.tangosol.util.UID;
 
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -199,23 +200,41 @@ public class CoherenceCluster extends AbstractAssembly<CoherenceClusterMember>
         {
             return (cluster) -> {
 
-                       // determine the cluster size so we can determine what's a valid status
-                       int clusterSize = cluster.getClusterSize();
+                // determine the number of each auto start service is defined by the cluster
+                       HashMap<String, Integer> serviceCountMap = new HashMap<>();
 
                        for (CoherenceClusterMember member : cluster)
                        {
-                           Set<String> setServiceNames = member.invoke(new GetAutoStartServiceNames());
+                           Set<String> serviceNames = member.invoke(new GetAutoStartServiceNames());
 
-                           for (String sServiceName : setServiceNames)
+                           for (String serviceName : serviceNames)
                            {
-                               ServiceStatus status = member.invoke(new GetServiceStatus(sServiceName));
+                               serviceCountMap.compute(serviceName,
+                                                       (name, count) -> count == null ? 1 : count + 1);
+                           }
+                       }
 
-                               if ((clusterSize > 1 && status == ServiceStatus.ENDANGERED)
-                                   || status == ServiceStatus.ORPHANED
-                                   || status == ServiceStatus.STOPPED
-                                   || status == ServiceStatus.UNKNOWN)
+                       // ensure the autostart services defined by each member are safe
+                       // according to the number of required services
+                       for (CoherenceClusterMember member : cluster)
+                       {
+                           Set<String> serviceNames = member.invoke(new GetAutoStartServiceNames());
+
+                           for (String serviceName : serviceNames)
+                           {
+                               int count = serviceCountMap.get(serviceName);
+
+                               if (count > 1)
                                {
-                                   return false;
+                                   ServiceStatus status = member.invoke(new GetServiceStatus(serviceName));
+
+                                   if (status == ServiceStatus.ENDANGERED
+                                       || status == ServiceStatus.ORPHANED
+                                       || status == ServiceStatus.STOPPED
+                                       || status == ServiceStatus.UNKNOWN)
+                                   {
+                                       return false;
+                                   }
                                }
                            }
                        }
