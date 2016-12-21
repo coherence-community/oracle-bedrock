@@ -71,7 +71,10 @@ public abstract class AbstractAssemblyBuilder<A extends Application, G extends A
                         Class<? extends A> applicationClass,
                         Option...          options)
     {
-        characteristics.add(new Characteristics(count, applicationClass, options));
+        if (count > 0)
+        {
+            characteristics.add(new Characteristics(count, applicationClass, options));
+        }
     }
 
 
