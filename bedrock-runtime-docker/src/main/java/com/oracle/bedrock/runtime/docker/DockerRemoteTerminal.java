@@ -655,6 +655,13 @@ public class DockerRemoteTerminal implements RemoteTerminal, Deployer
 
 
         @Override
+        public boolean isOperational()
+        {
+            return true;
+        }
+
+
+        @Override
         public void close(Option... options)
         {
         }
