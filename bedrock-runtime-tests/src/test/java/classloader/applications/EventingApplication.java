@@ -31,11 +31,9 @@ import com.oracle.bedrock.runtime.concurrent.RemoteEvent;
 import com.oracle.bedrock.runtime.concurrent.RemoteEventListener;
 import com.oracle.bedrock.runtime.concurrent.RemoteRunnable;
 import com.oracle.bedrock.runtime.concurrent.options.StreamName;
-
 import com.oracle.bedrock.runtime.java.JavaApplication;
 
 import java.util.Random;
-
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 
@@ -55,12 +53,6 @@ public class EventingApplication
     public static final Object WAITER = new Object();
     private static Random      random = new Random(System.currentTimeMillis());
 
-    /**
-     * Field description
-     */
-    @RemoteChannel.Inject
-    public static RemoteChannel channel;
-
 
     public static void main(String[] args) throws Exception
     {
@@ -71,7 +63,7 @@ public class EventingApplication
 
             for (int i = 0; i < count; i++)
             {
-                channel.raise(new Event(i), StreamName.of(streamName));
+                RemoteChannel.get().raise(new Event(i), StreamName.of(streamName));
                 Thread.sleep(random.nextInt(100) + 10);
             }
         }
@@ -215,13 +207,18 @@ public class EventingApplication
      */
     public static class FireEvent implements RemoteRunnable
     {
-        private String      streamName;
-        private RemoteEvent event;
+        /**
+         * The {@link RemoteChannel} for asynchronously sending events / responses back
+         * (in addition to return values).
+         */
+        @RemoteChannel.Inject
+        private RemoteChannel remoteChannel;
+        private String        streamName;
+        private RemoteEvent   event;
 
 
         /**
-         * Constructs ...
-         *
+         * Constructs a {@link FireEvent}.
          *
          * @param streamName
          * @param event
@@ -237,7 +234,7 @@ public class EventingApplication
         @Override
         public void run()
         {
-            EventingApplication.channel.raise(event, StreamName.of(streamName));
+            remoteChannel.raise(event, StreamName.of(streamName));
         }
     }
 
@@ -266,10 +263,16 @@ public class EventingApplication
      * register a {@link RemoteEventListener} on a
      * stream.
      */
-    public static class Listen implements RemoteCallable<Object>
+    public static class Listen implements RemoteCallable
     {
-        private String incomingStreamName;
-        private String outgoingStreamName;
+        /**
+         * The {@link RemoteChannel} for asynchronously sending events / responses back
+         * (in addition to return values).
+         */
+        @RemoteChannel.Inject
+        private RemoteChannel remoteChannel;
+        private String        incomingStreamName;
+        private String        outgoingStreamName;
 
 
         /**
@@ -295,21 +298,19 @@ public class EventingApplication
 
             System.err.println("*** Listening to " + incomingStreamName + " firing back on " + outgoingStreamName);
 
-            RemoteChannel channel = EventingApplication.channel;
+            System.err.println("Channel=" + remoteChannel);
 
-            System.err.println("Channel=" + channel);
+            remoteChannel.addListener(new RemoteEventListener()
+                                      {
+                                          @Override
+                                          public void onEvent(RemoteEvent event)
+                                          {
+                                              System.err.println("*** Received event " + event + " sending back on "
+                                                                 + outgoingStreamName);
 
-            channel.addListener(new RemoteEventListener()
-                                {
-                                    @Override
-                                    public void onEvent(RemoteEvent event)
-                                    {
-                                        System.err.println("*** Received event " + event + " sending back on "
-                                                           + outgoingStreamName);
-
-                                        channel.raise(event, StreamName.of(outgoingStreamName));
-                                    }
-                                }, StreamName.of(incomingStreamName));
+                                              remoteChannel.raise(event, StreamName.of(outgoingStreamName));
+                                          }
+                                      },StreamName.of(incomingStreamName));
 
             return null;
         }
@@ -321,12 +322,22 @@ public class EventingApplication
      */
     public static class RoundTripCallable implements RemoteCallable<Integer>
     {
+        /**
+         * The {@link RemoteChannel} for asynchronously sending events / responses back
+         * (in addition to return values).
+         */
+        @RemoteChannel.Inject
+        private RemoteChannel remoteChannel;
+
+
         @Override
         public Integer call() throws Exception
         {
             GetIntCallable.value = -1;
 
-            CompletableFuture<Integer> future = EventingApplication.channel.submit(new GetIntCallable());
+            System.out.println("Remote Channel is: " + RemoteChannel.get());
+
+            CompletableFuture<Integer> future = remoteChannel.submit(new GetIntCallable());
 
             return future.get();
         }
@@ -338,10 +349,18 @@ public class EventingApplication
      */
     public static class RoundTripRunnable implements RemoteRunnable
     {
+        /**
+         * The {@link RemoteChannel} for asynchronously sending events / responses back
+         * (in addition to return values).
+         */
+        @RemoteChannel.Inject
+        private RemoteChannel remoteChannel;
+
+
         @Override
         public void run()
         {
-            EventingApplication.channel.submit(new CountDownRunnable());
+            remoteChannel.submit(new CountDownRunnable());
         }
     }
 }

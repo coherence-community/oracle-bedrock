@@ -27,19 +27,19 @@ package com.oracle.bedrock.runtime.concurrent;
 
 import com.oracle.bedrock.Option;
 import com.oracle.bedrock.OptionsByType;
-import com.oracle.bedrock.annotations.Experimental;
 import com.oracle.bedrock.runtime.concurrent.options.StreamName;
+import com.oracle.bedrock.runtime.java.JavaApplication;
+import com.oracle.bedrock.runtime.java.JavaApplicationLauncher;
+import com.oracle.bedrock.runtime.java.JavaApplicationRunner;
+import com.oracle.bedrock.runtime.java.container.Container;
+import com.oracle.bedrock.runtime.java.container.ContainerScope;
 
 import java.io.Closeable;
-import java.lang.annotation.Annotation;
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -98,8 +98,8 @@ public interface RemoteChannel extends Closeable
      * @throws IllegalArgumentException  if the {@link RemoteCallable} isn't serializable, is anonymous
      *                                   or a non-static inner class
      */
-    public <T> CompletableFuture<T> submit(RemoteCallable<T> callable,
-                                           Option...         options) throws IllegalStateException;
+    <T> CompletableFuture<T> submit(RemoteCallable<T> callable,
+                                    Option...         options) throws IllegalStateException;
 
 
     /**
@@ -117,8 +117,8 @@ public interface RemoteChannel extends Closeable
      * @throws IllegalArgumentException  if the {@link RemoteCallable} isn't serializable, is anonymous
      *                                   or a non-static inner class
      */
-    public CompletableFuture<Void> submit(RemoteRunnable runnable,
-                                          Option...      options) throws IllegalStateException;
+    CompletableFuture<Void> submit(RemoteRunnable runnable,
+                                   Option...      options) throws IllegalStateException;
 
 
     /**
@@ -135,8 +135,8 @@ public interface RemoteChannel extends Closeable
      * @param listener  the {@link RemoteEventListener}
      * @param options   the {@link Option}s
      */
-    public void addListener(RemoteEventListener listener,
-                            Option...           options);
+    void addListener(RemoteEventListener listener,
+                     Option...           options);
 
 
     /**
@@ -148,8 +148,8 @@ public interface RemoteChannel extends Closeable
      * @param listener  the {@link RemoteEventListener} to remove
      * @param options   the {@link Option}s used to add the {@link RemoteEventListener}
      */
-    public void removeListener(RemoteEventListener listener,
-                               Option...           options);
+    void removeListener(RemoteEventListener listener,
+                        Option...           options);
 
 
     /**
@@ -166,129 +166,48 @@ public interface RemoteChannel extends Closeable
      * @return a {@link CompletableFuture} allowing an application to determine
      *         when the event has been raised
      */
-    public CompletableFuture<Void> raise(RemoteEvent event,
-                                         Option...   options);
+    CompletableFuture<Void> raise(RemoteEvent event,
+                                  Option...   options);
 
 
     /**
-     * An abstract class with a single method to inject a {@link RemoteChannel}
-     * into static fields or static methods of other classes.
+     * Acquires the {@link RemoteChannel} for the {@link JavaApplication} that was launched
+     * with a {@link JavaApplicationLauncher}.
+     *
+     * @return the {@link RemoteChannel} or <code>null</code> if it's not available
      */
-    @Experimental
-    abstract class Injector
+    static RemoteChannel get()
     {
-        /**
-         * Inject the specified {@link RemoteChannel} into static fields or static methods of
-         * the specified {@link Class}.
-         *
-         * @param targetClass  the {@link Class} to have the {@link RemoteChannel} injected
-         * @param channel      the {@link RemoteChannel} to inject
-         */
-        public static void injectChannel(Class<?>      targetClass,
-                                         RemoteChannel channel)
+        // determine if we're running in a Container?
+        ContainerScope containerScope = Container.getContainerScope();
+
+        if (containerScope == null)
         {
-            if (channel == null)
-            {
-                return;
-            }
-
-            try
-            {
-                ClassLoader loader = targetClass.getClassLoader();
-                Class<Annotation> annotation =
-                    (Class<Annotation>) loader.loadClass(RemoteChannel.Inject.class.getName());
-                Class<?> channelClass = channel.getClass();
-
-                for (Method method : targetClass.getMethods())
-                {
-                    int modifiers = method.getModifiers();
-
-                    if (method.getAnnotation(annotation) != null
-                        && method.getParameterTypes().length == 1
-                        && method.getParameterTypes()[0].isAssignableFrom(channelClass)
-                        && Modifier.isStatic(modifiers)
-                        && Modifier.isPublic(modifiers))
-                    {
-                        try
-                        {
-                            method.invoke(null, channel);
-                        }
-                        catch (Exception e)
-                        {
-                            // carry on... perhaps we can use another approach?
-                        }
-                    }
-                }
-
-                for (Field field : targetClass.getFields())
-                {
-                    int modifiers = field.getModifiers();
-
-                    if (field.getAnnotation(annotation) != null
-                        && Modifier.isStatic(modifiers)
-                        && Modifier.isPublic(modifiers)
-                        && field.getType().isAssignableFrom(channelClass))
-                    {
-                        try
-                        {
-                            field.set(null, channel);
-                        }
-                        catch (Exception e)
-                        {
-                            // carry on... perhaps we can use another approach?
-                        }
-                    }
-                }
-            }
-            catch (ClassNotFoundException e)
-            {
-                e.printStackTrace();
-            }
+            // not running in a container, so assume we used the JavaApplicationRunner
+            return JavaApplicationRunner.channel;
         }
+        else
+        {
+            // when in a container, acquire the remote channel from the container scope
+            return (RemoteChannel) containerScope.getRemoteChannel();
+        }
+
     }
 
 
     /**
-     * Defines how a {@link RemoteChannel} may be injected into a {@link Class}
-     * that requires a reference to a {@link RemoteChannel}. The target class is
-     * typically the main class that runs as an application.
+     * Provides a mechanism to inject a {@link RemoteChannel} into a
+     * {@link RemoteCallable} or {@link RemoteRunnable} prior to execution.
      * <p>
-     * If this annotation is used on fields the fields should be public
-     * static and of type {@link RemoteChannel}.
+     * When used on fields, the fields should be public, non-final and
+     * non-static, with the type {@link RemoteChannel}.
      * <p>
-     * If this annotation is used on methods the methods should be public
-     * static and have a single parameter of type {@link RemoteChannel}.
-     * <p>
-     *
-     * The {@link Inject} annotation can be used to specify a public static
-     * field to inject a {@link RemoteChannel} reference into.
-     * <pre><code>
-     * public class App {
-     *     ...
-     *     &#64;RemoteChannel.Inject
-     *     public static RemoteChannel CHANNEL;
-     *     ...
-     * }
-     * </code></pre>
-     *
-     * Alternatively, the {@link Inject} annotation can be used to specify that
-     * the public static method is called for injecting the value.
-     * <pre><code>
-     * public class App {
-     *     ...
-     *     &#64;RemoteChannel.Inject
-     *     public static void setPublisher(RemoteChannel channel) {
-     *         ...
-     *     }
-     *     ...
-     * }
-     * </code></pre>
-     *
-     * @see Injector#injectChannel(Class, RemoteChannel)
+     * When used on methods, the methods should be public and non-static, with
+     * a single parameter type {@link RemoteChannel}.
      */
     @Documented
     @Retention(RetentionPolicy.RUNTIME)
-    @Target({ElementType.CONSTRUCTOR, ElementType.FIELD, ElementType.METHOD})
+    @Target({ElementType.FIELD, ElementType.METHOD})
     @interface Inject
     {
     }

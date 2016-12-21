@@ -30,6 +30,10 @@ import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.annotations.Internal;
 import com.oracle.bedrock.runtime.concurrent.options.StreamName;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 
@@ -115,6 +119,90 @@ public abstract class AbstractControllableRemoteChannel implements ControllableR
     public synchronized boolean isOpen()
     {
         return isOpen;
+    }
+
+
+    /**
+     * Injects this {@link RemoteChannel} into the specified object annotated with
+     * {@link Inject}.
+     *
+     * @param object  the non-null object in which to inject this {@link RemoteChannel}
+     */
+    public void injectInto(Object object)
+    {
+        if (object != null)
+        {
+            try
+            {
+                // acquire the class of object so we can locate injection points
+                Class<?> objectClass = object.getClass();
+
+                // acquire the classloader for the object in which to inject
+                ClassLoader loader = objectClass.getClassLoader();
+
+                // acquire the annotation class based on the class in which we have to inject
+                // (just in case it was loaded with a special class loader)
+                Class<Annotation> annotationClass =
+                    (Class<Annotation>) loader.loadClass(RemoteChannel.Inject.class.getName());
+
+                // acquire the channel class
+                Class<?> channelClass = this.getClass();
+
+                for (Method method : objectClass.getDeclaredMethods())
+                {
+                    int modifiers = method.getModifiers();
+
+                    if (method.getAnnotation(annotationClass) != null
+                        && method.getParameterTypes().length == 1
+                        && method.getParameterTypes()[0].isAssignableFrom(channelClass)
+                        && Modifier.isPublic(modifiers))
+                    {
+                        try
+                        {
+                            method.invoke(object, this);
+                        }
+                        catch (Exception e)
+                        {
+                            // carry on... perhaps we can use another approach?
+                        }
+                    }
+                }
+
+                for (Field field : objectClass.getDeclaredFields())
+                {
+                    int modifiers = field.getModifiers();
+
+                    if (field.getAnnotation(annotationClass) != null
+                        &&!Modifier.isStatic(modifiers)
+                        && field.getType().isAssignableFrom(channelClass))
+                    {
+                        try
+                        {
+                            // ensure the field is accessible
+                            try
+                            {
+                                field.setAccessible(true);
+                            }
+                            catch (Exception accessException)
+                            {
+                                // carry on... perhaps it will work?
+                            }
+
+                            // now set the value
+                            field.set(object, this);
+                        }
+                        catch (Exception e)
+                        {
+                            // carry on... perhaps we can use another approach?
+                        }
+                    }
+                }
+            }
+            catch (ClassNotFoundException e)
+            {
+                e.printStackTrace();
+            }
+        }
     }
 
 

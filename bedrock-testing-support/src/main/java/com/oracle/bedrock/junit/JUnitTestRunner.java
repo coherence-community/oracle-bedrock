@@ -75,7 +75,6 @@ public class JUnitTestRunner implements Runnable
     /**
      * The {@link RemoteChannel} to use to publish JUnit test events.
      */
-    @RemoteChannel.Inject
     public static RemoteChannel channel;
 
     /**
@@ -391,6 +390,10 @@ public class JUnitTestRunner implements Runnable
      */
     public static void main(String[] args)
     {
+        // acquire the RemoteChannel for the JUnitTestRunner
+        channel = RemoteChannel.get();
+
+        // run the JUnit tests
         JUnitTestRunner.INSTANCE.run();
     }
 

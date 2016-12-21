@@ -43,13 +43,6 @@ import com.tangosol.net.DefaultCacheServer;
  */
 public class CustomServer
 {
-    /** 
-     *Field description 
-     */
-    @RemoteChannel.Inject
-    public static RemoteChannel channel;
-
-
     public static void main(String[] args)
     {
         DefaultCacheServer.main(args);
@@ -144,13 +137,18 @@ public class CustomServer
      */
     public static class FireEvent implements RemoteRunnable
     {
-        private String      streamName;
-        private RemoteEvent event;
+        /**
+         * The {@link RemoteChannel} for asynchronously sending events / responses back
+         * (in addition to return values).
+         */
+        @RemoteChannel.Inject
+        private RemoteChannel remoteChannel;
+        private String        streamName;
+        private RemoteEvent   event;
 
 
         /**
-         * Constructs ...
-         *
+         * Constructs a {@link FireEvent}.
          *
          * @param streamName
          * @param event
@@ -166,7 +164,7 @@ public class CustomServer
         @Override
         public void run()
         {
-            CustomServer.channel.raise(event, StreamName.of(streamName));
+            remoteChannel.raise(event, StreamName.of(streamName));
         }
     }
 }

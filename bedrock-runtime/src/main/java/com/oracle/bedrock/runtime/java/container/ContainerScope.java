@@ -27,6 +27,7 @@ package com.oracle.bedrock.runtime.java.container;
 
 import com.oracle.bedrock.annotations.Internal;
 import com.oracle.bedrock.runtime.LocalPlatform;
+import com.oracle.bedrock.runtime.concurrent.RemoteChannel;
 import com.oracle.bedrock.runtime.network.AvailablePortIterator;
 
 import java.io.IOException;
@@ -114,6 +115,12 @@ public class ContainerScope extends AbstractContainerScope
      */
     private ContainerMBeanServerBuilder mBeanServerBuilder;
 
+    /**
+     * The {@link RemoteChannel} the application can use with in this {@link Scope}
+     * to communicate back to the launcher of the application.
+     */
+    private Object remoteChannel;
+
 
     /**
      * Constructs a {@link ContainerScope}.
@@ -196,6 +203,8 @@ public class ContainerScope extends AbstractContainerScope
 
         this.mBeanServerBuilder = mBeanServerBuilder == null
                                   ? new ContainerMBeanServerBuilder(this.availablePorts) : mBeanServerBuilder;
+
+        this.remoteChannel = null;
     }
 
 
@@ -239,6 +248,28 @@ public class ContainerScope extends AbstractContainerScope
     public OutputStream getStandardInputOutputStream()
     {
         return stdinPipedOutputStream;
+    }
+
+
+    /**
+     * Sets the {@link RemoteChannel} for the application.
+     *
+     * @param remoteChannel the {@link RemoteChannel}
+     */
+    public void setRemoteChannel(Object remoteChannel)
+    {
+        this.remoteChannel = remoteChannel;
+    }
+
+
+    /**
+     * Acquires the {@link RemoteChannel} for the application
+     *
+     * @return  the {@link RemoteChannel}
+     */
+    public Object getRemoteChannel()
+    {
+        return remoteChannel;
     }
 
 

@@ -55,7 +55,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * An astract implementation of a {@link RemoteChannel}.
+ * An abstract implementation of a {@link RemoteChannel}.
  * <p>
  * Copyright (c) 2013. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
@@ -482,7 +482,7 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
         /**
          * Executes the {@link Operation}.
          *
-         * @param sequence         the sequence number of the {@link Operation}
+         * @param sequence  the sequence number of the {@link Operation}
          *
          * @return Operation  the {@link Operation} to be sent back to the initiator of this
          *                    {@link Operation} (if null, nothing is returned)
@@ -574,6 +574,9 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
 
             try
             {
+                // attempt to inject the RemoteChannel into the callable.
+                AbstractRemoteChannel.this.injectInto(callable);
+
                 // execute the Callable
                 Object result = callable.call();
 
@@ -825,14 +828,22 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
      */
     class Executor implements Runnable
     {
-        private long      sequence;
+        /**
+         * The sequence number for the {@link Operation} to execute.
+         */
+        private long sequence;
+
+        /**
+         * The {@link Operation} to execute.
+         */
         private Operation operation;
 
 
         /**
          * Constructs an {@link Executor}.
          *
-         * @param operation
+         * @param sequence   the sequence number of the {@link Operation}
+         * @param operation  the {@link Operation} to execute
          */
         public Executor(long      sequence,
                         Operation operation)
@@ -1033,6 +1044,9 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
 
             try
             {
+                // attempt to inject the RemoteChannel into the callable.
+                AbstractRemoteChannel.this.injectInto(runnable);
+
                 runnable.run();
 
                 if (isResponseRequired)

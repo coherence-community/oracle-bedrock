@@ -64,7 +64,6 @@ import java.io.OutputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -426,16 +425,9 @@ public class ContainerBasedJavaApplicationLauncher<A extends JavaApplication> im
             // open the RemoteChannel
             remoteChannelClass.getMethod("open").invoke(remoteChannel);
 
-            // inject the RemoteChannel (if we have a target class)
-            if (targetClassName != null)
-            {
-                Class<?> targetClass   = containerClassLoader.loadClass(targetClassName);
-                Class<?> injectorClass = containerClassLoader.loadClass(RemoteChannel.Injector.class.getName());
-                Class<?> channelClass  = containerClassLoader.loadClass(RemoteChannel.class.getName());
-                Method   method        = injectorClass.getMethod("injectChannel", Class.class, channelClass);
-
-                method.invoke(null, targetClass, remoteChannel);
-            }
+            // save the RemoteChannel into the ContainerScope so that we can resolve it from within
+            // the application when required
+            containerClassLoader.getContainerScope().setRemoteChannel(remoteChannel);
         }
         catch (ClassNotFoundException e)
         {
@@ -826,7 +818,7 @@ public class ContainerBasedJavaApplicationLauncher<A extends JavaApplication> im
         {
             if (applicationController == null)
             {
-                throw new IllegalStateException("Attempting to raise to a ContainerBasedJavaProcess that has been destroyed");
+                throw new IllegalStateException("Attempting to raise a RemoteEvent on a ContainerBasedJavaProcess that has been destroyed");
             }
             else
             {
