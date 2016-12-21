@@ -209,6 +209,13 @@ public abstract class AbstractApplication<P extends ApplicationProcess> extends 
 
 
     @Override
+    public boolean isOperational()
+    {
+        return !closed.get();
+    }
+
+
+    @Override
     public void close()
     {
         // delegate the close() to close(Option...)

@@ -94,6 +94,17 @@ public interface Application extends Extensible, Closeable
 
 
     /**
+     * Determines if the {@link Application} is operational, has not been closed
+     * and closing has not been commenced.
+     *
+     * @return <code>true</code>  if operational,
+     *         <code>false</code> if the {@link Application} has been closed or
+     *                            has commenced closing
+     */
+    boolean isOperational();
+
+
+    /**
      * Causes the calling {@link Thread} to block and wait until the
      * {@link Application} has terminated, either naturally or due to a call
      * to {@link #close()} by another {@link Thread}.
