@@ -98,11 +98,6 @@ public abstract class AbstractCoherenceClusterBuilderTest extends AbstractTest
         {
             assertThat(invoking(cluster).getClusterSize(), is(CLUSTER_SIZE));
         }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-            Assert.fail();
-        }
     }
 
 
@@ -164,11 +159,6 @@ public abstract class AbstractCoherenceClusterBuilderTest extends AbstractTest
                 assertThat(invoking(storageMember).isServiceRunning("ExtendTcpProxyService"), is(false));
             }
         }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-            Assert.fail();
-        }
     }
 
 
@@ -200,11 +190,6 @@ public abstract class AbstractCoherenceClusterBuilderTest extends AbstractTest
         try (CoherenceCluster cluster = clusterBuilder.build(Console.system()))
         {
             assertThat(invoking(cluster).getClusterSize(), is(desiredClusterSize));
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-            Assert.fail();
         }
     }
 
@@ -254,11 +239,6 @@ public abstract class AbstractCoherenceClusterBuilderTest extends AbstractTest
 
             assertThat(invoking(cluster).getClusterSize(), is(CLUSTER_SIZE));
         }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-            Assert.fail();
-        }
     }
 
 
@@ -289,10 +269,52 @@ public abstract class AbstractCoherenceClusterBuilderTest extends AbstractTest
             assertThat(namedCache.size(), is(1));
             assertThat((String) namedCache.get("key"), is("hello"));
         }
-        catch (Exception e)
+    }
+
+
+    /**
+     * Ensure that a {@link NamedCache} produced by a {@link CoherenceCluster} {@link CoherenceClusterMember}
+     * is failed over to another {@link CoherenceClusterMember} when the original {@link CoherenceClusterMember}
+     * is closed.
+     */
+    @Test
+    public void shouldFailOverNamedCache()
+    {
+        final int               CLUSTER_SIZE   = 3;
+
+        AvailablePortIterator   availablePorts = LocalPlatform.get().getAvailablePorts();
+        ClusterPort             clusterPort    = ClusterPort.of(new Capture<>(availablePorts));
+
+        CoherenceClusterBuilder builder        = new CoherenceClusterBuilder();
+
+        builder.include(CLUSTER_SIZE,
+                CoherenceClusterMember.class,
+                clusterPort,
+                ClusterName.of("FailOver"),
+                DisplayName.of("DCS"));
+
+        try (CoherenceCluster cluster = builder.build(Console.system()))
         {
-            e.printStackTrace();
-            Assert.fail();
+            assertThat(invoking(cluster).getClusterSize(), is(CLUSTER_SIZE));
+
+            // acquire a NamedCache from a specific cluster member
+            CoherenceClusterMember member = cluster.get("DCS-1");
+
+            NamedCache             cache  = member.getCache("dist-example");
+
+            // use the cache to put some data
+            cache.put("message", "hello");
+
+            assertThat(cluster.get("DCS-2").getCache("dist-example").get("message"), is("hello"));
+
+            // close the cluster member
+            member.close();
+
+            // ensure that it's not in the cluster
+            assertThat(invoking(cluster).getClusterSize(), is(CLUSTER_SIZE - 1));
+
+            // attempt to use the cache
+            assertThat(invoking(cache).get("message"), is("hello"));
         }
     }
 
@@ -329,11 +351,6 @@ public abstract class AbstractCoherenceClusterBuilderTest extends AbstractTest
 
             // ensure that it's not in the cluster
             assertThat(invoking(cluster).getClusterSize(), is(CLUSTER_SIZE - 1));
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-            Assert.fail();
         }
     }
 

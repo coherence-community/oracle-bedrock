@@ -99,11 +99,6 @@ public abstract class AbstractCoherenceClusterBuilderTest extends AbstractTest
         {
             assertThat(invoking(cluster).getClusterSize(), is(CLUSTER_SIZE));
         }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-            Assert.fail();
-        }
     }
 
 
@@ -129,11 +124,6 @@ public abstract class AbstractCoherenceClusterBuilderTest extends AbstractTest
                                                           .Predicates.autoStartServicesSafe())))
         {
             assertThat(invoking(cluster).getClusterSize(), is(6));
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-            Assert.fail();
         }
     }
 
@@ -196,11 +186,6 @@ public abstract class AbstractCoherenceClusterBuilderTest extends AbstractTest
                 assertThat(invoking(storageMember).isServiceRunning("ExtendTcpProxyService"), is(false));
             }
         }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-            Assert.fail();
-        }
     }
 
 
@@ -232,11 +217,6 @@ public abstract class AbstractCoherenceClusterBuilderTest extends AbstractTest
         try (CoherenceCluster cluster = clusterBuilder.build(Console.system()))
         {
             assertThat(invoking(cluster).getClusterSize(), is(desiredClusterSize));
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-            Assert.fail();
         }
     }
 
@@ -286,11 +266,6 @@ public abstract class AbstractCoherenceClusterBuilderTest extends AbstractTest
 
             assertThat(invoking(cluster).getClusterSize(), is(CLUSTER_SIZE));
         }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-            Assert.fail();
-        }
     }
 
 
@@ -320,11 +295,6 @@ public abstract class AbstractCoherenceClusterBuilderTest extends AbstractTest
 
             assertThat(namedCache.size(), is(1));
             assertThat((String) namedCache.get("key"), is("hello"));
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-            Assert.fail();
         }
     }
 
@@ -362,6 +332,8 @@ public abstract class AbstractCoherenceClusterBuilderTest extends AbstractTest
             // use the cache to put some data
             cache.put("message", "hello");
 
+            assertThat(cluster.get("DCS-2").getCache("dist-example").get("message"), is("hello"));
+
             // close the cluster member
             member.close();
 
@@ -369,12 +341,7 @@ public abstract class AbstractCoherenceClusterBuilderTest extends AbstractTest
             assertThat(invoking(cluster).getClusterSize(), is(CLUSTER_SIZE - 1));
 
             // attempt to use the cache
-            assertThat(cache.get("message"), is("hello"));
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-            Assert.fail();
+            assertThat(invoking(cache).get("message"), is("hello"));
         }
     }
 
@@ -411,11 +378,6 @@ public abstract class AbstractCoherenceClusterBuilderTest extends AbstractTest
 
             // ensure that it's not in the cluster
             assertThat(invoking(cluster).getClusterSize(), is(CLUSTER_SIZE - 1));
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-            Assert.fail();
         }
     }
 
