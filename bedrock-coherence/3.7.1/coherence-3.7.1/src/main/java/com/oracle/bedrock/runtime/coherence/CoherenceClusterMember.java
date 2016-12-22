@@ -40,6 +40,7 @@ import com.oracle.bedrock.runtime.java.options.IPv4Preferred;
 import com.oracle.bedrock.runtime.java.options.SystemProperties;
 import com.oracle.bedrock.runtime.java.options.SystemProperty;
 import com.oracle.bedrock.runtime.remote.RemotePlatform;
+import com.oracle.bedrock.util.Trilean;
 import com.tangosol.net.NamedCache;
 import com.tangosol.util.UID;
 
@@ -148,6 +149,17 @@ public interface CoherenceClusterMember extends JavaApplication
      * @return <code>true</code> if the service is running, <code>false</code> otherwise
      */
     boolean isServiceRunning(String serviceName);
+
+
+    /**
+     * Determines if a specified service is storage enabled.
+     *
+     * @param serviceName the name of the service
+     *
+     * @return a {@link Trilean} indicating if the service is storage enabled {@link Trilean#TRUE},
+     *         disabled {@link Trilean#FALSE} or unknown / undefined / not applicable {@link Trilean#UNKNOWN}
+     */
+    Trilean isStorageEnabled(String serviceName);
 
 
     /**

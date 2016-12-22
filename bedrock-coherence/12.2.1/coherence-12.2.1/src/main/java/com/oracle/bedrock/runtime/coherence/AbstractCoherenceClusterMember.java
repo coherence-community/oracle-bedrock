@@ -38,10 +38,12 @@ import com.oracle.bedrock.runtime.coherence.callables.GetLocalMemberSiteName;
 import com.oracle.bedrock.runtime.coherence.callables.GetLocalMemberUID;
 import com.oracle.bedrock.runtime.coherence.callables.GetServiceStatus;
 import com.oracle.bedrock.runtime.coherence.callables.IsServiceRunning;
+import com.oracle.bedrock.runtime.coherence.callables.IsServiceStorageEnabled;
 import com.oracle.bedrock.runtime.java.AbstractJavaApplication;
 import com.oracle.bedrock.runtime.java.JavaApplication;
 import com.oracle.bedrock.runtime.java.JavaApplicationProcess;
 import com.oracle.bedrock.runtime.java.features.JmxFeature;
+import com.oracle.bedrock.util.Trilean;
 import com.tangosol.net.NamedCache;
 import com.tangosol.util.UID;
 
@@ -238,6 +240,13 @@ public abstract class AbstractCoherenceClusterMember extends AbstractJavaApplica
     public boolean isServiceRunning(String serviceName)
     {
         return invoke(new IsServiceRunning(serviceName));
+    }
+
+
+    @Override
+    public Trilean isStorageEnabled(String serviceName)
+    {
+        return invoke(new IsServiceStorageEnabled(serviceName));
     }
 
 

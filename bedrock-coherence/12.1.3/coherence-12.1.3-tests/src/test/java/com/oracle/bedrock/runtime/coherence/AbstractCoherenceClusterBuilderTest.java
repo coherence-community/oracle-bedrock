@@ -44,6 +44,7 @@ import com.oracle.bedrock.runtime.options.Console;
 import com.oracle.bedrock.runtime.options.DisplayName;
 import com.oracle.bedrock.runtime.options.StabilityPredicate;
 import com.oracle.bedrock.util.Capture;
+import com.oracle.bedrock.util.Trilean;
 import com.tangosol.net.NamedCache;
 import org.junit.Assert;
 import org.junit.Test;
@@ -416,6 +417,12 @@ public abstract class AbstractCoherenceClusterBuilderTest extends AbstractTest
         {
             assertThat(invoking(cluster).getClusterSize(), is(CLUSTER_SIZE));
 
+            // ensure that the DistributedCache service for the first (and only) cluster member is storage disabled
+            assertThat(invoking(cluster.get("DCS-1")).isStorageEnabled("DistributedCache"), is(Trilean.TRUE));
+
+            // ensure that the InvocationService service for the first (and only) cluster member is unknown
+            assertThat(invoking(cluster.get("DCS-1")).isStorageEnabled("InvocationService"), is(Trilean.UNKNOWN));
+
             cluster.expand(1,
                            LocalPlatform.get(),
                            CoherenceClusterMember.class,
@@ -426,7 +433,14 @@ public abstract class AbstractCoherenceClusterBuilderTest extends AbstractTest
                            Console.system(),
                            LocalStorage.disabled());
 
+            // ensure that the cluster is bigger by one
             assertThat(invoking(cluster).getClusterSize(), is(CLUSTER_SIZE + 1));
+
+            // ensure that the DistributedCache service for the new member is storage disabled
+            assertThat(invoking(cluster.get("DCS-2")).isStorageEnabled("DistributedCache"), is(Trilean.FALSE));
+
+            // ensure that the InvocationService service for the new member is unknown
+            assertThat(invoking(cluster.get("DCS-2")).isStorageEnabled("InvocationService"), is(Trilean.UNKNOWN));
         }
     }
 
