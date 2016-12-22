@@ -44,10 +44,7 @@ import com.oracle.bedrock.runtime.options.Console;
 import com.oracle.bedrock.runtime.options.DisplayName;
 import com.oracle.bedrock.runtime.options.StabilityPredicate;
 import com.oracle.bedrock.util.Capture;
-import com.tangosol.net.CacheFactory;
 import com.tangosol.net.NamedCache;
-import com.tangosol.net.cache.TypeAssertion;
-import com.tangosol.util.stream.RemoteCollectors;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -292,10 +289,10 @@ public abstract class AbstractCoherenceClusterBuilderTest extends AbstractTest
         CoherenceClusterBuilder builder        = new CoherenceClusterBuilder();
 
         builder.include(CLUSTER_SIZE,
-                CoherenceClusterMember.class,
-                clusterPort,
-                ClusterName.of("FailOver"),
-                DisplayName.of("DCS"));
+                        CoherenceClusterMember.class,
+                        clusterPort,
+                        ClusterName.of("FailOver"),
+                        DisplayName.of("DCS"));
 
         try (CoherenceCluster cluster = builder.build(Console.system()))
         {
@@ -365,7 +362,7 @@ public abstract class AbstractCoherenceClusterBuilderTest extends AbstractTest
     @Test
     public void shouldCloneMembersOfACluster()
     {
-        final int               CLUSTER_SIZE   = 2;
+        final int               CLUSTER_SIZE   = 1;
 
         AvailablePortIterator   availablePorts = LocalPlatform.get().getAvailablePorts();
         ClusterPort             clusterPort    = ClusterPort.of(new Capture<>(availablePorts));
@@ -391,6 +388,46 @@ public abstract class AbstractCoherenceClusterBuilderTest extends AbstractTest
             cluster.unordered().limit(2).clone(2);
 
             assertThat(invoking(cluster).getClusterSize(), is(CLUSTER_SIZE + 5));
+        }
+    }
+
+
+    /**
+     * Ensure we can expand {@link CoherenceClusterMember}s in a {@link CoherenceCluster}.
+     */
+    @Test
+    public void shouldExpandMembersOfACluster()
+    {
+        final int               CLUSTER_SIZE   = 1;
+
+        AvailablePortIterator   availablePorts = LocalPlatform.get().getAvailablePorts();
+        ClusterPort             clusterPort    = ClusterPort.of(new Capture<>(availablePorts));
+        String                  clusterName    = "Cloning" + getClass().getSimpleName();
+        CoherenceClusterBuilder builder        = new CoherenceClusterBuilder();
+
+        builder.include(CLUSTER_SIZE,
+                        CoherenceClusterMember.class,
+                        DisplayName.of("DCS"),
+                        clusterPort,
+                        ClusterName.of(clusterName),
+                        LocalHost.only(),
+                        Console.system());
+
+        try (CoherenceCluster cluster = builder.build())
+        {
+            assertThat(invoking(cluster).getClusterSize(), is(CLUSTER_SIZE));
+
+            cluster.expand(1,
+                           LocalPlatform.get(),
+                           CoherenceClusterMember.class,
+                           DisplayName.of("DCS"),
+                           clusterPort,
+                           ClusterName.of(clusterName),
+                           LocalHost.only(),
+                           Console.system(),
+                           LocalStorage.disabled());
+
+            assertThat(invoking(cluster).getClusterSize(), is(CLUSTER_SIZE + 1));
         }
     }
 

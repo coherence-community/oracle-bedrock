@@ -32,6 +32,8 @@ import com.oracle.bedrock.runtime.AbstractAssembly;
 import com.oracle.bedrock.runtime.Assembly;
 import com.oracle.bedrock.runtime.coherence.callables.GetAutoStartServiceNames;
 import com.oracle.bedrock.runtime.coherence.callables.GetServiceStatus;
+import com.oracle.bedrock.runtime.coherence.callables.IsServiceStorageEnabled;
+import com.oracle.bedrock.util.Trilean;
 import com.tangosol.net.NamedCache;
 import com.tangosol.util.UID;
 
@@ -186,8 +188,15 @@ public class CoherenceCluster extends AbstractAssembly<CoherenceClusterMember>
 
                            for (String serviceName : serviceNames)
                            {
+                               // determine if the service is storage enabled?
+                               Trilean trilean = member.invoke(new IsServiceStorageEnabled(serviceName));
+
+                               // only adjust the service count when it's not storage disabled
+                               // (ie: we count storage enabled and unknown service types)
+                               int adjust = trilean == Trilean.FALSE ? 0 : 1;
+
                                serviceCountMap.compute(serviceName,
-                                                       (name, count) -> count == null ? 1 : count + 1);
+                                                       (name, count) -> count == null ? adjust : count + adjust);
                            }
                        }
 

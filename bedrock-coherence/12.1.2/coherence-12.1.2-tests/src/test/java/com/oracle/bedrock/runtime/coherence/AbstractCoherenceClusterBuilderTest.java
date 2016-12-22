@@ -390,6 +390,46 @@ public abstract class AbstractCoherenceClusterBuilderTest extends AbstractTest
 
 
     /**
+     * Ensure we can expand {@link CoherenceClusterMember}s in a {@link CoherenceCluster}.
+     */
+    @Test
+    public void shouldExpandMembersOfACluster()
+    {
+        final int               CLUSTER_SIZE   = 1;
+
+        AvailablePortIterator   availablePorts = LocalPlatform.get().getAvailablePorts();
+        ClusterPort             clusterPort    = ClusterPort.of(new Capture<>(availablePorts));
+        String                  clusterName    = "Cloning" + getClass().getSimpleName();
+        CoherenceClusterBuilder builder        = new CoherenceClusterBuilder();
+
+        builder.include(CLUSTER_SIZE,
+                        CoherenceClusterMember.class,
+                        DisplayName.of("DCS"),
+                        clusterPort,
+                        ClusterName.of(clusterName),
+                        LocalHost.only(),
+                        Console.system());
+
+        try (CoherenceCluster cluster = builder.build())
+        {
+            assertThat(invoking(cluster).getClusterSize(), is(CLUSTER_SIZE));
+
+            cluster.expand(1,
+                           LocalPlatform.get(),
+                           CoherenceClusterMember.class,
+                           DisplayName.of("DCS"),
+                           clusterPort,
+                           ClusterName.of(clusterName),
+                           LocalHost.only(),
+                           Console.system(),
+                           LocalStorage.disabled());
+
+            assertThat(invoking(cluster).getClusterSize(), is(CLUSTER_SIZE + 1));
+        }
+    }
+
+
+    /**
      * Ensure we clean up an unsuccessfully created {@link CoherenceCluster}.
      */
     @Test
