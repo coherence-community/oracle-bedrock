@@ -150,9 +150,10 @@ public class CoherenceClusterOrchestration extends ExternalResource
         this.commonMemberOptions.add(ClusterPort.of(clusterPort));
         this.commonMemberOptions.add(Multicast.ttl(0));
 
-        // we also define the proxy configuration
+        // we also define proxy configuration
         this.commonMemberOptions.add(SystemProperty.of("tangosol.coherence.extend.address", hostAddress));
         this.commonMemberOptions.add(SystemProperty.of("tangosol.coherence.extend.port", clusterPort));
+        this.commonMemberOptions.add(SystemProperty.of("tangosol.coherence.extend.enabled", true));
 
         // establish default java process configuration
         this.commonMemberOptions.add(Headless.enabled());
