@@ -95,7 +95,7 @@ public abstract class AbstractCoherenceClusterBuilderTest extends AbstractTest
                         LocalHost.only(),
                         ClusterName.of("Storage-Only"));
 
-        try (CoherenceCluster cluster = builder.build(Console.system()))
+        try (CoherenceCluster cluster = builder.build(getPlatform(), Console.system()))
         {
             assertThat(invoking(cluster).getClusterSize(), is(CLUSTER_SIZE));
         }
@@ -133,7 +133,7 @@ public abstract class AbstractCoherenceClusterBuilderTest extends AbstractTest
                         LocalStorage.disabled(),
                         SystemProperty.of("coherence.extend.port", availablePorts));
 
-        try (CoherenceCluster cluster = builder.build(Console.system()))
+        try (CoherenceCluster cluster = builder.build(getPlatform(), Console.system()))
         {
             // ensure the cluster size is as expected
             assertThat(invoking(cluster).getClusterSize(), is(3));
@@ -219,7 +219,7 @@ public abstract class AbstractCoherenceClusterBuilderTest extends AbstractTest
                         LocalHost.only(),
                         Console.system());
 
-        try (CoherenceCluster cluster = builder.build())
+        try (CoherenceCluster cluster = builder.build(getPlatform()))
         {
             assertThat(invoking(cluster).getClusterSize(), is(CLUSTER_SIZE));
 
@@ -258,7 +258,7 @@ public abstract class AbstractCoherenceClusterBuilderTest extends AbstractTest
 
         builder.include(CLUSTER_SIZE, CoherenceClusterMember.class, clusterPort, ClusterName.of("Access"));
 
-        try (CoherenceCluster cluster = builder.build(Console.system()))
+        try (CoherenceCluster cluster = builder.build(getPlatform(), Console.system()))
         {
             assertThat(invoking(cluster).getClusterSize(), is(CLUSTER_SIZE));
 
@@ -294,7 +294,7 @@ public abstract class AbstractCoherenceClusterBuilderTest extends AbstractTest
                         ClusterName.of("FailOver"),
                         DisplayName.of("DCS"));
 
-        try (CoherenceCluster cluster = builder.build(Console.system()))
+        try (CoherenceCluster cluster = builder.build(getPlatform(), Console.system()))
         {
             assertThat(invoking(cluster).getClusterSize(), is(CLUSTER_SIZE));
 
@@ -340,7 +340,7 @@ public abstract class AbstractCoherenceClusterBuilderTest extends AbstractTest
                         ClusterName.of("Access"),
                         DisplayName.of("DCS"));
 
-        try (CoherenceCluster cluster = builder.build(Console.system()))
+        try (CoherenceCluster cluster = builder.build(getPlatform(), Console.system()))
         {
             assertThat(invoking(cluster).getClusterSize(), is(CLUSTER_SIZE));
 
@@ -377,7 +377,7 @@ public abstract class AbstractCoherenceClusterBuilderTest extends AbstractTest
                         LocalHost.only(),
                         Console.system());
 
-        try (CoherenceCluster cluster = builder.build())
+        try (CoherenceCluster cluster = builder.build(getPlatform()))
         {
             assertThat(invoking(cluster).getClusterSize(), is(CLUSTER_SIZE));
 
@@ -413,7 +413,7 @@ public abstract class AbstractCoherenceClusterBuilderTest extends AbstractTest
                         LocalHost.only(),
                         Console.system());
 
-        try (CoherenceCluster cluster = builder.build())
+        try (CoherenceCluster cluster = builder.build(getPlatform()))
         {
             assertThat(invoking(cluster).getClusterSize(), is(CLUSTER_SIZE));
 
@@ -488,7 +488,7 @@ public abstract class AbstractCoherenceClusterBuilderTest extends AbstractTest
                                           }
                                       }));
 
-        try (CoherenceCluster cluster = builder.build(Console.system()))
+        try (CoherenceCluster cluster = builder.build(getPlatform(), Console.system()))
         {
             Assert.fail("The cluster should not have started");
         }
