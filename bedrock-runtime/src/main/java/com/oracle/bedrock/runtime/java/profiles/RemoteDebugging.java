@@ -201,7 +201,7 @@ public class RemoteDebugging implements Profile, Option
             }
             else
             {
-                address = transportAddress.getInetAddress().getHostName() + ":" + transportAddress.getPort().get();
+                address = transportAddress.getInetAddress().getHostAddress() + ":" + transportAddress.getPort().get();
             }
 
             // determine if we're going to be in Server Mode

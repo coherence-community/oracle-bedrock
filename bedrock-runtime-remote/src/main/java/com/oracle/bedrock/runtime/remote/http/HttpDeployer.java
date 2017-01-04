@@ -280,14 +280,14 @@ public abstract class HttpDeployer implements Deployer
         {
             PlatformSeparators separators      = optionsByType.get(PlatformSeparators.class);
             Table              deploymentTable = new Table();
-            String             hostName        = httpServerAddress.getAddress().getCanonicalHostName();
+            String             hostAddress     = httpServerAddress.getAddress().getHostAddress();
             int                port            = httpServerAddress.getPort();
 
             for (Map.Entry<String, DeploymentArtifact> entry : artifacts.entrySet())
             {
                 DeploymentArtifact artifact        = entry.getValue();
                 File               sourceFile      = artifact.getSourceFile();
-                URL                sourceURL       = new URL("http", hostName, port, entry.getKey());
+                URL                sourceURL       = new URL("http", hostAddress, port, entry.getKey());
                 File               destinationFile = artifact.getDestinationFile();
                 double             start           = System.currentTimeMillis();
 
