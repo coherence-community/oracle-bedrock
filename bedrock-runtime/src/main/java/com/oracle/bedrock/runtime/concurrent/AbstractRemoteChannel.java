@@ -29,8 +29,11 @@ import com.oracle.bedrock.Option;
 import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.annotations.Internal;
 import com.oracle.bedrock.lang.ThreadFactories;
+import com.oracle.bedrock.options.Timeout;
+import com.oracle.bedrock.runtime.concurrent.options.Caching;
 import com.oracle.bedrock.runtime.concurrent.options.StreamName;
 import com.oracle.bedrock.runtime.java.io.ClassLoaderAwareObjectInputStream;
+import com.oracle.bedrock.util.Pair;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -44,6 +47,7 @@ import java.io.Serializable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
 import java.net.Socket;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Set;
 import java.util.concurrent.Callable;
@@ -51,6 +55,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -129,15 +134,25 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
     private HashMap<String, Class<? extends Operation>> protocol;
 
     /**
-     * The pending {@link CompletableFuture}s to be notified of responses.
+     * The pending {@link Operation}s that are waiting for responses,
+     * indexed by sequence number.
      */
-    private ConcurrentHashMap<Long, CompletableFuture<?>> pendingListeners;
+    private ConcurrentHashMap<Long, Operation<?>> pendingOperations;
 
     /**
      * The next available sequence number for a callable sent from
      * this {@link AbstractRemoteChannel}.
      */
     private AtomicLong nextSequenceNumber;
+
+    /**
+     * The result cache for {@link Callable}s submitted using a {@link Caching#enabled(Option...)}
+     * option.
+     * <p>
+     * The cache is a map from the {@link RemoteCallable} to a {@link Pair}
+     * consisting of the result and the {@link Instant} when result expires.
+     */
+    private ConcurrentHashMap<Callable<?>, Pair<Object, Instant>> cache;
 
 
     /**
@@ -169,8 +184,11 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
         this.isReadable                 = new AtomicBoolean(true);
         this.isWritable                 = new AtomicBoolean(true);
         this.protocol                   = new HashMap<>();
-        this.pendingListeners           = new ConcurrentHashMap<>();
+        this.pendingOperations          = new ConcurrentHashMap<>();
         this.nextSequenceNumber         = new AtomicLong(0);
+
+        // establish the result cache for RemoteCallables
+        this.cache = new ConcurrentHashMap<>();
 
         // establish the operations that are part of the protocol
         protocol.put("CALLABLE", CallableOperation.class);
@@ -346,12 +364,12 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
             output = null;
         }
 
-        // raise IllegalStateExceptions for any remaining listeners
-        for (CompletableFuture listener : pendingListeners.values())
+        // raise IllegalStateExceptions for any remaining pending operations
+        for (Operation operation : pendingOperations.values())
         {
             try
             {
-                listener.completeExceptionally(new IllegalStateException("RemoteChannel is closed"));
+                operation.completeExceptionally(new IllegalStateException("RemoteChannel is closed"));
             }
             catch (Exception e)
             {
@@ -359,7 +377,7 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
             }
         }
 
-        pendingListeners.clear();
+        pendingOperations.clear();
     }
 
 
@@ -370,11 +388,40 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
         if (isOpen())
         {
             OptionsByType optionsByType = OptionsByType.of(options);
-            RemoteChannel.AcknowledgeWhen acknowledge = optionsByType.getOrDefault(AcknowledgeWhen.class,
-                                                                                   AcknowledgeWhen.PROCESSED);
-            CallableOperation operation = new CallableOperation(callable, acknowledge);
 
-            return sendOperation(operation, acknowledge);
+            // determine if Caching is enabled for this submission
+            Caching caching = optionsByType.get(Caching.class);
+
+            if (caching.isEnabled())
+            {
+                // attempt to acquire the existing cache value that hasn't expired
+                // (if it's expired replace it with null)
+                Pair<Object, Instant> pair = cache.compute(callable,
+                                                           (c, existing) -> existing == null
+                                                                            || existing.getY()
+                                                                            .isBefore(Instant.now()) ? null : existing);
+
+                if (pair != null)
+                {
+                    CompletableFuture<T> future = new CompletableFuture<>();
+
+                    future.complete((T) pair.getX());
+
+                    return future;
+                }
+            }
+            else
+            {
+                // ensure the cache is cleared for the current callable
+                cache.remove(callable);
+            }
+
+            // by default we acknowledge when processed
+            optionsByType.addIfAbsent(AcknowledgeWhen.PROCESSED);
+
+            CallableOperation operation = new CallableOperation(callable, optionsByType);
+
+            return sendOperation(operation, optionsByType);
         }
         else
         {
@@ -389,11 +436,14 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
     {
         if (isOpen())
         {
-            OptionsByType                 optionsByType = OptionsByType.of(options);
-            RemoteChannel.AcknowledgeWhen acknowledge   = optionsByType.get(AcknowledgeWhen.class);
-            RunnableOperation             operation     = new RunnableOperation(runnable, acknowledge);
+            OptionsByType optionsByType = OptionsByType.of(options);
 
-            return sendOperation(operation, acknowledge);
+            // by default we acknowledge when sent
+            optionsByType.addIfAbsent(AcknowledgeWhen.SENT);
+
+            RunnableOperation operation = new RunnableOperation(runnable, optionsByType);
+
+            return sendOperation(operation, optionsByType);
         }
         else
         {
@@ -408,12 +458,15 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
     {
         if (isOpen())
         {
-            OptionsByType                 optionsByType = OptionsByType.of(options);
-            RemoteChannel.AcknowledgeWhen acknowledge   = optionsByType.get(AcknowledgeWhen.class);
-            StreamName                    streamName    = optionsByType.get(StreamName.class);
-            EventOperation                operation     = new EventOperation(streamName, event, acknowledge);
+            OptionsByType optionsByType = OptionsByType.of(options);
+            StreamName    streamName    = optionsByType.get(StreamName.class);
 
-            return sendOperation(operation, acknowledge);
+            // by default we acknowledge when sent
+            optionsByType.addIfAbsent(AcknowledgeWhen.SENT);
+
+            EventOperation operation = new EventOperation(streamName, event, optionsByType);
+
+            return sendOperation(operation, optionsByType);
         }
         else
         {
@@ -422,40 +475,40 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
     }
 
 
-    private <T> CompletableFuture<T> sendOperation(Operation       operation,
-                                                   AcknowledgeWhen acknowledge)
+    private <T> CompletableFuture<T> sendOperation(Operation<T>  operation,
+                                                   OptionsByType optionsByType)
     {
         long   sequence = nextSequenceNumber.getAndIncrement();
         Sender sender   = new Sender(sequence, operation);
 
-        if (acknowledge == AcknowledgeWhen.SENT)
+        if (optionsByType.get(AcknowledgeWhen.class) == AcknowledgeWhen.SENT)
         {
             return CompletableFuture.runAsync(sender, sequentialExecutionService).thenApply((_void) -> null);
         }
         else
         {
-            CompletableFuture<T> future = new CompletableFuture<>();
-
-            pendingListeners.put(sequence, future);
+            pendingOperations.put(sequence, operation);
 
             sequentialExecutionService.submit(sender);
 
-            return future;
+            return operation.getCompletableFuture();
         }
     }
 
 
     /**
      * An {@link Operation} to be executed in-order by a {@link AbstractRemoteChannel}.
+     *
+     * @param <T>  the result returned locally by remotely executing the operation.
      */
-    interface Operation
+    interface Operation<T>
     {
         /**
          * Obtains the unique type of {@link Operation}.
          *
          * @return the type of {@link Operation}
          */
-        public String getType();
+        String getType();
 
 
         /**
@@ -466,7 +519,7 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
          *
          * @throws IOException  should the write fail
          */
-        public void write(ObjectOutputStream output) throws IOException;
+        void write(ObjectOutputStream output) throws IOException;
 
 
         /**
@@ -476,7 +529,7 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
          *
          * @throws IOException  should the read fail
          */
-        public void read(ObjectInputStream input) throws IOException;
+        void read(ObjectInputStream input) throws IOException;
 
 
         /**
@@ -487,7 +540,7 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
          * @return Operation  the {@link Operation} to be sent back to the initiator of this
          *                    {@link Operation} (if null, nothing is returned)
          */
-        public Operation execute(long sequence);
+        Operation execute(long sequence);
 
 
         /**
@@ -497,15 +550,50 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
          *
          * @return  the {@link StreamName}
          */
-        public StreamName getStreamName();
+        StreamName getStreamName();
+
+
+        /**
+         * Notifies the {@link Operation} that it was completed with the specified result.
+         *
+         * @param result  the result
+         */
+        void complete(T result);
+
+
+        /**
+         * Notifies the {@link Operation} that is was completed exceptionally with the specified {@link Throwable}.
+         *
+         * @param throwable  the throwable
+         */
+        void completeExceptionally(Throwable throwable);
+
+
+        /**
+         * Obtains the {@link CompletableFuture} that can be used for acquiring
+         * the result of the {@link Operation}, including the result and exception thrown.
+         *
+         * @return  the {@link CompletableFuture}
+         */
+        CompletableFuture<T> getCompletableFuture();
     }
 
 
     /**
      * An {@link Operation} to send and execute a {@link Callable}.
      */
-    class CallableOperation implements Operation
+    class CallableOperation<T> implements Operation<T>
     {
+        /**
+         * The {@link CompletableFuture} for the result of the {@link Callable}.
+         */
+        private transient CompletableFuture<T> future;
+
+        /**
+         * The transient {@link OptionsByType} for the {@link Operation}.
+         */
+        private transient OptionsByType optionsByType;
+
         /**
          * Is a response required for the {@link Callable}?
          */
@@ -514,7 +602,7 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
         /**
          * The {@link Callable} to eventually execute.
          */
-        private Callable<?> callable;
+        private Callable<T> callable;
 
 
         /**
@@ -529,14 +617,14 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
         /**
          * Constructs a {@link AbstractRemoteChannel.CallableOperation}
          *
-         * @param callable         the {@link Callable} to execute remotely
-         * @param acknowledgeWhen  the type of acknowledgement required
+         * @param callable       the {@link Callable} to execute remotely
+         * @param optionsByType  the {@link OptionsByType} for the execution
          *
          * @throws NullPointerException      should the {@link Callable} be <code>null</code>
          * @throws IllegalArgumentException  should the {@link Callable} be an anonymous inner class
          */
-        public CallableOperation(Callable<?>     callable,
-                                 AcknowledgeWhen acknowledgeWhen)
+        public CallableOperation(Callable<T>   callable,
+                                 OptionsByType optionsByType)
         {
             Class<?> callableClass = callable == null ? null : callable.getClass();
 
@@ -554,8 +642,10 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
             }
             else
             {
-                this.isResponseRequired = acknowledgeWhen == AcknowledgeWhen.PROCESSED;
+                this.isResponseRequired = optionsByType.get(AcknowledgeWhen.class) == AcknowledgeWhen.PROCESSED;
                 this.callable           = callable;
+                this.future             = new CompletableFuture<>();
+                this.optionsByType      = optionsByType;
             }
         }
 
@@ -656,14 +746,60 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
         {
             return null;
         }
+
+
+        @Override
+        public void complete(T result)
+        {
+            // cache the result (if required)
+            Caching caching = optionsByType.get(Caching.class);
+
+            if (caching.isEnabled())
+            {
+                // determine the Caching Timeout
+                Timeout timeout = caching.getOptionsByType().get(Timeout.class);
+
+                // determine the Instant in the future when the result will timeout
+                Instant instant = Instant.now().plusMillis(timeout.to(TimeUnit.MILLISECONDS));
+
+                // cache the result for the callable
+                cache.put(callable, new Pair<>(result, instant));
+            }
+
+            future.complete(result);
+        }
+
+
+        @Override
+        public void completeExceptionally(Throwable throwable)
+        {
+            future.completeExceptionally(throwable);
+        }
+
+
+        @Override
+        public CompletableFuture<T> getCompletableFuture()
+        {
+            return future;
+        }
     }
 
 
     /**
      * An {@link Operation} to raise a {@link RemoteEvent}.
      */
-    class EventOperation implements Operation
+    class EventOperation implements Operation<Void>
     {
+        /**
+         * The {@link CompletableFuture} for notifying of event delivery.
+         */
+        private transient CompletableFuture<Void> future;
+
+        /**
+         * The transient {@link OptionsByType} for the {@link Operation}.
+         */
+        private transient OptionsByType optionsByType;
+
         /**
          * The {@link StreamName} for the {@link RemoteEvent}
          */
@@ -690,24 +826,19 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
          *
          * @param streamName       the {@link StreamName} for the {@link RemoteEvent}
          * @param event            the {@link RemoteEvent} to fire remotely
-         * @param acknowledgeWhen  the type of acknowledgement required
          *
          * @throws NullPointerException      should the {@link RemoteEvent} be <code>null</code>
          * @throws IllegalArgumentException  should the {@link RemoteEvent} be an anonymous inner class
          */
-        public EventOperation(StreamName      streamName,
-                              RemoteEvent     event,
-                              AcknowledgeWhen acknowledgeWhen)
+        public EventOperation(StreamName    streamName,
+                              RemoteEvent   event,
+                              OptionsByType optionsByType)
         {
             if (streamName == null)
             {
                 throw new NullPointerException("The streamName can't be null");
             }
-
-            this.streamName    = streamName;
-            this.isAckRequired = acknowledgeWhen == AcknowledgeWhen.PROCESSED;
-
-            if (event == null)
+            else if (event == null)
             {
                 throw new NullPointerException("RemoteEvent can't be null");
             }
@@ -717,7 +848,11 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
             }
             else
             {
-                this.event = event;
+                this.streamName    = streamName;
+                this.isAckRequired = optionsByType.get(AcknowledgeWhen.class) == AcknowledgeWhen.PROCESSED;
+                this.event         = event;
+                this.future        = new CompletableFuture<>();
+                this.optionsByType = optionsByType;
             }
         }
 
@@ -819,6 +954,27 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
         {
             return streamName;
         }
+
+
+        @Override
+        public void complete(Void result)
+        {
+            future.complete(result);
+        }
+
+
+        @Override
+        public void completeExceptionally(Throwable throwable)
+        {
+            future.completeExceptionally(throwable);
+        }
+
+
+        @Override
+        public CompletableFuture<Void> getCompletableFuture()
+        {
+            return future;
+        }
     }
 
 
@@ -871,12 +1027,12 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
     /**
      * An {@link Operation} to send and deliver a response.
      */
-    class ResponseOperation implements Operation
+    class ResponseOperation<T> implements Operation<T>
     {
         /**
          * The response.
          */
-        private Object response;
+        private T response;
 
 
         /**
@@ -893,7 +1049,7 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
          *
          * @param response  the response
          */
-        public ResponseOperation(Object response)
+        public ResponseOperation(T response)
         {
             this.response = response;
         }
@@ -909,24 +1065,24 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
         @Override
         public Operation execute(long sequence)
         {
-            CompletableFuture listener = pendingListeners.remove(sequence);
+            Operation operation = pendingOperations.remove(sequence);
 
-            if (listener != null)
+            if (operation != null)
             {
                 try
                 {
                     if (response instanceof Throwable)
                     {
-                        listener.completeExceptionally((Throwable) response);
+                        operation.completeExceptionally((Throwable) response);
                     }
                     else
                     {
-                        listener.complete(response);
+                        operation.complete(response);
                     }
                 }
                 catch (Throwable throwable)
                 {
-                    // we ignore any exceptions that the listener may throw
+                    // we ignore any exceptions that the future may throw
                 }
             }
 
@@ -939,7 +1095,7 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
         {
             try
             {
-                response = input.readObject();
+                response = (T) input.readObject();
             }
             catch (ClassNotFoundException e)
             {
@@ -967,14 +1123,40 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
         {
             return null;
         }
+
+
+        @Override
+        public void complete(T result)
+        {
+            // nothing to do as ResponseOperations never get completed
+        }
+
+
+        @Override
+        public void completeExceptionally(Throwable throwable)
+        {
+            // nothing to do as ResponseOperations don't throw exceptions
+        }
+
+
+        @Override
+        public CompletableFuture<T> getCompletableFuture()
+        {
+            return null;
+        }
     }
 
 
     /**
      * An {@link Operation} to send and execute a {@link Runnable}.
      */
-    class RunnableOperation implements Operation
+    class RunnableOperation implements Operation<Void>
     {
+        /**
+         * The {@link CompletableFuture} for notifying of {@link Runnable} execution.
+         */
+        private transient CompletableFuture<Void> future;
+
         /**
          * The {@link Runnable} to eventually execute.
          */
@@ -998,14 +1180,14 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
         /**
          * Constructs a {@link RunnableOperation}
          *
-         * @param runnable         the {@link Runnable} to run remotely
-         * @param acknowledgeWhen  the type of acknowledgement required
+         * @param runnable       the {@link Runnable} to run remotely
+         * @param optionsByType  the {@link OptionsByType} for the {@link Runnable} execution
          *
          * @throws NullPointerException      should the {@link Runnable} be <code>null</code>
          * @throws IllegalArgumentException  should the {@link Runnable} be an anonymous inner class
          */
-        public RunnableOperation(Runnable        runnable,
-                                 AcknowledgeWhen acknowledgeWhen)
+        public RunnableOperation(Runnable      runnable,
+                                 OptionsByType optionsByType)
         {
             Class<?> runnableClass = runnable == null ? null : runnable.getClass();
 
@@ -1023,10 +1205,10 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
             }
             else
             {
-                this.runnable = runnable;
+                this.runnable           = runnable;
+                this.isResponseRequired = optionsByType.get(AcknowledgeWhen.class) == AcknowledgeWhen.PROCESSED;
+                this.future             = new CompletableFuture<>();
             }
-
-            this.isResponseRequired = acknowledgeWhen == AcknowledgeWhen.PROCESSED;
         }
 
 
@@ -1124,6 +1306,27 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
         {
             return null;
         }
+
+
+        @Override
+        public void complete(Void result)
+        {
+            future.complete(result);
+        }
+
+
+        @Override
+        public void completeExceptionally(Throwable throwable)
+        {
+            future.completeExceptionally(throwable);
+        }
+
+
+        @Override
+        public CompletableFuture<Void> getCompletableFuture()
+        {
+            return future;
+        }
     }
 
 
@@ -1184,12 +1387,12 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
                 }
                 catch (NotSerializableException e)
                 {
-                    // determine if a "local" future was provided with the operation
-                    CompletableFuture<?> future = pendingListeners.remove(sequence);
+                    // determine if the operation required acknowledgement (we can acknowledge failure here)
+                    Operation operation = pendingOperations.remove(sequence);
 
-                    if (future == null)
+                    if (operation == null)
                     {
-                        // when there's no "local" future, we assume we must send a response
+                        // when the operation doesn't require acknowledgment, we assume we must send a response
                         sendTemporaryStream = true;
 
                         // while we failed to serialize the operation, that doesn't mean
@@ -1207,8 +1410,8 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
                         // send a response to the original caller
                         sendTemporaryStream = false;
 
-                        // notify the "local" future of the exception
-                        future.completeExceptionally(e);
+                        // notify the operation of the exception
+                        operation.completeExceptionally(e);
                     }
                 }
 

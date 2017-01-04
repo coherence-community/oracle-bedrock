@@ -25,11 +25,12 @@
 
 package com.oracle.bedrock.runtime.concurrent.socket;
 
-import com.oracle.bedrock.runtime.concurrent.RemoteCallable;
 import com.oracle.bedrock.deferred.Eventually;
+import com.oracle.bedrock.runtime.concurrent.RemoteCallable;
 import com.oracle.bedrock.runtime.concurrent.RemoteEvent;
 import com.oracle.bedrock.runtime.concurrent.RemoteEventListener;
 import com.oracle.bedrock.runtime.concurrent.RemoteRunnable;
+import com.oracle.bedrock.runtime.concurrent.options.Caching;
 import com.oracle.bedrock.runtime.concurrent.options.StreamName;
 import org.junit.Assert;
 import org.junit.Test;
@@ -42,6 +43,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.oracle.bedrock.deferred.DeferredHelper.future;
 import static org.hamcrest.CoreMatchers.is;
@@ -203,6 +205,69 @@ public class SocketBasedRemoteChannelTests
     }
 
 
+    /**
+     * Ensure a {@link SocketBasedRemoteChannelServer} can submit, receive and cache
+     * a {@link RemoteCallable}.
+     */
+    @Test
+    public void shouldCacheRemoteCallableRequest() throws InterruptedException
+    {
+        SocketBasedRemoteChannelServer server = null;
+        SocketBasedRemoteChannelClient client = null;
+
+        try
+        {
+            server = new SocketBasedRemoteChannelServer();
+
+            InetAddress address = server.open();
+
+            client = new SocketBasedRemoteChannelClient(address, server.getPort());
+
+            client.open();
+
+            CompletableFuture<Integer> response1 = client.submit(new Counter());
+
+            Eventually.assertThat(future(Integer.class, response1), is(1));
+
+            CompletableFuture<Integer> response2 = client.submit(new Counter(), Caching.enabled());
+
+            Eventually.assertThat(future(Integer.class, response2), is(2));
+
+            CompletableFuture<Integer> response3 = client.submit(new Counter(), Caching.enabled());
+
+            Eventually.assertThat(future(Integer.class, response3), is(2));
+
+            CompletableFuture<Integer> response4 = client.submit(new Counter());
+
+            Eventually.assertThat(future(Integer.class, response4), is(3));
+
+            CompletableFuture<Integer> response5 = client.submit(new Counter(), Caching.enabled());
+
+            Eventually.assertThat(future(Integer.class, response5), is(4));
+
+            CompletableFuture<Integer> response6 = client.submit(new Counter(), Caching.enabled());
+
+            Eventually.assertThat(future(Integer.class, response6), is(4));
+        }
+        catch (IOException e)
+        {
+            Assert.fail("Failed to process the request due to:\n" + e);
+        }
+        finally
+        {
+            if (client != null)
+            {
+                client.close();
+            }
+
+            if (server != null)
+            {
+                server.close();
+            }
+        }
+    }
+
+
     @Test
     public void shouldRaiseAndProcessEvents() throws Exception
     {
@@ -277,6 +342,36 @@ public class SocketBasedRemoteChannelTests
                     assertThat(list.get(i), is(i));
                 }
             }
+        }
+    }
+
+
+    /**
+     * A simple {@link RemoteCallable} that increments a count for each invocation.
+     */
+    public static class Counter implements RemoteCallable<Integer>
+    {
+        private static AtomicInteger counter = new AtomicInteger(0);
+
+
+        @Override
+        public Integer call() throws Exception
+        {
+            return counter.incrementAndGet();
+        }
+
+
+        @Override
+        public int hashCode()
+        {
+            return 0;
+        }
+
+
+        @Override
+        public boolean equals(Object other)
+        {
+            return other instanceof Counter;
         }
     }
 

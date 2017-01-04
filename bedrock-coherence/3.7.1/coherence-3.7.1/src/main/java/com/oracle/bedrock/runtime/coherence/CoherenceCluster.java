@@ -33,6 +33,7 @@ import com.oracle.bedrock.runtime.Assembly;
 import com.oracle.bedrock.runtime.coherence.callables.GetAutoStartServiceNames;
 import com.oracle.bedrock.runtime.coherence.callables.GetServiceStatus;
 import com.oracle.bedrock.runtime.coherence.callables.IsServiceStorageEnabled;
+import com.oracle.bedrock.runtime.concurrent.options.Caching;
 import com.oracle.bedrock.util.Trilean;
 import com.tangosol.net.NamedCache;
 import com.tangosol.util.UID;
@@ -184,7 +185,7 @@ public class CoherenceCluster extends AbstractAssembly<CoherenceClusterMember>
 
                        for (CoherenceClusterMember member : cluster)
                        {
-                           Set<String> serviceNames = member.invoke(new GetAutoStartServiceNames());
+                           Set<String> serviceNames = member.invoke(new GetAutoStartServiceNames(), Caching.enabled());
 
                            for (String serviceName : serviceNames)
                            {
@@ -204,7 +205,7 @@ public class CoherenceCluster extends AbstractAssembly<CoherenceClusterMember>
                        // according to the number of required services
                        for (CoherenceClusterMember member : cluster)
                        {
-                           Set<String> serviceNames = member.invoke(new GetAutoStartServiceNames());
+                           Set<String> serviceNames = member.invoke(new GetAutoStartServiceNames(), Caching.enabled());
 
                            for (String serviceName : serviceNames)
                            {
