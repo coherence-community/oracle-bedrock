@@ -31,6 +31,7 @@ import com.oracle.bedrock.runtime.ApplicationConsoleBuilder;
 import com.oracle.bedrock.runtime.java.container.Container;
 import com.oracle.bedrock.runtime.java.container.Scope;
 
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.Reader;
@@ -89,14 +90,30 @@ public class SystemApplicationConsole implements ApplicationConsole
             {
             }
         };
-        m_inputReader = new InputStreamReader(scope.getStandardInput());
+        m_inputReader = new InputStreamReader(scope.getStandardInput())
+        {
+            @Override
+            public void close() throws IOException
+            {
+            }
+        };
     }
 
 
     @Override
     public void close()
     {
-        // SKIP: we don't close the System streams
+        m_outputWriter.close();
+        m_errorWriter.close();
+
+        try
+        {
+            m_inputReader.close();
+        }
+        catch (IOException e)
+        {
+            // SKIP: we don't care if the reader fails to close
+        }
     }
 
 

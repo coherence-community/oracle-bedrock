@@ -27,7 +27,6 @@ package com.oracle.bedrock.runtime.java.io;
 
 import java.io.IOException;
 import java.io.Reader;
-
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -56,9 +55,6 @@ public class NullReader extends Reader
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void close() throws IOException
     {
@@ -66,9 +62,13 @@ public class NullReader extends Reader
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
+    public boolean ready() throws IOException
+    {
+        return false;
+    }
+
+
     @Override
     public int read(char[] chars,
                     int    offset,

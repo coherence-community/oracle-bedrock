@@ -113,13 +113,28 @@ public class FileWriterApplicationConsole implements ApplicationConsole
 
         m_outputWriter   = new PrintWriter(fileWriter);
         m_errorWriter    = new PrintWriter(fileWriter);
-        m_inputReader    = new InputStreamReader(Container.getPlatformScope().getStandardInput());
+        m_inputReader    = new InputStreamReader(Container.getPlatformScope().getStandardInput())
+        {
+            @Override
+            public void close() throws IOException
+            {
+            }
+        };
     }
 
 
     @Override
     public void close()
     {
+        try
+        {
+            m_inputReader.close();
+        }
+        catch (IOException e)
+        {
+            // SKIP: we don't care if an exception occurs - we're closing
+        }
+
         try
         {
             m_fileWriter.close();
