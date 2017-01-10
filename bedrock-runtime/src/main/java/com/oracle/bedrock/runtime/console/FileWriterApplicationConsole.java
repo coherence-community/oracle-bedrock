@@ -27,18 +27,17 @@ package com.oracle.bedrock.runtime.console;
 
 import com.oracle.bedrock.runtime.ApplicationConsole;
 import com.oracle.bedrock.runtime.ApplicationConsoleBuilder;
-import com.oracle.bedrock.runtime.java.container.Container;
+import com.oracle.bedrock.runtime.java.io.NullReader;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.Reader;
 
 /**
  * An {@link ApplicationConsole} that writes standard output and error streams
- * to a specified file, and uses the platform standard input for an input stream.
+ * to a specified file, and uses a {@link NullReader} for standard input.
  * <p>
  * Copyright (c) 2013. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
@@ -113,13 +112,7 @@ public class FileWriterApplicationConsole implements ApplicationConsole
 
         m_outputWriter   = new PrintWriter(fileWriter);
         m_errorWriter    = new PrintWriter(fileWriter);
-        m_inputReader    = new InputStreamReader(Container.getPlatformScope().getStandardInput())
-        {
-            @Override
-            public void close() throws IOException
-            {
-            }
-        };
+        m_inputReader    = new NullReader();
     }
 
 

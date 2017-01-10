@@ -30,14 +30,14 @@ import com.oracle.bedrock.runtime.ApplicationConsole;
 import com.oracle.bedrock.runtime.ApplicationConsoleBuilder;
 import com.oracle.bedrock.runtime.java.container.Container;
 import com.oracle.bedrock.runtime.java.container.Scope;
+import com.oracle.bedrock.runtime.java.io.NullReader;
 
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.Reader;
 
 /**
- * An {@link ApplicationConsole} that delegates i/o to the System.
+ * An {@link ApplicationConsole} that delegates output to the System.
  * <p>
  * Copyright (c) 2013. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
@@ -90,13 +90,7 @@ public class SystemApplicationConsole implements ApplicationConsole
             {
             }
         };
-        m_inputReader = new InputStreamReader(scope.getStandardInput())
-        {
-            @Override
-            public void close() throws IOException
-            {
-            }
-        };
+        m_inputReader = new NullReader();
     }
 
 
