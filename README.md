@@ -67,5 +67,5 @@ Oracle Bedrock is an open source project. Pull Requests are accepted. See
 [CONTRIBUTING](CONTRIBUTING.md) for details.
 
 ## License
-Copyright (c) 2010, 2016 Oracle and/or its affiliates.  Licensed under the [Common Development and
+Copyright (c) 2010, 2017 Oracle and/or its affiliates.  Licensed under the [Common Development and
 Distribution License v1.0](LICENSE.md) ("CDDL")
