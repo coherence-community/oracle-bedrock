@@ -4,7 +4,7 @@
     <parent>
         <groupId>com.oracle.bedrock</groupId>
         <artifactId>bedrock-coherence</artifactId>
-        <version>4.2.0</version>
+        <version>4.2.1-SNAPSHOT</version>
     </parent>
 
     <groupId>com.oracle.bedrock.coherence</groupId>
