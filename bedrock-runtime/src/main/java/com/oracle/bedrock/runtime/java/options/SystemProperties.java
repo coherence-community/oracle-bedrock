@@ -25,6 +25,7 @@
 
 package com.oracle.bedrock.runtime.java.options;
 
+import com.oracle.bedrock.ComposableOption;
 import com.oracle.bedrock.Option;
 import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.lang.ExpressionEvaluator;
@@ -46,7 +47,8 @@ import java.util.Properties;
  *
  * @author Brian Oliver
  */
-public class SystemProperties implements Option.Collector<SystemProperty, SystemProperties>
+public class SystemProperties implements Option.Collector<SystemProperty, SystemProperties>,
+                                         ComposableOption<SystemProperties>
 {
     /**
      * The names of Java System properties.
@@ -485,6 +487,14 @@ public class SystemProperties implements Option.Collector<SystemProperty, System
         }
     }
 
+
+    @Override
+    public SystemProperties compose(SystemProperties other)
+    {
+        // create a new SystemProperties based on this SystemProperties, including all of the other SystemProperties
+        return this.addAll(other);
+    }
+                                       
 
     @Override
     public Iterator<SystemProperty> iterator()
