@@ -1,5 +1,5 @@
 /*
- * File: SingletonCoherenceClusterOrchestrationTest.java
+ * File: SingleMemberCoherenceClusterResourceTest.java
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
@@ -28,7 +28,12 @@ package com.oracle.bedrock.junit;
 import com.oracle.bedrock.runtime.coherence.CoherenceCluster;
 import com.oracle.bedrock.runtime.coherence.CoherenceClusterMember;
 import com.oracle.bedrock.runtime.coherence.options.ClusterName;
+import com.oracle.bedrock.runtime.coherence.options.LocalHost;
+import com.oracle.bedrock.runtime.coherence.options.LocalStorage;
+import com.oracle.bedrock.runtime.coherence.options.Multicast;
+import com.oracle.bedrock.runtime.coherence.options.RoleName;
 import com.oracle.bedrock.runtime.java.options.SystemProperty;
+import com.oracle.bedrock.runtime.options.DisplayName;
 import org.junit.ClassRule;
 import org.junit.Test;
 
@@ -40,33 +45,36 @@ import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 
 /**
- * Functional Tests for the {@link CoherenceClusterOrchestration}.
+ * Functional Tests for single-member {@link CoherenceClusterResource}s.
  * <p>
- * Copyright (c) 2016. All Rights Reserved. Oracle Corporation.<br>
+ * Copyright (c) 2017. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Brian Oliver
  */
-public class SingletonCoherenceClusterOrchestrationTest
+public class SingleMemberCoherenceClusterResourceTest
 {
     /**
-     * A {@link CoherenceClusterOrchestration} for a default {@link CoherenceCluster}.
+     * A {@link CoherenceClusterResource} defining a single cluster member
      */
     @ClassRule
-    public static CoherenceClusterOrchestration orchestration =
-        new CoherenceClusterOrchestration()
-                .setStorageMemberCount(1)
-                .withOptions(ClusterName.of("SingletonCluster"))
-                .withStorageMemberOptions(SystemProperty.of("test.property", "storageMember"));
+    public static CoherenceClusterResource coherenceResource =
+        new CoherenceClusterResource()
+            .with(ClusterName.of("SingletonCluster"), LocalHost.only(), Multicast.ttl(0))
+            .include(1,
+                     RoleName.of("storage"),
+                     DisplayName.of("storage"),
+                     LocalStorage.enabled(),
+                     SystemProperty.of("test.property", "storageMember"));
 
 
     /**
-     * Ensure that a default cluster is formed by a {@link CoherenceClusterOrchestration}.
+     * Ensure that a single member cluster is formed by {@link CoherenceClusterResource}.
      */
     @Test
     public void shouldFormCorrectSizeCluster()
     {
-        CoherenceCluster cluster  = orchestration.getCluster();
+        CoherenceCluster cluster  = coherenceResource.getCluster();
         Set<String>      setNames = new TreeSet<>();
 
         for (CoherenceClusterMember member : cluster)
@@ -81,9 +89,9 @@ public class SingletonCoherenceClusterOrchestrationTest
     @Test
     public void shouldHaveSetStorageMemberProperty() throws Exception
     {
-        for (CoherenceClusterMember member : orchestration.getCluster().getAll("storage"))
+        for (CoherenceClusterMember member : coherenceResource.getCluster().getAll("storage"))
         {
             assertThat(member.getSystemProperty("test.property"), is("storageMember"));
         }
-    }
+    }                                                         
 }

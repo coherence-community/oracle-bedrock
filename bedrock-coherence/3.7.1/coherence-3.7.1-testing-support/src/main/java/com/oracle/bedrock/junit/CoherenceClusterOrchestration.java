@@ -69,12 +69,16 @@ import static org.hamcrest.core.Is.is;
  * <p>
  * Copyright (c) 2015. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
+ * <p>
+ * <strong>DEPRECATED:</strong> Please consider migrating to use the {@link CoherenceClusterResource} instead. This
+ * class may be removed in the next major release.
  *
  * @author Jonathan Knight
  * @author Brian Oliver
  * @author Harvey Raja
  * @author Aleks Seovic
  */
+@Deprecated
 public class CoherenceClusterOrchestration extends ExternalResource
 {
     /**
@@ -452,7 +456,7 @@ public class CoherenceClusterOrchestration extends ExternalResource
             optionsByType.add(RoleName.of("client"));
             optionsByType.add(LocalStorage.disabled());
 
-            session = builder.build(platform, this, optionsByType);
+            session = builder.build(platform, cluster, optionsByType);
 
             sessions.put(builder, session);
         }

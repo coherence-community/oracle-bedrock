@@ -27,12 +27,13 @@ package com.oracle.bedrock.junit;
 
 import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.runtime.LocalPlatform;
+import com.oracle.bedrock.runtime.coherence.CoherenceCluster;
+import com.oracle.bedrock.runtime.coherence.CoherenceClusterMember;
 import com.tangosol.net.ConfigurableCacheFactory;
-import net.sf.cglib.core.Local;
 
 /**
- * A mechanism to build local Coherence Session (represented as a {@link ConfigurableCacheFactory})
- * for a {@link CoherenceClusterOrchestration}.
+ * A mechanism to build local Coherence Session (represented as a {@link ConfigurableCacheFactory}), typically
+ * for a {@link CoherenceClusterOrchestration} or {@link CoherenceClusterResource}.
  * <p>
  * Copyright (c) 2015. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
@@ -44,14 +45,14 @@ public interface SessionBuilder
     /**
      * Creates a {@link ConfigurableCacheFactory} for a Coherence Session.
      *
-     * @param platform       the {@link Local} on which the {@link ConfigurableCacheFactory} will be established
-     * @param orchestration  the {@link CoherenceClusterOrchestration} establishing the session
-     * @param optionsByType  the {@link OptionsByType}s on which to base the
-     *                       newly created {@link ConfigurableCacheFactory}
+     * @param platform       the {@link LocalPlatform} on which the {@link ConfigurableCacheFactory} will be established
+     * @param cluster        the {@link CoherenceCluster} for which the session will be created
+     * @param optionsByType  the {@link OptionsByType}s provided to all of the {@link CoherenceClusterMember}s
+     *                       when establishing the {@link CoherenceCluster}
      *
      * @return a {@link ConfigurableCacheFactory}
      */
-    ConfigurableCacheFactory build(LocalPlatform                 platform,
-                                   CoherenceClusterOrchestration orchestration,
-                                   OptionsByType                 optionsByType);
+    ConfigurableCacheFactory build(LocalPlatform platform,
+                                   CoherenceCluster cluster,
+                                   OptionsByType optionsByType);
 }

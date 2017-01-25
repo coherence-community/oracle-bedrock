@@ -30,6 +30,7 @@ import com.oracle.bedrock.Version;
 import com.oracle.bedrock.runtime.LocalPlatform;
 import com.oracle.bedrock.runtime.MetaClass;
 import com.oracle.bedrock.runtime.Profile;
+import com.oracle.bedrock.runtime.coherence.CoherenceCluster;
 import com.oracle.bedrock.runtime.coherence.CoherenceClusterMember;
 import com.oracle.bedrock.runtime.coherence.options.CacheConfig;
 import com.oracle.bedrock.runtime.coherence.options.Clustering;
@@ -78,14 +79,14 @@ public class ExtendClient implements SessionBuilder
 
 
     @Override
-    public ConfigurableCacheFactory build(LocalPlatform                 platform,
-                                          CoherenceClusterOrchestration orchestration,
-                                          OptionsByType                 optionsByType)
+    public ConfigurableCacheFactory build(LocalPlatform    platform,
+                                          CoherenceCluster cluster,
+                                          OptionsByType    optionsByType)
     {
         // ----- establish the diagnostics output table -----
 
         Table diagnosticsTable = new Table();
-
+                                                                   
         diagnosticsTable.getOptions().add(Table.orderByColumn(0));
 
         // ----- establish the options for launching a local extend-based member -----
