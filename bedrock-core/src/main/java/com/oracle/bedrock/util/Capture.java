@@ -112,4 +112,18 @@ public class Capture<T> implements Iterator<T>
     {
         throw new UnsupportedOperationException("Can't remove from a Capture");
     }
+
+
+    /**
+     * Obtains a {@link Capture} based on a provided {@link Iterator}.
+     *
+     * @param iterator  the {@link Iterator}
+     * @param <T>       the type of the value captured
+     *
+     * @return the {@link Capture} of the {@link Iterator}
+     */
+    public static <T> Capture<T> of(Iterator<T> iterator)
+    {
+        return new Capture<>(iterator);
+    }
 }

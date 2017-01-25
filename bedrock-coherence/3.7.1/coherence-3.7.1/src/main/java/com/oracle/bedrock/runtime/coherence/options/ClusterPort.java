@@ -174,7 +174,7 @@ public class ClusterPort implements Profile, Option
                 {
                     if (platform instanceof LocalPlatform || platform instanceof JavaVirtualMachine)
                     {
-                        port = LocalPlatform.get().getAvailablePorts().next();
+                        ports = new Capture<>(LocalPlatform.get().getAvailablePorts());
                     }
                     else
                     {
@@ -182,10 +182,9 @@ public class ClusterPort implements Profile, Option
                                                         + platform.getName());
                     }
                 }
-                else
-                {
-                    port = ports.next();
-                }
+
+                // now acquire a port
+                port = ports.next();
 
                 optionsByType.add(SystemProperty.of(PROPERTY, port));
             }
