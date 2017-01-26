@@ -31,7 +31,9 @@ import com.oracle.bedrock.io.NetworkHelper;
 import com.oracle.bedrock.runtime.AbstractPlatform;
 import com.oracle.bedrock.runtime.Application;
 import com.oracle.bedrock.runtime.ApplicationLauncher;
+import com.oracle.bedrock.runtime.LocalPlatform;
 import com.oracle.bedrock.runtime.MetaClass;
+import com.oracle.bedrock.runtime.OperatingSystem;
 import com.oracle.bedrock.runtime.Platform;
 
 import java.lang.management.ManagementFactory;
@@ -97,6 +99,13 @@ public class JavaVirtualMachine extends AbstractPlatform
                 this.address = NetworkHelper.getFeasibleLocalHost();
             }
         }
+    }
+
+
+    @Override
+    public OperatingSystem getOperatingSystem()
+    {
+        return LocalPlatform.get().getOperatingSystem();
     }
 
 

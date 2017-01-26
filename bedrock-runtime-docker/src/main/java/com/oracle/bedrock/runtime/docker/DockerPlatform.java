@@ -32,12 +32,14 @@ import com.oracle.bedrock.runtime.Application;
 import com.oracle.bedrock.runtime.ApplicationLauncher;
 import com.oracle.bedrock.runtime.LocalPlatform;
 import com.oracle.bedrock.runtime.MetaClass;
+import com.oracle.bedrock.runtime.OperatingSystem;
 import com.oracle.bedrock.runtime.Platform;
 import com.oracle.bedrock.runtime.docker.commands.AbstractDockerCommand;
 import com.oracle.bedrock.runtime.java.JavaApplication;
 import com.oracle.bedrock.runtime.remote.RemoteTerminalBuilder;
 import com.oracle.bedrock.runtime.remote.SimpleRemoteApplicationLauncher;
 import com.oracle.bedrock.runtime.remote.java.RemoteJavaApplicationLauncher;
+import com.oracle.bedrock.util.Version;
 
 import java.net.InetAddress;
 
@@ -124,8 +126,15 @@ public class DockerPlatform extends AbstractPlatform
     }
 
 
+    @Override
+    public OperatingSystem getOperatingSystem()
+    {
+        return OperatingSystem.custom("Generic", "", OperatingSystem.Type.LINUX, Version.of("1.0"));
+    }
+
+
     /**
-     * Obtain the {@link InetAddress} of the Docker daemon.
+     * Obtain the {@link InetAddress} of the Docker daemon.                                         
      *
      * @return  the {@link InetAddress} of the Docker daemon.
      */

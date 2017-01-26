@@ -66,6 +66,11 @@ public class LocalPlatform extends AbstractPlatform
     private static LocalPlatform INSTANCE = new LocalPlatform();
 
     /**
+     * The {@link OperatingSystem} for the {@link LocalPlatform}.
+     */
+    private OperatingSystem operatingSystem;
+
+    /**
      * An {@link AvailablePortIterator} for the {@link LocalPlatform}.
      */
     private AvailablePortIterator availablePortIterator;
@@ -82,6 +87,9 @@ public class LocalPlatform extends AbstractPlatform
     private LocalPlatform()
     {
         super("Local");
+
+        // detect the OperatingSystem for the LocalPlatform
+        this.operatingSystem = OperatingSystem.detect();
 
         // ----- establish InetAddress of the LocalPlatform -----
 
@@ -117,9 +125,16 @@ public class LocalPlatform extends AbstractPlatform
 
 
     @Override
+    public OperatingSystem getOperatingSystem()
+    {
+        return operatingSystem;
+    }
+
+
+    @Override
     public InetAddress getAddress()
     {
-        return address;
+        return address;        
     }
 
 
@@ -194,6 +209,7 @@ public class LocalPlatform extends AbstractPlatform
         System.out.println("----------------------------------");
 
         System.out.println("Platform Name       : " + platform.getName());
+        System.out.println("Operating System    : " + platform.getOperatingSystem());
         System.out.println("Address             : " + platform.getAddress());
         System.out.println("Available Ports     : " + platform.getAvailablePorts());
         System.out.println("Options             : " + platform.getOptions());

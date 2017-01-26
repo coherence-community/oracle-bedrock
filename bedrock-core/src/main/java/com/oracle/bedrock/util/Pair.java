@@ -41,12 +41,12 @@ import java.util.Map;
 public class Pair<X, Y> implements Tuple
 {
     /**
-     * <p>The first value of the {@link Pair}.</p>
+     * The first value of the {@link Pair}.
      */
     private X x;
 
     /**
-     * <p>The second value of the {@link Pair}.</p>
+     * The second value of the {@link Pair}.
      */
     private Y y;
 
@@ -78,8 +78,21 @@ public class Pair<X, Y> implements Tuple
 
 
     /**
-     * {@inheritDoc}
+     * Constructs a {@link Pair}.
+     *
+     * @param x  the first value of the {@link Pair}
+     * @param y  the second value of the {@link Pair}
+     *
+     * @return a {@link Pair}
      */
+    public static <X, Y> Pair<X, Y> of(X x,
+                                       Y y)
+    {
+        return new Pair<X, Y>(x, y);
+    }
+
+
+    @Override
     public Object get(int index) throws IndexOutOfBoundsException
     {
         if (index == 0)
@@ -97,9 +110,7 @@ public class Pair<X, Y> implements Tuple
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public int size()
     {
         return 2;
@@ -128,9 +139,6 @@ public class Pair<X, Y> implements Tuple
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String toString()
     {

@@ -32,9 +32,11 @@ import com.oracle.bedrock.runtime.Application;
 import com.oracle.bedrock.runtime.ApplicationLauncher;
 import com.oracle.bedrock.runtime.LocalPlatform;
 import com.oracle.bedrock.runtime.MetaClass;
+import com.oracle.bedrock.runtime.OperatingSystem;
 import com.oracle.bedrock.runtime.Platform;
 import com.oracle.bedrock.runtime.java.JavaApplication;
 import com.oracle.bedrock.runtime.remote.java.RemoteJavaApplicationLauncher;
+import com.oracle.bedrock.util.Version;
 
 import java.net.InetAddress;
 
@@ -136,6 +138,13 @@ public class RemotePlatform extends AbstractPlatform
         this.port           = port;
         this.userName       = userName;
         this.authentication = authentication;
+    }
+
+
+    @Override
+    public OperatingSystem getOperatingSystem()
+    {
+        return OperatingSystem.custom("Generic", "", OperatingSystem.Type.LINUX, Version.of("1.0"));
     }
 
 

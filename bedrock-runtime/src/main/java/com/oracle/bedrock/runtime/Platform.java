@@ -50,6 +50,14 @@ public interface Platform extends Infrastructure
      * @return the name of this {@link Platform}
      */
     String getName();
+                     
+
+    /**
+     * Obtains the {@link OperatingSystem} being used by the {@link Platform}.
+     *
+     * @return the {@link OperatingSystem}
+     */
+    OperatingSystem getOperatingSystem();
 
 
     /**
