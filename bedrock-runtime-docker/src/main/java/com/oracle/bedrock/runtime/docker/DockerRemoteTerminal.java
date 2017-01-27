@@ -27,7 +27,7 @@ package com.oracle.bedrock.runtime.docker;
 
 import com.oracle.bedrock.Option;
 import com.oracle.bedrock.OptionsByType;
-import com.oracle.bedrock.Version;
+import com.oracle.bedrock.Bedrock;
 import com.oracle.bedrock.extensible.AbstractExtensible;
 import com.oracle.bedrock.extensible.Feature;
 import com.oracle.bedrock.io.FileHelper;
@@ -294,7 +294,7 @@ public class DockerRemoteTerminal implements RemoteTerminal, Deployer
             Files.readAllLines(dockerFile.toPath()).forEach(diagnosticsTable::addRow);
 
             LOGGER.log(Level.INFO,
-                       "Oracle Bedrock " + Version.get() + ": Created Dockerfile for Application...\n"
+                       "Oracle Bedrock " + Bedrock.getVersion() + ": Created Dockerfile for Application...\n"
                        + "------------------------------------------------------------------------\n"
                        + diagnosticsTable.toString() + "\n"
                        + "------------------------------------------------------------------------\n");

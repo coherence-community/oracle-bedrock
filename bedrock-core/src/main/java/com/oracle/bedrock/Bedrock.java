@@ -1,5 +1,5 @@
 /*
- * File: Version.java
+ * File: Bedrock.java
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
@@ -25,6 +25,7 @@
 
 package com.oracle.bedrock;
 
+import com.oracle.bedrock.annotations.Internal;
 import org.w3c.dom.Document;
 
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -38,14 +39,15 @@ import java.nio.file.Paths;
 import java.util.Properties;
 
 /**
- * Provides version information about the current build of Oracle Bedrock.
+ * Provides internal information about the current build of Oracle Bedrock.
  * <p>
  * Copyright (c) 2016. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Brian Oliver
  */
-public final class Version
+@Internal
+public final class Bedrock
 {
     /**
      * The last parsed / detected version number.
@@ -58,8 +60,8 @@ public final class Version
      */
     static
     {
-        // we use the Version class to find versioned resources
-        Class<Version> versionClass = Version.class;
+        // we use the Bedrock class to find version information
+        Class<Bedrock> versionClass = Bedrock.class;
 
         // attempt to determine the version using the pom.xml of the artifact (in source tree)
         try
@@ -107,7 +109,7 @@ public final class Version
         {
             Properties properties = new Properties();
             InputStream inputStream =
-                Version.class.getResourceAsStream("/META-INF/maven/com.oracle.bedrock/bedrock-core/pom.properties");
+                Bedrock.class.getResourceAsStream("/META-INF/maven/com.oracle.bedrock/bedrock-core/pom.properties");
 
             if (inputStream != null)
             {
@@ -123,7 +125,7 @@ public final class Version
         // attempt to use the Java MANIFEST.MF (in artifact jar)
         if (version == null)
         {
-            Package p = Version.class.getPackage();
+            Package p = Bedrock.class.getPackage();
 
             if (p != null)
             {
@@ -186,8 +188,9 @@ public final class Version
      *
      * @return the version number or an empty string if the version can't be determined.
      */
-    public static String get()
+    public static String getVersion()
     {
         return version;
     }
 }
+    

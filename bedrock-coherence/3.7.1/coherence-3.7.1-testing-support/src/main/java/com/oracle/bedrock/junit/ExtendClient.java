@@ -25,8 +25,8 @@
 
 package com.oracle.bedrock.junit;
 
+import com.oracle.bedrock.Bedrock;
 import com.oracle.bedrock.OptionsByType;
-import com.oracle.bedrock.Version;
 import com.oracle.bedrock.runtime.LocalPlatform;
 import com.oracle.bedrock.runtime.MetaClass;
 import com.oracle.bedrock.runtime.Profile;
@@ -87,7 +87,7 @@ public class ExtendClient implements SessionBuilder
         // ----- establish the diagnostics output table -----
 
         Table diagnosticsTable = new Table();
-                                                                   
+
         diagnosticsTable.getOptions().add(Table.orderByColumn(0));
 
         // ----- establish the options for launching a local extend-based member -----
@@ -139,13 +139,13 @@ public class ExtendClient implements SessionBuilder
         if (LOGGER.isLoggable(Level.INFO))
         {
             LOGGER.log(Level.INFO,
-                       "Oracle Bedrock " + Version.get() + ": Starting *Extend Client...\n"
+                       "Oracle Bedrock " + Bedrock.getVersion() + ": Starting *Extend Client...\n"
                        + "------------------------------------------------------------------------\n"
                        + diagnosticsTable.toString() + "\n"
                        + "------------------------------------------------------------------------\n");
         }
 
-        // ----- establish the session -----
+        // ----- establish the session -----                   
 
         // create the session
         ConfigurableCacheFactory session = new ScopedCacheFactoryBuilder().getConfigurableCacheFactory(cacheConfigURI,

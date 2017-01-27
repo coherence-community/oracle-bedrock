@@ -1,5 +1,5 @@
 /*
- * File: VersionTest.java
+ * File: BedrockTest.java
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
@@ -33,22 +33,22 @@ import static org.hamcrest.core.IsNot.not;
 import static org.junit.Assert.assertThat;
 
 /**
- * Unit Tests for {@link Version}
+ * Unit Tests for {@link Bedrock}.
  * <p>
  * Copyright (c) 2016. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Brian Oliver
  */
-public class VersionTest
+public class BedrockTest
 {
     /**
-     * Ensure we can determine a {@link Version} for Oracle Bedrock.
+     * Ensure we can determine a version for Oracle Bedrock.
      */
     @Test
     public void shouldHaveVersion()
     {
-        String version = Version.get();
+        String version = Bedrock.getVersion();
 
         System.out.println("Running Oracle Bedrock: " + version);
 

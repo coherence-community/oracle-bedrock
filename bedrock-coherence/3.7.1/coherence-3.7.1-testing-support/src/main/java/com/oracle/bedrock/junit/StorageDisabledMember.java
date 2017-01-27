@@ -25,15 +25,14 @@
 
 package com.oracle.bedrock.junit;
 
+import com.oracle.bedrock.Bedrock;
 import com.oracle.bedrock.OptionsByType;
-import com.oracle.bedrock.Version;
 import com.oracle.bedrock.runtime.LocalPlatform;
 import com.oracle.bedrock.runtime.MetaClass;
 import com.oracle.bedrock.runtime.Profile;
 import com.oracle.bedrock.runtime.coherence.CoherenceCluster;
 import com.oracle.bedrock.runtime.coherence.CoherenceClusterMember;
 import com.oracle.bedrock.runtime.coherence.options.CacheConfig;
-import com.oracle.bedrock.runtime.coherence.options.LocalHost;
 import com.oracle.bedrock.runtime.coherence.options.LocalStorage;
 import com.oracle.bedrock.runtime.coherence.options.RoleName;
 import com.oracle.bedrock.table.Cell;
@@ -69,7 +68,7 @@ public class StorageDisabledMember implements SessionBuilder
     {
         // ----- establish the diagnostics output table -----
 
-        Table diagnosticsTable = new Table();                      
+        Table diagnosticsTable = new Table();
 
         diagnosticsTable.getOptions().add(Table.orderByColumn(0));
 
@@ -121,12 +120,12 @@ public class StorageDisabledMember implements SessionBuilder
         if (LOGGER.isLoggable(Level.INFO))
         {
             LOGGER.log(Level.INFO,
-                       "Oracle Bedrock " + Version.get() + ": Starting Storage Disabled Member...\n"
+                       "Oracle Bedrock " + Bedrock.getVersion() + ": Starting Storage Disabled Member...\n"
                        + "------------------------------------------------------------------------\n"
                        + diagnosticsTable.toString() + "\n"
                        + "------------------------------------------------------------------------\n");
         }
-
+                                                               
         // ----- establish the session -----
 
         // create the session

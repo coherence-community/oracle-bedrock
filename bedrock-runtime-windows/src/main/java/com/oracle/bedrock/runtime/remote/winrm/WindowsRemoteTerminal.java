@@ -26,7 +26,7 @@
 package com.oracle.bedrock.runtime.remote.winrm;
 
 import com.oracle.bedrock.OptionsByType;
-import com.oracle.bedrock.Version;
+import com.oracle.bedrock.Bedrock;
 import com.oracle.bedrock.runtime.Application;
 import com.oracle.bedrock.runtime.options.WorkingDirectory;
 import com.oracle.bedrock.runtime.remote.AbstractRemoteTerminal;
@@ -105,7 +105,7 @@ public class WindowsRemoteTerminal extends AbstractRemoteTerminal
                 diagnosticsTable.addRow("Application Executable ", command);
 
                 LOGGER.log(Level.INFO,
-                           "Oracle Bedrock " + Version.get() + ": Starting Application...\n"
+                           "Oracle Bedrock " + Bedrock.getVersion() + ": Starting Application...\n"
                            + "------------------------------------------------------------------------\n"
                            + diagnosticsTable.toString() + "\n"
                            + "------------------------------------------------------------------------\n");

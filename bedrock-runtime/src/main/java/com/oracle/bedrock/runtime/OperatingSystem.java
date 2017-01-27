@@ -41,7 +41,8 @@ import java.util.LinkedHashMap;
 public class OperatingSystem
 {
     /**
-     * Mappings from {@link OperatingSystem} names into the corresponding {@link Type} and release name.
+     * Ordered mappings from {@link OperatingSystem} names (with versions) into the corresponding
+     * {@link Type} and release name.
      */
     private static final LinkedHashMap<String, Pair<Type, String>> MAPPINGS = new LinkedHashMap<>();
 
@@ -62,6 +63,7 @@ public class OperatingSystem
         MAPPINGS.put("windows 7", Pair.of(Type.WINDOWS, "7"));
         MAPPINGS.put("windows 8", Pair.of(Type.WINDOWS, "8"));
         MAPPINGS.put("windows 10", Pair.of(Type.WINDOWS, "10"));
+        MAPPINGS.put("windows", Pair.of(Type.WINDOWS, ""));
 
         MAPPINGS.put("aix", Pair.of(Type.AIX, ""));
         MAPPINGS.put("hp-ux", Pair.of(Type.HPUX, ""));
@@ -90,11 +92,15 @@ public class OperatingSystem
         MAPPINGS.put("mac os x 10.1", Pair.of(Type.MACOS, "Puma"));
         MAPPINGS.put("mac os x 10.0", Pair.of(Type.MACOS, "Cheetah"));
         MAPPINGS.put("mac os x", Pair.of(Type.MACOS, ""));
+
+        // the catch all "unknown" OperatingSystem
+        MAPPINGS.put("", Pair.of(Type.UNKNOWN, ""));
     }
 
 
     /**
-     * The name of the {@link OperatingSystem}.
+     * The name of the {@link OperatingSystem}, determined by inspecting
+     * the "os.name" system property.
      */
     private String name;
 
@@ -109,7 +115,8 @@ public class OperatingSystem
     private Type type;
 
     /**
-     * The {@link Version} of the {@link OperatingSystem}.
+     * The {@link Version} of the {@link OperatingSystem}, determined by inspecting
+     * the "os.version" system property.
      */
     private Version version;
 

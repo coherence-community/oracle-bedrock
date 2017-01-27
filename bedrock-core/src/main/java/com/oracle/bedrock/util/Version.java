@@ -25,6 +25,10 @@
 
 package com.oracle.bedrock.util;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Locale;
+
 /**
  * A utility class for representing {@link Version} numbers and comparing them.
  * <p>
@@ -33,35 +37,181 @@ package com.oracle.bedrock.util;
  *
  * @author Brian Oliver
  */
-public class Version
+public class Version implements Comparable<Version>
 {
     /**
-     * The {@link Version} number.
+     * The qualifier aliases.
      */
-    private String number;
+    private static final HashMap<String, String> QUALIFIER_ALIASES = new HashMap<>();
 
 
-    /**
-     * Constructs a {@link Version} given a number.
-     *
-     * @param number  the {@link Version} number
-     */
-    private Version(String number)
+    static
     {
-        this.number = number;
+        // initialize the standard qualifier aliases / abbreviations
+        QUALIFIER_ALIASES.put("a", "alpha");
+        QUALIFIER_ALIASES.put("b", "beta");
+        QUALIFIER_ALIASES.put("m", "milestone");
+        QUALIFIER_ALIASES.put("r", "release");
+        QUALIFIER_ALIASES.put("rc", "release candidate");
+        QUALIFIER_ALIASES.put("sp", "service pack");
     }
 
 
     /**
-     * Constructs a {@link Version} by parsing the specified version number
+     * The parsed components of the version number (either {@link Integer}s or {@link String}s.
+     */
+    private ArrayList components;
+
+
+    /**
+     * Constructs a {@link Version} given zero or more components strings.
      *
-     * @param number  the {@link Version} number.
+     * @param strings  the individual components strings of the {@link Version}
+     */
+    private Version(String... strings)
+    {
+        // the components of the Version
+        this.components = new ArrayList();
+
+        if (strings == null)
+        {
+            // if nothing is specified, we assume version zero
+            this.components.add("0");
+        }
+        else
+        {
+            // parse and add each of the strings as components
+            // (when a string itself contains components, they too are added as components)
+            for (String number : strings)
+            {
+                // ensure we have a trimmed, lowercase value to parse
+                number = number == null ? "" : number.trim().toLowerCase(Locale.ENGLISH);
+
+                // the collector of digits / text for the version
+                StringBuilder collector = new StringBuilder();
+
+                char          last      = Character.MIN_VALUE;
+
+                for (char c : number.toCharArray())
+                {
+                    if (Character.isDigit(c))
+                    {
+                        if (!Character.isDigit(last) && collector.length() != 0)
+                        {
+                            // remember the collected qualifier
+                            components.add(expand(collector.toString()));
+
+                            // create a new collector
+                            collector = new StringBuilder();
+                        }
+
+                        collector.append(c);
+
+                        last = c;
+                    }
+                    else if (Character.isLetter(c))
+                    {
+                        if (!Character.isLetter(last) && collector.length() != 0)
+                        {
+                            // store the collected digits as an integer
+                            components.add(Integer.parseInt(collector.toString()));
+
+                            // create a new collector
+                            collector = new StringBuilder();
+                        }
+
+                        collector.append(c);
+
+                        last = c;
+                    }
+                    else if (c == '.' || c == '-')
+                    {
+                        if (last == Character.MIN_VALUE)
+                        {
+                            // when there's no collected value, assume 0
+                            components.add(Integer.valueOf(0));
+                        }
+                        else if (Character.isDigit(last))
+                        {
+                            // store the collected digits as an integer
+                            components.add(Integer.parseInt(collector.toString()));
+                        }
+                        else if (Character.isLetter(last))
+                        {
+                            // remember the collected qualifier
+                            components.add(expand(collector.toString()));
+                        }
+
+                        // create a new collector
+                        collector = new StringBuilder();
+
+                        last      = Character.MIN_VALUE;
+                    }
+                    else
+                    {
+                        // when we encounter anything else, we stop parsing
+                        break;
+                    }
+                }
+
+                if (components.isEmpty() || last != Character.MIN_VALUE)
+                {
+                    if (last == Character.MIN_VALUE)
+                    {
+                        // when there's no collected value, assume version 0
+                        components.add(Integer.valueOf(0));
+                    }
+                    else if (Character.isDigit(last))
+                    {
+                        // store the collected digits as an integer
+                        components.add(Integer.parseInt(collector.toString()));
+                    }
+                    else if (Character.isLetter(last))
+                    {
+                        // remember the collected qualifier
+                        components.add(expand(collector.toString()));
+                    }
+                }
+            }
+        }
+    }
+
+
+    /**
+     * Expands the commonly abbreviated version qualifiers.
+     *
+     * @param qualifier  the qualifier string to expand
+     *
+     * @return an expanded qualifier
+     */
+    private String expand(String qualifier)
+    {
+        return QUALIFIER_ALIASES.getOrDefault(qualifier, qualifier);
+    }
+
+
+    /**
+     * Constructs a {@link Version} by parsing the specified components of a version number.
+     * If a component string itself contains components, those are parsed and included in the {@link Version}.
+     *
+     * @param strings  the components of the {@link Version} number
      *
      * @return a {@link Version}
      */
-    public static Version of(String number)
+    public static Version of(String... strings)
     {
-        return new Version(number);
+        return new Version(strings);
+    }
+
+
+    /**
+     * Construct a {@link Version} representing an unknown version number.
+     *
+     * @return an unknown {@link Version}
+     */
+    public static Version unknown()
+    {
+        return new Version("unknown");
     }
 
 
@@ -80,20 +230,78 @@ public class Version
 
         Version version = (Version) o;
 
-        return number != null ? number.equals(version.number) : version.number == null;
+        return components.equals(version.components);
+    }
+
+
+    @Override
+    public int compareTo(Version other)
+    {
+        if (other == null)
+        {
+            return 1;
+        }
+        else
+        {
+            // compare each of the components of each version, returning early when we know the result
+            for (int i = 0; i < this.components.size() && i < other.components.size(); i++)
+            {
+                Object x = this.components.get(i);
+                Object y = other.components.get(i);
+
+                if (x instanceof Integer && y instanceof Integer)
+                {
+                    if (!x.equals(y))
+                    {
+                        return ((Integer) x).compareTo((Integer) y);
+                    }
+                }
+                else if (x instanceof Integer && y instanceof String)
+                {
+                    return 1;
+                }
+                else if (x instanceof String && y instanceof Integer)
+                {
+                    return -1;
+                }
+                else
+                {
+                    // both strings
+                    if (!x.equals(y))
+                    {
+                        return ((String) x).compareTo((String) y);
+                    }
+                }
+            }
+
+            // when all of the components thus far are equal, we determine based on the remaining size
+            return this.components.size() - other.components.size();
+        }
     }
 
 
     @Override
     public int hashCode()
     {
-        return number != null ? number.hashCode() : 0;
+        return components.hashCode();
     }
 
 
     @Override
     public String toString()
     {
-        return number;
+        StringBuilder builder = new StringBuilder();
+
+        for (Object component : components)
+        {
+            if (builder.length() > 0)
+            {
+                builder.append(".");
+            }
+
+            builder.append(component);
+        }
+
+        return builder.toString();
     }
 }
