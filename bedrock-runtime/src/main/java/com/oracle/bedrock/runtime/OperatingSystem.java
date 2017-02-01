@@ -25,20 +25,27 @@
 
 package com.oracle.bedrock.runtime;
 
+import com.oracle.bedrock.Option;
+import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.util.Pair;
 import com.oracle.bedrock.util.Version;
 
+import java.io.File;
 import java.util.LinkedHashMap;
 
 /**
  * Provides information about the {@link OperatingSystem} being used by a {@link Platform}.
+ * <p>
+ * While an {@link OperatingSystem} may be provided or requested as an {@link Option}, all {@link Platform}s
+ * provide an instance through {@link Platform#getOperatingSystem()}.  However in cases were a {@link Platform}
+ * is unavailable and {@link Option}s, the use of an {@link OperatingSystem} an {@link Option} is supported.
  * <p>
  * Copyright (c) 2017. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Brian Oliver
  */
-public class OperatingSystem
+public class OperatingSystem implements Option
 {
     /**
      * Ordered mappings from {@link OperatingSystem} names (with versions) into the corresponding
@@ -62,6 +69,7 @@ public class OperatingSystem
         MAPPINGS.put("windows vista", Pair.of(Type.WINDOWS, "Vista"));
         MAPPINGS.put("windows 7", Pair.of(Type.WINDOWS, "7"));
         MAPPINGS.put("windows 8", Pair.of(Type.WINDOWS, "8"));
+        MAPPINGS.put("windows 8.1", Pair.of(Type.WINDOWS, "8.1"));
         MAPPINGS.put("windows 10", Pair.of(Type.WINDOWS, "10"));
         MAPPINGS.put("windows", Pair.of(Type.WINDOWS, ""));
 
@@ -102,42 +110,73 @@ public class OperatingSystem
      * The name of the {@link OperatingSystem}, determined by inspecting
      * the "os.name" system property.
      */
-    private String name;
+    private final String name;
 
     /**
      * The release name of the {@link OperatingSystem}.
      */
-    private String releaseName;
+    private final String releaseName;
 
     /**
      * The {@link Type} of the {@link OperatingSystem}.
      */
-    private Type type;
+    private final Type type;
 
     /**
      * The {@link Version} of the {@link OperatingSystem}, determined by inspecting
      * the "os.version" system property.
      */
-    private Version version;
+    private final Version version;
+
+    /**
+     * The {@link String} used by a {@link OperatingSystem} to separate paths with in a fully qualified file name.
+     * <p>
+     * eg: On *unix this is "/", on Windows it is "\"
+     */
+    private final String fileSeparator;
+
+    /**
+     * The {@link String} used by a {@link OperatingSystem} to separate individual
+     * paths occurring in a collection of paths.  eg: a class path
+     * <p>
+     * eg: On *unix this is ":", on Windows it is ";"
+     */
+    private final String pathSeparator;
+
+    /**
+     * The {@link String} used by the {@link OperatingSystem} to separate individual lines of text.
+     * <p>
+     * eg: On *unix this is "\n", on Windows it is "\r\n"
+     */
+    private final String lineSeparator;
 
 
     /**
      * Constructs an {@link OperatingSystem}.
      *
-     * @param name         the name of the {@link OperatingSystem}
-     * @param releaseName  the release name of the {@link OperatingSystem}
-     * @param type         the {@link Type} of the {@link OperatingSystem}
-     * @param version      the {@link Version} of the {@link OperatingSystem}
+     * @param name           the name of the {@link OperatingSystem}
+     * @param releaseName    the release name of the {@link OperatingSystem}
+     * @param type           the {@link Type} of the {@link OperatingSystem}
+     * @param version        the {@link Version} of the {@link OperatingSystem}
+     * @param fileSeparator  the {@link String} to separate files in a path on the {@link OperatingSystem}
+     * @param pathSeparator  the {@link String} to separate paths in a collection of paths on the {@link OperatingSystem}
+     * @param lineSeparator  the {@link String} to separate lines of text on the {@link OperatingSystem}
      */
     private OperatingSystem(String  name,
                             String  releaseName,
                             Type    type,
-                            Version version)
+                            Version version,
+                            String  fileSeparator,
+                            String  pathSeparator,
+                            String  lineSeparator)
     {
-        this.name        = name;
-        this.releaseName = releaseName;
-        this.type        = type;
-        this.version     = version;
+        this.name          = name;
+        this.releaseName   = releaseName;
+        this.type          = type;
+        this.version       = version;
+        this.fileSeparator = fileSeparator;
+        this.pathSeparator = pathSeparator;
+        this.lineSeparator = lineSeparator;
     }
 
 
@@ -203,6 +242,66 @@ public class OperatingSystem
         {
             return this == FREEBSD || this == MACOS || this == NETBSD || this == OPENBSD;
         }
+
+
+        /**
+         * Determines the typical {@link File#separator} used to separate path segments with in a fully qualified
+         * file name for an {@link OperatingSystem} {@link Type}.
+         * <p>
+         * This value may be different from that ultimately detected and provided when calling
+         * {@link OperatingSystem#getFileSeparator()}.
+         * <p>
+         * When the {@link Type} is unknown or the {@link File#separator} can't be determined, the
+         * {@link File#separator} of the current {@link OperatingSystem} is returned.
+         * <p>
+         * eg: On *unix this is "/", on Windows it is "\"
+         *
+         * @return the {@link File#separator} for the {@link Type}
+         */
+        String getTypicalFileSeparator()
+        {
+            return isWindows() ? "\\" : (isUnix() || isBSD() ? "/" : File.separator);
+        }
+
+
+        /**
+         * Determines the typical {@link File#pathSeparator} used to separate multiple paths in a collection of paths for
+         * an {@link OperatingSystem} {@link Type}.  eg: a class path
+         * <p>
+         * This value may be different from that ultimately detected and provided when calling
+         * {@link OperatingSystem#getPathSeparator()}.
+         * <p>
+         * When the {@link Type} is unknown or the {@link File#pathSeparator} can't be determined, the
+         * {@link File#pathSeparator} of the current {@link OperatingSystem} is returned.
+         * <p>
+         * eg: On *unix this is ":", on Windows it is ";"
+         *
+         * @return the {@link File#pathSeparator} for the {@link Type}
+         */
+        String getTypicalPathSeparator()
+        {
+            return isWindows() ? ";" : (isUnix() || isBSD() ? ":" : File.pathSeparator);
+        }
+
+
+        /**
+         * Determines the typical {@link System#lineSeparator()} used to separate lines of text for
+         * an {@link OperatingSystem} {@link Type}.
+         * <p>
+         * This value may be different from that ultimately detected and provided when calling
+         * {@link OperatingSystem#getLineSeparator()}.
+         * <p>
+         * When the {@link Type} is unknown or the {@link System#lineSeparator()} can't be determined, the
+         * {@link System#lineSeparator()} of the current {@link OperatingSystem} is returned.
+         * <p>
+         * eg: On *unix this is ":", on Windows it is ";"
+         *
+         * @return the {@link System#lineSeparator()} for the {@link Type}
+         */
+        String getTypicalLineSeparator()
+        {
+            return isWindows() ? "\r\n" : (isUnix() || isBSD() ? "\n" : System.lineSeparator());
+        }
     }
 
 
@@ -225,7 +324,7 @@ public class OperatingSystem
      *
      * @return  the {@link Type} of the {@link OperatingSystem}
      */
-    Type getType()
+    public Type getType()
     {
         return type;
     }
@@ -239,7 +338,7 @@ public class OperatingSystem
      *
      * @return the release name
      */
-    String getReleaseName()
+    public String getReleaseName()
     {
         return releaseName;
     }
@@ -257,21 +356,125 @@ public class OperatingSystem
     }
 
 
-    @Override
-    public String toString()
+    /**
+     * Determines the {@link String} the {@link OperatingSystem} uses to separate paths with in a fully qualified
+     * file name.
+     * <p>
+     * eg: On *unix this is "/", on Windows it is "\"
+     *
+     * @return the file separator
+     */
+    public String getFileSeparator()
     {
-        return type + " " + version + " (" + name + (releaseName.isEmpty() ? "" : ", " + releaseName) + ")";
-
+        return fileSeparator;
     }
 
 
     /**
-     * Constructs a custom {@link OperatingSystem}.
+     * Determines the {@link String} the {@link OperatingSystem} uses to separate individual paths occurring in a
+     * collection of paths.  eg: a class path
+     * <p>
+     * eg: On *unix this is ":", on Windows it is ";"
      *
-     * @param name         the name of the {@link OperatingSystem}
-     * @param releaseName  the release name of the {@link OperatingSystem}
-     * @param type         the {@link Type} of the {@link OperatingSystem}
-     * @param version      the {@link Version} of the {@link OperatingSystem}
+     * @return the path separator
+     */
+    public String getPathSeparator()
+    {
+        return pathSeparator;
+    }
+
+
+    /**
+     * Determines the {@link String}the {@link OperatingSystem} uses to separate individual lines of text.
+     * <p>
+     * eg: On *unix this is "\n", on Windows it is "\r\n"
+     */
+    public String getLineSeparator()
+    {
+        return lineSeparator;
+    }
+
+
+    @Override
+    public String toString()
+    {
+        return type + " " + version + " (" + name + (releaseName.isEmpty() ? "" : ", " + releaseName) + ")";
+    }
+
+
+    @Override
+    public boolean equals(Object o)
+    {
+        if (this == o)
+        {
+            return true;
+        }
+
+        if (!(o instanceof OperatingSystem))
+        {
+            return false;
+        }
+
+        OperatingSystem that = (OperatingSystem) o;
+
+        if (!name.equals(that.name))
+        {
+            return false;
+        }
+
+        if (!releaseName.equals(that.releaseName))
+        {
+            return false;
+        }
+
+        if (type != that.type)
+        {
+            return false;
+        }
+
+        if (!version.equals(that.version))
+        {
+            return false;
+        }
+
+        if (!fileSeparator.equals(that.fileSeparator))
+        {
+            return false;
+        }
+
+        if (!pathSeparator.equals(that.pathSeparator))
+        {
+            return false;
+        }
+
+        return lineSeparator.equals(that.lineSeparator);
+    }
+
+
+    @Override
+    public int hashCode()
+    {
+        int result = name.hashCode();
+
+        result = 31 * result + releaseName.hashCode();
+        result = 31 * result + type.hashCode();
+        result = 31 * result + version.hashCode();
+        result = 31 * result + fileSeparator.hashCode();
+        result = 31 * result + pathSeparator.hashCode();
+        result = 31 * result + lineSeparator.hashCode();
+
+        return result;
+    }
+
+
+    /**
+     * Constructs a custom {@link OperatingSystem}, using the file, path and line separators
+     * defined by the {@link Type}.
+     *
+     * @param name           the name of the {@link OperatingSystem}
+     * @param releaseName    the release name of the {@link OperatingSystem}
+     * @param type           the {@link Type} of the {@link OperatingSystem}
+     * @param version        the {@link Version} of the {@link OperatingSystem}
      *
      * @return a new {@link OperatingSystem}
      */
@@ -280,16 +483,48 @@ public class OperatingSystem
                                          Type    type,
                                          Version version)
     {
-        return new OperatingSystem(name, releaseName, type, version);
+        return new OperatingSystem(name,
+                                   releaseName,
+                                   type,
+                                   version,
+                                   type.getTypicalFileSeparator(),
+                                   type.getTypicalPathSeparator(),
+                                   type.getTypicalLineSeparator());
     }
 
 
     /**
-     * Attempts to detect the {@link OperatingSystem} based on the currently running Java Virtual Machine.
+     * Constructs a custom {@link OperatingSystem}.
+     *
+     * @param name           the name of the {@link OperatingSystem}
+     * @param releaseName    the release name of the {@link OperatingSystem}
+     * @param type           the {@link Type} of the {@link OperatingSystem}
+     * @param version        the {@link Version} of the {@link OperatingSystem}
+     * @param fileSeparator  the {@link String} to separate files in a path on the {@link OperatingSystem}
+     * @param pathSeparator  the {@link String} to separate paths in a collection of paths on the {@link OperatingSystem}
+     * @param lineSeparator  the {@link String} to separate lines of text on the {@link OperatingSystem}
+     *
+     * @return a new {@link OperatingSystem}
+     */
+    public static OperatingSystem custom(String  name,
+                                         String  releaseName,
+                                         Type    type,
+                                         Version version,
+                                         String  fileSeparator,
+                                         String  pathSeparator,
+                                         String  lineSeparator)
+    {
+        return new OperatingSystem(name, releaseName, type, version, fileSeparator, pathSeparator, lineSeparator);
+    }
+
+     
+    /**
+     * Attempts to detect the local {@link OperatingSystem} based on the currently running Java Virtual Machine.
      *
      * @return the detected {@link OperatingSystem}.
      */
-    public static OperatingSystem detect()
+    @OptionsByType.Default
+    public static OperatingSystem local()
     {
         try
         {
@@ -303,10 +538,10 @@ public class OperatingSystem
 
 
     /**
-     * Attempts to detect the {@link OperatingSystem} based on the Java System Property
+     * Determines the {@link OperatingSystem} based on the Java System Property
      * defined os.name and os.version.
      *
-     * @return the detected {@link OperatingSystem}
+     * @return the {@link OperatingSystem}
      */
     public static OperatingSystem from(String osName,
                                        String osVersion)
@@ -336,7 +571,13 @@ public class OperatingSystem
             }
         }
 
-        return OperatingSystem.custom(osName, release, type, Version.of(osVersion));
+        return OperatingSystem.custom(osName,
+                                      release,
+                                      type,
+                                      Version.of(osVersion),
+                                      type.getTypicalFileSeparator(),
+                                      type.getTypicalPathSeparator(),
+                                      type.getTypicalLineSeparator());
     }
 
 
@@ -347,6 +588,12 @@ public class OperatingSystem
      */
     public static OperatingSystem unknown()
     {
-        return OperatingSystem.custom("", "", Type.UNKNOWN, Version.of(""));
+        return OperatingSystem.custom("",
+                                      "",
+                                      Type.UNKNOWN,
+                                      Version.of(""),
+                                      File.separator,
+                                      File.pathSeparator,
+                                      System.lineSeparator());
     }
 }

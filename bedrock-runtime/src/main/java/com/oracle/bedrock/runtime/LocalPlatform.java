@@ -89,7 +89,7 @@ public class LocalPlatform extends AbstractPlatform
         super("Local");
 
         // detect the OperatingSystem for the LocalPlatform
-        this.operatingSystem = OperatingSystem.detect();
+        this.operatingSystem = OperatingSystem.local();
 
         // ----- establish InetAddress of the LocalPlatform -----
 

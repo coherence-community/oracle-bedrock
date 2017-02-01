@@ -41,8 +41,7 @@ import com.oracle.bedrock.util.Version;
 import java.net.InetAddress;
 
 /**
- * A {@link Platform} that is remote from the
- * current {@link LocalPlatform}.
+ * A {@link Platform} that is remote from the current {@link LocalPlatform}.
  * <p>
  * Copyright (c) 2014. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
@@ -148,7 +147,7 @@ public class RemotePlatform extends AbstractPlatform
     }
 
 
-    @Override
+    @Override                        
     public InetAddress getAddress()
     {
         return address;
