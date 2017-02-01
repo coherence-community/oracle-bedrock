@@ -27,7 +27,7 @@ package com.oracle.bedrock.runtime.virtual.vagrant;
 
 import com.oracle.bedrock.Option;
 import com.oracle.bedrock.OptionsByType;
-import com.oracle.bedrock.runtime.options.OperatingSystem;
+import com.oracle.bedrock.runtime.OperatingSystem;
 import com.oracle.bedrock.runtime.remote.options.HostName;
 import com.oracle.bedrock.runtime.virtual.vagrant.options.BoxName;
 import com.oracle.bedrock.runtime.virtual.vagrant.options.Networks;
