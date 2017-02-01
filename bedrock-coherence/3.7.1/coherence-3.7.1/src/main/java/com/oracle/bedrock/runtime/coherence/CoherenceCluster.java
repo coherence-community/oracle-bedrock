@@ -223,6 +223,15 @@ public class CoherenceCluster extends AbstractAssembly<CoherenceClusterMember>
                                        return false;
                                    }
                                }
+                               else if (count == 1)
+                               {
+                                   ServiceStatus status = member.invoke(new GetServiceStatus(serviceName));
+
+                                   if (status == ServiceStatus.STOPPED || status == ServiceStatus.UNKNOWN)
+                                   {
+                                       return false;
+                                   }
+                               }
                            }
                        }
 

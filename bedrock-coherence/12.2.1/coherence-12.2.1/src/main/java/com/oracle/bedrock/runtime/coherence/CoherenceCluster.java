@@ -213,7 +213,8 @@ public class CoherenceCluster extends AbstractAssembly<CoherenceClusterMember>
                            for (String serviceName : serviceNames)
                            {
                                // determine if the service is storage enabled?
-                               Trilean trilean = member.invoke(new IsServiceStorageEnabled(serviceName), Caching.enabled());
+                               Trilean trilean = member.invoke(new IsServiceStorageEnabled(serviceName),
+                                                               Caching.enabled());
 
                                // only adjust the service count when it's not storage disabled
                                // (ie: we count storage enabled and unknown service types)
@@ -246,6 +247,15 @@ public class CoherenceCluster extends AbstractAssembly<CoherenceClusterMember>
                                        return false;
                                    }
                                }
+                               else if (count == 1)
+                               {
+                                   ServiceStatus status = member.invoke(new GetServiceStatus(serviceName));
+
+                                   if (status == ServiceStatus.STOPPED || status == ServiceStatus.UNKNOWN)
+                                   {
+                                       return false;
+                                   }
+                               }
                            }
                        }
 
@@ -254,3 +264,4 @@ public class CoherenceCluster extends AbstractAssembly<CoherenceClusterMember>
         }
     }
 }
+                           
