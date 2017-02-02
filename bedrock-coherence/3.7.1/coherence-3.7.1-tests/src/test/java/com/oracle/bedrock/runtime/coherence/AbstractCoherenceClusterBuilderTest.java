@@ -520,7 +520,7 @@ public abstract class AbstractCoherenceClusterBuilderTest extends AbstractTest
         catch (RuntimeException e)
         {
             Assert.assertThat(e.getMessage(),
-                              containsString("Automatically closed 2 of the successfully created applications out of the 3 that were meant to be created"));
+                              containsString("Failed to launch one of the desired CoherenceClusterMember(s)"));
         }
     }
 }

@@ -30,8 +30,6 @@ import com.oracle.bedrock.runtime.AbstractAssemblyBuilder;
 import com.oracle.bedrock.runtime.AssemblyBuilder;
 import com.oracle.bedrock.runtime.options.StabilityPredicate;
 
-import java.util.List;
-
 /**
  * An {@link AssemblyBuilder} for a collection of {@link CoherenceClusterMember}s, called
  * a {@link CoherenceCluster}.
@@ -44,12 +42,12 @@ import java.util.List;
 public class CoherenceClusterBuilder extends AbstractAssemblyBuilder<CoherenceClusterMember, CoherenceCluster>
 {
     @Override
-    protected CoherenceCluster createAssembly(List<CoherenceClusterMember> members,
-                                              OptionsByType                optionsByType)
+    protected CoherenceCluster createAssembly(OptionsByType optionsByType)
     {
         // introduce a StabilityPredicate
         optionsByType.addIfAbsent(StabilityPredicate.of(CoherenceCluster.Predicates.autoStartServicesSafe()));
 
-        return new CoherenceCluster(members, optionsByType);
+        return new CoherenceCluster(optionsByType);
     }
 }
+                                    

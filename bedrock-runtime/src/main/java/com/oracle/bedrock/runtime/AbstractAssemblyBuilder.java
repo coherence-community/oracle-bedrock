@@ -28,12 +28,8 @@ package com.oracle.bedrock.runtime;
 import com.oracle.bedrock.Option;
 import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.annotations.Internal;
-import com.oracle.bedrock.runtime.options.Console;
-import com.oracle.bedrock.runtime.options.Discriminator;
 
 import java.util.LinkedList;
-import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * A base implementation of an {@link AssemblyBuilder}.
@@ -48,13 +44,18 @@ import java.util.stream.Collectors;
  * @param <G>  the type of the {@link Assembly} built by the {@link AssemblyBuilder}
  */
 @Internal
-public abstract class AbstractAssemblyBuilder<A extends Application, G extends Assembly<A>>
+public abstract class AbstractAssemblyBuilder<A extends Application, G extends AbstractAssembly<A>>
     implements AssemblyBuilder<A, G>
 {
     /**
      * The map of required {@link Assembly} {@link Characteristics}
      */
     protected LinkedList<Characteristics> characteristics;
+
+    /**
+     * The common {@link OptionsByType} to be used when launching all {@link Application}s.
+     */
+    protected OptionsByType optionsByType;
 
 
     /**
@@ -63,6 +64,14 @@ public abstract class AbstractAssemblyBuilder<A extends Application, G extends A
     public AbstractAssemblyBuilder()
     {
         characteristics = new LinkedList<>();
+        optionsByType   = OptionsByType.empty();
+    }
+
+
+    @Override
+    public void with(Option... options)
+    {
+        optionsByType = OptionsByType.of(options);
     }
 
 
@@ -82,98 +91,32 @@ public abstract class AbstractAssemblyBuilder<A extends Application, G extends A
     public G build(Infrastructure infrastructure,
                    Option...      options)
     {
-        // build a list of applications
-        LinkedList<A> applications = new LinkedList<>();
+        // establish the assembly starting with a copy of the common options
+        G assembly = createAssembly(OptionsByType.of(optionsByType));
 
-        // establish the applications for the assembly
-        launchApplications(applications, infrastructure, options);
+        // use the characteristics to expand the assembly on the infrastructure
+        for (Characteristics characteristic : characteristics)
+        {
+            int                instanceCount    = characteristic.getCount();
+            Class<? extends A> applicationClass = characteristic.getApplicationClass();
+            OptionsByType      launchOptions    = OptionsByType.of(characteristic.getOptions()).addAll(options);
 
-        // establish the assembly based on the applications
-        G assembly = createAssembly(applications, OptionsByType.of(options));
+            // expand the assembly based on the desired characteristics
+            assembly.expand(instanceCount, infrastructure, applicationClass, launchOptions.asArray());
+        }
 
         return assembly;
     }
 
 
     /**
-     * Launch the {@link Application}s based on the defined {@link Characteristics}.
+     * Create an empty {@link Assembly} of the required type based on the specified {@link OptionsByType}.
      *
-     * @param applications    the list to add each realized {@link Application} to
-     * @param infrastructure  the {@link Infrastructure} on which to launch the {@link Application}s
-     * @param options         the {@link Option}s for overriding any defined {@link Characteristics}
+     * @param optionsByType  the {@link OptionsByType} for the {@link Assembly}
+     *
+     * @return an empty {@link Assembly}
      */
-    protected void launchApplications(LinkedList<A>  applications,
-                                      Infrastructure infrastructure,
-                                      Option...      options)
-    {
-        // attempt to launch the applications using the specified infrastructure
-        try
-        {
-            for (Characteristics characteristic : characteristics)
-            {
-                int                instanceCount    = characteristic.getCount();
-                Class<? extends A> applicationClass = characteristic.getApplicationClass();
-
-                for (int i = 1; i <= instanceCount; i++)
-                {
-                    // establish a new set of launch options for each application
-                    OptionsByType launchOptions = OptionsByType.of(characteristic.getOptions()).addAll(options);
-
-                    // include a discriminator for the application being launched
-                    launchOptions.add(Discriminator.of(i));
-
-                    // ensure there's at least a system console
-                    launchOptions.addIfAbsent(Console.system());
-
-                    // finalize the launching options
-                    Option[] launchingOptions = launchOptions.asArray();
-
-                    // determine the platform
-                    Platform platform = infrastructure.getPlatform(launchingOptions);
-
-                    // launch the application
-                    A application = platform.launch(applicationClass, launchingOptions);
-
-                    // add the application to the assembly
-                    applications.add(application);
-                }
-            }
-        }
-        catch (Throwable throwable)
-        {
-            // ensure all recently launched applications are shutdown to prevent applications staying around
-            for (A application : applications)
-            {
-                try
-                {
-                    application.close();
-                }
-                catch (Throwable t)
-                {
-                    // we ignore any issues when the application fails to close
-                }
-            }
-
-            throw new RuntimeException("Failed to create " + this.getClass().getSimpleName()
-                                       + ". Automatically closed " + applications.size()
-                                       + " of the successfully created applications out of the "
-                                       + characteristics.stream().collect(Collectors.summingInt(c -> c.count))
-                                       + " that were meant to be created.",
-                                       throwable);
-        }
-    }
-
-
-    /**
-     * Create an {@link Assembly} based on the specified collection of {@link Application}s.
-     *
-     * @param applications   the collection of {@link Application}s.
-     * @param optionsByType  the {@link OptionsByType} used to launch the {@link Application}s
-     *
-     * @return An {@link Assembly} implementation.
-     */
-    abstract protected G createAssembly(List<A>       applications,
-                                        OptionsByType optionsByType);
+    abstract protected G createAssembly(OptionsByType optionsByType);
 
 
     /**

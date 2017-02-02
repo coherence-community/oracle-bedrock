@@ -30,6 +30,7 @@ import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.annotations.Internal;
 import com.oracle.bedrock.deferred.DeferredPredicate;
 import com.oracle.bedrock.runtime.options.Discriminator;
+import com.oracle.bedrock.runtime.options.DisplayName;
 import com.oracle.bedrock.runtime.options.StabilityPredicate;
 
 import java.util.ArrayList;
@@ -38,6 +39,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -79,45 +81,31 @@ public abstract class AbstractAssembly<A extends Application> implements Assembl
     protected AtomicBoolean isClosed;
 
     /**
-     * The number of {@link Application}s that have been added to the {@link Assembly}
-     * over time.  This is used for adding new {@link Discriminator}s when expanding
-     * an {@link Assembly}.
+     * The next value to use for discriminating {@link Application}s by their {@link DisplayName}.
+     * <p>
+     * These values are used for creating {@link Discriminator}s when expanding an {@link Assembly}.
      */
-    protected AtomicInteger applicationCount;
+    protected ConcurrentHashMap<DisplayName, AtomicInteger> discriminators;
 
     /**
-     * The {@link OptionsByType} used for constructing the {@link Assembly}.
+     * The {@link OptionsByType} used when constructing the {@link Assembly}.
+     * <p>
+     * These are used as the default options where {@link OptionsByType} are required.
      */
     protected OptionsByType optionsByType;
 
 
     /**
-     * Constructs an {@link AbstractAssembly} given a list of {@link Application}s.
+     * Constructs an {@link AbstractAssembly} with the specified {@link OptionsByType}.
      *
-     * @param applications   the {@link Application}s in the {@link Assembly}.
-     * @param optionsByType  the {@link OptionsByType} used to launch the {@link Application}s
+     * @param optionsByType  the {@link OptionsByType} for the {@link Assembly}
      */
-    public AbstractAssembly(List<? extends A> applications,
-                            OptionsByType     optionsByType)
+    public AbstractAssembly(OptionsByType optionsByType)
     {
-        this.applications     = new CopyOnWriteArrayList<>();
-        this.isClosed         = new AtomicBoolean(false);
-        this.applicationCount = new AtomicInteger(applications.size());
-        this.optionsByType    = optionsByType;
-
-        // add the applications to the assembly
-        for (A application : applications)
-        {
-            // add this assembly as a feature of each application
-            // (so that the application can notify the assembly of independent lifecycle events)
-            application.add(Assembly.class, this);
-
-            // add the application to the assembly
-            this.applications.add(application);
-        }
-
-        // notify the assembly that it has expanded (for the first time)
-        onExpanded(applications);
+        this.applications   = new CopyOnWriteArrayList<>();
+        this.isClosed       = new AtomicBoolean(false);
+        this.discriminators = new ConcurrentHashMap<>();
+        this.optionsByType  = OptionsByType.of(optionsByType);
     }
 
 
@@ -240,7 +228,7 @@ public abstract class AbstractAssembly<A extends Application> implements Assembl
             applications.add(application);
 
             // notify the assembly implementation that it has expanded
-            onExpanded(Collections.singletonList(application));
+            onExpanded(Collections.singletonList(application), application.getOptions());
         }
     }
 
@@ -291,31 +279,101 @@ public abstract class AbstractAssembly<A extends Application> implements Assembl
                        Class<? extends A> applicationClass,
                        Option...          options)
     {
+        expand(count, Infrastructure.of(platform), applicationClass, options);
+    }
+
+
+    /**
+     * Expands the number of {@link Application}s in the {@link Assembly} by launching and adding the specified number
+     * of {@link Application}s on the provided {@link Infrastructure} using the zero or more provided {@link Option}s.
+     *
+     * @param count             the number of instances of the {@link Application} that should be launched and added
+     *                          to the {@link Assembly}
+     * @param infrastructure    the {@link Infrastructure} on which to launch the {@link Application}s
+     * @param applicationClass  the class of {@link Application}
+     * @param options           the {@link Option}s to use for launching the {@link Application}s
+     *
+     * @see Platform#launch(String, Option...)
+     * @see AssemblyBuilder#include(int, Class, Option...)
+     */
+    public void expand(int                count,
+                       Infrastructure     infrastructure,
+                       Class<? extends A> applicationClass,
+                       Option...          options)
+    {
         // we keep track of the new applications that are launched
         ArrayList<A> launchedApplications = new ArrayList<>();
 
-        // determine the base expanding options
-        OptionsByType expandingOptions = OptionsByType.of(options);
+        // determine the common expandingOptions
+        OptionsByType expandingOptions = OptionsByType.of(optionsByType).addAll(options);
 
         for (int i = 0; i < count; i++)
         {
+            // establish the launch options for the next application
             OptionsByType launchOptions = OptionsByType.of(expandingOptions);
 
-            // create a discriminator for the new application
-            launchOptions.add(Discriminator.of(applicationCount.incrementAndGet()));
+            // include a discriminator for the application about to be launched
+            // (if it has a DisplayName, doesn't have a Discriminator and there are more than one to launch)
+            DisplayName displayName = launchOptions.getOrDefault(DisplayName.class, null);
 
-            // launch the application
-            A application = platform.launch(applicationClass, launchOptions.asArray());
+            if (displayName != null &&!launchOptions.contains(Discriminator.class))
+            {
+                // acquire the discriminator counter for the application DisplayName
+                AtomicInteger counter = discriminators.computeIfAbsent(displayName, name -> new AtomicInteger(0));
 
-            // remember the application
-            launchedApplications.add(application);
+                // create a discriminator for the application
+                launchOptions.addIfAbsent(Discriminator.of(counter.incrementAndGet()));
+            }
 
-            // add the application to the assembly
-            add(application);
+            // attempt to launch the application
+            try
+            {
+                // acquire the platform from the infrastructure based on the launch options
+                Platform platform = infrastructure.getPlatform(launchOptions.asArray());
+
+                // launch the application
+                A application = platform.launch(applicationClass, launchOptions.asArray());
+
+                // remember the application
+                // (so we can add it to the assembly once they are all launched)
+                launchedApplications.add(application);
+            }
+            catch (Throwable throwable)
+            {
+                // ensure all recently launched applications are shutdown to prevent applications staying around
+                for (A application : launchedApplications)
+                {
+                    try
+                    {
+                        application.close();
+                    }
+                    catch (Throwable t)
+                    {
+                        // we ignore any issues when the application fails to close
+                    }
+                }
+
+                throw new RuntimeException("Failed to launch one of the desired " + applicationClass.getSimpleName()
+                                           + "(s) out of " + count + " requested. " + "Automatically closed "
+                                           + launchedApplications.size()
+                                           + " that were successfully created.  The options provided where "
+                                           + launchOptions,
+                                           throwable);
+            }
         }
 
-        // notify the assembly implementation that it has expanded
-        onExpanded(launchedApplications);
+        // include the launched applications in the assembly                          
+        for (A application : launchedApplications)
+        {
+            // ensure the assembly is a feature of the application so that it can be called back for lifecycle events
+            application.add(Assembly.class, this);
+
+            // add the application to the assembly
+            applications.add(application);
+        }
+
+        // notify the assembly that it has expanded with the launched applications
+        onExpanded(launchedApplications, expandingOptions);
     }
 
 
@@ -325,9 +383,11 @@ public abstract class AbstractAssembly<A extends Application> implements Assembl
      * {@link #clone(int, Option...)} methods have increased the number of {@link Application}s
      * in the {@link Assembly}.
      *
-     * @param applications  the newly added {@link Application}s to the {@link Assembly}
+     * @param applications   the newly added {@link Application}s to the {@link Assembly}
+     * @param optionsByType  the {@link OptionsByType} used for expanding
      */
-    protected void onExpanded(List<? extends A> applications)
+    protected void onExpanded(List<? extends A> applications,
+                              OptionsByType     optionsByType)
     {
         // notify the assembly of the change
         onChanged(optionsByType);
@@ -463,33 +523,19 @@ public abstract class AbstractAssembly<A extends Application> implements Assembl
                          int               count,
                          Option...         options)
     {
-        // close and relaunch each application one at a time
+        // clone each application the desired amount
         applications.forEach(
             application -> {
 
-                for (int i = 0; i < count; i++)
-                {
-                    // obtain some information about the application
-                    Platform      platform           = application.getPlatform();
-                    OptionsByType applicationOptions = application.getOptions();
+            // obtain some information about the application
+                Platform      platform           = application.getPlatform();
+                OptionsByType applicationOptions = application.getOptions();
 
-                    // establish the launch options
-                    // (based on the application and specified options)
-                    OptionsByType launchOptions = OptionsByType.of(applicationOptions).addAll(options);
+                // we'll create the same class of application
+                Class<A> applicationClass = (Class<A>) application.getClass();
 
-                    // we use a new discriminator
-                    launchOptions.add(Discriminator.of(applicationCount.incrementAndGet()));
-
-                    // we'll create the same class of application
-                    Class<A> applicationClass = (Class<A>) application.getClass();
-
-                    // launch the clone
-                    A clonedApplication = platform.launch(applicationClass, launchOptions.asArray());
-
-                    // add the application to the assembly
-                    // (this will notify the assembly of the new application)
-                    add(clonedApplication);
-                }
+                // expand the assembly by the desired amount
+                expand(count, platform, applicationClass, applicationOptions.asArray());
             });
     }
 

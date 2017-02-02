@@ -28,8 +28,6 @@ package com.oracle.bedrock.runtime;
 import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.annotations.Internal;
 
-import java.util.List;
-
 /**
  * A simple implementation of an {@link Assembly}
  * <p>
@@ -44,14 +42,12 @@ import java.util.List;
 public class SimpleAssembly<A extends Application> extends AbstractAssembly<A>
 {
     /**
-     * Constructs a {@link SimpleAssembly}
+     * Constructs a {@link SimpleAssembly}.
      *
-     * @param applications  the {@link Application}s for the {@link Assembly}
-     * @param options       the shared / common {@link OptionsByType} used to launch the {@link Application}s
+     * @param optionsByType  the {@link OptionsByType} for the {@link Assembly}
      */
-    public SimpleAssembly(List<? extends A> applications,
-                          OptionsByType     options)
+    public SimpleAssembly(OptionsByType optionsByType)
     {
-        super(applications, options);
+        super(optionsByType);
     }
 }

@@ -40,7 +40,6 @@ import com.tangosol.util.UID;
 
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.function.Predicate;
@@ -65,13 +64,11 @@ public class CoherenceCluster extends AbstractAssembly<CoherenceClusterMember>
     /**
      * Constructs a {@link CoherenceCluster} given a list of {@link CoherenceClusterMember}s.
      *
-     * @param members  the {@link CoherenceClusterMember}s
-     * @param optionsByType  the shared / common {@link OptionsByType} used to launch the {@link CoherenceClusterMember}s
+     * @param optionsByType  the {@link OptionsByType} for the {@link CoherenceCluster}
      */
-    public CoherenceCluster(List<? extends CoherenceClusterMember> members,
-                            OptionsByType                          optionsByType)
+    public CoherenceCluster(OptionsByType optionsByType)
     {
-        super(members, optionsByType);
+        super(optionsByType);
     }
 
 
@@ -239,7 +236,8 @@ public class CoherenceCluster extends AbstractAssembly<CoherenceClusterMember>
                                {
                                    ServiceStatus status = member.invoke(new GetServiceStatus(serviceName));
 
-                                   if (status == ServiceStatus.ENDANGERED
+                                   if (status == null
+                                       || status == ServiceStatus.ENDANGERED
                                        || status == ServiceStatus.ORPHANED
                                        || status == ServiceStatus.STOPPED
                                        || status == ServiceStatus.UNKNOWN)
@@ -248,10 +246,12 @@ public class CoherenceCluster extends AbstractAssembly<CoherenceClusterMember>
                                    }
                                }
                                else if (count == 1)
-                               {
+                               {          
                                    ServiceStatus status = member.invoke(new GetServiceStatus(serviceName));
 
-                                   if (status == ServiceStatus.STOPPED || status == ServiceStatus.UNKNOWN)
+                                   if (status == null
+                                       || status == ServiceStatus.STOPPED
+                                       || status == ServiceStatus.UNKNOWN)
                                    {
                                        return false;
                                    }
@@ -264,4 +264,3 @@ public class CoherenceCluster extends AbstractAssembly<CoherenceClusterMember>
         }
     }
 }
-                           

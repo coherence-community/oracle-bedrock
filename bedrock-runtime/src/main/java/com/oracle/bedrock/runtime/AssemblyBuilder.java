@@ -39,6 +39,17 @@ import com.oracle.bedrock.Option;
 public interface AssemblyBuilder<A extends Application, G extends Assembly<A>>
 {
     /**
+     * Sets the {@link Option}s to be used as the basis launching each {@link Application}.
+     * These {@link Option} will be overriden by those specifically provided for each application
+     * as part of calling {@link #include(int, Class, Option...)} and by those defined when calling
+     * {@link #build(Infrastructure, Option...)} or {@link #build(Option...)}.
+     *
+     * @param options  the {@link Option}s
+     */
+    void with(Option... options);
+
+
+    /**
      * Includes the necessary information for launching one or more {@link Application}s of a specified
      * type as part of an {@link Assembly}, using {@link Platform#launch(Class, Option...)} when
      * {@link #build(Infrastructure, Option...)} method is called.
