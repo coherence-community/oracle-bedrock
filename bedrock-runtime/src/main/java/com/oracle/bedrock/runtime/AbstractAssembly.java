@@ -362,7 +362,7 @@ public abstract class AbstractAssembly<A extends Application> implements Assembl
             }
         }
 
-        // include the launched applications in the assembly                          
+        // include the launched applications in the assembly
         for (A application : launchedApplications)
         {
             // ensure the assembly is a feature of the application so that it can be called back for lifecycle events
@@ -528,14 +528,14 @@ public abstract class AbstractAssembly<A extends Application> implements Assembl
             application -> {
 
             // obtain some information about the application
-                Platform      platform           = application.getPlatform();
-                OptionsByType applicationOptions = application.getOptions();
+                Platform platform = application.getPlatform();
+                OptionsByType launchOptions = OptionsByType.of(application.getOptions()).addAll(options);
 
                 // we'll create the same class of application
                 Class<A> applicationClass = (Class<A>) application.getClass();
 
                 // expand the assembly by the desired amount
-                expand(count, platform, applicationClass, applicationOptions.asArray());
+                expand(count, platform, applicationClass, launchOptions.asArray());
             });
     }
 
@@ -543,7 +543,7 @@ public abstract class AbstractAssembly<A extends Application> implements Assembl
     @Override
     public Iterator<A> iterator()
     {
-        return applications.iterator();
+        return applications.iterator();                                
     }
 
 
