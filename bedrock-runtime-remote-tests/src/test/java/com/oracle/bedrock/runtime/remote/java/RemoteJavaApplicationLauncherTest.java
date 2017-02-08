@@ -302,10 +302,8 @@ public class RemoteJavaApplicationLauncherTest extends AbstractRemoteTest
 
     protected void assertCanConnectDebuggerToApplication(JavaApplication application) throws Exception
     {
-        RemoteDebugging.TransportAddress transportAddress =
-            application.getOptions().get(RemoteDebugging.TransportAddress.class);
-
-        InetSocketAddress socket = transportAddress.getSocketAddress();
+        InetSocketAddress socket =
+            application.getOptions().getInstancesOf(RemoteDebugging.Agent.class).iterator().next().getSocketAddress();
 
         Assert.assertThat(socket, is(notNullValue()));
 
@@ -320,7 +318,7 @@ public class RemoteJavaApplicationLauncherTest extends AbstractRemoteTest
                                                                                     socket.getAddress()
                                                                                     .getHostAddress(),
                                                                                     socket.getPort())),
-                                                          Console.of(console)))
+                                                          Console.of(console)))                   
         {
             Eventually.assertThat(invoking(console).getCapturedOutputLines(), hasItem(startsWith("VM Started")));
 

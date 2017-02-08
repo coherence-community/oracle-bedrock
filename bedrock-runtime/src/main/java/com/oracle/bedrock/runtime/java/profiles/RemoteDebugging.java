@@ -27,6 +27,7 @@ package com.oracle.bedrock.runtime.java.profiles;
 
 import com.oracle.bedrock.Option;
 import com.oracle.bedrock.OptionsByType;
+import com.oracle.bedrock.annotations.Internal;
 import com.oracle.bedrock.io.NetworkHelper;
 import com.oracle.bedrock.lang.ExpressionEvaluator;
 import com.oracle.bedrock.runtime.Application;
@@ -213,10 +214,8 @@ public class RemoteDebugging implements Profile, Option
             Agent agent = new Agent(String.format("-agentlib:jdwp=transport=dt_socket,server=%s,suspend=%s,address=%s",
                                                   (isDebugServer ? "y" : "n"),
                                                   (startSuspended ? "y" : "n"),
-                                                  address));
-
-            // replace the TransportAddress with the one we've resolved / created
-            optionsByType.add(transportAddress);
+                                                  address),
+                                    transportAddress.getSocketAddress());
 
             // add the agent
             optionsByType.add(agent);
@@ -227,7 +226,7 @@ public class RemoteDebugging implements Profile, Option
                 optionsByType.add(WaitToStart.disabled());
             }
         }
-    }                              
+    }       
 
 
     @Override
@@ -395,11 +394,12 @@ public class RemoteDebugging implements Profile, Option
 
 
     /**
-     * The {@link RemoteDebugging} Agent {@link JvmOption}.
+     * The internal {@link RemoteDebugging} Agent {@link JvmOption}.
      * <p>
      * This is {@link JvmOption} is produced by the {@link RemoteDebugging} profile
-     * when a {@link JavaApplication} is launched.
+     * when a {@link JavaApplication} is launched to setup remote debugging.
      */
+    @Internal
     public static class Agent implements JvmOption
     {
         /**
@@ -407,15 +407,34 @@ public class RemoteDebugging implements Profile, Option
          */
         private String configuration;
 
+        /**
+         * The transport {@link InetSocketAddress} used for remote debugging.
+         */
+        private InetSocketAddress address;
+
 
         /**
          * Constructs a {@link RemoteDebugging.Agent}.
          *
          * @param configuration  the configuration of the agent
+         * @param address        the transport {@link InetSocketAddress} for remote debugging
          */
-        public Agent(String configuration)
+        public Agent(String            configuration,
+                     InetSocketAddress address)
         {
             this.configuration = configuration;
+            this.address       = address;
+        }
+
+
+        /**
+         * Obtains the transport {@link InetSocketAddress} for the {@link Agent}.
+         *
+         * @return the {@link InetSocketAddress}
+         */
+        public InetSocketAddress getSocketAddress()
+        {
+            return address;
         }
 
 
