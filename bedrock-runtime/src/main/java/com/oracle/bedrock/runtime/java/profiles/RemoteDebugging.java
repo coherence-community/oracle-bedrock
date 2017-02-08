@@ -28,6 +28,7 @@ package com.oracle.bedrock.runtime.java.profiles;
 import com.oracle.bedrock.Option;
 import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.io.NetworkHelper;
+import com.oracle.bedrock.lang.ExpressionEvaluator;
 import com.oracle.bedrock.runtime.Application;
 import com.oracle.bedrock.runtime.LocalPlatform;
 import com.oracle.bedrock.runtime.MetaClass;
@@ -35,7 +36,7 @@ import com.oracle.bedrock.runtime.Platform;
 import com.oracle.bedrock.runtime.Profile;
 import com.oracle.bedrock.runtime.java.JavaApplication;
 import com.oracle.bedrock.runtime.java.JavaVirtualMachine;
-import com.oracle.bedrock.runtime.java.options.Freeform;
+import com.oracle.bedrock.runtime.java.options.JvmOption;
 import com.oracle.bedrock.runtime.java.options.WaitToStart;
 import com.oracle.bedrock.runtime.network.AvailablePortIterator;
 import com.oracle.bedrock.util.Capture;
@@ -43,6 +44,7 @@ import com.oracle.bedrock.util.PerpetualIterator;
 
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.util.Collections;
 
 /**
  * Defines a {@link Profile} to enable/disable Remote Java Debugging for {@link JavaApplication}s.
@@ -207,17 +209,17 @@ public class RemoteDebugging implements Profile, Option
             // determine if we're going to be in Server Mode
             boolean isDebugServer = behavior == Behavior.LISTEN_FOR_DEBUGGER;
 
-            // construct the agentlib
-            String agentlib = String.format("-agentlib:jdwp=transport=dt_socket,server=%s,suspend=%s,address=%s",
-                                            (isDebugServer ? "y" : "n"),
-                                            (startSuspended ? "y" : "n"),
-                                            address);
+            // construct the agent JvmOption
+            Agent agent = new Agent(String.format("-agentlib:jdwp=transport=dt_socket,server=%s,suspend=%s,address=%s",
+                                                  (isDebugServer ? "y" : "n"),
+                                                  (startSuspended ? "y" : "n"),
+                                                  address));
 
             // replace the TransportAddress with the one we've resolved / created
             optionsByType.add(transportAddress);
 
-            // add the agent as a Freeform JvmOption
-            optionsByType.add(new Freeform(agentlib));
+            // add the agent
+            optionsByType.add(agent);
 
             // disable waiting for the application to start if we're in suspend mode
             if (startSuspended)
@@ -225,7 +227,7 @@ public class RemoteDebugging implements Profile, Option
                 optionsByType.add(WaitToStart.disabled());
             }
         }
-    }
+    }                              
 
 
     @Override
@@ -389,6 +391,74 @@ public class RemoteDebugging implements Profile, Option
                                    false,
                                    Behavior.LISTEN_FOR_DEBUGGER,
                                    null);
+    }
+
+
+    /**
+     * The {@link RemoteDebugging} Agent {@link JvmOption}.
+     * <p>
+     * This is {@link JvmOption} is produced by the {@link RemoteDebugging} profile
+     * when a {@link JavaApplication} is launched.
+     */
+    public static class Agent implements JvmOption
+    {
+        /**
+         * The {@link RemoteDebugging.Agent} {@link JvmOption} configuration.
+         */
+        private String configuration;
+
+
+        /**
+         * Constructs a {@link RemoteDebugging.Agent}.
+         *
+         * @param configuration  the configuration of the agent
+         */
+        public Agent(String configuration)
+        {
+            this.configuration = configuration;
+        }
+
+
+        @Override
+        public Iterable<String> resolve(OptionsByType optionsByType)
+        {
+            ExpressionEvaluator evaluator = new ExpressionEvaluator(optionsByType);
+
+            return Collections.singletonList(evaluator.evaluate(configuration, String.class));
+        }
+
+
+        @Override
+        public boolean equals(Object o)
+        {
+            if (this == o)
+            {
+                return true;
+            }
+
+            if (!(o instanceof Agent))
+            {
+                return false;
+            }
+
+            Agent agent = (Agent) o;
+
+            return configuration != null ? configuration.equals(agent.configuration) : agent.configuration == null;
+        }
+
+
+        @Override
+        public int hashCode()
+        {
+            return configuration != null ? configuration.hashCode() : 0;
+        }
+
+
+        @Override
+        public String toString()
+        {
+            return "Agent{" + configuration + '}';
+        }
     }
 
 
