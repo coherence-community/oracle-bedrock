@@ -57,6 +57,7 @@ import com.oracle.bedrock.util.Capture;
 import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.ClassRule;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
@@ -257,6 +258,7 @@ public class RemoteJavaApplicationLauncherTest extends AbstractRemoteTest
      * Start the application with remote debugging enabled using {@link RemoteDebugging.Behavior#ATTACH_TO_DEBUGGER}
      * and assert the process connects back to the debugger
      */
+    @Ignore("This test can cause JVMs to crash on various platforms.  Disabled for now until there is a fix.")
     @Test
     public void shouldEnableRemoteDebugAndConnectBackToDebugger() throws Exception
     {

@@ -236,6 +236,35 @@ public class LocalPlatformJavaApplicationTest extends AbstractJavaApplicationTes
 
 
     /**
+     * Ensure cloned {@link JavaApplication}s can be launched when using {@link RemoteDebugging}.
+     */
+    @Test
+    public void shouldCloneApplicationsWhenUsingRemoteDebugging()
+    {
+        try (JavaApplication application = getPlatform().launch(JavaApplication.class,
+                                                                ClassName.of(SleepingApplication.class),
+                                                                IPv4Preferred.yes(),
+                                                                RemoteDebugging.autoDetect(),
+                                                                Argument.of(5)))
+        {
+            // ensure we don't set the TransportAddress when auto-detecting RemoteDebugging
+            assertThat(application.getOptions().get(RemoteDebugging.TransportAddress.class), is(nullValue()));
+
+            try (JavaApplication otherApplication = getPlatform().launch(JavaApplication.class,
+                                                                         application.getOptions().asArray()))
+            {
+                // ensure we don't set the TransportAddress when auto-detecting RemoteDebugging
+                assertThat(otherApplication.getOptions().get(RemoteDebugging.TransportAddress.class), is(nullValue()));
+
+                otherApplication.waitFor();
+            }
+
+            application.waitFor();
+        }
+    }
+                                                                             
+
+    /**
      * Ensure that we can connect a debugger to the specified {@link JavaApplication}.
      *
      * @param application  the {@link JavaApplication}
@@ -262,7 +291,7 @@ public class LocalPlatformJavaApplicationTest extends AbstractJavaApplicationTes
             Eventually.assertThat(invoking(console).getCapturedOutputLines(), hasItem(startsWith("VM Started")));
 
             console.getInputWriter().println("run");
-            console.getInputWriter().println("quit");                                                                 
+            console.getInputWriter().println("quit");
 
             jdb.waitFor();
         }

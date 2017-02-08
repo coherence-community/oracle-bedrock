@@ -184,10 +184,6 @@ public class RemoteDebugging implements Profile, Option
                 {
                     // when we don't have an address we use the platform provides
                     transportAddress = new TransportAddress(LocalPlatform.get().getAvailablePorts());
-
-                    // add the TransportAddress as an Option
-                    optionsByType.add(transportAddress);
-
                 }
                 else
                 {
@@ -226,7 +222,7 @@ public class RemoteDebugging implements Profile, Option
                 optionsByType.add(WaitToStart.disabled());
             }
         }
-    }       
+    }
 
 
     @Override
