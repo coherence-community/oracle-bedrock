@@ -31,6 +31,7 @@ import com.jcraft.jsch.Session;
 import com.jcraft.jsch.SftpException;
 import com.oracle.bedrock.Option;
 import com.oracle.bedrock.OptionsByType;
+import com.oracle.bedrock.diagnostics.DiagnosticsRecording;
 import com.oracle.bedrock.runtime.Platform;
 import com.oracle.bedrock.runtime.options.PlatformSeparators;
 import com.oracle.bedrock.runtime.remote.Authentication;
@@ -298,7 +299,7 @@ public class SftpDeployer implements Deployer
             {
                 ChannelSftp sftpChannel = null;
 
-                try
+                try (DiagnosticsRecording diagnostics = DiagnosticsRecording.section("Remote Platform"))
                 {
                     // open an sftp channel that we can use to copy over the artifacts
                     sftpChannel = (ChannelSftp) session.openChannel("sftp");
@@ -308,31 +309,33 @@ public class SftpDeployer implements Deployer
                     {
                         try
                         {
-                            System.out.println("Undeploying File: " + file.toString());
-
                             // attempt to delete the file
                             sftpChannel.rm(file.toString());
+
+                            // include diagnostics
+                            diagnostics.add(file.toString());
                         }
                         catch (SftpException exception)
                         {
                             try
                             {
-                                System.out.println("Undeploying Directory: " + file.toString());
-
                                 // attempt to remove the file as a directory
                                 sftpChannel.rmdir(file.toString());
+
+                                // include diagnostics (directory removed)
+                                diagnostics.add(file.toString() + " (directory)");
                             }
                             catch (SftpException e)
                             {
-                                System.out.println("Failed to undeploying: " + file.toString() + " due to " + e.toString());
-                                e.printStackTrace();
+                                // include diagnostics
+                                diagnostics.add(file.toString() + " (failed to undeploy)");
 
                                 failedArtifacts.add(file);
                             }
                         }
                     }
                 }
-                finally
+                finally                         
                 {
                     if (sftpChannel != null)
                     {

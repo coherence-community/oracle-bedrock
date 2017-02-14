@@ -27,6 +27,7 @@ package com.oracle.bedrock.runtime.remote;
 
 import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.annotations.Internal;
+import com.oracle.bedrock.diagnostics.DiagnosticsRecording;
 import com.oracle.bedrock.lang.ExpressionEvaluator;
 import com.oracle.bedrock.options.Decoration;
 import com.oracle.bedrock.options.Variable;
@@ -62,6 +63,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Properties;
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 /**
@@ -78,6 +81,12 @@ import java.util.stream.Collectors;
 public abstract class AbstractRemoteApplicationLauncher<A extends Application> implements ApplicationLauncher<A>,
                                                                                           RemoteTerminal.Launchable
 {
+    /**
+     * The {@link Logger} for this class.
+     */
+    private static Logger LOGGER = Logger.getLogger(AbstractRemoteApplicationLauncher.class.getName());
+
+
     /**
      * Constructs an {@link AbstractRemoteApplicationLauncher}.
      *
@@ -232,10 +241,51 @@ public abstract class AbstractRemoteApplicationLauncher<A extends Application> i
                                                 public void onClosed(A             application,
                                                                      OptionsByType optionsByType)
                                                 {
-                                                    // undeploy the deployed artifacts
-                                                    deployer.undeploy(deployedArtifacts,
-                                                                      platform,
-                                                                      launchOptions.asArray());
+                                                    try (DiagnosticsRecording diagnostics =
+                                                        DiagnosticsRecording.create("Undeploy Diagnostics for "
+                                                                                    + application.getName()
+                                                                                    + " on platform "
+                                                                                    + platform.getName()).using(LOGGER,
+                                                                                                                Level
+                                                                                                                .INFO))
+                                                    {
+                                                        diagnostics.add("Platform", "Resource");
+
+                                                        try (DiagnosticsRecording local =
+                                                            DiagnosticsRecording.section("Local Platform"))
+                                                        {
+                                                            // clean up the locally created temporary artifacts
+                                                            artifactsToDeploy.stream().filter(artifact -> artifact.isTemporary()).forEach(artifact -> {
+                                                                    try
+                                                                    {
+                                                                        // attempt to remove the local file
+                                                                        artifact.getSourceFile().delete();
+
+                                                                        // include diagnostics
+                                                                        local.add(artifact.getSourceFile().toString());
+                                                                    }
+                                                                    catch (Exception e)
+                                                                    {
+                                                                        // log exceptions when attempting to remove local sources
+                                                                        LOGGER.log(Level.WARNING,
+                                                                                   "Failed to remove temporary "
+                                                                                   + artifact.toString()
+                                                                                   + " for application "
+                                                                                   + application.getName(),
+                                                                                   e);
+
+                                                                        // include diagnostics
+                                                                        local.add(artifact.getSourceFile()
+                                                                                  + " (failed to undeploy)");
+                                                                    }
+                                                                });
+                                                        }
+
+                                                        // undeploy the deployed artifacts
+                                                        deployer.undeploy(deployedArtifacts,
+                                                                          platform,
+                                                                          launchOptions.asArray());
+                                                    }
                                                 }
 
                                                 @Override

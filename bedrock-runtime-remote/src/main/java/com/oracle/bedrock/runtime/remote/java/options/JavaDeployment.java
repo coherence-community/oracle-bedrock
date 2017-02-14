@@ -223,12 +223,13 @@ public class JavaDeployment implements Deployment
                             FileHelper.zip(Collections.singletonList(file), "", temporaryFile.getAbsolutePath());
 
                             DeploymentArtifact artifact = new DeploymentArtifact(temporaryFile,
-                                                                                 new File(temporaryFile.getName()));
+                                                                                 new File(temporaryFile.getName()),
+                                                                                 true);
 
                             deploymentArtifacts.add(artifact);
                         }
                     }
-                }
+                }                                                                    
             }
         }
         else

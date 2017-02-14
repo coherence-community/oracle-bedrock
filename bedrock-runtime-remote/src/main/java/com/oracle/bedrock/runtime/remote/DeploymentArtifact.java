@@ -48,30 +48,66 @@ public class DeploymentArtifact
      */
     private File destinationFile;
 
+    /**
+     * Indicates that the source file was created for the purposes of deployment
+     * as a temporary file and should be removed (if possible automatically)
+     */
+    private boolean temporary;
+
 
     /**
-     * Constructs a {@link DeploymentArtifact} (without a specific destination).
+     * Constructs a {@link DeploymentArtifact} (without a specific destination),
+     * for a non-temporary source file.
      *
-     * @param sourceFile  the source {@link File}
+     * @param sourceFile  the source {@link File} (non-temporary)
      */
     public DeploymentArtifact(File sourceFile)
     {
-        this.sourceFile      = sourceFile;
-        this.destinationFile = null;
+        this(sourceFile, null, false);
     }
 
 
     /**
-     * Constructs a {@link DeploymentArtifact}.
+     * Constructs a {@link DeploymentArtifact} (without a specific destination),
+     * for a possibly temporary source file.
      *
-     * @param sourceFile       the source {@link File}
+     * @param sourceFile  the source {@link File}
+     * @param temporary   indicates if the source file is considered temporary
+     */
+    public DeploymentArtifact(File    sourceFile,
+                              boolean temporary)
+    {
+        this(sourceFile, null, temporary);
+    }
+
+
+    /**
+     * Constructs a {@link DeploymentArtifact} for a non-temporary source file.
+     *
+     * @param sourceFile       the source {@link File} (non-temporary)
      * @param destinationFile  the destination {@link File}
      */
     public DeploymentArtifact(File sourceFile,
                               File destinationFile)
     {
+        this(sourceFile, destinationFile, false);
+    }
+
+
+    /**
+     * Constructs a {@link DeploymentArtifact} for a possibly temporary source file.
+     *
+     * @param sourceFile       the source {@link File}
+     * @param destinationFile  the destination {@link File}
+     * @param temporary        indicates if the source file is considered temporary
+     */
+    public DeploymentArtifact(File    sourceFile,
+                              File    destinationFile,
+                              boolean temporary)
+    {
         this.sourceFile      = sourceFile;
         this.destinationFile = destinationFile;
+        this.temporary       = temporary;
     }
 
 
@@ -99,9 +135,24 @@ public class DeploymentArtifact
     }
 
 
+    /**
+     * Determines if the {@link #getSourceFile()} was created for the purposes of
+     * deployment and thus considered temporary, in which case it should be
+     * automatically removed once deployment has occurred.
+     *
+     * @return <code>true</code> when the {@link #getSourceFile()} is temporary,
+     *         <code>false</code> otherwise
+     */
+    public boolean isTemporary()
+    {
+        return temporary;
+    }
+
+
     @Override
     public String toString()
     {
-        return "DeploymentArtifact [" + destinationFile + " -> " + sourceFile + ']';
+        return "DeploymentArtifact{" + "sourceFile=" + sourceFile + ", destinationFile=" + destinationFile
+               + ", temporary=" + temporary + '}';
     }
 }
