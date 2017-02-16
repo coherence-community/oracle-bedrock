@@ -382,42 +382,6 @@ public abstract class AbstractCoherenceClusterBuilderTest extends AbstractTest
 
 
     /**
-     * Ensure we can clone {@link CoherenceClusterMember}s in a {@link CoherenceCluster}.
-     */
-    @Test
-    public void shouldCloneMembersOfACluster()
-    {
-        final int               CLUSTER_SIZE   = 2;
-
-        AvailablePortIterator   availablePorts = LocalPlatform.get().getAvailablePorts();
-        ClusterPort             clusterPort    = ClusterPort.of(new Capture<>(availablePorts));
-        String                  clusterName    = "Cloning" + getClass().getSimpleName();
-        CoherenceClusterBuilder builder        = new CoherenceClusterBuilder();
-
-        builder.include(CLUSTER_SIZE,
-                        CoherenceClusterMember.class,
-                        DisplayName.of("DCS"),
-                        clusterPort,
-                        ClusterName.of(clusterName),
-                        LocalHost.only(),
-                        Console.system());
-
-        try (CoherenceCluster cluster = builder.build(getPlatform()))
-        {
-            assertThat(invoking(cluster).getClusterSize(), is(CLUSTER_SIZE));
-
-            cluster.limit(1).clone(1);
-
-            assertThat(invoking(cluster).getClusterSize(), is(CLUSTER_SIZE + 1));
-
-            cluster.unordered().limit(2).clone(2);
-
-            assertThat(invoking(cluster).getClusterSize(), is(CLUSTER_SIZE + 5));
-        }
-    }
-
-
-    /**
      * Ensure we can expand {@link CoherenceClusterMember}s in a {@link CoherenceCluster}.
      */
     @Test
@@ -427,7 +391,7 @@ public abstract class AbstractCoherenceClusterBuilderTest extends AbstractTest
 
         AvailablePortIterator   availablePorts = LocalPlatform.get().getAvailablePorts();
         ClusterPort             clusterPort    = ClusterPort.of(new Capture<>(availablePorts));
-        String                  clusterName    = "Cloning" + getClass().getSimpleName();
+        String                  clusterName    = "Expanding" + getClass().getSimpleName();
         CoherenceClusterBuilder builder        = new CoherenceClusterBuilder();
 
         builder.include(CLUSTER_SIZE,
@@ -457,6 +421,51 @@ public abstract class AbstractCoherenceClusterBuilderTest extends AbstractTest
                            LocalHost.only(),
                            Console.system(),
                            LocalStorage.disabled());
+
+            // ensure that the cluster is bigger by one
+            assertThat(invoking(cluster).getClusterSize(), is(CLUSTER_SIZE + 1));
+
+            // ensure that the DistributedCache service for the new member is storage disabled
+            assertThat(invoking(cluster.get("DCS-2")).isStorageEnabled("DistributedCache"), is(Trilean.FALSE));
+
+            // ensure that the InvocationService service for the new member is unknown
+            assertThat(invoking(cluster.get("DCS-2")).isStorageEnabled("InvocationService"), is(Trilean.UNKNOWN));
+        }
+    }
+
+
+    /**
+     * Ensure we can clone {@link CoherenceClusterMember}s in a {@link CoherenceCluster}.
+     */
+    @Test
+    public void shouldCloneMembersOfACluster()
+    {
+        final int               CLUSTER_SIZE   = 1;
+
+        AvailablePortIterator   availablePorts = LocalPlatform.get().getAvailablePorts();
+        ClusterPort             clusterPort    = ClusterPort.of(new Capture<>(availablePorts));
+        String                  clusterName    = "Cloning" + getClass().getSimpleName();
+        CoherenceClusterBuilder builder        = new CoherenceClusterBuilder();
+
+        builder.include(CLUSTER_SIZE,
+                        CoherenceClusterMember.class,
+                        DisplayName.of("DCS"),
+                        clusterPort,
+                        ClusterName.of(clusterName),
+                        LocalHost.only(),
+                        Console.system());
+
+        try (CoherenceCluster cluster = builder.build(getPlatform()))
+        {
+            assertThat(invoking(cluster).getClusterSize(), is(CLUSTER_SIZE));
+
+            // ensure that the DistributedCache service for the first (and only) cluster member is storage disabled
+            assertThat(invoking(cluster.get("DCS-1")).isStorageEnabled("DistributedCache"), is(Trilean.TRUE));
+
+            // ensure that the InvocationService service for the first (and only) cluster member is unknown
+            assertThat(invoking(cluster.get("DCS-1")).isStorageEnabled("InvocationService"), is(Trilean.UNKNOWN));
+
+            cluster.limit(1).clone(1, LocalStorage.disabled());
 
             // ensure that the cluster is bigger by one
             assertThat(invoking(cluster).getClusterSize(), is(CLUSTER_SIZE + 1));

@@ -523,6 +523,9 @@ public abstract class AbstractAssembly<A extends Application> implements Assembl
                          int               count,
                          Option...         options)
     {
+        OptionsByType optionsByType              = OptionsByType.of(options);
+        boolean       definesCustomDiscriminator = optionsByType.contains(Discriminator.class);
+
         // clone each application the desired amount
         applications.forEach(
             application -> {
@@ -531,7 +534,13 @@ public abstract class AbstractAssembly<A extends Application> implements Assembl
                 Platform platform = application.getPlatform();
                 OptionsByType launchOptions = OptionsByType.of(application.getOptions()).addAll(options);
 
-                // we'll create the same class of application
+                // remove the existing Discriminator when a custom one hasn't been provided
+                if (!definesCustomDiscriminator)
+                {
+                    launchOptions.remove(Discriminator.class);
+                }
+
+                // we'll create the same class of application                                            
                 Class<A> applicationClass = (Class<A>) application.getClass();
 
                 // expand the assembly by the desired amount
@@ -543,7 +552,7 @@ public abstract class AbstractAssembly<A extends Application> implements Assembl
     @Override
     public Iterator<A> iterator()
     {
-        return applications.iterator();                                
+        return applications.iterator();
     }
 
 
