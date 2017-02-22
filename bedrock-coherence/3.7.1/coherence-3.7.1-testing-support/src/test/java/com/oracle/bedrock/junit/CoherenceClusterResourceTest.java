@@ -178,31 +178,6 @@ public class CoherenceClusterResourceTest
 
 
     /**
-     * Ensure that an {@link CoherenceClusterResource} will return the same Session when using
-     * the same {@link SessionBuilder}.
-     */
-    @Test()
-    public void shouldReturnSameSessionForSameSessionBuilder()
-    {
-        ConfigurableCacheFactory cacheFactory1 =
-            coherenceResource.createSession(SessionBuilders.storageDisabledMember());
-
-        ConfigurableCacheFactory cacheFactory2 =
-            coherenceResource.createSession(SessionBuilders.storageDisabledMember());
-
-        ConfigurableCacheFactory cacheFactory3 =
-            coherenceResource.createSession(SessionBuilders.extendClient("proxy-cache-config.xml"));
-
-        ConfigurableCacheFactory cacheFactory4 =
-            coherenceResource.createSession(SessionBuilders.extendClient("proxy-cache-config.xml"));
-
-        Assert.assertThat(cacheFactory1, is(cacheFactory2));
-        Assert.assertThat(cacheFactory3, is(cacheFactory4));
-        Assert.assertThat(cacheFactory1, is(not(cacheFactory3)));
-    }
-
-
-    /**
      * Ensure that a {@link CoherenceClusterResource} can be used to perform a rolling restart.
      */
     @Test
@@ -221,5 +196,27 @@ public class CoherenceClusterResourceTest
 
         assertThat(member1.getLocalMemberId(), is(4));
         assertThat(member2.getLocalMemberId(), is(5));
+    }
+
+
+    /**
+     * Ensure that a {@link CoherenceClusterResource} can be used to perform a rolling restart
+     * when there's a storage disabled session.
+     */
+    @Test
+    public void shouldPerformRollingRestartWithStorageDisabledSession() throws Exception
+    {
+        CoherenceCluster cluster = coherenceResource.getCluster();
+
+        ConfigurableCacheFactory cacheFactory = coherenceResource.createSession(new StorageDisabledMember());
+
+        // only restart storage enabled members
+        cluster.filter(member -> member.getName().startsWith("storage")).relaunch();
+
+        CoherenceClusterMember member1 = cluster.get("storage-1");
+        CoherenceClusterMember member2 = cluster.get("storage-2");
+
+        assertThat(member1, is(notNullValue()));
+        assertThat(member2, is(notNullValue()));
     }
 }
