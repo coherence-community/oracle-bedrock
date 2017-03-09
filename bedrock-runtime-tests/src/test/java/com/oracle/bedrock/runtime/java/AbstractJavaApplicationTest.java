@@ -132,7 +132,7 @@ public abstract class AbstractJavaApplicationTest<P extends Platform> extends Ab
     @Test
     public void shouldRunApplicationWithRestrictedClasspath() throws Exception
     {
-        ClassPath               knownJarClassPath = ClassPath.ofResource("asm-license.txt");
+        ClassPath               knownJarClassPath = ClassPath.ofResource("LICENSE");
         Class<Mock>             knownClass        = Mock.class;
 
         ClassPath               path1             = ClassPath.ofClass(DummyClassPathApp.class);

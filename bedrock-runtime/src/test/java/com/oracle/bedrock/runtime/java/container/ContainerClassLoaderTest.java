@@ -152,8 +152,8 @@ public class ContainerClassLoaderTest
     @Test
     public void shouldLoadClassFromJarInCustomClassPath() throws Exception
     {
-        // NOTE: the Mockito class in the Mockito jar contains the asm-license.txt
-        ClassPath   classPath = ClassPath.ofResource("asm-license.txt");
+        // NOTE: the Mockito class in the Mockito jar contains a LICENSE file
+        ClassPath   classPath = ClassPath.ofResource("LICENSE");
         ClassLoader loader    = ContainerClassLoader.newInstance("Test", classPath, System.getProperties());
         Class<?>    result    = loader.loadClass(Mockito.class.getCanonicalName());
 
