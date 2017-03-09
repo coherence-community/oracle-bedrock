@@ -69,10 +69,20 @@ public class DeferredCallable<T> implements Deferred<T>
         {
             return callable.call();
         }
+        catch (TemporarilyUnavailableException e)
+        {
+            // we rethrow temporarily unavailable exceptions
+            throw e;
+        }
+        catch (PermanentlyUnavailableException e)
+        {
+            // we rethrow permanently unavailable exceptions
+            throw e;
+        }
         catch (Exception e)
         {
-            // any exception means the callable can't produce a value
-            throw new PermanentlyUnavailableException(this, e);
+            // we assume any other exception is just a temporary issue
+            throw new TemporarilyUnavailableException(this, e);
         }
     }
 
