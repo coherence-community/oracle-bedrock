@@ -83,6 +83,9 @@ public class Pair<X, Y> implements Tuple
      * @param x  the first value of the {@link Pair}
      * @param y  the second value of the {@link Pair}
      *
+     * @param <X>  the type of the first value of the {@link Pair}
+     * @param <Y>  the type of the second value of the {@link Pair}
+     *
      * @return a {@link Pair}
      */
     public static <X, Y> Pair<X, Y> of(X x,

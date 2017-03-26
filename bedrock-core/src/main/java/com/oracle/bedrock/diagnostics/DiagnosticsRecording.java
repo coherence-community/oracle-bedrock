@@ -234,6 +234,8 @@ public class DiagnosticsRecording implements AutoCloseable
     /**
      * Creates a new {@link DiagnosticsRecording} with the specified name.
      *
+     * @param name the name of the {@link DiagnosticsRecording}
+     *
      * @return a new {@link DiagnosticsRecording}
      */
     public static DiagnosticsRecording create(String name)
@@ -264,6 +266,8 @@ public class DiagnosticsRecording implements AutoCloseable
     /**
      * Creates a nested {@link DiagnosticsRecording} section with a specified name.  If there's no previously defined
      * {@link DiagnosticsRecording}, a new {@link DiagnosticsRecording} with the specified name will be created.
+     *
+     * @param name the name of the {@link DiagnosticsRecording} section
      *
      * @return a new {@link DiagnosticsRecording}
      */

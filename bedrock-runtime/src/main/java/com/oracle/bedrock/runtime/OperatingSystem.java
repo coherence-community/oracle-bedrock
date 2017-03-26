@@ -385,9 +385,11 @@ public class OperatingSystem implements Option
 
 
     /**
-     * Determines the {@link String}the {@link OperatingSystem} uses to separate individual lines of text.
+     * Determines the {@link String} the {@link OperatingSystem} uses to separate individual lines of text.
      * <p>
      * eg: On *unix this is "\n", on Windows it is "\r\n"
+     *
+     * @return the line separator
      */
     public String getLineSeparator()
     {
@@ -540,6 +542,9 @@ public class OperatingSystem implements Option
     /**
      * Determines the {@link OperatingSystem} based on the Java System Property
      * defined os.name and os.version.
+     *
+     * @param osName     the operating system name
+     * @param osVersion  the operating system version
      *
      * @return the {@link OperatingSystem}
      */

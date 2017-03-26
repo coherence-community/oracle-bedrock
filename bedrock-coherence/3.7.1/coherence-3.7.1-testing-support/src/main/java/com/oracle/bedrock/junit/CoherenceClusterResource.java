@@ -101,7 +101,7 @@ public class CoherenceClusterResource
 
 
     /**
-     * Obtains the {@link CoherenceCluster} created by the {@link CoherenceClusterResource <R>}.
+     * Obtains the {@link CoherenceCluster} created by the {@link CoherenceClusterResource}.
      *
      * @return the {@link CoherenceCluster}
      */
