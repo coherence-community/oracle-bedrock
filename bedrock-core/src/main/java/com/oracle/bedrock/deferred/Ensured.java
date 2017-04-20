@@ -157,27 +157,27 @@ public class Ensured<T> implements Deferred<T>
         // determine the maximum time we can wait
         long remainingRetryDurationMS = maximumRetryDurationMS;
 
-        do
+        // wait the initial duration
+        if (initialDelayDurationMS > 0)
         {
-            // wait the initial duration
-            if (initialDelayDurationMS > 0)
+            try
             {
-                try
-                {
-                    Thread.sleep(initialDelayDurationMS);
-                }
-                catch (InterruptedException e)
-                {
-                    throw new PermanentlyUnavailableException(deferred, e);
-                }
-
-                // reduce the remaining time
-                remainingRetryDurationMS -= initialDelayDurationMS;
-
-                // NOTE: even if there's no time remaining we'll at least
-                // attempt to acquire the object reference just once!
+                Thread.sleep(initialDelayDurationMS);
+            }
+            catch (InterruptedException e)
+            {
+                throw new PermanentlyUnavailableException(deferred, e);
             }
 
+            // reduce the remaining time
+            remainingRetryDurationMS -= initialDelayDurationMS;
+
+            // NOTE: even if there's no time remaining we'll at least
+            // attempt to acquire the object reference just once!
+        }
+
+        do
+        {
             // the time the most recent acquisition took
             long acquisitionDurationMS = 0;
 
