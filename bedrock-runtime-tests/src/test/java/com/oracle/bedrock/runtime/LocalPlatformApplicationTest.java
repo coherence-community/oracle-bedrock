@@ -74,7 +74,7 @@ public class LocalPlatformApplicationTest extends AbstractTest
         {
             String stdout = console.getOutputReader().readLine();
 
-            assertThat(stdout, containsString("Usage: java [-options] class [args...]"));
+            assertThat(stdout, containsString("Usage: java"));
         }
     }
 
@@ -98,7 +98,7 @@ public class LocalPlatformApplicationTest extends AbstractTest
         {
             String stdout = console.getOutputReader().readLine();
 
-            assertThat(stdout, containsString("Usage: java [-options] class [args...]"));
+            assertThat(stdout, containsString("Usage: java"));
         }
     }
 
@@ -129,7 +129,7 @@ public class LocalPlatformApplicationTest extends AbstractTest
 
             String stdout = console.getOutputReader().readLine();
 
-            assertThat(stdout, containsString("Usage: java [-options] class [args...]"));
+            assertThat(stdout, containsString("Usage: java"));
 
             application.waitFor();
 

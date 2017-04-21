@@ -136,10 +136,11 @@ public class CommercialFeatures implements Profile, Option
     {
         try
         {
-            return ManagementFactory.getRuntimeMXBean().getInputArguments().toString()
-            .indexOf("-XX:+UnlockCommercialFeatures") > 0 ? enabled() : disabled();
+            return ManagementFactory.getRuntimeMXBean().getInputArguments().stream()
+            .filter(arg -> arg.contains("-XX:+UnlockCommercialFeatures")).findFirst().isPresent() ? enabled()
+                                                                                                  : disabled();
         }
-        catch (Throwable t)
+        catch (Throwable t)                                                         
         {
             System.err.println("Error trying to determine commercial features status - " + t.getMessage());
 

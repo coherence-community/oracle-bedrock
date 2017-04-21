@@ -48,20 +48,38 @@
     <build>
         <plugins>
             <plugin>
-              <groupId>org.jvnet.jaxb2.maven2</groupId>
-              <artifactId>maven-jaxb2-plugin</artifactId>
-              <executions>
-                <execution>
-                  <goals>
-                    <goal>generate</goal>
-                  </goals>
-                  <configuration>
-                    <schemaDirectory>src/main/resources/xsd</schemaDirectory>
-                    <bindingDirectory>src/main/resources</bindingDirectory>
-                    <generateDirectory>${project.build.directory}/generated-sources</generateDirectory>
-                  </configuration>
-                </execution>
-              </executions>
+                <groupId>org.jvnet.jaxb2.maven2</groupId>
+                <artifactId>maven-jaxb2-plugin</artifactId>
+                <version>0.13.2</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <schemaDirectory>src/main/resources/xsd</schemaDirectory>
+                            <bindingDirectory>src/main/resources</bindingDirectory>
+                            <generateDirectory>${project.build.directory}/generated-sources</generateDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>com.sun.xml.bind</groupId>
+                        <artifactId>jaxb-impl</artifactId>
+                        <version>2.2.11</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>com.sun.xml.bind</groupId>
+                        <artifactId>jaxb-xjc</artifactId>
+                        <version>2.2.11</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>com.sun.xml.bind</groupId>
+                        <artifactId>jaxb-core</artifactId>
+                        <version>2.2.11</version>
+                    </dependency>
+                </dependencies>
             </plugin>
 
             <!-- exclude the generated sources from javadoc -->

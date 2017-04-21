@@ -36,6 +36,7 @@ import com.oracle.bedrock.runtime.remote.ssh.JSchBasedAuthentication;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Base64;
 
 /**
  * A password-based {@link Authentication}.
@@ -99,7 +100,7 @@ public class Password implements Authentication, JSchBasedAuthentication, HttpBa
         {
         case Basic :
             String userPassword = userName + ":" + password;
-            String encoding     = new sun.misc.BASE64Encoder().encode(userPassword.getBytes());
+            String encoding     = Base64.getEncoder().encodeToString(userPassword.getBytes());
 
             connection = proxy.openConnection(url);
 

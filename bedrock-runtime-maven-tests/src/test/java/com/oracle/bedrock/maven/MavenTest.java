@@ -31,6 +31,7 @@ import com.oracle.bedrock.runtime.LocalPlatform;
 import com.oracle.bedrock.runtime.console.CapturingApplicationConsole;
 import com.oracle.bedrock.runtime.java.JavaApplication;
 import com.oracle.bedrock.runtime.java.options.ClassName;
+import com.oracle.bedrock.runtime.java.options.Freeform;
 import com.oracle.bedrock.runtime.java.options.SystemProperty;
 import com.oracle.bedrock.runtime.options.Console;
 import org.junit.Test;
@@ -63,13 +64,13 @@ public class MavenTest
                                                            ClassName.of("com.tangosol.net.DefaultCacheServer"),
                                                            Maven.artifact("com.oracle.coherence",
                                                                           "coherence",
-                                                                          "3.7.1.14"),
+                                                                          "3.7.1.16"),
                                                            SystemProperty.of("tangosol.coherence.cacheconfig",
                                                                              "coherence-cache-config.xml"),
                                                            Console.of(console),
                                                            Diagnostics.enabled()))
         {
-            Eventually.assertThat(invoking(console).getCapturedErrorLines(), hasItem(containsString("3.7.1.14")));
+            Eventually.assertThat(invoking(console).getCapturedErrorLines(), hasItem(containsString("3.7.1.16")));
         }
     }
 }
