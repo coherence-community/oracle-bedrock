@@ -26,6 +26,7 @@
 package com.oracle.bedrock.maven;
 
 import com.oracle.bedrock.ComposableOption;
+import com.oracle.bedrock.Option;
 import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.runtime.Application;
 import com.oracle.bedrock.runtime.MetaClass;
@@ -43,7 +44,9 @@ import org.apache.maven.settings.building.SettingsBuilder;
 import org.apache.maven.settings.building.SettingsBuildingException;
 import org.eclipse.aether.DefaultRepositoryCache;
 import org.eclipse.aether.DefaultRepositorySystemSession;
+import org.eclipse.aether.RepositoryException;
 import org.eclipse.aether.RepositorySystem;
+import org.eclipse.aether.RepositorySystemSession;
 import org.eclipse.aether.artifact.Artifact;
 import org.eclipse.aether.artifact.DefaultArtifact;
 import org.eclipse.aether.collection.CollectRequest;
@@ -55,12 +58,15 @@ import org.eclipse.aether.repository.LocalRepository;
 import org.eclipse.aether.repository.RemoteRepository;
 import org.eclipse.aether.resolution.ArtifactResult;
 import org.eclipse.aether.resolution.DependencyRequest;
+import org.eclipse.aether.resolution.VersionRangeRequest;
+import org.eclipse.aether.resolution.VersionRangeResult;
 import org.eclipse.aether.spi.connector.RepositoryConnectorFactory;
 import org.eclipse.aether.spi.connector.transport.TransporterFactory;
 import org.eclipse.aether.transport.file.FileTransporterFactory;
 import org.eclipse.aether.transport.http.HttpTransporterFactory;
 import org.eclipse.aether.util.artifact.JavaScopes;
 import org.eclipse.aether.util.filter.DependencyFilterUtils;
+import org.eclipse.aether.version.Version;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -178,16 +184,14 @@ public class Maven implements Profile, ComposableOption<Maven>
 
 
     /**
-     * Obtain the Maven {@link Settings} for this {@link Maven}
-     * given the specified {@link Platform} and {@link OptionsByType}.
+     * Obtain the Maven {@link Settings} for this {@link Maven} profile
+     * given the specified {@link OptionsByType}.
      *
-     * @param platform       the {@link Platform} on which an {@link Application} will be launched
      * @param optionsByType  the launch {@link OptionsByType}
      *
      * @return  a new {@link Settings}
      */
-    private Settings getSettings(Platform      platform,
-                                 OptionsByType optionsByType)
+    private Settings getSettings(OptionsByType optionsByType)
     {
         SettingsBuilder                settingsBuilder = new DefaultSettingsBuilderFactory().newInstance();
 
@@ -255,108 +259,48 @@ public class Maven implements Profile, ComposableOption<Maven>
                             MetaClass     metaClass,
                             OptionsByType optionsByType)
     {
-        PlatformSeparators separators = optionsByType.get(PlatformSeparators.class);
-
-        // define the global settings location if it's not defined
-        if (globalSettingsFile == null)
-        {
-            // determine the location of the Maven Home
-            String mavenHome = System.getenv("M2_HOME");
-
-            globalSettingsFile = new File(System.getProperty("maven.home",
-                                                             mavenHome != null ? mavenHome : ""),
-                                          "conf" + separators.getFileSeparator() + "settings.xml");
-        }
-
-        // define the user settings location if it's not defined
-        if (userSettingsFile == null)
-        {
-            userSettingsFile = new File(System.getProperty("user.home") + separators.getFileSeparator() + ".m2"
-                                        + separators.getFileSeparator() + "settings.xml");
-        }
-
-        // define the scope (if it's not defined)
-        if (scope == null || scope.isEmpty())
-        {
-            this.scope = JavaScopes.RUNTIME;
-        }
-
-        // acquire the Maven Settings for the profile
-        Settings settings = getSettings(platform, optionsByType);
-
-        // ----- establish the repository system using the settings -----
-        RepositorySystem system = newRepositorySystem();
-
-        // ----- establish the session for the repository system -----
-        DefaultRepositorySystemSession session = MavenRepositorySystemUtils.newSession();
-
-        session.setOffline(isOffline == null ? false : isOffline);
-
-        session.setCache(new DefaultRepositoryCache());
-
-        // define the local repository
-        File localRepositoryLocation = new File(System.getProperty("user.home") + separators.getFileSeparator() + ".m2"
-                                                + separators.getFileSeparator() + "repository");
-
-        LocalRepository localRepo = new LocalRepository(localRepositoryLocation);
-
-        session.setLocalRepositoryManager(system.newLocalRepositoryManager(session, localRepo));
-
-        // ----- establish the remote repositories to use from the settings -----
-
-        Map<String, org.apache.maven.settings.Profile> profiles           = settings.getProfilesAsMap();
-        ArrayList<RemoteRepository>                    remoteRepositories = new ArrayList<>(20);
-
-        for (String profileName : settings.getActiveProfiles())
-        {
-            for (Repository repo : profiles.get(profileName).getRepositories())
-            {
-                RemoteRepository remoteRepository = new RemoteRepository.Builder(repo.getId(),
-                                                                                 "default",
-                                                                                 repo.getUrl()).build();
-
-                remoteRepositories.add(remoteRepository);
-            }
-        }
-
-        // ----- resolve the artifacts using the provided artifacts to create a class path -----
-
+        // resolve the class path based on the required maven artifacts
         try
         {
-            // we only filter based on the scope
-            DependencyFilter filter = DependencyFilterUtils.classpathFilter(scope);
+            perform(
+                (system, session, repositories, scope) -> {
 
-            // collect class paths for each resolved artifact
-            LinkedHashSet<ClassPath> artifactPaths = new LinkedHashSet<>();
+                // we only filter based on the scope
+                    DependencyFilter filter = DependencyFilterUtils.classpathFilter(scope);
 
-            for (Artifact artifact : artifacts)
-            {
-                CollectRequest collectRequest = new CollectRequest();
+                    // collect class paths for each resolved artifact
+                    LinkedHashSet<ClassPath> artifactPaths = new LinkedHashSet<>();
 
-                collectRequest.setRoot(new Dependency(artifact, scope));
-                collectRequest.setRepositories(remoteRepositories);
+                    for (Artifact artifact : artifacts)
+                    {
+                        CollectRequest collectRequest = new CollectRequest();
 
-                DependencyRequest dependencyRequest = new DependencyRequest(collectRequest, filter);
+                        collectRequest.setRoot(new Dependency(artifact, scope));
+                        collectRequest.setRepositories(repositories);
 
-                List<ArtifactResult> artifactResults = system.resolveDependencies(session,
-                                                                                  dependencyRequest)
-                                                                                  .getArtifactResults();
+                        DependencyRequest dependencyRequest = new DependencyRequest(collectRequest, filter);
 
-                for (ArtifactResult artifactResult : artifactResults)
-                {
-                    artifactPaths.add(ClassPath.ofFile(artifactResult.getArtifact().getFile()));
-                }
-            }
+                        List<ArtifactResult> artifactResults = system.resolveDependencies(session,
+                                                                                          dependencyRequest)
+                                                                                          .getArtifactResults();
 
-            // define the ClassPath based on the artifact paths
-            ClassPath classPath = new ClassPath(artifactPaths);
+                        for (ArtifactResult artifactResult : artifactResults)
+                        {
+                            artifactPaths.add(ClassPath.ofFile(artifactResult.getArtifact().getFile()));
+                        }
+                    }
 
-            // add the additional ClassPaths (when defined)
-            classPath = additionalClassPath == null ? classPath : new ClassPath(classPath, additionalClassPath);
+                    // define the ClassPath based on the artifact paths
+                    ClassPath classPath = new ClassPath(artifactPaths);
 
-            optionsByType.add(classPath);
+                    // add the additional ClassPaths (when defined)
+                    classPath = additionalClassPath == null ? classPath : new ClassPath(classPath, additionalClassPath);
+
+                    optionsByType.add(classPath);
+                },
+                optionsByType);
         }
-        catch (Exception e)
+        catch (RepositoryException e)
         {
             throw new RuntimeException("Failed to resolve artifact", e);
         }
@@ -531,6 +475,31 @@ public class Maven implements Profile, ComposableOption<Maven>
 
 
     /**
+     * Creates a {@link Maven} profile based on and composed by a number of other
+     * {@link Maven} profiles.
+     *
+     * @param mavens  the other {@link Maven} profiles
+     *
+     * @return a new {@link Maven} profile
+     */
+    public static Maven from(Maven... mavens)
+    {
+        Maven maven = autoDetect();
+
+        if (maven != null)
+        {
+            // compose maven options
+            for (Maven m : mavens)
+            {
+                maven = maven.compose(m);
+            }
+        }
+
+        return maven;
+    }
+
+
+    /**
      * Obtains a {@link Maven} {@link Profile}, automatically detecting the
      * configuration from the underlying environment, without any {@link Artifact}s
      * defined, and being online by default.
@@ -657,5 +626,149 @@ public class Maven implements Profile, ComposableOption<Maven>
         result = 31 * result + (additionalClassPath != null ? additionalClassPath.hashCode() : 0);
 
         return result;
+    }
+
+
+    /**
+     * Performs the specified {@link RepositorySystemOperation} against the Maven repository
+     * using the settings defined by the profile.
+     *
+     * @throws RepositoryException  when an exception occurs interacting with the repository
+     */
+    private void perform(RepositorySystemOperation operation,
+                         OptionsByType             optionsByType) throws RepositoryException
+    {
+        // obtain the PlatformSeparators
+        PlatformSeparators separators = optionsByType.get(PlatformSeparators.class);
+
+        // define the global settings location if it's not defined
+        if (globalSettingsFile == null)
+        {
+            // determine the location of the Maven Home
+            String mavenHome = System.getenv("M2_HOME");
+
+            globalSettingsFile = new File(System.getProperty("maven.home",
+                                                             mavenHome != null ? mavenHome : ""),
+                                          "conf" + separators.getFileSeparator() + "settings.xml");
+        }
+
+        // define the user settings location if it's not defined
+        if (userSettingsFile == null)
+        {
+            userSettingsFile = new File(System.getProperty("user.home") + separators.getFileSeparator() + ".m2"
+                                        + separators.getFileSeparator() + "settings.xml");
+        }
+
+        // define the scope (if it's not defined)
+        if (scope == null || scope.isEmpty())
+        {
+            this.scope = JavaScopes.RUNTIME;
+        }
+
+        // acquire the Maven Settings for the profile
+        Settings settings = getSettings(optionsByType);
+
+        // ----- establish the repository system using the settings -----
+        RepositorySystem system = newRepositorySystem();
+
+        // ----- establish the session for the repository system -----
+        DefaultRepositorySystemSession session = MavenRepositorySystemUtils.newSession();
+
+        session.setOffline(isOffline == null ? false : isOffline);
+
+        session.setCache(new DefaultRepositoryCache());
+
+        // define the local repository
+        File localRepositoryLocation = new File(System.getProperty("user.home") + separators.getFileSeparator() + ".m2"
+                                                + separators.getFileSeparator() + "repository");
+
+        LocalRepository localRepo = new LocalRepository(localRepositoryLocation);
+
+        session.setLocalRepositoryManager(system.newLocalRepositoryManager(session, localRepo));
+
+        // ----- establish the remote repositories to use from the settings -----
+
+        Map<String, org.apache.maven.settings.Profile> profiles           = settings.getProfilesAsMap();
+        ArrayList<RemoteRepository>                    remoteRepositories = new ArrayList<>(20);
+
+        for (String profileName : settings.getActiveProfiles())
+        {
+            for (Repository repo : profiles.get(profileName).getRepositories())
+            {
+                RemoteRepository remoteRepository = new RemoteRepository.Builder(repo.getId(),
+                                                                                 "default",
+                                                                                 repo.getUrl()).build();
+
+                remoteRepositories.add(remoteRepository);
+            }
+        }
+
+        // perform the operation
+        operation.perform(system, session, remoteRepositories, scope);
+    }
+
+
+    /**
+     * Obtains the versions of a Maven artifact resolvable from the {@link Maven} profile.
+     *
+     * @param groupId         the Maven Group Id
+     * @param artifactId      the Maven Artfiact Id
+     * @param versionPattern  the Maven Artifact Version number range pattern. eg: "[1.0,)"
+     * @param options         the {@link Option}s
+     *                        (for example {@link PlatformSeparators} if the local platform defaults are unacceptable)
+     *
+     * @return a {@link List} of available artifact versions, empty if none are available (not null)
+     *
+     * @see <a href="https://maven.apache.org/enforcer/enforcer-rules/versionRanges.html">Maven Version Number Ranges</a>
+     * @see <a href="https://docs.oracle.com/middleware/1212/core/MAVEN/maven_version.htm#MAVEN401">Oracle's guidelines on Maven Version Number ranges</a>
+     */
+    public List<String> versionsOf(String    groupId,
+                                   String    artifactId,
+                                   String    versionPattern,
+                                   Option... options) throws RepositoryException
+    {
+        OptionsByType optionsByType = OptionsByType.of(options);
+
+        List<String>  versions      = new ArrayList<>();
+
+        perform(
+            (system, session, repositories, scope) -> {
+                Artifact artifact = new DefaultArtifact(groupId + ":" + artifactId + ":" + versionPattern);
+
+                VersionRangeRequest rangeRequest = new VersionRangeRequest();
+
+                rangeRequest.setArtifact(artifact);
+                rangeRequest.setRepositories(repositories);
+
+                VersionRangeResult rangeResult = system.resolveVersionRange(session, rangeRequest);
+
+                for (Version version : rangeResult.getVersions())
+                {
+                    versions.add(version.toString());
+                }
+            },
+            optionsByType);
+
+        return versions;
+    }
+
+
+    @FunctionalInterface
+    private interface RepositorySystemOperation
+    {
+        /**
+         * Perform an operation against a {@link RepositorySystem}.
+         *
+         * @param system         the {@link RepositorySystem}
+         * @param session        the {@link RepositorySystemSession}
+         * @param repositories   the {@link RemoteRepository}s
+         * @param scope          the Maven scope of the operation
+         *
+         * @throws RepositoryException  when an exception occurs interacting with the repository
+         */
+        void perform(RepositorySystem        system,
+                     RepositorySystemSession session,
+                     List<RemoteRepository>  repositories,
+                     String                  scope) throws RepositoryException;
     }
 }

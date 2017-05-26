@@ -30,12 +30,15 @@ import com.oracle.bedrock.runtime.LocalPlatform;
 import com.oracle.bedrock.runtime.MetaClass;
 import com.oracle.bedrock.runtime.java.ClassPath;
 import com.oracle.bedrock.runtime.java.JavaApplication;
+import org.eclipse.aether.RepositoryException;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.util.List;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
@@ -129,4 +132,18 @@ public class MavenTest
         assertThat(classPath.toString(), containsString(ClassPath.ofClass(MavenTest.class).toString()));
         assertThat(classPath.toString(), containsString(ClassPath.ofResource("example-resource.txt").toString()));
     }
+
+    /**
+     * Ensure that {@link Maven} can resolve the versions of an artifact.
+     */
+    @Test
+    public void shouldResolveArtifactVersions() throws RepositoryException
+    {
+        Maven maven = Maven.autoDetect();
+
+        List<String> versions = maven.versionsOf("org.eclipse.aether", "aether-util", "[0,)");
+
+        assertThat(versions.size(), is(greaterThan(5)));
+    }
+
 }
