@@ -138,7 +138,7 @@ public class Maven implements Profile, ComposableOption<Maven>
     /**
      * Constructs a {@link Maven} {@link Profile} based on another {@link Maven} {@link Profile}.
      *
-     * @param maven  the {@link Maven} {@link Profile}
+     * @param maven the {@link Maven} {@link Profile}
      */
     private Maven(Maven maven)
     {
@@ -154,12 +154,12 @@ public class Maven implements Profile, ComposableOption<Maven>
     /**
      * Constructs a {@link Maven} {@link Profile}.
      *
-     * @param globalSettingsFile   the location of the global settings.xml (use {@code null} for the default)
-     * @param userSettingsFile     the location of the user settings.xml (use {@code null} for the default)
-     * @param isOffline            if {@link Maven} is to operate in offline-mode  (use {@code null} for default)
-     * @param scope                the scope to use for resolving artifacts
-     * @param artifacts            the set of {@link Artifact}s
-     * @param additionalClassPath  the additional {@link ClassPath} to add to the resolved artifacts
+     * @param globalSettingsFile  the location of the global settings.xml (use {@code null} for the default)
+     * @param userSettingsFile    the location of the user settings.xml (use {@code null} for the default)
+     * @param isOffline           if {@link Maven} is to operate in offline-mode  (use {@code null} for default)
+     * @param scope               the scope to use for resolving artifacts
+     * @param artifacts           the set of {@link Artifact}s
+     * @param additionalClassPath the additional {@link ClassPath} to add to the resolved artifacts
      */
     private Maven(File                    globalSettingsFile,
                   File                    userSettingsFile,
@@ -187,9 +187,9 @@ public class Maven implements Profile, ComposableOption<Maven>
      * Obtain the Maven {@link Settings} for this {@link Maven} profile
      * given the specified {@link OptionsByType}.
      *
-     * @param optionsByType  the launch {@link OptionsByType}
+     * @param optionsByType the launch {@link OptionsByType}
      *
-     * @return  a new {@link Settings}
+     * @return a new {@link Settings}
      */
     private Settings getSettings(OptionsByType optionsByType)
     {
@@ -330,7 +330,7 @@ public class Maven implements Profile, ComposableOption<Maven>
      * parsed from the {@link String} in the following format:
      * {@code <groupId>:<artifactId>[:<extension>[:<classifier>]]:<version>}.
      *
-     * @param artifact  the g:a[:e][:c]:v coordinates of the {@link Artifact}
+     * @param artifact the g:a[:e][:c]:v coordinates of the {@link Artifact}
      *
      * @return a new {@link Maven} {@link Profile}
      */
@@ -348,9 +348,9 @@ public class Maven implements Profile, ComposableOption<Maven>
      * Create a {@link Maven} {@link Profile} consisting of the artifact specified groupId,
      * artifactId and version (using the default extension .jar and no classifier)
      *
-     * @param groupId     the group id
-     * @param artifactId  the artifact id
-     * @param version     the version
+     * @param groupId    the group id
+     * @param artifactId the artifact id
+     * @param version    the version
      *
      * @return a new {@link Maven} {@link Profile}
      */
@@ -367,9 +367,59 @@ public class Maven implements Profile, ComposableOption<Maven>
 
 
     /**
+     * Create a {@link Maven} {@link Profile} consisting of the artifact specified groupId,
+     * artifactId, version and extension (without a classifier)
+     *
+     * @param groupId    the group id
+     * @param artifactId the artifact id
+     * @param version    the version
+     * @param extension  the extension
+     *
+     * @return a new {@link Maven} {@link Profile}
+     */
+    public static Maven artifact(String groupId,
+                                 String artifactId,
+                                 String version,
+                                 String extension)
+    {
+        Maven maven = Maven.autoDetect();
+
+        maven.artifacts.add(new DefaultArtifact(groupId, artifactId, extension, version));
+
+        return maven;
+    }
+
+
+    /**
+     * Create a {@link Maven} {@link Profile} consisting of the artifact specified groupId,
+     * artifactId, version, extension and classifier
+     *
+     * @param groupId    the group id
+     * @param artifactId the artifact id
+     * @param version    the version
+     * @param extension  the extension
+     * @param classifier the classifier
+     *
+     * @return a new {@link Maven} {@link Profile}
+     */
+    public static Maven artifact(String groupId,
+                                 String artifactId,
+                                 String version,
+                                 String extension,
+                                 String classifier)
+    {
+        Maven maven = Maven.autoDetect();
+
+        maven.artifacts.add(new DefaultArtifact(groupId, artifactId, classifier, extension, version));
+
+        return maven;
+    }
+
+
+    /**
      * Create a default {@link Maven} {@link Profile} that is offline.
      *
-     * @return  an offline {@link Maven} {@link Profile}
+     * @return an offline {@link Maven} {@link Profile}
      */
     public static Maven offline()
     {
@@ -384,10 +434,10 @@ public class Maven implements Profile, ComposableOption<Maven>
     /**
      * Create a default {@link Maven} {@link Profile} using the specified offline status
      *
-     * @param  isOffline  <code>true</code> if the {@link Maven} {@link Profile} should be offline,
-     *                    <code>false</code> otherwise
+     * @param isOffline <code>true</code> if the {@link Maven} {@link Profile} should be offline,
+     *                  <code>false</code> otherwise
      *
-     * @return  a {@link Maven} {@link Profile} with the specified offline status
+     * @return a {@link Maven} {@link Profile} with the specified offline status
      */
     public static Maven offline(boolean isOffline)
     {
@@ -402,10 +452,10 @@ public class Maven implements Profile, ComposableOption<Maven>
     /**
      * Create a default {@link Maven} {@link Profile} and use the specified user settings.xml location.
      *
-     * @param  settingsFileLocation  the location of the Maven settings.xml file, or <code>null</code>
-     *                               to use the default/auto-detect
+     * @param settingsFileLocation the location of the Maven settings.xml file, or <code>null</code>
+     *                             to use the default/auto-detect
      *
-     * @return  a {@link Maven} {@link Profile} with the specified user settings file
+     * @return a {@link Maven} {@link Profile} with the specified user settings file
      */
     public static Maven settings(String settingsFileLocation)
     {
@@ -420,10 +470,10 @@ public class Maven implements Profile, ComposableOption<Maven>
     /**
      * Create a default {@link Maven} {@link Profile} and use the specified user settings.xml location.
      *
-     * @param  settingsFileLocation  the location of the Maven settings.xml file, or <code>null</code>
-     *                               to use the default/auto-detect
+     * @param settingsFileLocation the location of the Maven settings.xml file, or <code>null</code>
+     *                             to use the default/auto-detect
      *
-     * @return  a {@link Maven} {@link Profile} with the specified user settings file
+     * @return a {@link Maven} {@link Profile} with the specified user settings file
      */
     public static Maven settings(File settingsFileLocation)
     {
@@ -439,10 +489,10 @@ public class Maven implements Profile, ComposableOption<Maven>
      * Create a default {@link Maven} {@link Profile} and use the specified scope when resolving
      * artifacts.
      *
-     * @param  scope  the Maven Scope for artifact resolution, or <code>null</code> to use the default
-     *                (which is RUNTIME)
+     * @param scope the Maven Scope for artifact resolution, or <code>null</code> to use the default
+     *              (which is RUNTIME)
      *
-     * @return  a {@link Maven} {@link Profile} with the specified scope
+     * @return a {@link Maven} {@link Profile} with the specified scope
      *
      * @see JavaScopes
      */
@@ -460,9 +510,9 @@ public class Maven implements Profile, ComposableOption<Maven>
      * Create a default {@link Maven} {@link Profile} that includes the specified {@link ClassPath}, that is
      * included after any resolved Maven artifacts.
      *
-     * @param classPath  the additional {@link ClassPath}
+     * @param classPath the additional {@link ClassPath}
      *
-     * @return  a {@link Maven} {@link Profile} with the additional {@link ClassPath}
+     * @return a {@link Maven} {@link Profile} with the additional {@link ClassPath}
      */
     public static Maven include(ClassPath classPath)
     {
@@ -478,7 +528,7 @@ public class Maven implements Profile, ComposableOption<Maven>
      * Creates a {@link Maven} profile based on and composed by a number of other
      * {@link Maven} profiles.
      *
-     * @param mavens  the other {@link Maven} profiles
+     * @param mavens the other {@link Maven} profiles
      *
      * @return a new {@link Maven} profile
      */
@@ -504,7 +554,7 @@ public class Maven implements Profile, ComposableOption<Maven>
      * configuration from the underlying environment, without any {@link Artifact}s
      * defined, and being online by default.
      *
-     * @return  a {@link Maven} {@link Profile}
+     * @return a {@link Maven} {@link Profile}
      */
     @OptionsByType.Default
     public static Maven autoDetect()
@@ -633,7 +683,7 @@ public class Maven implements Profile, ComposableOption<Maven>
      * Performs the specified {@link RepositorySystemOperation} against the Maven repository
      * using the settings defined by the profile.
      *
-     * @throws RepositoryException  when an exception occurs interacting with the repository
+     * @throws RepositoryException when an exception occurs interacting with the repository
      */
     private void perform(RepositorySystemOperation operation,
                          OptionsByType             optionsByType) throws RepositoryException
@@ -711,11 +761,109 @@ public class Maven implements Profile, ComposableOption<Maven>
     /**
      * Obtains the versions of a Maven artifact resolvable from the {@link Maven} profile.
      *
-     * @param groupId         the Maven Group Id
-     * @param artifactId      the Maven Artfiact Id
-     * @param versionPattern  the Maven Artifact Version number range pattern. eg: "[1.0,)"
-     * @param options         the {@link Option}s
-     *                        (for example {@link PlatformSeparators} if the local platform defaults are unacceptable)
+     * @param groupId        the Maven Group Id
+     * @param artifactId     the Maven Artifact Id
+     * @param extension      the Maven Artifact Extension
+     * @param classifier     the Maven Artifact Classifier
+     * @param versionPattern the Maven Artifact Version number range pattern. eg: "[1.0,)"
+     * @param options        the {@link Option}s
+     *                       (for example {@link PlatformSeparators} if the local platform defaults are unacceptable)
+     *
+     * @return a {@link List} of available artifact versions, empty if none are available (not null)
+     *
+     * @see <a href="https://maven.apache.org/enforcer/enforcer-rules/versionRanges.html">Maven Version Number Ranges</a>
+     * @see <a href="https://docs.oracle.com/middleware/1212/core/MAVEN/maven_version.htm#MAVEN401">Oracle's guidelines on Maven Version Number ranges</a>
+     */
+    public List<String> versionsOf(String    groupId,
+                                   String    artifactId,
+                                   String    extension,
+                                   String    classifier,
+                                   String    versionPattern,
+                                   Option... options) throws RepositoryException
+    {
+        OptionsByType optionsByType = OptionsByType.of(options);
+
+        List<String>  versions      = new ArrayList<>();
+
+        perform(
+            (system, session, repositories, scope) -> {
+                Artifact artifact = new DefaultArtifact(groupId + ":" + artifactId + ":" + extension + ":" + classifier
+                                                        + ":" + versionPattern);
+
+                VersionRangeRequest rangeRequest = new VersionRangeRequest();
+
+                rangeRequest.setArtifact(artifact);
+                rangeRequest.setRepositories(repositories);
+
+                VersionRangeResult rangeResult = system.resolveVersionRange(session, rangeRequest);
+
+                for (Version version : rangeResult.getVersions())
+                {
+                    versions.add(version.toString());
+                }
+            },
+            optionsByType);
+
+        return versions;
+    }
+
+
+    /**
+     * Obtains the versions of a Maven artifact resolvable from the {@link Maven} profile.
+     *
+     * @param groupId        the Maven Group Id
+     * @param artifactId     the Maven Artifact Id
+     * @param extension      the Maven Artifact Extension
+     * @param versionPattern the Maven Artifact Version number range pattern. eg: "[1.0,)"
+     * @param options        the {@link Option}s
+     *                       (for example {@link PlatformSeparators} if the local platform defaults are unacceptable)
+     *
+     * @return a {@link List} of available artifact versions, empty if none are available (not null)
+     *
+     * @see <a href="https://maven.apache.org/enforcer/enforcer-rules/versionRanges.html">Maven Version Number Ranges</a>
+     * @see <a href="https://docs.oracle.com/middleware/1212/core/MAVEN/maven_version.htm#MAVEN401">Oracle's guidelines on Maven Version Number ranges</a>
+     */
+    public List<String> versionsOf(String    groupId,
+                                   String    artifactId,
+                                   String    extension,
+                                   String    versionPattern,
+                                   Option... options) throws RepositoryException
+    {
+        OptionsByType optionsByType = OptionsByType.of(options);
+
+        List<String>  versions      = new ArrayList<>();
+
+        perform(
+            (system, session, repositories, scope) -> {
+                Artifact artifact = new DefaultArtifact(groupId + ":" + artifactId + ":" + extension + ":"
+                                                        + versionPattern);
+
+                VersionRangeRequest rangeRequest = new VersionRangeRequest();
+
+                rangeRequest.setArtifact(artifact);
+                rangeRequest.setRepositories(repositories);
+
+                VersionRangeResult rangeResult = system.resolveVersionRange(session, rangeRequest);
+
+                for (Version version : rangeResult.getVersions())
+                {
+                    versions.add(version.toString());
+                }
+            },
+            optionsByType);
+
+        return versions;
+    }
+
+
+    /**
+     * Obtains the versions of a Maven artifact resolvable from the {@link Maven} profile.
+     *                                                  
+     * @param groupId        the Maven Group Id
+     * @param artifactId     the Maven Artifact Id
+     * @param versionPattern the Maven Artifact Version number range pattern. eg: "[1.0,)"
+     * @param options        the {@link Option}s
+     *                       (for example {@link PlatformSeparators} if the local platform defaults are unacceptable)
      *
      * @return a {@link List} of available artifact versions, empty if none are available (not null)
      *
@@ -759,12 +907,12 @@ public class Maven implements Profile, ComposableOption<Maven>
         /**
          * Perform an operation against a {@link RepositorySystem}.
          *
-         * @param system         the {@link RepositorySystem}
-         * @param session        the {@link RepositorySystemSession}
-         * @param repositories   the {@link RemoteRepository}s
-         * @param scope          the Maven scope of the operation
+         * @param system       the {@link RepositorySystem}
+         * @param session      the {@link RepositorySystemSession}
+         * @param repositories the {@link RemoteRepository}s
+         * @param scope        the Maven scope of the operation
          *
-         * @throws RepositoryException  when an exception occurs interacting with the repository
+         * @throws RepositoryException when an exception occurs interacting with the repository
          */
         void perform(RepositorySystem        system,
                      RepositorySystemSession session,
