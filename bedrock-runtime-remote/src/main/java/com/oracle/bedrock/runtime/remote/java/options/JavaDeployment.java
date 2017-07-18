@@ -31,6 +31,7 @@ import com.oracle.bedrock.io.FileHelper;
 import com.oracle.bedrock.runtime.Platform;
 import com.oracle.bedrock.runtime.java.ClassPath;
 import com.oracle.bedrock.runtime.java.JavaApplication;
+import com.oracle.bedrock.runtime.java.options.BedrockRunner;
 import com.oracle.bedrock.runtime.remote.DeploymentArtifact;
 import com.oracle.bedrock.runtime.remote.options.Deployment;
 
@@ -170,6 +171,18 @@ public class JavaDeployment implements Deployment
             // we'll use the class-path option to work out what to deploy
             ClassPath classPath = optionsByType.get(ClassPath.class);
 
+            // include the application runner (if defined)
+            BedrockRunner bedrockRunner = optionsByType.get(BedrockRunner.class);
+
+            if (bedrockRunner != null && bedrockRunner.isEnabled())
+            {
+                // include the JavaApplicationLauncher
+                classPath = new ClassPath(classPath, ClassPath.ofClass(bedrockRunner.getClassOfRunner()));
+
+                // update the class path in the option
+                optionsByType.add(classPath);
+            }
+
             for (String path : classPath)
             {
                 // we ignore leading and trailing spaces
@@ -229,7 +242,7 @@ public class JavaDeployment implements Deployment
                             deploymentArtifacts.add(artifact);
                         }
                     }
-                }                                                                    
+                }
             }
         }
         else
