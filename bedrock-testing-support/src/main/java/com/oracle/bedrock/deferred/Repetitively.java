@@ -39,6 +39,7 @@ import org.hamcrest.StringDescription;
 
 import java.util.Iterator;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 
 import static com.oracle.bedrock.deferred.DeferredHelper.eventually;
 import static com.oracle.bedrock.deferred.DeferredHelper.valueOf;
@@ -310,6 +311,52 @@ public class Repetitively
         {
             throw new AssertionError("Failed to resolve a value for " + deferred);
         }
+    }
+
+
+    /**
+     * Asserts that a specified function, when applied to a value, will repetitively satisfy a
+     * {@link Matcher} using the provided {@link Option}s.
+     *
+     * @param <T>       the type of the value
+     * @param <R>       the return type of the function
+     *
+     * @param value     the value
+     * @param function  the function to apply to the value
+     * @param matcher   the {@link Matcher}
+     * @param options   the {@link Option}s
+     *
+     * @throws AssertionError
+     */
+    public static <T, R> void assertThat(T                  value,
+                                         Function<T, R>     function,
+                                         Matcher<? super R> matcher,
+                                         Option...          options) throws AssertionError
+    {
+        assertThat(eventually(value), function, matcher, options);
+    }
+
+
+    /**
+     * Asserts that a specified function, when applied to a {@link Deferred} value, will
+     * repetitively satisfy a {@link Matcher} using the provided {@link Option}s.
+     *
+     * @param <T>       the type of the {@link Deferred} value
+     * @param <R>       the return type of the function
+     *
+     * @param deferred  the {@link Deferred}
+     * @param function  the function to apply to the value
+     * @param matcher   the {@link Matcher}
+     * @param options   the {@link Option}s
+     *
+     * @throws AssertionError
+     */
+    public static <T, R> void assertThat(Deferred<T>        deferred,
+                                         Function<T, R>     function,
+                                         Matcher<? super R> matcher,
+                                         Option...          options) throws AssertionError
+    {
+        assertThat(null, new DeferredFunction<>(deferred, function), matcher, options);
     }
 
 

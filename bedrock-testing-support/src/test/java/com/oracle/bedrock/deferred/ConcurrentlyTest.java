@@ -95,6 +95,26 @@ public class ConcurrentlyTest
 
 
     /**
+     * Ensure that a function concurrently matches a value.
+     */
+    @Test
+    public void shouldConcurrentlyAssertFunction() throws InterruptedException
+    {
+        RecordingMatcher<Integer> matcher = RecordingMatcher.of(is(42));
+
+        try (Concurrent.Assertion assertion = Concurrently.assertThat(42, (value) -> value, matcher))
+        {
+            Eventually.assertThat(invoking(matcher).attempted(), is(true));
+
+            assertion.check();
+
+            Assert.assertThat(matcher.hasSucceeded(), is(true));
+            Assert.assertThat(matcher.hasFailed(), is(false));
+        }
+    }                                                                                       
+
+
+    /**
      * Ensure that a {@link Concurrent.Assertion} can be closed without causing an
      * {@link AssertionError}.
      */

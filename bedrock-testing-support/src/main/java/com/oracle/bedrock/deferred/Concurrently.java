@@ -36,6 +36,8 @@ import com.oracle.bedrock.runtime.concurrent.RemoteCallable;
 import com.oracle.bedrock.runtime.java.JavaApplication;
 import org.hamcrest.Matcher;
 
+import java.util.function.Function;
+
 import static com.oracle.bedrock.deferred.DeferredHelper.eventually;
 import static com.oracle.bedrock.deferred.DeferredHelper.valueOf;
 
@@ -206,6 +208,54 @@ public class Concurrently
 
 
     /**
+     * Asserts that a specified function, when applied to a value, will concurrently satisfy a
+     * {@link Matcher} using the provided {@link Option}s.
+     *
+     * @param <T>       the type of the value
+     * @param <R>       the return type of the function
+     *
+     * @param value     the value
+     * @param function  the function to apply to the value
+     * @param matcher   the {@link Matcher}
+     * @param options   the {@link Option}s
+     *
+     * @return an {@link Concurrent.Assertion} providing the ability to check the status and
+     *         control the evaluation of the concurrent {@link Concurrent.Assertion}
+     */
+    public static <T, R> Concurrent.Assertion assertThat(T                  value,
+                                                         Function<T, R>     function,
+                                                         Matcher<? super R> matcher,
+                                                         Option...          options)
+    {
+        return assertThat(eventually(value), function, matcher, options);
+    }
+
+
+    /**
+     * Asserts that a specified function, when applied to a {@link Deferred} value, will
+     * concurrently satisfy a {@link Matcher} using the provided {@link Option}s.
+     *
+     * @param <T>       the type of the {@link Deferred} value
+     * @param <R>       the return type of the function
+     *
+     * @param deferred  the {@link Deferred}
+     * @param function  the function to apply to the value
+     * @param matcher   the {@link Matcher}
+     * @param options   the {@link Option}s
+     *
+     * @return an {@link Concurrent.Assertion} providing the ability to check the status and
+     *         control the evaluation of the concurrent {@link Concurrent.Assertion}
+     */
+    public static <T, R> Concurrent.Assertion assertThat(Deferred<T>        deferred,
+                                                         Function<T, R>     function,
+                                                         Matcher<? super R> matcher,
+                                                         Option...          options)
+    {
+        return assertThat(null, new DeferredFunction<>(deferred, function), matcher, options);
+    }
+
+
+    /**
      * Creates a background thread to repetitively assert that the specified {@link RemoteCallable}
      * submitted to the {@link JavaApplication} matches the specified {@link Matcher}.
      *
@@ -215,13 +265,14 @@ public class Concurrently
      * @param callable     the {@link RemoteCallable}
      * @param matcher      the {@link Matcher} representing the desire condition to match
      *
-     * @throws AssertionError  if the assertion fails
+     * @return an {@link Concurrent.Assertion} providing the ability to check the status and
+     *         control the evaluation of the concurrent {@link Concurrent.Assertion}
      */
-    public static <T> void assertThat(JavaApplication    application,
-                                      RemoteCallable<T>  callable,
-                                      Matcher<? super T> matcher) throws AssertionError
+    public static <T> Concurrent.Assertion assertThat(JavaApplication    application,
+                                                      RemoteCallable<T>  callable,
+                                                      Matcher<? super T> matcher)
     {
-        assertThat(valueOf(new DeferredRemoteExecution<T>(application, callable)), matcher);
+        return assertThat(valueOf(new DeferredRemoteExecution<T>(application, callable)), matcher);
     }
 
 
@@ -237,14 +288,15 @@ public class Concurrently
      * @param matcher      the {@link Matcher} representing the desire condition to match
      * @param options      the {@link Option}s
      *
-     * @throws AssertionError  if the assertion fails
+     * @return an {@link Concurrent.Assertion} providing the ability to check the status and
+     *         control the evaluation of the concurrent {@link Concurrent.Assertion}
      */
-    public static <T> void assertThat(JavaApplication    application,
-                                      RemoteCallable<T>  callable,
-                                      Matcher<? super T> matcher,
-                                      Option...          options) throws AssertionError
+    public static <T> Concurrent.Assertion assertThat(JavaApplication    application,
+                                                      RemoteCallable<T>  callable,
+                                                      Matcher<? super T> matcher,
+                                                      Option...          options)
     {
-        assertThat(valueOf(new DeferredRemoteExecution<T>(application, callable)), matcher, options);
+        return assertThat(valueOf(new DeferredRemoteExecution<T>(application, callable)), matcher, options);
     }
 
 

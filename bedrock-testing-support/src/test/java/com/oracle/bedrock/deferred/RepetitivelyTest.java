@@ -111,4 +111,30 @@ public class RepetitivelyTest
             Assert.fail("Should have failed immediately");
         }
     }
+
+
+    /**
+     * Ensure a function can be repetitively asserted to a value.
+     */
+    @Test
+    public void shouldRepetitivelyAssertFunction()
+    {
+        Duration                  duration = Duration.of(5, TimeUnit.SECONDS);
+        RecordingMatcher<Integer> matcher  = RecordingMatcher.of(is(constant()));
+
+        StopWatch                 watch    = new StopWatch();
+
+        watch.start();
+
+        Repetitively.assertThat(42, (value) -> value, matcher, Timeout.of(duration));
+
+        watch.stop();
+
+        assertThat(matcher.attempted(), is(true));
+        assertThat(matcher.hasSucceeded(), is(true));
+        assertThat(matcher.hasFailed(), is(false));
+
+        assertThat(watch.getElapsedTimeIn(TimeUnit.SECONDS),
+                   greaterThanOrEqualTo((long) (duration.to(TimeUnit.SECONDS) * 0.95)));
+    }
 }
