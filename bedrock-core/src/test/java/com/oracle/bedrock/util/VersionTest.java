@@ -79,6 +79,8 @@ public class VersionTest
 
         assertThat(Version.of("1.2.3-A"), is(Version.of("1", "2", "3", "a")));
         assertThat(Version.of("1.2.3-A.B"), is(Version.of("1", "2", "3", "a", "b")));
+
+        assertThat(Version.of("1.0.0-SNAPSHOT"), is(Version.of("1", "0", "0", "SNAPSHOT")));
     }
 
 
@@ -93,13 +95,15 @@ public class VersionTest
         assertThat(Version.of("1"), is(lessThan(Version.of("2"))));
         assertThat(Version.of("12"), is(lessThan(Version.of("12.1"))));
         assertThat(Version.of("12.1"), is(lessThan(Version.of("12.2"))));
-        assertThat(Version.of("12"), is(lessThan(Version.of("12-A"))));
+        assertThat(Version.of("12-A"), is(lessThan(Version.of("12"))));
         assertThat(Version.of("12-A"), is(lessThan(Version.of("12.1"))));
 
         assertThat(Version.of("1.2"), is(lessThan(Version.of("1.2.1"))));
         assertThat(Version.of("1.2.1"), is(lessThan(Version.of("1.2.2"))));
         assertThat(Version.of("1.2.1"), is(lessThan(Version.of("1.2.2-sp2"))));
         assertThat(Version.of("1.2-sp2"), is(lessThan(Version.of("1.2.1"))));
+        assertThat(Version.of("1.2-SNAPSHOT"), is(lessThan(Version.of("1.2"))));
+        assertThat(Version.of("1.2-SNAPSHOT"), is(lessThan(Version.of("1.2.1-SNAPSHOT"))));
     }
 
 

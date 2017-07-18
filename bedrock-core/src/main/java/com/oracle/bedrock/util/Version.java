@@ -58,7 +58,7 @@ public class Version implements Comparable<Version>
 
 
     /**
-     * The parsed components of the version number (either {@link Integer}s or {@link String}s.
+     * The parsed components of the version number, either {@link Integer}s or {@link String}s.
      */
     private ArrayList components;
 
@@ -244,10 +244,10 @@ public class Version implements Comparable<Version>
         else
         {
             // compare each of the components of each version, returning early when we know the result
-            for (int i = 0; i < this.components.size() && i < other.components.size(); i++)
+            for (int i = 0; i < Math.max(this.components.size(), other.components.size()); i++)
             {
-                Object x = this.components.get(i);
-                Object y = other.components.get(i);
+                Object x = i < this.components.size() ? this.components.get(i) : Integer.valueOf(0);
+                Object y = i < other.components.size() ? other.components.get(i) : Integer.valueOf(0);
 
                 if (x instanceof Integer && y instanceof Integer)
                 {
@@ -274,8 +274,8 @@ public class Version implements Comparable<Version>
                 }
             }
 
-            // when all of the components thus far are equal, we determine based on the remaining size
-            return this.components.size() - other.components.size();
+            // when all of the components thus far are equal, the versions are equal
+            return 0;
         }
     }
 
