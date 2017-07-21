@@ -498,7 +498,7 @@ public abstract class AbstractAssembly<A extends Application> implements Assembl
                     Class<A> applicationClass = (Class<A>) application.getClass();
 
                     // (re) launch the application
-                    A relaunchedApplication = platform.launch(applicationClass, applicationOptions.asArray());
+                    A relaunchedApplication = platform.launch(applicationClass, launchOptions.asArray());
 
                     // notify the assembly that the application was restarted
                     onRelaunched(application, relaunchedApplication, launchOptions);
