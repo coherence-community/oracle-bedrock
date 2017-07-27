@@ -42,6 +42,7 @@ import org.apache.maven.settings.building.DefaultSettingsBuilderFactory;
 import org.apache.maven.settings.building.DefaultSettingsBuildingRequest;
 import org.apache.maven.settings.building.SettingsBuilder;
 import org.apache.maven.settings.building.SettingsBuildingException;
+import org.apache.tools.ant.util.LinkedHashtable;
 import org.eclipse.aether.DefaultRepositoryCache;
 import org.eclipse.aether.DefaultRepositorySystemSession;
 import org.eclipse.aether.RepositoryException;
@@ -125,9 +126,10 @@ public class Maven implements Profile, ComposableOption<Maven>
     private String scope;
 
     /**
-     * The list of {@link Artifact}s. (never <code>null</code>)
+     * The list of {@link Artifact}s, indexed by group, artifact, classifier and extension,
+     * thus allowing overriding of artifacts with different versions.
      */
-    private final LinkedHashSet<Artifact> artifacts;
+    private final LinkedHashtable<String, Artifact> artifacts;
 
     /**
      * The additional {@link ClassPath} to add to the {@link ClassPath} of the resolved artifacts.
@@ -158,27 +160,27 @@ public class Maven implements Profile, ComposableOption<Maven>
      * @param userSettingsFile    the location of the user settings.xml (use {@code null} for the default)
      * @param isOffline           if {@link Maven} is to operate in offline-mode  (use {@code null} for default)
      * @param scope               the scope to use for resolving artifacts
-     * @param artifacts           the set of {@link Artifact}s
+     * @param artifacts           the table of {@link Artifact}s
      * @param additionalClassPath the additional {@link ClassPath} to add to the resolved artifacts
      */
-    private Maven(File                    globalSettingsFile,
-                  File                    userSettingsFile,
-                  Boolean                 isOffline,
-                  String                  scope,
-                  LinkedHashSet<Artifact> artifacts,
-                  ClassPath               additionalClassPath)
+    private Maven(File                              globalSettingsFile,
+                  File                              userSettingsFile,
+                  Boolean                           isOffline,
+                  String                            scope,
+                  LinkedHashtable<String, Artifact> artifacts,
+                  ClassPath                         additionalClassPath)
     {
         this.globalSettingsFile  = globalSettingsFile;
         this.userSettingsFile    = userSettingsFile;
         this.isOffline           = isOffline;
         this.scope               = scope;
-        this.artifacts           = new LinkedHashSet<>();
+        this.artifacts           = new LinkedHashtable<>();
         this.additionalClassPath = additionalClassPath;
 
         // add all of the artifacts (if there are any)
         if (artifacts != null)
         {
-            this.artifacts.addAll(artifacts);
+            this.artifacts.putAll(artifacts);
         }
     }
 
@@ -271,7 +273,7 @@ public class Maven implements Profile, ComposableOption<Maven>
                     // collect class paths for each resolved artifact
                     LinkedHashSet<ClassPath> artifactPaths = new LinkedHashSet<>();
 
-                    for (Artifact artifact : artifacts)
+                    for (Artifact artifact : artifacts.values())
                     {
                         CollectRequest collectRequest = new CollectRequest();
 
@@ -336,9 +338,11 @@ public class Maven implements Profile, ComposableOption<Maven>
      */
     public static Maven artifact(String artifact)
     {
-        Maven maven = Maven.autoDetect();
+        Maven           maven           = Maven.autoDetect();
 
-        maven.artifacts.add(new DefaultArtifact(artifact));
+        DefaultArtifact defaultArtifact = new DefaultArtifact(artifact);
+
+        maven.artifacts.put(getArtifactIdentity(defaultArtifact), new DefaultArtifact(artifact));
 
         return maven;
     }
@@ -358,9 +362,11 @@ public class Maven implements Profile, ComposableOption<Maven>
                                  String artifactId,
                                  String version)
     {
-        Maven maven = Maven.autoDetect();
+        Maven           maven           = Maven.autoDetect();
 
-        maven.artifacts.add(new DefaultArtifact(groupId, artifactId, "jar", version));
+        DefaultArtifact defaultArtifact = new DefaultArtifact(groupId, artifactId, "jar", version);
+
+        maven.artifacts.put(getArtifactIdentity(defaultArtifact), defaultArtifact);
 
         return maven;
     }
@@ -382,9 +388,11 @@ public class Maven implements Profile, ComposableOption<Maven>
                                  String version,
                                  String extension)
     {
-        Maven maven = Maven.autoDetect();
+        Maven           maven           = Maven.autoDetect();
 
-        maven.artifacts.add(new DefaultArtifact(groupId, artifactId, extension, version));
+        DefaultArtifact defaultArtifact = new DefaultArtifact(groupId, artifactId, extension, version);
+
+        maven.artifacts.put(getArtifactIdentity(defaultArtifact), defaultArtifact);
 
         return maven;
     }
@@ -408,9 +416,11 @@ public class Maven implements Profile, ComposableOption<Maven>
                                  String extension,
                                  String classifier)
     {
-        Maven maven = Maven.autoDetect();
+        Maven           maven           = Maven.autoDetect();
 
-        maven.artifacts.add(new DefaultArtifact(groupId, artifactId, classifier, extension, version));
+        DefaultArtifact defaultArtifact = new DefaultArtifact(groupId, artifactId, classifier, extension, version);
+
+        maven.artifacts.put(getArtifactIdentity(defaultArtifact), defaultArtifact);
 
         return maven;
     }
@@ -599,9 +609,9 @@ public class Maven implements Profile, ComposableOption<Maven>
 
         // add all of the artifacts
         // (we combine them together)
-        for (Artifact artifact : other.artifacts)
+        for (Artifact artifact : other.artifacts.values())
         {
-            maven.artifacts.add(artifact);
+            maven.artifacts.put(getArtifactIdentity(artifact), artifact);
         }
 
         // include the additional ClassPath
@@ -676,6 +686,27 @@ public class Maven implements Profile, ComposableOption<Maven>
         result = 31 * result + (additionalClassPath != null ? additionalClassPath.hashCode() : 0);
 
         return result;
+    }
+
+
+    /**
+     * Obtains the identity of an {@link Artifact}, not including the version.
+     *
+     * @param artifact  the {@link Artifact}
+     *
+     * @return a {@link String}-based identity of an {@link Artifact}
+     */
+    private static String getArtifactIdentity(Artifact artifact)
+    {
+        if (artifact == null)
+        {
+            return "";
+        }
+        else
+        {
+            return artifact.getGroupId() + ":" + artifact.getArtifactId() + ":" + artifact.getClassifier() + ":"
+                   + artifact.getExtension();
+        }
     }
 
 
@@ -858,7 +889,7 @@ public class Maven implements Profile, ComposableOption<Maven>
 
     /**
      * Obtains the versions of a Maven artifact resolvable from the {@link Maven} profile.
-     *                                                  
+     *
      * @param groupId        the Maven Group Id
      * @param artifactId     the Maven Artifact Id
      * @param versionPattern the Maven Artifact Version number range pattern. eg: "[1.0,)"
