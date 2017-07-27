@@ -56,6 +56,7 @@ import static com.oracle.bedrock.deferred.Eventually.assertThat;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.isEmptyOrNullString;
 
 /**
  * Functional Tests for the {@link CoherenceClusterBuilder} class.
@@ -264,6 +265,17 @@ public abstract class AbstractCoherenceClusterBuilderTest extends AbstractTest
             cluster.unordered().limit(2).relaunch(predicate);
 
             assertThat(invoking(cluster).getClusterSize(), is(CLUSTER_SIZE));
+
+            // introduce a new system property for the relaunched members
+            cluster.relaunch(predicate, SystemProperty.of("cloned", "yes"));
+
+            assertThat(invoking(cluster).getClusterSize(), is(CLUSTER_SIZE));
+
+            // ensure all the members have the new system property
+            for(CoherenceClusterMember member : cluster)
+            {
+                assertThat(member.getSystemProperty("cloned"), is("yes"));
+            }
         }
     }
 
@@ -465,7 +477,10 @@ public abstract class AbstractCoherenceClusterBuilderTest extends AbstractTest
             // ensure that the InvocationService service for the first (and only) cluster member is unknown
             assertThat(invoking(cluster.get("DCS-1")).isStorageEnabled("InvocationService"), is(Trilean.UNKNOWN));
 
-            cluster.limit(1).clone(1, LocalStorage.disabled());
+            // ensure that we don't have the clone system property
+            Assert.assertThat(cluster.get("DCS-1").getSystemProperty("cloned"), isEmptyOrNullString());
+
+            cluster.limit(1).clone(1, LocalStorage.disabled(), SystemProperty.of("cloned", "yes"));
 
             // ensure that the cluster is bigger by one
             assertThat(invoking(cluster).getClusterSize(), is(CLUSTER_SIZE + 1));
@@ -475,6 +490,9 @@ public abstract class AbstractCoherenceClusterBuilderTest extends AbstractTest
 
             // ensure that the InvocationService service for the new member is unknown
             assertThat(invoking(cluster.get("DCS-2")).isStorageEnabled("InvocationService"), is(Trilean.UNKNOWN));
+
+            // ensure that we added the system property to the clone
+            assertThat(cluster.get("DCS-2").getSystemProperty("cloned"), is("yes"));
         }
     }
 
