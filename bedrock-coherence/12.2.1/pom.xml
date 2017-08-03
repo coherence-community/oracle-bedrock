@@ -16,7 +16,7 @@
 
     <properties>
         <!-- the version of coherence -->
-        <coherence.version>12.2.1-0-2</coherence.version>
+        <coherence.version>12.2.1-0-4</coherence.version>
     </properties>
 
     <modules>
