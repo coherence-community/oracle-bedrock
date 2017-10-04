@@ -133,17 +133,49 @@ public class MavenTest
         assertThat(classPath.toString(), containsString(ClassPath.ofResource("example-resource.txt").toString()));
     }
 
+
     /**
      * Ensure that {@link Maven} can resolve the versions of an artifact.
      */
     @Test
     public void shouldResolveArtifactVersions() throws RepositoryException
     {
-        Maven maven = Maven.autoDetect();
+        Maven        maven    = Maven.autoDetect();
 
         List<String> versions = maven.versionsOf("org.eclipse.aether", "aether-util", "[0,)");
 
         assertThat(versions.size(), is(greaterThan(5)));
     }
 
+
+    /**
+     * Ensure that {@link Maven} artifacts of the same group, artifactid, classified and extension
+     * are overridden when defined multiple times.
+     */
+    @Test
+    public void shouldOverrideArtifacts() throws IOException
+    {
+        LocalPlatform platform      = LocalPlatform.get();
+        MetaClass     metaClass     = new JavaApplication.MetaClass();
+        OptionsByType optionsByType = OptionsByType.empty();
+
+        optionsByType.addAll(Maven.artifact("junit:junit:jar:4.10"),
+                             Maven.artifact("junit:junit:jar:4.11"),
+                             Maven.artifact("junit:junit:jar:4.12"));
+
+        Maven maven = optionsByType.get(Maven.class);
+
+        maven.onLaunching(platform, metaClass, optionsByType);
+
+        ClassPath classPath = optionsByType.getOrDefault(ClassPath.class, null);
+
+        assertThat(classPath, is(not(nullValue())));
+        assertThat(classPath.size(), is(2));  // includes transitive dependencies
+
+        assertThat(classPath.toString(), containsString("junit-4.12.jar"));
+        assertThat(classPath.toString(), containsString("hamcrest-core-1.3.jar"));
+
+        assertThat(classPath.toString(), not(containsString("junit-4.10.jar")));
+        assertThat(classPath.toString(), not(containsString("junit-4.11.jar")));
+    }
 }

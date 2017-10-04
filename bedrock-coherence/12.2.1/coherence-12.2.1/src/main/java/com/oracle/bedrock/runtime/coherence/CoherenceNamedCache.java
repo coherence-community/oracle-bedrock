@@ -222,15 +222,15 @@ class CoherenceNamedCache<K, V> implements NamedCache<K, V>
 
         }
 
-        throw new IllegalStateException("Failed to perform request [" + methodName + "] using [" + retryCount
-                                        + "] Cluster Members");
+        throw new IllegalStateException("Failed to perform request [" + methodName + "] with arguments "
+                                        + Arrays.toString(arguments) + " using [" + retryCount + "] Cluster Members");
     }
 
 
     @Override
     public String getCacheName()
     {
-        return cacheName;
+        return cacheName;                                              
     }
 
 

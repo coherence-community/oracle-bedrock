@@ -52,6 +52,7 @@ import com.oracle.bedrock.runtime.concurrent.RemoteEventListener;
 import com.oracle.bedrock.runtime.concurrent.RemoteRunnable;
 import com.oracle.bedrock.runtime.concurrent.socket.SocketBasedRemoteChannelServer;
 import com.oracle.bedrock.runtime.java.features.JmxFeature;
+import com.oracle.bedrock.runtime.java.options.BedrockRunner;
 import com.oracle.bedrock.runtime.java.options.ClassName;
 import com.oracle.bedrock.runtime.java.options.IPv4Preferred;
 import com.oracle.bedrock.runtime.java.options.JavaHome;
@@ -310,8 +311,14 @@ public class LocalJavaApplicationLauncher<A extends JavaApplication> implements 
                 classPath = new ClassPath(classPath, ClassPath.ofClass(option.getClass()));
             }
 
-            // include the JavaApplicationLauncher
-            classPath = new ClassPath(classPath, ClassPath.ofClass(JavaApplicationRunner.class));
+            // include the application runner (if defined)
+            BedrockRunner bedrockRunner = optionsByType.get(BedrockRunner.class);
+
+            if (bedrockRunner != null && bedrockRunner.isEnabled())
+            {
+                // include the JavaApplicationLauncher
+                classPath = new ClassPath(classPath, ClassPath.ofClass(bedrockRunner.getClassOfRunner()));
+            }
 
             // add the updated ClassPath back into the launch options
             launchOptions.add(classPath);

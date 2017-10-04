@@ -86,6 +86,7 @@ public class OperatingSystem implements Option
         MAPPINGS.put("solaris", Pair.of(Type.SOLARIS, ""));
         MAPPINGS.put("sunos", Pair.of(Type.SUNOS, ""));
 
+        MAPPINGS.put("mac os x 10.13", Pair.of(Type.MACOS, "High Sierra"));
         MAPPINGS.put("mac os x 10.12", Pair.of(Type.MACOS, "Sierra"));
         MAPPINGS.put("mac os x 10.11", Pair.of(Type.MACOS, "El Capitan"));
         MAPPINGS.put("mac os x 10.10", Pair.of(Type.MACOS, "Yosemite"));

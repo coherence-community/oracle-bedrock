@@ -147,15 +147,9 @@ public class RemoteJavaApplicationLauncher extends AbstractRemoteApplicationLaun
 
         // ----- determine the remote classpath based on the deployment option -----
 
-        JavaDeployment deployment = (JavaDeployment) optionsByType.get(Deployment.class);
-
-        if (deployment == null)
-        {
-            // when no deployment is specified we assume automatic
-            deployment = JavaDeployment.automatic();
-
-            optionsByType.addIfAbsent(deployment);
-        }
+        // when no deployment is specified we assume automatic
+        JavaDeployment deployment = (JavaDeployment) optionsByType.getOrSetDefault(Deployment.class,
+                                                                                   JavaDeployment.automatic());
 
         if (deployment.isAutoDeployEnabled())
         {
