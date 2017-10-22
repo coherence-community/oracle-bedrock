@@ -26,7 +26,7 @@
 package com.oracle.bedrock.runtime.java.container;
 
 import com.oracle.bedrock.OptionsByType;
-import com.oracle.bedrock.junit.AbstractTest;
+import com.oracle.bedrock.testsupport.junit.AbstractTest;
 import com.oracle.bedrock.runtime.concurrent.callable.RemoteCallableStaticMethod;
 import com.oracle.bedrock.runtime.java.ContainerBasedJavaApplicationLauncher;
 import org.junit.Before;

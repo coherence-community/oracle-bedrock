@@ -28,7 +28,7 @@ package com.oracle.bedrock.runtime.java;
 import classloader.applications.EventingApplication;
 import classloader.applications.ParentApplication;
 import classloader.applications.SleepingApplication;
-import com.oracle.bedrock.deferred.Eventually;
+import com.oracle.bedrock.testsupport.deferred.Eventually;
 import com.oracle.bedrock.io.NetworkHelper;
 import com.oracle.bedrock.options.Timeout;
 import com.oracle.bedrock.runtime.Application;

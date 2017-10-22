@@ -26,7 +26,7 @@
 package com.oracle.bedrock.runtime.java.container;
 
 import com.oracle.bedrock.runtime.java.features.JmxFeature;
-import com.oracle.bedrock.junit.AbstractTest;
+import com.oracle.bedrock.testsupport.junit.AbstractTest;
 
 import com.oracle.bedrock.runtime.LocalPlatform;
 

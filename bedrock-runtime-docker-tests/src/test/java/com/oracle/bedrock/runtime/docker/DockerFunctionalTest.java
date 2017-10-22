@@ -27,7 +27,7 @@ package com.oracle.bedrock.runtime.docker;
 
 import applications.SocketEchoServer;
 import com.oracle.bedrock.OptionsByType;
-import com.oracle.bedrock.deferred.Eventually;
+import com.oracle.bedrock.testsupport.deferred.Eventually;
 import com.oracle.bedrock.options.Timeout;
 import com.oracle.bedrock.runtime.Application;
 import com.oracle.bedrock.runtime.LocalPlatform;

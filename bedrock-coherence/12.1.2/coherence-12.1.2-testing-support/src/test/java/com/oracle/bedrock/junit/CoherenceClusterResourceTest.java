@@ -25,7 +25,7 @@
 
 package com.oracle.bedrock.junit;
 
-import com.oracle.bedrock.deferred.Eventually;
+import com.oracle.bedrock.testsupport.deferred.Eventually;
 import com.oracle.bedrock.runtime.LocalPlatform;
 import com.oracle.bedrock.runtime.coherence.CoherenceCluster;
 import com.oracle.bedrock.runtime.coherence.CoherenceClusterMember;

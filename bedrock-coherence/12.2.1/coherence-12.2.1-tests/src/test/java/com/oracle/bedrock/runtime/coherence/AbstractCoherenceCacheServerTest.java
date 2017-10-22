@@ -25,9 +25,9 @@
 
 package com.oracle.bedrock.runtime.coherence;
 
-import com.oracle.bedrock.deferred.Eventually;
-import com.oracle.bedrock.junit.AbstractTest;
-import com.oracle.bedrock.matchers.MapMatcher;
+import com.oracle.bedrock.testsupport.deferred.Eventually;
+import com.oracle.bedrock.testsupport.junit.AbstractTest;
+import com.oracle.bedrock.testsupport.matchers.MapMatcher;
 import com.oracle.bedrock.options.Diagnostics;
 import com.oracle.bedrock.runtime.LocalPlatform;
 import com.oracle.bedrock.runtime.Platform;
@@ -69,7 +69,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import static com.oracle.bedrock.deferred.DeferredHelper.invoking;
-import static com.oracle.bedrock.deferred.Eventually.assertThat;
+import static com.oracle.bedrock.testsupport.deferred.Eventually.assertThat;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 

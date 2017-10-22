@@ -44,6 +44,10 @@ import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
+import java.util.Set;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * A local immutable representation of a Java class path.
@@ -67,6 +71,10 @@ public class ClassPath implements Iterable<String>, Tabular, Option
      */
     private final LinkedHashSet<String> paths;
 
+    /**
+     * A list of reg-ex patterns to use to exclude artifacts from the path.
+     */
+    private final Set<Pattern> excludes;
 
     /**
      * Constructs an empty {@link ClassPath} using the system default
@@ -74,7 +82,8 @@ public class ClassPath implements Iterable<String>, Tabular, Option
      */
     public ClassPath()
     {
-        paths = new LinkedHashSet<>();
+        paths    = new LinkedHashSet<>();
+        excludes = new LinkedHashSet<>();
     }
 
 
@@ -86,7 +95,8 @@ public class ClassPath implements Iterable<String>, Tabular, Option
      */
     public ClassPath(ClassPath... classPaths)
     {
-        paths = new LinkedHashSet<>();
+        paths    = new LinkedHashSet<>();
+        excludes = new LinkedHashSet<>();
 
         if (classPaths != null && classPaths.length > 0)
         {
@@ -97,6 +107,8 @@ public class ClassPath implements Iterable<String>, Tabular, Option
                     path = sanitizePath(path);
                     paths.add(path);
                 }
+
+                excludes.addAll(classPath.excludes);
             }
         }
     }
@@ -110,7 +122,8 @@ public class ClassPath implements Iterable<String>, Tabular, Option
      */
     public ClassPath(Iterable<ClassPath> classPaths)
     {
-        paths = new LinkedHashSet<>();
+        paths    = new LinkedHashSet<>();
+        excludes = new LinkedHashSet<>();
 
         if (classPaths != null)
         {
@@ -121,6 +134,8 @@ public class ClassPath implements Iterable<String>, Tabular, Option
                     path = sanitizePath(path);
                     paths.add(path);
                 }
+
+                excludes.addAll(classPath.excludes);
             }
         }
     }
@@ -134,7 +149,8 @@ public class ClassPath implements Iterable<String>, Tabular, Option
      */
     public ClassPath(String... classPaths)
     {
-        paths = new LinkedHashSet<>();
+        paths    = new LinkedHashSet<>();
+        excludes = new LinkedHashSet<>();
 
         if (classPaths != null)
         {
@@ -174,7 +190,16 @@ public class ClassPath implements Iterable<String>, Tabular, Option
      */
     public int size()
     {
-        return paths.size();
+        if (excludes.isEmpty())
+        {
+            return paths.size();
+        }
+        else
+        {
+            return (int) paths.stream()
+                              .filter(this::include)
+                              .count();
+        }
     }
 
 
@@ -280,7 +305,17 @@ public class ClassPath implements Iterable<String>, Tabular, Option
     @Override
     public Iterator<String> iterator()
     {
-        return paths.iterator();
+        if (excludes.isEmpty())
+        {
+            return paths.iterator();
+        }
+        else
+        {
+            return paths.stream()
+                        .filter(this::include)
+                        .collect(Collectors.toList())
+                        .iterator();
+        }
     }
 
 
@@ -316,9 +351,18 @@ public class ClassPath implements Iterable<String>, Tabular, Option
         PlatformSeparators separators    = optionsByType.get(PlatformSeparators.class);
         ClassPathModifier  modifier      = optionsByType.get(ClassPathModifier.class);
         String             pathSeparator = separators.getPathSeparator();
+        Stream<String>     stream;
 
-        for (String path : paths)
+        if (excludes.isEmpty())
         {
+            stream = paths.stream().filter(this::include);
+        }
+        else
+        {
+            stream = paths.stream().filter(this::include);
+        }
+
+        stream.forEach(path -> {
             if (builder.length() > 0)
             {
                 builder.append(pathSeparator);
@@ -327,7 +371,7 @@ public class ClassPath implements Iterable<String>, Tabular, Option
             // NOTE: DON'T BE TEMPTED TO DOUBLE QUOTE THESE PATH STRINGS!
             // (on certain platforms they may be double quoted again!)
             builder.append(path);
-        }
+        });
 
         // NOTE: DON'T BE TEMPTED TO DOUBLE QUOTE THESE PATH STRINGS!
         // (on certain platforms they may be double quoted again!)
@@ -378,6 +422,45 @@ public class ClassPath implements Iterable<String>, Tabular, Option
         return table;
     }
 
+
+    /**
+     * Create a {@link ClassPath} that is the same as this {@link ClassPath}
+     * excluding any artifacts matching any of the specified expressions.
+     *
+     * @param exclude  the reg-ex expressions to use to exclude artifacts
+     *
+     * @return a {@link ClassPath} that is the same as this {@link ClassPath}
+     *         excluding any artifacts matching any of the specified expressions
+     */
+    public ClassPath excluding(String... exclude)
+    {
+        if (exclude == null || exclude.length == 0)
+        {
+            return this;
+        }
+
+        ClassPath classPath = new ClassPath(this);
+
+        for (String ex : exclude)
+        {
+            classPath.excludes.add(Pattern.compile(ex));
+        }
+
+        return classPath;
+    }
+
+    private boolean include(String path)
+    {
+        if (excludes.isEmpty())
+        {
+            return true;
+        }
+
+        boolean exclude = excludes.stream()
+                .anyMatch(pattern -> pattern.matcher(path).matches());
+
+        return !exclude;
+    }
 
     @Override
     public boolean equals(Object other)

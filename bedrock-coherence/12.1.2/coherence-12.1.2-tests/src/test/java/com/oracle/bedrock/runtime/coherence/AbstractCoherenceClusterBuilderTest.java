@@ -26,7 +26,7 @@
 package com.oracle.bedrock.runtime.coherence;
 
 import com.oracle.bedrock.OptionsByType;
-import com.oracle.bedrock.junit.AbstractTest;
+import com.oracle.bedrock.testsupport.junit.AbstractTest;
 import com.oracle.bedrock.options.Decoration;
 import com.oracle.bedrock.runtime.ApplicationListener;
 import com.oracle.bedrock.runtime.LocalPlatform;
@@ -52,7 +52,7 @@ import org.junit.Test;
 import java.util.HashSet;
 
 import static com.oracle.bedrock.deferred.DeferredHelper.invoking;
-import static com.oracle.bedrock.deferred.Eventually.assertThat;
+import static com.oracle.bedrock.testsupport.deferred.Eventually.assertThat;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.greaterThan;

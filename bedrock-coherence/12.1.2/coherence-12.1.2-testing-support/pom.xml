@@ -4,7 +4,7 @@
     <parent>
         <groupId>com.oracle.bedrock.coherence</groupId>
         <artifactId>12.1.2</artifactId>
-        <version>4.5.1-SNAPSHOT</version>
+        <version>5.0.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>coherence-12.1.2-testing-support</artifactId>
@@ -51,10 +51,19 @@
             <version>${project.version}</version>
         </dependency>
 
+
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>${junit.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>hamcrest-library</artifactId>
+            <version>${hamcrest.version}</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 
@@ -84,6 +93,14 @@
                             </excludes>
                         </filter>
                     </filters>
+                    <transformers>
+                        <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+                        <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                            <manifestEntries>
+                                <Automatic-Module-Name>com.oracle.bedrock.coherence</Automatic-Module-Name>
+                            </manifestEntries>
+                        </transformer>
+                    </transformers>
                 </configuration>
                 <executions>
                     <execution>

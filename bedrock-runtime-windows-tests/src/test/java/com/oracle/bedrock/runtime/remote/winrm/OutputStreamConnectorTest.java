@@ -29,7 +29,7 @@ import com.microsoft.wsman.shell.CommandStateType;
 import com.microsoft.wsman.shell.ReceiveResponse;
 import com.microsoft.wsman.shell.StreamType;
 
-import com.oracle.bedrock.deferred.Eventually;
+import com.oracle.bedrock.testsupport.deferred.Eventually;
 
 import org.junit.Test;
 

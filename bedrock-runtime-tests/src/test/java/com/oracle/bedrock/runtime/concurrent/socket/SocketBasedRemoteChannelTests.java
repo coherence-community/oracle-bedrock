@@ -25,7 +25,7 @@
 
 package com.oracle.bedrock.runtime.concurrent.socket;
 
-import com.oracle.bedrock.deferred.Eventually;
+import com.oracle.bedrock.testsupport.deferred.Eventually;
 import com.oracle.bedrock.runtime.concurrent.RemoteCallable;
 import com.oracle.bedrock.runtime.concurrent.RemoteEvent;
 import com.oracle.bedrock.runtime.concurrent.RemoteEventListener;

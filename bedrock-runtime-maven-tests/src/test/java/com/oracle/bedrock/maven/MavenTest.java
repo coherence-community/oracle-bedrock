@@ -25,13 +25,12 @@
 
 package com.oracle.bedrock.maven;
 
-import com.oracle.bedrock.deferred.Eventually;
+import com.oracle.bedrock.testsupport.deferred.Eventually;
 import com.oracle.bedrock.options.Diagnostics;
 import com.oracle.bedrock.runtime.LocalPlatform;
 import com.oracle.bedrock.runtime.console.CapturingApplicationConsole;
 import com.oracle.bedrock.runtime.java.JavaApplication;
 import com.oracle.bedrock.runtime.java.options.ClassName;
-import com.oracle.bedrock.runtime.java.options.Freeform;
 import com.oracle.bedrock.runtime.java.options.SystemProperty;
 import com.oracle.bedrock.runtime.options.Console;
 import org.junit.Test;

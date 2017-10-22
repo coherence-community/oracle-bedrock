@@ -47,7 +47,7 @@ import org.junit.Test;
 import java.io.File;
 
 import static com.oracle.bedrock.deferred.DeferredHelper.invoking;
-import static com.oracle.bedrock.deferred.Eventually.assertThat;
+import static com.oracle.bedrock.testsupport.deferred.Eventually.assertThat;
 import static org.hamcrest.CoreMatchers.is;
 
 /**

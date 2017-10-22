@@ -59,6 +59,7 @@ import com.oracle.bedrock.runtime.java.options.JavaHome;
 import com.oracle.bedrock.runtime.java.options.JvmOption;
 import com.oracle.bedrock.runtime.java.options.RemoteEvents;
 import com.oracle.bedrock.runtime.java.options.SystemProperties;
+import com.oracle.bedrock.runtime.java.options.JavaModules;
 import com.oracle.bedrock.runtime.java.options.WaitToStart;
 import com.oracle.bedrock.runtime.java.profiles.CommercialFeatures;
 import com.oracle.bedrock.runtime.java.profiles.RemoteDebugging;
@@ -88,6 +89,7 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import static com.oracle.bedrock.deferred.DeferredHelper.ensure;
 import static com.oracle.bedrock.deferred.DeferredHelper.within;
@@ -297,6 +299,9 @@ public class LocalJavaApplicationLauncher<A extends JavaApplication> implements 
 
         // ----- establish the class path -----
 
+        JavaModules modular    = launchOptions.get(JavaModules.class);
+        boolean    useModules = modular.isEnabled();
+
         // determine the predefined class path based on the launch options
         ClassPath classPath = launchOptions.get(ClassPath.class);
 
@@ -328,7 +333,7 @@ public class LocalJavaApplicationLauncher<A extends JavaApplication> implements 
             throw new RuntimeException("Failed to locate required classes for the class path", e);
         }
 
-        processBuilder.command().add("-cp");
+        processBuilder.command().add(useModules ? "--module-path" : "-cp");
         processBuilder.command().add(classPath.toString(launchOptions.asArray()));
 
         Table classPathTable = classPath.getTable();
@@ -475,6 +480,12 @@ public class LocalJavaApplicationLauncher<A extends JavaApplication> implements 
         // use the launcher to launch the application
         // (we don't start the application directly itself)
         String applicationLauncherClassName = JavaApplicationRunner.class.getName();
+
+        if (useModules)
+        {
+            applicationLauncherClassName = "com.oracle.bedrock.runtime/" + applicationLauncherClassName;
+            processBuilder.command().add("-m");
+        }
 
         processBuilder.command().add(applicationLauncherClassName);
 

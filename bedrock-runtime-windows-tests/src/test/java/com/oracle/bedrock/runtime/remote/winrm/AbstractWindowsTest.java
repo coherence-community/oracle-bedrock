@@ -29,7 +29,7 @@ import com.oracle.bedrock.runtime.Platform;
 import com.oracle.bedrock.runtime.remote.RemotePlatform;
 import com.oracle.bedrock.Option;
 
-import com.oracle.bedrock.deferred.Eventually;
+import com.oracle.bedrock.testsupport.deferred.Eventually;
 
 import com.oracle.bedrock.runtime.Application;
 import com.oracle.bedrock.runtime.LocalPlatform;

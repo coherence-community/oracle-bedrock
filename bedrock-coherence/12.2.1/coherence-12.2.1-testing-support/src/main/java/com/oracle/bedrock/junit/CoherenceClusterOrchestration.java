@@ -27,13 +27,11 @@ package com.oracle.bedrock.junit;
 
 import com.oracle.bedrock.Option;
 import com.oracle.bedrock.OptionsByType;
-import com.oracle.bedrock.deferred.Eventually;
 import com.oracle.bedrock.runtime.LocalPlatform;
 import com.oracle.bedrock.runtime.Platform;
 import com.oracle.bedrock.runtime.coherence.CoherenceCluster;
 import com.oracle.bedrock.runtime.coherence.CoherenceClusterBuilder;
 import com.oracle.bedrock.runtime.coherence.CoherenceClusterMember;
-import com.oracle.bedrock.runtime.coherence.callables.GetAutoStartServiceNames;
 import com.oracle.bedrock.runtime.coherence.options.ClusterName;
 import com.oracle.bedrock.runtime.coherence.options.ClusterPort;
 import com.oracle.bedrock.runtime.coherence.options.LocalStorage;
@@ -55,7 +53,6 @@ import org.junit.runners.model.Statement;
 
 import java.util.HashMap;
 import java.util.Properties;
-import java.util.Set;
 
 import static com.oracle.bedrock.deferred.DeferredHelper.invoking;
 import static org.hamcrest.core.Is.is;

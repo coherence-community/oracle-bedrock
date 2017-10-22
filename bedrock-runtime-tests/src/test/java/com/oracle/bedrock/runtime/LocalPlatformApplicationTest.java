@@ -26,7 +26,7 @@
 package com.oracle.bedrock.runtime;
 
 import com.oracle.bedrock.OptionsByType;
-import com.oracle.bedrock.junit.AbstractTest;
+import com.oracle.bedrock.testsupport.junit.AbstractTest;
 import com.oracle.bedrock.options.Decoration;
 import com.oracle.bedrock.options.Diagnostics;
 import com.oracle.bedrock.runtime.console.PipedApplicationConsole;

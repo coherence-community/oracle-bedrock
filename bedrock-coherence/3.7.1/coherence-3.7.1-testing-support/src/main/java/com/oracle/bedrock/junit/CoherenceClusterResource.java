@@ -42,6 +42,7 @@ import com.oracle.bedrock.runtime.java.options.HeapSize;
 import com.oracle.bedrock.runtime.java.options.HotSpot;
 import com.oracle.bedrock.runtime.options.Console;
 import com.oracle.bedrock.runtime.options.PlatformPredicate;
+import com.oracle.bedrock.testsupport.junit.AbstractAssemblyResource;
 import com.tangosol.net.CacheFactory;
 import com.tangosol.net.ConfigurableCacheFactory;
 import org.junit.runner.Description;
