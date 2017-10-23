@@ -26,6 +26,7 @@
 package com.oracle.bedrock.runtime.coherence;
 
 import com.oracle.bedrock.runtime.Assembly;
+import com.oracle.bedrock.runtime.concurrent.RemoteCallable;
 import com.oracle.bedrock.runtime.concurrent.callable.RemoteCallableStaticMethod;
 import com.oracle.bedrock.runtime.concurrent.callable.RemoteMethodInvocation;
 import com.oracle.bedrock.util.ReflectionHelper;
@@ -90,7 +91,7 @@ class CoherenceNamedCache<K, V> implements NamedCache<K, V>
      * The {@link RemoteCallableStaticMethod} to use in the
      * {@link CoherenceClusterMember} to acquire the {@link NamedCache}.
      */
-    private RemoteCallableStaticMethod<NamedCache> producer;
+    private RemoteCallable<NamedCache> producer;
 
     /**
      * The {@link RemoteMethodInvocation.Interceptor} to use for intercepting
@@ -112,14 +113,33 @@ class CoherenceNamedCache<K, V> implements NamedCache<K, V>
                                Class<K>               keyClass,
                                Class<V>               valueClass)
     {
-        this.member     = member;
-        this.cacheName  = cacheName;
-        this.keyClass   = keyClass;
-        this.valueClass = valueClass;
+    this(member,
+         cacheName,
+         keyClass,
+         valueClass,
+         new RemoteCallableStaticMethod<>("com.tangosol.net.CacheFactory", "getCache", cacheName));
+    }
 
-        this.producer = new RemoteCallableStaticMethod<NamedCache>("com.tangosol.net.CacheFactory",
-                                                                   "getCache",
-                                                                   cacheName);
+    /**
+     * Constructs a {@link CoherenceNamedCache}.
+     *
+     * @param member      the {@link CoherenceClusterMember} that owns the {@link NamedCache}
+     * @param cacheName   the name of the {@link NamedCache}
+     * @param keyClass    the type of the keys for the {@link NamedCache}
+     * @param valueClass  the type of the values for the {@link NamedCache}
+     * @param producer    the {@link RemoteCallable} to use to obtain a {@link NamedCache} instance
+     */
+    public CoherenceNamedCache(CoherenceClusterMember     member,
+                               String                     cacheName,
+                               Class<K>                   keyClass,
+                               Class<V>                   valueClass,
+                               RemoteCallable<NamedCache> producer)
+    {
+        this.member      = member;
+        this.cacheName   = cacheName;
+        this.keyClass    = keyClass;
+        this.valueClass  = valueClass;
+        this.producer    = producer;
         this.interceptor = new NamedCacheMethodInterceptor();
 
         // determine the CoherenceCluster that the CoherenceClusterMember is part of
