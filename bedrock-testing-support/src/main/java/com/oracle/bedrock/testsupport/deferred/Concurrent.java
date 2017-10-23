@@ -41,7 +41,7 @@ public class Concurrent
      * A mechanism to check the status and control the evaluation of an assertion, typically
      * occurring on another {@link Thread}.
      */
-    interface Assertion extends AutoCloseable
+    public interface Assertion extends AutoCloseable
     {
         /**
          * Checks the current state of the {@link Assertion}.
