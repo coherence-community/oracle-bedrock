@@ -25,16 +25,16 @@
 
 package com.oracle.bedrock.runtime.java.options;
 
+import com.oracle.bedrock.ComposableOption;
 import com.oracle.bedrock.Option;
 import com.oracle.bedrock.OptionsByType;
-import com.oracle.bedrock.runtime.Application;
-import com.oracle.bedrock.runtime.MetaClass;
-import com.oracle.bedrock.runtime.Platform;
-import com.oracle.bedrock.runtime.Profile;
 import com.oracle.bedrock.runtime.java.JavaApplication;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -47,15 +47,20 @@ import java.util.stream.Collectors;
  *
  * @author JK
  */
-public class JavaModules implements Option, Profile
+public class JavaModules implements ComposableOption<JavaModules>, JvmOption
 {
     /**
      * Is modular mode enabled?
      */
     private final boolean enabled;
 
-
     private final Set<String> modules;
+
+    private final Set<String> exports;
+
+    private final Set<String> patches;
+
+    private final Set<String> reading;
 
     /**
      * Constructs a {@link JavaModules} for the specified value.
@@ -63,89 +68,272 @@ public class JavaModules implements Option, Profile
      * @param enabled if modular mode is enabled
      * @param modules the set of modules to add and export to bedrock
      */
-    private JavaModules(boolean enabled, Set<String> modules)
+    private JavaModules(boolean     enabled,
+                        Set<String> modules,
+                        Set<String> exports,
+                        Set<String> patches,
+                        Set<String> reading)
     {
         this.enabled = enabled;
         this.modules = modules;
+        this.exports = exports;
+        this.patches = patches;
+        this.reading = reading;
     }
 
 
     /**
-     * Obtains a {@link JavaModules} for a specified value.
+     * Obtains a {@link JavaModules} option that enables
+     * running an application as a post Java 9 modular process.
      *
-     * @param enabled if modular mode is enabled
-     *
-     * @return a {@link JavaModules} for the specified value
+     * @return a {@link JavaModules} option to enable
+     *         a modular JVM process
      */
-    public static JavaModules enabled(boolean enabled, String... modules)
+    public static JavaModules enabled()
     {
-        Set<String> moduleSet;
-
-        if (modules == null || modules.length == 0)
-        {
-            moduleSet = Collections.emptySet();
-        }
-        else
-        {
-            moduleSet = Arrays.stream(modules)
-                            .filter(Objects::nonNull)
-                            .collect(Collectors.toSet());
-        }
-
-        return new JavaModules(enabled, moduleSet);
+        return new JavaModules(true, Collections.emptySet(), Collections.emptySet(),
+                               Collections.emptySet(), Collections.emptySet());
     }
 
 
     /**
-     * Obtains an enabled {@link JavaModules} mode.
+     * Obtains a {@link JavaModules} option that enables
+     * running an application as a Java process using class
+     * path instead of modules.
      *
-     * @return an enabled {@link JavaModules} mode
-     */
-    public static JavaModules enabled(String... modules)
-    {
-        return enabled(true, modules);
-    }
-
-
-    /**
-     * Obtains an disabled {@link JavaModules} mode.
-     *
-     * @return an disabled {@link JavaModules} mode
+     * @return a {@link JavaModules} option to disable
+     *         a modular JVM process
      */
     @OptionsByType.Default
     public static JavaModules disabled()
     {
-        return enabled(false);
+        return new JavaModules(false, Collections.emptySet(), Collections.emptySet()
+                , Collections.emptySet(), Collections.emptySet());
     }
 
 
+    /**
+     * Obtain a copy of this {@link JavaModules} option
+     * with the specified modules in the {@code --add-modules}
+     * option.
+     *
+     * @param modules  the modules to list in the {@code --add-modules}
+     *                 JVM option
+     *
+     * @return  a copy of this {@link JavaModules} option
+     *          with the specified modules in the
+     *          {@code --add-modules} option.
+     */
+    public JavaModules adding(String... modules)
+    {
+        if (modules.length == 0)
+        {
+            return this;
+        }
+
+        return new JavaModules(true, toSet(this.modules, modules), this.exports, this.patches, this.reading);
+    }
+
+
+    /**
+     * Obtain a copy of this {@link JavaModules} option
+     * with the specified modules in the {@code --add-exports}
+     * option.
+     *
+     * @param exports  the module export statement to list
+     *                 in the {@code --add-exports} JVM option
+     *
+     * @return  a copy of this {@link JavaModules} option
+     *          with the specified modules in the
+     *          {@code --add-exports} option.
+     */
+    public JavaModules exporting(String... exports)
+    {
+        return new JavaModules(true, this.modules, toSet(this.exports, exports),
+                               this.patches, this.reading);
+    }
+
+
+    /**
+     * Obtain a copy of this {@link JavaModules} option
+     * with the specified modules in the {@code --add-exports}
+     * option.
+     *
+     * @param toModule the name of the module to export to
+     * @param modules  the modules to list in the
+     *                 {@code --add-exports} JVM option
+     *
+     * @return  a copy of this {@link JavaModules} option
+     *          with the specified modules in the
+     *          {@code --add-exports} option
+     */
+    public JavaModules exportingTo(String toModule, String... modules)
+    {
+        if (modules.length == 0)
+        {
+            return this;
+        }
+
+        Set<String> exports = new LinkedHashSet<>(this.exports);
+
+        Arrays.stream(modules)
+              .map(m -> m + "/" + m + "=" + toModule)
+              .forEach(exports::add);
+
+        return new JavaModules(true, this.modules, exports, this.patches, this.reading);
+    }
+
+
+    /**
+     * Obtain a copy of this {@link JavaModules} option
+     * with the specified modules exported to
+     * {@code com.oracle.bedrock.runtime} in the
+     * {@code --add-exports} option.
+     *
+     * @param modules  the modules to export to Bedrock in the
+     *                 {@code --add-exports} JVM option
+     *
+     * @return  a copy of this {@link JavaModules} option
+     *          with the specified modules exported to
+     *          {@code com.oracle.bedrock.runtime} in the
+     *           {@code --add-exports} option
+     */
+    public JavaModules exportingToBedrock(String... modules)
+    {
+        return exportingTo("com.oracle.bedrock.runtime", modules);
+    }
+
+
+    /**
+     * Obtain a copy of this {@link JavaModules} option
+     * with the specified patch module statements in
+     * the {@code --patch-module} JVM option.
+     *
+     * @param patches  the patch module statements to list
+     *                 in the {@code --patch-module} JVM option
+     *
+     * @return  a copy of this {@link JavaModules} option
+     *          with the specified module patch statements in
+     *          the {@code --patch-module} JVM option.
+     */
+    public JavaModules patching(String... patches)
+    {
+        if (patches.length == 0)
+        {
+            return this;
+        }
+
+        return new JavaModules(true, this.modules, this.exports, toSet(this.patches, patches), this.reading);
+    }
+
+
+    /**
+     * Obtain a copy of this {@link JavaModules} option
+     * with the specified reads module statements in
+     * the {@code --add-reads} JVM option.
+     *
+     * @param reads  the reads module statements to list
+     *               in the {@code --add-reads} JVM option
+     *
+     * @return  a copy of this {@link JavaModules} option
+     *          with the specified reads module statements in
+     *          the {@code --add-reads} JVM option.
+     */
+    public JavaModules reading(String... reads)
+    {
+        if (reads.length == 0)
+        {
+            return this;
+        }
+
+        return new JavaModules(true, this.modules, this.exports, this.patches, toSet(this.reading, reads));
+    }
+
+
+    /**
+     * Determine whether a JVM application should be run with Modules.
+     *
+     * @return  {@code true} if a JVM application should be run with Modules
+     */
     public boolean isEnabled()
     {
         return enabled;
     }
 
 
-    @Override
-    public void onLaunching(Platform platform, MetaClass metaClass, OptionsByType optionsByType)
+    private static Set<String> toSet(Set<String> set, String[] modules)
     {
-        modules.forEach(module -> {
-            optionsByType.add(JvmOptions.include("--add-exports",
-                                                 module + "/com.oracle.coherence.server=com.oracle.bedrock.runtime",
-                                                 "--add-modules",
-                                                module));
-        });
+        Set<String> moduleSet;
+
+        if (modules == null || modules.length == 0)
+        {
+            moduleSet = set;
+        }
+        else
+        {
+            moduleSet = new LinkedHashSet<>(set);
+
+            Arrays.stream(modules)
+                    .filter(Objects::nonNull)
+                    .forEach(moduleSet::add);
+
+        }
+        return moduleSet;
     }
 
 
     @Override
-    public void onLaunched(Platform platform, Application application, OptionsByType optionsByType)
+    public JavaModules compose(JavaModules other)
     {
+        Set<String> setAdd    = new LinkedHashSet<>(this.modules);
+        Set<String> setExport = new LinkedHashSet<>(this.exports);
+        Set<String> setPatch  = new LinkedHashSet<>(this.patches);
+        Set<String> setReads  = new LinkedHashSet<>(this.reading);
+
+        setAdd.addAll(other.modules);
+        setExport.addAll(other.exports);
+        setPatch.addAll(other.patches);
+        setReads.addAll(other.reading);
+
+        boolean isEnabled = this.enabled && other.enabled;
+
+        return new JavaModules(isEnabled, setAdd, setExport, setPatch, setReads);
     }
 
 
     @Override
-    public void onClosing(Platform platform, Application application, OptionsByType optionsByType)
+    public Iterable<String> resolve(OptionsByType optionsByType)
     {
+        List<String> opts = new ArrayList<>();
+
+        if (enabled)
+        {
+            if (modules.size() > 0)
+            {
+                opts.add("--add-modules");
+                opts.add(modules.stream().collect(Collectors.joining(",")));
+            }
+
+            if (exports.size() > 0)
+            {
+                opts.add("--add-exports");
+                opts.add(exports.stream().collect(Collectors.joining(",")));
+            }
+
+            for (String patch : patches)
+            {
+                opts.add("--patch-module");
+                opts.add(patch);
+            }
+
+            if (reading.size() > 0)
+            {
+                opts.add("--add-reads");
+                opts.add(reading.stream().collect(Collectors.joining(",")));
+            }
+        }
+
+        return opts;
     }
 
 
@@ -156,22 +344,40 @@ public class JavaModules implements Option, Profile
         {
             return true;
         }
-
-        if (!(o instanceof JavaModules))
+        if (o == null || getClass() != o.getClass())
         {
             return false;
         }
 
-        JavaModules other = (JavaModules) o;
+        JavaModules modules1 = (JavaModules) o;
 
-        return enabled == other.enabled;
-
+        if (enabled != modules1.enabled)
+        {
+            return false;
+        }
+        if (modules != null ? !modules.equals(modules1.modules) : modules1.modules != null)
+        {
+            return false;
+        }
+        if (exports != null ? !exports.equals(modules1.exports) : modules1.exports != null)
+        {
+            return false;
+        }
+        if (patches != null ? !patches.equals(modules1.patches) : modules1.patches != null)
+        {
+            return false;
+        }
+        return reading != null ? reading.equals(modules1.reading) : modules1.reading == null;
     }
-
 
     @Override
     public int hashCode()
     {
-        return (enabled ? 1 : 0);
+        int result = (enabled ? 1 : 0);
+        result = 31 * result + (modules != null ? modules.hashCode() : 0);
+        result = 31 * result + (exports != null ? exports.hashCode() : 0);
+        result = 31 * result + (patches != null ? patches.hashCode() : 0);
+        result = 31 * result + (reading != null ? reading.hashCode() : 0);
+        return result;
     }
 }
