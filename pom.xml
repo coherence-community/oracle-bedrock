@@ -79,6 +79,8 @@
 
         <module>bedrock-runtime-vagrant</module>
         <module>bedrock-runtime-vagrant-tests</module>
+
+        <module>bedrock-runtime-k8s</module>
     </modules>
 
     <properties>

@@ -76,4 +76,28 @@ public interface Deployer extends Option
     DeployedArtifacts undeploy(DeployedArtifacts deployedArtifacts,
                                Platform          platform,
                                Option...         deploymentOptions);
+
+
+    /**
+     * A no-op implementation of a deployer.
+     */
+    Deployer NULL = new Deployer()
+    {
+        @Override
+        public DeployedArtifacts deploy(List<DeploymentArtifact> artifactsToDeploy,
+                                        String                   remoteDirectory,
+                                        Platform                 platform,
+                                        Option...                deploymentOptions)
+        {
+            return new DeployedArtifacts();
+        }
+
+        @Override
+        public DeployedArtifacts undeploy(DeployedArtifacts deployedArtifacts,
+                                          Platform          platform,
+                                          Option...         deploymentOptions)
+        {
+            return new DeployedArtifacts();
+        }
+    };
 }

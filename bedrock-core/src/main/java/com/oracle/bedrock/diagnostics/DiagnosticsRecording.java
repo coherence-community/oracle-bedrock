@@ -304,11 +304,14 @@ public class DiagnosticsRecording implements AutoCloseable
                 Logger logger = this.logger == null ? LOGGER : this.logger;
                 Level  level  = this.level == null ? Level.INFO : this.level;
 
-                logger.log(level,
-                           "Oracle Bedrock " + Bedrock.getVersion() + ": " + name + " ...\n"
-                           + "------------------------------------------------------------------------\n"
-                           + table.toString() + "\n"                 
-                           + "------------------------------------------------------------------------\n");
+                if (level != Level.OFF && logger.isLoggable(level))
+                {
+                    logger.log(level,
+                               "Oracle Bedrock " + Bedrock.getVersion() + ": " + name + " ...\n"
+                               + "------------------------------------------------------------------------\n"
+                               + table.toString() + "\n"
+                               + "------------------------------------------------------------------------\n");
+                }
             }
             else
             {

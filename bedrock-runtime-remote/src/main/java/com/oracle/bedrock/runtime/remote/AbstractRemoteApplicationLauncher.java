@@ -30,6 +30,7 @@ import com.oracle.bedrock.annotations.Internal;
 import com.oracle.bedrock.diagnostics.DiagnosticsRecording;
 import com.oracle.bedrock.lang.ExpressionEvaluator;
 import com.oracle.bedrock.options.Decoration;
+import com.oracle.bedrock.options.LaunchLogging;
 import com.oracle.bedrock.options.Variable;
 import com.oracle.bedrock.options.Variables;
 import com.oracle.bedrock.runtime.Application;
@@ -241,13 +242,15 @@ public abstract class AbstractRemoteApplicationLauncher<A extends Application> i
                                                 public void onClosed(A             application,
                                                                      OptionsByType optionsByType)
                                                 {
+                                                    Level logLevel = optionsByType.get(LaunchLogging.class).isEnabled()
+                                                                            ? Level.INFO : Level.OFF;
+
                                                     try (DiagnosticsRecording diagnostics =
                                                         DiagnosticsRecording.create("Undeploy Diagnostics for "
                                                                                     + application.getName()
                                                                                     + " on platform "
-                                                                                    + platform.getName()).using(LOGGER,
-                                                                                                                Level
-                                                                                                                .INFO))
+                                                                                    + platform.getName())
+                                                                            .using(LOGGER, logLevel))
                                                     {
                                                         diagnostics.add("Platform", "Resource");
 
@@ -255,7 +258,8 @@ public abstract class AbstractRemoteApplicationLauncher<A extends Application> i
                                                             DiagnosticsRecording.section("Local Platform"))
                                                         {
                                                             // clean up the locally created temporary artifacts
-                                                            artifactsToDeploy.stream().filter(artifact -> artifact.isTemporary()).forEach(artifact -> {
+                                                            artifactsToDeploy.stream().filter(DeploymentArtifact::isTemporary)
+                                                                .forEach(artifact -> {
                                                                     try
                                                                     {
                                                                         // attempt to remove the local file

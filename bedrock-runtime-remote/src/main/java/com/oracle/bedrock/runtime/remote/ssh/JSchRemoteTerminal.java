@@ -32,8 +32,10 @@ import com.jcraft.jsch.Session;
 import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.Bedrock;
 import com.oracle.bedrock.lang.StringHelper;
+import com.oracle.bedrock.options.LaunchLogging;
 import com.oracle.bedrock.options.Variable;
 import com.oracle.bedrock.runtime.Application;
+import com.oracle.bedrock.runtime.options.CommandInterceptor;
 import com.oracle.bedrock.runtime.options.Shell;
 import com.oracle.bedrock.runtime.options.WorkingDirectory;
 import com.oracle.bedrock.runtime.remote.AbstractRemoteTerminal;
@@ -42,6 +44,7 @@ import com.oracle.bedrock.runtime.remote.RemotePlatform;
 import com.oracle.bedrock.runtime.remote.RemoteTerminal;
 import com.oracle.bedrock.table.Table;
 
+import java.io.File;
 import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
@@ -156,34 +159,41 @@ public class JSchRemoteTerminal extends AbstractRemoteTerminal
                 break;
             }
 
-            for (String variableName : variables.stringPropertyNames())
+            List<String>       arguments        = launchable.getCommandLineArguments(platform, optionsByType);
+            CommandInterceptor interceptor      = optionsByType.get(CommandInterceptor.class);
+            String             executableName   = launchable.getCommandToExecute(platform, optionsByType);
+            File               workingDirectory = optionsByType.get(WorkingDirectory.class).resolve(platform, optionsByType);
+            String             remoteCommand;
+
+            if (interceptor == null)
             {
-                environmentVariables += String.format(format,
-                                                      variableName,
-                                                      StringHelper.doubleQuoteIfNecessary(variables.getProperty(variableName)));
+                for (String variableName : variables.stringPropertyNames())
+                {
+                    environmentVariables += String.format(format,
+                                                          variableName,
+                                                          StringHelper.doubleQuoteIfNecessary(variables.getProperty(variableName)));
+                }
+
+                // ----- establish the application command line to execute -----
+
+                // determine the command to execute remotely
+                StringBuilder command        = new StringBuilder(executableName);
+
+                // add the arguments
+                for (String arg : arguments)
+                {
+                    command.append(" ").append(arg);
+                }
+
+                // the actual remote command must include changing to the remote directory
+                remoteCommand = environmentVariables + String.format("cd %s ; %s",
+                                                                     workingDirectory,
+                                                                     command);
             }
-
-            // ----- establish the application command line to execute -----
-
-            // determine the command to execute remotely
-            String        executableName = launchable.getCommandToExecute(platform, optionsByType);
-            StringBuilder command        = new StringBuilder(executableName);
-
-            // add the arguments
-            List<String> arguments = launchable.getCommandLineArguments(platform, optionsByType);
-
-            for (String arg : arguments)
+            else
             {
-                command.append(" ").append(arg);
+                remoteCommand = interceptor.onExecute(executableName, arguments, variables, workingDirectory);
             }
-
-            WorkingDirectory workingDirectory = optionsByType.get(WorkingDirectory.class);
-
-            // the actual remote command must include changing to the remote directory
-            String remoteCommand = environmentVariables + String.format("cd %s ; %s",
-                                                                        workingDirectory.resolve(platform,
-                                                                                                 optionsByType),
-                                                                        command);
 
             execChannel.setCommand(remoteCommand);
 
@@ -194,17 +204,20 @@ public class JSchRemoteTerminal extends AbstractRemoteTerminal
 
             // ----- start the remote application -----
 
-            Table diagnosticsTable = optionsByType.get(Table.class);
-
-            if (diagnosticsTable != null && LOGGER.isLoggable(Level.INFO))
+            if (optionsByType.get(LaunchLogging.class).isEnabled())
             {
-                diagnosticsTable.addRow("Application Executable ", executableName);
+                Table diagnosticsTable = optionsByType.get(Table.class);
 
-                LOGGER.log(Level.INFO,
-                           "Oracle Bedrock " + Bedrock.getVersion() + ": Starting Application...\n"
-                           + "------------------------------------------------------------------------\n"
-                           + diagnosticsTable.toString() + "\n"
-                           + "------------------------------------------------------------------------\n");
+                if (diagnosticsTable != null && LOGGER.isLoggable(Level.INFO))
+                {
+                    diagnosticsTable.addRow("Application Executable ", executableName);
+
+                    LOGGER.log(Level.INFO,
+                               "Oracle Bedrock " + Bedrock.getVersion() + ": Starting Application...\n"
+                               + "------------------------------------------------------------------------\n"
+                               + diagnosticsTable.toString() + "\n"
+                               + "------------------------------------------------------------------------\n");
+                }
             }
 
             // connect the channel

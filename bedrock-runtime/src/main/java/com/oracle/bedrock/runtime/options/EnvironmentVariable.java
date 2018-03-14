@@ -30,6 +30,7 @@ import com.oracle.bedrock.runtime.Application;
 import com.oracle.bedrock.runtime.Platform;
 
 import java.util.Iterator;
+import java.util.Objects;
 
 /**
  * A {@link Collectable} {@link Option} representing en Environment Variable, consisting
@@ -200,6 +201,28 @@ public class EnvironmentVariable implements Option.Collectable
         return String.format("{name=%s, value=%s}", name, value);
     }
 
+    @Override
+    public boolean equals(Object o)
+    {
+        if (this == o)
+        {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass())
+        {
+            return false;
+        }
+        EnvironmentVariable that = (EnvironmentVariable) o;
+
+        return Objects.equals(name, that.name) &&
+               Objects.equals(value, that.value);
+    }
+
+    @Override
+    public int hashCode()
+    {
+        return Objects.hash(name, value);
+    }
 
     @Override
     public Class<EnvironmentVariables> getCollectorClass()

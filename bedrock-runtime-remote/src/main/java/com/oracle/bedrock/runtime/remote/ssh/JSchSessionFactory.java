@@ -32,7 +32,9 @@ import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.options.Timeout;
 import com.oracle.bedrock.runtime.remote.Authentication;
 import com.oracle.bedrock.runtime.remote.options.StrictHostChecking;
+import com.oracle.bedrock.runtime.remote.options.UserKnownHostsFile;
 
+import java.io.File;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
@@ -130,6 +132,15 @@ public class JSchSessionFactory
         StrictHostChecking strictHostChecking = optionsByType.get(StrictHostChecking.class);
 
         config.put("StrictHostKeyChecking", strictHostChecking.isEnabled() ? "yes" : "no");
+
+        UserKnownHostsFile userKnownHostsFile = optionsByType.get(UserKnownHostsFile.class);
+        String             file               = userKnownHostsFile == null ? null : userKnownHostsFile.getFile();
+
+        if (file != null && !file.trim().isEmpty())
+        {
+            config.put("UserKnownHostsFile", file.trim());
+        }
+
         session.setConfig(config);
 
         // connect the session

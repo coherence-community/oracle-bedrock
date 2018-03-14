@@ -179,12 +179,44 @@ public class FileWriterApplicationConsole implements ApplicationConsole
      * {@link FileWriterApplicationConsole}.
      *
      * @param directory  the existing directory in which to create the files
+     *
+     * @return a {@link ApplicationConsoleBuilder}
+     */
+    public static ApplicationConsoleBuilder builder(final String directory)
+    {
+        return builder(directory, null, null);
+    }
+
+
+    /**
+     * Obtains a {@link ApplicationConsoleBuilder} for the
+     * {@link FileWriterApplicationConsole}.
+     *
+     * @param directory  the existing directory in which to create the files
      * @param prefix     the prefix to use for files (may be null)
      *
      * @return a {@link ApplicationConsoleBuilder}
      */
     public static ApplicationConsoleBuilder builder(final String directory,
                                                     final String prefix)
+    {
+        return builder(directory, prefix, null);
+    }
+
+
+    /**
+     * Obtains a {@link ApplicationConsoleBuilder} for the
+     * {@link FileWriterApplicationConsole}.
+     *
+     * @param directory  the existing directory in which to create the files
+     * @param prefix     the prefix to use for files (may be null)
+     * @param suffix     the suffix to use for files (may be null)
+     *
+     * @return a {@link ApplicationConsoleBuilder}
+     */
+    public static ApplicationConsoleBuilder builder(final String directory,
+                                                    final String prefix,
+                                                    final String suffix)
     {
         return new ApplicationConsoleBuilder()
         {
@@ -204,8 +236,9 @@ public class FileWriterApplicationConsole implements ApplicationConsole
 
                 if (file.exists())
                 {
-                    // normalize the prefix
+                    // normalize the prefix and suffix
                     String normalizedPrefix = prefix == null ? "" : prefix.trim();
+                    String normalizedSuffix = suffix == null ? "" : suffix.trim();
 
                     if (normalizedPrefix.length() > 0 &&!normalizedPrefix.endsWith("-"))
                     {
@@ -215,7 +248,7 @@ public class FileWriterApplicationConsole implements ApplicationConsole
                     // normalize the application name
                     String normalizedApplicationName = applicationName.trim();
 
-                    String fileName = normalizedDirectory + normalizedPrefix + normalizedApplicationName;
+                    String fileName = normalizedDirectory + normalizedPrefix + normalizedApplicationName + normalizedSuffix;
 
                     try
                     {

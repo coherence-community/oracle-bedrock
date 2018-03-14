@@ -29,6 +29,7 @@ import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.Bedrock;
 import com.oracle.bedrock.annotations.Internal;
 import com.oracle.bedrock.lang.StringHelper;
+import com.oracle.bedrock.options.LaunchLogging;
 import com.oracle.bedrock.runtime.options.Arguments;
 import com.oracle.bedrock.runtime.options.DisplayName;
 import com.oracle.bedrock.runtime.options.EnvironmentVariables;
@@ -222,7 +223,9 @@ public class SimpleApplicationLauncher implements ApplicationLauncher<Applicatio
 
         processBuilder.redirectErrorStream(redirection.isEnabled());
 
-        if (LOGGER.isLoggable(Level.INFO))
+        boolean launchLogging = optionsByType.get(LaunchLogging.class).isEnabled();
+
+        if (launchLogging && LOGGER.isLoggable(Level.INFO))
         {
             LOGGER.log(Level.INFO,
                        "Oracle Bedrock " + Bedrock.getVersion() + ": Starting Application...\n"

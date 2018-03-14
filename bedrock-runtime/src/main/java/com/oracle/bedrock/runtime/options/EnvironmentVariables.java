@@ -279,6 +279,37 @@ public class EnvironmentVariables implements Option.Collector<EnvironmentVariabl
      * this {@link EnvironmentVariables} and in the {@link Collection} being
      * added then the value being added takes precedence.
      *
+     * @param env  the {@link EnvironmentVariable}s to union with
+     *                   this {@link EnvironmentVariables}
+     *
+     * @return   a new {@link EnvironmentVariables} that is the union
+     *           of this {@link EnvironmentVariables} and the specified
+     *           array of {@link EnvironmentVariable} instances
+     */
+    public EnvironmentVariables with(EnvironmentVariables env)
+    {
+        if (env == null || env.variables.isEmpty())
+        {
+            return this;
+        }
+
+        EnvironmentVariables environmentVariables = new EnvironmentVariables(this);
+
+        environmentVariables.variables.putAll(env.variables);
+
+        return environmentVariables;
+    }
+
+
+    /**
+     * Obtain a new {@link EnvironmentVariables} that is the union of
+     * this {@link EnvironmentVariables} and the specified {@link Collection}
+     * of {@link EnvironmentVariable} instances.
+     * <p>
+     * If an {@link EnvironmentVariable} with a given name is present in
+     * this {@link EnvironmentVariables} and in the {@link Collection} being
+     * added then the value being added takes precedence.
+     *
      * @param variables  the {@link EnvironmentVariable}s to union with
      *                   this {@link EnvironmentVariables}
      *
@@ -386,5 +417,14 @@ public class EnvironmentVariables implements Option.Collector<EnvironmentVariabl
         result = 31 * result + variables.hashCode();
 
         return result;
+    }
+
+    @Override
+    public String toString()
+    {
+        return "EnvironmentVariables(" +
+               "source=" + source +
+               ", variables=" + variables +
+               ')';
     }
 }

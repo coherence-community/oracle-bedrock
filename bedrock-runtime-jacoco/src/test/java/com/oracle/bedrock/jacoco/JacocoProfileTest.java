@@ -63,7 +63,7 @@ public class JacocoProfileTest
         File destinationFile = new File(System.getProperty("java.io.tmpdir"), jacocoDestinationFileName);
 
         // define the JaCoCo profile
-        JacocoProfile profile = new JacocoProfile("destfile=" + destinationFile);
+        JacocoProfile profile = JacocoProfile.enabled("destfile=" + destinationFile);
 
         // build and start the SleepingApplication
         LocalPlatform platform = LocalPlatform.get();

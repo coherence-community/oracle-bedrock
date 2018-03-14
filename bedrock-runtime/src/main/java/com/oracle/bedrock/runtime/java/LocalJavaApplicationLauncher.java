@@ -34,6 +34,7 @@ import com.oracle.bedrock.deferred.PermanentlyUnavailableException;
 import com.oracle.bedrock.deferred.TemporarilyUnavailableException;
 import com.oracle.bedrock.lang.ExpressionEvaluator;
 import com.oracle.bedrock.lang.StringHelper;
+import com.oracle.bedrock.options.LaunchLogging;
 import com.oracle.bedrock.options.Timeout;
 import com.oracle.bedrock.options.Variable;
 import com.oracle.bedrock.options.Variables;
@@ -541,7 +542,9 @@ public class LocalJavaApplicationLauncher<A extends JavaApplication> implements 
 
         // ----- start the local process -----
 
-        if (LOGGER.isLoggable(Level.INFO))
+        boolean launchLogging = optionsByType.get(LaunchLogging.class).isEnabled();
+
+        if (launchLogging && LOGGER.isLoggable(Level.INFO))
         {
             LOGGER.log(Level.INFO,
                        "Oracle Bedrock " + Bedrock.getVersion() + ": Starting Application...\n"
