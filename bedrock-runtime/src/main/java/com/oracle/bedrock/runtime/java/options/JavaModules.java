@@ -62,6 +62,8 @@ public class JavaModules implements ComposableOption<JavaModules>, JvmOption
 
     private final Set<String> reading;
 
+    private final Set<String> opens;
+
     /**
      * Constructs a {@link JavaModules} for the specified value.
      *
@@ -72,13 +74,15 @@ public class JavaModules implements ComposableOption<JavaModules>, JvmOption
                         Set<String> modules,
                         Set<String> exports,
                         Set<String> patches,
-                        Set<String> reading)
+                        Set<String> reading,
+                        Set<String> opens)
     {
         this.enabled = enabled;
         this.modules = modules;
         this.exports = exports;
         this.patches = patches;
         this.reading = reading;
+        this.opens   = opens;
     }
 
 
@@ -92,7 +96,8 @@ public class JavaModules implements ComposableOption<JavaModules>, JvmOption
     public static JavaModules enabled()
     {
         return new JavaModules(true, Collections.emptySet(), Collections.emptySet(),
-                               Collections.emptySet(), Collections.emptySet());
+                               Collections.emptySet(), Collections.emptySet(),
+                               Collections.emptySet());
     }
 
 
@@ -107,8 +112,9 @@ public class JavaModules implements ComposableOption<JavaModules>, JvmOption
     @OptionsByType.Default
     public static JavaModules disabled()
     {
-        return new JavaModules(false, Collections.emptySet(), Collections.emptySet()
-                , Collections.emptySet(), Collections.emptySet());
+        return new JavaModules(false, Collections.emptySet(), Collections.emptySet(),
+                               Collections.emptySet(), Collections.emptySet(),
+                               Collections.emptySet());
     }
 
 
@@ -131,7 +137,7 @@ public class JavaModules implements ComposableOption<JavaModules>, JvmOption
             return this;
         }
 
-        return new JavaModules(true, toSet(this.modules, modules), this.exports, this.patches, this.reading);
+        return new JavaModules(true, toSet(this.modules, modules), this.exports, this.patches, this.reading, this.opens);
     }
 
 
@@ -150,7 +156,7 @@ public class JavaModules implements ComposableOption<JavaModules>, JvmOption
     public JavaModules exporting(String... exports)
     {
         return new JavaModules(true, this.modules, toSet(this.exports, exports),
-                               this.patches, this.reading);
+                               this.patches, this.reading, this.opens);
     }
 
 
@@ -180,7 +186,7 @@ public class JavaModules implements ComposableOption<JavaModules>, JvmOption
               .map(m -> m + "/" + m + "=" + toModule)
               .forEach(exports::add);
 
-        return new JavaModules(true, this.modules, exports, this.patches, this.reading);
+        return new JavaModules(true, this.modules, exports, this.patches, this.reading, this.opens);
     }
 
 
@@ -206,6 +212,36 @@ public class JavaModules implements ComposableOption<JavaModules>, JvmOption
 
     /**
      * Obtain a copy of this {@link JavaModules} option
+     * with the specified modules in the {@code --add-opens}
+     * option.
+     *
+     * @param module   the module name to open
+     * @param _package the name of the package within the provided
+     *                 <code>module</code>
+     * @param targetModule the name of the module the code within
+     *                     the specified <code>module</code> and
+     *                     <code>package</code> should be opened to
+     *
+     * @return  a copy of this {@link JavaModules} option
+     *          with the specified modules/packages exported opened via
+     *          the {@code --add-opens} option
+     */
+    public JavaModules opens(String module, String _package, String targetModule)
+    {
+        if (module == null || _package == null || targetModule == null)
+        {
+            return this;
+        }
+
+        Set<String> opens = new LinkedHashSet<>(this.opens);
+        opens.add(module + '/' + _package + '=' + targetModule);
+
+        return new JavaModules(true, this.modules, this.exports, this.patches, this.reading, opens);
+    }
+
+
+    /**
+     * Obtain a copy of this {@link JavaModules} option
      * with the specified patch module statements in
      * the {@code --patch-module} JVM option.
      *
@@ -223,7 +259,7 @@ public class JavaModules implements ComposableOption<JavaModules>, JvmOption
             return this;
         }
 
-        return new JavaModules(true, this.modules, this.exports, toSet(this.patches, patches), this.reading);
+        return new JavaModules(true, this.modules, this.exports, toSet(this.patches, patches), this.reading, this.opens);
     }
 
 
@@ -246,7 +282,7 @@ public class JavaModules implements ComposableOption<JavaModules>, JvmOption
             return this;
         }
 
-        return new JavaModules(true, this.modules, this.exports, this.patches, toSet(this.reading, reads));
+        return new JavaModules(true, this.modules, this.exports, this.patches, toSet(this.reading, reads), this.opens);
     }
 
 
@@ -289,15 +325,17 @@ public class JavaModules implements ComposableOption<JavaModules>, JvmOption
         Set<String> setExport = new LinkedHashSet<>(this.exports);
         Set<String> setPatch  = new LinkedHashSet<>(this.patches);
         Set<String> setReads  = new LinkedHashSet<>(this.reading);
+        Set<String> setOpens  = new LinkedHashSet<>(this.opens);
 
         setAdd.addAll(other.modules);
         setExport.addAll(other.exports);
         setPatch.addAll(other.patches);
         setReads.addAll(other.reading);
+        setOpens.addAll(other.opens);
 
         boolean isEnabled = this.enabled && other.enabled;
 
-        return new JavaModules(isEnabled, setAdd, setExport, setPatch, setReads);
+        return new JavaModules(isEnabled, setAdd, setExport, setPatch, setReads, setOpens);
     }
 
 
@@ -318,6 +356,12 @@ public class JavaModules implements ComposableOption<JavaModules>, JvmOption
             {
                 opts.add("--add-exports");
                 opts.add(exports.stream().collect(Collectors.joining(",")));
+            }
+
+            if (!opens.isEmpty())
+            {
+                opts.add("--add-opens");
+                opts.add(opens.stream().collect(Collectors.joining(",")));
             }
 
             for (String patch : patches)
