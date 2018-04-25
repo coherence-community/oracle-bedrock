@@ -57,7 +57,6 @@
                             <goal>generate</goal>
                         </goals>
                         <configuration>
-                            <episode>false</episode>
                             <schemaDirectory>src/main/resources/xsd</schemaDirectory>
                             <bindingDirectory>src/main/resources</bindingDirectory>
                             <generateDirectory>${project.build.directory}/generated-sources</generateDirectory>
