@@ -350,9 +350,9 @@ public class ContainerMBeanServerBuilder extends MBeanServerBuilder
                 try
                 {
                     environment.put(PROPERTY_JMX_REMOTE_RMI_CLIENT_SOCKET_FACTORY,
-                                    Class.forName(DEFAULT_RMICLIENT_SOCKET_FACTORY).newInstance());
+                                    Class.forName(DEFAULT_RMICLIENT_SOCKET_FACTORY).getDeclaredConstructor().newInstance());
                     environment.put(PROPERTY_JMX_REMOTE_RMI_SERVER_SOCKET_FACTORY,
-                                    Class.forName(DEFAULT_RMISERVER_SOCKET_FACTORY).newInstance());
+                                    Class.forName(DEFAULT_RMISERVER_SOCKET_FACTORY).getDeclaredConstructor().newInstance());
                 }
                 catch (ClassNotFoundException e)
                 {

@@ -38,8 +38,6 @@ import com.oracle.bedrock.util.MappingIterator;
 import com.oracle.bedrock.util.PerpetualIterator;
 import com.oracle.bedrock.util.ProxyHelper;
 import com.oracle.bedrock.util.RandomIterator;
-import net.sf.cglib.proxy.MethodInterceptor;
-import net.sf.cglib.proxy.MethodProxy;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
@@ -579,7 +577,7 @@ public class DeferredHelper
             // FUTURE: we should raise a soft exception here if the deferred
             // class is final or perhaps native as we can't proxy them.
 
-            T proxy = ProxyHelper.createProxyOf(deferred.getDeferredClass(), new DeferredMethodInteceptor());
+            T proxy = ProxyHelper.createProxyOf(deferred.getDeferredClass(), new DeferredMethodInterceptor());
 
             // set the current deferred as a thread local so that
             // we can "eventually" evaluate and return it.
@@ -827,24 +825,20 @@ public class DeferredHelper
 
 
     /**
-     * A {@link MethodInterceptor} that records invocations against a
+     * A interceptor that records invocations against a
      * {@link ThreadLocal} {@link Deferred}.
      */
-    private static class DeferredMethodInteceptor implements MethodInterceptor
+    public static class DeferredMethodInterceptor implements ProxyHelper.Interceptor
     {
-        @SuppressWarnings({"rawtypes", "unchecked"})
         @Override
-        public Object intercept(Object      self,
-                                Method      method,
-                                Object[]    args,
-                                MethodProxy methodProxy) throws Throwable
+        public Object intercept(Method method, Object[] args) throws Throwable
         {
-            // get the underlying deferred object on which this invocation really occurred
+        // get the underlying deferred object on which this invocation really occurred
             Deferred<?> deferred = DeferredHelper.DEFERRED.get();
 
             // replace the underlying deferred with a deferred method invocation
             // representing the result of this invocation
-            DeferredHelper.DEFERRED.set(new DeferredInvoke(deferred, method, args));
+            DeferredHelper.DEFERRED.set(new DeferredInvoke<>(deferred, method, args));
 
             // determine a suitable return value based on the method return type.
             // this value will actually be ignored as this method call is being
@@ -911,7 +905,7 @@ public class DeferredHelper
             {
                 // as the return type is an object type, create a proxy of it
                 // so we can continue to capture and defer method calls
-                return ProxyHelper.createProxyOf(resultType, new DeferredMethodInteceptor());
+                return ProxyHelper.createProxyOf(resultType, new DeferredMethodInterceptor());
             }
         }
     }

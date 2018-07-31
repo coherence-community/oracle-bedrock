@@ -637,7 +637,7 @@ public class Run extends AbstractDockerCommand<Run>
      */
     public Run deviceReadBytesPerSec(String... values)
     {
-        Argument argument = Argument.of("--device-read-bps", '=', new Argument.Multiple(values));
+        Argument argument = Argument.of("--device-read-bps", '=', new Argument.Multiple((Object[]) values));
 
         return new Run(getCommandArguments().replace(argument), this.imageArgument, this.environmentVariables);
     }

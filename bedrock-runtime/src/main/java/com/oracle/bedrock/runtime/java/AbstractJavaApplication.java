@@ -39,8 +39,6 @@ import com.oracle.bedrock.runtime.concurrent.RemoteRunnable;
 import com.oracle.bedrock.runtime.concurrent.callable.GetSystemProperty;
 import com.oracle.bedrock.runtime.concurrent.callable.RemoteMethodInvocation;
 import com.oracle.bedrock.util.ProxyHelper;
-import net.sf.cglib.proxy.MethodInterceptor;
-import net.sf.cglib.proxy.MethodProxy;
 
 import java.lang.reflect.Method;
 import java.util.Properties;
@@ -146,11 +144,11 @@ public abstract class AbstractJavaApplication<P extends JavaApplicationProcess> 
 
 
     /**
-     * The {@link MethodInterceptor} for remotely proxied classes.
+     * The interceptor for remotely proxied classes.
      *
      * @param <T>  the type of the proxied class
      */
-    private class ProxyMethodInterceptor<T> implements MethodInterceptor
+    private class ProxyMethodInterceptor<T> implements ProxyHelper.Interceptor
     {
         /**
          * The {@link RemoteCallable} that will provide the application instance
@@ -181,12 +179,7 @@ public abstract class AbstractJavaApplication<P extends JavaApplicationProcess> 
             this.interceptor      = interceptor;
         }
 
-
-        @Override
-        public Object intercept(Object      self,
-                                Method      method,
-                                Object[]    args,
-                                MethodProxy methodProxy) throws Throwable
+        public Object intercept(Method method, Object[] args) throws Throwable
         {
             if (interceptor != null)
             {

@@ -49,15 +49,15 @@
         </dependency>
 
         <dependency>
-            <groupId>javax.json</groupId>
-            <artifactId>javax.json-api</artifactId>
+          <groupId>javax.json</groupId>
+          <artifactId>javax.json-api</artifactId>
             <version>${javax.json.version}</version>
         </dependency>
 
         <dependency>
-            <groupId>org.glassfish</groupId>
-            <artifactId>javax.json</artifactId>
-            <version>${glassfish.json.version}</version>
+          <groupId>org.glassfish</groupId>
+          <artifactId>javax.json</artifactId>
+            <version>${javax.json.version}</version>
         </dependency>
     </dependencies>
 

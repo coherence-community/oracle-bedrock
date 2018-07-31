@@ -45,6 +45,7 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.net.Socket;
 import java.time.Instant;
@@ -702,22 +703,15 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
                     String   className     = (String) object;
                     Class<?> callableClass = Class.forName(className);
 
-                    callable = (Callable) callableClass.newInstance();
+                    callable = (Callable) callableClass.getDeclaredConstructor().newInstance();
                 }
                 else
                 {
                     callable = (Callable) object;
                 }
             }
-            catch (ClassNotFoundException e)
-            {
-                throw new IOException(e);
-            }
-            catch (InstantiationException e)
-            {
-                throw new IOException(e);
-            }
-            catch (IllegalAccessException e)
+            catch (ClassNotFoundException | InstantiationException | IllegalAccessException
+                    | NoSuchMethodException | InvocationTargetException e)
             {
                 throw new IOException(e);
             }
@@ -1262,22 +1256,15 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
                 {
                     String className = (String) object;
 
-                    runnable = (Runnable) Class.forName(className).newInstance();
+                    runnable = (Runnable) Class.forName(className).getDeclaredConstructor().newInstance();
                 }
                 else
                 {
                     runnable = (Runnable) object;
                 }
             }
-            catch (ClassNotFoundException e)
-            {
-                throw new IOException(e);
-            }
-            catch (InstantiationException e)
-            {
-                throw new IOException(e);
-            }
-            catch (IllegalAccessException e)
+            catch (ClassNotFoundException | InvocationTargetException | NoSuchMethodException
+                    | IllegalAccessException | InstantiationException e)
             {
                 throw new IOException(e);
             }

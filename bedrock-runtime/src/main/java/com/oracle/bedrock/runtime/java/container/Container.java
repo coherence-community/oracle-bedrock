@@ -314,6 +314,7 @@ public class Container
      *
      * @deprecated use LocalPlatform.INSTANCE.getAvailablePorts()
      */
+    @Deprecated
     public static AvailablePortIterator getAvailablePorts()
     {
         return LocalPlatform.get().getAvailablePorts();

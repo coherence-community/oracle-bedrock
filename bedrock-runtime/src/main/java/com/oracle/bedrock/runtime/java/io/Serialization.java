@@ -124,7 +124,7 @@ public class Serialization
             {
                 String clazzName = (String) objectInputStream.readObject();
 
-                object = classLoader.loadClass(clazzName).newInstance();
+                object = classLoader.loadClass(clazzName).getDeclaredConstructor().newInstance();
             }
 
             if (object == null || clazz.isInstance(object))

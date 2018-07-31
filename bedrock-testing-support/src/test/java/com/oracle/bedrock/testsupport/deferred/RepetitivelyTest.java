@@ -40,7 +40,8 @@ import java.util.concurrent.TimeUnit;
 
 import static com.oracle.bedrock.testsupport.matchers.ConstantMatcher.constant;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+
+import static org.hamcrest.number.OrderingComparison.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.lessThan;
 import static org.hamcrest.core.Is.is;
 

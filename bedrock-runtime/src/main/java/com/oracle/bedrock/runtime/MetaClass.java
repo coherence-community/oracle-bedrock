@@ -106,6 +106,7 @@ public interface MetaClass<A extends Application>
      *
      * @return  the {@link MetaClass} of the {@link Application} or <code>null</code> if not defined
      */
+    @SuppressWarnings("unchecked")
     static <A extends Application> MetaClass<A> of(Class<?> applicationClass)
     {
         Class<? extends MetaClass> metaClassClass = null;
@@ -152,7 +153,7 @@ public interface MetaClass<A extends Application>
             try
             {
                 // try to create the MetaClass instance
-                return metaClassClass.newInstance();
+                return metaClassClass.getDeclaredConstructor().newInstance();
             }
             catch (Exception e)
             {

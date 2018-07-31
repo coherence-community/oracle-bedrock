@@ -30,7 +30,7 @@ import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 
-import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.AllOf.allOf;
 import static org.hamcrest.core.IsInstanceOf.instanceOf;
 
@@ -123,7 +123,7 @@ public class ThrowableMatcher<T> extends BaseMatcher<T>
      */
     public ThrowableMatcher<T> withMessage(String message)
     {
-        return new ThrowableMatcher<>(allOf(this.matcher, ThrowableMessageMatcher.message(equalTo(message))));
+        return new ThrowableMatcher<>(allOf(this.matcher, ThrowableMessageMatcher.message(is(message))));
     }
 
 

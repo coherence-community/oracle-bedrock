@@ -118,19 +118,16 @@
 
         <!-- dependency versions -->
         <aether.version>1.1.0</aether.version>
-        <asm.version>6.0</asm.version>
-        <cglib.version>3.2.5</cglib.version>
         <glassfish.el.version>3.0.1-b08</glassfish.el.version>
         <hamcrest.version>1.3</hamcrest.version>
         <glassfish.json.version>1.0.4</glassfish.json.version>
         <jacoco.version>0.7.9</jacoco.version>
-        <javax.json.version>1.0</javax.json.version>
+        <javax.json.version>1.1.2</javax.json.version>
         <jprofiler.version>9.1.1</jprofiler.version>
         <jsch.version>0.1.54</jsch.version>
         <junit.version>4.12</junit.version>
         <maven.aether.version>3.3.9</maven.aether.version>
-        <mockito.version>2.7.11</mockito.version>
-        <objenesis.version>2.5.1</objenesis.version>
+        <mockito.version>2.20.1</mockito.version>
     </properties>
 
     <distributionManagement>
@@ -148,39 +145,46 @@
         <!-- enforce specific versions of dependencies -->
         <dependencies>
             <dependency>
-                <groupId>org.hamcrest</groupId>
-                <artifactId>hamcrest-core</artifactId>
-                <version>${hamcrest.version}</version>
+                <groupId>junit</groupId>
+                <artifactId>junit</artifactId>
+                <version>${junit.version}</version>
+                <scope>provided</scope>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.hamcrest</groupId>
+                        <artifactId>hamcrest-core</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+
+            <dependency>
+                <groupId>org.mockito</groupId>
+                <artifactId>mockito-core</artifactId>
+                <version>${mockito.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.hamcrest</groupId>
+                        <artifactId>hamcrest-core</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
 
             <dependency>
                 <groupId>org.hamcrest</groupId>
-                <artifactId>hamcrest-library</artifactId>
+                <artifactId>hamcrest-all</artifactId>
                 <version>${hamcrest.version}</version>
             </dependency>
 
-            <dependency>
-           		<groupId>cglib</groupId>
-           		<artifactId>cglib</artifactId>
-           		<version>${cglib.version}</version>
-       			<exclusions>
-       				<exclusion>
-       					<groupId>org.ow2.asm</groupId>
-       					<artifactId>asm</artifactId>
-       				</exclusion>
-       			</exclusions>
-           	</dependency>
+       		<dependency>
+       			<groupId>org.glassfish</groupId>
+       			<artifactId>javax.el</artifactId>
+       			<version>${glassfish.el.version}</version>
+       		</dependency>
 
             <dependency>
-                <groupId>org.ow2.asm</groupId>
-                <artifactId>asm</artifactId>
-                <version>${asm.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.objenesis</groupId>
-                <artifactId>objenesis</artifactId>
-                <version>${objenesis.version}</version>
+                <groupId>com.jcraft</groupId>
+                <artifactId>jsch</artifactId>
+                <version>${jsch.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -244,7 +248,7 @@
                         <configuration>
                             <rules>
                                 <requireMavenVersion>
-                                    <version>3.2.5</version>
+                                    <version>3.5</version>
                                 </requireMavenVersion>
                                 <requireJavaVersion>
                                     <version>${java.version}</version>

@@ -29,6 +29,8 @@ import org.hamcrest.Matchers;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -108,14 +110,20 @@ public class DeferredHelperTest
     @Test
     public void shouldCreateDeferredOfSpecificType()
     {
-        Integer          integer        = new Integer(42);
+        Foo           map         = new Foo();
+        Deferred<Foo> deferredMap = DeferredHelper.eventually(DeferredHelper.invoking(map, Foo.class));
 
-        Deferred<Number> deferredNumber = DeferredHelper.eventually(DeferredHelper.invoking(integer, Number.class));
-
-        Assert.assertThat(deferredNumber.getDeferredClass(), Matchers.instanceOf(Number.class.getClass()));
-        Assert.assertThat(deferredNumber.get().intValue(), Matchers.is(42));
+        Assert.assertThat(deferredMap.getDeferredClass(), Matchers.instanceOf(Number.class.getClass()));
+        Assert.assertThat(deferredMap.get().bar(), Matchers.is("bar"));
     }
 
+    public static class Foo
+    {
+        public String bar()
+        {
+            return "bar";
+        }
+    }
 
     /**
      * Ensure that we can create a {@link Deferred} representing a {@link String}.

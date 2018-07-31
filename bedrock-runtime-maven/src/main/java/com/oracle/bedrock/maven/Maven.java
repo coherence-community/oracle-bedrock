@@ -42,7 +42,6 @@ import org.apache.maven.settings.building.DefaultSettingsBuilderFactory;
 import org.apache.maven.settings.building.DefaultSettingsBuildingRequest;
 import org.apache.maven.settings.building.SettingsBuilder;
 import org.apache.maven.settings.building.SettingsBuildingException;
-import org.apache.tools.ant.util.LinkedHashtable;
 import org.eclipse.aether.DefaultRepositoryCache;
 import org.eclipse.aether.DefaultRepositorySystemSession;
 import org.eclipse.aether.RepositoryException;
@@ -71,6 +70,7 @@ import org.eclipse.aether.version.Version;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -129,7 +129,7 @@ public class Maven implements Profile, ComposableOption<Maven>
      * The list of {@link Artifact}s, indexed by group, artifact, classifier and extension,
      * thus allowing overriding of artifacts with different versions.
      */
-    private final LinkedHashtable<String, Artifact> artifacts;
+    private final LinkedHashMap<String, Artifact> artifacts;
 
     /**
      * The additional {@link ClassPath} to add to the {@link ClassPath} of the resolved artifacts.
@@ -167,14 +167,14 @@ public class Maven implements Profile, ComposableOption<Maven>
                   File                              userSettingsFile,
                   Boolean                           isOffline,
                   String                            scope,
-                  LinkedHashtable<String, Artifact> artifacts,
+                  LinkedHashMap<String, Artifact>   artifacts,
                   ClassPath                         additionalClassPath)
     {
         this.globalSettingsFile  = globalSettingsFile;
         this.userSettingsFile    = userSettingsFile;
         this.isOffline           = isOffline;
         this.scope               = scope;
-        this.artifacts           = new LinkedHashtable<>();
+        this.artifacts           = new LinkedHashMap<>();
         this.additionalClassPath = additionalClassPath;
 
         // add all of the artifacts (if there are any)

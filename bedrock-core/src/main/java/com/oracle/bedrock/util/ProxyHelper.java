@@ -25,14 +25,12 @@
 
 package com.oracle.bedrock.util;
 
-import net.sf.cglib.proxy.Callback;
-import net.sf.cglib.proxy.Enhancer;
-import net.sf.cglib.proxy.MethodInterceptor;
-import org.objenesis.Objenesis;
-import org.objenesis.ObjenesisStd;
+import org.mockito.Mockito;
+
+import java.lang.reflect.Method;
 
 /**
- * A collection of utilities to assist in using Objenesis to create object proxies.
+ * A collection of utilities to assist in using Mockito to create object proxies.
  * <p>
  * Copyright (c) 2016. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
@@ -43,18 +41,17 @@ public class ProxyHelper
 {
     /**
      * Creates a dynamic proxy of the specified {@link Object} routing all
-     * method calls to the specified {@link MethodInterceptor}.
+     * method calls to the specified interceptor.
      *
      * @param object       the {@link Object} to proxy
-     * @param interceptor  the {@link MethodInterceptor}
+     * @param interceptor  the interceptor
      *
      * @param <T>          the type of the {@link Object} to proxy
      *
      * @return a dynamic proxy of the specified {@link Object}
      */
     @SuppressWarnings("unchecked")
-    public static <T> T createProxyOf(T                 object,
-                                      MethodInterceptor interceptor)
+    public static <T> T createProxyOf(T object, Object interceptor)
     {
         return (T) createProxyOf(object.getClass(), interceptor);
     }
@@ -62,33 +59,29 @@ public class ProxyHelper
 
     /**
      * Creates a dynamic proxy of the specified {@link Class} routing all
-     * method calls to the specified {@link MethodInterceptor}.
+     * method calls to the specified interceptor.
      *
      * @param clazz        the {@link Class} to proxy
-     * @param interceptor  the {@link MethodInterceptor}
+     * @param interceptor  the interceptor
      *
      * @param <T>          the type of the {@link Class} to proxy
      *
      * @return a dynamic proxy of the specified {@link Class}
      */
     @SuppressWarnings("unchecked")
-    public static <T> T createProxyOf(Class<T>          clazz,
-                                      MethodInterceptor interceptor)
+    public static <T> T createProxyOf(Class<T>    clazz,
+                                      Interceptor interceptor)
     {
-        // use a cglib enhancer to create the proxy
-        Enhancer enhancer = new Enhancer();
 
-        enhancer.setSuperclass(clazz);
-        enhancer.setCallbackType(interceptor.getClass());
+        return Mockito.mock(clazz, invocation -> interceptor.intercept(invocation.getMethod(),
+                                                                       invocation.getArguments()));
+    }
 
-        Class<T> proxiedClass = (Class<T>) enhancer.createClass();
-
-        Enhancer.registerCallbacks(proxiedClass, new Callback[] {interceptor});
-
-        Objenesis objenesis = new ObjenesisStd();
-
-        T         proxy     = (T) objenesis.newInstance(proxiedClass);
-
-        return proxy;
+    /**
+     * 
+     */
+    public interface Interceptor
+    {
+        Object intercept(Method method, Object[] args) throws Throwable;
     }
 }
