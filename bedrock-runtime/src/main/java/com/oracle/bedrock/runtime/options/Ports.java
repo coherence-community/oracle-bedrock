@@ -161,6 +161,65 @@ public class Ports implements ComposableOption<Ports>
 
 
     /**
+     * Determine whether there is a port mapping of the specific port.
+     *
+     * @param mappedPort  the port mapping
+     *
+     * @return  true if a port mapping exists, otherwise false
+     */
+    public boolean hasPort(int mappedPort)
+    {
+        for (Port port : ports.values())
+        {
+            if (port.getMappedPort() == mappedPort)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+
+    /**
+     * Obtain the {@link Port} with the specified name.
+     *
+     * @param name  the name of the {@link Port} to obtain
+     *
+     * @return  the {@link Port} with the specified name or
+     *          {@code null} if the port does not exist
+     *          in this {@link Ports} collection
+     */
+    public Port getPort(String name)
+    {
+        return ports.get(name);
+    }
+
+
+    /**
+     * Obtain the {@link Port} for the specified port mapping
+     *
+     * @param mappedPort  the mapped port to use to obtain the {@link Port}.
+     *
+     * @return  the {@link Port} with the specified mapping or
+     *          {@code null} if the port mapping does not exist
+     *          in this {@link Ports} collection
+     */
+    public Port getPort(int mappedPort)
+    {
+        for (Port port : ports.values())
+        {
+            if (port.getMappedPort() == mappedPort)
+            {
+                return port;
+            }
+        }
+
+        return null;
+    }
+
+
+    /**
      * Create a default empty {@link Ports}.
      *
      * @return  a default empty {@link Ports}
@@ -225,18 +284,33 @@ public class Ports implements ComposableOption<Ports>
         }
 
 
+        /**
+         * Obtain the name of this port.
+         *
+         * @return  the name of this port
+         */
         public String getName()
         {
             return name;
         }
 
 
+        /**
+         * Obtain the actual port used.
+         *
+         * @return  the actual port used
+         */
         public int getActualPort()
         {
             return actualPort;
         }
 
 
+        /**
+         * Obtain the mapped port.
+         *
+         * @return  the mapped port
+         */
         public int getMappedPort()
         {
             return mappedPort;

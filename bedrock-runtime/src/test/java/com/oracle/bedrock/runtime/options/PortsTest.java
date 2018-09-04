@@ -33,6 +33,7 @@ import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.CoreMatchers.sameInstance;
 import static org.hamcrest.collection.IsEmptyIterable.emptyIterable;
 import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInAnyOrder;
 import static org.junit.Assert.assertThat;
@@ -118,5 +119,62 @@ public class PortsTest
         Ports.Port port3 = new Ports.Port("--port2", 100, 100);
 
         assertThat(ports.getPorts(), containsInAnyOrder(port1, port2, port3));
+    }
+
+    @Test
+    public void shouldHavePort()
+    {
+        Ports.Port port  = new Ports.Port("foo.1", 1, 2);
+        Ports      ports = Ports.of(port);
+
+        assertThat(ports.hasPort(port.getName()), is(true));
+    }
+
+
+    @Test
+    public void shouldNotHavePort()
+    {
+        Ports ports = Ports.empty();
+
+        assertThat(ports.hasPort("foo"), is(false));
+    }
+
+
+    @Test
+    public void shouldGetPort()
+    {
+        Ports.Port port  = new Ports.Port("foo.1", 1, 2);
+        Ports      ports = Ports.of(port);
+
+        assertThat(ports.getPort(port.getName()), is(sameInstance(port)));
+    }
+
+
+    @Test
+    public void shouldHaveMappedPort()
+    {
+        Ports.Port port  = new Ports.Port("foo.1", 1, 2);
+        Ports      ports = Ports.of(port);
+
+        assertThat(ports.hasPort(port.getMappedPort()), is(true));
+    }
+
+
+    @Test
+    public void shouldNotHaveMappedPort()
+    {
+        Ports ports = Ports.empty();
+
+        assertThat(ports.hasPort(100), is(false));
+    }
+
+
+    @Test
+    public void shouldGetMappedPort()
+    {
+        Ports.Port port  = new Ports.Port("foo.1", 1, 2);
+        Ports      ports = Ports.of(port);
+
+        assertThat(ports.getPort(port.getMappedPort()), is(sameInstance(port)));
     }
 }
