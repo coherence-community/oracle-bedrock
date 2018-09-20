@@ -28,6 +28,7 @@ package com.oracle.bedrock.runtime.java.options;
 import com.oracle.bedrock.ComposableOption;
 import com.oracle.bedrock.Option;
 import com.oracle.bedrock.OptionsByType;
+import com.oracle.bedrock.runtime.java.ClassPath;
 import com.oracle.bedrock.runtime.java.JavaApplication;
 
 import java.util.ArrayList;
@@ -54,15 +55,35 @@ public class JavaModules implements ComposableOption<JavaModules>, JvmOption
      */
     private final boolean enabled;
 
+    /**
+     * The modules to add.
+     */
     private final Set<String> modules;
 
+    /**
+     * The modules to export.
+     */
     private final Set<String> exports;
 
+    /**
+     * The modules to patch.
+     */
     private final Set<String> patches;
 
+    /**
+     * The values to use in the --add-reads parameter.
+     */
     private final Set<String> reading;
 
+    /**
+     * The values to use in the --add-opens parameter.
+     */
     private final Set<String> opens;
+
+    /**
+     * The optional class path to use.
+     */
+    private final ClassPath classPath;
 
     /**
      * Constructs a {@link JavaModules} for the specified value.
@@ -75,14 +96,16 @@ public class JavaModules implements ComposableOption<JavaModules>, JvmOption
                         Set<String> exports,
                         Set<String> patches,
                         Set<String> reading,
-                        Set<String> opens)
+                        Set<String> opens,
+                        ClassPath   classPath)
     {
-        this.enabled = enabled;
-        this.modules = modules;
-        this.exports = exports;
-        this.patches = patches;
-        this.reading = reading;
-        this.opens   = opens;
+        this.enabled   = enabled;
+        this.modules   = modules;
+        this.exports   = exports;
+        this.patches   = patches;
+        this.reading   = reading;
+        this.opens     = opens;
+        this.classPath = classPath;
     }
 
 
@@ -97,7 +120,7 @@ public class JavaModules implements ComposableOption<JavaModules>, JvmOption
     {
         return new JavaModules(true, Collections.emptySet(), Collections.emptySet(),
                                Collections.emptySet(), Collections.emptySet(),
-                               Collections.emptySet());
+                               Collections.emptySet(), new ClassPath());
     }
 
 
@@ -114,7 +137,7 @@ public class JavaModules implements ComposableOption<JavaModules>, JvmOption
     {
         return new JavaModules(false, Collections.emptySet(), Collections.emptySet(),
                                Collections.emptySet(), Collections.emptySet(),
-                               Collections.emptySet());
+                               Collections.emptySet(), new ClassPath());
     }
 
 
@@ -137,7 +160,8 @@ public class JavaModules implements ComposableOption<JavaModules>, JvmOption
             return this;
         }
 
-        return new JavaModules(true, toSet(this.modules, modules), this.exports, this.patches, this.reading, this.opens);
+        return new JavaModules(true, toSet(this.modules, modules), this.exports, this.patches,
+                               this.reading, this.opens, this.classPath);
     }
 
 
@@ -156,7 +180,7 @@ public class JavaModules implements ComposableOption<JavaModules>, JvmOption
     public JavaModules exporting(String... exports)
     {
         return new JavaModules(true, this.modules, toSet(this.exports, exports),
-                               this.patches, this.reading, this.opens);
+                               this.patches, this.reading, this.opens, this.classPath);
     }
 
 
@@ -186,7 +210,8 @@ public class JavaModules implements ComposableOption<JavaModules>, JvmOption
               .map(m -> m + "/" + m + "=" + toModule)
               .forEach(exports::add);
 
-        return new JavaModules(true, this.modules, exports, this.patches, this.reading, this.opens);
+        return new JavaModules(true, this.modules, exports, this.patches,
+                               this.reading, this.opens, this.classPath);
     }
 
 
@@ -236,7 +261,8 @@ public class JavaModules implements ComposableOption<JavaModules>, JvmOption
         Set<String> opens = new LinkedHashSet<>(this.opens);
         opens.add(module + '/' + _package + '=' + targetModule);
 
-        return new JavaModules(true, this.modules, this.exports, this.patches, this.reading, opens);
+        return new JavaModules(true, this.modules, this.exports, this.patches,
+                               this.reading, opens, this.classPath);
     }
 
 
@@ -259,7 +285,8 @@ public class JavaModules implements ComposableOption<JavaModules>, JvmOption
             return this;
         }
 
-        return new JavaModules(true, this.modules, this.exports, toSet(this.patches, patches), this.reading, this.opens);
+        return new JavaModules(true, this.modules, this.exports, toSet(this.patches, patches),
+                               this.reading, this.opens, this.classPath);
     }
 
 
@@ -282,9 +309,63 @@ public class JavaModules implements ComposableOption<JavaModules>, JvmOption
             return this;
         }
 
-        return new JavaModules(true, this.modules, this.exports, this.patches, toSet(this.reading, reads), this.opens);
+        return new JavaModules(true, this.modules, this.exports, this.patches,
+                               toSet(this.reading, reads), this.opens, this.classPath);
     }
 
+
+    /**
+     * Set the {@link ClassPath} to use as well as a module path.
+     *
+     * @param classPath  the {@link ClassPath} to use as well as a module path
+     *
+     * @return  a copy of this {@link JavaModules} option
+     *          with the specified classpath.
+     */
+    public JavaModules withClassPath(ClassPath classPath)
+    {
+        if (classPath == null || classPath.isEmpty())
+        {
+            return this;
+        }
+
+        return new JavaModules(true, this.modules, this.exports, this.patches,
+                               this.reading, this.opens, classPath);
+
+    }
+
+
+    /**
+     * Add a {@link ClassPath} to use as well as a module path, appending the
+     * {@link ClassPath} to any other classpath that this {@link JavaModules}
+     * may already have.
+     *
+     * @param classPath  a {@link ClassPath} to use as well as a module path
+     *
+     * @return  a copy of this {@link JavaModules} option
+     *          with the specified addition of the classpath.
+     */
+    public JavaModules appendingToClassPath(ClassPath classPath)
+    {
+        if (classPath == null || classPath.isEmpty())
+        {
+            return this;
+        }
+
+        return new JavaModules(true, this.modules, this.exports, this.patches,
+                               this.reading, this.opens, new ClassPath(this.classPath, classPath));
+
+    }
+
+    /**
+     * Obtain the {@link ClassPath} to use as well as a module path.
+     *
+     * @return  the {@link ClassPath} to use as well as a module path
+     */
+    public ClassPath getClassPath()
+    {
+        return classPath;
+    }
 
     /**
      * Determine whether a JVM application should be run with Modules.
@@ -333,9 +414,10 @@ public class JavaModules implements ComposableOption<JavaModules>, JvmOption
         setReads.addAll(other.reading);
         setOpens.addAll(other.opens);
 
-        boolean isEnabled = this.enabled && other.enabled;
+        boolean   isEnabled = this.enabled && other.enabled;
+        ClassPath classPath = new ClassPath(this.classPath, other.classPath);
 
-        return new JavaModules(isEnabled, setAdd, setExport, setPatch, setReads, setOpens);
+        return new JavaModules(isEnabled, setAdd, setExport, setPatch, setReads, setOpens, classPath);
     }
 
 

@@ -449,6 +449,36 @@ public class ClassPath implements Iterable<String>, Tabular, Option
         return classPath;
     }
 
+
+    /**
+     * Create a {@link ClassPath} that is the same as this {@link ClassPath}
+     * excluding any artifacts matching any of those in the specified
+     * {@link ClassPath}.
+     *
+     * @param exclude  {@link ClassPath} to exclude
+     *
+     * @return a {@link ClassPath} that is the same as this {@link ClassPath}
+     *         excluding any artifacts matching any of those in the specified
+     *         {@link ClassPath}
+     */
+    public ClassPath excluding(ClassPath exclude)
+    {
+        if (exclude.isEmpty())
+        {
+            return this;
+        }
+
+        ClassPath classPath = new ClassPath(this);
+
+        for (String path : exclude.paths)
+        {
+            classPath.paths.remove(path);
+        }
+
+        return classPath;
+    }
+
+
     private boolean include(String path)
     {
         if (excludes.isEmpty())

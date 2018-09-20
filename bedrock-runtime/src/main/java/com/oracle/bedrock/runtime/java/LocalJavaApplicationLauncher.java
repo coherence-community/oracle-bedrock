@@ -301,7 +301,7 @@ public class LocalJavaApplicationLauncher<A extends JavaApplication> implements 
         // ----- establish the class path -----
 
         JavaModules modular    = launchOptions.get(JavaModules.class);
-        boolean    useModules = modular.isEnabled();
+        boolean     useModules = modular.isEnabled();
 
         // determine the predefined class path based on the launch options
         ClassPath classPath = launchOptions.get(ClassPath.class);
@@ -337,10 +337,32 @@ public class LocalJavaApplicationLauncher<A extends JavaApplication> implements 
         processBuilder.command().add(useModules ? "--module-path" : "-cp");
         processBuilder.command().add(classPath.toString(launchOptions.asArray()));
 
-        Table classPathTable = classPath.getTable();
+        if (useModules)
+        {
+            Table modulePathTable = classPath.getTable();
 
-        classPathTable.getOptions().add(Cell.Separator.of(""));
-        diagnosticsTable.addRow("Class Path", classPathTable.toString());
+            modulePathTable.getOptions().add(Cell.Separator.of(""));
+            diagnosticsTable.addRow("Module Path", modulePathTable.toString());
+
+            ClassPath path = modular.getClassPath();
+
+            if (path != null && !path.isEmpty())
+            {
+                processBuilder.command().add("-cp");
+                processBuilder.command().add(path.toString(launchOptions.asArray()));
+
+                Table classPathTable  = path.getTable();
+                classPathTable.getOptions().add(Cell.Separator.of(""));
+                diagnosticsTable.addRow("Class Path", classPathTable.toString());
+            }
+        }
+        else
+        {
+            Table classPathTable = classPath.getTable();
+
+            classPathTable.getOptions().add(Cell.Separator.of(""));
+            diagnosticsTable.addRow("Class Path", classPathTable.toString());
+        }
 
         // ----- establish Bedrock specific system properties -----
 
