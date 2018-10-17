@@ -4,7 +4,7 @@
     <parent>
         <groupId>com.oracle.bedrock.coherence</groupId>
         <artifactId>12.1.2</artifactId>
-        <version>5.0.10</version>
+        <version>5.0.11-SNAPSHOT</version>
     </parent>
 
     <artifactId>coherence-12.1.2-tests</artifactId>
