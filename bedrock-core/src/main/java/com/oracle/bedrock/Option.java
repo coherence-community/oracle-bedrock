@@ -32,7 +32,8 @@ package com.oracle.bedrock;
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Brian Oliver
- * @see Options
+ *
+ * @see OptionsByType
  */
 public interface Option
 {

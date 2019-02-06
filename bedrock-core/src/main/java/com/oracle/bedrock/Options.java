@@ -240,7 +240,7 @@ class Options implements OptionsByType
 
 
     @Override
-    public Options add(Option option)
+    public OptionsByType add(Option option)
     {
         if (option == null)
         {
@@ -304,7 +304,7 @@ class Options implements OptionsByType
 
 
     @Override
-    public Options addIfAbsent(Option option)
+    public OptionsByType addIfAbsent(Option option)
     {
         Class<? extends Option> classOfOption = OptionsByType.getClassOf(option);
 
@@ -318,7 +318,7 @@ class Options implements OptionsByType
 
 
     @Override
-    public Options addAll(Option... options)
+    public OptionsByType addAll(Option... options)
     {
         if (options != null)
         {
@@ -333,7 +333,7 @@ class Options implements OptionsByType
 
 
     @Override
-    public Options addAll(OptionsByType options)
+    public OptionsByType addAll(OptionsByType options)
     {
         for (Option option : options.asArray())
         {

@@ -3,16 +3,16 @@
 
     <parent>
         <groupId>com.oracle.bedrock.coherence</groupId>
-        <artifactId>12.2.1</artifactId>
+        <artifactId>12.2.1.4</artifactId>
         <version>5.0.11-SNAPSHOT</version>
     </parent>
 
-    <artifactId>coherence-12.2.1-testing-support</artifactId>
+    <artifactId>coherence-12.2.1.4</artifactId>
 
-    <name>Bedrock for Testing Coherence 12.2.1</name>
+    <name>Bedrock for Coherence 12.2.1.4</name>
 
     <description>
-        A set of tools to aid testing of Oracle Coherence 12.2.1 based applications.
+        A set of tools to manage and control Oracle Coherence 12.2.1.4 processes at runtime.
     </description>
 
     <dependencies>
@@ -24,51 +24,97 @@
         </dependency>
 
         <dependency>
-            <groupId>com.oracle.bedrock.coherence</groupId>
-            <artifactId>coherence-12.2.1</artifactId>
+            <groupId>com.oracle.bedrock</groupId>
+            <artifactId>bedrock-runtime</artifactId>
             <version>${project.version}</version>
         </dependency>
 
         <dependency>
             <groupId>com.oracle.bedrock</groupId>
-            <artifactId>bedrock-testing-support</artifactId>
+            <artifactId>bedrock-runtime-remote</artifactId>
             <version>${project.version}</version>
         </dependency>
 
         <dependency>
             <groupId>com.oracle.bedrock.coherence</groupId>
-            <artifactId>coherence-12.1.3-testing-support</artifactId>
+            <artifactId>coherence-12.2.1</artifactId>
             <version>${project.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>com.oracle.coherence</groupId>
                     <artifactId>coherence</artifactId>
                 </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>com.oracle.bedrock.coherence</groupId>
+            <artifactId>coherence-12.2.1-testing-support</artifactId>
+            <version>${project.version}</version>
+            <exclusions>
                 <exclusion>
-                    <groupId>com.oracle.bedrock.coherence</groupId>
-                    <artifactId>coherence-12.1.3</artifactId>
+                    <groupId>com.oracle.coherence</groupId>
+                    <artifactId>coherence</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
 
-
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>${junit.version}</version>
-            <scope>provided</scope>
+            <groupId>com.oracle.bedrock</groupId>
+            <artifactId>bedrock-testing-support</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>org.hamcrest</groupId>
             <artifactId>hamcrest-all</artifactId>
             <version>${hamcrest.version}</version>
-            <scope>provided</scope>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>${mockito.version}</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>${maven.javadoc.plugin.version}</version>
+                <configuration>
+                    <failOnError>false</failOnError>
+                    <includeDependencySources>true</includeDependencySources>
+                    <dependencySourceIncludes>
+                        <dependencySourceInclude>com.oracle.bedrock.coherence:coherence-3.7.1</dependencySourceInclude>
+                        <dependencySourceInclude>com.oracle.bedrock.coherence:coherence-12.1.2</dependencySourceInclude>
+                        <dependencySourceInclude>com.oracle.bedrock.coherence:coherence-12.1.3</dependencySourceInclude>
+                        <dependencySourceInclude>com.oracle.bedrock.coherence:coherence-12.2.1</dependencySourceInclude>
+                        <dependencySourceInclude>com.oracle.bedrock.coherence:coherence-12.2.1-testing-support</dependencySourceInclude>
+                    </dependencySourceIncludes>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>attach-javadocs</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
@@ -80,29 +126,25 @@
                     <!-- only include the previous version of coherence -->
                     <artifactSet>
                         <includes>
-                            <include>com.oracle.bedrock.coherence:coherence-12.1.3-testing-support</include>
+                            <include>com.oracle.bedrock.coherence:coherence-12.2.1</include>
+                            <include>com.oracle.bedrock.coherence:coherence-12.2.1-testing-support</include>
                         </includes>
                     </artifactSet>
 
                     <!-- exclude meta-inf and certain classes -->
                     <filters>
                         <filter>
-                            <artifact>com.oracle.bedrock.coherence:coherence-12.1.3-testing-support</artifact>
+                            <artifact>com.oracle.bedrock.coherence:coherence-12.2.1</artifact>
                             <excludes>
                                 <exclude>META-INF/**</exclude>
                             </excludes>
                         </filter>
                     </filters>
+
                     <transformers>
-                        <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
                         <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                             <manifestEntries>
                                 <Automatic-Module-Name>com.oracle.bedrock.coherence</Automatic-Module-Name>
-                            </manifestEntries>
-                        </transformer>
-                        <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                            <manifestEntries>
-                                <Automatic-Module-Name>com.oracle.bedrock.coherence.testing.support</Automatic-Module-Name>
                             </manifestEntries>
                         </transformer>
                     </transformers>
@@ -112,44 +154,6 @@
                         <phase>package</phase>
                         <goals>
                             <goal>shade</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <plugin>
-                <artifactId>maven-antrun-plugin</artifactId>
-                <version>1.8</version>
-                <executions>
-                    <execution>
-                        <id>unpack-source</id>
-                        <phase>package</phase>
-                        <configuration>
-                            <target>
-                                <echo message="unpacking shaded source (for javadoc)" />
-                                <unzip src="${build.directory}/${project.artifactId}-${project.version}-sources.jar" dest="${build.directory}/generated-sources" />
-                            </target>
-                        </configuration>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <version>${maven.javadoc.plugin.version}</version>
-                <configuration>
-                    <failOnError>false</failOnError>
-                    <sourcepath>${build.directory}/generated-sources</sourcepath>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>attach-javadocs</id>
-                        <goals>
-                            <goal>jar</goal>
                         </goals>
                     </execution>
                 </executions>
