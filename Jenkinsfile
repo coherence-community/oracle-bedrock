@@ -19,7 +19,8 @@ pipeline {
                 withMaven(jdk: 'Jdk8', maven: 'Maven3.6.0', mavenSettingsConfig: 'maven-settings', tempBinDir: '') {
                    sh 'mvn -am -pl bedrock-core clean install'
                 }
-
+            }
+        }
         stage('bedrock-runtime-maven-tests') {
             agent {
               label 'linux'
