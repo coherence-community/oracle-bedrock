@@ -6,7 +6,7 @@ pipeline {
               label 'linux'
             }
             steps {
-                echo 'Maven Build'
+                echo 'Compile'
                 withMaven(jdk: 'Jdk8', maven: 'Maven3.6.0', mavenSettingsConfig: 'maven-settings', tempBinDir: '') {
                    sh 'mvn -DskipTests clean install'
                 }
@@ -17,8 +17,9 @@ pipeline {
               label 'linux'
             }
             steps {
-                echo 'Maven Build'
+                echo 'Maven Tests'
                 withMaven(jdk: 'Jdk8', maven: 'Maven3.6.0', mavenSettingsConfig: 'maven-settings', tempBinDir: '') {
+                   sh 'mvn dependency:get -DartifactId=org.hamcrest:hamcrest-library:jar:1.3'
                    sh 'mvn -am -pl bedrock-runtime-maven-tests clean install'
                 }
             }
