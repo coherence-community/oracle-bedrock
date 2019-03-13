@@ -29,7 +29,7 @@ pipeline {
                     }
                     steps {
                         withMaven(jdk: 'Jdk8', maven: 'Maven3.6.0', mavenSettingsConfig: 'maven-settings', tempBinDir: '') {
-                           sh 'mvn -am -pl bedrock-runtime-jprofiler clean install'
+                           sh 'mvn -am -pl bedrock-runtime-docker-tests clean install'
                         }
                     }
                 }
@@ -59,7 +59,7 @@ pipeline {
                     }
                     steps {
                         withMaven(jdk: 'Jdk8', maven: 'Maven3.6.0', mavenSettingsConfig: 'maven-settings', tempBinDir: '') {
-                           sh 'mvn -am -pl bedrock-runtime-jprofiler clean install'
+                           sh 'mvn -am -pl bedrock-runtime-k8s clean install'
                         }
                     }
                 }
