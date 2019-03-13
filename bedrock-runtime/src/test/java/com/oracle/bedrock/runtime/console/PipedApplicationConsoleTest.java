@@ -112,7 +112,11 @@ public class PipedApplicationConsoleTest
 
         BufferedReader reader = console.getErrorReader();
 
-        assertThat(reader.readLine(), is("Err: foo"));
+        String line = reader.readLine();
+        while(line.contains("JAVA_TOOL_OPTIONS")) {
+            line = reader.readLine();
+        }
+        assertThat(line, is("Err: foo"));
         assertThat(reader.readLine(), is("Err: bar"));
         assertThat(reader.readLine(), is("(terminated)"));
         assertThat(reader.readLine(), is(nullValue()));
