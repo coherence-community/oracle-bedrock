@@ -51,5 +51,15 @@ pipeline {
                 }
             }
         }
+        stage('bedrock-runtime-jprofiler') {
+            agent {
+              label 'linux'
+            }
+            steps {
+                withMaven(jdk: 'Jdk8', maven: 'Maven3.6.0', mavenSettingsConfig: 'maven-settings', tempBinDir: '') {
+                   sh 'mvn -am -pl bedrock-runtime-jprofiler clean install'
+                }
+            }
+        }
     }
 }
