@@ -67,5 +67,59 @@ Oracle Bedrock is an open source project. Pull Requests are accepted. See
 [CONTRIBUTING](CONTRIBUTING.md) for details.
 
 ## License
-Copyright (c) 2010, 2017 Oracle and/or its affiliates.  Licensed under the [Common Development and
+Copyright (c) 2010, 2019 Oracle and/or its affiliates.  Licensed under the [Common Development and
 Distribution License v1.0](LICENSE.md) ("CDDL")
+
+## Building
+
+Bedrock is a Maven project and can be built with standard Maven commands.
+
+### Prerequisites
+
+1. The Coherence modules have a dependency on four versions of Coherence. The exact versions can be found in the `coherence.version` property in `pom.xml` files 
+    [bedrock-coherence/3.7.1/pom.xml](./bedrock-coherence/3.7.1/pom.xml)  
+    [bedrock-coherence/12.1.2/pom.xml](./bedrock-coherence/12.1.2/pom.xml)  
+    [bedrock-coherence/12.1.3/pom.xml](./bedrock-coherence/12.1.3/pom.xml)  
+    [bedrock-coherence/12.2.1/pom.xml](./bedrock-coherence/12.2.1/pom.xml)  
+    
+    As Coherence is not available in public Maven repos the `coherence.jar` files for each of those versions needs to be loaded to your own local or remote Maven repository under the groupId `com.oracle.coherence` and artifactId `coherence`.
+
+2. There are a number of tests in the `bedrock-runtime-remote-tests` module that will attempt to SSH into your local machine using private/public key pair. For this to work you need a key pair configured.
+
+    1. By default the private key file is called `127.0.0.1_dsa` and corresponding public key `127.0.0.1_dsa.pub`. You can run the build with a system property to change this to any valid key that you already have configured for ssh'ing into your machine: For example to use `id_rsa` then add `-Dbedrock.remote.privatekey.file=~/.ssh/id_rsa` to the Maven command line.
+    
+    2. Alternatively you may need to generate a new key pair using `ssh-keygen`. **NOTE** ensure that they type of key-pair generated is a valid type to SSH into your machine. For example on MacOS an RSA key pair will be fine, a DSA key pair may not, so even though the default file name used in tests has the suffix `_dsa` it can contain any type of key.
+    
+        ```
+        ssh-keygen -t rsa -f 127.0.0.1_dsa
+        ```   
+  
+        **Do not** set a passphrase for the keys. 
+        
+    3. Add the public key to your `~/.ssh/authorized_keys` file:
+    
+        ```
+        cat ~/.ssh/127.0.0.1_dsa >> ~/.ssh/authorized_keys
+        ```   
+    
+    4. Restart your SSH daemon to pick up the change to the `~/.ssh/authorized_keys` file. On MacOS run
+        ```
+        sudo launchctl stop com.openssh.sshd
+        sudo launchctl start com.openssh.sshd
+        ```
+
+    5. Test that you can ssh into your own machine with the new key
+        ```
+        ssh -i ~/.ssh/foo_rsa <your-user-name>@127.0.0.1
+        ```
+        
+### Run the build
+To run a full build:
+```
+mvn clean install
+```
+To run a full build without tests:
+```
+mvn clean install -DskipTests
+```
+    
