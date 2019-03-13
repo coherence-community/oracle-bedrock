@@ -17,7 +17,7 @@ pipeline {
             }
             steps {
                 withMaven(jdk: 'Jdk8', maven: 'Maven3.6.0', mavenSettingsConfig: 'maven-settings', tempBinDir: '') {
-                   sh 'mvn -amd -pl \!bedrock-runtime-docker-tests,\!bedrock-runtimevagrant-tests clean install'
+                   sh 'mvn -amd -pl !bedrock-runtime-docker-tests,!bedrock-runtimevagrant-tests clean install'
                 }
             }
         }
