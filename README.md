@@ -76,7 +76,8 @@ Bedrock is a Maven project and can be built with standard Maven commands.
 
 ### Prerequisites
 
-1. The Coherence modules have a dependency on four versions of Coherence. The exact versions can be found in the `coherence.version` property in `pom.xml` files 
+1. The Coherence modules have a dependency on four versions of Coherence. The exact versions can be found in the `coherence.version` property in `pom.xml` files
+ 
     [bedrock-coherence/3.7.1/pom.xml](./bedrock-coherence/3.7.1/pom.xml)  
     [bedrock-coherence/12.1.2/pom.xml](./bedrock-coherence/12.1.2/pom.xml)  
     [bedrock-coherence/12.1.3/pom.xml](./bedrock-coherence/12.1.3/pom.xml)  
@@ -99,7 +100,7 @@ Bedrock is a Maven project and can be built with standard Maven commands.
     3. Add the public key to your `~/.ssh/authorized_keys` file:
     
         ```
-        cat ~/.ssh/127.0.0.1_dsa >> ~/.ssh/authorized_keys
+        cat ~/.ssh/127.0.0.1_dsa.pub >> ~/.ssh/authorized_keys
         ```   
     
     4. Restart your SSH daemon to pick up the change to the `~/.ssh/authorized_keys` file. On MacOS run
