@@ -23,53 +23,53 @@ pipeline {
                         }
                     }
                 }
-                stage('bedrock-coherence-3.7.1') {
+                stage('Coherence 3.7.1 Tests') {
                     agent {
                         label 'linux'
                     }
                     steps {
                         withMaven(jdk: 'Jdk8', maven: 'Maven3.6.0', mavenSettingsConfig: 'maven-settings', tempBinDir: '') {
-                            sh 'mvn -am -Djava.net.preferIPv4Stack=true -pl bedrock-coherence/3.7.1 clean install'
+                            sh 'mvn -am -Djava.net.preferIPv4Stack=true -pl bedrock-coherence/3.7.1/coherence-3.7.1-tests clean install'
                         }
                     }
                 }
-                stage('bedrock-coherence-12.1.2') {
+                stage('Coherence 12.1.2 Tests') {
                     agent {
                         label 'linux'
                     }
                     steps {
                         withMaven(jdk: 'Jdk8', maven: 'Maven3.6.0', mavenSettingsConfig: 'maven-settings', tempBinDir: '') {
-                            sh 'mvn -am -Djava.net.preferIPv4Stack=true -pl bedrock-coherence/12.1.2 clean install'
+                            sh 'mvn -am -Djava.net.preferIPv4Stack=true -pl bedrock-coherence/12.1.2/coherence-12.1.2-tests clean install'
                         }
                     }
                 }
-                stage('bedrock-coherence-12.1.3') {
+                stage('Coherence 12.1.3 Tests') {
                     agent {
                         label 'linux'
                     }
                     steps {
                         withMaven(jdk: 'Jdk8', maven: 'Maven3.6.0', mavenSettingsConfig: 'maven-settings', tempBinDir: '') {
-                            sh 'mvn -am -Djava.net.preferIPv4Stack=true -pl bedrock-coherence/12.1.3 clean install'
+                            sh 'mvn -am -Djava.net.preferIPv4Stack=true -pl bedrock-coherence/12.1.3/coherence-12.1.3-tests clean install'
                         }
                     }
                 }
-                stage('bedrock-coherence-12.2.1') {
+                stage('Coherence 12.2.1 Tests') {
                     agent {
                         label 'linux'
                     }
                     steps {
                         withMaven(jdk: 'Jdk8', maven: 'Maven3.6.0', mavenSettingsConfig: 'maven-settings', tempBinDir: '') {
-                            sh 'mvn -am -Djava.net.preferIPv4Stack=true -pl bedrock-coherence/12.2.1 clean install'
+                            sh 'mvn -am -Djava.net.preferIPv4Stack=true -pl bedrock-coherence/12.2.1/coherence-12.2.1-tests clean install'
                         }
                     }
                 }
-                stage('bedrock-coherence-12.2.1.4') {
+                stage('Coherence 12.2.1.4 Tests') {
                     agent {
                         label 'linux'
                     }
                     steps {
                         withMaven(jdk: 'Jdk8', maven: 'Maven3.6.0', mavenSettingsConfig: 'maven-settings', tempBinDir: '') {
-                            sh 'mvn -am -Djava.net.preferIPv4Stack=true -pl bedrock-coherence/12.2.1.4 clean install'
+                            sh 'mvn -am -Djava.net.preferIPv4Stack=true -pl bedrock-coherence/12.2.1.4/coherence-12.2.1.4-tests clean install'
                         }
                     }
                 }
