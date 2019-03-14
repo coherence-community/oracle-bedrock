@@ -49,7 +49,7 @@ pipeline {
                     }
                     steps {
                         withMaven(jdk: 'Jdk8', maven: 'Maven3.6.0', mavenSettingsConfig: 'maven-settings', tempBinDir: '') {
-                            sh 'mvn -am -Djava.net.preferIPv4Stack=true -pl bedrock-coherence/12.1.3/coherence-12.1.3-tests,!bedrock-coherence/3.7.1,,!bedrock-coherence/12.1.2 clean install'
+                            sh 'mvn -am -Djava.net.preferIPv4Stack=true -pl bedrock-coherence/12.1.3/coherence-12.1.3-tests,!bedrock-coherence/3.7.1,!bedrock-coherence/12.1.2 clean install'
                         }
                     }
                 }
@@ -59,7 +59,7 @@ pipeline {
                     }
                     steps {
                         withMaven(jdk: 'Jdk8', maven: 'Maven3.6.0', mavenSettingsConfig: 'maven-settings', tempBinDir: '') {
-                            sh 'mvn -am -Djava.net.preferIPv4Stack=true -pl bedrock-coherence/12.2.1/coherence-12.2.1-tests,!bedrock-coherence/3.7.1,,!bedrock-coherence/12.1.2,!bedrock-coherence/12.1.3 clean install'
+                            sh 'mvn -am -Djava.net.preferIPv4Stack=true -pl bedrock-coherence/12.2.1/coherence-12.2.1-tests,!bedrock-coherence/3.7.1,!bedrock-coherence/12.1.2,!bedrock-coherence/12.1.3 clean install'
                         }
                     }
                 }
@@ -69,7 +69,7 @@ pipeline {
                     }
                     steps {
                         withMaven(jdk: 'Jdk8', maven: 'Maven3.6.0', mavenSettingsConfig: 'maven-settings', tempBinDir: '') {
-                            sh 'mvn -am -Djava.net.preferIPv4Stack=true -pl bedrock-coherence/12.2.1.4/coherence-12.2.1.4-tests,!bedrock-coherence/3.7.1,,!bedrock-coherence/12.1.2,!bedrock-coherence/12.1.3,!bedrock-coherence/12.2.1 clean install'
+                            sh 'mvn -am -Djava.net.preferIPv4Stack=true -pl bedrock-coherence/12.2.1.4/coherence-12.2.1.4-tests,!bedrock-coherence/3.7.1,!bedrock-coherence/12.1.2,!bedrock-coherence/12.1.3,!bedrock-coherence/12.2.1 clean install'
                         }
                     }
                 }
