@@ -68,7 +68,7 @@ pipeline {
                       label 'linux'
                     }
                     steps {
-                        withCredentials([sshUserPrivateKey(credentialsId: 'opc-ssh', keyFileVariable: 'SSH_KEY_FILE', passphraseVariable: 'SSH_PASSPHRASE', usernameVariable: 'SSH_USERNAME')]) {
+                        withCredentials([sshUserPrivateKey(credentialsId: 'bedrockSsh', keyFileVariable: 'SSH_KEY_FILE', passphraseVariable: 'SSH_PASSPHRASE', usernameVariable: 'SSH_USERNAME')]) {
                             withMaven(jdk: 'Jdk8', maven: 'Maven3.6.0', mavenSettingsConfig: 'maven-settings', tempBinDir: '') {
                                 sh 'mvn -am -Dbedrock.remote.privatekey.file=$SSH_KEY_FILE -pl bedrock-runtime-remote-tests clean install'
                             }
