@@ -13,3 +13,4 @@ target/
 .classpath/
 .checkstyle/
 .flattened-pom.xml
+dependency-reduced-pom.xml
