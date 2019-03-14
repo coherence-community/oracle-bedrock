@@ -23,57 +23,53 @@ pipeline {
                         }
                     }
                 }
-                stage('bedrock-coherence') {
-                    parallel {
-                        stage('bedrock-coherence-3.7.1') {
-                            agent {
-                                label 'linux'
-                            }
-                            steps {
-                                withMaven(jdk: 'Jdk8', maven: 'Maven3.6.0', mavenSettingsConfig: 'maven-settings', tempBinDir: '') {
-                                    sh 'mvn -amd -pl bedrock-coherence/3.7.1 clean install'
-                                }
-                            }
+                stage('bedrock-coherence-3.7.1') {
+                    agent {
+                        label 'linux'
+                    }
+                    steps {
+                        withMaven(jdk: 'Jdk8', maven: 'Maven3.6.0', mavenSettingsConfig: 'maven-settings', tempBinDir: '') {
+                            sh 'mvn -amd -pl bedrock-coherence/3.7.1 clean install'
                         }
-                        stage('bedrock-coherence-12.1.2') {
-                            agent {
-                                label 'linux'
-                            }
-                            steps {
-                                withMaven(jdk: 'Jdk8', maven: 'Maven3.6.0', mavenSettingsConfig: 'maven-settings', tempBinDir: '') {
-                                    sh 'mvn -amd -pl bedrock-coherence/12.1.2 clean install'
-                                }
-                            }
+                    }
+                }
+                stage('bedrock-coherence-12.1.2') {
+                    agent {
+                        label 'linux'
+                    }
+                    steps {
+                        withMaven(jdk: 'Jdk8', maven: 'Maven3.6.0', mavenSettingsConfig: 'maven-settings', tempBinDir: '') {
+                            sh 'mvn -amd -pl bedrock-coherence/12.1.2 clean install'
                         }
-                        stage('bedrock-coherence-12.1.3') {
-                            agent {
-                                label 'linux'
-                            }
-                            steps {
-                                withMaven(jdk: 'Jdk8', maven: 'Maven3.6.0', mavenSettingsConfig: 'maven-settings', tempBinDir: '') {
-                                    sh 'mvn -amd -pl bedrock-coherence/12.1.3 clean install'
-                                }
-                            }
+                    }
+                }
+                stage('bedrock-coherence-12.1.3') {
+                    agent {
+                        label 'linux'
+                    }
+                    steps {
+                        withMaven(jdk: 'Jdk8', maven: 'Maven3.6.0', mavenSettingsConfig: 'maven-settings', tempBinDir: '') {
+                            sh 'mvn -amd -pl bedrock-coherence/12.1.3 clean install'
                         }
-                        stage('bedrock-coherence-12.2.1') {
-                            agent {
-                                label 'linux'
-                            }
-                            steps {
-                                withMaven(jdk: 'Jdk8', maven: 'Maven3.6.0', mavenSettingsConfig: 'maven-settings', tempBinDir: '') {
-                                    sh 'mvn -amd -pl bedrock-coherence/12.2.1 clean install'
-                                }
-                            }
+                    }
+                }
+                stage('bedrock-coherence-12.2.1') {
+                    agent {
+                        label 'linux'
+                    }
+                    steps {
+                        withMaven(jdk: 'Jdk8', maven: 'Maven3.6.0', mavenSettingsConfig: 'maven-settings', tempBinDir: '') {
+                            sh 'mvn -amd -pl bedrock-coherence/12.2.1 clean install'
                         }
-                        stage('bedrock-coherence-12.2.1.4') {
-                            agent {
-                                label 'linux'
-                            }
-                            steps {
-                                withMaven(jdk: 'Jdk8', maven: 'Maven3.6.0', mavenSettingsConfig: 'maven-settings', tempBinDir: '') {
-                                    sh 'mvn -amd -pl bedrock-coherence/12.2.1.4 clean install'
-                                }
-                            }
+                    }
+                }
+                stage('bedrock-coherence-12.2.1.4') {
+                    agent {
+                        label 'linux'
+                    }
+                    steps {
+                        withMaven(jdk: 'Jdk8', maven: 'Maven3.6.0', mavenSettingsConfig: 'maven-settings', tempBinDir: '') {
+                            sh 'mvn -amd -pl bedrock-coherence/12.2.1.4 clean install'
                         }
                     }
                 }
