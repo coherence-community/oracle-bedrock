@@ -63,7 +63,7 @@ public class MavenTest
         MetaClass     metaClass     = new JavaApplication.MetaClass();
         OptionsByType optionsByType = OptionsByType.empty();
 
-        optionsByType.add(Maven.artifact("org.hamcrest:hamcrest-library:jar:1.3"));
+        optionsByType.add(Maven.artifact("org.hamcrest:hamcrest-all:jar:1.3"));
 
         Maven maven = optionsByType.get(Maven.class);
 
@@ -72,9 +72,9 @@ public class MavenTest
         ClassPath classPath = optionsByType.getOrDefault(ClassPath.class, null);
 
         assertThat(classPath, is(not(nullValue())));
-        assertThat(classPath.size(), is(2));
+        assertThat(classPath.size(), is(1));
 
-        assertThat(classPath.toString(), containsString("hamcrest-library-1.3.jar"));
+        assertThat(classPath.toString(), containsString("hamcrest-all-1.3.jar"));
     }
 
 
