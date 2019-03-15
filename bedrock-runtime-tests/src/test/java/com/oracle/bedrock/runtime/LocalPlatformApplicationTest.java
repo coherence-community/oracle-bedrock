@@ -38,6 +38,8 @@ import com.oracle.bedrock.runtime.options.Executable;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import java.io.BufferedReader;
+
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.StringContains.containsString;
 import static org.junit.Assert.assertThat;
@@ -72,7 +74,12 @@ public class LocalPlatformApplicationTest extends AbstractTest
                                                                   Diagnostics.enabled(),
                                                                   Console.of(console)))
         {
-            String stdout = console.getOutputReader().readLine();
+            BufferedReader reader = console.getOutputReader();
+
+            String stdout = reader.readLine();
+            while(stdout.contains("JAVA_TOOL_OPTIONS")) {
+                stdout = reader.readLine();
+            }
 
             assertThat(stdout, containsString("Usage: java"));
         }
@@ -96,7 +103,12 @@ public class LocalPlatformApplicationTest extends AbstractTest
                                                                   Diagnostics.enabled(),
                                                                   Console.of(console)))
         {
-            String stdout = console.getOutputReader().readLine();
+            BufferedReader reader = console.getOutputReader();
+
+            String stdout = reader.readLine();
+            while(stdout.contains("JAVA_TOOL_OPTIONS")) {
+                stdout = reader.readLine();
+            }
 
             assertThat(stdout, containsString("Usage: java"));
         }
@@ -127,7 +139,12 @@ public class LocalPlatformApplicationTest extends AbstractTest
         {
             Mockito.verify(listener, Mockito.times(1)).onLaunched(Mockito.same(application));
 
-            String stdout = console.getOutputReader().readLine();
+            BufferedReader reader = console.getOutputReader();
+
+            String stdout = reader.readLine();
+            while(stdout.contains("JAVA_TOOL_OPTIONS")) {
+                stdout = reader.readLine();
+            }
 
             assertThat(stdout, containsString("Usage: java"));
 
