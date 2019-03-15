@@ -23,6 +23,56 @@ pipeline {
                         }
                     }
                 }
+                stage('Coherence 3.7.1 Tests') {
+                    agent {
+                        label 'linux'
+                    }
+                    steps {
+                        withMaven(jdk: 'Jdk8', maven: 'Maven3.6.0', mavenSettingsConfig: 'maven-settings', tempBinDir: '') {
+                            sh 'mvn -am -Djava.net.preferIPv4Stack=true -Dtangosol.coherence.tcpring=false -pl bedrock-coherence/3.7.1/coherence-3.7.1-tests clean install'
+                        }
+                    }
+                }
+                stage('Coherence 12.1.2 Tests') {
+                    agent {
+                        label 'linux'
+                    }
+                    steps {
+                        withMaven(jdk: 'Jdk8', maven: 'Maven3.6.0', mavenSettingsConfig: 'maven-settings', tempBinDir: '') {
+                            sh 'mvn -am -Djava.net.preferIPv4Stack=true -Dtangosol.coherence.tcpring=false -pl bedrock-coherence/12.1.2/coherence-12.1.2-tests,!bedrock-coherence/3.7.1 clean install'
+                        }
+                    }
+                }
+                stage('Coherence 12.1.3 Tests') {
+                    agent {
+                        label 'linux'
+                    }
+                    steps {
+                        withMaven(jdk: 'Jdk8', maven: 'Maven3.6.0', mavenSettingsConfig: 'maven-settings', tempBinDir: '') {
+                            sh 'mvn -am -Djava.net.preferIPv4Stack=true -Dtangosol.coherence.tcpring=false -pl bedrock-coherence/12.1.3/coherence-12.1.3-tests,!bedrock-coherence/3.7.1,!bedrock-coherence/12.1.2 clean install'
+                        }
+                    }
+                }
+                stage('Coherence 12.2.1 Tests') {
+                    agent {
+                        label 'linux'
+                    }
+                    steps {
+                        withMaven(jdk: 'Jdk8', maven: 'Maven3.6.0', mavenSettingsConfig: 'maven-settings', tempBinDir: '') {
+                            sh 'mvn -am -Djava.net.preferIPv4Stack=true -Dtangosol.coherence.tcpring=false -pl bedrock-coherence/12.2.1/coherence-12.2.1-tests,!bedrock-coherence/3.7.1,!bedrock-coherence/12.1.2,!bedrock-coherence/12.1.3 clean install'
+                        }
+                    }
+                }
+                stage('Coherence 12.2.1.4 Tests') {
+                    agent {
+                        label 'linux'
+                    }
+                    steps {
+                        withMaven(jdk: 'Jdk8', maven: 'Maven3.6.0', mavenSettingsConfig: 'maven-settings', tempBinDir: '') {
+                            sh 'mvn -am -Djava.net.preferIPv4Stack=true -Dtangosol.coherence.tcpring=false -pl bedrock-coherence/12.2.1.4/coherence-12.2.1.4-tests,!bedrock-coherence/3.7.1,!bedrock-coherence/12.1.2,!bedrock-coherence/12.1.3,!bedrock-coherence/12.2.1 clean install'
+                        }
+                    }
+                }
                 stage('bedrock-runtime-docker-tests') {
                     agent {
                       label 'linux'
