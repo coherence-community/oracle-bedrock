@@ -173,7 +173,7 @@ public abstract class AbstractCoherenceClusterBuilderTest extends AbstractTest
     public void shouldBuilderWKABasedStorageCluster()
     {
         Capture<Integer>        wkaPort            = new Capture<>(LocalPlatform.get().getAvailablePorts());
-        ClusterPort             clusterPort = ClusterPort.of(new Capture<>(LocalPlatform.get().getAvailablePorts()));
+        ClusterPort             clusterPort        = ClusterPort.of(new Capture<>(LocalPlatform.get().getAvailablePorts()));
         String                  localHost          = System.getProperty("tangosol.coherence.localhost", "127.0.0.1");
 
         String                  clusterName        = "WKA" + getClass().getSimpleName();
@@ -186,7 +186,7 @@ public abstract class AbstractCoherenceClusterBuilderTest extends AbstractTest
                                CoherenceClusterMember.class,
                                DisplayName.of("storage"),
                                LocalStorage.enabled(),
-                               WellKnownAddress.of(localHost, wkaPort),
+                               WellKnownAddress.of(localHost),
                                ClusterName.of(clusterName),
                                LocalHost.of(localHost, wkaPort),
                                clusterPort);
@@ -209,9 +209,6 @@ public abstract class AbstractCoherenceClusterBuilderTest extends AbstractTest
         AvailablePortIterator   availablePorts = LocalPlatform.get().getAvailablePorts();
         ClusterPort             clusterPort    = ClusterPort.of(new Capture<>(availablePorts));
         String                  clusterName    = "Rolling" + getClass().getSimpleName();
-
-        Platform                platform       = getPlatform();
-
         CoherenceClusterBuilder builder        = new CoherenceClusterBuilder();
 
         builder.include(CLUSTER_SIZE,
