@@ -60,7 +60,6 @@ import static org.hamcrest.CoreMatchers.is;
  *
  * @author Brian Oliver
  */
-@Ignore
 public class LocalCoherenceClusterBuilderTest extends AbstractCoherenceClusterBuilderTest
 {
     @Override
@@ -135,5 +134,18 @@ public class LocalCoherenceClusterBuilderTest extends AbstractCoherenceClusterBu
             e.printStackTrace();
             Assert.fail();
         }
+    }
+
+    @Override
+    @Ignore
+    public void shouldFailOverNamedCache() {
+        // FIXME
+    }
+
+
+    @Override
+    @Ignore
+    public void shouldRemoveCoherenceClusterMemberFromCoherenceCluster() {
+        // FIXME
     }
 }

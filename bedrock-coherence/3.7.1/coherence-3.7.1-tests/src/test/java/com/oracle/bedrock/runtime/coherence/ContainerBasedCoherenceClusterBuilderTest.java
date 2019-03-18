@@ -29,6 +29,7 @@ import com.oracle.bedrock.runtime.Platform;
 import com.oracle.bedrock.runtime.java.ContainerBasedJavaApplicationLauncher;
 import com.oracle.bedrock.runtime.java.JavaVirtualMachine;
 import org.junit.Ignore;
+import org.junit.Test;
 
 /**
  * Functional Tests for {@link CoherenceClusterBuilder}s using a {@link ContainerBasedJavaApplicationLauncher}.
@@ -38,7 +39,6 @@ import org.junit.Ignore;
  *
  * @author Brian Oliver
  */
-@Ignore
 public class ContainerBasedCoherenceClusterBuilderTest extends AbstractCoherenceClusterBuilderTest
 {
     @Override
@@ -63,5 +63,12 @@ public class ContainerBasedCoherenceClusterBuilderTest extends AbstractCoherence
     {
         // we skip this test as membership starting/stopping events and
         // recovery is not supported in a single JVM
+    }
+
+
+    @Override
+    @Ignore
+    public void shouldRemoveCoherenceClusterMemberFromCoherenceCluster() {
+        // FIXME
     }
 }
