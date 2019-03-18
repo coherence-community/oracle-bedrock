@@ -42,6 +42,8 @@ import com.oracle.bedrock.runtime.options.Executable;
 
 import java.io.Closeable;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -61,6 +63,11 @@ public class K8sCluster<K extends K8sCluster>
      * The default location of kubectl.
      */
     public static final File DEFAULT_KUBECTL = new File("/usr/local/bin/kubectl");
+
+    /**
+     * The name of the default namespace if none is provided for a Pod.
+     */
+    public static final String DEFAULT_NAMESPACE = "default";
 
     /**
      * The kubectl executable.
@@ -259,6 +266,20 @@ public class K8sCluster<K extends K8sCluster>
      */
     public Application kubectl(Option... options)
     {
+        return kubectl(SimpleApplication.class, options);
+    }
+
+    /**
+     * Execute a kubectl command against the k8s cluster
+     *
+     * @param applicationClass  {@link Class} of {@link Application} to launch
+     * @param options           the options to use to run the kubectl command
+     *
+     * @return  the {@link Application} representing the running
+     *          kubectl command
+     */
+    public <A extends Application> A kubectl(Class<A> applicationClass, Option... options)
+    {
         try
         {
             OptionsByType optionsByType = OptionsByType.empty();
@@ -287,7 +308,7 @@ public class K8sCluster<K extends K8sCluster>
 
             optionsByType.add(arguments);
 
-            return LocalPlatform.get().launch(SimpleApplication.class, optionsByType.asArray());
+            return LocalPlatform.get().launch(applicationClass, optionsByType.asArray());
         }
         catch (Throwable e)
         {
@@ -371,6 +392,58 @@ public class K8sCluster<K extends K8sCluster>
         String[] parts = line.trim().split("\\s+");
 
         return parts.length >= 2 ? parts[1] : "NotReady";
+    }
+
+
+    /**
+     * Obtain the {@link Pod} with the specified name.
+     *
+     * @param podName  the name of the Pod
+     *
+     * @return  the requested Pod or an {@code null} if the Pod
+     *          does not  exist
+     */
+    public Pod getPod(String podName)
+    {
+        return getPod(null, podName);
+    }
+
+
+    /**
+     * Obtain the {@link Pod} with the specified name.
+     *
+     * @param podName  the name of the Pod
+     *
+     * @return  the requested Pod or an {@code null} if the Pod
+     *          does not  exist
+     */
+    public Pod getPod(String namespace, String podName)
+    {
+        List<String> args = new ArrayList<>();
+
+        args.add("get");
+        args.add("pod");
+
+        if (namespace != null)
+        {
+            args.add("-n");
+            args.add(namespace);
+        }
+
+        args.add("-o");
+        args.add("name");
+        args.add(podName);
+
+        int exitCode = kubectlAndWait(Arguments.of(args), Console.none());
+
+        if (exitCode == 0)
+        {
+            return new Pod(this, podName, namespace);
+        }
+        else
+        {
+            return null;
+        }
     }
 
 
