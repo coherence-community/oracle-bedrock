@@ -37,7 +37,7 @@ import com.oracle.bedrock.runtime.java.JavaVirtualMachine;
  *
  * @author Brian Oliver
  */
-public class ContainerBasedCoherenceCacheServerTest extends AbstractCoherenceCacheServerTest
+public class ContainerBasedCoherenceCacheServerIT extends AbstractCoherenceCacheServerTest
 {
     @Override
     public Platform getPlatform()

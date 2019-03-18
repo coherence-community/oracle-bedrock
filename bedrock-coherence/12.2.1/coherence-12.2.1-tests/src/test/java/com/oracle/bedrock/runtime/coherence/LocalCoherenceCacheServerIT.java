@@ -1,5 +1,5 @@
 /*
- * File: ContainerBasedCoherenceClusterBuilderTest.java
+ * File: LocalCoherenceCacheServerTest.java
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
@@ -25,33 +25,23 @@
 
 package com.oracle.bedrock.runtime.coherence;
 
+import com.oracle.bedrock.runtime.LocalPlatform;
 import com.oracle.bedrock.runtime.Platform;
-import com.oracle.bedrock.runtime.java.ContainerBasedJavaApplicationLauncher;
-import com.oracle.bedrock.runtime.java.JavaVirtualMachine;
-import org.junit.Ignore;
+import com.oracle.bedrock.runtime.java.LocalJavaApplicationLauncher;
 
 /**
- * Functional Tests for {@link CoherenceClusterBuilder}s using a {@link ContainerBasedJavaApplicationLauncher}.
+ * Functional Test for {@link CoherenceCacheServer}s using a {@link LocalJavaApplicationLauncher}.
  * <p>
  * Copyright (c) 2014. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Brian Oliver
  */
-public class ContainerBasedCoherenceClusterBuilderTest extends AbstractCoherenceClusterBuilderTest
+public class LocalCoherenceCacheServerIT extends AbstractCoherenceCacheServerTest
 {
     @Override
     public Platform getPlatform()
     {
-        return JavaVirtualMachine.get();
-    }
-
-
-    @Override
-    @Ignore
-    public void shouldPerformRollingRestartOfCluster()
-    {
-        // we skip this test as performing a rolling restart in single JVM
-        // container is not supported for Coherence
+        return LocalPlatform.get();
     }
 }

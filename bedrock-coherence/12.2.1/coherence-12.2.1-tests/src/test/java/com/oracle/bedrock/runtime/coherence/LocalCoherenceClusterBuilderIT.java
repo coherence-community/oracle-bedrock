@@ -59,7 +59,7 @@ import static org.hamcrest.CoreMatchers.is;
  *
  * @author Brian Oliver
  */
-public class LocalCoherenceClusterBuilderTest extends AbstractCoherenceClusterBuilderTest
+public class LocalCoherenceClusterBuilderIT extends AbstractCoherenceClusterBuilderTest
 {
     @Override
     public Platform getPlatform()
