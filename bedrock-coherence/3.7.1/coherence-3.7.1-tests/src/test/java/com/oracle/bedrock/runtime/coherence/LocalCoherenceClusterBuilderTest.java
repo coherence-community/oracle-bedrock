@@ -141,11 +141,4 @@ public class LocalCoherenceClusterBuilderTest extends AbstractCoherenceClusterBu
     public void shouldFailOverNamedCache() {
         // FIXME
     }
-
-
-    @Override
-    @Ignore
-    public void shouldRemoveCoherenceClusterMemberFromCoherenceCluster() {
-        // FIXME
-    }
 }
