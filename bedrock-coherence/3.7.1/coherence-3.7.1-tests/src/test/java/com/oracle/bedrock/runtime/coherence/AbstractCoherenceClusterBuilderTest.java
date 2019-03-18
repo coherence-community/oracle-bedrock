@@ -371,7 +371,10 @@ public abstract class AbstractCoherenceClusterBuilderTest extends AbstractTest
     @Test
     public void shouldRemoveCoherenceClusterMemberFromCoherenceCluster()
     {
+        Capture<Integer>        wkaPort        = new Capture<>(LocalPlatform.get().getAvailablePorts());
         final int               CLUSTER_SIZE   = 3;
+        String                  localHost      = System.getProperty("tangosol.coherence.localhost", "127.0.0.1");
+
         ClusterPort             clusterPort    = ClusterPort.of(new Capture<>(LocalPlatform.get().getAvailablePorts()));
         AvailablePortIterator   availablePorts = LocalPlatform.get().getAvailablePorts();
 
@@ -379,7 +382,9 @@ public abstract class AbstractCoherenceClusterBuilderTest extends AbstractTest
 
         builder.include(CLUSTER_SIZE,
                         CoherenceClusterMember.class,
+                        WellKnownAddress.of(localHost, wkaPort),
                         clusterPort,
+                        LocalHost.of(localHost, wkaPort),
                         ClusterName.of("Access"),
                         DisplayName.of("DCS"));
 

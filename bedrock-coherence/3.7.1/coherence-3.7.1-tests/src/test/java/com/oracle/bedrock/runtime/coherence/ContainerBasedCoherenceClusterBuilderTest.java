@@ -64,11 +64,4 @@ public class ContainerBasedCoherenceClusterBuilderTest extends AbstractCoherence
         // we skip this test as membership starting/stopping events and
         // recovery is not supported in a single JVM
     }
-
-
-    @Override
-    @Ignore
-    public void shouldRemoveCoherenceClusterMemberFromCoherenceCluster() {
-        // FIXME
-    }
 }
