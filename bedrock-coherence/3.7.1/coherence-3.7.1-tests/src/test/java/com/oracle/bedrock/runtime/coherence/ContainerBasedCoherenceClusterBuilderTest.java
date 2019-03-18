@@ -38,6 +38,7 @@ import org.junit.Ignore;
  *
  * @author Brian Oliver
  */
+@Ignore
 public class ContainerBasedCoherenceClusterBuilderTest extends AbstractCoherenceClusterBuilderTest
 {
     @Override

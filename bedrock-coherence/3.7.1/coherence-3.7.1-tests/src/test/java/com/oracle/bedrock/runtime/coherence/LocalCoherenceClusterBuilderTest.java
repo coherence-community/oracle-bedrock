@@ -42,6 +42,7 @@ import com.oracle.bedrock.runtime.options.DisplayName;
 import com.oracle.bedrock.util.Capture;
 import org.jacoco.agent.rt.RT;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.File;
@@ -59,6 +60,7 @@ import static org.hamcrest.CoreMatchers.is;
  *
  * @author Brian Oliver
  */
+@Ignore
 public class LocalCoherenceClusterBuilderTest extends AbstractCoherenceClusterBuilderTest
 {
     @Override
