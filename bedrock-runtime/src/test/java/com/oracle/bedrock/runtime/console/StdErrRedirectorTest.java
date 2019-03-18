@@ -23,14 +23,12 @@
  * "Portions Copyright [year] [name of copyright owner]"
  */
 
-package com.oracle.bedrock.runtime;
+package com.oracle.bedrock.runtime.console;
 
+import com.oracle.bedrock.runtime.ApplicationConsole;
+import com.oracle.bedrock.runtime.console.StdErrRedirector;
+import com.oracle.bedrock.runtime.console.StdOutRedirector;
 import org.junit.Test;
-
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.nullValue;
-
-import static org.junit.Assert.assertThat;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -39,27 +37,38 @@ import java.io.PrintWriter;
 import java.io.StringReader;
 import java.io.StringWriter;
 
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.nullValue;
+import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 /**
  * @author Jonathan Knight
  */
-public class AbstractApplicationOutputRedirectorTest
+public class StdErrRedirectorTest
 {
     @Test
     public void shouldWriteNonConsoleDiagnosticOutput() throws Exception
     {
-        InputStream  inputStream  = new ByteArrayInputStream("foo".getBytes());
-        StringWriter writer       = new StringWriter();
-        PrintWriter  outputWriter = new PrintWriter(writer);
+        InputStream        inputStream  = new ByteArrayInputStream("foo".getBytes());
+        StringWriter       writer       = new StringWriter();
+        PrintWriter        outputWriter = new PrintWriter(writer);
+        ApplicationConsole console = mock(ApplicationConsole.class);
 
-        AbstractApplication.OutputRedirector redirector = new AbstractApplication.OutputRedirector("TestApp",
-                                                                                                   "X",
-                                                                                                   inputStream,
-                                                                                                   outputWriter,
-                                                                                                   1234,
-                                                                                                   false,
-                                                                                                   false);
+        when(console.getErrorWriter()).thenReturn(outputWriter);
+        when(console.isDiagnosticsEnabled()).thenReturn(false);
 
-        redirector.run();
+        StdErrRedirector redirector = new StdErrRedirector()
+        {
+            @Override
+            public synchronized void start()
+            {
+                run();
+            }
+        };
+
+        redirector.start("TestApp", "X", inputStream, console, 1234, false);
 
         BufferedReader reader = new BufferedReader(new StringReader(writer.getBuffer().toString()));
         String         line1  = reader.readLine();
@@ -79,19 +88,24 @@ public class AbstractApplicationOutputRedirectorTest
     @Test
     public void shouldWriteConsoleDiagnosticOutput() throws Exception
     {
-        InputStream  inputStream  = new ByteArrayInputStream("foo".getBytes());
-        StringWriter writer       = new StringWriter();
-        PrintWriter  outputWriter = new PrintWriter(writer);
+        InputStream        inputStream  = new ByteArrayInputStream("foo".getBytes());
+        StringWriter       writer       = new StringWriter();
+        PrintWriter        outputWriter = new PrintWriter(writer);
+        ApplicationConsole console = mock(ApplicationConsole.class);
 
-        AbstractApplication.OutputRedirector redirector = new AbstractApplication.OutputRedirector("TestApp",
-                                                                                                   "X",
-                                                                                                   inputStream,
-                                                                                                   outputWriter,
-                                                                                                   1234,
-                                                                                                   false,
-                                                                                                   true);
+        when(console.getErrorWriter()).thenReturn(outputWriter);
+        when(console.isDiagnosticsEnabled()).thenReturn(true);
 
-        redirector.run();
+        StdErrRedirector redirector = new StdErrRedirector()
+        {
+            @Override
+            public synchronized void start()
+            {
+                run();
+            }
+        };
+
+        redirector.start("TestApp", "X", inputStream, console, 1234, false);
 
         BufferedReader reader = new BufferedReader(new StringReader(writer.getBuffer().toString()));
         String         line1  = reader.readLine();
