@@ -23,6 +23,16 @@ pipeline {
                         }
                     }
                 }
+                stage('Coherence 3.7.1 Tests') {
+                    agent {
+                        label 'linux'
+                    }
+                    steps {
+                        withMaven(jdk: 'Jdk8', maven: 'Maven3.6.0', mavenSettingsConfig: 'maven-settings', tempBinDir: '') {
+                            sh 'mvn -am -P coherence -pl bedrock-coherence/3.7.1/coherence-3.7.1-tests clean install'
+                        }
+                    }
+                }
                 stage('bedrock-runtime-docker-tests') {
                     agent {
                       label 'linux'

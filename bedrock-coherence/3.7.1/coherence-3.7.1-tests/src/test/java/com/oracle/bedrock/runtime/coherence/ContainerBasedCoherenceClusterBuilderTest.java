@@ -29,6 +29,7 @@ import com.oracle.bedrock.runtime.Platform;
 import com.oracle.bedrock.runtime.java.ContainerBasedJavaApplicationLauncher;
 import com.oracle.bedrock.runtime.java.JavaVirtualMachine;
 import org.junit.Ignore;
+import org.junit.Test;
 
 /**
  * Functional Tests for {@link CoherenceClusterBuilder}s using a {@link ContainerBasedJavaApplicationLauncher}.

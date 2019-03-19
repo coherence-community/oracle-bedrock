@@ -72,8 +72,6 @@
         <module>bedrock-runtime-windows</module>
         <module>bedrock-runtime-windows-tests</module>
 
-        <module>bedrock-coherence</module>
-
         <module>bedrock-runtime-docker</module>
         <module>bedrock-runtime-docker-tests</module>
 
@@ -372,4 +370,12 @@
             </plugin>
         </plugins>
     </build>
+    <profiles>
+        <profile>
+            <id>coherence</id>
+            <modules>
+                <module>bedrock-coherence</module>
+            </modules>
+        </profile>
+    </profiles>
 </project>
