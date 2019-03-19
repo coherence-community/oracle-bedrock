@@ -29,7 +29,7 @@ pipeline {
                     }
                     steps {
                         withMaven(jdk: 'Jdk8', maven: 'Maven3.6.0', mavenSettingsConfig: 'maven-settings', tempBinDir: '') {
-                            sh 'mvn -am -Djava.net.preferIPv4Stack=true -Dtangosol.coherence.tcpring=false -pl bedrock-coherence/3.7.1/coherence-3.7.1-tests clean install'
+                            sh 'mvn -am -Djava.net.preferIPv4Stack=true -Dtangosol.coherence.tcpring=false -P coherence -pl bedrock-coherence/3.7.1/coherence-3.7.1-tests clean install'
                         }
                     }
                 }
