@@ -39,7 +39,7 @@ pipeline {
                     }
                     steps {
                         withMaven(jdk: 'Jdk8', maven: 'Maven3.6.0', mavenSettingsConfig: 'maven-settings', tempBinDir: '') {
-                            sh 'mvn -am -P coherence -pl bedrock-coherence/12.1.2/coherence-3.7.1-tests,!bedrock-coherence/3.7.1 clean install'
+                            sh 'mvn -am -P coherence -pl bedrock-coherence/12.1.2/coherence-12.1.2-tests,!bedrock-coherence/3.7.1 clean install'
                         }
                     }
                 }
