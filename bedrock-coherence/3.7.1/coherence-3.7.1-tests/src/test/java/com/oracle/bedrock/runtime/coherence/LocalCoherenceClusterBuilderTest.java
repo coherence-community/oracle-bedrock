@@ -135,10 +135,4 @@ public class LocalCoherenceClusterBuilderTest extends AbstractCoherenceClusterBu
             Assert.fail();
         }
     }
-
-    @Override
-    @Ignore
-    public void shouldFailOverNamedCache() {
-        // FIXME
-    }
 }
