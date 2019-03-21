@@ -33,6 +33,16 @@ pipeline {
                         }
                     }
                 }
+                stage('Coherence 12.1.2 Tests') {
+                    agent {
+                        label 'linux'
+                    }
+                    steps {
+                        withMaven(jdk: 'Jdk8', maven: 'Maven3.6.0', mavenSettingsConfig: 'maven-settings', tempBinDir: '') {
+                            sh 'mvn -am -P coherence -pl bedrock-coherence/12.1.2/coherence-12.1.2-tests,!bedrock-coherence/3.7.1 clean install'
+                        }
+                    }
+                }
                 stage('bedrock-runtime-docker-tests') {
                     agent {
                       label 'linux'
