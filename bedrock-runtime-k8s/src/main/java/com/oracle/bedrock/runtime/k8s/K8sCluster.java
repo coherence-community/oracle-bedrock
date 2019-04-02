@@ -60,9 +60,23 @@ public class K8sCluster<K extends K8sCluster>
         implements Closeable
 {
     /**
-     * The default location of kubectl.
+     * The System property value used to override the location of the
+     * kubectl executable.
      */
-    public static final File DEFAULT_KUBECTL = new File("/usr/local/bin/kubectl");
+    public static final String PROP_KUBECTL = "bedrock.kubectl";
+
+    /**
+     * The default location of kubectl on MacOS and linux platforms.
+     */
+    private static final String DEFAULT_KUBECTL_LOCATION = "/usr/local/bin/kubectl";
+
+    /**
+     * The default location of kubectl.
+     * <p>
+     * Defaults to "/usr/local/bin/kubectl" but can be overridden using the
+     * "bedrock.kubectl" System property.
+     */
+    public static final File DEFAULT_KUBECTL = new File(System.getProperty(PROP_KUBECTL, DEFAULT_KUBECTL_LOCATION));
 
     /**
      * The name of the default namespace if none is provided for a Pod.
