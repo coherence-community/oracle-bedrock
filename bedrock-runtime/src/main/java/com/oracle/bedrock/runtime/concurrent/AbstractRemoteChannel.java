@@ -59,6 +59,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * An abstract implementation of a {@link RemoteChannel}.
@@ -71,6 +73,11 @@ import java.util.concurrent.atomic.AtomicLong;
 @Internal
 public abstract class AbstractRemoteChannel extends AbstractControllableRemoteChannel
 {
+    /**
+    * The {@link Logger} for this class.
+    */
+    private static Logger LOGGER = Logger.getLogger(AbstractRemoteChannel.class.getName());
+
     /**
      * The underlying {@link OutputStream} to use for sending requests and raising
      * events on the {@link RemoteChannel}.
@@ -218,9 +225,9 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
             }
             catch (IOException e)
             {
-                // TODO: log the exception
-
                 isReadable.set(false);
+                LOGGER.warning(this.getClass().getName() + ".open: unexpected IOException: " + e.getLocalizedMessage());
+                LOGGER.log(Level.FINE, "stack trace", e);
             }
 
             requestAcceptorThread = new Thread(new Runnable()
@@ -296,6 +303,7 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
                                                                // the stream has become corrupted or was closed
                                                                // (either way there's nothing else we can read or do)
                                                                isReadable.set(false);
+                                                               LOGGER.log(Level.FINE, "termination of RemoteChannel:RequestAcceptor thread", e);
                                                            }
                                                        }
 
@@ -341,7 +349,10 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
         // close the input and output streams
         try
         {
-            input.close();
+            if (input != null)
+                {
+                input.close();
+                }
         }
         catch (IOException e)
         {
@@ -354,7 +365,10 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
 
         try
         {
-            output.close();
+            if (output != null)
+                {
+                output.close();
+                }
         }
         catch (IOException e)
         {
