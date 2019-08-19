@@ -4,7 +4,7 @@
     <parent>
         <groupId>com.oracle.bedrock</groupId>
         <artifactId>project</artifactId>
-        <version>5.0.12-SNAPSHOT</version>
+        <version>5.0.12</version>
     </parent>
 
     <artifactId>bedrock-testing-support</artifactId>
