@@ -373,6 +373,9 @@
     <profiles>
         <profile>
             <id>coherence</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
             <modules>
                 <module>bedrock-coherence</module>
             </modules>
