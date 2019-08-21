@@ -105,12 +105,12 @@ public class GetAutoStartServiceNames implements RemoteCallable<Set<String>>
 
                             if (isAutoStartable(serviceScheme))
                             {
-                                serviceNames.add(serviceScheme.getServiceName());
+                                serviceNames.add(serviceScheme.getScopedServiceName());
                             }
                         }
                         else
                         {
-                            serviceNames.add(serviceScheme.getServiceName());
+                            serviceNames.add(serviceScheme.getScopedServiceName());
                         }
                     }
                 }
