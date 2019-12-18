@@ -363,31 +363,51 @@ public class SocketBasedRemoteChannelServer extends AbstractControllableRemoteCh
             {
                 // determine the next channel id
                 int remoteChannelId = ++channelId;
+                boolean connected = false;
+                int attempts = 0;
+                int maxAttempts = 5;
 
-                try
+                while (!connected && attempts < maxAttempts)
                 {
-                    Socket socket = serverSocket.accept();
+                    attempts++;
+                    try
+                    {
+                        Socket socket = serverSocket.accept();
 
-                    remoteChannel = new SocketBasedRemoteChannel(socket);
+                        remoteChannel = new SocketBasedRemoteChannel(socket);
 
-                    // add all of the RemoteChannelServer RemoteEventListeners to the RemoteChannel
-                    eventListenersByStreamName.forEach((streamName,
-                        listeners) -> listeners.forEach(listener -> remoteChannel.addListener(listener,
-                                                                                              streamName)));
+                        // add all of the RemoteChannelServer RemoteEventListeners to the RemoteChannel
+                        eventListenersByStreamName.forEach((streamName,
+                            listeners) -> listeners.forEach(listener -> remoteChannel.addListener(listener,
+                                                                                                  streamName)));
 
-                    // add all of the RemoteChannelServer ChannelListeners to the RemoteChannel
-                    channelListeners.forEach(listener -> remoteChannel.addListener(listener));
+                        // add all of the RemoteChannelServer ChannelListeners to the RemoteChannel
+                        channelListeners.forEach(listener -> remoteChannel.addListener(listener));
 
-                    // remember our the RemoteChannel
-                    remoteChannels.put(remoteChannelId, remoteChannel);
+                        // remember our the RemoteChannel
+                        remoteChannels.put(remoteChannelId, remoteChannel);
 
-                    // open the channel to for communication
-                    remoteChannel.open();
-                }
-                catch (Throwable e)
-                {
-                    isTerminating.compareAndSet(false, true);
-                    remoteChannels.remove(remoteChannelId);
+                        // open the channel to for communication
+                        remoteChannel.open();
+                        connected = true;
+                    }
+                    catch (Throwable e)
+                    {
+                        if (remoteChannel != null && remoteChannel.isOpen())
+                        {
+                        try
+                            {
+                            remoteChannel.onClose();
+                            }
+                        catch (Throwable t)
+                            {
+                            // ignored
+                            }
+                        }
+                        remoteChannel = null;
+                        remoteChannels.remove(remoteChannelId);
+                    }
+                    isTerminating.compareAndSet(false, !connected);
                 }
             }
         }
