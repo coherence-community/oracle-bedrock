@@ -114,6 +114,7 @@
         <maven.site.plugin.version>3.7.1</maven.site.plugin.version>
         <maven.source.plugin.version>3.0.1</maven.source.plugin.version>
         <maven.surefire.plugin.version>2.21.0</maven.surefire.plugin.version>
+        <maven.license.plugin.version>3.0</maven.license.plugin.version>
 
         <!-- dependency versions -->
         <aether.version>1.1.0</aether.version>
@@ -129,6 +130,7 @@
         <junit.version>4.12</junit.version>
         <maven.aether.version>3.3.9</maven.aether.version>
         <mockito.version>2.20.1</mockito.version>
+        <p4.version>2019.1.1889202</p4.version>
     </properties>
 
     <distributionManagement>
@@ -176,16 +178,28 @@
                 <version>${hamcrest.version}</version>
             </dependency>
 
-       		<dependency>
-       			<groupId>org.glassfish</groupId>
-       			<artifactId>javax.el</artifactId>
-       			<version>${glassfish.el.version}</version>
-       		</dependency>
+            <dependency>
+                <groupId>org.glassfish</groupId>
+                <artifactId>javax.el</artifactId>
+                <version>${glassfish.el.version}</version>
+            </dependency>
 
             <dependency>
                 <groupId>com.jcraft</groupId>
                 <artifactId>jsch</artifactId>
                 <version>${jsch.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.perforce</groupId>
+                <artifactId>p4java</artifactId>
+                <version>${p4.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.mycila</groupId>
+                <artifactId>license-maven-plugin</artifactId>
+                <version>${maven.license.plugin.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
