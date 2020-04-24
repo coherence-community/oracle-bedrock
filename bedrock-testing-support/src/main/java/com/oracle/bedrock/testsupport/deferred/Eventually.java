@@ -68,6 +68,44 @@ import static com.oracle.bedrock.deferred.DeferredHelper.valueOf;
 public class Eventually
 {
     /**
+     * Asserts that a value returned by a specified {@link Deferred} will
+     * eventually satisfy a {@link Matcher} using the provided {@link Option}s.
+     *
+     * @param <T>      the type of the value
+     * @param deferred the deferred value
+     * @param matcher  the {@link Matcher} for the value
+     * @param options  the {@link Option}s for the assertion
+     *
+     * @throws AssertionError if the assertion fails
+     */
+    public static <T> void assertDeferred(Deferred<T> deferred,
+                                          Matcher<? super T> matcher,
+                                          Option... options) throws AssertionError
+    {
+        assertDeferred(null, deferred, matcher, options);
+    }
+
+    /**
+     * Asserts that a value returned by a specified {@link Deferred} will
+     * eventually satisfy a {@link Matcher} using the provided {@link Option}s.
+     *
+     * @param <T>      the type of the value
+     * @param message  the message for the AssertionError (<code>null</code> ok)
+     * @param deferred the deferred of value
+     * @param matcher  the {@link Matcher} for the value
+     * @param options  the {@link Option}s
+     *
+     * @throws AssertionError if the assertion fails
+     */
+    public static <T> void assertDeferred(String message,
+                                          Deferred<T> deferred,
+                                          Matcher<? super T> matcher,
+                                          Option... options) throws AssertionError
+    {
+        assertThat(message, deferred, matcher, options);
+    }
+
+    /**
      * Asserts that a value will eventually satisfy the specified {@link Matcher}
      * using the specified {@link Option}s.
      * <p>

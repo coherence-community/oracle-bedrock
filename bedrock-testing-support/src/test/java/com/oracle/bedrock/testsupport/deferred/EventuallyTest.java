@@ -37,6 +37,8 @@ import com.oracle.bedrock.deferred.TemporarilyUnavailableException;
 import com.oracle.bedrock.testsupport.matchers.ThrowableMatcher;
 import com.oracle.bedrock.testsupport.deferred.Eventually;
 import com.oracle.bedrock.util.StopWatch;
+import java.util.Collections;
+import java.util.Map;
 import org.hamcrest.Matcher;
 import org.hamcrest.Matchers;
 import org.junit.Assert;
@@ -66,6 +68,18 @@ import static org.hamcrest.core.IsCollectionContaining.hasItem;
  */
 public class EventuallyTest
 {
+    /**
+     * Ensure that a {@link Eventually#assertDeferred(Deferred, Matcher, Option...)}
+     * does not fail when called on a proxy that returns a primitive or wrapper
+     * type.
+     */
+    @Test
+    public void shouldWorkWithDeferredLambda()
+    {
+        Map<String, Integer> map = Collections.singletonMap("one", 1);
+        Eventually.assertDeferred(() -> map.get("one"), is(1));
+    }
+
     /**
      * Ensure that a {@link Eventually#assertThat(Object, Matcher, Option...)}
      * waits at least the default amount of time before throwing an exception when
