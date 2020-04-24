@@ -121,5 +121,9 @@ public interface Deferred<T>
      *
      * @return the {@link Class} of the {@link Deferred} object
      */
-    public Class<T> getDeferredClass();
+    @SuppressWarnings("unchecked")
+    public default Class<T> getDeferredClass()
+    {
+        return (Class<T>) Object.class;
+    }
 }

@@ -89,11 +89,4 @@ public class DeferredFunction<T, R> implements Deferred<R>
             throw new TemporarilyUnavailableException(this, e);
         }
     }
-
-
-    @Override
-    public Class<R> getDeferredClass()
-    {
-        return (Class<R>) Object.class;
-    }
 }
