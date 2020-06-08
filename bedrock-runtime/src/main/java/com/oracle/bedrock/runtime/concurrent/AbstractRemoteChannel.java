@@ -30,25 +30,33 @@ import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.annotations.Internal;
 import com.oracle.bedrock.lang.ThreadFactories;
 import com.oracle.bedrock.options.Timeout;
+import com.oracle.bedrock.runtime.Application;
+import com.oracle.bedrock.runtime.LocalPlatform;
 import com.oracle.bedrock.runtime.concurrent.options.Caching;
 import com.oracle.bedrock.runtime.concurrent.options.StreamName;
 import com.oracle.bedrock.runtime.java.io.ClassLoaderAwareObjectInputStream;
+import com.oracle.bedrock.runtime.options.Argument;
+import com.oracle.bedrock.runtime.options.Console;
 import com.oracle.bedrock.util.Pair;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.NotSerializableException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
+import java.io.StreamCorruptedException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.net.Socket;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Set;
 import java.util.concurrent.Callable;
@@ -205,6 +213,50 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
         protocol.put("EVENT", EventOperation.class);
     }
 
+    /**
+     * Get netstats information from OS.
+     */
+    public static ArrayList<String> getNetStatsInfo()
+        {
+        try
+            {
+            String        sOS       = System.getProperty("os.name").toLowerCase();
+            StringBuilder sbCommand = new StringBuilder().append("netstat ");
+
+            if (sOS.contains("mac"))
+                {
+                sbCommand.append("-tanp tcp");
+                }
+            else if (sOS.contains("linux"))
+                {
+                sbCommand.append("-tanpve");
+                }
+            else if (sOS.contains("windows"))
+                {
+                sbCommand.append("-baonp tcp");
+                }
+
+            Process           process    = Runtime.getRuntime().exec(sbCommand.toString());
+            InputStream       in         = process.getInputStream();
+            ArrayList<String> asPortInfo = new ArrayList<String>();
+            BufferedReader    buffer     = new BufferedReader(new InputStreamReader(in));
+
+            String line;
+            while ((line = buffer.readLine()) != null)
+                {
+                line += System.lineSeparator();
+                asPortInfo.add(line);
+                }
+
+            return asPortInfo;
+            }
+        catch (Exception e)
+            {
+            e.printStackTrace(System.err);
+            }
+
+        return null;
+        }
 
     /**
      * Opens the {@link AbstractRemoteChannel} to accept and submit {@link Callable}s.
@@ -227,6 +279,7 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
             {
                 isReadable.set(false);
                 LOGGER.warning(this.getClass().getName() + ".open: unexpected IOException: " + e.getLocalizedMessage());
+                LOGGER.info("netstats info: " + getNetStatsInfo());
                 LOGGER.log(Level.FINE, "stack trace", e);
             }
 
