@@ -30,13 +30,9 @@ import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.annotations.Internal;
 import com.oracle.bedrock.lang.ThreadFactories;
 import com.oracle.bedrock.options.Timeout;
-import com.oracle.bedrock.runtime.Application;
-import com.oracle.bedrock.runtime.LocalPlatform;
 import com.oracle.bedrock.runtime.concurrent.options.Caching;
 import com.oracle.bedrock.runtime.concurrent.options.StreamName;
 import com.oracle.bedrock.runtime.java.io.ClassLoaderAwareObjectInputStream;
-import com.oracle.bedrock.runtime.options.Argument;
-import com.oracle.bedrock.runtime.options.Console;
 import com.oracle.bedrock.util.Pair;
 
 import java.io.BufferedReader;
@@ -50,7 +46,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
-import java.io.StreamCorruptedException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
@@ -216,8 +211,10 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
     /**
      * Get netstats information from OS.
      */
-    public static ArrayList<String> getNetStatsInfo()
+    public ArrayList<String> getNetStatsInfo()
         {
+        ArrayList<String> asPortInfo = new ArrayList<String>();
+
         try
             {
             String        sOS       = System.getProperty("os.name").toLowerCase();
@@ -236,10 +233,9 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
                 sbCommand.append("-baonp tcp");
                 }
 
-            Process           process    = Runtime.getRuntime().exec(sbCommand.toString());
-            InputStream       in         = process.getInputStream();
-            ArrayList<String> asPortInfo = new ArrayList<String>();
-            BufferedReader    buffer     = new BufferedReader(new InputStreamReader(in));
+            Process        process = Runtime.getRuntime().exec(sbCommand.toString());
+            InputStream    in      = process.getInputStream();
+            BufferedReader buffer  = new BufferedReader(new InputStreamReader(in));
 
             String line;
             while ((line = buffer.readLine()) != null)
@@ -252,10 +248,10 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
             }
         catch (Exception e)
             {
-            e.printStackTrace(System.err);
+            LOGGER.warning(this.getClass().getName() + ".getNetStatsInfo: unexpected Exception: " + e.getLocalizedMessage());
             }
 
-        return null;
+        return asPortInfo;
         }
 
     /**
