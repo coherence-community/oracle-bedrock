@@ -61,15 +61,15 @@ public class MavenTest
 
         try (JavaApplication application = platform.launch(JavaApplication.class,
                                                            ClassName.of("com.tangosol.net.DefaultCacheServer"),
-                                                           Maven.artifact("com.oracle.coherence",
+                                                           Maven.artifact("com.oracle.coherence.ce",
                                                                           "coherence",
-                                                                          "3.7.1.16"),
+                                                                          "14.1.1-0-1"),
                                                            SystemProperty.of("tangosol.coherence.cacheconfig",
                                                                              "coherence-cache-config.xml"),
                                                            Console.of(console),
                                                            Diagnostics.enabled()))
         {
-            Eventually.assertThat(invoking(console).getCapturedErrorLines(), hasItem(containsString("3.7.1.16")));
+            Eventually.assertThat(invoking(console).getCapturedErrorLines(), hasItem(containsString("14.1.1-0-1")));
         }
     }
 }
