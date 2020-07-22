@@ -274,9 +274,11 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
             catch (IOException e)
             {
                 isReadable.set(false);
+                setOpen(false);
                 LOGGER.warning(this.getClass().getName() + ".open: unexpected IOException: " + e.getLocalizedMessage());
                 LOGGER.info("netstats info: " + getNetStatsInfo());
                 LOGGER.log(Level.FINE, "stack trace", e);
+                return;
             }
 
             requestAcceptorThread = new Thread(new Runnable()

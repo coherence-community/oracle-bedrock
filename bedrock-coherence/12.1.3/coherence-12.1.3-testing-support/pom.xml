@@ -123,7 +123,7 @@
                         <configuration>
                             <target>
                                 <echo message="unpacking shaded source (for javadoc)" />
-                                <unzip src="${build.directory}/${project.artifactId}-${project.version}-sources.jar" dest="${build.directory}/generated-sources" />
+                                <unzip src="${project.build.directory}/${project.artifactId}-${project.version}-sources.jar" dest="${project.build.directory}/generated-sources" />
                             </target>
                         </configuration>
                         <goals>
@@ -139,7 +139,7 @@
                 <version>${maven.javadoc.plugin.version}</version>
                 <configuration>
                     <failOnError>false</failOnError>
-                    <sourcepath>${build.directory}/generated-sources</sourcepath>
+                    <sourcepath>${project.build.directory}/generated-sources</sourcepath>
                 </configuration>
                 <executions>
                     <execution>

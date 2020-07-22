@@ -372,24 +372,32 @@ public class SocketBasedRemoteChannelServer extends AbstractControllableRemoteCh
                     attempts++;
                     try
                     {
-                        Socket socket = serverSocket.accept();
-
-                        remoteChannel = new SocketBasedRemoteChannel(socket);
+                        Socket                   socket  = serverSocket.accept();
+                        SocketBasedRemoteChannel channel = new SocketBasedRemoteChannel(socket);
 
                         // add all of the RemoteChannelServer RemoteEventListeners to the RemoteChannel
                         eventListenersByStreamName.forEach((streamName,
-                            listeners) -> listeners.forEach(listener -> remoteChannel.addListener(listener,
-                                                                                                  streamName)));
+                            listeners) -> listeners.forEach(listener -> channel.addListener(listener, streamName)));
 
                         // add all of the RemoteChannelServer ChannelListeners to the RemoteChannel
-                        channelListeners.forEach(listener -> remoteChannel.addListener(listener));
+                        channelListeners.forEach(channel::addListener);
 
                         // remember our the RemoteChannel
-                        remoteChannels.put(remoteChannelId, remoteChannel);
+                        remoteChannels.put(remoteChannelId, channel);
 
                         // open the channel to for communication
-                        remoteChannel.open();
-                        connected = true;
+                        channel.open();
+
+                        if (channel.isOpen())
+                        {
+                            remoteChannel = channel;
+                            connected = true;
+                        }
+                        else
+                        {
+                            // failed to open the channel
+                            remoteChannels.remove(remoteChannelId);
+                        }
                     }
                     catch (Throwable e)
                     {

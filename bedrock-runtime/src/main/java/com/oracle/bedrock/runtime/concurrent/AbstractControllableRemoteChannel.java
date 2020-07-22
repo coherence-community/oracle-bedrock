@@ -83,7 +83,7 @@ public abstract class AbstractControllableRemoteChannel implements ControllableR
      */
     protected synchronized void setOpen(boolean isOpen)
     {
-        this.isOpen = true;
+        this.isOpen = isOpen;
     }
 
 

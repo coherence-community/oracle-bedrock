@@ -57,6 +57,7 @@ import com.oracle.bedrock.runtime.options.Executable;
 import com.oracle.bedrock.runtime.options.Orphanable;
 import com.oracle.bedrock.runtime.options.PlatformSeparators;
 import com.oracle.bedrock.runtime.options.WorkingDirectory;
+import com.oracle.bedrock.testsupport.junit.CheckJDK;
 import com.oracle.bedrock.util.Capture;
 import org.junit.Assume;
 import org.junit.ClassRule;
@@ -644,11 +645,13 @@ public class LocalPlatformJavaApplicationTest extends AbstractJavaApplicationTes
     /**
      * Should run a {@link JavaApplication} with commercial features.
      *
-     * NOTE: This test is ignored when running in an IDE with commercial features
+     * NOTE: This test is ignored when running in a non-Oracle JDK or in an
+     * IDE with commercial features enabled.
      */
     @Test
     public void shouldUnlockCommercialFeatures() throws Exception
     {
+        CheckJDK.assumeOracleJDK();
         Assume.assumeThat(CommercialFeatures.autoDetect().isEnabled(), is(false));
 
         try (JavaApplication app = getPlatform().launch(JavaApplication.class,
