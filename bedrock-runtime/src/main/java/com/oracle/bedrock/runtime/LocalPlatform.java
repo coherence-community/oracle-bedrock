@@ -277,7 +277,7 @@ public class LocalPlatform extends AbstractPlatform
 
         // establish a remote executor server locally to test connectivity
 
-        try (SocketBasedRemoteChannelServer server = new SocketBasedRemoteChannelServer();)
+        try (SocketBasedRemoteChannelServer server = new SocketBasedRemoteChannelServer(platform.getName()))
         {
             System.out.println("Network Connectivity Tests:");
             System.out.println("---------------------------");

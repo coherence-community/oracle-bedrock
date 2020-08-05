@@ -213,6 +213,12 @@ public abstract class AbstractControllableRemoteChannel implements ControllableR
     }
 
 
+    public synchronized void removeListener(RemoteChannelListener listener)
+    {
+        channelListeners.remove(listener);
+    }
+
+
     @Override
     public void addListener(RemoteEventListener listener,
                             Option...           options)

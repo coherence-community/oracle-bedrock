@@ -364,10 +364,12 @@ public class LocalJavaApplicationLauncher<A extends JavaApplication> implements 
             diagnosticsTable.addRow("Class Path", classPathTable.toString());
         }
 
+        String applicationName = displayName.resolve(launchOptions);
+
         // ----- establish Bedrock specific system properties -----
 
         // configure a server channel to communicate with the native process
-        final SocketBasedRemoteChannelServer server = new SocketBasedRemoteChannelServer();
+        final SocketBasedRemoteChannelServer server = new SocketBasedRemoteChannelServer(applicationName);
 
         // register the defined RemoteEventListeners with the server so that when the application starts
         // the listeners can immediately start receiving RemoteEvents
@@ -526,7 +528,7 @@ public class LocalJavaApplicationLauncher<A extends JavaApplication> implements 
 
         diagnosticsTable.addRow("Application Launcher", applicationLauncherClassName);
         diagnosticsTable.addRow("Application Class", applicationClassName);
-        diagnosticsTable.addRow("Application", displayName.resolve(launchOptions));
+        diagnosticsTable.addRow("Application", applicationName);
 
         // ----- included the java arguments to the command -----
 

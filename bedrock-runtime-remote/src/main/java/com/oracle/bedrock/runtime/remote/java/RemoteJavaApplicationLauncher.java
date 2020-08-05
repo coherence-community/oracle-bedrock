@@ -117,7 +117,7 @@ public class RemoteJavaApplicationLauncher extends AbstractRemoteApplicationLaun
     public RemoteJavaApplicationLauncher() throws UnsupportedOperationException
     {
         // configure a server that the remote process can communicate with
-        remoteChannel = new SocketBasedRemoteChannelServer();
+        remoteChannel = new SocketBasedRemoteChannelServer("RemoteLauncher");
 
         // assume no resolved system properties at first
         systemProperties = new Properties();

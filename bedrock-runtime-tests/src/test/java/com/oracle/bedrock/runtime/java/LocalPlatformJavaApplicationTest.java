@@ -374,7 +374,7 @@ public class LocalPlatformJavaApplicationTest extends AbstractJavaApplicationTes
     @Test
     public void shouldCreateOrphans()
     {
-        try (SocketBasedRemoteChannelServer server = new SocketBasedRemoteChannelServer())
+        try (SocketBasedRemoteChannelServer server = new SocketBasedRemoteChannelServer("Test"))
         {
             // start a server that the child can connect too.
             server.open();
@@ -427,7 +427,7 @@ public class LocalPlatformJavaApplicationTest extends AbstractJavaApplicationTes
     @Test
     public void shouldNotCreateOrphans()
     {
-        try (SocketBasedRemoteChannelServer server = new SocketBasedRemoteChannelServer())
+        try (SocketBasedRemoteChannelServer server = new SocketBasedRemoteChannelServer("Test"))
         {
             // start a server that the child can connect too.
             server.open();

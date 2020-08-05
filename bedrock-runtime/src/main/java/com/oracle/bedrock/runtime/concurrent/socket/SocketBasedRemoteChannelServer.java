@@ -29,6 +29,7 @@ import com.oracle.bedrock.Option;
 import com.oracle.bedrock.annotations.Internal;
 import com.oracle.bedrock.io.NetworkHelper;
 import com.oracle.bedrock.runtime.concurrent.AbstractControllableRemoteChannel;
+import com.oracle.bedrock.runtime.concurrent.AbstractRemoteChannel;
 import com.oracle.bedrock.runtime.concurrent.ControllableRemoteChannel;
 import com.oracle.bedrock.runtime.concurrent.RemoteCallable;
 import com.oracle.bedrock.runtime.concurrent.RemoteChannel;
@@ -47,6 +48,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import static com.oracle.bedrock.predicate.Predicates.allOf;
@@ -63,6 +65,11 @@ import static com.oracle.bedrock.predicate.Predicates.allOf;
 @Internal
 public class SocketBasedRemoteChannelServer extends AbstractControllableRemoteChannel
 {
+    /**
+    * The {@link Logger} for this class.
+    */
+    private static Logger LOGGER = Logger.getLogger(SocketBasedRemoteChannelServer.class.getName());
+
     /**
      * The {@link ServerSocket} that will be used to accept {@link SocketBasedRemoteChannelClient}
      * connections and requests.
@@ -90,15 +97,19 @@ public class SocketBasedRemoteChannelServer extends AbstractControllableRemoteCh
      */
     private AtomicBoolean isTerminating;
 
+    /**
+     * The name for this server.
+     */
+    private String name;
 
     /**
      * Constructs a {@link SocketBasedRemoteChannelServer} that will accept
      * and process {@link Callable}s from {@link SocketBasedRemoteChannelClient}s.
      */
-    public SocketBasedRemoteChannelServer()
+    public SocketBasedRemoteChannelServer(String name)
     {
         super();
-
+        this.name           = name;
         this.serverSocket   = null;
         this.serverThread   = null;
         this.remoteChannels = new ConcurrentHashMap<>();
@@ -351,6 +362,7 @@ public class SocketBasedRemoteChannelServer extends AbstractControllableRemoteCh
          */
         private ServerThread()
         {
+            super("RemoteChannelServer-" + name);
         }
 
 
@@ -382,21 +394,20 @@ public class SocketBasedRemoteChannelServer extends AbstractControllableRemoteCh
                         // add all of the RemoteChannelServer ChannelListeners to the RemoteChannel
                         channelListeners.forEach(channel::addListener);
 
-                        // remember our the RemoteChannel
-                        remoteChannels.put(remoteChannelId, channel);
-
                         // open the channel to for communication
                         channel.open();
 
                         if (channel.isOpen())
                         {
+                            // remember our the RemoteChannel
+                            remoteChannels.put(remoteChannelId, channel);
                             remoteChannel = channel;
                             connected = true;
                         }
                         else
                         {
-                            // failed to open the channel
-                            remoteChannels.remove(remoteChannelId);
+                            attempts--;
+                            LOGGER.severe("SocketBasedRemoteChannelServer \"" + name + "\" Rejected connection on " + socket);
                         }
                     }
                     catch (Throwable e)
@@ -415,8 +426,8 @@ public class SocketBasedRemoteChannelServer extends AbstractControllableRemoteCh
                         remoteChannel = null;
                         remoteChannels.remove(remoteChannelId);
                     }
-                    isTerminating.compareAndSet(false, !connected);
                 }
+                isTerminating.compareAndSet(false, !connected);
             }
         }
     }
