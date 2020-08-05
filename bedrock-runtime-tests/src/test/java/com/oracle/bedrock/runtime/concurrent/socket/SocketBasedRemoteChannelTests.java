@@ -66,7 +66,7 @@ public class SocketBasedRemoteChannelTests
 
         try
         {
-            server = new SocketBasedRemoteChannelServer();
+            server = new SocketBasedRemoteChannelServer("Test");
 
             InetAddress address = server.open();
 
@@ -113,7 +113,7 @@ public class SocketBasedRemoteChannelTests
 
         try
         {
-            server = new SocketBasedRemoteChannelServer();
+            server = new SocketBasedRemoteChannelServer("Test");
 
             InetAddress address = server.open();
 
@@ -166,7 +166,7 @@ public class SocketBasedRemoteChannelTests
 
         try
         {
-            server = new SocketBasedRemoteChannelServer();
+            server = new SocketBasedRemoteChannelServer("Test");
 
             try
             {
@@ -217,7 +217,7 @@ public class SocketBasedRemoteChannelTests
 
         try
         {
-            server = new SocketBasedRemoteChannelServer();
+            server = new SocketBasedRemoteChannelServer("Test");
 
             InetAddress address = server.open();
 
@@ -281,7 +281,7 @@ public class SocketBasedRemoteChannelTests
             }
         };
 
-        try (SocketBasedRemoteChannelServer server = new SocketBasedRemoteChannelServer())
+        try (SocketBasedRemoteChannelServer server = new SocketBasedRemoteChannelServer("Test"))
         {
             StreamName  streamName = StreamName.of("Foo");
 
@@ -317,7 +317,7 @@ public class SocketBasedRemoteChannelTests
             }
         };
 
-        try (SocketBasedRemoteChannelServer server = new SocketBasedRemoteChannelServer())
+        try (SocketBasedRemoteChannelServer server = new SocketBasedRemoteChannelServer("Test"))
         {
             StreamName  streamName = StreamName.of("Foo");
 
