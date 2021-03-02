@@ -490,6 +490,7 @@ public abstract class AbstractAssembly<A extends Application> implements Assembl
 
                     // close the application (using the options)
                     application.close(options);
+                    application.waitFor();
 
                     // notify the assembly we're about to relaunch an application
                     onRelaunching(platform, launchOptions);

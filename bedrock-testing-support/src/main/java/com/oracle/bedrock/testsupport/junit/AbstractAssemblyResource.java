@@ -36,8 +36,13 @@ import com.oracle.bedrock.runtime.Platform;
 import com.oracle.bedrock.runtime.options.PlatformPredicate;
 import com.oracle.bedrock.util.Triple;
 import org.junit.rules.ExternalResource;
+import org.junit.rules.TestRule;
+import org.junit.runner.Description;
+import org.junit.runners.model.MultipleFailureException;
+import org.junit.runners.model.Statement;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * An abstract JUnit {@link ExternalResource} to configure and build an {@link Assembly} for use with JUnit tests.
@@ -57,64 +62,52 @@ import java.util.ArrayList;
  * @see AssemblyBuilder
  */
 public abstract class AbstractAssemblyResource<A extends Application, G extends Assembly<A>,
-                                               R extends AbstractAssemblyResource<A, G, R>> extends ExternalResource
+                                               R extends AbstractAssemblyResource<A, G, R>>
+        extends AbstractBaseAssembly<A, G, R>
+        implements TestRule
 {
-    /**
-     * Definitions for the number, types and options of each {@link Application} to launch.
-     */
-    protected ArrayList<Triple<Integer, Class<? extends A>, OptionsByType>> launchDefinitions;
-
-    /**
-     * The {@link AssemblyBuilder} to create the {@link Assembly} of {@link Application}s.
-     */
-    protected AssemblyBuilder<A, G> assemblyBuilder;
-
-    /**
-     * The {@link Infrastructure} on which to create the {@link Assembly}.
-     */
-    protected Infrastructure infrastructure;
-
-    /**
-     * The {@link OptionsByType} to use as the basis for each {@link Application} launched for the {@link Assembly}.
-     */
-    protected OptionsByType commonOptionsByType;
-
-    /**
-     * The {@link OptionsByType} to use when building the {@link Assembly} with {@link AssemblyBuilder#build(Infrastructure, Option...)}.
-     */
-    protected OptionsByType creationOptionsByType;
-
-    /**
-     * The {@link OptionsByType} to use when closing the {@link Assembly}
-     */
-    protected OptionsByType closingOptionsByType;
-
-    /**
-     * The {@link Assembly} created by the {@link AssemblyBuilder}.
-     */
-    protected G assembly;
-
-
     /**
      * Constructor for {@link AbstractAssemblyResource}.
      */
     protected AbstractAssemblyResource()
     {
-        this.launchDefinitions = new ArrayList<>();
-
-        // assume no infrastructure (ie: local)
-        this.infrastructure        = null;
-
-        this.commonOptionsByType   = OptionsByType.empty();
-        this.creationOptionsByType = OptionsByType.empty();
-        this.closingOptionsByType  = OptionsByType.empty();
-
-        this.assembly              = null;
-
-        // create the assembly builder now so sub-classes may enhance it
-        this.assemblyBuilder = createBuilder();
     }
 
+    public Statement apply(Statement base, Description description)
+    {
+        return statement(base);
+    }
+
+    private Statement statement(final Statement base)
+    {
+        return new Statement() {
+            @Override
+            public void evaluate() throws Throwable {
+            before();
+
+            List<Throwable> errors = new ArrayList<Throwable>();
+            try
+            {
+                base.evaluate();
+            } catch (Throwable t)
+            {
+                errors.add(t);
+            }
+            finally
+            {
+                try
+                {
+                    after();
+                }
+                catch (Throwable t)
+                {
+                    errors.add(t);
+                }
+            }
+            MultipleFailureException.assertEmpty(errors);
+            }
+        };
+    }
 
     /**
      * Creates a new {@link AssemblyBuilder} for creating an {@link Assembly}.
@@ -123,149 +116,13 @@ public abstract class AbstractAssemblyResource<A extends Application, G extends 
      */
     protected abstract AssemblyBuilder<A, G> createBuilder();
 
-
-    @Override
     protected void before() throws Throwable
     {
-        // establish the launch definitions for the assembly builder
-        for (Triple<Integer, Class<? extends A>, OptionsByType> launchDefinition : launchDefinitions)
-        {
-            // create the options for the application, based on the common options
-            OptionsByType optionsByType = OptionsByType.of(commonOptionsByType).addAll(launchDefinition.getZ());
+        start();
+    }
 
-            // include in the assembly builder
-            assemblyBuilder.include(launchDefinition.getX(), launchDefinition.getY(), optionsByType.asArray());
-        }
-
-        // build the assembly
-        assembly = assemblyBuilder.build(infrastructure == null ? Infrastructure.local() : infrastructure,
-                                         creationOptionsByType.asArray());
-
-        super.before();
-    }                                                                                                    
-
-
-    @Override
     protected void after()
     {
-        // close the assembly
-        assembly.close(closingOptionsByType.asArray());
-
-        super.after();
-    }
-
-
-    /**
-     * Defines the necessary information for launching one or more {@link Application}s of a specified
-     * type as part of the {@link Assembly} when the {@link ExternalResource} is established.
-     * <p>
-     * The {@link Platform} on which the {@link Application}s are launched is based on the
-     * {@link PlatformPredicate} specified as an {@link Option}.  By default this is {@link PlatformPredicate#any()}.
-     * <p>
-     * Multiple calls to this method are permitted, allowing an {@link Assembly} to be created containing
-     * multiple different types of {@link Application}s.
-     *
-     * @param count             the number of instances of the {@link Application} that should be launched for
-     *                          the {@link Assembly}
-     * @param applicationClass  the class of {@link Application}
-     * @param options           the {@link Option}s to use for launching the {@link Application}s
-     *
-     * @return the {@link AbstractAssemblyResource} to permit fluent-style method calls
-     */
-    public R include(int                count,
-                     Class<? extends A> applicationClass,
-                     Option...          options)
-    {
-        // remember the launch definition
-        launchDefinitions.add(new Triple<>(count, applicationClass, OptionsByType.of(options)));
-
-        return (R) this;
-    }
-
-
-    /**
-     * Specifies the {@link Infrastructure} that will be used to launch the specified {@link Application}s,
-     * allowing different {@link Platform}s to be used for each {@link Application} when required.
-     * <p>
-     * By default this is {@link Infrastructure#local()}, which is the {@link LocalPlatform}.
-     *
-     * @param infrastructure  the {@link Infrastructure}
-     *
-     * @return the {@link AbstractAssemblyResource} to permit fluent-style method calls
-     */
-    public R using(Infrastructure infrastructure)
-    {
-        this.infrastructure = infrastructure;
-
-        return (R) this;
-    }
-
-
-    /**
-     * Specifies the {@link Platform}s that will be used to launch the specified {@link Application}s.
-     * <p>
-     * This is equivalent to calling {@link #using(Infrastructure)} using {@link Infrastructure#using(Platform...)}
-     * with the provided {@link Platform}s.
-     *
-     * @param platforms  the {@link Platform}s
-     *
-     * @return the {@link AbstractAssemblyResource} to permit fluent-style method calls
-     */
-    public R using(Platform... platforms)
-    {
-        return using(Infrastructure.using(platforms));
-    }
-
-
-    /**
-     * The {@link Option}s to be used as the basis launching each {@link Application}s.   This will be overridden
-     * by those specifically provided for each application and those defined by {@link #withOverridingOptions(Option...)}.
-     *
-     * @param options  the {@link Option}s
-     *
-     * @return the {@link AbstractAssemblyResource} to permit fluent-style method calls
-     *
-     * @see AssemblyBuilder#build(Infrastructure, Option...)
-     */
-    public R with(Option... options)
-    {
-        this.commonOptionsByType.addAll(options);
-
-        return (R) this;
-    }
-
-
-    /**
-     * The {@link Option}s to be provided when launching {@link Application}s, overriding those
-     * that may be been defined for each {@link Application}.
-     *
-     * @param options  the {@link Option}s
-     *
-     * @return the {@link AbstractAssemblyResource} to permit fluent-style method calls
-     *
-     * @see AssemblyBuilder#build(Infrastructure, Option...)
-     */
-    public R withOverridingOptions(Option... options)
-    {
-        this.creationOptionsByType.addAll(options);
-
-        return (R) this;
-    }
-
-
-    /**
-     * The {@link Option}s to be used when closing the {@link Assembly}.
-     *
-     * @param options  the {@link Option}s
-     *
-     * @return the {@link AbstractAssemblyResource} to permit fluent-style method calls
-     *
-     * @see Assembly#close(Option...)
-     */
-    public R withClosingOptions(Option... options)
-    {
-        this.closingOptionsByType.addAll(options);
-
-        return (R) this;
+        close();
     }
 }
