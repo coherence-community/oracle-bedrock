@@ -41,10 +41,12 @@ import com.oracle.bedrock.runtime.options.StabilityPredicate;
 import com.oracle.bedrock.testsupport.junit.AbstractTest;
 import com.oracle.bedrock.util.Capture;
 import com.oracle.bedrock.util.Trilean;
+import com.tangosol.net.InetAddressHelper;
 import com.tangosol.net.NamedCache;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.net.InetAddress;
 import java.util.HashSet;
 
 import static com.oracle.bedrock.deferred.DeferredHelper.invoking;
@@ -167,11 +169,12 @@ public abstract class AbstractCoherenceClusterBuilderTest extends AbstractTest
      * Ensure that we can build a cluster using WKA.
      */
     @Test
-    public void shouldBuilderWKABasedStorageCluster()
+    public void shouldBuilderWKABasedStorageCluster()  throws Exception
     {
+        InetAddress             address            = InetAddressHelper.getLocalHost();
         Capture<Integer>        wkaPort            = new Capture<>(LocalPlatform.get().getAvailablePorts());
         ClusterPort             clusterPort        = ClusterPort.of(new Capture<>(LocalPlatform.get().getAvailablePorts()));
-        String                  localHost          = System.getProperty("tangosol.coherence.localhost", "127.0.0.1");
+        String                  localHost          = System.getProperty("tangosol.coherence.localhost", address.getHostAddress());
 
         String                  clusterName        = "WKA" + getClass().getSimpleName();
 
