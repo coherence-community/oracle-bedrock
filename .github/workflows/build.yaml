@@ -40,7 +40,6 @@ jobs:
           - bedrock-runtime-tests
           - bedrock-runtime-vagrant-tests
           - bedrock-runtime-virtual-tests
-          - bedrock-runtime-windows-tests
           - bedrock-testing-support
           - bedrock-testing-support-tests
 

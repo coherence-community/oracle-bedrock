@@ -54,7 +54,7 @@ import static org.mockito.Matchers.any;
  * @author Jonathan Knight
  * @author Brian Oliver
  */
-public class LocalPlatformApplicationIT extends AbstractTest
+public class LocalPlatformApplicationTest extends AbstractTest
 {
     /**
      * Ensure that we can run an {@link Application} (a JVM in this case).
