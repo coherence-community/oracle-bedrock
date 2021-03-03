@@ -35,6 +35,7 @@ import com.oracle.bedrock.runtime.options.Console;
 import com.oracle.bedrock.runtime.options.DisplayName;
 import com.oracle.bedrock.runtime.options.ErrorStreamRedirection;
 import com.oracle.bedrock.runtime.options.Executable;
+import org.junit.Assume;
 import org.junit.Test;
 import org.mockito.Mockito;
 
@@ -64,6 +65,8 @@ public class LocalPlatformApplicationTest
     @Test
     public void shouldLaunchApplication() throws Exception
     {
+        Assume.assumeFalse("Skipping test in GitHub", Boolean.getBoolean("github.build"));
+
         PipedApplicationConsole console = new PipedApplicationConsole();
 
         try (Application application = LocalPlatform.get().launch(Application.class,
@@ -94,6 +97,8 @@ public class LocalPlatformApplicationTest
     @Test
     public void shouldLaunchExecutable() throws Exception
     {
+        Assume.assumeFalse("Skipping test in GitHub", Boolean.getBoolean("github.build"));
+
         PipedApplicationConsole console = new PipedApplicationConsole();
 
         try (Application application = LocalPlatform.get().launch("java",
@@ -124,6 +129,8 @@ public class LocalPlatformApplicationTest
     @Test
     public void shouldInvokeApplicationListeners() throws Exception
     {
+        Assume.assumeFalse("Skipping test in GitHub", Boolean.getBoolean("github.build"));
+
         ApplicationListener<Application> listener = Mockito.mock(ApplicationListener.class);
 
         PipedApplicationConsole          console  = new PipedApplicationConsole();

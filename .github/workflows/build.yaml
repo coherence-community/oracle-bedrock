@@ -64,4 +64,4 @@ jobs:
       run: |
         export DEV_ROOT=$(pwd)
         mvn -U --batch-mode -e clean install -DskipTests
-        mvn -U --batch-mode -e verify -pl ${{ matrix.module }}
+        mvn -U --batch-mode -e verify -pl ${{ matrix.module }} -Dgithub.build=true

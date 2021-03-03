@@ -44,6 +44,7 @@ import com.oracle.bedrock.util.Trilean;
 import com.tangosol.net.InetAddressHelper;
 import com.tangosol.net.NamedCache;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Test;
 
 import java.net.InetAddress;
@@ -171,6 +172,8 @@ public abstract class AbstractCoherenceClusterBuilderTest extends AbstractTest
     @Test
     public void shouldBuilderWKABasedStorageCluster()  throws Exception
     {
+        Assumptions.assumeFalse(Boolean.getBoolean("github.build"), "Skipping test in GitHub");
+
         InetAddress             address            = InetAddressHelper.getLocalHost();
         Capture<Integer>        wkaPort            = new Capture<>(LocalPlatform.get().getAvailablePorts());
         ClusterPort             clusterPort        = ClusterPort.of(new Capture<>(LocalPlatform.get().getAvailablePorts()));
