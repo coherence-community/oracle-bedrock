@@ -38,6 +38,7 @@ import org.junit.jupiter.api.Disabled;
  *
  * @author Brian Oliver
  */
+@Disabled
 public class ContainerBasedCoherenceClusterBuilderIT extends AbstractCoherenceClusterBuilderTest
 {
     @Override

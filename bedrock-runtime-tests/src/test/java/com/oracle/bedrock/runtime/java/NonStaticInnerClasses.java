@@ -29,7 +29,7 @@ import com.oracle.bedrock.runtime.concurrent.RemoteCallable;
 import com.oracle.bedrock.runtime.concurrent.RemoteRunnable;
 
 /**
- * Supporting class for {@link ContainerBasedJavaApplicationTest#shouldNotAllowNonStaticInnerClassRemoteCallable()}
+ * Supporting class for {@link ContainerBasedJavaApplicationIT#shouldNotAllowNonStaticInnerClassRemoteCallable()}
  * tests asserting the result of a non static inner class, which cannot be serialized, fails correctly.
  *
  * <p>

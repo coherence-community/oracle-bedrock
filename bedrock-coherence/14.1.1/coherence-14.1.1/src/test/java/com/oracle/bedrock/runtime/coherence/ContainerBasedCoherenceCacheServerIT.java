@@ -28,6 +28,7 @@ package com.oracle.bedrock.runtime.coherence;
 import com.oracle.bedrock.runtime.Platform;
 import com.oracle.bedrock.runtime.java.ContainerBasedJavaApplicationLauncher;
 import com.oracle.bedrock.runtime.java.JavaVirtualMachine;
+import org.junit.jupiter.api.Disabled;
 
 /**
  * Functional Test for {@link CoherenceCacheServer}s using a {@link ContainerBasedJavaApplicationLauncher}.
@@ -37,6 +38,7 @@ import com.oracle.bedrock.runtime.java.JavaVirtualMachine;
  *
  * @author Brian Oliver
  */
+@Disabled
 public class ContainerBasedCoherenceCacheServerIT extends AbstractCoherenceCacheServerTest
 {
     @Override

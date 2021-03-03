@@ -34,7 +34,7 @@ jobs:
           - bedrock-runtime-jprofiler
           - bedrock-runtime-k8s
           - bedrock-runtime-maven-tests
-          - bedrock-runtime-remote-tests
+#          - bedrock-runtime-remote-tests
           - bedrock-runtime-tests
           - bedrock-runtime-vagrant-tests
           - bedrock-runtime-virtual-tests

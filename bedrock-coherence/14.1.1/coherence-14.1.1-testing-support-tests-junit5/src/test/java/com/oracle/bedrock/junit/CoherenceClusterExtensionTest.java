@@ -35,9 +35,8 @@ import com.oracle.bedrock.testsupport.deferred.Eventually;
 import com.oracle.bedrock.util.Capture;
 import com.tangosol.net.ConfigurableCacheFactory;
 import com.tangosol.net.NamedCache;
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import java.util.Set;
 import java.util.TreeSet;
@@ -51,21 +50,21 @@ import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNull.notNullValue;
 
 /**
- * Functional Tests for the JUnit {@link CoherenceClusterResource}.
+ * Functional Tests for the JUnit 5 {@link CoherenceClusterExtension}.
  * <p>
- * Copyright (c) 2017. All Rights Reserved. Oracle Corporation.<br>
+ * Copyright (c) 2021. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
- * @author Brian Oliver
+ * @author Jonathsan Knight
  */
-public class CoherenceClusterResourceIT
+public class CoherenceClusterExtensionTest
 {
     /**
-     * Establish a {@link CoherenceClusterResource} for our test.
+     * Establish a {@link CoherenceClusterExtension} for our test.
      */
-    @Rule
-    public CoherenceClusterResource coherenceResource =
-            new CoherenceClusterResource()
+    @RegisterExtension
+    static CoherenceClusterExtension coherenceResource =
+            new CoherenceClusterExtension()
                     .using(LocalPlatform.get())
                     .with(LocalHost.only(),
                           Multicast.ttl(0),
@@ -93,7 +92,7 @@ public class CoherenceClusterResourceIT
     public void shouldFormCluster()
     {
         // ensure the size of the cluster is as expected
-        Assert.assertThat(coherenceResource.getCluster().getClusterSize(), is(greaterThanOrEqualTo(3)));
+        assertThat(coherenceResource.getCluster().getClusterSize(), is(greaterThanOrEqualTo(3)));
 
         // collect the names of the members
         CoherenceCluster cluster  = coherenceResource.getCluster();
@@ -106,7 +105,6 @@ public class CoherenceClusterResourceIT
 
         // ensure the names of the cluster members are as expected
         assertThat(setNames, contains("proxy-1", "storage-1", "storage-2"));
-
     }
 
 
@@ -140,7 +138,7 @@ public class CoherenceClusterResourceIT
 
         NamedCache cache = session.ensureCache("dist-example", null);
 
-        Assert.assertThat(coherenceResource.getCluster().getClusterSize(), is(greaterThanOrEqualTo(3)));
+        assertThat(coherenceResource.getCluster().getClusterSize(), is(greaterThanOrEqualTo(3)));
 
         cache.put("message", "hello world");
 

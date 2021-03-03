@@ -47,7 +47,7 @@ import java.util.List;
  *
  * @author Brian Oliver
  */
-public class NetworkHelperTest
+public class NetworkHelperIT
 {
     /**
      * Ensure that there are bindable addresses

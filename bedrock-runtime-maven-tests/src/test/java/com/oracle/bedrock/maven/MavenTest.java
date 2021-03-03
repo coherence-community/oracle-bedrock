@@ -63,13 +63,13 @@ public class MavenTest
                                                            ClassName.of("com.tangosol.net.DefaultCacheServer"),
                                                            Maven.artifact("com.oracle.coherence.ce",
                                                                           "coherence",
-                                                                          "14.1.1-0-1"),
+                                                                          "14.1.1-0-3"),
                                                            SystemProperty.of("tangosol.coherence.cacheconfig",
                                                                              "coherence-cache-config.xml"),
                                                            Console.of(console),
                                                            Diagnostics.enabled()))
         {
-            Eventually.assertThat(invoking(console).getCapturedErrorLines(), hasItem(containsString("14.1.1-0-1")));
+            Eventually.assertThat(invoking(console).getCapturedErrorLines(), hasItem(containsString("14.1.1-0-3")));
         }
     }
 }

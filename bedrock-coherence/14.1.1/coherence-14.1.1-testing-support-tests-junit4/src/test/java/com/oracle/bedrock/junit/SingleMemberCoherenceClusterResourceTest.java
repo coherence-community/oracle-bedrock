@@ -36,9 +36,9 @@ import org.junit.Test;
 import java.util.Set;
 import java.util.TreeSet;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsIterableContainingInOrder.contains;
 import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertThat;
 
 /**
  * Functional Tests for single-member {@link CoherenceClusterResource}s.
@@ -48,7 +48,7 @@ import static org.junit.Assert.assertThat;
  *
  * @author Brian Oliver
  */
-public class SingleMemberCoherenceClusterResourceIT
+public class SingleMemberCoherenceClusterResourceTest
 {
     /**
      * A {@link CoherenceClusterResource} defining a single cluster member

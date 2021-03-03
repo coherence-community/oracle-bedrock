@@ -40,7 +40,7 @@ import com.oracle.bedrock.runtime.concurrent.runnable.RuntimeExit;
 import com.oracle.bedrock.runtime.concurrent.runnable.RuntimeHalt;
 import com.oracle.bedrock.runtime.concurrent.runnable.SystemExit;
 import com.oracle.bedrock.runtime.concurrent.socket.SocketBasedRemoteChannelServer;
-import com.oracle.bedrock.runtime.concurrent.socket.SocketBasedRemoteChannelTests;
+import com.oracle.bedrock.runtime.concurrent.socket.SocketBasedRemoteChannelIT;
 import com.oracle.bedrock.runtime.console.CapturingApplicationConsole;
 import com.oracle.bedrock.runtime.java.options.ClassName;
 import com.oracle.bedrock.runtime.java.options.HeapSize;
@@ -96,7 +96,7 @@ import static org.junit.Assert.assertThat;
  * @author Brian Oliver
  * @author Jonathan Knight
  */
-public class LocalPlatformJavaApplicationTest extends AbstractJavaApplicationTest<LocalPlatform>
+public class LocalPlatformJavaApplicationIT extends AbstractJavaApplicationTest<LocalPlatform>
 {
     /**
      * Field description
@@ -404,7 +404,7 @@ public class LocalPlatformJavaApplicationTest extends AbstractJavaApplicationTes
             // submit the child a request to prove that it's orphaned
             RemoteChannel             child    = listener.getExecutor();
 
-            CompletableFuture<String> response = child.submit(new SocketBasedRemoteChannelTests.PingPong());
+            CompletableFuture<String> response = child.submit(new SocketBasedRemoteChannelIT.PingPong());
 
             Eventually.assertThat(future(String.class, response), is("PONG"));
 
