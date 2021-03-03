@@ -20,21 +20,46 @@ jobs:
 # First run a simple compile and unit tests
   build:
     runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        module:
+          - bedrock-coherence/14.1.1/coherence-14.1.1
+          - bedrock-coherence/14.1.1/coherence-14.1.1-testing-support
+          - bedrock-core
+          - bedrock-runtime
+          - bedrock-runtime-docker-tests
+          - bedrock-runtime-jacoco
+          - bedrock-runtime-jprofiler
+          - bedrock-runtime-k8s
+          - bedrock-runtime-maven-tests
+          - bedrock-runtime-remote-tests
+          - bedrock-runtime-tests
+          - bedrock-runtime-vagrant-tests
+          - bedrock-runtime-virtual-tests
+          - bedrock-testing-support
+          - bedrock-testing-support-tests
+
     steps:
     - name: Checkout
       uses: actions/checkout@v2
+
     - name: Set up JDK
       uses: actions/setup-java@v1
       with:
         java-version: '11'
+
     - name: Cache Maven packages
       uses: actions/cache@v1
       with:
         path: ~/.m2
         key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
         restore-keys: ${{ runner.os }}-m2-
+
     - name: Build
       shell: bash
       run: |
         export DEV_ROOT=$(pwd)
-        mvn -U --batch-mode -e verify
+        mvn -U --batch-mode -e clean install -DskipTests
+        mvn -U --batch-mode -e verify -o -pl ${{ matrix.module }}
