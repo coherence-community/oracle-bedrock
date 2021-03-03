@@ -32,6 +32,7 @@ import com.oracle.bedrock.runtime.LocalPlatform;
 import com.oracle.bedrock.runtime.Platform;
 import com.oracle.bedrock.runtime.coherence.options.*;
 import com.oracle.bedrock.runtime.java.JavaApplicationLauncher;
+import com.oracle.bedrock.runtime.java.options.IPv4Preferred;
 import com.oracle.bedrock.runtime.java.options.SystemProperty;
 import com.oracle.bedrock.runtime.network.AvailablePortIterator;
 import com.oracle.bedrock.runtime.options.Console;
@@ -184,6 +185,7 @@ public abstract class AbstractCoherenceClusterBuilderTest extends AbstractTest
                                LocalStorage.enabled(),
                                WellKnownAddress.of(localHost),
                                ClusterName.of(clusterName),
+                               IPv4Preferred.yes(),
                                LocalHost.of(localHost, wkaPort),
                                clusterPort);
 
