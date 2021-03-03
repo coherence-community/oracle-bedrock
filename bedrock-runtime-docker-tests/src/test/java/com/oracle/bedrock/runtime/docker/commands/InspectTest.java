@@ -46,10 +46,9 @@ import java.util.List;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.sameInstance;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInAnyOrder;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyVararg;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -216,8 +215,8 @@ public class InspectTest extends AbstractCommandTest
         Application application = mock(Application.class);
         Docker      docker      = Docker.auto();
 
-        when(application.waitFor(anyVararg())).thenReturn(0);
-        when(platform.launch(any(MetaClass.class), anyVararg())).then(new LaunchAnswer(application));
+        when(application.waitFor(any())).thenReturn(0);
+        when(platform.launch(any(MetaClass.class), any())).then(new LaunchAnswer(application));
 
         JsonArray jsonArray = (JsonArray) Inspect.image("foo").run(platform, docker);
 

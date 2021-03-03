@@ -52,7 +52,7 @@ import static org.junit.Assert.assertThat;
 /**
  * Functional Tests for {@link SocketBasedRemoteChannel}s.
  */
-public class SocketBasedRemoteChannelIT
+public class SocketBasedRemoteChannelTest
 {
     /**
      * Ensure a {@link SocketBasedRemoteChannelServer} can submit and receive a

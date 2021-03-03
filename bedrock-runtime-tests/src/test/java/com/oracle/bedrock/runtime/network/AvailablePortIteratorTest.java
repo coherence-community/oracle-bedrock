@@ -46,7 +46,7 @@ import static org.hamcrest.Matchers.not;
  *
  * @author Brian Oliver
  */
-public class AvailablePortIteratorIT
+public class AvailablePortIteratorTest
 {
     /**
      * Ensure that at least one port is available.
