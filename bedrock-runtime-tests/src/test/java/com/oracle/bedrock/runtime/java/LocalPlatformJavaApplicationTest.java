@@ -96,7 +96,7 @@ import static org.junit.Assert.assertThat;
  * @author Brian Oliver
  * @author Jonathan Knight
  */
-public class LocalPlatformJavaApplicationIT extends AbstractJavaApplicationTest<LocalPlatform>
+public class LocalPlatformJavaApplicationTest extends AbstractJavaApplicationTest<LocalPlatform>
 {
     /**
      * Field description

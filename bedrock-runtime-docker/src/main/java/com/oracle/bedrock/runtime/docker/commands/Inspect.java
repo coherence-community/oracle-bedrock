@@ -217,6 +217,9 @@ public class Inspect extends CommandWithArgumentList<Inspect>
         String json = lines.stream().filter((line) -> line != null
                                                       &&!line.equals("(terminated)")).collect(Collectors.joining("\n"))
                                                       .trim();
+System.out.println("===================");
+System.out.println(json);
+System.out.println("===================");
 
         if (!json.startsWith("[") &&!json.startsWith("{"))
         {

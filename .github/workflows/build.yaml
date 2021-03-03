@@ -27,6 +27,8 @@ jobs:
         module:
           - bedrock-coherence/14.1.1/coherence-14.1.1
           - bedrock-coherence/14.1.1/coherence-14.1.1-testing-support
+          - bedrock-coherence/14.1.1/coherence-14.1.1-testing-support-tests-junit4
+          - bedrock-coherence/14.1.1/coherence-14.1.1-testing-support-tests-junit5
           - bedrock-core
           - bedrock-runtime
           - bedrock-runtime-docker-tests
@@ -38,6 +40,7 @@ jobs:
           - bedrock-runtime-tests
           - bedrock-runtime-vagrant-tests
           - bedrock-runtime-virtual-tests
+          - bedrock-runtime-windows-tests
           - bedrock-testing-support
           - bedrock-testing-support-tests
 

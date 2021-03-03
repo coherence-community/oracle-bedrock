@@ -55,7 +55,7 @@ import static org.junit.Assert.fail;
  * @author Brian Oliver
  * @author Jonathan Knight
  */
-public class ContainerBasedJavaApplicationIT extends AbstractJavaApplicationTest<JavaVirtualMachine>
+public class ContainerBasedJavaApplicationTest extends AbstractJavaApplicationTest<JavaVirtualMachine>
 {
     @Override
     public JavaVirtualMachine getPlatform()

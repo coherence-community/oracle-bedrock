@@ -219,7 +219,9 @@ public class InspectTest extends AbstractCommandTest
         when(platform.launch(any(MetaClass.class), any())).then(new LaunchAnswer(application));
 
         JsonArray jsonArray = (JsonArray) Inspect.image("foo").run(platform, docker);
-
+System.out.println("===================");
+System.out.println(jsonArray);
+System.out.println("===================");
         assertThat(jsonArray.getJsonObject(0).getString("Id"), is("foo-id"));
     }
 
