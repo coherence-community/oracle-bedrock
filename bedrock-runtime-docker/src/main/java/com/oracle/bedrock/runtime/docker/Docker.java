@@ -857,7 +857,7 @@ public class Docker implements Option
      * @return  an {@link InetAddress} that should be visible from
      *          the daemon
      */
-    protected InetAddress getValidLocalAddress()
+    public InetAddress getValidLocalAddress()
     {
         InetAddress localAddress = LocalPlatform.get().getAddress();
 

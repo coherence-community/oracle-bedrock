@@ -33,6 +33,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.Optional;
 
 /**
  * An internal implementation of an {@link OptionsByType}.
@@ -108,6 +109,12 @@ class Options implements OptionsByType
     }
 
 
+    @Override
+    public <T extends Option> Optional<T> optionally(Class<T> classOfOption, Object... arguments) {
+        return Optional.ofNullable(get(classOfOption, arguments));
+    }
+
+    
     @Override
     public <T extends Option, D extends T> T getOrDefault(Class<T> classOfOption,
                                                           D        defaultOption)

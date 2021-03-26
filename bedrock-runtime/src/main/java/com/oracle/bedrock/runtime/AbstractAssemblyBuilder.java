@@ -116,7 +116,7 @@ public abstract class AbstractAssemblyBuilder<A extends Application, G extends A
      *
      * @return an empty {@link Assembly}
      */
-    abstract protected G createAssembly(OptionsByType optionsByType);
+    abstract public G createAssembly(OptionsByType optionsByType);
 
 
     /**

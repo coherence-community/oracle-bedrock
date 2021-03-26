@@ -31,6 +31,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Modifier;
+import java.util.Optional;
 import java.util.Stack;
 
 /**
@@ -99,6 +100,25 @@ public interface OptionsByType
      */
     <T extends Option> T get(Class<T>  classOfOption,
                              Object... arguments);
+
+
+    /**
+     * Obtains the {@link Option} for a specified concrete type from the collection.
+     *
+     * <p>Should the {@link Option} not exist in the collection, an attempt is made
+     * to determine an annotated {@link Default}.  If determined, the default value
+     * will be <strong>added</strong> to the collection.
+     *
+     * @param classOfOption  the concrete type of {@link Option} to obtain
+     * @param arguments      the optional arguments for determining the default
+     * @param <T>            the type of value
+     *
+     * @return an {@link Optional} containing the {@link Option} of the specified type or
+     *         if undefined, the suitable default value (or empty {@link Optional} if a
+     *         default {@link Option} can't be determined)
+     */
+    <T extends Option> Optional<T> optionally(Class<T>  classOfOption,
+                                              Object... arguments);
 
 
     /**

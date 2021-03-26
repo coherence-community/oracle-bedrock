@@ -103,13 +103,28 @@ public class SocketBasedRemoteChannelServer extends AbstractControllableRemoteCh
     private String name;
 
     /**
+     * The port that this server should bind to (or zero to use an ephemeral port).
+     */
+    private int port;
+
+    /**
      * Constructs a {@link SocketBasedRemoteChannelServer} that will accept
      * and process {@link Callable}s from {@link SocketBasedRemoteChannelClient}s.
      */
     public SocketBasedRemoteChannelServer(String name)
     {
+        this(name, 0);
+    }
+
+    /**
+     * Constructs a {@link SocketBasedRemoteChannelServer} that will accept
+     * and process {@link Callable}s from {@link SocketBasedRemoteChannelClient}s.
+     */
+    public SocketBasedRemoteChannelServer(String name, int port)
+    {
         super();
         this.name           = name;
+        this.port           = port;
         this.serverSocket   = null;
         this.serverThread   = null;
         this.remoteChannels = new ConcurrentHashMap<>();
@@ -131,7 +146,7 @@ public class SocketBasedRemoteChannelServer extends AbstractControllableRemoteCh
     {
         if (!isOpen())
         {
-            serverSocket = new ServerSocket(0);    // use an ephemeral port
+            serverSocket = new ServerSocket(port);    // 0 to use an ephemeral port
             serverSocket.setReuseAddress(true);
 
             serverThread = new ServerThread();

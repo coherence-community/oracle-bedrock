@@ -122,6 +122,10 @@ public class LocalJavaApplicationLauncher<A extends JavaApplication> implements 
     {
     }
 
+    protected LocalProcessBuilder createProcessBuilder(String executable)
+    {
+        return new SimpleLocalProcessBuilder(executable);
+    }
 
     @Override
     public A launch(Platform      platform,
@@ -185,7 +189,7 @@ public class LocalJavaApplicationLauncher<A extends JavaApplication> implements 
 
         // we'll use the native operating system process builder to create
         // and manage the local application process
-        ProcessBuilder processBuilder = new ProcessBuilder(executable.getName());
+        LocalProcessBuilder processBuilder = createProcessBuilder(executable.getName());
 
         // ----- establish the working directory -----
 
@@ -582,7 +586,7 @@ public class LocalJavaApplicationLauncher<A extends JavaApplication> implements 
 
         try
         {
-            process = processBuilder.start();
+            process = processBuilder.start(launchOptions);
         }
         catch (IOException e)
         {

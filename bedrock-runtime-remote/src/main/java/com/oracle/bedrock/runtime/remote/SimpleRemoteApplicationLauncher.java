@@ -29,6 +29,8 @@ import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.annotations.Internal;
 import com.oracle.bedrock.runtime.ApplicationLauncher;
 import com.oracle.bedrock.runtime.SimpleApplication;
+import com.oracle.bedrock.runtime.java.LocalProcessBuilder;
+import com.oracle.bedrock.runtime.java.SimpleLocalProcessBuilder;
 
 /**
  * A simple implementation of a remote {@link ApplicationLauncher}.

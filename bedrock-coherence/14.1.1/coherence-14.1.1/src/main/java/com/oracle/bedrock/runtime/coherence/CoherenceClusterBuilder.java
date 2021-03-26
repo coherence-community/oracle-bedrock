@@ -42,7 +42,7 @@ import com.oracle.bedrock.runtime.options.StabilityPredicate;
 public class CoherenceClusterBuilder extends AbstractAssemblyBuilder<CoherenceClusterMember, CoherenceCluster>
 {
     @Override
-    protected CoherenceCluster createAssembly(OptionsByType optionsByType)
+    public CoherenceCluster createAssembly(OptionsByType optionsByType)
     {
         // introduce a StabilityPredicate
         optionsByType.addIfAbsent(StabilityPredicate.of(CoherenceCluster.Predicates.autoStartServicesSafe()));

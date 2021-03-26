@@ -447,14 +447,15 @@ public abstract class AbstractAssembly<A extends Application> implements Assembl
      *
      * @param optionsByType  the {@link OptionsByType} used for the change
      */
+    @SuppressWarnings("unchecked")
     protected void onChanged(OptionsByType optionsByType)
     {
         // ensure the stability of the assembly after it was changed
-        StabilityPredicate<Assembly> stabilityPredicate = optionsByType.getOrDefault(StabilityPredicate.class, null);
+        StabilityPredicate<Assembly<?>> stabilityPredicate = optionsByType.getOrDefault(StabilityPredicate.class, null);
 
         if (stabilityPredicate != null)
         {
-            DeferredPredicate deferredPredicate = new DeferredPredicate<>(this, stabilityPredicate.get());
+            DeferredPredicate<?> deferredPredicate = new DeferredPredicate<>(this, stabilityPredicate.get());
 
             ensure(eventually(deferredPredicate), is(true));
         }
@@ -742,6 +743,10 @@ public abstract class AbstractAssembly<A extends Application> implements Assembl
         stream().clone(count, options);
     }
 
+    protected ApplicationStream<A> streamOf(Stream<A> stream)
+    {
+        return new StreamAdapter(stream);
+    }
 
     /**
      * An internal implementation of an {@link ApplicationStream} that
@@ -750,7 +755,7 @@ public abstract class AbstractAssembly<A extends Application> implements Assembl
      * to interact with the underlying {@link Assembly} from which it was
      * produced.
      */
-    private class StreamAdapter implements ApplicationStream<A>
+    protected class StreamAdapter implements ApplicationStream<A>
     {
         /**
          * The {@link Stream} of {@link Application}s to adapt into an {@link ApplicationStream}.
@@ -762,7 +767,7 @@ public abstract class AbstractAssembly<A extends Application> implements Assembl
          * Constructs a {@link StreamAdapter}
          * @param stream
          */
-        StreamAdapter(Stream<A> stream)
+        protected StreamAdapter(Stream<A> stream)
         {
             this.stream = stream;
         }
