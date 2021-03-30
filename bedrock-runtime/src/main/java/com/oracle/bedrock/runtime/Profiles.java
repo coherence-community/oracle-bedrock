@@ -62,10 +62,14 @@ public class Profiles
                 // when the profile name contains a "." we don't process this system property
                 if (profileName.indexOf(".") < 0)
                 {
-                    // create a default class name based on the profile name
-                    String profileClassName = "com.oracle.bedrock." + profileName + "."
-                                              + profileName.substring(0, 1).toUpperCase() + profileName.substring(1)
-                                              + "Profile";
+                    String profileClassName = System.getProperty(name + ".classname");
+                    if (profileClassName == null)
+                    {
+                        // create a default class name based on the profile name
+                        profileClassName = "com.oracle.bedrock." + profileName + "."
+                                + profileName.substring(0, 1).toUpperCase() + profileName.substring(1)
+                                + "Profile";
+                    }
 
                     try
                     {

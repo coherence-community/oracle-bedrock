@@ -150,6 +150,50 @@ public abstract class AbstractAssembly<A extends Application> implements Assembl
 
 
     /**
+     * Obtains an {@link Application} in this {@link Assembly} matching the given {@link Predicate}.
+     *
+     * If no such {@link Application} exists in the {@link Assembly}, {@code null}
+     * will be returned.  If multiple {@link Application}s in the {@link Assembly}
+     * matching the given {@link Predicate}, an arbitrary {@link Application} matching
+     * the specified {@link Predicate} will be returned.
+     *
+     * @param predicate  a {@link Predicate} to use to match an {@link Application}
+     *
+     * @return the application in this {@link Assembly} matching the given name or {@code null}
+     *         if no application has matched with the given {@link Predicate}
+     */
+    public A get(Predicate<A> predicate)
+    {
+        // when not found, search for the application using the pattern
+        for (A application : applications)
+        {
+            if (predicate.test(application))
+            {
+                return application;
+            }
+        }
+
+        return null;
+    }
+
+
+    /**
+     * Obtains an {@link Application} in this {@link Assembly}.
+     *
+     * If no {@link Application} exists in the {@link Assembly}, {@code null}
+     * will be returned.  If multiple {@link Application}s in the {@link Assembly}
+     * an arbitrary {@link Application} matching will be returned.
+     *
+     * @return the application in this {@link Assembly} or {@code null}
+     *         if there are no no applications
+     */
+    public A getAny()
+    {
+        return applications.stream().findFirst().orElse(null);
+    }
+
+
+    /**
      * Obtains the {@link Application}s in this {@link Assembly} where by their
      * {@link Application#getName()} matches the specified pattern (as a regex)
      * or starts with the specified pattern.

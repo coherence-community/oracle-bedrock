@@ -221,7 +221,8 @@ public abstract class AbstractCoherenceClusterMember extends AbstractJavaApplica
 
 
     @Override
-    public NamedCache getCache(String cacheName)
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public <K, V> NamedCache<K, V> getCache(String cacheName)
     {
         return new CoherenceNamedCache(this, cacheName, Object.class, Object.class);
     }
@@ -232,7 +233,7 @@ public abstract class AbstractCoherenceClusterMember extends AbstractJavaApplica
                                             Class<K> keyClass,
                                             Class<V> valueClass)
     {
-        return new CoherenceNamedCache(this, cacheName, keyClass, valueClass);
+        return new CoherenceNamedCache<>(this, cacheName, keyClass, valueClass);
     }
 
 

@@ -138,7 +138,7 @@ public interface CoherenceClusterMember extends JavaApplication
      *
      * @return a proxy to the {@link NamedCache}
      */
-    NamedCache getCache(String cacheName);
+    <K, V> NamedCache<K, V> getCache(String cacheName);
 
 
     /**

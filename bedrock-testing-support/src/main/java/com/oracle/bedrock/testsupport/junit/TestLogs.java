@@ -1,20 +1,40 @@
+/*
+ * File: TestLogs.java
+ *
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ *
+ * The contents of this file are subject to the terms and conditions of
+ * the Common Development and Distribution License 1.0 (the "License").
+ *
+ * You may not use this file except in compliance with the License.
+ *
+ * You can obtain a copy of the License by consulting the LICENSE.txt file
+ * distributed with this file, or by consulting https://oss.oracle.com/licenses/CDDL
+ *
+ * See the License for the specific language governing permissions
+ * and limitations under the License.
+ *
+ * When distributing the software, include this License Header Notice in each
+ * file and include the License file LICENSE.txt.
+ *
+ * MODIFICATIONS:
+ * If applicable, add the following below the License Header, with the fields
+ * enclosed by brackets [] replaced by your own identifying information:
+ * "Portions Copyright [year] [name of copyright owner]"
+ */
+
 package com.oracle.bedrock.testsupport.junit;
 
 import com.oracle.bedrock.runtime.ApplicationConsole;
 import com.oracle.bedrock.runtime.ApplicationConsoleBuilder;
-import com.oracle.bedrock.runtime.console.EventsApplicationConsole;
-import com.oracle.bedrock.runtime.console.FileWriterApplicationConsole;
-import com.oracle.bedrock.testsupport.MavenProjectFileUtils;
-import com.oracle.bedrock.util.Pair;
 import org.junit.rules.TestName;
+import org.junit.rules.TestRule;
 import org.junit.runner.Description;
+import org.junit.runners.model.MultipleFailureException;
+import org.junit.runners.model.Statement;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Predicate;
 
 /**
  * An extension of the JUnit {@link TestName} class that can be used as
@@ -27,24 +47,9 @@ import java.util.function.Predicate;
  * @author jk  2018.10.17
  */
 public class TestLogs
-        extends TestName
+        extends AbstractTestLogs
+        implements TestRule
 {
-    /**
-     * The current test class.
-     */
-    private Class<?> m_clsTest;
-
-    /**
-     * The current test method.
-     */
-    private String m_sMethodName;
-
-    /**
-     * The root folder to put logs.
-     */
-    private File m_fileOutDir;
-
-
     /**
      * Create a {@link TestLogs}.
      */
@@ -56,28 +61,40 @@ public class TestLogs
     /**
      * Create a {@link TestLogs}.
      *
-     * @param clsTest the test class
+     * @param testClass  the test class
      */
-    public TestLogs(Class<?> clsTest)
+    public TestLogs(Class<?> testClass)
     {
-        m_clsTest = clsTest;
+        this.testClass = testClass;
     }
 
-    // ----- TestWatcher methods --------------------------------------------
-
     @Override
-    public void starting(Description description)
-    {
-        super.starting(description);
+    public Statement apply(final Statement base, final Description description) {
+        return new Statement() {
+            @Override
+            public void evaluate() throws Throwable {
+                List<Throwable> errors = new ArrayList<Throwable>();
+                starting(description);
+                try {
+                    base.evaluate();
+                } catch (Throwable e) {
+                    errors.add(e);
+                }
+                MultipleFailureException.assertEmpty(errors);
+            }
+        };
+    }
 
+    protected void starting(Description description)
+    {
         Class<?> cls = description.getTestClass();
 
         if (cls == null)
         {
             try
             {
-                String sName = description.getClassName();
-                cls = Class.forName(sName);
+                String clsName = description.getClassName();
+                cls = Class.forName(clsName);
             }
             catch (ClassNotFoundException e)
             {
@@ -86,259 +103,5 @@ public class TestLogs
         }
 
         init(cls, description.getMethodName());
-    }
-
-    // Overridden to make public
-    @Override
-    public void finished(Description description)
-    {
-        super.finished(description);
-    }
-
-    // ----- helper methods -------------------------------------------------
-
-    /**
-     * Initialise this {@link TestLogs}.
-     *
-     * @param clsTest      the test class
-     * @param sMethodName  the test method name
-     */
-    public void init(Class<?> clsTest, String sMethodName)
-    {
-        m_clsTest     = clsTest;
-        m_sMethodName = sMethodName;
-        m_fileOutDir  = MavenProjectFileUtils.ensureTestOutputBaseFolder(m_clsTest);
-
-        m_fileOutDir.mkdirs();
-    }
-
-    /**
-     * Obtain the current test class.
-     *
-     * @return the current test class.
-     */
-    public Class<?> getTestClass()
-    {
-        return m_clsTest;
-    }
-
-    /**
-     * Obtain the logs folder.
-     *
-     * @return the logs folder
-     */
-    public File getOutputFolder()
-    {
-        return m_fileOutDir;
-    }
-
-    /**
-     * Obtain an {@link ConsoleBuilder} that will write the process output to a file.
-     *
-     * @return an {@link ConsoleBuilder} that will write the process output to a file
-     */
-    public ConsoleBuilder builder()
-    {
-        return new ConsoleBuilder(this);
-    }
-
-    private Console buildConsole(String name) throws IOException
-    {
-        File dir = new File(m_fileOutDir, m_clsTest.getSimpleName());
-
-        dir.mkdir();
-
-        if (m_sMethodName != null && m_sMethodName.trim().length() > 0)
-        {
-            dir = new File(dir, m_sMethodName);
-
-            dir.mkdir();
-        }
-
-        System.err.println("Logging output from application '" + name + "' to " + dir + File.separator + name + ".log");
-
-        return new Console(new FileWriter(new File(dir, name + ".log")));
-    }
-
-
-    /**
-     * An {@link ApplicationConsoleBuilder} that uses {@link TestLogs} to build a .{@link
-     * FileWriterApplicationConsole}.
-     */
-    public static class ConsoleBuilder
-            implements ApplicationConsoleBuilder
-    {
-        // ----- constructors ---------------------------------------------------
-
-        public ConsoleBuilder(TestLogs testLogs)
-        {
-            m_testLogs = testLogs;
-        }
-
-        // ----- ConsoleBuilder methods -------------------------------------
-
-        /**
-         * Build an {@link ApplicationConsole}.
-         *
-         * @param name the name of the application
-         * @return an {@link ApplicationConsole}
-         */
-        public ApplicationConsole build(String name)
-        {
-            try
-            {
-                Console console = m_testLogs.buildConsole(name);
-
-                stdOutListeners.stream()
-                        .filter(pair -> pair.getX() == null)
-                        .map(Pair::getY)
-                        .forEach(console::withStdOutListener);
-
-                stdErrListeners.stream()
-                        .filter(pair -> pair.getX() == null)
-                        .map(Pair::getY)
-                        .forEach(console::withStdErrListener);
-
-                stdOutListeners.stream()
-                        .filter(pair -> pair.getX() != null)
-                        .forEach(pair -> console.withStdOutListener(pair.getX(), pair.getY()));
-
-                stdErrListeners.stream()
-                        .filter(pair -> pair.getX() != null)
-                        .forEach(pair -> console.withStdErrListener(pair.getX(), pair.getY()));
-
-                return console;
-            }
-            catch (IOException e)
-            {
-                throw new RuntimeException(e);
-            }
-        }
-
-        /**
-         * Remove all of the output listeners.
-         */
-        public void clearListeners()
-        {
-            stdErrListeners.clear();
-            stdOutListeners.clear();
-        }
-
-        /**
-         * Add a listener to receive stdout console lines as events.
-         *
-         * @param listener the {@link EventsApplicationConsole.Listener}
-         * @return this {@link ConsoleBuilder}
-         */
-        public ConsoleBuilder addStdOutListener(EventsApplicationConsole.Listener listener)
-        {
-            stdOutListeners.add(new Pair<>(null, listener));
-
-            return this;
-        }
-
-        /**
-         * Add a listener to receive stdout console lines as events that match the specified {@link Predicate}.
-         *
-         * @param predicate the {@link Predicate} to use to match console output lines
-         * @param listener  the {@link EventsApplicationConsole.Listener}
-         * @return this {@link ConsoleBuilder}
-         */
-        public ConsoleBuilder addStdOutListener(Predicate<String> predicate, EventsApplicationConsole.Listener listener)
-        {
-            stdOutListeners.add(new Pair<>(predicate, listener));
-
-            return this;
-        }
-
-        /**
-         * Add a listener to receive stderr console lines as events.
-         *
-         * @param listener the {@link EventsApplicationConsole.Listener}
-         * @return this {@link ConsoleBuilder}
-         */
-        public ConsoleBuilder addStdErrListener(EventsApplicationConsole.Listener listener)
-        {
-            stdErrListeners.add(new Pair<>(null, listener));
-
-            return this;
-        }
-
-        /**
-         * Add a listener to receive stderr console lines as events that match the specified {@link Predicate}.
-         *
-         * @param predicate the {@link Predicate} to use to match console output lines
-         * @param listener  the {@link EventsApplicationConsole.Listener}
-         * @return this {@link ConsoleBuilder}
-         */
-        public ConsoleBuilder addStdErrListener(Predicate<String> predicate, EventsApplicationConsole.Listener listener)
-        {
-            stdErrListeners.add(new Pair<>(predicate, listener));
-
-            return this;
-        }
-
-        // ----- data members -----------------------------------------------
-
-        /**
-         * The {@link TestLogs} to use to build {@link ApplicationConsole}s.
-         */
-        private TestLogs m_testLogs;
-
-        /**
-         * The listeners to receive lines written to stdout.
-         */
-        private List<Pair<Predicate<String>, EventsApplicationConsole.Listener>> stdOutListeners = new ArrayList<>();
-
-        /**
-         * The listeners to receive lines written to stderr.
-         */
-        private List<Pair<Predicate<String>, EventsApplicationConsole.Listener>> stdErrListeners = new ArrayList<>();
-    }
-
-
-    // ----- inner class: Console -------------------------------------------
-
-    /**
-     * A custom {@link ApplicationConsole}.
-     */
-    public static class Console
-            extends EventsApplicationConsole
-    {
-        /**
-         * The {@link FileWriter} to write log lines to.
-         */
-        private final FileWriter writer;
-
-        /**
-         * Create a {@link Console}.
-         *
-         * @param writer  the {@link FileWriter} to write log lines to
-         */
-        private Console(FileWriter writer)
-        {
-            this.writer = writer;
-            withStdOutListener(this::write);
-            withStdErrListener(this::write);
-        }
-
-        /**
-         * Write the log line.
-         *
-         * @param line  the line to write
-         */
-        private void write(String line)
-        {
-            try
-            {
-                writer.write(line);
-                writer.write('\n');
-                writer.flush();
-            }
-            catch (IOException e)
-            {
-                e.printStackTrace();
-            }
-        }
     }
 }

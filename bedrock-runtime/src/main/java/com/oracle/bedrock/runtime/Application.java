@@ -32,6 +32,8 @@ import com.oracle.bedrock.options.Timeout;
 import com.oracle.bedrock.runtime.options.ApplicationClosingBehavior;
 
 import java.io.Closeable;
+import java.util.function.Predicate;
+import java.util.regex.Pattern;
 
 /**
  * A platform and location independent mechanism to represent, access and
@@ -211,5 +213,38 @@ public interface Application extends Extensible, Closeable
         {
             // there's nothing to do after launching the application
         }
+    }
+
+
+    static <A extends Application> Predicate<A> withName(String name)
+    {
+        String regex = Pattern.quote(name);
+        Pattern pattern = Pattern.compile(regex);
+        return new Predicate<A>() {
+            @Override
+            public boolean test(A a) {
+                return pattern.matcher(a.getName()).matches();
+            }
+        };
+    }
+
+    static <A extends Application> Predicate<A> withNameMatching(String regex)
+    {
+        Pattern pattern = Pattern.compile(regex);
+        return a -> pattern.matcher(a.getName()).matches();
+    }
+
+    static <A extends Application> Predicate<A> withNamePrefix(String name)
+    {
+        String regex = Pattern.quote(name);
+        Pattern pattern = Pattern.compile(regex);
+        return a -> pattern.matcher(a.getName()).lookingAt();
+    }
+
+    static <A extends Application> Predicate<A> withNameContaining(String name)
+    {
+        String regex = Pattern.quote(name);
+        Pattern pattern = Pattern.compile(regex);
+        return a -> pattern.matcher(a.getName()).find();
     }
 }
