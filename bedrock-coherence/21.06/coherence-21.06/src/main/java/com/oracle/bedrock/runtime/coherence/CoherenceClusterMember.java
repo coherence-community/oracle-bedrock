@@ -348,6 +348,20 @@ public interface CoherenceClusterMember extends JavaApplication
 
 
     /**
+     * Determines if a specified service is being run by the {@link CoherenceClusterMember}.
+     *
+     * @param scopeName   the scope name of the service
+     * @param serviceName the name of the service
+     *
+     * @return <code>true</code> if the service is running, <code>false</code> otherwise
+     */
+    default boolean isServiceRunning(String scopeName, String serviceName)
+    {
+        return isServiceRunning(scopeName + ":" + serviceName);
+    }
+
+
+    /**
      * Determines if a specified service is storage enabled.
      *
      * @param serviceName the name of the service
@@ -359,6 +373,21 @@ public interface CoherenceClusterMember extends JavaApplication
 
 
     /**
+     * Determines if a specified service is storage enabled.
+     *
+     * @param scopeName   the scope name of the service
+     * @param serviceName the name of the service
+     *
+     * @return a {@link Trilean} indicating if the service is storage enabled {@link Trilean#TRUE},
+     *         disabled {@link Trilean#FALSE} or unknown / undefined / not applicable {@link Trilean#UNKNOWN}
+     */
+    default Trilean isStorageEnabled(String scopeName, String serviceName)
+    {
+        return isStorageEnabled(scopeName + ":" + serviceName);
+    }
+
+
+    /**
      * Determines the status of a service being run by the {@link CoherenceClusterMember}.
      *
      * @param serviceName the name of the service
@@ -366,6 +395,20 @@ public interface CoherenceClusterMember extends JavaApplication
      * @return the {@link ServiceStatus}
      */
     ServiceStatus getServiceStatus(String serviceName);
+
+
+    /**
+     * Determines the status of a service being run by the {@link CoherenceClusterMember}.
+     *
+     * @param scopeName   the scope name of the service
+     * @param serviceName the name of the service
+     *
+     * @return the {@link ServiceStatus}
+     */
+    default ServiceStatus getServiceStatus(String scopeName, String serviceName)
+    {
+        return getServiceStatus(scopeName + ":" + serviceName);
+    }
 
 
     /**

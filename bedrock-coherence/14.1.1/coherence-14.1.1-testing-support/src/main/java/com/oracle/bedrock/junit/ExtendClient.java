@@ -26,6 +26,7 @@
 package com.oracle.bedrock.junit;
 
 import com.oracle.bedrock.Bedrock;
+import com.oracle.bedrock.Option;
 import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.runtime.LocalPlatform;
 import com.oracle.bedrock.runtime.MetaClass;
@@ -56,13 +57,17 @@ public class ExtendClient implements SessionBuilder
     /**
      * The {@link Logger} for this class.
      */
-    private static Logger LOGGER = Logger.getLogger(ExtendClient.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(ExtendClient.class.getName());
 
     /**
      * The Coherence Cache Configuration URI to use for the {@link ExtendClient}.
      */
-    private String cacheConfigURI;
+    private final String cacheConfigURI;
 
+    /**
+     * The additional options to apply to the client.
+     */
+    private final OptionsByType options;
 
     /**
      * Creates an {@link ExtendClient} for the specified Cache Configuration URI.
@@ -71,7 +76,19 @@ public class ExtendClient implements SessionBuilder
      */
     public ExtendClient(String cacheConfigURI)
     {
+        this(cacheConfigURI, new Option[0]);
+    }
+
+
+    /**
+     * Creates an {@link ExtendClient} for the specified Cache Configuration URI.
+     *
+     * @param cacheConfigURI the cache configuration URI
+     */
+    public ExtendClient(String cacheConfigURI, Option... options)
+    {
         this.cacheConfigURI = cacheConfigURI;
+        this.options        = OptionsByType.of(options);
     }
 
 
@@ -88,30 +105,33 @@ public class ExtendClient implements SessionBuilder
 
         // ----- establish the options for launching a local extend-based member -----
 
-        optionsByType.add(RoleName.of("extend-client"));
-        optionsByType.add(Clustering.disabled());
-        optionsByType.add(LocalStorage.disabled());
-        optionsByType.add(LocalHost.only());
-        optionsByType.add(SystemProperty.of("tangosol.coherence.extend.enabled", true));
-        optionsByType.add(CacheConfig.of(cacheConfigURI));
+        OptionsByType clientOptions = OptionsByType.of(optionsByType);
+
+        clientOptions.add(RoleName.of("extend-client"));
+        clientOptions.add(Clustering.disabled());
+        clientOptions.add(LocalStorage.disabled());
+        clientOptions.add(LocalHost.only());
+        clientOptions.add(SystemProperty.of("tangosol.coherence.extend.enabled", true));
+        clientOptions.add(CacheConfig.of(cacheConfigURI));
+
+        clientOptions.addAll(this.options);
 
         // ----- notify the Profiles that we're about to launch an application -----
 
         MetaClass<CoherenceClusterMember> metaClass = new CoherenceClusterMember.MetaClass();
 
-        for (Profile profile : optionsByType.getInstancesOf(Profile.class))
+        for (Profile profile : clientOptions.getInstancesOf(Profile.class))
         {
-            profile.onLaunching(platform, metaClass, optionsByType);
+            profile.onLaunching(platform, metaClass, clientOptions);
         }
 
         // ----- create local system properties based on those defined by the launch options -----
 
         // modify the current system properties to include/override those in the schema
         com.oracle.bedrock.runtime.java.options.SystemProperties systemProperties =
-            optionsByType.get(com.oracle.bedrock.runtime.java.options.SystemProperties.class);
+                clientOptions.get(com.oracle.bedrock.runtime.java.options.SystemProperties.class);
 
-        Properties properties            = systemProperties.resolve(platform, optionsByType);
-
+        Properties properties            = systemProperties.resolve(platform, clientOptions);
         Table      systemPropertiesTable = new Table();
 
         systemPropertiesTable.getOptions().add(Table.orderByColumn(0));
@@ -137,7 +157,7 @@ public class ExtendClient implements SessionBuilder
             LOGGER.log(Level.INFO,
                        "Oracle Bedrock " + Bedrock.getVersion() + ": Starting *Extend Client...\n"
                        + "------------------------------------------------------------------------\n"
-                       + diagnosticsTable.toString() + "\n"
+                       + diagnosticsTable + "\n"
                        + "------------------------------------------------------------------------\n");
         }
 

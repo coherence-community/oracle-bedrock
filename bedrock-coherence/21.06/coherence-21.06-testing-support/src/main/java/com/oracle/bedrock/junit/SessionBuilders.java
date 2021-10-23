@@ -25,10 +25,12 @@
 
 package com.oracle.bedrock.junit;
 
+import com.oracle.bedrock.Option;
+
 /**
  * A helper class for creating various types of {@link SessionBuilder}s.
  * <p>
- * Copyright (c) 2021. All Rights Reserved. Oracle Corporation.<br>
+ * Copyright (c) 2015. All Rights Reserved. Oracle Corporation.<br>
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Brian Oliver
@@ -56,5 +58,19 @@ public class SessionBuilders
     public static SessionBuilder extendClient(String cacheConfigURI)
     {
         return new ExtendClient(cacheConfigURI);
+    }
+
+
+    /**
+     * Constructs a {@link SessionBuilder} for a *Extend Client.
+     *
+     * @param cacheConfigURI  the Cache Configuration URI
+     * @param options         additional options to configure the client
+     *
+     * @return a {@link SessionBuilder}
+     */
+    public static SessionBuilder extendClient(String cacheConfigURI, Option... options)
+    {
+        return new ExtendClient(cacheConfigURI, options);
     }
 }
