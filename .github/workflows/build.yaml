@@ -25,6 +25,10 @@ jobs:
       fail-fast: false
       matrix:
         module:
+          - bedrock-coherence/21.06/coherence-21.06
+          - bedrock-coherence/21.06/coherence-21.06-testing-support
+          - bedrock-coherence/21.06/coherence-21.06-testing-support-tests-junit4
+          - bedrock-coherence/21.06/coherence-21.06-testing-support-tests-junit5
           - bedrock-coherence/14.1.1/coherence-14.1.1
           - bedrock-coherence/14.1.1/coherence-14.1.1-testing-support
           - bedrock-coherence/14.1.1/coherence-14.1.1-testing-support-tests-junit4
@@ -64,4 +68,4 @@ jobs:
       run: |
         export DEV_ROOT=$(pwd)
         mvn -U --batch-mode -e clean install -DskipTests -P-coherence-commercial
-        mvn -U --batch-mode -e verify -pl ${{ matrix.module }} -P-coherence-commercial -Dgithub.build=true
+        mvn -U --batch-mode -e verify -pl ${{ matrix.module }} -o -P-coherence-commercial -Dgithub.build=true
