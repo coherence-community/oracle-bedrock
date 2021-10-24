@@ -9,7 +9,8 @@
 name: CI Build
 
 on:
-  push:		
+  workflow_dispatch:
+  push:
     branches:
     - '*'
   pull_request:
@@ -25,6 +26,10 @@ jobs:
       fail-fast: false
       matrix:
         module:
+          - bedrock-coherence/21.06/coherence-21.06
+          - bedrock-coherence/21.06/coherence-21.06-testing-support
+          - bedrock-coherence/21.06/coherence-21.06-testing-support-tests-junit4
+          - bedrock-coherence/21.06/coherence-21.06-testing-support-tests-junit5
           - bedrock-coherence/14.1.1/coherence-14.1.1
           - bedrock-coherence/14.1.1/coherence-14.1.1-testing-support
           - bedrock-coherence/14.1.1/coherence-14.1.1-testing-support-tests-junit4

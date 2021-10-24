@@ -24,6 +24,7 @@
  */
 package com.oracle.bedrock.testsupport.junit;
 
+import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 
@@ -31,7 +32,7 @@ import java.lang.reflect.Method;
 
 public class TestLogsExtension
         extends AbstractTestLogs
-        implements BeforeEachCallback
+        implements BeforeEachCallback, BeforeAllCallback
 {
     /**
      * Create a {@link TestLogsExtension}.
@@ -48,12 +49,21 @@ public class TestLogsExtension
     public TestLogsExtension(Class<?> testClass)
     {
         this.testClass = testClass;
+        init(testClass, "unknown");
     }
 
     @Override
     public void beforeEach(ExtensionContext context) throws Exception
     {
         String   methodName = context.getTestMethod().map(Method::getName).orElse("unknown");
+        Class<?> cls = context.getTestClass().orElse(testClass);
+        init(cls, methodName);
+    }
+
+    @Override
+    public void beforeAll(ExtensionContext context) throws Exception
+    {
+        String   methodName = context.getTestMethod().map(Method::getName).orElse("BeforeAll");
         Class<?> cls = context.getTestClass().orElse(testClass);
         init(cls, methodName);
     }
