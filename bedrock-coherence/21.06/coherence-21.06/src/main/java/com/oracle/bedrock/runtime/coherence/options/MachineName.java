@@ -50,7 +50,7 @@ public class MachineName implements Profile, Option
     /**
      * The tangosol.coherence.machine property.
      */
-    public static final String PROPERTY = "tangosol.coherence.machine";
+    public static final String PROPERTY = "coherence.machine";
 
     /**
      * The machine name of an {@link CoherenceClusterMember}.

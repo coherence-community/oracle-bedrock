@@ -48,7 +48,7 @@ public class OperationalOverride implements Profile, Option
     /**
      * The tangosol.coherence.override property.
      */
-    public static final String PROPERTY = "tangosol.coherence.override";
+    public static final String PROPERTY = "coherence.override";
 
     /**
      * The operational override uri.

@@ -49,12 +49,12 @@ public class Logging implements Profile, ComposableOption<Logging>
     /**
      * The tangosol.coherence.log property.
      */
-    public static final String PROPERTY = "tangosol.coherence.log";
+    public static final String PROPERTY = "coherence.log";
 
     /**
      * The tangosol.coherence.log.level property.
      */
-    public static final String PROPERTY_LEVEL = "tangosol.coherence.log.level";
+    public static final String PROPERTY_LEVEL = "coherence.log.level";
 
     /**
      * The logging destination (null if not set).

@@ -48,7 +48,7 @@ public class CacheConfig implements Profile, Option
     /**
      * The tangosol.coherence.cacheconfig property.
      */
-    public static final String PROPERTY = "tangosol.coherence.cacheconfig";
+    public static final String PROPERTY = "coherence.cacheconfig";
 
     /**
      * The cache config uri.

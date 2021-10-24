@@ -48,7 +48,7 @@ public class Multicast implements Profile, Option
     /**
      * The tangosol.coherence.ttl property.
      */
-    public static final String PROPERTY = "tangosol.coherence.ttl";
+    public static final String PROPERTY = "coherence.ttl";
 
     /**
      * The multicast ttl value {@link CoherenceClusterMember}.

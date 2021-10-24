@@ -29,16 +29,27 @@ import com.oracle.bedrock.runtime.concurrent.RemoteCallable;
 import com.tangosol.coherence.config.CacheConfig;
 import com.tangosol.coherence.config.scheme.AbstractCompositeScheme;
 import com.tangosol.coherence.config.scheme.ServiceScheme;
+import com.tangosol.internal.net.ConfigurableCacheFactorySession;
 import com.tangosol.net.CacheFactory;
+import com.tangosol.net.Coherence;
 import com.tangosol.net.ConfigurableCacheFactory;
 import com.tangosol.net.DefaultConfigurableCacheFactory;
 import com.tangosol.net.ExtensibleConfigurableCacheFactory;
+import com.tangosol.net.Session;
+import com.tangosol.net.SessionConfiguration;
 import com.tangosol.run.xml.XmlElement;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * A {@link RemoteCallable} to determine the names of auto-start cluster-based services.
@@ -53,8 +64,31 @@ public class GetAutoStartServiceNames implements RemoteCallable<Set<String>>
     @Override
     public Set<String> call() throws Exception
     {
-        ConfigurableCacheFactory configurableCacheFactory = CacheFactory.getConfigurableCacheFactory();
+        List<ConfigurableCacheFactory> ccfList = new ArrayList<>();
 
+        Coherence.getInstances()
+                .stream()
+                .flatMap(c -> c.getConfiguration().getSessionConfigurations().values().stream())
+                .map(SessionConfiguration::getName)
+                .map(name -> Coherence.findSession(name).orElse(null))
+                .filter(Objects::nonNull)
+                .filter(s -> s instanceof ConfigurableCacheFactorySession)
+                .map(s -> ((ConfigurableCacheFactorySession) s).getConfigurableCacheFactory())
+                .forEach(ccfList::add);
+
+        if (ccfList.isEmpty())
+        {
+            ccfList.add(CacheFactory.getConfigurableCacheFactory());
+        }
+
+        return ccfList.stream()
+                      .flatMap(this::getServiceNames)
+                      .collect(Collectors.toSet());
+    }
+
+
+    private Stream<String> getServiceNames(ConfigurableCacheFactory configurableCacheFactory)
+    {
         if (configurableCacheFactory instanceof DefaultConfigurableCacheFactory)
         {
             DefaultConfigurableCacheFactory cacheFactory = (DefaultConfigurableCacheFactory) configurableCacheFactory;
@@ -78,7 +112,7 @@ public class GetAutoStartServiceNames implements RemoteCallable<Set<String>>
                 }
             }
 
-            return serviceNames;
+            return serviceNames.stream();
         }
         else if (configurableCacheFactory instanceof ExtensibleConfigurableCacheFactory)
         {
@@ -115,7 +149,7 @@ public class GetAutoStartServiceNames implements RemoteCallable<Set<String>>
                     }
                 }
 
-                return serviceNames;
+                return serviceNames.stream();
             }
         }
         else

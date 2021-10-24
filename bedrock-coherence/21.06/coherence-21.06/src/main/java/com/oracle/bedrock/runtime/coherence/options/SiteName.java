@@ -50,7 +50,7 @@ public class SiteName implements Profile, Option
     /**
      * The tangosol.coherence.site property.
      */
-    public static final String PROPERTY = "tangosol.coherence.site";
+    public static final String PROPERTY = "coherence.site";
 
     /**
      * The site name of an {@link CoherenceClusterMember}.

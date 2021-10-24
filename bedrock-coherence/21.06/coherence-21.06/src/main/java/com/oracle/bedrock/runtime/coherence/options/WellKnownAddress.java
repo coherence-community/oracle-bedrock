@@ -53,12 +53,12 @@ public class WellKnownAddress implements Profile, Option
     /**
      * The tangosol.coherence.wka property.
      */
-    public static final String PROPERTY = "tangosol.coherence.wka";
+    public static final String PROPERTY = "coherence.wka";
 
     /**
      * The tangosol.coherence.wka.port property.
      */
-    public static final String PROPERTY_PORT = "tangosol.coherence.wka.port";
+    public static final String PROPERTY_PORT = "coherence.wka.port";
 
     /**
      * The well known address of an {@link CoherenceClusterMember}.

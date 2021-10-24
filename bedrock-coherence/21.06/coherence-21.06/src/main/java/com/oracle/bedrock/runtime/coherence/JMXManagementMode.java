@@ -52,7 +52,7 @@ public enum JMXManagementMode implements Option, Profile
     /**
      * The tangosol.coherence.management property.
      */
-    public static final String PROPERTY = "tangosol.coherence.management";
+    public static final String PROPERTY = "coherence.management";
 
 
     /**

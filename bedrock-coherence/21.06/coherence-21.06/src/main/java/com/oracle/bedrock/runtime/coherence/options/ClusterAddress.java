@@ -48,7 +48,7 @@ public class ClusterAddress implements Profile, Option
     /**
      * The tangosol.coherence.clusteraddress property.
      */
-    public static final String PROPERTY = "tangosol.coherence.clusteraddress";
+    public static final String PROPERTY = "coherence.clusteraddress";
 
     /**
      * The cluster address for a {@link CoherenceClusterMember}.

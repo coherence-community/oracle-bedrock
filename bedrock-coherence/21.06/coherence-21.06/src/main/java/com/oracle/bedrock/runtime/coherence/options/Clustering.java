@@ -48,7 +48,7 @@ public class Clustering implements Profile, Option
     /**
      * The tangosol.coherence.tcmp.enabled property.
      */
-    public static final String PROPERTY = "tangosol.coherence.tcmp.enabled";
+    public static final String PROPERTY = "coherence.tcmp.enabled";
 
     /**
      * Is local storage enabled?

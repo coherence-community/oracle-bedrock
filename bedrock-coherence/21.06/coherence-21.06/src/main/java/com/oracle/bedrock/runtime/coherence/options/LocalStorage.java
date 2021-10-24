@@ -48,7 +48,7 @@ public class LocalStorage implements Profile, Option
     /**
      * The tangosol.coherence.distributed.localstorage property.
      */
-    public static final String PROPERTY = "tangosol.coherence.distributed.localstorage";
+    public static final String PROPERTY = "coherence.distributed.localstorage";
 
     /**
      * Is local storage enabled?

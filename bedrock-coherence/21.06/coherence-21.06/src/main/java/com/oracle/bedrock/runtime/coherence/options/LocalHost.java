@@ -54,12 +54,12 @@ public class LocalHost implements Profile, Option
     /**
      * The tangosol.coherence.localhost property.
      */
-    public static final String PROPERTY = "tangosol.coherence.localhost";
+    public static final String PROPERTY = "coherence.localhost";
 
     /**
      * The tangosol.coherence.localport property.
      */
-    public static final String PROPERTY_PORT = "tangosol.coherence.localport";
+    public static final String PROPERTY_PORT = "coherence.localport";
 
     /**
      * The local address of an {@link CoherenceClusterMember}.
@@ -221,7 +221,7 @@ public class LocalHost implements Profile, Option
                     optionsByType.add(SystemProperty.of(PROPERTY, InetAddress.getLoopbackAddress().getHostAddress()));
 
                     // set TTL to 0
-                    optionsByType.add(SystemProperty.of("tangosol.coherence.ttl", "0"));
+                    optionsByType.add(SystemProperty.of("coherence.ttl", "0"));
                 }
                 else
                 {

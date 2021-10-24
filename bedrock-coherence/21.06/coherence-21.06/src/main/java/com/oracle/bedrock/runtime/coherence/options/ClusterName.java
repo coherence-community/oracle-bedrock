@@ -50,7 +50,7 @@ public class ClusterName implements Profile, Option
     /**
      * The tangosol.coherence.cluster property.
      */
-    public static final String PROPERTY = "tangosol.coherence.cluster";
+    public static final String PROPERTY = "coherence.cluster";
 
     /**
      * The cluster name of an {@link CoherenceClusterMember}.

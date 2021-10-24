@@ -51,7 +51,7 @@ public class ClusterPort implements Profile, Option
     /**
      * The tangosol.coherence.clusterport property.
      */
-    public static final String PROPERTY = "tangosol.coherence.clusterport";
+    public static final String PROPERTY = "coherence.clusterport";
 
     /**
      * The cluster port for a {@link CoherenceClusterMember}.

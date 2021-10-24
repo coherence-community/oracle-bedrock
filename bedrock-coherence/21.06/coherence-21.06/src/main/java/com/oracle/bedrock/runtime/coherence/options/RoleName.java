@@ -50,7 +50,7 @@ public class RoleName implements Profile, Option
     /**
      * The tangosol.coherence.role property.
      */
-    public static final String PROPERTY = "tangosol.coherence.role";
+    public static final String PROPERTY = "coherence.role";
 
     /**
      * The role name of an {@link CoherenceClusterMember}.
