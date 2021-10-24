@@ -55,5 +55,5 @@ jobs:
         git checkout "${GIT_COMMIT}"
         git config --local user.name "${GIT_USER}"
         git config --local user.email "${GIT_EMAIL}"
-        sh ./tools/bin/maven-gpg.sh
+        sh ./tools/bin/mvn-gpg.sh
         mvn -s ./.mvn/settings.xml -B clean deploy -DskipTests -DskipTests -Dgpg.passphrase=${GPG_PASSPHRASE}
