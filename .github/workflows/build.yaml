@@ -9,7 +9,8 @@
 name: CI Build
 
 on:
-  push:		
+  workflow_dispatch:
+  push:
     branches:
     - '*'
   pull_request:
