@@ -68,5 +68,5 @@ jobs:
       shell: bash
       run: |
         export DEV_ROOT=$(pwd)
-        mvn -U --batch-mode -e clean install -DskipTests -P-coherence-commercial
+        mvn -U --batch-mode -e clean install -DskipTests -Pcoherence-ce
         mvn -U --batch-mode -e verify -pl ${{ matrix.module }} -Pcoherence-ce -Dgithub.build=true
