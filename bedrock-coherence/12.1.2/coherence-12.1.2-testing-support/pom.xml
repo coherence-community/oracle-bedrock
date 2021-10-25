@@ -17,7 +17,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.oracle.coherence</groupId>
+            <groupId>${coherence.groupId}</groupId>
             <artifactId>coherence</artifactId>
             <version>${coherence.version}</version>
             <scope>provided</scope>
@@ -35,7 +35,7 @@
             <version>${project.version}</version>
             <exclusions>
                 <exclusion>
-                    <groupId>com.oracle.coherence</groupId>
+                    <groupId>${coherence.groupId}</groupId>
                     <artifactId>coherence</artifactId>
                 </exclusion>
                 <exclusion>

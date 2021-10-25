@@ -69,4 +69,4 @@ jobs:
       run: |
         export DEV_ROOT=$(pwd)
         mvn -U --batch-mode -e clean install -DskipTests -P-coherence-commercial
-        mvn -U --batch-mode -e verify -pl ${{ matrix.module }} -P-coherence-commercial -Dgithub.build=true
+        mvn -U --batch-mode -e verify -pl ${{ matrix.module }} -Pcoherence-ce -Dgithub.build=true

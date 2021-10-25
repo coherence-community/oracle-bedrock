@@ -56,4 +56,4 @@ jobs:
         git config --local user.name "${GIT_USER}"
         git config --local user.email "${GIT_EMAIL}"
         sh ./tools/bin/mvn-gpg.sh
-        mvn -s ./.mvn/settings.xml -B clean deploy -DskipTests -DskipTests -Dgpg.passphrase=${GPG_PASSPHRASE} -P-coherence-commercial -Dgithub.build=true
+        mvn -s ./.mvn/settings.xml -B clean deploy -DskipTests -Dgpg.passphrase=${GPG_PASSPHRASE} -P-coherence-ce -Dgithub.build=true

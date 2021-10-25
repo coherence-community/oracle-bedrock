@@ -14,27 +14,28 @@
     <name>Bedrock for Coherence Project</name>
 
     <modules>
+        <module>3.7.1</module>
+        <module>12.1.2</module>
+        <module>12.1.3</module>
+        <module>12.2.1</module>
         <module>14.1.1</module>
         <module>21.06</module>
     </modules>
 
     <!--
-    This profile builds Bedrock modules dependent on commercial versions of Oracle Coherence.
-    The relevant Coherence jar files must be present in a Maven repo to enable this profile
+    This profile builds Bedrock modules dependent on commercial versions of Oracle Coherence
+    using CE. This allows builds to be run on external CI infrastructure.
     -->
     <profiles>
         <profile>
-            <id>coherence-commercial</id>
+            <id>coherence-ce</id>
             <activation>
-                <!-- This is a work-around for the fact that activeByDefault does not do what you'd think it should -->
-                <file><exists>.</exists></file>
+                <activeByDefault>false</activeByDefault>
             </activation>
-            <modules>
-                <module>3.7.1</module>
-                <module>12.1.2</module>
-                <module>12.1.3</module>
-                <module>12.2.1</module>
-            </modules>
+            <properties>
+                <coherence.version>21.06.2</coherence.version>
+                <coherence.groupId>com.oracle.coherence.ce</coherence.groupId>
+            </properties>
         </profile>
     </profiles>
 
