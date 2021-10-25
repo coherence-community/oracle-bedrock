@@ -17,6 +17,7 @@
     <properties>
         <!-- the version of coherence -->
         <coherence.version>12.1.2-0-5</coherence.version>
+        <coherence.groupId>com.oracle.coherence</coherence.groupId>
     </properties>
 
     <modules>

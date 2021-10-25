@@ -403,14 +403,4 @@
             </plugin>
         </plugins>
     </build>
-
-    <profiles>
-        <profile>
-            <id>coherence-commercial</id>
-            <activation>
-                <!-- This is a work-around for the fact that activeByDefault does not do what you'd think it should -->
-                <file><exists>.</exists></file>
-            </activation>
-        </profile>
-    </profiles>
 </project>
