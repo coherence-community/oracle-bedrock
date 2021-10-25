@@ -21,22 +21,4 @@
         <module>14.1.1</module>
         <module>21.06</module>
     </modules>
-
-    <!--
-    This profile builds Bedrock modules dependent on commercial versions of Oracle Coherence
-    using CE. This allows builds to be run on external CI infrastructure.
-    -->
-    <profiles>
-        <profile>
-            <id>coherence-ce</id>
-            <activation>
-                <activeByDefault>false</activeByDefault>
-            </activation>
-            <properties>
-                <coherence.version>21.06.2</coherence.version>
-                <coherence.groupId>com.oracle.coherence.ce</coherence.groupId>
-            </properties>
-        </profile>
-    </profiles>
-
 </project>

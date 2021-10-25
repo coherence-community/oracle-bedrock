@@ -25,4 +25,21 @@
         <module>coherence-12.1.2-tests</module>
         <module>coherence-12.1.2-testing-support</module>
     </modules>
+
+    <!--
+    This profile builds Bedrock modules dependent on commercial versions of Oracle Coherence
+    using CE. This allows builds to be run on external CI infrastructure.
+    -->
+    <profiles>
+        <profile>
+            <id>coherence-ce</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <properties>
+                <coherence.version>21.06.2</coherence.version>
+                <coherence.groupId>com.oracle.coherence.ce</coherence.groupId>
+            </properties>
+        </profile>
+    </profiles>
 </project>
