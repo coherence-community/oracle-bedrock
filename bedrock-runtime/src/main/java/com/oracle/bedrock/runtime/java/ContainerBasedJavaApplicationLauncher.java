@@ -101,7 +101,7 @@ public class ContainerBasedJavaApplicationLauncher<A extends JavaApplication> im
     /**
      * The {@link Logger} for this class.
      */
-    private static Logger LOGGER = Logger.getLogger(ContainerBasedJavaApplicationLauncher.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(ContainerBasedJavaApplicationLauncher.class.getName());
 
 
     /**

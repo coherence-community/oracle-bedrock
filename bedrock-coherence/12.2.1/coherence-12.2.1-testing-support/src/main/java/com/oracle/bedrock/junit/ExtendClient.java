@@ -59,7 +59,7 @@ public class ExtendClient implements SessionBuilder
     /**
      * The {@link Logger} for this class.
      */
-    private static Logger LOGGER = Logger.getLogger(ExtendClient.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(ExtendClient.class.getName());
 
     /**
      * The Coherence Cache Configuration URI to use for the {@link ExtendClient}.

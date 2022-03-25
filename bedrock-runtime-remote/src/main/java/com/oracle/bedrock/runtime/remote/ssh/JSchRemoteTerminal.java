@@ -63,7 +63,7 @@ public class JSchRemoteTerminal extends AbstractRemoteTerminal
     /**
      * The {@link Logger} for this class.
      */
-    private static Logger LOGGER = Logger.getLogger(JSchRemoteTerminal.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(JSchRemoteTerminal.class.getName());
 
     /**
      * The {@link JSch} framework.

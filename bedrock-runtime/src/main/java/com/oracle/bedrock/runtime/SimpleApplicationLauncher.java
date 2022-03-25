@@ -68,7 +68,7 @@ public class SimpleApplicationLauncher implements ApplicationLauncher<Applicatio
     /**
      * The {@link Logger} for this class.
      */
-    private static Logger LOGGER = Logger.getLogger(SimpleApplicationLauncher.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(SimpleApplicationLauncher.class.getName());
 
 
     /**

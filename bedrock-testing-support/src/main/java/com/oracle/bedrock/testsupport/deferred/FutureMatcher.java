@@ -26,7 +26,6 @@
 package com.oracle.bedrock.testsupport.deferred;
 
 import org.hamcrest.Description;
-import org.hamcrest.Factory;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeDiagnosingMatcher;
 import org.hamcrest.core.Is;
@@ -106,7 +105,6 @@ public class FutureMatcher<T> extends TypeSafeDiagnosingMatcher<CompletableFutur
      *
      * @return the {@link Matcher}
      */
-    @Factory
     public static <T> Matcher<T> futureOf(Matcher<T> matcher)
     {
         return new Is<T>(matcher);
@@ -127,7 +125,6 @@ public class FutureMatcher<T> extends TypeSafeDiagnosingMatcher<CompletableFutur
      *
      * @return the {@link Matcher}
      */
-    @Factory
     public static <T> Matcher<T> futureOf(T value)
     {
         return futureOf(equalTo(value));

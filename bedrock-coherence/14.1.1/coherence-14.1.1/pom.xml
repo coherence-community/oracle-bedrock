@@ -4,7 +4,7 @@
     <parent>
         <groupId>com.oracle.bedrock.coherence</groupId>
         <artifactId>14.1.1</artifactId>
-        <version>5.1.4-SNAPSHOT</version>
+        <version>6.0.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>coherence-14.1.1</artifactId>
@@ -44,7 +44,7 @@
 
         <dependency>
             <groupId>org.hamcrest</groupId>
-            <artifactId>hamcrest-all</artifactId>
+            <artifactId>hamcrest-core</artifactId>
             <version>${hamcrest.version}</version>
             <scope>test</scope>
         </dependency>

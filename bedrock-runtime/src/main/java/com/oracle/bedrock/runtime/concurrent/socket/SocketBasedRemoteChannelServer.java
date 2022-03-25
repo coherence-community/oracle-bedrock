@@ -68,7 +68,7 @@ public class SocketBasedRemoteChannelServer extends AbstractControllableRemoteCh
     /**
     * The {@link Logger} for this class.
     */
-    private static Logger LOGGER = Logger.getLogger(SocketBasedRemoteChannelServer.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(SocketBasedRemoteChannelServer.class.getName());
 
     /**
      * The {@link ServerSocket} that will be used to accept {@link SocketBasedRemoteChannelClient}

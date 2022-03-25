@@ -95,7 +95,7 @@ public class Maven implements Profile, ComposableOption<Maven>
     /**
      * The {@link Logger} for this class.
      */
-    private static Logger LOGGER = Logger.getLogger(Maven.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(Maven.class.getName());
 
     /**
      * The {@link File} for the user settings (ie: settings.xml)

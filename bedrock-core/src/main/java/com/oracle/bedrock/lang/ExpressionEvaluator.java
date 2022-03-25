@@ -30,8 +30,9 @@ import com.oracle.bedrock.annotations.Internal;
 import com.oracle.bedrock.options.Variable;
 import com.oracle.bedrock.options.Variables;
 
-import javax.el.ELProcessor;
-import javax.el.StandardELContext;
+import jakarta.el.ELProcessor;
+import jakarta.el.StandardELContext;
+
 import java.util.HashMap;
 import java.util.regex.Pattern;
 
@@ -50,7 +51,7 @@ import java.util.regex.Pattern;
 public class ExpressionEvaluator
 {
     /**
-     * The {@link ELProcessor} to use for evaluating expressions.
+     * The {@link jakarta.el.ELProcessor} to use for evaluating expressions.
      */
     private ELProcessor processor;
 

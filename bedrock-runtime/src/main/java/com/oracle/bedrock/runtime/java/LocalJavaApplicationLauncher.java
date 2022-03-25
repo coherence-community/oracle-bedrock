@@ -90,7 +90,6 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 import static com.oracle.bedrock.deferred.DeferredHelper.ensure;
 import static com.oracle.bedrock.deferred.DeferredHelper.within;
@@ -109,9 +108,9 @@ import static com.oracle.bedrock.deferred.DeferredHelper.within;
 public class LocalJavaApplicationLauncher<A extends JavaApplication> implements JavaApplicationLauncher<A>
 {
     /**
-     * The {@link Logger} for this class.
+     * The {@link java.util.logging.Logger} for this class.
      */
-    private static Logger LOGGER = Logger.getLogger(LocalJavaApplicationLauncher.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(LocalJavaApplicationLauncher.class.getName());
 
 
     /**

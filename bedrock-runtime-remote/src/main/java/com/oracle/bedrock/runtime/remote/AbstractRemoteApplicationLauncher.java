@@ -85,7 +85,7 @@ public abstract class AbstractRemoteApplicationLauncher<A extends Application> i
     /**
      * The {@link Logger} for this class.
      */
-    private static Logger LOGGER = Logger.getLogger(AbstractRemoteApplicationLauncher.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(AbstractRemoteApplicationLauncher.class.getName());
 
 
     /**

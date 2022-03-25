@@ -55,7 +55,7 @@ public class WindowsRemoteTerminal extends AbstractRemoteTerminal
     /**
      * The {@link Logger} for this class.
      */
-    private static Logger LOGGER = Logger.getLogger(WindowsRemoteTerminal.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(WindowsRemoteTerminal.class.getName());
 
 
     /**

@@ -79,7 +79,7 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
     /**
     * The {@link Logger} for this class.
     */
-    private static Logger LOGGER = Logger.getLogger(AbstractRemoteChannel.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(AbstractRemoteChannel.class.getName());
 
     /**
      * The underlying {@link OutputStream} to use for sending requests and raising

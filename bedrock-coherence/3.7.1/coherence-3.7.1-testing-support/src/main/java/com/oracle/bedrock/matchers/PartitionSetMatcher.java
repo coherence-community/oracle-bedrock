@@ -27,7 +27,6 @@ package com.oracle.bedrock.matchers;
 
 import com.tangosol.net.partition.PartitionSet;
 import org.hamcrest.Description;
-import org.hamcrest.Factory;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
 
@@ -98,7 +97,6 @@ public class PartitionSetMatcher extends TypeSafeMatcher<PartitionSet>
     }
 
 
-    @Factory
     public static Matcher<PartitionSet> contains(int... partitionIds)
     {
         return new PartitionSetMatcher(partitionIds);
