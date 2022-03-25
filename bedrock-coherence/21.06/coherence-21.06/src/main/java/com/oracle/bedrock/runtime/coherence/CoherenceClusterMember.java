@@ -41,6 +41,7 @@ import com.oracle.bedrock.runtime.java.options.SystemProperties;
 import com.oracle.bedrock.runtime.java.options.SystemProperty;
 import com.oracle.bedrock.runtime.remote.RemotePlatform;
 import com.oracle.bedrock.util.Trilean;
+import com.tangosol.net.Coherence;
 import com.tangosol.net.NamedCache;
 import com.tangosol.net.Session;
 import com.tangosol.util.UID;
@@ -541,7 +542,7 @@ public interface CoherenceClusterMember extends JavaApplication
         @Override
         public CompletableFuture<Void> start(ContainerBasedJavaApplicationLauncher.ControllableApplication application)
         {
-            RemoteCallable<Void> callable = new RemoteCallableStaticMethod<>(MAIN_CLASSNAME, "start");
+            RemoteCallable<Void> callable = new StartCoherence();
 
             return application.submit(callable);
         }
@@ -552,7 +553,7 @@ public interface CoherenceClusterMember extends JavaApplication
             .ControllableApplication application)
         {
             RemoteCallable<Void> callable = new RemoteCallableStaticMethod<>(MAIN_CLASSNAME,
-                                                                             "shutdown");
+                                                                             "closeAll");
 
             return application.submit(callable);
         }
@@ -571,6 +572,21 @@ public interface CoherenceClusterMember extends JavaApplication
                                                                          pipedOutputStream,
                                                                          pipedInputStream,
                                                                          className.getName());
+        }
+    }
+
+    /**
+     * A {@link RemoteCallable} that will start a {@link Coherence} cluster member
+     * using the default configuration.
+     */
+    class StartCoherence
+        implements RemoteCallable<Void>
+    {
+        @Override
+        public Void call() throws Exception
+        {
+            Coherence.clusterMember().start();
+            return null;
         }
     }
 }

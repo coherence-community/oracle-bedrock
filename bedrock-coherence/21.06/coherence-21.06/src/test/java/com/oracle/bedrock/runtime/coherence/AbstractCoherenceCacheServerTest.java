@@ -35,6 +35,7 @@ import com.oracle.bedrock.runtime.concurrent.RemoteEventListener;
 import com.oracle.bedrock.runtime.concurrent.options.StreamName;
 import com.oracle.bedrock.runtime.java.features.JmxFeature;
 import com.oracle.bedrock.runtime.java.options.ClassName;
+import com.oracle.bedrock.runtime.java.options.IPv4Preferred;
 import com.oracle.bedrock.runtime.network.AvailablePortIterator;
 import com.oracle.bedrock.runtime.options.Console;
 import com.oracle.bedrock.runtime.options.Discriminator;
@@ -230,8 +231,9 @@ public abstract class AbstractCoherenceCacheServerTest extends AbstractTest
         Platform platform = getPlatform();
 
         try (CoherenceCacheServer server = platform.launch(CoherenceCacheServer.class,
-                                                           ClusterPort.automatic(),
                                                            LocalHost.only(),
+                                                           WellKnownAddress.of("127.0.0.1"),
+                                                           IPv4Preferred.yes(),
                                                            Console.system()))
         {
             assertThat(server, new GetLocalMemberId(), is(1));
