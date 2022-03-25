@@ -26,7 +26,6 @@
 package com.oracle.bedrock.testsupport.matchers;
 
 import org.hamcrest.Description;
-import org.hamcrest.Factory;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
 
@@ -214,14 +213,12 @@ public class MapMatcher<K, V> extends TypeSafeMatcher<Map<? extends K, ? extends
     }
 
 
-    @Factory
     public static <K, V> Matcher<Map<? extends K, ? extends V>> sameAs(Map<K, V> map)
     {
         return new MapMatcher<K, V>(map, Equivalence.EQUALS);
     }
 
 
-    @Factory
     public static <K, V> Matcher<Map<? extends K, ? extends V>> sameAs(Map<K, V>      map,
                                                                        Equivalence<V> valueEquivalence)
     {

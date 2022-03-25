@@ -3,7 +3,7 @@
 
     <groupId>com.oracle.bedrock</groupId>
     <artifactId>project</artifactId>
-    <version>5.1.4-SNAPSHOT</version>
+    <version>6.0.0-SNAPSHOT</version>
 
     <packaging>pom</packaging>
 
@@ -58,7 +58,6 @@
         <module>bedrock-runtime-maven-tests</module>
 
         <module>bedrock-runtime-jacoco</module>
-        <module>bedrock-runtime-jprofiler</module>
 
         <module>bedrock-testing-support</module>
         <module>bedrock-testing-support-tests</module>
@@ -72,13 +71,8 @@
         <module>bedrock-runtime-windows</module>
         <module>bedrock-runtime-windows-tests</module>
 
-        <module>bedrock-runtime-docker</module>
-        <module>bedrock-runtime-docker-tests</module>
-
         <module>bedrock-runtime-vagrant</module>
         <module>bedrock-runtime-vagrant-tests</module>
-
-        <module>bedrock-runtime-k8s</module>
 
         <module>bedrock-coherence</module>
     </modules>
@@ -95,45 +89,45 @@
         <repository>snapshots</repository>
 
         <!-- the version of java required to build -->
-        <java.version>1.8</java.version>
+        <java.version.enforcer>11</java.version.enforcer>
+        <java.version>11</java.version>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
+
+        <maven.version>3.6</maven.version>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <!-- plugin dependency versions -->
-        <maven.compiler.plugin.version>3.8.1</maven.compiler.plugin.version>
-        <maven.deploy.plugin.version>3.0.0-M1</maven.deploy.plugin.version>
-        <maven.doxia.markdown.plugin.version>1.6</maven.doxia.markdown.plugin.version>
-        <maven.enforcer.plugin.version>3.0.0-M3</maven.enforcer.plugin.version>
+        <maven.compiler.plugin.version>3.10.1</maven.compiler.plugin.version>
+        <maven.deploy.plugin.version>3.0.0-M2</maven.deploy.plugin.version>
+        <maven.doxia.markdown.plugin.version>2.0.0-M2</maven.doxia.markdown.plugin.version>
+        <maven.enforcer.plugin.version>3.0.0</maven.enforcer.plugin.version>
         <maven.failsafe.plugin.version>3.0.0-M5</maven.failsafe.plugin.version>
-        <maven.flatten.plugin.version>1.2.2</maven.flatten.plugin.version>
-        <maven.gpg.plugin.version>1.6</maven.gpg.plugin.version>
+        <maven.flatten.plugin.version>1.2.7</maven.flatten.plugin.version>
+        <maven.gpg.plugin.version>3.0.1</maven.gpg.plugin.version>
         <maven.install.plugin.version>3.0.0-M1</maven.install.plugin.version>
-        <maven.jar.plugin.version>3.2.0</maven.jar.plugin.version>
-        <maven.javadoc.plugin.version>3.2.0</maven.javadoc.plugin.version>
-        <maven.release.plugin.version>3.0.0-M1</maven.release.plugin.version>
+        <maven.jar.plugin.version>3.2.2</maven.jar.plugin.version>
+        <maven.javadoc.plugin.version>3.3.2</maven.javadoc.plugin.version>
+        <maven.release.plugin.version>3.0.0-M5</maven.release.plugin.version>
         <maven.shade.plugin.version>3.2.4</maven.shade.plugin.version>
-        <maven.site.plugin.version>3.9.1</maven.site.plugin.version>
-        <maven.source.plugin.version>3.2.0</maven.source.plugin.version>
+        <maven.site.plugin.version>3.11.0</maven.site.plugin.version>
+        <maven.source.plugin.version>3.2.1</maven.source.plugin.version>
         <maven.surefire.plugin.version>3.0.0-M5</maven.surefire.plugin.version>
-        <maven.license.plugin.version>3.0</maven.license.plugin.version>
+        <maven.license.plugin.version>4.1</maven.license.plugin.version>
 
         <!-- dependency versions -->
         <aether.version>1.1.0</aether.version>
-        <glassfish.el.version>3.0.4</glassfish.el.version>
-        <hamcrest.version>1.3</hamcrest.version>
+        <glassfish.el.version>5.0.0-M1</glassfish.el.version>
+        <hamcrest.version>2.2</hamcrest.version>
         <glassfish.json.version>1.0.4</glassfish.json.version>
-        <jacoco.version>0.8.2</jacoco.version>
-        <javax.json.version>1.1.2</javax.json.version>
-        <javax.xml.bind.version>2.3.0</javax.xml.bind.version>
-        <javax.xml.ws.version>2.3.0</javax.xml.ws.version>
-        <jprofiler.version>9.1.1</jprofiler.version>
-        <jsch.version>0.1.54</jsch.version>
-        <junit.version>4.13.1</junit.version>
-        <junit.five.version>5.7.1</junit.five.version>
-        <junit.jupiter.version>5.7.0</junit.jupiter.version>
-        <junit.vintage.version>5.7.0</junit.vintage.version>
+        <jakarta.el.version>5.0.0-RC1</jakarta.el.version>
+        <jacoco.version>0.8.7</jacoco.version>
+        <jsch.version>0.1.55</jsch.version>
+        <junit.version>4.13.2</junit.version>
+        <junit.five.version>5.8.1</junit.five.version>
         <maven.aether.version>3.3.9</maven.aether.version>
-        <mockito.version>2.20.1</mockito.version>
+        <mockito.version>4.4.0</mockito.version>
         <p4.version>2019.1.1889202</p4.version>
     </properties>
 
@@ -189,10 +183,15 @@
 
             <dependency>
                 <groupId>org.hamcrest</groupId>
-                <artifactId>hamcrest-all</artifactId>
+                <artifactId>hamcrest-core</artifactId>
                 <version>${hamcrest.version}</version>
             </dependency>
 
+            <dependency>
+                <groupId>jakarta.el</groupId>
+                 <artifactId>jakarta.el-api</artifactId>
+                <version>${jakarta.el.version}</version>
+            </dependency>
             <dependency>
                 <groupId>org.glassfish</groupId>
                  <artifactId>jakarta.el</artifactId>
@@ -278,7 +277,7 @@
                         <configuration>
                             <rules>
                                 <requireMavenVersion>
-                                    <version>3.5</version>
+                                    <version>[${maven.version},)</version>
                                 </requireMavenVersion>
                                 <requireJavaVersion>
                                     <version>${java.version}</version>

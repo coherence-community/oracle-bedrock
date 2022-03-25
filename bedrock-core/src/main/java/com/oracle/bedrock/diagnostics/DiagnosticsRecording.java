@@ -54,7 +54,7 @@ public class DiagnosticsRecording implements AutoCloseable
     /**
      * The {@link Logger} for this class.
      */
-    private static Logger LOGGER = Logger.getLogger(DiagnosticsRecording.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(DiagnosticsRecording.class.getName());
 
     /**
      * The {@link Stack} of nested {@link DiagnosticsRecording}s for the

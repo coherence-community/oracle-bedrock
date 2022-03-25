@@ -32,12 +32,12 @@ import org.mockito.ArgumentCaptor;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.sameInstance;
 
-import static org.hamcrest.collection.IsArrayContainingInOrder.arrayContaining;
+import static org.hamcrest.collection.ArrayMatching.arrayContaining;
 
 import static org.junit.Assert.assertThat;
 
-import static org.mockito.Matchers.anyMap;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.eq;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;

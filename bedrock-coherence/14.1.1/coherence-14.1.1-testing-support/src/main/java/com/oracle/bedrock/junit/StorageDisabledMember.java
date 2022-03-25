@@ -58,7 +58,7 @@ public class StorageDisabledMember implements SessionBuilder
     /**
      * The {@link Logger} for this class.
      */
-    private static Logger LOGGER = Logger.getLogger(StorageDisabledMember.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(StorageDisabledMember.class.getName());
 
 
     @Override

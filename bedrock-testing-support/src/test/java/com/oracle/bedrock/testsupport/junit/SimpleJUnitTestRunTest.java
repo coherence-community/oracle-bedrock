@@ -33,10 +33,6 @@ import com.oracle.bedrock.runtime.Platform;
 import com.oracle.bedrock.runtime.concurrent.RemoteCallable;
 import com.oracle.bedrock.runtime.concurrent.RemoteEventListener;
 import com.oracle.bedrock.runtime.java.JavaApplicationProcess;
-import com.oracle.bedrock.testsupport.junit.JUnitTestListener;
-import com.oracle.bedrock.testsupport.junit.JUnitTestRunner;
-import com.oracle.bedrock.testsupport.junit.SimpleJUnitTestListener;
-import com.oracle.bedrock.testsupport.junit.SimpleJUnitTestRun;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
@@ -45,12 +41,11 @@ import java.util.List;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.collection.IsArrayContainingInAnyOrder.arrayContainingInAnyOrder;
+import static org.hamcrest.collection.ArrayMatching.arrayContainingInAnyOrder;
 import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInAnyOrder;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyVararg;
-import static org.mockito.Matchers.same;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -95,13 +90,13 @@ public class SimpleJUnitTestRunTest
             OptionsByType      testOptions = OptionsByType.of(testClasses);
             SimpleJUnitTestRun spyApp      = spy(application);
 
-            doReturn(null).when(spyApp).submit(any(RemoteCallable.class), anyVararg());
+            doReturn(null).when(spyApp).submit(any(RemoteCallable.class), any());
 
             spyApp.startTests(testOptions);
 
             ArgumentCaptor<RemoteCallable> captorCallable = ArgumentCaptor.forClass(RemoteCallable.class);
 
-            verify(spyApp).submit(captorCallable.capture(), anyVararg());
+            verify(spyApp).submit(captorCallable.capture(), any());
 
             RemoteCallable callable = captorCallable.getValue();
 

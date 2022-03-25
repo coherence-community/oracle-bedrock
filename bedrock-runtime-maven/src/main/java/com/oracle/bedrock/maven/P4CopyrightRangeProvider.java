@@ -90,7 +90,7 @@ public class P4CopyrightRangeProvider
     @Override
     public Map<String, String> getAdditionalProperties(AbstractLicenseMojo mojo, Properties properties, Document document)
     {
-        mojo.debug("Obtain additional properties for baseDir=%s doc=%s", mojo.basedir, document.getFile());
+        mojo.debug("Obtain additional properties for baseDir=%s doc=%s", mojo.defaultBasedir, document.getFile());
 
         String inceptionYear = properties.getProperty(INCEPTION_YEAR_KEY);
         if (inceptionYear == null)
@@ -141,7 +141,7 @@ public class P4CopyrightRangeProvider
     }
 
     private synchronized P4Lookup getP4Lookup(AbstractLicenseMojo mojo, Properties props) {
-        String path = mojo.basedir.getAbsolutePath();
+        String path = mojo.defaultBasedir.getAbsolutePath();
         mojo.debug("Find P4Lookup for basedir %s", path);
 
         for (Map.Entry<File, P4Lookup> entry : p4LookupMap.entrySet()) {
@@ -152,7 +152,7 @@ public class P4CopyrightRangeProvider
                 return entry.getValue();
             }
         }
-        return p4LookupMap.computeIfAbsent(mojo.basedir, k -> createP4Lookup(mojo, k, props));
+        return p4LookupMap.computeIfAbsent(mojo.defaultBasedir, k -> createP4Lookup(mojo, k, props));
     }
 
     private P4Lookup createP4Lookup(AbstractLicenseMojo mojo, File baseDir, Properties props)
