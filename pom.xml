@@ -293,6 +293,7 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>${maven.surefire.plugin.version}</version>
                 <configuration>
+                    <useModulePath>false</useModulePath>
                     <argLine>-Xms800m -Xmx800m</argLine>
                     <includes>
                         <include>**/*Test.java</include>
@@ -308,6 +309,7 @@
                 <artifactId>maven-failsafe-plugin</artifactId>
                 <version>${maven.failsafe.plugin.version}</version>
                 <configuration>
+                    <useModulePath>false</useModulePath>
                     <argLine>-Xms800m -Xmx800m</argLine>
                     <includes>
                         <include>**/*IT.java</include>

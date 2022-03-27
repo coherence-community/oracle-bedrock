@@ -36,10 +36,10 @@ jobs:
           - bedrock-coherence/14.1.1/coherence-14.1.1-testing-support-tests-junit5
           - bedrock-core
           - bedrock-runtime
-          - bedrock-runtime-docker-tests
+#          - bedrock-runtime-docker-tests
           - bedrock-runtime-jacoco
-          - bedrock-runtime-jprofiler
-          - bedrock-runtime-k8s
+#          - bedrock-runtime-jprofiler
+#          - bedrock-runtime-k8s
           - bedrock-runtime-maven-tests
 #          - bedrock-runtime-remote-tests
           - bedrock-runtime-tests
