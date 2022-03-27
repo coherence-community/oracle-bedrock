@@ -26,8 +26,6 @@
 package com.oracle.bedrock.runtime.console;
 
 import com.oracle.bedrock.runtime.ApplicationConsole;
-import com.oracle.bedrock.runtime.console.StdErrRedirector;
-import com.oracle.bedrock.runtime.console.StdOutRedirector;
 import org.junit.Test;
 
 import java.io.BufferedReader;
@@ -39,7 +37,7 @@ import java.io.StringWriter;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 

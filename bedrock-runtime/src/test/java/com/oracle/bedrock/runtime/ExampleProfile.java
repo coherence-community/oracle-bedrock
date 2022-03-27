@@ -23,14 +23,10 @@
  * "Portions Copyright [year] [name of copyright owner]"
  */
 
-package com.oracle.bedrock.example;
+package com.oracle.bedrock.runtime;
 
 import com.oracle.bedrock.Option;
 import com.oracle.bedrock.OptionsByType;
-import com.oracle.bedrock.runtime.Application;
-import com.oracle.bedrock.runtime.MetaClass;
-import com.oracle.bedrock.runtime.Platform;
-import com.oracle.bedrock.runtime.Profile;
 
 /**
  * An example {@link Profile} for testing.

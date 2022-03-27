@@ -508,6 +508,7 @@ class Options implements OptionsByType
                 }
                 catch (Exception e)
                 {
+                    e.printStackTrace();
                     // carry on... perhaps we can use another approach?
                 }
             }

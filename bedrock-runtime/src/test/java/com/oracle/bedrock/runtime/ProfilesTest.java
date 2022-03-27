@@ -26,13 +26,12 @@
 package com.oracle.bedrock.runtime;
 
 import com.oracle.bedrock.OptionsByType;
-import com.oracle.bedrock.example.ExampleProfile;
 import org.junit.Test;
 
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.nullValue;
-import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 /**
  * Tests for {@link Profile}s.
@@ -51,6 +50,7 @@ public class ProfilesTest
     public void shouldReturnCreateProfiles()
     {
         System.setProperty("bedrock.profile.example", "hello");
+        System.setProperty("bedrock.profile.example.classname", ExampleProfile.class.getName());
 
         OptionsByType optionsByType = Profiles.getProfiles();
 
