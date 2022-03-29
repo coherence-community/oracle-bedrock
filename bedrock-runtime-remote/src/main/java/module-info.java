@@ -1,4 +1,4 @@
-module com.oracle.bedrock.runtime.remote {
+open module com.oracle.bedrock.runtime.remote {
     exports com.oracle.bedrock.runtime.remote;
     exports com.oracle.bedrock.runtime.remote.http;
     exports com.oracle.bedrock.runtime.remote.java;

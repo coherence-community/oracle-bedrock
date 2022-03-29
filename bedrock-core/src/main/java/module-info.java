@@ -1,4 +1,4 @@
-module com.oracle.bedrock {
+open module com.oracle.bedrock {
     exports com.oracle.bedrock;
     exports com.oracle.bedrock.annotations;
     exports com.oracle.bedrock.deferred;
