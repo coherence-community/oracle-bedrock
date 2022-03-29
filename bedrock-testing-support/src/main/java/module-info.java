@@ -1,4 +1,4 @@
-module com.oracle.bedrock.testsupport {
+open module com.oracle.bedrock.testsupport {
     exports com.oracle.bedrock.testsupport;
     exports com.oracle.bedrock.testsupport.deferred;
     exports com.oracle.bedrock.testsupport.deferred.options;

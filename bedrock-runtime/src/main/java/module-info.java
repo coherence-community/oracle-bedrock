@@ -1,4 +1,4 @@
-module com.oracle.bedrock.runtime {
+open module com.oracle.bedrock.runtime {
     exports com.oracle.bedrock.runtime;
     exports com.oracle.bedrock.runtime.concurrent;
     exports com.oracle.bedrock.runtime.concurrent.callable;

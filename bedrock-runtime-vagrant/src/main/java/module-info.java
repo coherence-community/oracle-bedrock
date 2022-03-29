@@ -1,4 +1,4 @@
-module com.oracle.bedrock.runtime.virtual.vagrant {
+open module com.oracle.bedrock.runtime.virtual.vagrant {
     exports com.oracle.bedrock.runtime.virtual.vagrant;
     exports com.oracle.bedrock.runtime.virtual.vagrant.options;
 

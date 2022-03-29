@@ -1,4 +1,4 @@
-module com.oracle.bedrock.maven {
+open module com.oracle.bedrock.maven {
     exports com.oracle.bedrock.maven;
 
     requires transitive com.oracle.bedrock.runtime;
