@@ -5,7 +5,7 @@ open module com.oracle.bedrock.runtime.coherence.testing {
     requires com.oracle.bedrock.runtime.coherence;
     requires com.oracle.bedrock.testsupport;
 
-    requires com.oracle.coherence.ce;
+    requires com.oracle.coherence;
 
     requires static junit;
     requires static org.junit.jupiter.api;

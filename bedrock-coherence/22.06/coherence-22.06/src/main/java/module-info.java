@@ -5,7 +5,7 @@ open module com.oracle.bedrock.runtime.coherence {
 
     requires transitive com.oracle.bedrock.runtime;
     requires static com.oracle.bedrock.runtime.remote;
-    requires com.oracle.coherence.ce;
+    requires com.oracle.coherence;
 
     requires java.management;
 
