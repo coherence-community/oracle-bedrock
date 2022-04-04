@@ -75,6 +75,8 @@
         <module>bedrock-runtime-vagrant-tests</module>
 
         <module>bedrock-coherence</module>
+
+        <module>bedrock-bom</module>
     </modules>
 
     <properties>
@@ -84,7 +86,7 @@
 
         <!--
             defines the maven.java.net repository that should be targeted for download links
-            when generating latest project documentation valid options: snapshots, releases
+            when generating the latest project documentation valid options: snapshots, releases
           -->
         <repository>snapshots</repository>
 
