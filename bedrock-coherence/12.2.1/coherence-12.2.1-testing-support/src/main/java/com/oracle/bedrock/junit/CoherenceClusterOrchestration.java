@@ -85,17 +85,17 @@ public class CoherenceClusterOrchestration extends ExternalResource
     /**
      * The {@link LocalPlatform} on which the Coherence Cluster will be orchestrated.
      */
-    private LocalPlatform platform;
+    private final LocalPlatform platform;
 
     /**
      * The {@link OptionsByType} to use as a basis for constructing a variety of {@link CoherenceClusterMember}s.
      */
-    private OptionsByType commonMemberOptions;
+    private final OptionsByType commonMemberOptions;
 
     /**
      * The {@link OptionsByType} to use as a basis for constructing storage-enabled {@link CoherenceClusterMember}s.
      */
-    private OptionsByType storageMemberOptions;
+    private final OptionsByType storageMemberOptions;
 
     /**
      * The {@link OptionsByType} to use when creating the {@link CoherenceCluster}.
@@ -121,7 +121,7 @@ public class CoherenceClusterOrchestration extends ExternalResource
      * The {@link ConfigurableCacheFactory} sessions that have been
      * created against the orchestrated {@link CoherenceCluster}.
      */
-    private HashMap<SessionBuilder, ConfigurableCacheFactory> sessions;
+    private final HashMap<SessionBuilder, ConfigurableCacheFactory> sessions;
 
     /**
      * The cluster port.

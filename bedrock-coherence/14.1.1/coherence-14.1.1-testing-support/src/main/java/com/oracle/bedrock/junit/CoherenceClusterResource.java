@@ -71,7 +71,7 @@ public class CoherenceClusterResource
      * The {@link ConfigurableCacheFactory} sessions that have been locally created against the
      * {@link CoherenceCluster} using this {@link CoherenceClusterResource}.
      */
-    private HashMap<SessionBuilder, ConfigurableCacheFactory> sessions;
+    private final HashMap<SessionBuilder, ConfigurableCacheFactory> sessions;
 
 
     /**
