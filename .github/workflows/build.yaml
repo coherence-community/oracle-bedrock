@@ -26,10 +26,6 @@ jobs:
       fail-fast: false
       matrix:
         module:
-          - bedrock-coherence/22.06/coherence-22.06
-          - bedrock-coherence/22.06/coherence-22.06-testing-support
-          - bedrock-coherence/22.06/coherence-22.06-testing-support-tests-junit4
-          - bedrock-coherence/22.06/coherence-22.06-testing-support-tests-junit5
           - bedrock-coherence/21.06/coherence-21.06
           - bedrock-coherence/21.06/coherence-21.06-testing-support
           - bedrock-coherence/21.06/coherence-21.06-testing-support-tests-junit4
