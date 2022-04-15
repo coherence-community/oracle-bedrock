@@ -71,6 +71,9 @@
         <module>bedrock-runtime-windows</module>
         <module>bedrock-runtime-windows-tests</module>
 
+        <module>bedrock-runtime-docker</module>
+        <module>bedrock-runtime-docker-tests</module>
+
         <module>bedrock-runtime-vagrant</module>
         <module>bedrock-runtime-vagrant-tests</module>
 
@@ -122,7 +125,6 @@
         <aether.version>1.1.0</aether.version>
         <glassfish.el.version>5.0.0-M1</glassfish.el.version>
         <hamcrest.version>2.2</hamcrest.version>
-        <glassfish.json.version>1.0.4</glassfish.json.version>
         <jakarta.el.version>5.0.0-RC1</jakarta.el.version>
         <jacoco.version>0.8.7</jacoco.version>
         <jsch.version>0.1.55</jsch.version>
@@ -219,8 +221,14 @@
             </dependency>
             <dependency>
                 <groupId>org.glassfish</groupId>
-                 <artifactId>jakarta.el</artifactId>
+                <artifactId>jakarta.el</artifactId>
                 <version>${glassfish.el.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>jakarta.el</groupId>
+                        <artifactId>jakarta.el-api</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
 
             <dependency>

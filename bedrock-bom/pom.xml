@@ -45,6 +45,11 @@
             </dependency>
             <dependency>
                 <groupId>com.oracle.bedrock</groupId>
+                <artifactId>bedrock-runtime-docker</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.oracle.bedrock</groupId>
                 <artifactId>bedrock-runtime-vagrant</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -122,16 +127,6 @@
             <dependency>
                 <groupId>com.oracle.bedrock.coherence</groupId>
                 <artifactId>coherence-21.06-testing-support</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.oracle.bedrock.coherence</groupId>
-                <artifactId>coherence-22.06</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.oracle.bedrock.coherence</groupId>
-                <artifactId>coherence-22.06-testing-support</artifactId>
                 <version>${project.version}</version>
             </dependency>
 

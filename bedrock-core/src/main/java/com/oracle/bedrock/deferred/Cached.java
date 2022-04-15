@@ -49,7 +49,7 @@ public class Cached<T> implements Deferred<T>
     /**
      * The last successfully resolved object from the {@link #deferred}.
      */
-    private AtomicReference<T> object;
+    private volatile AtomicReference<T> object;
 
 
     /**
