@@ -114,12 +114,13 @@
         <maven.install.plugin.version>3.0.0-M1</maven.install.plugin.version>
         <maven.jar.plugin.version>3.2.2</maven.jar.plugin.version>
         <maven.javadoc.plugin.version>3.3.2</maven.javadoc.plugin.version>
+        <maven.license.plugin.version>4.1</maven.license.plugin.version>
+        <maven.moditect.plugin.version>1.0.0-SNAPSHOT</maven.moditect.plugin.version>
         <maven.release.plugin.version>3.0.0-M5</maven.release.plugin.version>
-        <maven.shade.plugin.version>3.2.4</maven.shade.plugin.version>
+        <maven.shade.plugin.version>3.3.0</maven.shade.plugin.version>
         <maven.site.plugin.version>3.11.0</maven.site.plugin.version>
         <maven.source.plugin.version>3.2.1</maven.source.plugin.version>
         <maven.surefire.plugin.version>3.0.0-M5</maven.surefire.plugin.version>
-        <maven.license.plugin.version>4.1</maven.license.plugin.version>
 
         <!-- dependency versions -->
         <aether.version>1.1.0</aether.version>
@@ -436,5 +437,41 @@
               <version>${maven.jar.plugin.version}</version>
             </plugin>
         </plugins>
+
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>com.oracle.coherence.moditect</groupId>
+                    <artifactId>moditect-maven-plugin</artifactId>
+                    <version>${maven.moditect.plugin.version}</version>
+                    <executions>
+                      <execution>
+                        <id>add-module-info</id>
+                        <phase>package</phase>
+                        <goals>
+                          <goal>add-module-info</goal>
+                        </goals>
+                        <configuration>
+                          <module>
+                            <moduleInfo>
+                              <name>${module.name}</name>
+                              <open>true</open>
+                              <exports>
+                                *;
+                              </exports>
+                              <addServiceUses>true</addServiceUses>
+                            </moduleInfo>
+                          </module>
+                          <jdepsExtraArgs>
+                            <extraArg>--multi-release=11</extraArg>
+                          </jdepsExtraArgs>
+                          <outputDirectory>${project.build.directory}</outputDirectory>
+                          <overwriteExistingFiles>true</overwriteExistingFiles>
+                        </configuration>
+                      </execution>
+                    </executions>
+                </plugin>
+            </plugins>
+        </pluginManagement>
     </build>
 </project>
