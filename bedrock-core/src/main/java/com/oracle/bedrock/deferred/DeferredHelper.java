@@ -465,7 +465,26 @@ public class DeferredHelper
     public static <T> boolean ensure(Deferred<T>          deferred,
                                      Predicate<? super T> predicate)
     {
-        return ensure(new DeferredPredicate<T>(deferred, predicate));
+        return ensure(deferred, predicate, new Option[0]);
+    }
+
+
+    /**
+     * Ensures the {@link Deferred} satisfies the specified {@link Predicate}.
+     *
+     * @param deferred   the {@link Deferred}
+     * @param predicate  the {@link Predicate}
+     * @param options    the {@link Option}s
+     *
+     * @param <T>        the type of the {@link Deferred} value
+     *
+     * @return a boolean indicating if the predicate was satisfied.
+     */
+    public static <T> boolean ensure(Deferred<T>          deferred,
+                                     Predicate<? super T> predicate,
+                                     Option...            options)
+    {
+        return ensure(new DeferredPredicate<T>(deferred, predicate), options);
     }
 
 
