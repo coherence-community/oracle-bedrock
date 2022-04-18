@@ -25,6 +25,7 @@
 
 package com.oracle.bedrock.runtime.coherence;
 
+import com.oracle.bedrock.Option;
 import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.options.Decoration;
 import com.oracle.bedrock.options.Decorations;
@@ -137,25 +138,25 @@ public class CoherenceCluster extends AbstractAssembly<CoherenceClusterMember>
     {
         // ensure that the original member UID is no longer in the cluster
         Decorations decorations       = optionsByType.get(Decorations.class);
-
+        Option[]    options           = optionsByType.asArray();
         UID         originalMemberUID = decorations.get(UID.class);
 
         if (originalMemberUID != null)
         {
             // ensure that the restarted member is in the member set of the cluster
-            ensure(eventually(invoking(this).getClusterMemberUIDs()), doesNotContain(originalMemberUID));
+            ensure(eventually(invoking(this).getClusterMemberUIDs()), doesNotContain(originalMemberUID), options);
         }
 
         // ensure the restarted member has joined the cluster
         // (without doing this the local member id returned below may be different from
         // the one when the member joins the cluster)
-        ensure(eventually(invoking(restarted).getClusterSize()), greaterThan(1));
+        ensure(eventually(invoking(restarted).getClusterSize()), greaterThan(1), options);
 
         // determine the UID of the restarted member
         UID restartedMemberUID = restarted.getLocalMemberUID();
 
         // ensure that the restarted member is in the member set of the cluster
-        ensure(eventually(invoking(this).getClusterMemberUIDs()), contains(restartedMemberUID));
+        ensure(eventually(invoking(this).getClusterMemberUIDs()), contains(restartedMemberUID), options);
 
         // notify the assembly of the change
         onChanged(optionsByType);
