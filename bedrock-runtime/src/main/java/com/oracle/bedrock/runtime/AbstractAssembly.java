@@ -501,7 +501,7 @@ public abstract class AbstractAssembly<A extends Application> implements Assembl
         {
             DeferredPredicate<?> deferredPredicate = new DeferredPredicate<>(this, stabilityPredicate.get());
 
-            ensure(eventually(deferredPredicate), is(true));
+            ensure(eventually(deferredPredicate), is(true), optionsByType.asArray());
         }
     }
 
