@@ -23,7 +23,7 @@
  * "Portions Copyright [year] [name of copyright owner]"
  */
 
-package com.oracle.bedrock.runtime.remote.http;
+package com.oracle.bedrock.runtime.remote.windows.http;
 
 import com.oracle.bedrock.runtime.Platform;
 import com.oracle.bedrock.runtime.console.CapturingApplicationConsole;
@@ -38,6 +38,7 @@ import com.oracle.bedrock.runtime.Application;
 import com.oracle.bedrock.runtime.options.Argument;
 import com.oracle.bedrock.runtime.options.Executable;
 import com.oracle.bedrock.runtime.options.WorkingDirectory;
+import com.oracle.bedrock.runtime.remote.http.HttpDeployer;
 
 import java.io.File;
 

@@ -23,13 +23,14 @@
  * "Portions Copyright [year] [name of copyright owner]"
  */
 
-package com.oracle.bedrock.runtime.remote;
+package com.oracle.bedrock.runtime.remote.windows;
 
 import com.oracle.bedrock.Option;
 import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.runtime.Platform;
+import com.oracle.bedrock.runtime.remote.RemotePlatform;
 import com.oracle.bedrock.runtime.remote.options.FileShareDeployer;
-import com.oracle.bedrock.runtime.remote.winrm.WindowsRemoteTerminal;
+import com.oracle.bedrock.runtime.remote.windows.winrm.WindowsRemoteTerminal;
 
 import java.io.IOException;
 

@@ -245,16 +245,12 @@ public class Repetitively
                                              + " time(s), succeeded " + matchCount + " time(s))");
                 }
             }
-            catch (PermanentlyUnavailableException e)
+            catch (PermanentlyUnavailableException | UnsupportedOperationException e)
             {
                 // give up immediately!
                 throw new AssertionError("Failed to resolve value for " + deferred, e);
             }
-            catch (UnsupportedOperationException e)
-            {
-                // give up immediately when an operation is not supported
-                throw new AssertionError("Failed to resolve value for " + deferred, e);
-            }
+            // give up immediately when an operation is not supported
             catch (TemporarilyUnavailableException e)
             {
                 // SKIP: we will retry if the instance is temporarily unavailable
@@ -331,7 +327,7 @@ public class Repetitively
      * @param matcher   the {@link Matcher}
      * @param options   the {@link Option}s
      *
-     * @throws AssertionError
+     * @throws AssertionError if the test fails
      */
     public static <T, R> void assertThat(T                  value,
                                          Function<T, R>     function,
@@ -354,7 +350,7 @@ public class Repetitively
      * @param matcher   the {@link Matcher}
      * @param options   the {@link Option}s
      *
-     * @throws AssertionError
+     * @throws AssertionError if the test fails
      */
     public static <T, R> void assertThat(Deferred<T>        deferred,
                                          Function<T, R>     function,

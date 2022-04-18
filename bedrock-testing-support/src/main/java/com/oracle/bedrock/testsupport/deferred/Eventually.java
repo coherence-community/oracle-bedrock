@@ -187,7 +187,7 @@ public class Eventually
      * @param matcher   the {@link Matcher}
      * @param options   the {@link Option}s
      *
-     * @throws AssertionError
+     * @throws AssertionError if the test fails
      */
     public static <T, R> void assertThat(T                  value,
                                          Function<T, R>     function,
@@ -210,7 +210,7 @@ public class Eventually
      * @param matcher   the {@link Matcher}
      * @param options   the {@link Option}s
      *
-     * @throws AssertionError
+     * @throws AssertionError if the test fails
      */
     public static <T, R> void assertThat(Deferred<T>        deferred,
                                          Function<T, R>     function,

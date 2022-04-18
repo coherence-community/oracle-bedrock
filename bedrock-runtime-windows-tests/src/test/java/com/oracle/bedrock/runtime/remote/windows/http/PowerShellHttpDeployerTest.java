@@ -23,7 +23,7 @@
  * "Portions Copyright [year] [name of copyright owner]"
  */
 
-package com.oracle.bedrock.runtime.remote.http;
+package com.oracle.bedrock.runtime.remote.windows.http;
 
 import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.runtime.LocalPlatform;
@@ -31,7 +31,7 @@ import com.oracle.bedrock.runtime.Platform;
 import com.oracle.bedrock.runtime.remote.DeployedArtifacts;
 import com.oracle.bedrock.runtime.remote.DeploymentArtifact;
 import com.oracle.bedrock.runtime.remote.options.Deployer;
-import com.oracle.bedrock.runtime.remote.winrm.AbstractWindowsTest;
+import com.oracle.bedrock.runtime.remote.windows.winrm.AbstractWindowsTest;
 import org.junit.Assume;
 import org.junit.Test;
 
