@@ -23,7 +23,7 @@
  * "Portions Copyright [year] [name of copyright owner]"
  */
 
-package com.oracle.bedrock.runtime.remote.http;
+package com.oracle.bedrock.runtime.remote.windows.http;
 
 import com.oracle.bedrock.runtime.remote.DeploymentArtifact;
 

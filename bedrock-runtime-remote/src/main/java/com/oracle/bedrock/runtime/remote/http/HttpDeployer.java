@@ -264,7 +264,7 @@ public abstract class HttpDeployer implements Deployer
      * @param optionsByType      the {@link OptionsByType}s to use
      * @param deployedArtifacts  the {@link DeployedArtifacts}
      */
-    protected void deployAllArtifacts(Map<String, DeploymentArtifact> artifacts,
+    public void deployAllArtifacts(Map<String, DeploymentArtifact> artifacts,
                                       String                          remoteDirectory,
                                       Platform                        platform,
                                       InetSocketAddress               httpServerAddress,

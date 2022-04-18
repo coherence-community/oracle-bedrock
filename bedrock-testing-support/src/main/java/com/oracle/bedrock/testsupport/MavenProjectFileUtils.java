@@ -97,6 +97,8 @@ public class MavenProjectFileUtils
      * By default for a Maven build this will be <code>target/test-output/functional/class-name</code>.
      *
      * @param classTest the test class being executed
+     * @param sSuffix   the folder suffix
+     *
      * @return the location to put test logs
      */
     public static File ensureTestOutputFolder(Class classTest, String sSuffix)

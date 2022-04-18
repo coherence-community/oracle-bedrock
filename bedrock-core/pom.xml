@@ -100,7 +100,7 @@
                 <groupId>com.oracle.coherence.moditect</groupId>
                 <artifactId>moditect-maven-plugin</artifactId>
             </plugin>
-            
+
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>flatten-maven-plugin</artifactId>

@@ -23,7 +23,7 @@
  * "Portions Copyright [year] [name of copyright owner]"
  */
 
-package com.oracle.bedrock.runtime.remote.winrm;
+package com.oracle.bedrock.runtime.remote.windows.winrm;
 
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;

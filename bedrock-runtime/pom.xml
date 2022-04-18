@@ -41,4 +41,13 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+
+<!--    <build>-->
+<!--        <plugins>-->
+<!--            <plugin>-->
+<!--                <groupId>com.oracle.coherence.moditect</groupId>-->
+<!--                <artifactId>moditect-maven-plugin</artifactId>-->
+<!--            </plugin>-->
+<!--        </plugins>-->
+<!--    </build>-->
 </project>

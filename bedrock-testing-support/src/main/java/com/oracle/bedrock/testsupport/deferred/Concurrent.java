@@ -61,8 +61,8 @@ public class Concurrent
         /**
          * Determines if the {@link Assertion} has been closed.
          *
-         * @return  <code>true></code> when the {@link Assertion} is closed and not longer being evaluated
-         *          <code>false</code> otherwise
+         * @return  {@code true} when the {@link Assertion} is closed and no longer being evaluated
+         *          {@code false} otherwise
          */
         boolean isClosed();
 

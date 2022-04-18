@@ -23,7 +23,7 @@
  * "Portions Copyright [year] [name of copyright owner]"
  */
 
-package com.oracle.bedrock.runtime.remote.winrm;
+package com.oracle.bedrock.runtime.remote.windows.winrm;
 
 import com.oracle.bedrock.runtime.PropertiesBuilder;
 import com.oracle.bedrock.ComposableOption;
