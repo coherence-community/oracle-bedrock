@@ -124,9 +124,9 @@ public abstract class OutputRedirector
     }
 
     /**
-     * Obtain
+     * Obtain the process id.
      *
-     * @return
+     * @return the process id
      */
     public long getProcessId()
     {

@@ -74,6 +74,8 @@ public class ConsoleOutputRedirector
      * Obtain a {@link ConsoleOutputRedirector} option that uses
      * the specified {@link OutputRedirector}.
      *
+     * @param redirector  the {@link OutputRedirector} to use
+     *
      * @return a {@link ConsoleOutputRedirector} option that uses
      *         the specified {@link OutputRedirector}
      */

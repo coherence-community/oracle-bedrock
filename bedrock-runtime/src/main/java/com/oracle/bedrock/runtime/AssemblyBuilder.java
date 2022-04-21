@@ -34,9 +34,8 @@ import com.oracle.bedrock.Option;
  * Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
  *
  * @author Brian Oliver
- *
  */
-public interface AssemblyBuilder<A extends Application, G extends Assembly<A>>
+public interface AssemblyBuilder<A extends Application, G extends Assembly<A>, B extends AssemblyBuilder<A, G, B>>
 {
     /**
      * Sets the {@link Option}s to be used as the basis launching each {@link Application}.
@@ -45,8 +44,10 @@ public interface AssemblyBuilder<A extends Application, G extends Assembly<A>>
      * {@link #build(Infrastructure, Option...)} or {@link #build(Option...)}.
      *
      * @param options  the {@link Option}s
+     *
+     * @return this {@link AssemblyBuilder}
      */
-    void with(Option... options);
+    B with(Option... options);
 
 
     /**
@@ -65,11 +66,13 @@ public interface AssemblyBuilder<A extends Application, G extends Assembly<A>>
      * @param applicationClass  the class of {@link Application}
      * @param options           the {@link Option}s to use for launching the {@link Application}s
      *
+     * @return this {@link AssemblyBuilder}
+     *
      * @see Platform#launch(String, Option...)
      */
-    void include(int                count,
-                 Class<? extends A> applicationClass,
-                 Option...          options);
+    B include(int                count,
+              Class<? extends A> applicationClass,
+              Option...          options);
 
 
     /**

@@ -74,6 +74,8 @@ public class ConsoleInputRedirector
      * Obtain a {@link ConsoleInputRedirector} option that uses
      * the specified {@link InputRedirector}.
      *
+     * @param redirector  the {@link InputRedirector} to use
+     *
      * @return a {@link ConsoleInputRedirector} option that uses
      *         the specified {@link InputRedirector}
      */

@@ -74,6 +74,8 @@ public class ConsoleErrorRedirector
      * Obtain a {@link ConsoleErrorRedirector} option that uses
      * the specified {@link OutputRedirector}.
      *
+     * @param redirector the {@link OutputRedirector} to use
+     *
      * @return a {@link ConsoleErrorRedirector} option that uses
      *         the specified {@link OutputRedirector}
      */

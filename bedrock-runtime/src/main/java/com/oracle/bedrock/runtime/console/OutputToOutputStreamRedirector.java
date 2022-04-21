@@ -109,6 +109,8 @@ public class OutputToOutputStreamRedirector
      *
      * @return  {@code true} if the count reached zero and {@code false}
      *          if the waiting time elapsed before the count reached zero
+     *
+     * @throws InterruptedException if the wait is interrupted
      */
     public boolean awaitRunning(long timeout, TimeUnit unit) throws InterruptedException
     {

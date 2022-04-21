@@ -85,13 +85,13 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
      * The underlying {@link OutputStream} to use for sending requests and raising
      * events on the {@link RemoteChannel}.
      */
-    private OutputStream underlyingOutput;
+    private final OutputStream underlyingOutput;
 
     /**
      * The underlying {@link OutputStream} to use for receiving requests, responses
      * and events from the {@link RemoteChannel}.
      */
-    private InputStream underlyingInput;
+    private final InputStream underlyingInput;
 
     /**
      * The {@link ObjectOutputStream} from the {@link RemoteChannel}.
@@ -111,13 +111,13 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
      * The {@link ExecutorService} for executing tasks asynchronously in sequence
      * (a singled threaded worker queue).
      */
-    private ExecutorService sequentialExecutionService;
+    private final ExecutorService sequentialExecutionService;
 
     /**
      * The {@link ExecutorService} for executing multiple tasks asynchronously and
      * concurrently (using multiple worker threads).
      */
-    private ExecutorService concurrentExecutionService;
+    private final ExecutorService concurrentExecutionService;
 
     /**
      * The {@link Thread} to read {@link Callable}s from the {@link Socket}.
@@ -130,31 +130,32 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
      * A flag to indicate if the {@link AbstractRemoteChannel} {@link ObjectInputStream}
      * is readable.
      */
-    private AtomicBoolean isReadable;
+    private final AtomicBoolean isReadable;
 
     /**
      * A flag to indicate if the {@link AbstractRemoteChannel} {@link ObjectOutputStream}
      * is writable.
      */
-    private AtomicBoolean isWritable;
+    private final AtomicBoolean isWritable;
 
     /**
      * The defined protocol (of {@link Operation} types) that the
      * {@link AbstractRemoteChannel} can process.
      */
-    private HashMap<String, Class<? extends Operation>> protocol;
+    @SuppressWarnings("rawtypes")
+    private final HashMap<String, Class<? extends Operation>> protocol;
 
     /**
      * The pending {@link Operation}s that are waiting for responses,
      * indexed by sequence number.
      */
-    private ConcurrentHashMap<Long, Operation<?>> pendingOperations;
+    private final ConcurrentHashMap<Long, Operation<?>> pendingOperations;
 
     /**
      * The next available sequence number for a callable sent from
      * this {@link AbstractRemoteChannel}.
      */
-    private AtomicLong nextSequenceNumber;
+    private final AtomicLong nextSequenceNumber;
 
     /**
      * The result cache for {@link Callable}s submitted using a {@link Caching#enabled(Option...)}
@@ -163,7 +164,7 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
      * The cache is a map from the {@link RemoteCallable} to a {@link Pair}
      * consisting of the result and the {@link Instant} when result expires.
      */
-    private ConcurrentHashMap<Callable<?>, Pair<Object, Instant>> cache;
+    private final ConcurrentHashMap<Callable<?>, Pair<Object, Instant>> cache;
 
 
     /**
@@ -177,7 +178,7 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
     public AbstractRemoteChannel(OutputStream outputStream,
                                  InputStream  inputStream) throws IOException
     {
-        // remember the underlying streams as we may may have to interact with them later
+        // remember the underlying streams as we may have to interact with them later
         this.underlyingOutput = outputStream;
         this.underlyingInput  = inputStream;
 
@@ -210,10 +211,12 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
 
     /**
      * Get netstats information from OS.
+     *
+     * @return the netstat information as an {@link ArrayList}
      */
     public ArrayList<String> getNetStatsInfo()
         {
-        ArrayList<String> asPortInfo = new ArrayList<String>();
+        ArrayList<String> asPortInfo = new ArrayList<>();
 
         try
             {
@@ -257,6 +260,7 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
     /**
      * Opens the {@link AbstractRemoteChannel} to accept and submit {@link Callable}s.
      */
+    @SuppressWarnings("rawtypes")
     public synchronized void open()
     {
         if (!isOpen())
@@ -281,86 +285,80 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
                 return;
             }
 
-            requestAcceptorThread = new Thread(new Runnable()
-                                               {
-                                                   @Override
-                                                   public void run()
-                                                   {
-                                                       while (isReadable.get() && isWritable.get())
-                                                       {
-                                                           try
-                                                           {
-                                                               // read the operation to perform
-                                                               String operationType = input.readUTF();
+            requestAcceptorThread = new Thread(() -> {
+                while (isReadable.get() && isWritable.get())
+                {
+                    try
+                    {
+                        // read the operation to perform
+                        String operationType = input.readUTF();
 
-                                                               // read the allocated sequence number for the operation
-                                                               long sequence = input.readLong();
+                        // read the allocated sequence number for the operation
+                        long sequence = input.readLong();
 
-                                                               // read the serialized operation from the stream
-                                                               int    length = input.readInt();
-                                                               byte[] bytes  = new byte[length];
+                        // read the serialized operation from the stream
+                        int    length = input.readInt();
+                        byte[] bytes  = new byte[length];
 
-                                                               input.readFully(bytes, 0, length);
+                        input.readFully(bytes, 0, length);
 
-                                                               // attempt to instantiate, deserialize and schedule the operation for execution
-                                                               try
-                                                               {
-                                                                   ByteArrayInputStream buffer =
-                                                                       new ByteArrayInputStream(bytes);
-                                                                   ObjectInputStream stream =
-                                                                       new ClassLoaderAwareObjectInputStream(classLoader,
-                                                                                                             buffer);
+                        // attempt to instantiate, deserialize and schedule the operation for execution
+                        try
+                        {
+                            ByteArrayInputStream buffer =
+                                new ByteArrayInputStream(bytes);
+                            ObjectInputStream stream =
+                                new ClassLoaderAwareObjectInputStream(classLoader,
+                                                                      buffer);
 
-                                                                   // instantiate the operation and initialize its state
-                                                                   Class<? extends Operation> operationClass =
-                                                                       protocol.get(operationType);
+                            // instantiate the operation and initialize its state
+                            Class<? extends Operation> operationClass =
+                                protocol.get(operationType);
 
-                                                                   Constructor<? extends AbstractRemoteChannel.Operation> constructor =
-                                                                       operationClass.getConstructor(AbstractRemoteChannel.class);
+                            Constructor<? extends Operation> constructor =
+                                operationClass.getConstructor(AbstractRemoteChannel.class);
 
-                                                                   Operation operation =
-                                                                       constructor.newInstance(AbstractRemoteChannel
-                                                                           .this);
+                            Operation operation =
+                                constructor.newInstance(AbstractRemoteChannel
+                                    .this);
 
-                                                                   operation.read(stream);
+                            operation.read(stream);
 
-                                                                   // submit the operation for execution based on the
-                                                                   // operational stream
-                                                                   StreamName streamName = operation.getStreamName();
+                            // submit the operation for execution based on the
+                            // operational stream
+                            StreamName streamName = operation.getStreamName();
 
-                                                                   if (streamName == null)
-                                                                   {
-                                                                       // when there's no stream name, execute the operation concurrently
-                                                                       concurrentExecutionService.submit(new Executor(sequence,
-                                                                                                                      operation));
-                                                                   }
-                                                                   else
-                                                                   {
-                                                                       // when there's stream name, execute the operation sequentially
-                                                                       sequentialExecutionService.submit(new Executor(sequence,
-                                                                                                                      operation));
-                                                                   }
+                            if (streamName == null)
+                            {
+                                // when there's no stream name, execute the operation concurrently
+                                concurrentExecutionService.submit(new Executor(sequence,
+                                                                               operation));
+                            }
+                            else
+                            {
+                                // when there's stream name, execute the operation sequentially
+                                sequentialExecutionService.submit(new Executor(sequence,
+                                                                               operation));
+                            }
 
-                                                               }
-                                                               catch (Exception e)
-                                                               {
-                                                                   // when we can't execute the operation we notify the sender of the exception
-                                                                   sequentialExecutionService.submit(new Sender(sequence,
-                                                                                                                new ResponseOperation(e)));
-                                                               }
-                                                           }
-                                                           catch (Exception e)
-                                                           {
-                                                               // the stream has become corrupted or was closed
-                                                               // (either way there's nothing else we can read or do)
-                                                               isReadable.set(false);
-                                                               LOGGER.log(Level.FINE, "termination of RemoteChannel:RequestAcceptor thread", e);
-                                                           }
-                                                       }
+                        }
+                        catch (Exception e)
+                        {
+                            // when we can't execute the operation we notify the sender of the exception
+                            sequentialExecutionService.submit(new Sender(sequence, new ResponseOperation<>(e)));
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        // the stream has become corrupted or was closed
+                        // (either way there's nothing else we can read or do)
+                        isReadable.set(false);
+                        LOGGER.log(Level.FINE, "termination of RemoteChannel:RequestAcceptor thread", e);
+                    }
+                }
 
-                                                       close();
-                                                   }
-                                               });
+                close();
+            });
 
             requestAcceptorThread.setName("RemoteChannel:RequestAcceptor");
             requestAcceptorThread.setDaemon(true);
@@ -431,7 +429,7 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
         }
 
         // raise IllegalStateExceptions for any remaining pending operations
-        for (Operation operation : pendingOperations.values())
+        for (Operation<?> operation : pendingOperations.values())
         {
             try
             {
@@ -447,6 +445,7 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
     }
 
 
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public <T> CompletableFuture<T> submit(RemoteCallable<T> callable,
                                            Option...         options) throws IllegalStateException
@@ -485,7 +484,7 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
             // by default we acknowledge when processed
             optionsByType.addIfAbsent(AcknowledgeWhen.PROCESSED);
 
-            CallableOperation operation = new CallableOperation(callable, optionsByType);
+            CallableOperation operation = new CallableOperation<>(callable, optionsByType);
 
             return sendOperation(operation, optionsByType);
         }
@@ -606,6 +605,7 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
          * @return Operation  the {@link Operation} to be sent back to the initiator of this
          *                    {@link Operation} (if null, nothing is returned)
          */
+        @SuppressWarnings("rawtypes")
         Operation execute(long sequence);
 
 
@@ -648,6 +648,7 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
     /**
      * An {@link Operation} to send and execute a {@link Callable}.
      */
+    @SuppressWarnings({"rawtypes", "unchecked"})
     class CallableOperation<T> implements Operation<T>
     {
         /**
@@ -675,6 +676,7 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
          * Constructs a {@link AbstractRemoteChannel.CallableOperation}
          * (required for construction)
          */
+        @SuppressWarnings("unused")
         public CallableOperation()
         {
         }
@@ -738,14 +740,14 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
 
                 if (isResponseRequired)
                 {
-                    operation = new ResponseOperation(result);
+                    operation = new ResponseOperation<>(result);
                 }
             }
             catch (Throwable throwable)
             {
                 if (isResponseRequired)
                 {
-                    operation = new ResponseOperation(throwable);
+                    operation = new ResponseOperation<>(throwable);
                 }
             }
 
@@ -847,6 +849,7 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
     /**
      * An {@link Operation} to raise a {@link RemoteEvent}.
      */
+    @SuppressWarnings("rawtypes")
     class EventOperation implements Operation<Void>
     {
         /**
@@ -943,7 +946,7 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
                     });
             }
 
-            return isAckRequired ? new ResponseOperation(null) : null;
+            return isAckRequired ? new ResponseOperation<>(null) : null;
         }
 
 
@@ -965,22 +968,15 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
                 {
                     String className = (String) object;
 
-                    event = (RemoteEvent) Class.forName(className).newInstance();
+                    event = (RemoteEvent) Class.forName(className).getDeclaredConstructor().newInstance();
                 }
                 else
                 {
                     event = (RemoteEvent) object;
                 }
             }
-            catch (ClassNotFoundException e)
-            {
-                throw new IOException(e);
-            }
-            catch (InstantiationException e)
-            {
-                throw new IOException(e);
-            }
-            catch (IllegalAccessException e)
+            catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException
+                    | InstantiationException | IllegalAccessException e)
             {
                 throw new IOException(e);
             }
@@ -1041,17 +1037,18 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
      * Asynchronously executes an {@link Operation} that was
      * received by the {@link AbstractRemoteChannel}.
      */
+    @SuppressWarnings("rawtypes")
     class Executor implements Runnable
     {
         /**
          * The sequence number for the {@link Operation} to execute.
          */
-        private long sequence;
+        private final long sequence;
 
         /**
          * The {@link Operation} to execute.
          */
-        private Operation operation;
+        private final Operation operation;
 
 
         /**
@@ -1086,6 +1083,7 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
     /**
      * An {@link Operation} to send and deliver a response.
      */
+    @SuppressWarnings({"rawtypes", "unchecked"})
     class ResponseOperation<T> implements Operation<T>
     {
         /**
@@ -1209,6 +1207,7 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
     /**
      * An {@link Operation} to send and execute a {@link Runnable}.
      */
+    @SuppressWarnings("rawtypes")
     class RunnableOperation implements Operation<Void>
     {
         /**
@@ -1292,14 +1291,14 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
 
                 if (isResponseRequired)
                 {
-                    response = new ResponseOperation(null);
+                    response = new ResponseOperation<>(null);
                 }
             }
             catch (Throwable throwable)
             {
                 if (isResponseRequired)
                 {
-                    response = new ResponseOperation(throwable);
+                    response = new ResponseOperation<>(throwable);
                 }
             }
 
@@ -1386,17 +1385,18 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
      * Asynchronously sends an {@link Operation} over the
      * {@link ObjectOutputStream} for the {@link AbstractRemoteChannel}.
      */
+    @SuppressWarnings("rawtypes")
     class Sender implements Runnable
     {
         /**
          * The sequence number of the {@link Operation}.
          */
-        private long sequence;
+        private final long sequence;
 
         /**
          * The {@link Operation} to send over the {@link ObjectOutputStream}.
          */
-        private Operation operation;
+        private final Operation operation;
 
 
         /**
@@ -1453,7 +1453,7 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
                         buffer.reset();
                         stream    = new ObjectOutputStream(buffer);
 
-                        operation = new ResponseOperation(e);
+                        operation = new ResponseOperation<>(e);
                         operation.write(stream);
                     }
                     else

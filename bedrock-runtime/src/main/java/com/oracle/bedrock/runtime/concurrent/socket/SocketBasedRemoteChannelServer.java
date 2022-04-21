@@ -105,11 +105,13 @@ public class SocketBasedRemoteChannelServer extends AbstractControllableRemoteCh
     /**
      * The port that this server should bind to (or zero to use an ephemeral port).
      */
-    private int port;
+    private final int port;
 
     /**
      * Constructs a {@link SocketBasedRemoteChannelServer} that will accept
      * and process {@link Callable}s from {@link SocketBasedRemoteChannelClient}s.
+     *
+     * @param name  the name of this server
      */
     public SocketBasedRemoteChannelServer(String name)
     {
@@ -119,6 +121,9 @@ public class SocketBasedRemoteChannelServer extends AbstractControllableRemoteCh
     /**
      * Constructs a {@link SocketBasedRemoteChannelServer} that will accept
      * and process {@link Callable}s from {@link SocketBasedRemoteChannelClient}s.
+     *
+     * @param name  the name of this server
+     * @param port  the port to bind to
      */
     public SocketBasedRemoteChannelServer(String name, int port)
     {

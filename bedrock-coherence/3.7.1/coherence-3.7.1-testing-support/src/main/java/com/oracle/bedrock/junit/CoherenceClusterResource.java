@@ -71,7 +71,7 @@ public class CoherenceClusterResource
      * The {@link ConfigurableCacheFactory} sessions that have been locally created against the
      * {@link CoherenceCluster} using this {@link CoherenceClusterResource}.
      */
-    private HashMap<SessionBuilder, ConfigurableCacheFactory> sessions;
+    private final HashMap<SessionBuilder, ConfigurableCacheFactory> sessions;
 
 
     /**
@@ -81,7 +81,7 @@ public class CoherenceClusterResource
     {
         super();
 
-        // by default we have no sessions
+        // by default, we have no sessions
         this.sessions = new HashMap<>();
 
         // establish default java process options
@@ -95,7 +95,7 @@ public class CoherenceClusterResource
 
 
     @Override
-    protected AssemblyBuilder<CoherenceClusterMember, CoherenceCluster> createBuilder()
+    protected CoherenceClusterBuilder createBuilder()
     {
         return new CoherenceClusterBuilder();
     }
@@ -120,7 +120,7 @@ public class CoherenceClusterResource
             throw new IllegalStateException("CoherenceClusterResource fails to define members to include when launching");
         }
 
-        // take a snapshot of the current system properties so we can restore them when cleaning up the resource
+        // take a snapshot of the current system properties, if so we can restore them when cleaning up the resource
         this.systemProperties = com.oracle.bedrock.util.SystemProperties.createSnapshot();
 
         // let's ensure that we don't have a local cluster member
@@ -128,7 +128,7 @@ public class CoherenceClusterResource
 
         CacheFactory.shutdown();
 
-        // let the super-class perform it's initialization
+        // let the super-class perform its initialization
         super.before();
     }
 
@@ -175,7 +175,7 @@ public class CoherenceClusterResource
      * as part of the {@link CoherenceCluster} when the {@link CoherenceClusterResource} is established.
      * <p>
      * The {@link Platform} on which the {@link CoherenceClusterMember}s are launched is based on the
-     * {@link PlatformPredicate} specified as an {@link Option}.  By default this is {@link PlatformPredicate#any()}.
+     * {@link PlatformPredicate} specified as an {@link Option}.  By default, this is {@link PlatformPredicate#any()}.
      * <p>
      * Multiple calls to this method are permitted, allowing a {@link CoherenceCluster} to be created containing
      * multiple different types of {@link CoherenceCluster}s.

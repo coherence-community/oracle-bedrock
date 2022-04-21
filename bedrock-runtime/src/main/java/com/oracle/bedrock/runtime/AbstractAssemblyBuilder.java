@@ -44,13 +44,13 @@ import java.util.LinkedList;
  * @param <G>  the type of the {@link Assembly} built by the {@link AssemblyBuilder}
  */
 @Internal
-public abstract class AbstractAssemblyBuilder<A extends Application, G extends AbstractAssembly<A>>
-    implements AssemblyBuilder<A, G>
+public abstract class AbstractAssemblyBuilder<A extends Application, G extends AbstractAssembly<A>, B extends AbstractAssemblyBuilder<A, G, B>>
+    implements AssemblyBuilder<A, G, B>
 {
     /**
      * The map of required {@link Assembly} {@link Characteristics}
      */
-    protected LinkedList<Characteristics> characteristics;
+    protected LinkedList<Characteristics<A>> characteristics;
 
     /**
      * The common {@link OptionsByType} to be used when launching all {@link Application}s.
@@ -69,21 +69,23 @@ public abstract class AbstractAssemblyBuilder<A extends Application, G extends A
 
 
     @Override
-    public void with(Option... options)
+    public B with(Option... options)
     {
         optionsByType = OptionsByType.of(options);
+        return castThis();
     }
 
 
     @Override
-    public void include(int                count,
+    public B include(int                count,
                         Class<? extends A> applicationClass,
                         Option...          options)
     {
         if (count > 0)
         {
-            characteristics.add(new Characteristics(count, applicationClass, options));
+            characteristics.add(new Characteristics<>(count, applicationClass, options));
         }
+        return castThis();
     }
 
 
@@ -95,7 +97,7 @@ public abstract class AbstractAssemblyBuilder<A extends Application, G extends A
         G assembly = createAssembly(OptionsByType.of(optionsByType));
 
         // use the characteristics to expand the assembly on the infrastructure
-        for (Characteristics characteristic : characteristics)
+        for (Characteristics<A> characteristic : characteristics)
         {
             int                instanceCount    = characteristic.getCount();
             Class<? extends A> applicationClass = characteristic.getApplicationClass();
@@ -118,6 +120,16 @@ public abstract class AbstractAssemblyBuilder<A extends Application, G extends A
      */
     abstract public G createAssembly(OptionsByType optionsByType);
 
+    /**
+     * Cast this builder to a {@code B}.
+     *
+     * @return this builder cast to a {@code B}.
+     */
+    @SuppressWarnings("unchecked")
+    private B castThis()
+    {
+        return (B) this;
+    }
 
     /**
      * Encapsulates the characteristics for one or more specific types of {@link Application}
@@ -128,17 +140,17 @@ public abstract class AbstractAssemblyBuilder<A extends Application, G extends A
         /**
          * The number of {@link Application} instances to be created.
          */
-        private int count;
+        private final int count;
 
         /**
          * The class of {@link Application} to create.
          */
-        private Class<? extends A> applicationClass;
+        private final Class<? extends A> applicationClass;
 
         /**
          * The {@link Option}s for realizing the {@link Application}s.
          */
-        private Option[] options;
+        private final Option[] options;
 
 
         /**
