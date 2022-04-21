@@ -251,6 +251,7 @@ public abstract class AbstractAssembly<A extends Application> implements Assembl
      *
      * @throws IllegalStateException  when the {@link Assembly} {@link #isClosed}
      */
+    @SuppressWarnings("StatementWithEmptyBody")
     public void add(A application)
     {
         if (isClosed())
@@ -430,6 +431,7 @@ public abstract class AbstractAssembly<A extends Application> implements Assembl
      * @param applications   the newly added {@link Application}s to the {@link Assembly}
      * @param optionsByType  the {@link OptionsByType} used for expanding
      */
+    @SuppressWarnings("unused")
     protected void onExpanded(List<? extends A> applications,
                               OptionsByType     optionsByType)
     {
@@ -461,6 +463,7 @@ public abstract class AbstractAssembly<A extends Application> implements Assembl
      * @param platform       the {@link Platform}
      * @param optionsByType  the {@link OptionsByType}
      */
+    @SuppressWarnings("unused")
     protected void onRelaunching(Platform      platform,
                                  OptionsByType optionsByType)
     {
@@ -512,6 +515,7 @@ public abstract class AbstractAssembly<A extends Application> implements Assembl
      * @param applications  the {@link Application}s to relaunch
      * @param options       the {@link Option}s for restarting
      */
+    @SuppressWarnings("unchecked")
     protected void relaunch(List<? extends A> applications,
                             Option...         options)
     {
@@ -565,6 +569,7 @@ public abstract class AbstractAssembly<A extends Application> implements Assembl
      * @param count         the number of clones of each application
      * @param options       the override {@link Option}s
      */
+    @SuppressWarnings("unchecked")
     protected void clone(List<? extends A> applications,
                          int               count,
                          Option...         options)
@@ -787,6 +792,13 @@ public abstract class AbstractAssembly<A extends Application> implements Assembl
         stream().clone(count, options);
     }
 
+    /**
+     * Return an {@link ApplicationStream} that wraps a stream of the {@link Application applications}.
+     *
+     * @param stream the stream of the {@link Application applications}
+     *
+     * @return an {@link ApplicationStream} that wraps the stream of the {@link Application applications}
+     */
     protected ApplicationStream<A> streamOf(Stream<A> stream)
     {
         return new StreamAdapter(stream);
@@ -804,12 +816,13 @@ public abstract class AbstractAssembly<A extends Application> implements Assembl
         /**
          * The {@link Stream} of {@link Application}s to adapt into an {@link ApplicationStream}.
          */
-        private Stream<A> stream;
+        private final Stream<A> stream;
 
 
         /**
-         * Constructs a {@link StreamAdapter}
-         * @param stream
+         * Constructs a {@link StreamAdapter}.
+         *
+         * @param stream the stream of {@link Application applications}
          */
         protected StreamAdapter(Stream<A> stream)
         {

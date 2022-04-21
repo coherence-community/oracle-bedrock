@@ -59,7 +59,7 @@ public abstract class AbstractBaseAssembly<A extends Application, G extends Asse
     /**
      * The {@link AssemblyBuilder} to create the {@link Assembly} of {@link Application}s.
      */
-    protected AssemblyBuilder<A, G> assemblyBuilder;
+    protected AssemblyBuilder<A, G, ?> assemblyBuilder;
 
     /**
      * The {@link Infrastructure} on which to create the {@link Assembly}.
@@ -113,7 +113,7 @@ public abstract class AbstractBaseAssembly<A extends Application, G extends Asse
      *
      * @return a new {@link AssemblyBuilder}
      */
-    protected abstract AssemblyBuilder<A, G> createBuilder();
+    protected abstract AssemblyBuilder<A, G, ?> createBuilder();
 
 
     protected void start() throws Exception

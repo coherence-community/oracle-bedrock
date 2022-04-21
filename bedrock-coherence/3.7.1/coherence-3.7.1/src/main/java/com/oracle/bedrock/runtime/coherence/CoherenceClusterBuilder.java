@@ -39,7 +39,7 @@ import com.oracle.bedrock.runtime.options.StabilityPredicate;
  *
  * @author Brian Oliver
  */
-public class CoherenceClusterBuilder extends AbstractAssemblyBuilder<CoherenceClusterMember, CoherenceCluster>
+public class CoherenceClusterBuilder extends AbstractAssemblyBuilder<CoherenceClusterMember, CoherenceCluster, CoherenceClusterBuilder>
 {
     @Override
     public CoherenceCluster createAssembly(OptionsByType optionsByType)

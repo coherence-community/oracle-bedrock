@@ -25,16 +25,9 @@
 
 package com.oracle.bedrock.testsupport.junit;
 
-import com.oracle.bedrock.Option;
-import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.runtime.Application;
 import com.oracle.bedrock.runtime.Assembly;
 import com.oracle.bedrock.runtime.AssemblyBuilder;
-import com.oracle.bedrock.runtime.Infrastructure;
-import com.oracle.bedrock.runtime.LocalPlatform;
-import com.oracle.bedrock.runtime.Platform;
-import com.oracle.bedrock.runtime.options.PlatformPredicate;
-import com.oracle.bedrock.util.Triple;
 import org.junit.rules.ExternalResource;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
@@ -85,7 +78,7 @@ public abstract class AbstractAssemblyResource<A extends Application, G extends 
             public void evaluate() throws Throwable {
             before();
 
-            List<Throwable> errors = new ArrayList<Throwable>();
+            List<Throwable> errors = new ArrayList<>();
             try
             {
                 base.evaluate();
@@ -114,7 +107,7 @@ public abstract class AbstractAssemblyResource<A extends Application, G extends 
      *
      * @return a new {@link AssemblyBuilder}
      */
-    protected abstract AssemblyBuilder<A, G> createBuilder();
+    protected abstract AssemblyBuilder<A, G, ?> createBuilder();
 
     protected void before() throws Throwable
     {
