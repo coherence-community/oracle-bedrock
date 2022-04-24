@@ -53,6 +53,7 @@ import com.oracle.bedrock.runtime.java.JavaApplicationRunner;
 import com.oracle.bedrock.runtime.java.features.JmxFeature;
 import com.oracle.bedrock.runtime.java.options.ClassName;
 import com.oracle.bedrock.runtime.java.options.JavaHome;
+import com.oracle.bedrock.runtime.java.options.JavaModules;
 import com.oracle.bedrock.runtime.java.options.JvmOption;
 import com.oracle.bedrock.runtime.java.options.RemoteEvents;
 import com.oracle.bedrock.runtime.java.options.SystemProperties;
@@ -333,8 +334,11 @@ public class RemoteJavaApplicationLauncher extends AbstractRemoteApplicationLaun
 
         // ----- establish the remote application class path -----
 
+        JavaModules modular    = optionsByType.get(JavaModules.class);
+        boolean     useModules = modular.isEnabled();
+
         // set the remote classpath (it must be quoted to prevent wildcard expansion)
-        arguments.add("-cp");
+        arguments.add(useModules ? "--module-path" : "-cp");
 
         ClassPathModifier modifier  = optionsByType.getOrSetDefault(ClassPathModifier.class, ClassPathModifier.none());
         String            classPath = modifier.applyQuotes(remoteClassPath.toString(optionsByType.asArray()));
@@ -349,7 +353,8 @@ public class RemoteJavaApplicationLauncher extends AbstractRemoteApplicationLaun
 
             classPathTable.getOptions().add(Cell.Separator.of(""));
 
-            diagnosticsTable.addRow("Class Path", classPathTable.toString());
+            String pathType = useModules ? "Module Path" : "Class Path";
+            diagnosticsTable.addRow(pathType, classPathTable.toString());
         }
 
         // ----- establish Java Virtual Machine options -----
@@ -422,7 +427,18 @@ public class RemoteJavaApplicationLauncher extends AbstractRemoteApplicationLaun
         // (we don't start the application directly itself)
         String applicationLauncherClassName = JavaApplicationRunner.class.getName();
 
-        arguments.add(applicationLauncherClassName);
+        if (useModules)
+        {
+
+            applicationLauncherClassName = "com.oracle.bedrock.runtime/" + applicationLauncherClassName;
+            arguments.add("-m");
+            arguments.add(applicationLauncherClassName);
+        }
+        else
+        {
+            arguments.add(applicationLauncherClassName);
+        }
+
 
         // set the Java application class name we need to launch
         ClassName className = optionsByType.get(ClassName.class);

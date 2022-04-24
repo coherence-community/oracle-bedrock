@@ -132,10 +132,37 @@ public class JavaModules implements ComposableOption<JavaModules>, JvmOption
      * @return a {@link JavaModules} option to disable
      *         a modular JVM process
      */
-    @OptionsByType.Default
     public static JavaModules disabled()
     {
         return new JavaModules(false, Collections.emptySet(), Collections.emptySet(),
+                               Collections.emptySet(), Collections.emptySet(),
+                               Collections.emptySet(), new ClassPath());
+    }
+
+
+    /**
+     * Obtains a {@link JavaModules} option that enables
+     * running an application as a Java process using class
+     * path instead of modules.
+     *
+     * @return a {@link JavaModules} option to disable
+     *         a modular JVM process
+     */
+    @OptionsByType.Default
+    public static JavaModules automatic()
+    {
+        boolean useModules;
+        String  useModulesProperty = System.getProperty("com.oracle.bedrock.modules.enabled");
+        if (useModulesProperty == null || useModulesProperty.isBlank())
+        {
+            String  modulePath = System.getProperty("jdk.module.path");
+            useModules = modulePath != null && !modulePath.isBlank();
+        }
+        else
+        {
+            useModules = Boolean.parseBoolean(useModulesProperty);
+        }
+        return new JavaModules(useModules, Collections.emptySet(), Collections.emptySet(),
                                Collections.emptySet(), Collections.emptySet(),
                                Collections.emptySet(), new ClassPath());
     }
