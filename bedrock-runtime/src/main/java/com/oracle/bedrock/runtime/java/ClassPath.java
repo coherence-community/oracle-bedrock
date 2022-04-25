@@ -28,6 +28,7 @@ package com.oracle.bedrock.runtime.java;
 import com.oracle.bedrock.Option;
 import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.lang.StringHelper;
+import com.oracle.bedrock.runtime.java.options.JavaModules;
 import com.oracle.bedrock.runtime.options.PlatformSeparators;
 import com.oracle.bedrock.table.Table;
 import com.oracle.bedrock.table.Tabular;
@@ -65,8 +66,8 @@ public class ClassPath implements Iterable<String>, Tabular, Option
      * The known of Java Archives Types, typically used in class-paths and
      * file names. (strictly in ascending order).
      */
-    public static final String[] JAVA_ARCHIVE_TYPES = new String[] {"aar", "car", "ear", "gar", "jar", "rar", "sar",
-                                                                    "war", "zip"};
+    public static final String[] JAVA_ARCHIVE_TYPES = new String[] {"aar", "car", "ear", "gar",
+            "jar", "rar", "sar", "war", "zip"};
 
     /**
      * The paths that make up the {@link ClassPath}.
@@ -852,7 +853,10 @@ public class ClassPath implements Iterable<String>, Tabular, Option
     @OptionsByType.Default
     public static ClassPath ofSystem()
     {
-        return new ClassPath(System.getProperty("java.class.path"));
+        String sProperty = JavaModules.useModules()
+                ? System.getProperty("jdk.module.path")
+                : System.getProperty("java.class.path");
+        return new ClassPath(sProperty);
     }
 
 

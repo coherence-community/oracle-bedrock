@@ -86,6 +86,11 @@ public class JavaModules implements ComposableOption<JavaModules>, JvmOption
     private final ClassPath classPath;
 
     /**
+     * The system property to check to determine whether modules should be used.
+     */
+    public static final String PROP_USE_MODULES = "com.oracle.bedrock.modules.enabled";
+
+    /**
      * Constructs a {@link JavaModules} for the specified value.
      *
      * @param enabled if modular mode is enabled
@@ -120,7 +125,7 @@ public class JavaModules implements ComposableOption<JavaModules>, JvmOption
     {
         return new JavaModules(true, Collections.emptySet(), Collections.emptySet(),
                                Collections.emptySet(), Collections.emptySet(),
-                               Collections.emptySet(), new ClassPath());
+                               Collections.emptySet(), ClassPath.ofSystem());
     }
 
 
@@ -136,7 +141,7 @@ public class JavaModules implements ComposableOption<JavaModules>, JvmOption
     {
         return new JavaModules(false, Collections.emptySet(), Collections.emptySet(),
                                Collections.emptySet(), Collections.emptySet(),
-                               Collections.emptySet(), new ClassPath());
+                               Collections.emptySet(), ClassPath.ofSystem());
     }
 
 
@@ -151,22 +156,29 @@ public class JavaModules implements ComposableOption<JavaModules>, JvmOption
     @OptionsByType.Default
     public static JavaModules automatic()
     {
-        boolean useModules;
-        String  useModulesProperty = System.getProperty("com.oracle.bedrock.modules.enabled");
+        boolean useModules = useModules();
+
+        return new JavaModules(useModules, Collections.emptySet(), Collections.emptySet(),
+                               Collections.emptySet(), Collections.emptySet(),
+                               Collections.emptySet(), ClassPath.ofSystem());
+    }
+
+    /**
+     * Returns {@code true} if modules should be used, based on the
+     * value of the {@link #PROP_USE_MODULES} system property.
+     *
+     * @return {@code true} if modules should be used
+     */
+    public static boolean useModules()
+    {
+        String  useModulesProperty = System.getProperty(PROP_USE_MODULES);
         if (useModulesProperty == null || useModulesProperty.isBlank())
         {
             String  modulePath = System.getProperty("jdk.module.path");
-            useModules = modulePath != null && !modulePath.isBlank();
+            return modulePath != null && !modulePath.isBlank();
         }
-        else
-        {
-            useModules = Boolean.parseBoolean(useModulesProperty);
-        }
-        return new JavaModules(useModules, Collections.emptySet(), Collections.emptySet(),
-                               Collections.emptySet(), Collections.emptySet(),
-                               Collections.emptySet(), new ClassPath());
+        return Boolean.parseBoolean(useModulesProperty);
     }
-
 
     /**
      * Obtain a copy of this {@link JavaModules} option
@@ -351,11 +363,10 @@ public class JavaModules implements ComposableOption<JavaModules>, JvmOption
      */
     public JavaModules withClassPath(ClassPath classPath)
     {
-        if (classPath == null || classPath.isEmpty())
+        if (classPath == null)
         {
-            return this;
+            classPath = ClassPath.ofSystem();
         }
-
         return new JavaModules(true, this.modules, this.exports, this.patches,
                                this.reading, this.opens, classPath);
 

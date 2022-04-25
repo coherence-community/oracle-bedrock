@@ -1,10 +1,9 @@
 open module com.oracle.bedrock {
+    requires jakarta.el;
     requires java.xml;
     requires org.mockito;
-    requires java.desktop;
     requires java.logging;
     requires java.management;
-    requires static jakarta.el;
     exports com.oracle.bedrock;
     exports com.oracle.bedrock.annotations;
     exports com.oracle.bedrock.deferred;
