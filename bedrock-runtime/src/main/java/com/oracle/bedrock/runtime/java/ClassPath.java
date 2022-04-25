@@ -533,11 +533,6 @@ public class ClassPath implements Iterable<String>, Tabular, Option
 
     private boolean include(String path)
     {
-        if (excludes.isEmpty())
-        {
-            return true;
-        }
-
         boolean exclude = false;
 
         if (useDefaultExcludes)
@@ -546,8 +541,11 @@ public class ClassPath implements Iterable<String>, Tabular, Option
                     .anyMatch(pattern -> pattern.matcher(path).matches());
         }
 
-        exclude = exclude || excludes.stream()
-                .anyMatch(pattern -> pattern.matcher(path).matches());
+        if (!excludes.isEmpty())
+        {
+            exclude = exclude || excludes.stream()
+                    .anyMatch(pattern -> pattern.matcher(path).matches());
+        }
 
         return !exclude;
     }
