@@ -511,11 +511,15 @@ public class LocalJavaApplicationLauncher<A extends JavaApplication> implements 
 
         if (useModules)
         {
+            
             applicationLauncherClassName = "com.oracle.bedrock.runtime/" + applicationLauncherClassName;
             processBuilder.command().add("-m");
+            processBuilder.command().add(applicationLauncherClassName);
         }
-
-        processBuilder.command().add(applicationLauncherClassName);
+        else
+        {
+            processBuilder.command().add(applicationLauncherClassName);
+        }
 
         // set the Java application class name we need to launch
         ClassName className = launchOptions.get(ClassName.class);

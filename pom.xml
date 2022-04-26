@@ -17,7 +17,7 @@
         Coherence is not really required.
     </description>
 
-    <url>https://github.com/coherence-community/bedrock</url>
+    <url>https://github.com/coherence-community/oracle-bedrock</url>
 
     <licenses>
         <license>
@@ -29,15 +29,8 @@
 
     <developers>
         <developer>
-            <name>Brian Oliver</name>
+            <name>Jonathan Knight</name>
             <organization>Oracle Corporation</organization>
-            <email>brian.oliver@oracle.com</email>
-        </developer>
-
-        <developer>
-            <name>Jonathan Knight (aka: Gridman)</name>
-            <organization>Oracle Corporation</organization>
-            <email>jonathan.knight@oracle.com</email>
         </developer>
     </developers>
 

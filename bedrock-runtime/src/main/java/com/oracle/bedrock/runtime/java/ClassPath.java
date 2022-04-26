@@ -28,6 +28,7 @@ package com.oracle.bedrock.runtime.java;
 import com.oracle.bedrock.Option;
 import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.lang.StringHelper;
+import com.oracle.bedrock.runtime.java.options.JavaModules;
 import com.oracle.bedrock.runtime.options.PlatformSeparators;
 import com.oracle.bedrock.table.Table;
 import com.oracle.bedrock.table.Tabular;
@@ -42,8 +43,10 @@ import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -63,8 +66,8 @@ public class ClassPath implements Iterable<String>, Tabular, Option
      * The known of Java Archives Types, typically used in class-paths and
      * file names. (strictly in ascending order).
      */
-    public static final String[] JAVA_ARCHIVE_TYPES = new String[] {"aar", "car", "ear", "gar", "jar", "rar", "sar",
-                                                                    "war", "zip"};
+    public static final String[] JAVA_ARCHIVE_TYPES = new String[] {"aar", "car", "ear", "gar",
+            "jar", "rar", "sar", "war", "zip"};
 
     /**
      * The paths that make up the {@link ClassPath}.
@@ -77,13 +80,28 @@ public class ClassPath implements Iterable<String>, Tabular, Option
     private final Set<Pattern> excludes;
 
     /**
+     * A flag indicating whether to apply the default exclusions.
+     */
+    private final boolean useDefaultExcludes;
+
+    /**
+     * The default class path exclusions.
+     */
+    private static final Set<Pattern> defaultExcludes = new HashSet<>(Arrays.asList(
+            Pattern.compile(".*idea_rt.*"),
+            Pattern.compile(".*junit-rt.*"),
+            Pattern.compile(".*junit5-rt.*")
+    ));
+
+    /**
      * Constructs an empty {@link ClassPath} using the system default
      * {@link File#separator} and {@link File#pathSeparator}s.
      */
     public ClassPath()
     {
-        paths    = new LinkedHashSet<>();
-        excludes = new LinkedHashSet<>();
+        paths              = new LinkedHashSet<>();
+        excludes           = new LinkedHashSet<>();
+        useDefaultExcludes = true;
     }
 
 
@@ -95,8 +113,22 @@ public class ClassPath implements Iterable<String>, Tabular, Option
      */
     public ClassPath(ClassPath... classPaths)
     {
+        this(Arrays.stream(classPaths).allMatch(cp -> cp.useDefaultExcludes), classPaths);
+    }
+
+
+    /**
+     * Constructs a {@link ClassPath} based zero or more other {@link ClassPath}s.
+     * (ie: a copy constructor)
+     *
+     * @param defaultsExcludes  {@code true} to use default file exclusions
+     * @param classPaths        the {@link ClassPath}s to copy
+     */
+    private ClassPath(boolean defaultsExcludes, ClassPath... classPaths)
+    {
         paths    = new LinkedHashSet<>();
         excludes = new LinkedHashSet<>();
+        useDefaultExcludes = defaultsExcludes;
 
         if (classPaths != null && classPaths.length > 0)
         {
@@ -125,10 +157,14 @@ public class ClassPath implements Iterable<String>, Tabular, Option
         paths    = new LinkedHashSet<>();
         excludes = new LinkedHashSet<>();
 
+        boolean useDefaults = true;
+
         if (classPaths != null)
         {
             for (ClassPath classPath : classPaths)
             {
+                useDefaults = useDefaults && classPath.useDefaultExcludes;
+
                 for (String path : classPath)
                 {
                     path = sanitizePath(path);
@@ -138,6 +174,8 @@ public class ClassPath implements Iterable<String>, Tabular, Option
                 excludes.addAll(classPath.excludes);
             }
         }
+
+        useDefaultExcludes = useDefaults;
     }
 
 
@@ -149,8 +187,9 @@ public class ClassPath implements Iterable<String>, Tabular, Option
      */
     public ClassPath(String... classPaths)
     {
-        paths    = new LinkedHashSet<>();
-        excludes = new LinkedHashSet<>();
+        paths              = new LinkedHashSet<>();
+        excludes           = new LinkedHashSet<>();
+        useDefaultExcludes = true;
 
         if (classPaths != null)
         {
@@ -190,16 +229,9 @@ public class ClassPath implements Iterable<String>, Tabular, Option
      */
     public int size()
     {
-        if (excludes.isEmpty())
-        {
-            return paths.size();
-        }
-        else
-        {
-            return (int) paths.stream()
-                              .filter(this::include)
-                              .count();
-        }
+        return (int) paths.stream()
+                          .filter(this::include)
+                          .count();
     }
 
 
@@ -210,7 +242,7 @@ public class ClassPath implements Iterable<String>, Tabular, Option
      */
     public boolean isEmpty()
     {
-        return paths.isEmpty();
+        return paths.stream().noneMatch(this::include);
     }
 
 
@@ -221,22 +253,24 @@ public class ClassPath implements Iterable<String>, Tabular, Option
      */
     public URL[] getURLs()
     {
-        URL[] urls = new URL[paths.size()];
-        int   i    = 0;
+        List<URL> urls = new ArrayList<>();
 
-        for (String path : paths)
+        for (String path : this)
         {
-            try
+            if (include(path))
             {
-                urls[i++] = new File(path).toURI().toURL();
-            }
-            catch (MalformedURLException e)
-            {
-                throw new RuntimeException("Failed to convert the path [" + path + "] into a URL", e);
+                try
+                {
+                    urls.add(new File(path).toURI().toURL());
+                }
+                catch (MalformedURLException e)
+                {
+                    throw new RuntimeException("Failed to convert the path [" + path + "] into a URL", e);
+                }
             }
         }
 
-        return urls;
+        return urls.toArray(URL[]::new);
     }
 
 
@@ -250,7 +284,7 @@ public class ClassPath implements Iterable<String>, Tabular, Option
      */
     public boolean contains(String path)
     {
-        if (path == null)
+        if (path == null || !include(path))
         {
             return false;
         }
@@ -305,17 +339,10 @@ public class ClassPath implements Iterable<String>, Tabular, Option
     @Override
     public Iterator<String> iterator()
     {
-        if (excludes.isEmpty())
-        {
-            return paths.iterator();
-        }
-        else
-        {
-            return paths.stream()
-                        .filter(this::include)
-                        .collect(Collectors.toList())
-                        .iterator();
-        }
+        return paths.stream()
+                    .filter(this::include)
+                    .collect(Collectors.toList())
+                    .iterator();
     }
 
 
@@ -402,7 +429,7 @@ public class ClassPath implements Iterable<String>, Tabular, Option
     {
         Table table = new Table();
 
-        for (String path : paths)
+        for (String path : this)
         {
             // If the path is the current directory "./" or "./*" then just add it as-is
             if ("./".equals(path) || "./*".equals(path))
@@ -420,6 +447,32 @@ public class ClassPath implements Iterable<String>, Tabular, Option
         }
 
         return table;
+    }
+
+
+    /**
+     * Create a {@link ClassPath} that is the same as this {@link ClassPath}
+     * removing the default class path exclusions.
+     *
+     * @return a {@link ClassPath} that is the same as this {@link ClassPath}
+     *         removing the default class path exclusions
+     */
+    public ClassPath withDefaultExcludes()
+    {
+        return new ClassPath(true, this);
+    }
+
+
+    /**
+     * Create a {@link ClassPath} that is the same as this {@link ClassPath}
+     * with the default class path exclusions added back.
+     *
+     * @return a {@link ClassPath} that is the same as this {@link ClassPath}
+     *         with the default class path exclusions added back
+     */
+    public ClassPath withoutDefaultExcludes()
+    {
+        return new ClassPath(false, this);
     }
 
 
@@ -481,13 +534,19 @@ public class ClassPath implements Iterable<String>, Tabular, Option
 
     private boolean include(String path)
     {
-        if (excludes.isEmpty())
+        boolean exclude = false;
+
+        if (useDefaultExcludes)
         {
-            return true;
+            exclude = defaultExcludes.stream()
+                    .anyMatch(pattern -> pattern.matcher(path).matches());
         }
 
-        boolean exclude = excludes.stream()
-                .anyMatch(pattern -> pattern.matcher(path).matches());
+        if (!excludes.isEmpty())
+        {
+            exclude = exclude || excludes.stream()
+                    .anyMatch(pattern -> pattern.matcher(path).matches());
+        }
 
         return !exclude;
     }
@@ -506,6 +565,11 @@ public class ClassPath implements Iterable<String>, Tabular, Option
         }
 
         ClassPath classPath = (ClassPath) other;
+
+        if (useDefaultExcludes != classPath.useDefaultExcludes)
+        {
+            return false;
+        }
 
         return paths.equals(classPath.paths);
     }
@@ -789,7 +853,10 @@ public class ClassPath implements Iterable<String>, Tabular, Option
     @OptionsByType.Default
     public static ClassPath ofSystem()
     {
-        return new ClassPath(System.getProperty("java.class.path"));
+        String sProperty = JavaModules.useModules()
+                ? System.getProperty("jdk.module.path")
+                : System.getProperty("java.class.path");
+        return new ClassPath(sProperty);
     }
 
 
