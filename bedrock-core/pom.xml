@@ -56,52 +56,6 @@
     <build>
         <plugins>
             <plugin>
-              <groupId>org.apache.maven.plugins</groupId>
-              <artifactId>maven-shade-plugin</artifactId>
-              <executions>
-                <execution>
-                  <id>shade</id>
-                  <phase>package</phase>
-                  <goals>
-                    <goal>shade</goal>
-                  </goals>
-                  <configuration>
-                    <shadedArtifactAttached>false</shadedArtifactAttached>
-                    <createDependencyReducedPom>true</createDependencyReducedPom>
-                    <useDependencyReducedPomInJar>true</useDependencyReducedPomInJar>
-                    <promoteTransitiveDependencies>true</promoteTransitiveDependencies>
-                    <artifactSet>
-                      <includes>
-                        <include>jakarta.el:jakarta.el-api</include>
-                        <include>org.glassfish:jakarta.el</include>
-                      </includes>
-                    </artifactSet>
-                    <filters>
-                      <filter>
-                        <artifact>*:*</artifact>
-                      </filter>
-                    </filters>
-                    <relocations>
-                      <relocation>
-                        <pattern>jakarta.el</pattern>
-                        <shadedPattern>com.oracle.bedrock.internal.jakarta.el</shadedPattern>
-                      </relocation>
-                      <relocation>
-                        <pattern>com.sun.el</pattern>
-                        <shadedPattern>com.oracle.bedrock.internal.com.sun.el</shadedPattern>
-                      </relocation>
-                    </relocations>
-                  </configuration>
-                </execution>
-              </executions>
-            </plugin>
-
-            <plugin>
-                <groupId>com.oracle.coherence.moditect</groupId>
-                <artifactId>moditect-maven-plugin</artifactId>
-            </plugin>
-
-            <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>flatten-maven-plugin</artifactId>
                 <version>${maven.flatten.plugin.version}</version>
@@ -124,6 +78,11 @@
                     </execution>
                 </executions>
             </plugin>
+
+<!--            <plugin>-->
+<!--                <groupId>com.oracle.coherence.moditect</groupId>-->
+<!--                <artifactId>moditect-maven-plugin</artifactId>-->
+<!--            </plugin>-->
         </plugins>
     </build>
 </project>

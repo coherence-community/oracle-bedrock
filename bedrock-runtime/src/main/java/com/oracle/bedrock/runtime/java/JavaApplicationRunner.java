@@ -38,7 +38,6 @@ import java.net.InetAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.UnknownHostException;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Used to run {@link JavaApplication}s that connect back to their "parent"
@@ -93,124 +92,104 @@ public class JavaApplicationRunner
                 Runtime.getRuntime().halt(1);
             }
 
-            if (arguments.length >= 1)
+            String applicationClassName = arguments[0];
+
+            // create the arguments for the application
+            String[] applicationArguments = new String[arguments.length - 1];
+
+            System.arraycopy(arguments, 1, applicationArguments, 0, arguments.length - 1);
+
+            // attempt to connect to the parent application
+            try
             {
-                String applicationClassName = arguments[0];
+                URI parentURI = new URI(parent);
 
-                // create the arguments for the application
-                String[] applicationArguments = new String[arguments.length - 1];
+                // find the InetAddress of the host on which the parent is running
+                InetAddress inetAddress = InetAddress.getByName(parentURI.getHost());
 
-                System.arraycopy(arguments, 1, applicationArguments, 0, arguments.length - 1);
+                // establish a RemoteExecutorClient to handle and send requests to the parent
+                channel = new SocketBasedRemoteChannelClient(inetAddress, parentURI.getPort());
 
-                // a flag indicating if this application is in the process of
-                // shutting down naturally
-                // (System.exit(...) or main has finished and shutdown hooks have started)
-                final AtomicBoolean isShuttingDown = new AtomicBoolean(false);
-
-                // add a shutdown hook so we can tell when the application is
-                // terminating due to natural causes
-                // (like it's finished or a System.exit(...) was called)
-                Runtime.getRuntime().addShutdownHook(new Thread()
-                                                     {
-                                                         @Override
-                                                         public void run()
-                                                         {
-                                                             isShuttingDown.set(true);
-                                                         }
-                                                     });
-
-                // attempt to connect to the parent application
-                try
-                {
-                    URI parentURI = new URI(parent);
-
-                    // find the InetAddress of the host on which the parent is running
-                    InetAddress inetAddress = InetAddress.getByName(parentURI.getHost());
-
-                    // establish a RemoteExecutorClient to handle and send requests to the parent
-                    channel = new SocketBasedRemoteChannelClient(inetAddress, parentURI.getPort());
-
-                    channel.addListener(new RemoteChannelListener()
+                channel.addListener(new RemoteChannelListener()
+                                    {
+                                        @Override
+                                        public void onOpened(RemoteChannel channel)
                                         {
-                                            @Override
-                                            public void onOpened(RemoteChannel channel)
+                                            // connected to the parent!
+                                        }
+
+                                        @Override
+                                        public void onClosed(RemoteChannel channel)
+                                        {
+                                            // disconnected from the parent so terminate
+                                            // (if we're not orphanable)
+                                            if (!isOrphanable)
                                             {
-                                                // connected to the parent!
+                                                Runtime.getRuntime().halt(2);
                                             }
+                                        }
+                                    });
 
-                                            @Override
-                                            public void onClosed(RemoteChannel channel)
-                                            {
-                                                // disconnected from the parent so terminate
-                                                // (if we're not orphanable)
-                                                if (!isOrphanable)
-                                                {
-                                                    Runtime.getRuntime().halt(2);
-                                                }
-                                            }
-                                        });
-
-                    // connect to the parent
-                    channel.open();
-                }
-                catch (URISyntaxException e)
-                {
-                    System.out.println("JavaApplicationRunner: The specified parent URI [" + parent + "] is invalid");
-                    e.printStackTrace(System.out);
-                }
-                catch (UnknownHostException e)
-                {
-                    System.out.println("JavaApplicationRunner: The specified parent address is unknown");
-                    e.printStackTrace(System.out);
-                }
-                catch (IOException e)
-                {
-                    System.out.println("JavaApplicationRunner: Failed to open a connection to parent");
-                    e.printStackTrace(System.out);
-
-                    if (channel != null)
-                    {
-                        channel.close();
-                        channel = null;
-                    }
-                }
+                // connect to the parent
+                channel.open();
+            }
+            catch (URISyntaxException e)
+            {
+                System.out.println("JavaApplicationRunner: The specified parent URI [" + parent + "] is invalid");
+                e.printStackTrace(System.out);
+            }
+            catch (UnknownHostException e)
+            {
+                System.out.println("JavaApplicationRunner: The specified parent address is unknown");
+                e.printStackTrace(System.out);
+            }
+            catch (IOException e)
+            {
+                System.out.println("JavaApplicationRunner: Failed to open a connection to parent");
+                e.printStackTrace(System.out);
 
                 if (channel != null)
                 {
-                    // start the application
-                    try
-                    {
-                        // attempt to load the application class
-                        Class<?> applicationClass = Class.forName(applicationClassName);
+                    channel.close();
+                    channel = null;
+                }
+            }
 
-                        // now launch the application
-                        Method mainMethod = applicationClass.getMethod("main", String[].class);
+            if (channel != null)
+            {
+                // start the application
+                try
+                {
+                    // attempt to load the application class
+                    Class<?> applicationClass = Class.forName(applicationClassName);
 
-                        mainMethod.invoke(null, new Object[] {applicationArguments});
-                    }
-                    catch (ClassNotFoundException e)
-                    {
-                        System.out.println("JavaApplicationRunner: Could not load the class " + applicationClassName);
-                        e.printStackTrace(System.out);
-                    }
-                    catch (NoSuchMethodException e)
-                    {
-                        System.out.println("JavaApplicationRunner: Could not locate a main method for "
-                                           + applicationClassName);
-                        e.printStackTrace(System.out);
-                    }
-                    catch (IllegalAccessException e)
-                    {
-                        System.out.println("JavaApplicationRunner: Could not access the main method for "
-                                           + applicationClassName);
-                        e.printStackTrace(System.out);
-                    }
-                    catch (InvocationTargetException e)
-                    {
-                        System.out.println("JavaApplicationRunner: Failed to invoke the main method for "
-                                           + applicationClassName);
-                        e.printStackTrace(System.out);
-                    }
+                    // now launch the application
+                    Method mainMethod = applicationClass.getMethod("main", String[].class);
+
+                    mainMethod.invoke(null, new Object[] {applicationArguments});
+                }
+                catch (ClassNotFoundException e)
+                {
+                    System.out.println("JavaApplicationRunner: Could not load the class " + applicationClassName);
+                    e.printStackTrace(System.out);
+                }
+                catch (NoSuchMethodException e)
+                {
+                    System.out.println("JavaApplicationRunner: Could not locate a main method for "
+                                       + applicationClassName);
+                    e.printStackTrace(System.out);
+                }
+                catch (IllegalAccessException e)
+                {
+                    System.out.println("JavaApplicationRunner: Could not access the main method for "
+                                       + applicationClassName);
+                    e.printStackTrace(System.out);
+                }
+                catch (InvocationTargetException e)
+                {
+                    System.out.println("JavaApplicationRunner: Failed to invoke the main method for "
+                                       + applicationClassName);
+                    e.printStackTrace(System.out);
                 }
             }
         }
