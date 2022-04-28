@@ -90,7 +90,8 @@ public class ClassPath implements Iterable<String>, Tabular, Option
     private static final Set<Pattern> defaultExcludes = new HashSet<>(Arrays.asList(
             Pattern.compile(".*idea_rt.*"),
             Pattern.compile(".*junit-rt.*"),
-            Pattern.compile(".*junit5-rt.*")
+            Pattern.compile(".*junit5-rt.*"),
+            Pattern.compile(".*surefire-.*")
     ));
 
     /**
@@ -851,12 +852,39 @@ public class ClassPath implements Iterable<String>, Tabular, Option
      * @return a {@link ClassPath} representing the System java.class.path property.
      */
     @OptionsByType.Default
+    public static ClassPath automatic()
+    {
+        return JavaModules.useModules()
+                ? ofModulePath()
+                : ofSystem();
+    }
+
+
+    /**
+     * Obtains Java System module path.
+     *
+     * @return a {@link ClassPath} representing the System java.class.path property.
+     */
+    public static ClassPath ofModulePath()
+    {
+        String sProperty = System.getProperty("jdk.module.path");
+        return sProperty == null || sProperty.isBlank()
+                ? new ClassPath()
+                : new ClassPath(sProperty);
+    }
+
+
+    /**
+     * Obtains Java System class-path.
+     *
+     * @return a {@link ClassPath} representing the System java.class.path property.
+     */
     public static ClassPath ofSystem()
     {
-        String sProperty = JavaModules.useModules()
-                ? System.getProperty("jdk.module.path")
-                : System.getProperty("java.class.path");
-        return new ClassPath(sProperty);
+        String sProperty = System.getProperty("java.class.path");
+        return sProperty == null || sProperty.isBlank()
+                ? new ClassPath()
+                : new ClassPath(sProperty);
     }
 
 

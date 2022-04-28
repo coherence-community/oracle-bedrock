@@ -31,9 +31,12 @@ import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.runtime.java.ClassPath;
 import com.oracle.bedrock.runtime.java.JavaApplication;
 
+import java.lang.management.ManagementFactory;
+import java.lang.management.RuntimeMXBean;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
@@ -156,11 +159,36 @@ public class JavaModules implements ComposableOption<JavaModules>, JvmOption
     @OptionsByType.Default
     public static JavaModules automatic()
     {
-        boolean useModules = useModules();
+        boolean       useModules = useModules();
+        RuntimeMXBean bean       = ManagementFactory.getRuntimeMXBean();
+        List<String>  arguments  = bean.getInputArguments();
+        Set<String>   patches    = new HashSet<>();
+        Set<String>   modules    = new HashSet<>();
+        Set<String>   reads      = new HashSet<>();
+        Set<String>   opens      = new HashSet<>();
 
-        return new JavaModules(useModules, Collections.emptySet(), Collections.emptySet(),
-                               Collections.emptySet(), Collections.emptySet(),
-                               Collections.emptySet(), ClassPath.ofSystem());
+        for (String arg : arguments)
+        {
+            if (arg.startsWith("--patch-module="))
+            {
+            patches.add(arg.substring(15));
+            }
+            if (arg.startsWith("--add-modules="))
+            {
+            modules.add(arg.substring(14));
+            }
+            if (arg.startsWith("--add-reads="))
+            {
+            reads.add(arg.substring(12));
+            }
+            if (arg.startsWith("--add-opens="))
+            {
+            opens.add(arg.substring(12));
+            }
+        }
+
+        return new JavaModules(useModules, modules, Collections.emptySet(),
+                               patches, reads, opens, ClassPath.ofSystem());
     }
 
     /**
