@@ -41,7 +41,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * An {@link Option} to specify that a {@link JavaApplication} should run using Java 9 modules.
@@ -494,34 +493,51 @@ public class JavaModules implements ComposableOption<JavaModules>, JvmOption
 
         if (enabled)
         {
-            if (modules.size() > 0)
+            if (!modules.isEmpty())
             {
+                // syntax: --add-modules module[,module...]
                 opts.add("--add-modules");
-                opts.add(modules.stream().collect(Collectors.joining(",")));
+                opts.add(String.join(",", modules));
             }
 
-            if (exports.size() > 0)
+            if (!exports.isEmpty())
             {
-                opts.add("--add-exports");
-                opts.add(exports.stream().collect(Collectors.joining(",")));
+                // syntax: --add-exports module/package=target-module(,target-module)*
+                //         may be used more than once
+                exports.forEach(export -> {
+                    opts.add("--add-exports");
+                    opts.add(export);
+                });
             }
 
             if (!opens.isEmpty())
             {
-                opts.add("--add-opens");
-                opts.add(opens.stream().collect(Collectors.joining(",")));
+                // syntax: --add-opens module/package=target-module(,target-module)*
+                //         may be used more than once
+                opens.forEach(open -> {
+                    opts.add("--add-opens");
+                    opts.add(open);
+                });
             }
 
-            for (String patch : patches)
+            if (!patches.isEmpty())
             {
-                opts.add("--patch-module");
-                opts.add(patch);
+                // syntax: --patch-module module=file(;file)*
+                //         may be used more than once
+                patches.forEach(patch -> {
+                    opts.add("--patch-module");
+                    opts.add(patch);
+                });
             }
 
-            if (reading.size() > 0)
+            if (!reading.isEmpty())
             {
-                opts.add("--add-reads");
-                opts.add(reading.stream().collect(Collectors.joining(",")));
+                // syntax: --add-reads module=target-module(,target-module)*
+                //         may be used more than once
+                reading.forEach(read -> {
+                    opts.add("--add-reads");
+                    opts.add(read);
+                });
             }
         }
 
