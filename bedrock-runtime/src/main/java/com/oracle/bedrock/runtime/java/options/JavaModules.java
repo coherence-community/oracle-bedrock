@@ -63,6 +63,11 @@ public class JavaModules implements ComposableOption<JavaModules>, JvmOption
     private final Set<String> modules;
 
     /**
+     * The modules to exclude.
+     */
+    private final Set<String> excludes;
+
+    /**
      * The modules to export.
      */
     private final Set<String> exports;
@@ -100,6 +105,7 @@ public class JavaModules implements ComposableOption<JavaModules>, JvmOption
      */
     private JavaModules(boolean     enabled,
                         Set<String> modules,
+                        Set<String> excludes,
                         Set<String> exports,
                         Set<String> patches,
                         Set<String> reading,
@@ -108,6 +114,7 @@ public class JavaModules implements ComposableOption<JavaModules>, JvmOption
     {
         this.enabled   = enabled;
         this.modules   = modules;
+        this.excludes  = excludes;
         this.exports   = exports;
         this.patches   = patches;
         this.reading   = reading;
@@ -125,7 +132,7 @@ public class JavaModules implements ComposableOption<JavaModules>, JvmOption
      */
     public static JavaModules enabled()
     {
-        return new JavaModules(true, Collections.emptySet(), Collections.emptySet(),
+        return new JavaModules(true, Collections.emptySet(), Collections.emptySet(), Collections.emptySet(),
                                Collections.emptySet(), Collections.emptySet(),
                                Collections.emptySet(), ClassPath.ofSystem());
     }
@@ -141,7 +148,7 @@ public class JavaModules implements ComposableOption<JavaModules>, JvmOption
      */
     public static JavaModules disabled()
     {
-        return new JavaModules(false, Collections.emptySet(), Collections.emptySet(),
+        return new JavaModules(false, Collections.emptySet(), Collections.emptySet(), Collections.emptySet(),
                                Collections.emptySet(), Collections.emptySet(),
                                Collections.emptySet(), ClassPath.ofSystem());
     }
@@ -186,7 +193,7 @@ public class JavaModules implements ComposableOption<JavaModules>, JvmOption
             }
         }
 
-        return new JavaModules(useModules, modules, Collections.emptySet(),
+        return new JavaModules(useModules, modules, Collections.emptySet(), Collections.emptySet(),
                                patches, reads, opens, ClassPath.ofSystem());
     }
 
@@ -226,7 +233,31 @@ public class JavaModules implements ComposableOption<JavaModules>, JvmOption
             return this;
         }
 
-        return new JavaModules(true, toSet(this.modules, modules), this.exports, this.patches,
+        return new JavaModules(true, toSet(this.modules, modules), this.excludes, this.exports, this.patches,
+                               this.reading, this.opens, this.classPath);
+    }
+
+
+    /**
+     * Obtain a copy of this {@link JavaModules} option
+     * excluding the specified modules from the {@code --add-modules}
+     * option.
+     *
+     * @param modules  the modules to exclude from the {@code --add-modules}
+     *                 JVM option
+     *
+     * @return  a copy of this {@link JavaModules} option
+     *          with the specified modules excluded from the
+     *          {@code --add-modules} option.
+     */
+    public JavaModules excluding(String... modules)
+    {
+        if (modules.length == 0)
+        {
+            return this;
+        }
+
+        return new JavaModules(true, this.modules, toSet(this.excludes, modules), this.exports, this.patches,
                                this.reading, this.opens, this.classPath);
     }
 
@@ -245,7 +276,7 @@ public class JavaModules implements ComposableOption<JavaModules>, JvmOption
      */
     public JavaModules exporting(String... exports)
     {
-        return new JavaModules(true, this.modules, toSet(this.exports, exports),
+        return new JavaModules(true, this.modules, this.excludes, toSet(this.exports, exports),
                                this.patches, this.reading, this.opens, this.classPath);
     }
 
@@ -276,7 +307,7 @@ public class JavaModules implements ComposableOption<JavaModules>, JvmOption
               .map(m -> m + "/" + m + "=" + toModule)
               .forEach(exports::add);
 
-        return new JavaModules(true, this.modules, exports, this.patches,
+        return new JavaModules(true, this.modules, this.excludes, exports, this.patches,
                                this.reading, this.opens, this.classPath);
     }
 
@@ -327,7 +358,7 @@ public class JavaModules implements ComposableOption<JavaModules>, JvmOption
         Set<String> opens = new LinkedHashSet<>(this.opens);
         opens.add(module + '/' + _package + '=' + targetModule);
 
-        return new JavaModules(true, this.modules, this.exports, this.patches,
+        return new JavaModules(true, this.modules, this.excludes, this.exports, this.patches,
                                this.reading, opens, this.classPath);
     }
 
@@ -351,7 +382,7 @@ public class JavaModules implements ComposableOption<JavaModules>, JvmOption
             return this;
         }
 
-        return new JavaModules(true, this.modules, this.exports, toSet(this.patches, patches),
+        return new JavaModules(true, this.modules, this.excludes, this.exports, toSet(this.patches, patches),
                                this.reading, this.opens, this.classPath);
     }
 
@@ -375,7 +406,7 @@ public class JavaModules implements ComposableOption<JavaModules>, JvmOption
             return this;
         }
 
-        return new JavaModules(true, this.modules, this.exports, this.patches,
+        return new JavaModules(true, this.modules, this.excludes, this.exports, this.patches,
                                toSet(this.reading, reads), this.opens, this.classPath);
     }
 
@@ -394,7 +425,7 @@ public class JavaModules implements ComposableOption<JavaModules>, JvmOption
         {
             classPath = ClassPath.ofSystem();
         }
-        return new JavaModules(true, this.modules, this.exports, this.patches,
+        return new JavaModules(true, this.modules, this.excludes, this.exports, this.patches,
                                this.reading, this.opens, classPath);
 
     }
@@ -417,7 +448,7 @@ public class JavaModules implements ComposableOption<JavaModules>, JvmOption
             return this;
         }
 
-        return new JavaModules(true, this.modules, this.exports, this.patches,
+        return new JavaModules(true, this.modules, this.excludes, this.exports, this.patches,
                                this.reading, this.opens, new ClassPath(this.classPath, classPath));
 
     }
@@ -467,13 +498,15 @@ public class JavaModules implements ComposableOption<JavaModules>, JvmOption
     @Override
     public JavaModules compose(JavaModules other)
     {
-        Set<String> setAdd    = new LinkedHashSet<>(this.modules);
-        Set<String> setExport = new LinkedHashSet<>(this.exports);
-        Set<String> setPatch  = new LinkedHashSet<>(this.patches);
-        Set<String> setReads  = new LinkedHashSet<>(this.reading);
-        Set<String> setOpens  = new LinkedHashSet<>(this.opens);
+        Set<String> setAdd     = new LinkedHashSet<>(this.modules);
+        Set<String> setExclude = new LinkedHashSet<>(this.excludes);
+        Set<String> setExport  = new LinkedHashSet<>(this.exports);
+        Set<String> setPatch   = new LinkedHashSet<>(this.patches);
+        Set<String> setReads   = new LinkedHashSet<>(this.reading);
+        Set<String> setOpens   = new LinkedHashSet<>(this.opens);
 
         setAdd.addAll(other.modules);
+        setExclude.addAll(other.excludes);
         setExport.addAll(other.exports);
         setPatch.addAll(other.patches);
         setReads.addAll(other.reading);
@@ -482,7 +515,7 @@ public class JavaModules implements ComposableOption<JavaModules>, JvmOption
         boolean   isEnabled = this.enabled && other.enabled;
         ClassPath classPath = new ClassPath(this.classPath, other.classPath);
 
-        return new JavaModules(isEnabled, setAdd, setExport, setPatch, setReads, setOpens, classPath);
+        return new JavaModules(isEnabled, setAdd, setExclude, setExport, setPatch, setReads, setOpens, classPath);
     }
 
 
@@ -497,7 +530,16 @@ public class JavaModules implements ComposableOption<JavaModules>, JvmOption
             {
                 // syntax: --add-modules module[,module...]
                 opts.add("--add-modules");
-                opts.add(String.join(",", modules));
+                if (excludes.isEmpty())
+                {
+                    opts.add(String.join(",", modules));
+                }
+                else
+                {
+                    LinkedHashSet<String> set = new LinkedHashSet<>(modules);
+                    set.removeAll(excludes);
+                    opts.add(String.join(",", set));
+                }
             }
 
             if (!exports.isEmpty())
@@ -567,6 +609,10 @@ public class JavaModules implements ComposableOption<JavaModules>, JvmOption
         {
             return false;
         }
+        if (excludes != null ? !excludes.equals(modules1.excludes) : modules1.excludes != null)
+        {
+            return false;
+        }
         if (exports != null ? !exports.equals(modules1.exports) : modules1.exports != null)
         {
             return false;
@@ -583,6 +629,7 @@ public class JavaModules implements ComposableOption<JavaModules>, JvmOption
     {
         int result = (enabled ? 1 : 0);
         result = 31 * result + (modules != null ? modules.hashCode() : 0);
+        result = 31 * result + (excludes != null ? excludes.hashCode() : 0);
         result = 31 * result + (exports != null ? exports.hashCode() : 0);
         result = 31 * result + (patches != null ? patches.hashCode() : 0);
         result = 31 * result + (reading != null ? reading.hashCode() : 0);
