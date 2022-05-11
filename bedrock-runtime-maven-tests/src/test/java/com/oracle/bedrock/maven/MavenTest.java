@@ -60,16 +60,14 @@ public class MavenTest
         CapturingApplicationConsole console  = new CapturingApplicationConsole();
 
         try (JavaApplication application = platform.launch(JavaApplication.class,
-                                                           ClassName.of("com.tangosol.net.DefaultCacheServer"),
+                                                           ClassName.of("com.tangosol.net.Coherence"),
                                                            Maven.artifact("com.oracle.coherence.ce",
                                                                           "coherence",
-                                                                          "14.1.1-0-3"),
-                                                           SystemProperty.of("tangosol.coherence.cacheconfig",
-                                                                             "coherence-cache-config.xml"),
+                                                                          "21.12"),
                                                            Console.of(console),
                                                            Diagnostics.enabled()))
         {
-            Eventually.assertThat(invoking(console).getCapturedErrorLines(), hasItem(containsString("14.1.1-0-3")));
+            Eventually.assertThat(invoking(console).getCapturedErrorLines(), hasItem(containsString("21.12")));
         }
     }
 }
