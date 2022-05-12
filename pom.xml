@@ -458,7 +458,7 @@
                 <plugin>
                     <groupId>com.oracle.coherence.moditect</groupId>
                     <artifactId>moditect-maven-plugin</artifactId>
-                    <version>1.0.0-SNAPSHOT</version>
+                    <version>1.0.0-RC1</version>
                     <executions>
                       <execution>
                         <id>add-module-info</id>
