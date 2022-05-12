@@ -167,19 +167,18 @@ public class JavaModules implements ComposableOption<JavaModules>, JvmOption
     {
         RuntimeMXBean bean      = ManagementFactory.getRuntimeMXBean();
         List<String>  arguments = bean.getInputArguments();
-        return automatic(arguments);
+        return automatic(useModules(), arguments);
     }
 
 
-    static JavaModules automatic(List<String>  arguments)
+    static JavaModules automatic(boolean useModules, List<String>  arguments)
     {
-        boolean     useModules = useModules();
-        Set<String> patches    = new HashSet<>();
-        Set<String> modules    = new HashSet<>();
-        Set<String> reads      = new HashSet<>();
-        Set<String> opens      = new HashSet<>();
-        Set<String> exports    = new HashSet<>();
-        int         end        = arguments.size() - 1;
+        Set<String> patches = new HashSet<>();
+        Set<String> modules = new HashSet<>();
+        Set<String> reads   = new HashSet<>();
+        Set<String> opens   = new HashSet<>();
+        Set<String> exports = new HashSet<>();
+        int         end     = arguments.size() - 1;
 
         for (int i = 0; i <= end; i++)
         {

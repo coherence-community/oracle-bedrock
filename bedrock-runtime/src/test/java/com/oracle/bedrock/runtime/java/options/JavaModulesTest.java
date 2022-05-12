@@ -42,7 +42,7 @@ public class JavaModulesTest
     public void shouldHaveDefaultModules()
     {
         List<String> args     = new ArrayList<>();
-        JavaModules  modules  = JavaModules.automatic(args);
+        JavaModules  modules  = JavaModules.automatic(true, args);
         JavaModules  expected = JavaModules.enabled();
         assertThat(modules, is(expected));
     }
@@ -51,7 +51,7 @@ public class JavaModulesTest
     public void shouldAddSinglePatchModules()
     {
         List<String> args     = List.of("--patch-module=foo=bar");
-        JavaModules  modules  = JavaModules.automatic(args);
+        JavaModules  modules  = JavaModules.automatic(true, args);
         JavaModules  expected = JavaModules.enabled().patching("foo=bar");
         assertThat(modules, is(expected));
     }
@@ -60,7 +60,7 @@ public class JavaModulesTest
     public void shouldAddMultiplePatchModules()
     {
         List<String> args     = List.of("--patch-module=one=two", "--patch-module", "three=four", "--patch-module", "five=six");
-        JavaModules  modules  = JavaModules.automatic(args);
+        JavaModules  modules  = JavaModules.automatic(true, args);
         JavaModules  expected = JavaModules.enabled().patching("one=two", "three=four", "five=six");
         assertThat(modules, is(expected));
     }
@@ -69,7 +69,7 @@ public class JavaModulesTest
     public void shouldAddMultiplePatchModulesWithMissingFinalArg()
     {
         List<String> args     = List.of("--patch-module=one=two", "--patch-module", "three=four", "--patch-module");
-        JavaModules  modules  = JavaModules.automatic(args);
+        JavaModules  modules  = JavaModules.automatic(true, args);
         JavaModules  expected = JavaModules.enabled().patching("one=two", "three=four");
         assertThat(modules, is(expected));
     }
@@ -78,7 +78,7 @@ public class JavaModulesTest
     public void shouldAddSingleAddModules()
     {
         List<String> args     = List.of("--add-modules=foo=bar");
-        JavaModules  modules  = JavaModules.automatic(args);
+        JavaModules  modules  = JavaModules.automatic(true, args);
         JavaModules  expected = JavaModules.enabled().adding("foo=bar");
         assertThat(modules, is(expected));
     }
@@ -87,7 +87,7 @@ public class JavaModulesTest
     public void shouldAddMultipleAddModules()
     {
         List<String> args     = List.of("--add-modules=one=two", "--add-modules", "three=four", "--add-modules", "five=six");
-        JavaModules  modules  = JavaModules.automatic(args);
+        JavaModules  modules  = JavaModules.automatic(true, args);
         JavaModules  expected = JavaModules.enabled().adding("one=two", "three=four", "five=six");
         assertThat(modules, is(expected));
     }
@@ -96,7 +96,7 @@ public class JavaModulesTest
     public void shouldAddMultipleAddModulesWithMissingFinalArg()
     {
         List<String> args     = List.of("--add-modules=one=two", "--add-modules", "three=four", "--add-modules");
-        JavaModules  modules  = JavaModules.automatic(args);
+        JavaModules  modules  = JavaModules.automatic(true, args);
         JavaModules  expected = JavaModules.enabled().adding("one=two", "three=four");
         assertThat(modules, is(expected));
     }
@@ -105,7 +105,7 @@ public class JavaModulesTest
     public void shouldAddSingleAddExports()
     {
         List<String> args     = List.of("--add-exports=foo=bar");
-        JavaModules  modules  = JavaModules.automatic(args);
+        JavaModules  modules  = JavaModules.automatic(true, args);
         JavaModules  expected = JavaModules.enabled().exporting("foo=bar");
         assertThat(modules, is(expected));
     }
@@ -114,7 +114,7 @@ public class JavaModulesTest
     public void shouldAddMultipleAddExports()
     {
         List<String> args     = List.of("--add-exports=one=two", "--add-exports", "three=four", "--add-exports", "five=six");
-        JavaModules  modules  = JavaModules.automatic(args);
+        JavaModules  modules  = JavaModules.automatic(true, args);
         JavaModules  expected = JavaModules.enabled().exporting("one=two", "three=four", "five=six");
         assertThat(modules, is(expected));
     }
@@ -123,7 +123,7 @@ public class JavaModulesTest
     public void shouldAddMultipleAddExportsWithMissingFinalArg()
     {
         List<String> args     = List.of("--add-exports=one=two", "--add-exports", "three=four", "--add-exports");
-        JavaModules  modules  = JavaModules.automatic(args);
+        JavaModules  modules  = JavaModules.automatic(true, args);
         JavaModules  expected = JavaModules.enabled().exporting("one=two", "three=four");
         assertThat(modules, is(expected));
     }
@@ -132,7 +132,7 @@ public class JavaModulesTest
     public void shouldAddSingleAddReads()
     {
         List<String> args     = List.of("--add-reads=foo=bar");
-        JavaModules  modules  = JavaModules.automatic(args);
+        JavaModules  modules  = JavaModules.automatic(true, args);
         JavaModules  expected = JavaModules.enabled().reading("foo=bar");
         assertThat(modules, is(expected));
     }
@@ -141,7 +141,7 @@ public class JavaModulesTest
     public void shouldAddMultipleAddReads()
     {
         List<String> args     = List.of("--add-reads=one=two", "--add-reads", "three=four", "--add-reads", "five=six");
-        JavaModules  modules  = JavaModules.automatic(args);
+        JavaModules  modules  = JavaModules.automatic(true, args);
         JavaModules  expected = JavaModules.enabled().reading("one=two", "three=four", "five=six");
         assertThat(modules, is(expected));
     }
@@ -150,7 +150,7 @@ public class JavaModulesTest
     public void shouldAddMultipleAddReadsWithMissingFinalArg()
     {
         List<String> args     = List.of("--add-reads=one=two", "--add-reads", "three=four", "--add-reads");
-        JavaModules  modules  = JavaModules.automatic(args);
+        JavaModules  modules  = JavaModules.automatic(true, args);
         JavaModules  expected = JavaModules.enabled().reading("one=two", "three=four");
         assertThat(modules, is(expected));
     }
@@ -159,7 +159,7 @@ public class JavaModulesTest
     public void shouldAddSingleAddOpens()
     {
         List<String> args     = List.of("--add-opens=one/two=three");
-        JavaModules  modules  = JavaModules.automatic(args);
+        JavaModules  modules  = JavaModules.automatic(true, args);
         JavaModules  expected = JavaModules.enabled().opens("one", "two", "three");
         assertThat(modules, is(expected));
     }
@@ -168,7 +168,7 @@ public class JavaModulesTest
     public void shouldAddMultipleAddOpens()
     {
         List<String> args     = List.of("--add-opens=one/two=three", "--add-opens", "four/five=six", "--add-opens", "seven/eight=nine");
-        JavaModules  modules  = JavaModules.automatic(args);
+        JavaModules  modules  = JavaModules.automatic(true, args);
         JavaModules  expected = JavaModules.enabled()
                 .opens("one", "two", "three")
                 .opens("four", "five", "six")
@@ -180,7 +180,7 @@ public class JavaModulesTest
     public void shouldAddMultipleAddOpensWithMissingFinalArg()
     {
         List<String> args     = List.of("--add-opens=one/two=three", "--add-opens", "four/five=six", "--add-opens");
-        JavaModules  modules  = JavaModules.automatic(args);
+        JavaModules  modules  = JavaModules.automatic(true, args);
         JavaModules  expected = JavaModules.enabled()
                 .opens("one", "two", "three")
                 .opens("four", "five", "six");
