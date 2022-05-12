@@ -63,7 +63,7 @@ public class MavenTest
                                                            ClassName.of("com.tangosol.net.Coherence"),
                                                            Maven.artifact("com.oracle.coherence.ce",
                                                                           "coherence",
-                                                                          "21.12"),
+                                                                          "21.12.4"),
                                                            Console.of(console),
                                                            Diagnostics.enabled()))
         {

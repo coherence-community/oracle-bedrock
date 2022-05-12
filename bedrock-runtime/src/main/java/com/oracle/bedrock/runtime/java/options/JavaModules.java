@@ -165,35 +165,69 @@ public class JavaModules implements ComposableOption<JavaModules>, JvmOption
     @OptionsByType.Default
     public static JavaModules automatic()
     {
-        boolean       useModules = useModules();
-        RuntimeMXBean bean       = ManagementFactory.getRuntimeMXBean();
-        List<String>  arguments  = bean.getInputArguments();
-        Set<String>   patches    = new HashSet<>();
-        Set<String>   modules    = new HashSet<>();
-        Set<String>   reads      = new HashSet<>();
-        Set<String>   opens      = new HashSet<>();
+        RuntimeMXBean bean      = ManagementFactory.getRuntimeMXBean();
+        List<String>  arguments = bean.getInputArguments();
+        return automatic(arguments);
+    }
 
-        for (String arg : arguments)
+
+    static JavaModules automatic(List<String>  arguments)
+    {
+        boolean     useModules = useModules();
+        Set<String> patches    = new HashSet<>();
+        Set<String> modules    = new HashSet<>();
+        Set<String> reads      = new HashSet<>();
+        Set<String> opens      = new HashSet<>();
+        Set<String> exports    = new HashSet<>();
+        int         end        = arguments.size() - 1;
+
+        for (int i = 0; i <= end; i++)
         {
+            String arg = arguments.get(i);
+
             if (arg.startsWith("--patch-module="))
             {
-            patches.add(arg.substring(15));
+                patches.add(arg.substring(15));
             }
-            if (arg.startsWith("--add-modules="))
+            else if (arg.equals("--patch-module") && i < end)
             {
-            modules.add(arg.substring(14));
+                patches.add(arguments.get(++i));
             }
-            if (arg.startsWith("--add-reads="))
+            else if (arg.startsWith("--add-modules="))
             {
-            reads.add(arg.substring(12));
+                modules.add(arg.substring(14));
             }
-            if (arg.startsWith("--add-opens="))
+            else if (arg.equals("--add-modules") && i < end)
             {
-            opens.add(arg.substring(12));
+                modules.add(arguments.get(++i));
+            }
+            else if (arg.startsWith("--add-reads="))
+            {
+                reads.add(arg.substring(12));
+            }
+            else if (arg.equals("--add-reads") && i < end)
+            {
+                reads.add(arguments.get(++i));
+            }
+            else if (arg.startsWith("--add-opens="))
+            {
+                opens.add(arg.substring(12));
+            }
+            else if (arg.equals("--add-opens") && i < end)
+            {
+                opens.add(arguments.get(++i));
+            }
+            else if (arg.startsWith("--add-exports="))
+            {
+                exports.add(arg.substring(14));
+            }
+            else  if (arg.equals("--add-exports") && i < end)
+            {
+                exports.add(arguments.get(++i));
             }
         }
 
-        return new JavaModules(useModules, modules, Collections.emptySet(), Collections.emptySet(),
+        return new JavaModules(useModules, modules, Collections.emptySet(), exports,
                                patches, reads, opens, ClassPath.ofSystem());
     }
 
@@ -621,6 +655,10 @@ public class JavaModules implements ComposableOption<JavaModules>, JvmOption
         {
             return false;
         }
+        if (opens != null ? !opens.equals(modules1.opens) : modules1.opens != null)
+        {
+            return false;
+        }
         return reading != null ? reading.equals(modules1.reading) : modules1.reading == null;
     }
 
@@ -632,7 +670,14 @@ public class JavaModules implements ComposableOption<JavaModules>, JvmOption
         result = 31 * result + (excludes != null ? excludes.hashCode() : 0);
         result = 31 * result + (exports != null ? exports.hashCode() : 0);
         result = 31 * result + (patches != null ? patches.hashCode() : 0);
+        result = 31 * result + (opens != null ? opens.hashCode() : 0);
         result = 31 * result + (reading != null ? reading.hashCode() : 0);
         return result;
+    }
+
+    @Override
+    public String toString()
+    {
+        return "JavaModules(" + String.join(" ", resolve(OptionsByType.empty())) + ")";
     }
 }
