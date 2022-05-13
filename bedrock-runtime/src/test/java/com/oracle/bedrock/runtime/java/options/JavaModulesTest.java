@@ -9,6 +9,7 @@ import java.util.List;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInAnyOrder;
+import static org.hamcrest.collection.IsIterableContainingInOrder.contains;
 
 public class JavaModulesTest
 {
@@ -36,6 +37,78 @@ public class JavaModulesTest
         Iterable<String> iterable = modules.resolve(OptionsByType.empty());
 
         assertThat(iterable, containsInAnyOrder("--add-modules", "mod1,mod3"));
+    }
+
+    @Test
+    public void shouldExcludeModulesAndOpens()
+    {
+        JavaModules modules = JavaModules.enabled();
+        modules = modules.adding("mod1");
+        modules = modules.opens("mod1", "com.mod1", "foo");
+        modules = modules.adding("mod2");
+        modules = modules.opens("mod2", "com.mod2", "foo");
+        modules = modules.excluding("mod2");
+        modules = modules.adding("mod3");
+        modules = modules.adding("mod4");
+        modules = modules.opens("mod4", "com.mod2", "mod2");
+
+        Iterable<String> iterable = modules.resolve(OptionsByType.empty());
+
+        assertThat(iterable, contains("--add-modules", "mod1,mod3,mod4", "--add-opens", "mod1/com.mod1=foo"));
+    }
+
+    @Test
+    public void shouldExcludeModulesAndPatches()
+    {
+        JavaModules modules = JavaModules.enabled();
+        modules = modules.adding("mod1");
+        modules = modules.patching("mod1=foo.jar");
+        modules = modules.adding("mod2");
+        modules = modules.patching("mod2=bar.jar");
+        modules = modules.excluding("mod2");
+        modules = modules.adding("mod3");
+
+        Iterable<String> iterable = modules.resolve(OptionsByType.empty());
+
+        assertThat(iterable, containsInAnyOrder("--add-modules", "mod1,mod3", "--patch-module", "mod1=foo.jar"));
+    }
+
+    @Test
+    public void shouldExcludeModulesAndReads()
+    {
+        JavaModules modules = JavaModules.enabled();
+        modules = modules.adding("mod1");
+        modules = modules.adding("mod2");
+        modules = modules.excluding("mod2");
+        modules = modules.adding("mod3");
+        modules = modules.adding("mod4");
+        modules = modules.reading("mod1=mod3,mod2,mod4", "mod2=mod1,mod3", "mod3=mod1,mod4", "mod4=mod2");
+
+
+        Iterable<String> iterable = modules.resolve(OptionsByType.empty());
+
+        assertThat(iterable, containsInAnyOrder("--add-modules", "mod1,mod3,mod4",
+                                                "--add-reads", "mod1=mod3,mod4",
+                                                "--add-reads", "mod3=mod1,mod4"));
+    }
+
+    @Test
+    public void shouldExcludeModulesAndExports()
+    {
+        JavaModules modules = JavaModules.enabled();
+        modules = modules.adding("mod1");
+        modules = modules.adding("mod2");
+        modules = modules.excluding("mod2");
+        modules = modules.adding("mod3");
+        modules = modules.adding("mod4");
+        modules = modules.exporting("mod1/com.mod1=mod3,mod2,mod4", "mod2/com.mod2=mod1,mod3", "mod3/com.mod3=mod1,mod4", "mod4/com.mod4=mod2");
+
+
+        Iterable<String> iterable = modules.resolve(OptionsByType.empty());
+
+        assertThat(iterable, containsInAnyOrder("--add-modules", "mod1,mod3,mod4",
+                                                "--add-exports", "mod1/com.mod1=mod3,mod4",
+                                                "--add-exports", "mod3/com.mod3=mod1,mod4"));
     }
 
     @Test

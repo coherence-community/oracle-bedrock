@@ -41,6 +41,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * An {@link Option} to specify that a {@link JavaApplication} should run using Java 9 modules.
@@ -579,40 +580,126 @@ public class JavaModules implements ComposableOption<JavaModules>, JvmOption
             {
                 // syntax: --add-exports module/package=target-module(,target-module)*
                 //         may be used more than once
-                exports.forEach(export -> {
-                    opts.add("--add-exports");
-                    opts.add(export);
-                });
+                if (excludes.isEmpty())
+                {
+                    exports.forEach(export -> {
+                        opts.add("--add-exports");
+                        opts.add(export);
+                    });
+                }
+                else
+                {
+                    for (String export : exports)
+                    {
+                        String[] parts  = export.split("/");
+                        String   module = parts[0];
+                        if (!excludes.contains(module) && parts.length > 1)
+                        {
+                            String[] targetParts = parts[1].split("=");
+                            if (targetParts.length > 1)
+                            {
+                                String exportsToModules = Arrays.stream(targetParts[1].split(","))
+                                        .filter(s -> !excludes.contains(s))
+                                        .collect(Collectors.joining(","));
+
+                                if (exportsToModules.length() > 0)
+                                {
+                                    opts.add("--add-exports");
+                                    opts.add(module + "/" + targetParts[0] + "=" + exportsToModules);
+                                }
+                            }
+                        }
+                    }
+                }
             }
 
             if (!opens.isEmpty())
             {
                 // syntax: --add-opens module/package=target-module(,target-module)*
                 //         may be used more than once
-                opens.forEach(open -> {
-                    opts.add("--add-opens");
-                    opts.add(open);
-                });
+                if (excludes.isEmpty())
+                {
+                    opens.forEach(open -> {
+                        opts.add("--add-opens");
+                        opts.add(open);
+                    });
+                }
+                else
+                {
+                    for (String open : opens)
+                    {
+                        String[] parts  = open.split("/");
+                        String   module = parts[0];
+                        if (!excludes.contains(module) && parts.length > 1)
+                        {
+                            String[] openParts = parts[1].split("=");
+                            if (openParts.length > 1 && !excludes.contains(openParts[1]))
+                            {
+                                opts.add("--add-opens");
+                                opts.add(open);
+                            }
+                        }
+                    }
+                }
             }
 
             if (!patches.isEmpty())
             {
                 // syntax: --patch-module module=file(;file)*
                 //         may be used more than once
-                patches.forEach(patch -> {
-                    opts.add("--patch-module");
-                    opts.add(patch);
-                });
+                if (excludes.isEmpty())
+                {
+                    patches.forEach(patch -> {
+                        opts.add("--patch-module");
+                        opts.add(patch);
+                    });
+                }
+                else
+                {
+                    for (String patch : patches)
+                    {
+                        String module = patch.split("=")[0];
+                        if (!excludes.contains(module))
+                        {
+                            opts.add("--patch-module");
+                            opts.add(patch);
+                        }
+                    }
+                }
+
             }
 
             if (!reading.isEmpty())
             {
                 // syntax: --add-reads module=target-module(,target-module)*
                 //         may be used more than once
-                reading.forEach(read -> {
-                    opts.add("--add-reads");
-                    opts.add(read);
-                });
+                if (excludes.isEmpty())
+                {
+                    reading.forEach(read -> {
+                        opts.add("--add-reads");
+                        opts.add(read);
+                    });
+                }
+                else
+                {
+                    for (String reads : reading)
+                    {
+                        String[] parts = reads.split("=");
+                        String module = parts[0];
+                        if (!excludes.contains(module) && parts.length > 1)
+                        {
+                            String readsModules = Arrays.stream(parts[1].split(","))
+                                    .filter(s -> !excludes.contains(s))
+                                    .collect(Collectors.joining(","));
+
+                            if (readsModules.length() > 0)
+                            {
+                                opts.add("--add-reads");
+                                opts.add(module + "=" + readsModules);
+                            }
+                        }
+                    }
+                }
             }
         }
 
