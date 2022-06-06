@@ -1,6 +1,7 @@
 package com.oracle.bedrock.testsupport;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
@@ -135,16 +136,26 @@ public class MavenProjectFileUtils
      */
     public static void recursiveDelete(File folder)
     {
-        File[] files = folder.listFiles();
-        if (files != null)
+        if (folder.exists())
         {
-            for (File each : files)
+            File[] files = folder.listFiles();
+            if (files != null)
             {
-                recursiveDelete(each);
+                for (File each : files)
+                {
+                    recursiveDelete(each);
+                }
+            }
+
+            try
+            {
+                Files.delete(folder.toPath());
+            }
+            catch (IOException e)
+            {
+                throw new RuntimeException(e);
             }
         }
-
-        folder.delete();
     }
 
     /**
