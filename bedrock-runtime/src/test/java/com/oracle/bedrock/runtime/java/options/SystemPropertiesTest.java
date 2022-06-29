@@ -31,6 +31,9 @@ import com.oracle.bedrock.runtime.LocalPlatform;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
+import java.util.Properties;
+
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.collection.IsIterableContainingInOrder.contains;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.ArgumentMatchers.same;
@@ -49,7 +52,7 @@ import static org.mockito.Mockito.verify;
 public class SystemPropertiesTest
 {
     @Test
-    public void shouldCallResolveHandlers() throws Exception
+    public void shouldCallResolveHandlers()
     {
         SystemProperty.ResolveHandler handler1      = mock(SystemProperty.ResolveHandler.class);
         SystemProperty.ResolveHandler handler2      = mock(SystemProperty.ResolveHandler.class);
@@ -86,4 +89,18 @@ public class SystemPropertiesTest
         assertThat(names3.getAllValues(), contains("bar"));
         assertThat(values3.getAllValues(), contains("bar-value"));
     }
+
+    @Test
+    public void shouldCallSupplier()
+    {
+        OptionsByType optionsByType = OptionsByType.of(SystemProperty.of("property.one", () -> "foo"),
+                SystemProperty.of("property.two", () -> "bar"));
+
+        Properties properties = optionsByType.get(SystemProperties.class).resolve(LocalPlatform.get(), optionsByType);
+        assertThat(properties.containsKey("property.one"), is(true));
+        assertThat(properties.getProperty("property.one"), is("foo"));
+        assertThat(properties.containsKey("property.two"), is(true));
+        assertThat(properties.getProperty("property.two"), is("bar"));
+    }
+
 }

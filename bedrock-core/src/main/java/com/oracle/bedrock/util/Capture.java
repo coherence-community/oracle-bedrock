@@ -27,6 +27,7 @@ package com.oracle.bedrock.util;
 
 import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Supplier;
 
 /**
  * A {@link Capture} is an {@link Iterator} that captures and returns a
@@ -40,26 +41,42 @@ import java.util.concurrent.atomic.AtomicReference;
 public class Capture<T> implements Iterator<T>
 {
     /**
+     * The underlying wrapped {@link Iterator} supplier.
+     */
+    private final Supplier<Iterator<T>> supplier;
+
+    /**
      * The underlying wrapped {@link Iterator}.
      */
-    private Iterator<T> iterator;
+    private volatile Iterator<T> iterator;
 
     /**
      * The captured value from the {@link Iterator}.
      */
-    private AtomicReference<T> capture;
-
+    private volatile AtomicReference<T> capture;
 
     /**
      * Constructs a {@link Capture} with the specified
      * underlying (source) {@link Iterator}.
      *
      * @param iterator  the underlying {@link Iterator} providing
-     *                  the {@link Capture} with it's value.
+     *                  the {@link Capture} with its value.
      */
     public Capture(Iterator<T> iterator)
     {
-        this.iterator = iterator;
+    this(() -> iterator);
+    }
+
+    /**
+     * Constructs a {@link Capture} with the specified
+     * underlying (source) {@link Iterator}.
+     *
+     * @param supplier  the underlying {@link Iterator} supplier providing
+     *                  the {@link Capture} with its value.
+     */
+    public Capture(Supplier<Iterator<T>> supplier)
+    {
+        this.supplier = supplier;
         this.capture  = null;
     }
 
@@ -91,7 +108,7 @@ public class Capture<T> implements Iterator<T>
     @Override
     public boolean hasNext()
     {
-        return hasValue() || iterator.hasNext();
+        return hasValue() || ensureIterator().hasNext();
     }
 
 
@@ -100,7 +117,7 @@ public class Capture<T> implements Iterator<T>
     {
         if (!hasValue())
         {
-            capture = new AtomicReference<T>(iterator.next());
+            capture = new AtomicReference<T>(ensureIterator().next());
         }
 
         return capture.get();
@@ -111,6 +128,34 @@ public class Capture<T> implements Iterator<T>
     public void remove()
     {
         throw new UnsupportedOperationException("Can't remove from a Capture");
+    }
+
+
+    private synchronized Iterator<T> ensureIterator()
+    {
+        if (iterator == null)
+        {
+            Iterator<T> it = supplier.get();
+            if (it == null)
+            {
+                throw new IllegalStateException("The iterator supplier returned null");
+            }
+            iterator = it;
+        }
+        return iterator;
+    }
+
+    /**
+     * Obtains a {@link Capture} based on a provided {@link Iterator}.
+     *
+     * @param supplier  the {@link Iterator} supplier
+     * @param <T>       the type of the value captured
+     *
+     * @return the {@link Capture} of the {@link Iterator}
+     */
+    public static <T> Capture<T> of(Supplier<Iterator<T>> supplier)
+    {
+        return new Capture<>(supplier);
     }
 
 

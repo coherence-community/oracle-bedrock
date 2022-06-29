@@ -38,6 +38,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.function.Supplier;
 
 /**
  * A {@link Collector} of {@link SystemProperty}s.
@@ -399,6 +400,11 @@ public class SystemProperties implements Option.Collector<SystemProperty, System
 
             if (value != null)
             {
+                if (value instanceof Supplier)
+                {
+                    value = ((Supplier<?>) value).get();
+                }
+
                 if (value instanceof SystemProperty.ContextSensitiveValue)
                 {
                     SystemProperty.ContextSensitiveValue contextSensitiveValue =

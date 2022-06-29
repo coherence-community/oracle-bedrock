@@ -30,6 +30,7 @@ import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.runtime.Platform;
 
 import java.util.Iterator;
+import java.util.function.Supplier;
 
 /**
  * A {@link Collectable} {@link Option} representing a System Property, consisting
@@ -126,6 +127,23 @@ public class SystemProperty implements Option.Collectable
     public static SystemProperty of(String                name,
                                     ContextSensitiveValue value,
                                     Option...             options)
+    {
+        return new SystemProperty(name, value, options);
+    }
+
+
+    /**
+     * Constructs a {@link SystemProperty}.
+     *
+     * @param name     the name of the {@link SystemProperty}
+     * @param value    a {@link Supplier} used to supply the value of the {@link SystemProperty}
+     * @param options  then {@link Option}s for this {@link SystemProperty}
+     *
+     * @return a new {@link SystemProperty}
+     */
+    public static SystemProperty of(String      name,
+                                    Supplier<?> value,
+                                    Option...   options)
     {
         return new SystemProperty(name, value, options);
     }
