@@ -136,8 +136,11 @@ public abstract class AbstractBaseAssembly<A extends Application, G extends Asse
 
     protected void close()
     {
-        // close the assembly
-        assembly.close(closingOptionsByType.asArray());
+        if (assembly != null)
+        {
+            // close the assembly
+            assembly.close(closingOptionsByType.asArray());
+        }
     }
 
 
