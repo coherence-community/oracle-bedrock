@@ -180,21 +180,11 @@ public class Ensured<T> implements Deferred<T>
         {
             // the time the most recent acquisition took
             long acquisitionDurationMS = 0;
+            long started = System.currentTimeMillis();
 
             try
             {
-                long started = System.currentTimeMillis();
-
-                T    object  = deferred.get();
-
-                long stopped = System.currentTimeMillis();
-
-                // the time spent trying to access the resource
-                // is considered as part of the remaining time
-                acquisitionDurationMS    = stopped - started;
-                remainingRetryDurationMS -= acquisitionDurationMS < 0 ? 0 : acquisitionDurationMS;
-
-                return object;
+                return deferred.get();
             }
             catch (PermanentlyUnavailableException e)
             {
@@ -215,6 +205,13 @@ public class Ensured<T> implements Deferred<T>
                 // SKIP: we assume all other runtime exceptions
                 // simply means that we should retry
             }
+
+            long stopped = System.currentTimeMillis();
+
+            // the time spent trying to access the resource
+            // is considered as part of the remaining time
+            acquisitionDurationMS    = stopped - started;
+            remainingRetryDurationMS -= acquisitionDurationMS < 0 ? 0 : acquisitionDurationMS;
 
             // as no object was produced we should wait before retrying
             if (maximumRetryDurationMS < 0 || remainingRetryDurationMS > 0)
