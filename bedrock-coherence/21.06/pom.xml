@@ -4,7 +4,7 @@
     <parent>
         <groupId>com.oracle.bedrock</groupId>
         <artifactId>bedrock-coherence</artifactId>
-        <version>6.0.1</version>
+        <version>6.0.2-SNAPSHOT</version>
     </parent>
 
     <groupId>com.oracle.bedrock.coherence</groupId>
@@ -25,8 +25,4 @@
         <module>coherence-21.06-testing-support-tests-junit4</module>
         <module>coherence-21.06-testing-support-tests-junit5</module>
     </modules>
-
-  <scm>
-    <tag>project-6.0.1</tag>
-  </scm>
 </project>
