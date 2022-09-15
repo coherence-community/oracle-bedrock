@@ -113,7 +113,12 @@ Bedrock is a Maven project and can be built with standard Maven commands.
         ```
         ssh -i ~/.ssh/foo_rsa <your-user-name>@127.0.0.1
         ```
-        
+    
+:warning: **WARNING**
+Any keys used for testing and building should be used with care.
+If the private key is disclosed, any observer will be able to log into the user's machine.
+Users should delete the key from authorized_keys as soon as the tests are complete.
+
 ### Run the build
 To run a full build:
 ```
