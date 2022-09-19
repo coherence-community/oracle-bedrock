@@ -29,14 +29,27 @@
         </dependency>
 
         <dependency>
-          <groupId>javax.xml.bind</groupId>
-          <artifactId>jaxb-api</artifactId>
-          <version>${javax.xml.bind.version}</version>
+            <groupId>jakarta.xml.bind</groupId>
+            <artifactId>jakarta.xml.bind-api</artifactId>
+            <version>3.0.1</version>
         </dependency>
         <dependency>
-          <groupId>javax.xml.ws</groupId>
-          <artifactId>jaxws-api</artifactId>
-          <version>${javax.xml.ws.version}</version>
+            <groupId>com.sun.xml.bind</groupId>
+            <artifactId>jaxb-impl</artifactId>
+            <version>3.0.2</version>
+            <scope>runtime</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>jakarta.xml.ws</groupId>
+            <artifactId>jakarta.xml.ws-api</artifactId>
+            <version>3.0.1</version>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.xml.ws</groupId>
+            <artifactId>jaxws-rt</artifactId>
+            <version>3.0.1</version>
+            <scope>runtime</scope>
         </dependency>
 
         <dependency>
@@ -64,39 +77,74 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>org.jvnet.jaxb2.maven2</groupId>
-                <artifactId>maven-jaxb2-plugin</artifactId>
-                <version>0.14.0</version>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>jaxb2-maven-plugin</artifactId>
+                <version>3.1.0</version>
                 <executions>
                     <execution>
+                        <id>xjc</id>
                         <goals>
-                            <goal>generate</goal>
+                            <goal>xjc</goal>
                         </goals>
                         <configuration>
-                            <schemaDirectory>src/main/resources/xsd</schemaDirectory>
-                            <bindingDirectory>src/main/resources</bindingDirectory>
-                            <generateDirectory>${project.build.directory}/generated-sources</generateDirectory>
+                            <outputDirectory>${project.build.directory}/generated-sources</outputDirectory>
+                            <sources>
+                                <source>src/main/resources/xsd</source>
+                            </sources>
+                            <xjbSources>
+                                <xjbSource>src/main/resources/bindings.xjb</xjbSource>
+                            </xjbSources>
                         </configuration>
                     </execution>
                 </executions>
-                <dependencies>
-                    <dependency>
-                        <groupId>com.sun.xml.bind</groupId>
-                        <artifactId>jaxb-impl</artifactId>
-                        <version>2.3.0</version>
-                    </dependency>
-                    <dependency>
-                        <groupId>com.sun.xml.bind</groupId>
-                        <artifactId>jaxb-xjc</artifactId>
-                        <version>2.3.0</version>
-                    </dependency>
-                    <dependency>
-                        <groupId>com.sun.xml.bind</groupId>
-                        <artifactId>jaxb-core</artifactId>
-                        <version>2.3.0</version>
-                    </dependency>
-                </dependencies>
             </plugin>
+
+<!--            <plugin>-->
+<!--                <groupId>org.jvnet.jaxb2.maven2</groupId>-->
+<!--                <artifactId>maven-jaxb2-plugin</artifactId>-->
+<!--                <version>0.15.1</version>-->
+<!--                <executions>-->
+<!--                    <execution>-->
+<!--                        <goals>-->
+<!--                            <goal>generate</goal>-->
+<!--                        </goals>-->
+<!--                        <configuration>-->
+<!--                            <schemaDirectory>src/main/resources/xsd</schemaDirectory>-->
+<!--                            <bindingDirectory>src/main/resources</bindingDirectory>-->
+<!--                            <generateDirectory>${project.build.directory}/generated-sources</generateDirectory>-->
+<!--                        </configuration>-->
+<!--                    </execution>-->
+<!--                </executions>-->
+<!--                <dependencies>-->
+<!--                    <dependency>-->
+<!--                        <groupId>jakarta.xml.bind</groupId>-->
+<!--                        <artifactId>jakarta.xml.bind-api</artifactId>-->
+<!--                        <version>3.0.1</version>-->
+<!--                    </dependency>-->
+<!--                    <dependency>-->
+<!--                        <groupId>com.sun.xml.bind</groupId>-->
+<!--                        <artifactId>jaxb-impl</artifactId>-->
+<!--                        <version>3.0.2</version>-->
+<!--                        <scope>runtime</scope>-->
+<!--                    </dependency>-->
+
+<!--&lt;!&ndash;                    <dependency>&ndash;&gt;-->
+<!--&lt;!&ndash;                        <groupId>com.sun.xml.bind</groupId>&ndash;&gt;-->
+<!--&lt;!&ndash;                        <artifactId>jaxb-impl</artifactId>&ndash;&gt;-->
+<!--&lt;!&ndash;                        <version>2.3.0</version>&ndash;&gt;-->
+<!--&lt;!&ndash;                    </dependency>&ndash;&gt;-->
+<!--&lt;!&ndash;                    <dependency>&ndash;&gt;-->
+<!--&lt;!&ndash;                        <groupId>com.sun.xml.bind</groupId>&ndash;&gt;-->
+<!--&lt;!&ndash;                        <artifactId>jaxb-xjc</artifactId>&ndash;&gt;-->
+<!--&lt;!&ndash;                        <version>2.3.0</version>&ndash;&gt;-->
+<!--&lt;!&ndash;                    </dependency>&ndash;&gt;-->
+<!--&lt;!&ndash;                    <dependency>&ndash;&gt;-->
+<!--&lt;!&ndash;                        <groupId>com.sun.xml.bind</groupId>&ndash;&gt;-->
+<!--&lt;!&ndash;                        <artifactId>jaxb-core</artifactId>&ndash;&gt;-->
+<!--&lt;!&ndash;                        <version>2.3.0</version>&ndash;&gt;-->
+<!--&lt;!&ndash;                    </dependency>&ndash;&gt;-->
+<!--                </dependencies>-->
+<!--            </plugin>-->
 
             <!-- exclude the generated sources from javadoc -->
             <plugin>

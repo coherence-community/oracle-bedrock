@@ -32,7 +32,7 @@ import org.w3c.soap.envelope.Fault;
 import org.w3c.soap.envelope.Faultreason;
 import org.w3c.soap.envelope.Reasontext;
 
-import javax.xml.bind.JAXBElement;
+import jakarta.xml.bind.JAXBElement;
 import java.util.List;
 
 /**

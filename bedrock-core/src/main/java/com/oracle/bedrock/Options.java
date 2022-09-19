@@ -85,6 +85,7 @@ class Options implements OptionsByType
     }
 
 
+    @SuppressWarnings("unchecked")
     @Override
     public <T extends Option> T get(Class<T>  classOfOption,
                                     Object... arguments)
@@ -115,6 +116,7 @@ class Options implements OptionsByType
     }
 
     
+    @SuppressWarnings("unchecked")
     @Override
     public <T extends Option, D extends T> T getOrDefault(Class<T> classOfOption,
                                                           D        defaultOption)
@@ -137,6 +139,7 @@ class Options implements OptionsByType
     }
 
 
+    @SuppressWarnings("unchecked")
     @Override
     public <T extends Option, D extends T> T getOrSetDefault(Class<T> classOfOption,
                                                              D        defaultOption)
@@ -177,6 +180,7 @@ class Options implements OptionsByType
     }
 
 
+    @SuppressWarnings("unchecked")
     @Override
     public <O> Iterable<O> getInstancesOf(Class<O> requiredClass)
     {
@@ -191,9 +195,9 @@ class Options implements OptionsByType
 
             if (option instanceof Option.Collector)
             {
-                for (Object o : ((Option.Collector) option).getInstancesOf(requiredClass))
+                for (O o : ((Option.Collector<?, ?>) option).getInstancesOf(requiredClass))
                 {
-                    result.add((O) o);
+                    result.add(o);
                 }
             }
         }
@@ -246,67 +250,65 @@ class Options implements OptionsByType
     }
 
 
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public OptionsByType add(Option option)
     {
-        if (option == null)
+    if (option != null)
         {
-            return this;
-        }
-        else
-        {
-            if (option instanceof Option.Collectable)
+        if (option instanceof Option.Collectable)
             {
-                Option.Collectable collectable = (Option.Collectable) option;
+            Option.Collectable collectable = (Option.Collectable) option;
 
-                // determine the type of Collector in which we'll collect the Collectable
-                Class<? extends Option> classOfCollector = OptionsByType.getClassOf(collectable.getCollectorClass());
+            // determine the type of Collector in which we'll collect the Collectable
+            Class<? extends Option> classOfCollector = OptionsByType.getClassOf(collectable.getCollectorClass());
 
-                // attempt to locate an existing Collector
-                Option.Collector collector = (Option.Collector) options.get(classOfCollector);
+            // attempt to locate an existing Collector
+            Option.Collector<Option.Collectable, ?> collector
+                    = (Option.Collector<Option.Collectable, ?>) options.get(classOfCollector);
 
-                // create a new collector if we don't have one
-                if (collector == null)
+            // create a new collector if we don't have one
+            if (collector == null)
                 {
-                    // attempt to create a new collector (using the @Option.Default annotation)
-                    collector = (Option.Collector) getDefaultFor(classOfCollector);
+                // attempt to create a new collector (using the @Option.Default annotation)
+                collector = (Option.Collector<Option.Collectable, ?>) getDefaultFor(classOfCollector);
                 }
 
-                if (collector == null)
+            if (collector == null)
                 {
-                    throw new IllegalStateException("Failed to instantiate a default Collector of type "
-                                                    + classOfCollector + " for " + option);
+                throw new IllegalStateException("Failed to instantiate a default Collector of type "
+                                                        + classOfCollector + " for " + option);
                 }
-                else
+            else
                 {
-                    // collect the collectable into the collector
-                    collector = collector.with(collectable);
+                // collect the collectable into the collector
+                collector = collector.with(collectable);
 
-                    // replace the collector in the options
-                    options.put(classOfCollector, collector);
+                // replace the collector in the options
+                options.put(classOfCollector, collector);
                 }
             }
-            else
+        else
             {
-                // determine the class of option
-                Class<? extends Option> classOfOption = OptionsByType.getClassOf(option);
+            // determine the class of option
+            Class<? extends Option> classOfOption = OptionsByType.getClassOf(option);
 
-                // compose the option if it's composable
-                if (option instanceof ComposableOption)
+            // compose the option if it's composable
+            if (option instanceof ComposableOption)
                 {
-                    Option existing = options.get(classOfOption);
+                Option existing = options.get(classOfOption);
 
-                    if (existing != null)
+                if (existing != null)
                     {
-                        option = ((ComposableOption) existing).compose((ComposableOption) option);
+                    option = ((ComposableOption) existing).compose((ComposableOption) option);
                     }
                 }
 
-                options.put(classOfOption, option);
+            options.put(classOfOption, option);
             }
 
-            return this;
         }
+    return this;
     }
 
 
@@ -367,6 +369,7 @@ class Options implements OptionsByType
     }
 
 
+    @SuppressWarnings("unchecked")
     @Override
     public boolean remove(Option option)
     {
@@ -384,7 +387,8 @@ class Options implements OptionsByType
                 Class<? extends Option> classOfCollector = OptionsByType.getClassOf(collectable.getCollectorClass());
 
                 // attempt to locate an existing Collector
-                Option.Collector collector = (Option.Collector) options.get(classOfCollector);
+                Option.Collector<Option.Collectable, ?> collector
+                        = (Option.Collector<Option.Collectable, ?>) options.get(classOfCollector);
 
                 if (collector == null)
                 {
@@ -443,6 +447,7 @@ class Options implements OptionsByType
      * @return a default value or <code>null</code> if a default can't be
      * determined
      */
+    @SuppressWarnings("unchecked")
     protected <T extends Option> T getDefaultFor(Class<T>  classOfOption,
                                                  Object... arguments)
     {
@@ -494,7 +499,7 @@ class Options implements OptionsByType
             }
         }
 
-        for (Constructor constructor : classOfOption.getConstructors())
+        for (Constructor<?> constructor : classOfOption.getConstructors())
         {
             int modifiers = constructor.getModifiers();
 
