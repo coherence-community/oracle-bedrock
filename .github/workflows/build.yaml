@@ -69,7 +69,10 @@ jobs:
         export DEV_ROOT=$(pwd)
         ssh-keygen -t rsa -q -N "" -f ~/.ssh/127.0.0.1_dsa
         cat ~/.ssh/127.0.0.1_dsa.pub >> ~/.ssh/authorized_keys
-        sudo launchctl stop com.openssh.sshd || true
-        sudo launchctl start com.openssh.sshd || true
+        chmod 600 ~/.ssh/127.0.0.1_dsa
+        chmod 600 ~/.ssh/127.0.0.1_dsa.pub
+        ls -al ~/.ssh
+        sudo systemctl restart ssh
+        sudo systemctl status ssh
         mvn -U --batch-mode -e clean install -DskipTests -Pcoherence-ce
         mvn --batch-mode -e -nsu verify -pl ${{ matrix.module }} -Pcoherence-ce -Dgithub.build=true
