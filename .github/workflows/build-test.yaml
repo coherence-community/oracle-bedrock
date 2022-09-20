@@ -1,0 +1,52 @@
+# Copyright 2020 Oracle Corporation and/or its affiliates.  All rights reserved.
+# Licensed under the Universal Permissive License v 1.0 as shown at
+# http://oss.oracle.com/licenses/upl.
+
+# ---------------------------------------------------------------------------
+# Coherence CE GitHub Actions CI build.
+# ---------------------------------------------------------------------------
+
+name: CI Test
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+    - '*'
+  pull_request:
+    branches:
+    - '*'
+
+jobs:
+# First run a simple compile and unit tests
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Set up JDK
+      uses: actions/setup-java@v3
+      with:
+        distribution: 'zulu'
+        java-version: '17'
+
+    - name: Cache Maven packages
+      uses: actions/cache@v1
+      with:
+        path: ~/.m2
+        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+        restore-keys: ${{ runner.os }}-m2-
+
+    - name: Build
+      shell: bash
+      run: |
+        export DEV_ROOT=$(pwd)
+        ssh-keygen -t rsa -q -N "" -f ~/.ssh/127.0.0.1_dsa
+        cat ~/.ssh/127.0.0.1_dsa.pub >> ~/.ssh/authorized_keys
+        chmod 600 ~/.ssh/127.0.0.1_dsa
+        chmod 600 ~/.ssh/127.0.0.1_dsa.pub
+        ls -al ~/.ssh
+        sudo systemctl reload sshd
+        sudo systemctl status ssh
