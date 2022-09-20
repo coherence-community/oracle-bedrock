@@ -47,5 +47,5 @@ jobs:
         cat ~/.ssh/127.0.0.1_dsa.pub >> ~/.ssh/authorized_keys
         chmod 600 ~/.ssh/127.0.0.1_dsa
         chmod 600 ~/.ssh/127.0.0.1_dsa.pub
+        sudo systemctl restart ssh
         sudo systemctl status ssh
-        
