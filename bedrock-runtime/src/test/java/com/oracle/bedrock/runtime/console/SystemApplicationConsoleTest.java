@@ -28,13 +28,19 @@ package com.oracle.bedrock.runtime.console;
 import com.oracle.bedrock.runtime.java.container.Scope;
 import org.junit.Test;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.PrintStream;
+import java.nio.charset.Charset;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -61,12 +67,12 @@ public class SystemApplicationConsoleTest
      * is closed that System.out is not closed.
      */
     @Test
-    public void shouldNoCloseSystemOutIfOutputWriterClosed() throws Exception
+    public void shouldNotCloseSystemOutIfOutputWriterClosed()
     {
         Scope       scope  = mock(Scope.class);
-        PrintStream stdOut = mock(PrintStream.class, "Out");
-        PrintStream stdErr = mock(PrintStream.class, "Out");
-        InputStream stdIn  = mock(InputStream.class, "In");
+        PrintStream stdOut = new PrintStreamStub(new ByteArrayOutputStream());
+        PrintStream stdErr = new PrintStreamStub(new ByteArrayOutputStream());
+        InputStream stdIn  = new ByteArrayInputStream(new byte[0]);
 
         when(scope.getStandardOutput()).thenReturn(stdOut);
         when(scope.getStandardError()).thenReturn(stdErr);
@@ -77,8 +83,6 @@ public class SystemApplicationConsoleTest
         console.init(scope);
 
         console.getOutputWriter().close();
-
-        verify(stdOut, never()).close();
     }
 
 
@@ -87,11 +91,11 @@ public class SystemApplicationConsoleTest
      * is closed that System.err is not closed.
      */
     @Test
-    public void shouldNoCloseSystemErrIfErrorWriterClosed() throws Exception
+    public void shouldNotCloseSystemErrIfErrorWriterClosed()
     {
         Scope       scope  = mock(Scope.class);
-        PrintStream stdOut = mock(PrintStream.class, "Out");
-        PrintStream stdErr = mock(PrintStream.class, "Out");
+        PrintStream stdOut = new PrintStreamStub(new ByteArrayOutputStream());
+        PrintStream stdErr = new PrintStreamStub(new ByteArrayOutputStream());
         InputStream stdIn  = mock(InputStream.class, "In");
 
         when(scope.getStandardOutput()).thenReturn(stdOut);
@@ -103,7 +107,20 @@ public class SystemApplicationConsoleTest
         console.init(scope);
 
         console.getErrorWriter().close();
+    }
 
-        verify(stdErr, never()).close();
+    static class PrintStreamStub
+            extends PrintStream
+    {
+        public PrintStreamStub(OutputStream out)
+        {
+            super(out);
+        }
+
+    @Override
+    public void close()
+        {
+        fail("Close should not be called");
+        }
     }
 }
