@@ -39,8 +39,8 @@ jobs:
 #          - bedrock-runtime-docker-tests
           - bedrock-runtime-jacoco
           - bedrock-runtime-maven-tests
-          - bedrock-runtime-remote-tests
-#          - bedrock-runtime-tests
+#          - bedrock-runtime-remote-tests
+          - bedrock-runtime-tests
           - bedrock-runtime-vagrant-tests
           - bedrock-runtime-virtual-tests
           - bedrock-testing-support
