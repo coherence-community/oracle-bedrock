@@ -25,6 +25,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        jvmVersion: ['17', '19']
         module:
           - bedrock-coherence/21.06/coherence-21.06
           - bedrock-coherence/21.06/coherence-21.06-testing-support
@@ -45,7 +46,6 @@ jobs:
           - bedrock-runtime-virtual-tests
           - bedrock-testing-support
           - bedrock-testing-support-tests
-
     steps:
     - name: Checkout
       uses: actions/checkout@v2
@@ -54,7 +54,7 @@ jobs:
       uses: actions/setup-java@v3
       with:
         distribution: 'zulu'
-        java-version: '17'
+        java-version: ${{ matrix.jvmVersion }}
 
     - name: Cache Maven packages
       uses: actions/cache@v1
