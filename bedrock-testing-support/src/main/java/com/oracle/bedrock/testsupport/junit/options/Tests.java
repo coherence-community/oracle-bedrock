@@ -47,7 +47,7 @@ public class Tests implements Option.Collector<TestClasses, Tests>
      * The {@link List} of {@link TestClasses} to use to resolve the {@link Class}es
      * to use for a test run.
      */
-    private List<TestClasses> listOfTestClasses;
+    private final List<TestClasses> listOfTestClasses;
 
 
     /**

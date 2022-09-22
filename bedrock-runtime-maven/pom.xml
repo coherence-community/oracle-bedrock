@@ -3,7 +3,7 @@
     <parent>
         <groupId>com.oracle.bedrock</groupId>
         <artifactId>project</artifactId>
-        <version>6.0.2-SNAPSHOT</version>
+        <version>7.0.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -74,18 +74,6 @@
             <groupId>org.apache.maven</groupId>
             <artifactId>maven-settings-builder</artifactId>
             <version>${maven.aether.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.perforce</groupId>
-            <artifactId>p4java</artifactId>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>com.mycila</groupId>
-            <artifactId>license-maven-plugin</artifactId>
-            <scope>provided</scope>
         </dependency>
 
         <dependency>
