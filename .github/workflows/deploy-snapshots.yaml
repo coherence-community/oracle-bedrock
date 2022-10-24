@@ -10,7 +10,7 @@ name: Deploy to Maven Central
 on:
   workflow_run:
     workflows: ["CI Build"]
-    branches: [ main ]
+    branches: [ main, develop-6.x ]
     types:
     - completed
 
