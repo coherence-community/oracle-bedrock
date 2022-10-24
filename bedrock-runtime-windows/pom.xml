@@ -17,7 +17,10 @@
     </description>
 
     <properties>
+        <javassist.version>3.25.0-GA</javassist.version>
         <javax.xml.bind.version>2.3.1</javax.xml.bind.version>
+        <javax.xml.impl.version>2.3.7</javax.xml.impl.version>
+        <javax.xml.core.version>2.3.0.1</javax.xml.core.version>
         <javax.xml.ws.version>2.3.1</javax.xml.ws.version>
     </properties>
 
@@ -37,6 +40,22 @@
           <groupId>javax.xml.ws</groupId>
           <artifactId>jaxws-api</artifactId>
           <version>${javax.xml.ws.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.sun.xml.bind</groupId>
+            <artifactId>jaxb-core</artifactId>
+            <version>${javax.xml.core.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.xml.bind</groupId>
+            <artifactId>jaxb-impl</artifactId>
+            <version>${javax.xml.impl.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.javassist</groupId>
+            <artifactId>javassist</artifactId>
+            <version>${javassist.version}</version>
         </dependency>
 
         <dependency>

@@ -3,10 +3,10 @@
 # http://oss.oracle.com/licenses/upl.
 
 # ---------------------------------------------------------------------------
-# Coherence CE GitHub Actions CI build.
+# Coherence CE GitHub Actions CI build on Windows.
 # ---------------------------------------------------------------------------
 
-name: CI Build
+name: CI Build (Win)
 
 on:
   workflow_dispatch:
