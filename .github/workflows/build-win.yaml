@@ -1,0 +1,53 @@
+# Copyright 2020 Oracle Corporation and/or its affiliates.  All rights reserved.
+# Licensed under the Universal Permissive License v 1.0 as shown at
+# http://oss.oracle.com/licenses/upl.
+
+# ---------------------------------------------------------------------------
+# Coherence CE GitHub Actions CI build.
+# ---------------------------------------------------------------------------
+
+name: CI Build
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+    - '*'
+  pull_request:
+    branches:
+    - '*'
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        module:
+          - bedrock-core
+          - bedrock-runtime
+          - bedrock-runtime-windows-tests
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Set up JDK
+      uses: actions/setup-java@v1
+      with:
+        java-version: '11'
+
+    - name: Cache Maven packages
+      uses: actions/cache@v1
+      with:
+        path: ~/.m2
+        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+        restore-keys: ${{ runner.os }}-m2-
+
+    - name: Build
+      shell: bash
+      run: |
+        export DEV_ROOT=$(pwd)
+        mvn -U --batch-mode -e clean install -DskipTests -Pcoherence-ce
+        mvn --batch-mode -e -nsu verify -pl ${{ matrix.module }} -Pcoherence-ce -Dgithub.build=true

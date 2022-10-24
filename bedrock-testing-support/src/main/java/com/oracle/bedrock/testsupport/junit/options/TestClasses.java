@@ -65,20 +65,20 @@ public abstract class TestClasses implements Option.Collectable, Option, Seriali
      * The {@link Set} of {@link TestMatcher} to determine the tests
      * to include in a test run.
      */
-    private Set<TestMatcher> includePatterns = new HashSet<>();
+    private final Set<TestMatcher> includePatterns = new HashSet<>();
 
     /**
      * The {@link Set} of {@link TestMatcher} to determine the tests
      * to exclude from a test run.
      */
-    private Set<TestMatcher> excludePatterns = new HashSet<>();
+    private final Set<TestMatcher> excludePatterns = new HashSet<>();
 
     /**
      * The {@link Predicate} to use to determine whether a given
      * {@link Class} is a valid JUnit test class and should be
      * included in the test run.
      */
-    private Predicate<Class<?>> testClassPredicate = new TestClassPredicate();
+    private final Predicate<Class<?>> testClassPredicate = new TestClassPredicate();
 
 
     /**
@@ -353,8 +353,8 @@ public abstract class TestClasses implements Option.Collectable, Option, Seriali
 
                                     if (Files.isRegularFile(path) && ClassPath.isResourceAnArchive(fileName))
                                     {
-                                        testClasses.addAll(walkFileSystem(FileSystems.newFileSystem(path, null),
-                                                                          predicate));
+                                    FileSystem fileSystem = FileSystems.newFileSystem(path, (ClassLoader) null);
+                                    testClasses.addAll(walkFileSystem(fileSystem, predicate));
                                     }
                                 }
                             }
@@ -377,7 +377,7 @@ public abstract class TestClasses implements Option.Collectable, Option, Seriali
          * Walk the specified {@link FileSystem} and return all of the {@link Class}es that
          * match the specified {@link Predicate}.
          *
-         * @param fileSystem  the {@lin FileSystem} to search for matching {@link Class} files
+         * @param fileSystem  the {@link FileSystem} to search for matching {@link Class} files
          * @param predicate   the {@link Predicate} to use to match {@link Class} files
          *
          * @return  the {@link Set} of {@link Class}es from the {@link FileSystem} that match the {@link Predicate}
