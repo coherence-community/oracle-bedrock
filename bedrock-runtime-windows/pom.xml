@@ -17,7 +17,10 @@
     </description>
 
     <properties>
+        <javassist.version>3.25.0-GA</javassist.version>
         <javax.xml.bind.version>2.3.1</javax.xml.bind.version>
+        <javax.xml.impl.version>2.3.7</javax.xml.impl.version>
+        <javax.xml.core.version>2.3.0.1</javax.xml.core.version>
         <javax.xml.ws.version>2.3.1</javax.xml.ws.version>
     </properties>
 
@@ -37,6 +40,22 @@
           <groupId>javax.xml.ws</groupId>
           <artifactId>jaxws-api</artifactId>
           <version>${javax.xml.ws.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.sun.xml.bind</groupId>
+            <artifactId>jaxb-core</artifactId>
+            <version>${javax.xml.core.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.xml.bind</groupId>
+            <artifactId>jaxb-impl</artifactId>
+            <version>${javax.xml.impl.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.javassist</groupId>
+            <artifactId>javassist</artifactId>
+            <version>${javassist.version}</version>
         </dependency>
 
         <dependency>
@@ -64,38 +83,26 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>org.jvnet.jaxb2.maven2</groupId>
-                <artifactId>maven-jaxb2-plugin</artifactId>
-                <version>0.14.0</version>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>jaxb2-maven-plugin</artifactId>
+                <version>2.5.0</version>
                 <executions>
                     <execution>
+                        <id>xjc</id>
                         <goals>
-                            <goal>generate</goal>
+                            <goal>xjc</goal>
                         </goals>
                         <configuration>
-                            <schemaDirectory>src/main/resources/xsd</schemaDirectory>
-                            <bindingDirectory>src/main/resources</bindingDirectory>
-                            <generateDirectory>${project.build.directory}/generated-sources</generateDirectory>
+                            <outputDirectory>${project.build.directory}/generated-sources</outputDirectory>
+                            <sources>
+                                <source>src/main/resources/xsd</source>
+                            </sources>
+                            <xjbSources>
+                                <xjbSource>src/main/resources/bindings.xjb</xjbSource>
+                            </xjbSources>
                         </configuration>
                     </execution>
                 </executions>
-                <dependencies>
-                    <dependency>
-                        <groupId>com.sun.xml.bind</groupId>
-                        <artifactId>jaxb-impl</artifactId>
-                        <version>2.3.0</version>
-                    </dependency>
-                    <dependency>
-                        <groupId>com.sun.xml.bind</groupId>
-                        <artifactId>jaxb-xjc</artifactId>
-                        <version>2.3.0</version>
-                    </dependency>
-                    <dependency>
-                        <groupId>com.sun.xml.bind</groupId>
-                        <artifactId>jaxb-core</artifactId>
-                        <version>2.3.0</version>
-                    </dependency>
-                </dependencies>
             </plugin>
 
             <!-- exclude the generated sources from javadoc -->
