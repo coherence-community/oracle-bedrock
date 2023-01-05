@@ -153,6 +153,19 @@ public class DeferredMatch<T> implements Deferred<Boolean>
         {
             throw e;
         }
+        catch (RuntimeException e)
+            {
+            if (matcher instanceof ThrowableMatcher)
+                {
+                ThrowableMatcher throwableMatcher = (ThrowableMatcher) matcher;
+
+                return throwableMatcher.getMatcher().matches(e);
+                }
+            else
+                {
+                throw e;
+                }
+            }
         catch (Exception e)
         {
             if (matcher instanceof ThrowableMatcher)
