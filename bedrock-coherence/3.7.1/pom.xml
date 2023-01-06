@@ -4,7 +4,7 @@
     <parent>
         <groupId>com.oracle.bedrock</groupId>
         <artifactId>bedrock-coherence</artifactId>
-        <version>6.0.3</version>
+        <version>6.0.4-SNAPSHOT</version>
     </parent>
 
     <groupId>com.oracle.bedrock.coherence</groupId>
@@ -41,8 +41,4 @@
             </properties>
         </profile>
     </profiles>
-
-  <scm>
-    <tag>project-6.0.3</tag>
-  </scm>
 </project>
