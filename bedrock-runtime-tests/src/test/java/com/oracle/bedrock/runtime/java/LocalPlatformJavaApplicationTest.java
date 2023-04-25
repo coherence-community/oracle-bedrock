@@ -48,7 +48,6 @@ import com.oracle.bedrock.runtime.java.options.HotSpot;
 import com.oracle.bedrock.runtime.java.options.IPv4Preferred;
 import com.oracle.bedrock.runtime.java.options.JavaHome;
 import com.oracle.bedrock.runtime.java.options.SystemProperty;
-import com.oracle.bedrock.runtime.java.profiles.CommercialFeatures;
 import com.oracle.bedrock.runtime.java.profiles.RemoteDebugging;
 import com.oracle.bedrock.runtime.options.Argument;
 import com.oracle.bedrock.runtime.options.Console;
@@ -57,7 +56,6 @@ import com.oracle.bedrock.runtime.options.Executable;
 import com.oracle.bedrock.runtime.options.Orphanable;
 import com.oracle.bedrock.runtime.options.PlatformSeparators;
 import com.oracle.bedrock.runtime.options.WorkingDirectory;
-import com.oracle.bedrock.testsupport.junit.CheckJDK;
 import com.oracle.bedrock.util.Capture;
 import org.junit.Assume;
 import org.junit.ClassRule;
@@ -85,7 +83,7 @@ import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.CoreMatchers.startsWith;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 /**
  * Functional Tests for {@link LocalJavaApplicationLauncher}s.
@@ -190,6 +188,7 @@ public class LocalPlatformJavaApplicationTest extends AbstractJavaApplicationTes
      * {@link RemoteDebugging.Behavior#ATTACH_TO_DEBUGGER}
      * and assert the process connects back to the debugger
      */
+    @SuppressWarnings("unused")
     @Ignore("This test can cause JVMs to crash on various platforms.  Disabled for now until there is a fix.")
     @Test
     public void shouldEnableRemoteDebugAndConnectBackToDebugger() throws Exception
@@ -269,10 +268,8 @@ public class LocalPlatformJavaApplicationTest extends AbstractJavaApplicationTes
      * Ensure that we can connect a debugger to the specified {@link JavaApplication}.
      *
      * @param application  the {@link JavaApplication}
-     *
-     * @throws Exception
      */
-    protected void assertCanConnectDebuggerToApplication(JavaApplication application) throws Exception
+    protected void assertCanConnectDebuggerToApplication(JavaApplication application)
     {
         InetSocketAddress socket =
             application.getOptions().getInstancesOf(RemoteDebugging.Agent.class).iterator().next().getSocketAddress();
@@ -303,10 +300,8 @@ public class LocalPlatformJavaApplicationTest extends AbstractJavaApplicationTes
      * Determine if Java Debugging is available by attempting to launch the Java Debugger.
      *
      * @return <code>true</code> if "jdb" is available, <code>false</code> otherwise
-     *
-     * @throws Exception
      */
-    protected boolean hasJDB() throws Exception
+    protected boolean hasJDB()
     {
         CapturingApplicationConsole console = new CapturingApplicationConsole();
 
@@ -334,7 +329,7 @@ public class LocalPlatformJavaApplicationTest extends AbstractJavaApplicationTes
 
     /**
      * Should run the {@link JavaApplication} with remote debug disabled.
-     *
+     * <p/>
      * NOTE: This test is ignored when running in an IDE in debug mode
      * as the {@link JavaVirtualMachine} will pick up the debug settings
      * and pass them on to the process causing the test to fail
@@ -384,7 +379,7 @@ public class LocalPlatformJavaApplicationTest extends AbstractJavaApplicationTes
 
             server.addListener(listener);
 
-            try (JavaApplication parentApplication = getPlatform().launch(JavaApplication.class,
+            try (JavaApplication ignored = getPlatform().launch(JavaApplication.class,
                                                                           ClassName.of(ParentApplication.class),
                                                                           Orphanable.disabled(),    // the parent can't be orphaned
                                                                           SystemProperty.of("server.address",
@@ -416,6 +411,7 @@ public class LocalPlatformJavaApplicationTest extends AbstractJavaApplicationTes
         }
         catch (IOException e)
         {
+        // ignored
         }
     }
 
@@ -437,7 +433,7 @@ public class LocalPlatformJavaApplicationTest extends AbstractJavaApplicationTes
 
             server.addListener(listener);
 
-            try (JavaApplication parentApplication = getPlatform().launch(JavaApplication.class,
+            try (JavaApplication ignored = getPlatform().launch(JavaApplication.class,
                                                                           ClassName.of(ParentApplication.class),
                                                                           Orphanable.disabled(),
                                                                           SystemProperty.of("server.address",
@@ -459,6 +455,7 @@ public class LocalPlatformJavaApplicationTest extends AbstractJavaApplicationTes
         }
         catch (IOException e)
         {
+        // ignored
         }
     }
 
@@ -534,7 +531,8 @@ public class LocalPlatformJavaApplicationTest extends AbstractJavaApplicationTes
     @Test
     public void shouldSetHeapSize()
     {
-        try (JavaApplication application = getPlatform().launch(JavaApplication.class,
+        //noinspection EmptyTryBlock
+        try (JavaApplication ignored = getPlatform().launch(JavaApplication.class,
                                                                 ClassName.of(SleepingApplication.class),
                                                                 IPv4Preferred.yes(),
                                                                 DisplayName.of("sleeping"),
@@ -542,6 +540,7 @@ public class LocalPlatformJavaApplicationTest extends AbstractJavaApplicationTes
                                                                 HeapSize.initial(256, HeapSize.Units.MB),
                                                                 HeapSize.maximum(1, HeapSize.Units.GB)))
         {
+        // empty
         }
     }
 
@@ -651,7 +650,7 @@ public class LocalPlatformJavaApplicationTest extends AbstractJavaApplicationTes
         String appNameSanitized  = PlatformSeparators.autoDetect().asSanitizedFileName(appName);
         File   expectedDirectory = new File(folder, appNameSanitized);
 
-        expectedDirectory.mkdirs();
+        assertThat(expectedDirectory.mkdirs(), is(true));
 
         try (JavaApplication application = getPlatform().launch(JavaApplication.class,
                                                                 ClassName.of(SleepingApplication.class),
@@ -716,12 +715,12 @@ public class LocalPlatformJavaApplicationTest extends AbstractJavaApplicationTes
         /**
          * Was the {@link RemoteChannel} open?
          */
-        private AtomicBoolean isOpened;
+        private final AtomicBoolean isOpened;
 
         /**
          * Was the {@link RemoteChannel} closed?
          */
-        private AtomicBoolean isClosed;
+        private final AtomicBoolean isClosed;
 
 
         /**
