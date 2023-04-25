@@ -74,4 +74,117 @@ public class HeapSizeTest
         assertThat(heapSize.getInitialSizeAs(HeapSize.Units.KB), is(1048576L));
         assertThat(heapSize.getMaximumSizeAs(HeapSize.Units.KB), is(1048576L));
     }
+
+    /**
+     * Ensure that {@link HeapSize}s are composed when provided to {@link OptionsByType}.
+     */
+    @Test
+    public void shouldComposeInitialHeapSizesWhenSecondHeapSizeIsOverride()
+    {
+        OptionsByType optionsByType = OptionsByType.of(HeapSize.initial(1, HeapSize.Units.GB));
+        optionsByType.add(HeapSize.initial(128, HeapSize.Units.MB, true));
+
+        HeapSize heapSize = optionsByType.get(HeapSize.class);
+
+        assertThat(heapSize.getInitialSizeAs(HeapSize.Units.MB), is(128L));
+        assertThat(heapSize.getMaximumSizeAs(HeapSize.Units.MB), is(0L));
+    }
+
+
+    /**
+     * Ensure that {@link HeapSize}s are composed when provided to {@link OptionsByType}.
+     */
+    @Test
+    public void shouldComposeInitialHeapSizesWhenMultipleHeapSizeHaveOverride()
+    {
+        OptionsByType optionsByType = OptionsByType.of(HeapSize.initial(1, HeapSize.Units.GB));
+
+        HeapSize heapSize = optionsByType.get(HeapSize.class);
+        assertThat(heapSize.getInitialSizeAs(HeapSize.Units.GB), is(1L));
+        assertThat(heapSize.getMaximumSizeAs(HeapSize.Units.MB), is(0L));
+
+        optionsByType.add(HeapSize.initial(3, HeapSize.Units.MB));
+        heapSize = optionsByType.get(HeapSize.class);
+        assertThat(heapSize.getInitialSizeAs(HeapSize.Units.GB), is(1L));
+        assertThat(heapSize.getMaximumSizeAs(HeapSize.Units.MB), is(0L));
+
+        optionsByType.add(HeapSize.initial(3, HeapSize.Units.MB, true));
+        heapSize = optionsByType.get(HeapSize.class);
+        assertThat(heapSize.getInitialSizeAs(HeapSize.Units.MB), is(3L));
+        assertThat(heapSize.getMaximumSizeAs(HeapSize.Units.MB), is(0L));
+
+        optionsByType.add(HeapSize.initial(10, HeapSize.Units.MB, false));
+        heapSize = optionsByType.get(HeapSize.class);
+        assertThat(heapSize.getInitialSizeAs(HeapSize.Units.MB), is(3L));
+        assertThat(heapSize.getMaximumSizeAs(HeapSize.Units.MB), is(0L));
+
+        optionsByType.add(HeapSize.initial(1, HeapSize.Units.MB, true));
+        heapSize = optionsByType.get(HeapSize.class);
+        assertThat(heapSize.getInitialSizeAs(HeapSize.Units.MB), is(1L));
+        assertThat(heapSize.getMaximumSizeAs(HeapSize.Units.MB), is(0L));
+    }
+
+    /**
+     * Ensure that {@link HeapSize}s are composed when provided to {@link OptionsByType}.
+     */
+    @Test
+    public void shouldComposeMaximumHeapSizesWhenSecondHeapSizeIsOverride()
+    {
+        OptionsByType optionsByType = OptionsByType.of(HeapSize.maximum(1, HeapSize.Units.GB));
+        optionsByType.add(HeapSize.maximum(128, HeapSize.Units.MB, true));
+
+        HeapSize heapSize = optionsByType.get(HeapSize.class);
+
+        assertThat(heapSize.getInitialSizeAs(HeapSize.Units.MB), is(0L));
+        assertThat(heapSize.getMaximumSizeAs(HeapSize.Units.MB), is(128L));
+    }
+
+    /**
+     * Ensure that {@link HeapSize}s are composed when provided to {@link OptionsByType}.
+     */
+    @Test
+    public void shouldComposeMaximumHeapSizesWhenMultipleHeapSizeHaveOverride()
+    {
+        OptionsByType optionsByType = OptionsByType.of(HeapSize.maximum(1, HeapSize.Units.GB));
+
+        HeapSize heapSize = optionsByType.get(HeapSize.class);
+        assertThat(heapSize.getInitialSizeAs(HeapSize.Units.MB), is(0L));
+        assertThat(heapSize.getMaximumSizeAs(HeapSize.Units.GB), is(1L));
+
+        optionsByType.add(HeapSize.maximum(3, HeapSize.Units.MB));
+        heapSize = optionsByType.get(HeapSize.class);
+        assertThat(heapSize.getInitialSizeAs(HeapSize.Units.MB), is(0L));
+        assertThat(heapSize.getMaximumSizeAs(HeapSize.Units.GB), is(1L));
+
+        optionsByType.add(HeapSize.maximum(3, HeapSize.Units.MB, true));
+        heapSize = optionsByType.get(HeapSize.class);
+        assertThat(heapSize.getInitialSizeAs(HeapSize.Units.MB), is(0L));
+        assertThat(heapSize.getMaximumSizeAs(HeapSize.Units.MB), is(3L));
+
+        optionsByType.add(HeapSize.maximum(10, HeapSize.Units.MB, false));
+        heapSize = optionsByType.get(HeapSize.class);
+        assertThat(heapSize.getInitialSizeAs(HeapSize.Units.MB), is(0L));
+        assertThat(heapSize.getMaximumSizeAs(HeapSize.Units.MB), is(3L));
+
+        optionsByType.add(HeapSize.maximum(1, HeapSize.Units.MB, true));
+        heapSize = optionsByType.get(HeapSize.class);
+        assertThat(heapSize.getInitialSizeAs(HeapSize.Units.MB), is(0L));
+        assertThat(heapSize.getMaximumSizeAs(HeapSize.Units.MB), is(1L));
+    }
+
+    /**
+     * Ensure that {@link HeapSize}s are composed when provided to {@link OptionsByType}.
+     */
+    @Test
+    public void shouldComposeHeapSizesWhenSecondHeapSizeIsOverride()
+    {
+        OptionsByType optionsByType = OptionsByType.of(HeapSize.of(1, HeapSize.Units.GB, 5, HeapSize.Units.GB));
+        optionsByType.add(HeapSize.of(128, HeapSize.Units.MB, 256, HeapSize.Units.MB, true));
+
+        HeapSize heapSize = optionsByType.get(HeapSize.class);
+
+        assertThat(heapSize.getInitialSizeAs(HeapSize.Units.MB), is(128L));
+        assertThat(heapSize.getMaximumSizeAs(HeapSize.Units.MB), is(256L));
+    }
+
 }

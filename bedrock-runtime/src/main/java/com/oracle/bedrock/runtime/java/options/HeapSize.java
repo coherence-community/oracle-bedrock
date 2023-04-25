@@ -62,6 +62,19 @@ public class HeapSize implements ComposableOption<HeapSize>, JvmOption
      */
     private Units maximumUnits;
 
+    /**
+     * A flag that when {@code true} indicates this {@link HeapSize}
+     * option should override any other initial {@link HeapSize} options
+     * when being added to an {@link OptionsByType}.
+     */
+    private boolean overrideInitial;
+
+    /**
+     * A flag that when {@code true} indicates this {@link HeapSize}
+     * option should override any other maximum {@link HeapSize} options
+     * when being added to an {@link OptionsByType}.
+     */
+    private boolean overrideMaximum;
 
     /**
      * Privately constructs a default {@link HeapSize}.
@@ -82,10 +95,12 @@ public class HeapSize implements ComposableOption<HeapSize>, JvmOption
      */
     private HeapSize(HeapSize heapSize)
     {
-        this.initial      = heapSize.initial;
-        this.initialUnits = heapSize.initialUnits;
-        this.maximum      = heapSize.maximum;
-        this.maximumUnits = heapSize.maximumUnits;
+        this.initial         = heapSize.initial;
+        this.initialUnits    = heapSize.initialUnits;
+        this.maximum         = heapSize.maximum;
+        this.maximumUnits    = heapSize.maximumUnits;
+        this.overrideInitial = heapSize.overrideInitial;
+        this.overrideMaximum = heapSize.overrideMaximum;
     }
 
 
@@ -162,10 +177,29 @@ public class HeapSize implements ComposableOption<HeapSize>, JvmOption
     public static HeapSize initial(int   amount,
                                    Units units)
     {
+    return initial(amount, units, false);
+    }
+
+
+    /**
+     * Obtains a {@link HeapSize} with the specified initial amount
+     * (and a default maximum size)
+     *
+     * @param amount    the initial {@link HeapSize}
+     * @param units     the units of the initial {@link HeapSize}
+     * @param override  this {@link HeapSize} overrides any other initial {@link HeapSize} options
+     *
+     * @return the {@link HeapSize}
+     */
+    public static HeapSize initial(int     amount,
+                                   Units   units,
+                                   boolean override)
+    {
         HeapSize heapSize = new HeapSize();
 
-        heapSize.initial      = amount;
-        heapSize.initialUnits = units;
+        heapSize.initial         = amount;
+        heapSize.initialUnits    = units;
+        heapSize.overrideInitial = override;
 
         return heapSize;
     }
@@ -183,14 +217,31 @@ public class HeapSize implements ComposableOption<HeapSize>, JvmOption
     public static HeapSize maximum(int   amount,
                                    Units units)
     {
+    return maximum(amount, units, false);
+    }
+
+    /**
+     * Obtains a {@link HeapSize} with the specified maximum amount
+     * (and a default initial size).
+     *
+     * @param amount    the maximum {@link HeapSize}
+     * @param units     the units of the maximum {@link HeapSize}
+     * @param override  this {@link HeapSize} overrides any other maximum {@link HeapSize} options
+     *
+     * @return the {@link HeapSize}
+     */
+    public static HeapSize maximum(int     amount,
+                                   Units   units,
+                                   boolean override)
+    {
         HeapSize heapSize = new HeapSize();
 
-        heapSize.maximum      = amount;
-        heapSize.maximumUnits = units;
+        heapSize.maximum         = amount;
+        heapSize.maximumUnits    = units;
+        heapSize.overrideMaximum = override;
 
         return heapSize;
     }
-
 
     /**
      * Obtains a {@link HeapSize} with the values.
@@ -207,13 +258,35 @@ public class HeapSize implements ComposableOption<HeapSize>, JvmOption
                               int   maximum,
                               Units maximumUnits)
     {
+    return of(initial, initialUnits, maximum, maximumUnits, false);
+    }
+
+    /**
+     * Obtains a {@link HeapSize} with the values.
+     *
+     * @param initial       the initial {@link HeapSize}
+     * @param initialUnits  the units of the initial {@link HeapSize}
+     * @param maximum       the maximum {@link HeapSize}
+     * @param maximumUnits  the units of the maximum {@link HeapSize}
+     * @param override      this {@link HeapSize} overrides any other {@link HeapSize} options
+     *
+     * @return the {@link HeapSize}
+     */
+    public static HeapSize of(int     initial,
+                              Units   initialUnits,
+                              int     maximum,
+                              Units   maximumUnits,
+                              boolean override)
+    {
         HeapSize heapSize = new HeapSize();
 
-        heapSize.initial      = initial;
-        heapSize.initialUnits = initialUnits;
+        heapSize.initial         = initial;
+        heapSize.initialUnits    = initialUnits;
+        heapSize.overrideInitial = override;
 
-        heapSize.maximum      = maximum;
-        heapSize.maximumUnits = maximumUnits;
+        heapSize.maximum         = maximum;
+        heapSize.maximumUnits    = maximumUnits;
+        heapSize.overrideMaximum = override;
 
         return heapSize;
     }
@@ -272,29 +345,57 @@ public class HeapSize implements ComposableOption<HeapSize>, JvmOption
         long     initial      = this.initial <= 0 ? 0 : this.getInitialSizeAs(Units.KB);
         long     otherInitial = other.initial <= 0 ? 0 : other.getInitialSizeAs(Units.KB);
 
-        if (initial > otherInitial)
+        if (other.overrideInitial)
         {
-            result.initial      = this.initial;
-            result.initialUnits = this.initialUnits;
+            result.initial         = other.initial;
+            result.initialUnits    = other.initialUnits;
+            result.overrideInitial = true;
+        }
+        else if (this.overrideInitial)
+        {
+            result.initial         = this.initial;
+            result.initialUnits    = this.initialUnits;
+            result.overrideInitial = true;
+        }
+        else if (initial > otherInitial)
+        {
+            result.initial         = this.initial;
+            result.initialUnits    = this.initialUnits;
+            result.overrideInitial = false;
         }
         else
         {
-            result.initial      = other.initial;
-            result.initialUnits = other.initialUnits;
+            result.initial         = other.initial;
+            result.initialUnits    = other.initialUnits;
+            result.overrideInitial = false;
         }
 
         long maximum      = this.maximum <= 0 ? 0 : this.getMaximumSizeAs(Units.KB);
         long otherMaximum = other.maximum <= 0 ? 0 : other.getMaximumSizeAs(Units.KB);
 
-        if (maximum > otherMaximum)
+        if (other.overrideMaximum)
         {
-            result.maximum      = this.maximum;
-            result.maximumUnits = this.maximumUnits;
+            result.maximum         = other.maximum;
+            result.maximumUnits    = other.maximumUnits;
+            result.overrideMaximum = true;
+        }
+        else if (this.overrideMaximum)
+        {
+            result.maximum         = this.maximum;
+            result.maximumUnits    = this.maximumUnits;
+            result.overrideMaximum = true;
+        }
+        else if (maximum > otherMaximum)
+        {
+            result.maximum         = this.maximum;
+            result.maximumUnits    = this.maximumUnits;
+            result.overrideMaximum = false;
         }
         else
         {
-            result.maximum      = other.maximum;
-            result.maximumUnits = other.maximumUnits;
+            result.maximum         = other.maximum;
+            result.maximumUnits    = other.maximumUnits;
+            result.overrideMaximum = false;
         }
 
         return result;
