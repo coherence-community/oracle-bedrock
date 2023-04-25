@@ -25,7 +25,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        jvmVersion: ['17', '19']
+        jvmVersion: ['17', '20']
         module:
           - bedrock-coherence/21.06/coherence-21.06
           - bedrock-coherence/21.06/coherence-21.06-testing-support
@@ -53,7 +53,7 @@ jobs:
     - name: Set up JDK
       uses: actions/setup-java@v3
       with:
-        distribution: 'zulu'
+        distribution: 'oracle'
         java-version: ${{ matrix.jvmVersion }}
 
     - name: Cache Maven packages
