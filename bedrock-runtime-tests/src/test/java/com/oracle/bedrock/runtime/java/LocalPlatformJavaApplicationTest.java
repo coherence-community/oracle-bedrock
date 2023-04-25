@@ -642,41 +642,6 @@ public class LocalPlatformJavaApplicationTest extends AbstractJavaApplicationTes
     }
 
 
-    /**
-     * Should run a {@link JavaApplication} with commercial features.
-     *
-     * NOTE: This test is ignored when running in a non-Oracle JDK or in an
-     * IDE with commercial features enabled.
-     */
-    @Test
-    public void shouldUnlockCommercialFeatures() throws Exception
-    {
-        CheckJDK.assumeOracleJDK();
-        Assume.assumeThat(CommercialFeatures.autoDetect().isEnabled(), is(false));
-
-        try (JavaApplication app = getPlatform().launch(JavaApplication.class,
-                                                        ClassName.of(SleepingApplication.class),
-                                                        IPv4Preferred.yes(),
-                                                        CommercialFeatures.enabled()))
-        {
-            List<String> args                       = app.invoke(new GetProgramArgs());
-
-            String       commercialFeaturesArgument = null;
-
-            for (String arg : args)
-            {
-                if (arg.startsWith("-XX:+UnlockCommercialFeatures"))
-                {
-                    commercialFeaturesArgument = arg;
-                    break;
-                }
-            }
-
-            assertThat(commercialFeaturesArgument, is(not(nullValue())));
-        }
-    }
-
-
     @Test
     public void shouldSetWorkingDirectory() throws Exception
     {
