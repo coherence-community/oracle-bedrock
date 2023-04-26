@@ -232,7 +232,7 @@ public class Maven implements Profile, ComposableOption<Maven>
     {
         /*
          * Aether's components implement org.eclipse.aether.spi.locator.Service to ease manual wiring and using the
-         * prepopulated DefaultServiceLocator, we only need to register the repository connector and transporter
+         * pre-populated DefaultServiceLocator, we only need to register the repository connector and transporter
          * factories.
          */
         DefaultServiceLocator locator = MavenRepositorySystemUtils.newServiceLocator();
