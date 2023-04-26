@@ -1,11 +1,13 @@
 # ---------------------------------------------------------------------------
-# Bedrock GitHub Actions CI build on Windows.
+# Bedrock dependencies check.
 # ---------------------------------------------------------------------------
 
-name: CI Build (Win)
+name: Dependencies Check
 
 on:
   workflow_dispatch:
+  schedule:
+    - cron: '0 0 * * *'
   push:
     branches:
     - '*'
@@ -15,15 +17,7 @@ on:
 
 jobs:
   build:
-    runs-on: windows-latest
-
-    strategy:
-      fail-fast: false
-      matrix:
-        module:
-          - bedrock-core
-          - bedrock-runtime
-          - bedrock-runtime-windows-tests
+    runs-on: ubuntu-latest
 
     steps:
     - name: Checkout
@@ -42,9 +36,8 @@ jobs:
         key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
         restore-keys: ${{ runner.os }}-m2-
 
-    - name: Build
+    - name: Check
       shell: bash
       run: |
-        export DEV_ROOT=$(pwd)
-        mvn -U --batch-mode -e clean install -DskipTests -Pcoherence-ce
-        mvn --batch-mode -e -nsu verify -pl ${{ matrix.module }} -Pcoherence-ce -Dgithub.build=true
+        export MAVEN_ARGS="-P coherence-ce"
+        sh ./etc/dependency-check.sh
