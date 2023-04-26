@@ -55,4 +55,4 @@ jobs:
         git checkout "${GIT_COMMIT}"
         git config --local user.name "${GIT_USER}"
         git config --local user.email "${GIT_EMAIL}"
-        mvn -s ./.mvn/settings.xml -B clean deploy -DskipTests -Pcoherence-ce -Dgithub.build=true
+        sh etc/deploy-snapshots.sh
