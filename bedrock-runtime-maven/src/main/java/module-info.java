@@ -5,15 +5,15 @@ open module com.oracle.bedrock.maven {
 
     requires java.logging;
 
-    requires aether.api;
-    requires aether.connector.basic;
-    requires aether.impl;
-    requires aether.spi;
-    requires aether.transport.file;
-    requires aether.transport.http;
-    requires aether.util;
+    requires org.apache.maven.resolver;
 
-    requires maven.aether.provider;
     requires maven.settings;
     requires maven.settings.builder;
+    requires org.apache.maven.resolver.connector.basic;
+    requires org.apache.maven.resolver.impl;
+    requires org.apache.maven.resolver.spi;
+    requires org.apache.maven.resolver.transport.file;
+    requires org.apache.maven.resolver.transport.http;
+    requires org.apache.maven.resolver.util;
+requires maven.resolver.provider;
 }

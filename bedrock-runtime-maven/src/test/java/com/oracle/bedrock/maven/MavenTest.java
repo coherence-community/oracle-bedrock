@@ -30,18 +30,15 @@ import com.oracle.bedrock.runtime.LocalPlatform;
 import com.oracle.bedrock.runtime.MetaClass;
 import com.oracle.bedrock.runtime.java.ClassPath;
 import com.oracle.bedrock.runtime.java.JavaApplication;
-import org.eclipse.aether.RepositoryException;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.util.List;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertThat;
 
 /**
  * Unit tests for the {@link Maven}.
@@ -60,7 +57,7 @@ public class MavenTest
     public void shouldResolveSingleArtifact()
     {
         LocalPlatform platform      = LocalPlatform.get();
-        MetaClass     metaClass     = new JavaApplication.MetaClass();
+        MetaClass<?>  metaClass     = new JavaApplication.MetaClass();
         OptionsByType optionsByType = OptionsByType.empty();
 
         optionsByType.add(Maven.artifact("org.hamcrest:hamcrest-all:jar:1.3"));
@@ -85,10 +82,10 @@ public class MavenTest
     public void shouldResolveSingleArtifactWithTransitiveDependency()
     {
         LocalPlatform platform      = LocalPlatform.get();
-        MetaClass     metaClass     = new JavaApplication.MetaClass();
+        MetaClass<?>  metaClass     = new JavaApplication.MetaClass();
         OptionsByType optionsByType = OptionsByType.empty();
 
-        optionsByType.add(Maven.artifact("junit:junit:jar:4.12"));
+        optionsByType.add(Maven.artifact("org.hamcrest:hamcrest-core:jar:2.2"));
 
         Maven maven = optionsByType.get(Maven.class);
 
@@ -99,8 +96,8 @@ public class MavenTest
         assertThat(classPath, is(not(nullValue())));
         assertThat(classPath.size(), is(2));
 
-        assertThat(classPath.toString(), containsString("junit-4.12.jar"));
-        assertThat(classPath.toString(), containsString("hamcrest-core-1.3.jar"));
+        assertThat(classPath.toString(), containsString("hamcrest-2.2.jar"));
+        assertThat(classPath.toString(), containsString("hamcrest-core-2.2.jar"));
     }
 
 
@@ -111,10 +108,10 @@ public class MavenTest
     public void shouldIncludeAdditionalClassPaths() throws IOException
     {
         LocalPlatform platform      = LocalPlatform.get();
-        MetaClass     metaClass     = new JavaApplication.MetaClass();
+        MetaClass<?>  metaClass     = new JavaApplication.MetaClass();
         OptionsByType optionsByType = OptionsByType.empty();
 
-        optionsByType.addAll(Maven.artifact("junit:junit:jar:4.12"),
+        optionsByType.addAll(Maven.artifact("org.hamcrest:hamcrest-core:jar:2.2"),
                              Maven.include(ClassPath.ofClass(MavenTest.class)),
                              Maven.include(ClassPath.ofResource("example-resource.txt")));
 
@@ -127,24 +124,10 @@ public class MavenTest
         assertThat(classPath, is(not(nullValue())));
         assertThat(classPath.size(), is(3));
 
-        assertThat(classPath.toString(), containsString("junit-4.12.jar"));
-        assertThat(classPath.toString(), containsString("hamcrest-core-1.3.jar"));
+        assertThat(classPath.toString(), containsString("hamcrest-2.2.jar"));
+        assertThat(classPath.toString(), containsString("hamcrest-core-2.2.jar"));
         assertThat(classPath.toString(), containsString(ClassPath.ofClass(MavenTest.class).toString()));
         assertThat(classPath.toString(), containsString(ClassPath.ofResource("example-resource.txt").toString()));
-    }
-
-
-    /**
-     * Ensure that {@link Maven} can resolve the versions of an artifact.
-     */
-    //@Test
-    public void shouldResolveArtifactVersions() throws RepositoryException
-    {
-        Maven        maven    = Maven.autoDetect();
-
-        List<String> versions = maven.versionsOf("org.eclipse.aether", "aether-util", "[0,)");
-
-        assertThat(versions.size(), is(greaterThan(5)));
     }
 
 
@@ -156,12 +139,12 @@ public class MavenTest
     public void shouldOverrideArtifacts() throws IOException
     {
         LocalPlatform platform      = LocalPlatform.get();
-        MetaClass     metaClass     = new JavaApplication.MetaClass();
+        MetaClass<?>  metaClass     = new JavaApplication.MetaClass();
         OptionsByType optionsByType = OptionsByType.empty();
 
-        optionsByType.addAll(Maven.artifact("junit:junit:jar:4.10"),
-                             Maven.artifact("junit:junit:jar:4.11"),
-                             Maven.artifact("junit:junit:jar:4.12"));
+        optionsByType.addAll(Maven.artifact("org.hamcrest:hamcrest-core:jar:1.3"),
+                             Maven.artifact("org.hamcrest:hamcrest-core:jar:2.1"),
+                             Maven.artifact("org.hamcrest:hamcrest-core:jar:2.2"));
 
         Maven maven = optionsByType.get(Maven.class);
 
@@ -172,10 +155,10 @@ public class MavenTest
         assertThat(classPath, is(not(nullValue())));
         assertThat(classPath.size(), is(2));  // includes transitive dependencies
 
-        assertThat(classPath.toString(), containsString("junit-4.12.jar"));
-        assertThat(classPath.toString(), containsString("hamcrest-core-1.3.jar"));
+        assertThat(classPath.toString(), containsString("hamcrest-2.2.jar"));
+        assertThat(classPath.toString(), containsString("hamcrest-core-2.2.jar"));
 
-        assertThat(classPath.toString(), not(containsString("junit-4.10.jar")));
-        assertThat(classPath.toString(), not(containsString("junit-4.11.jar")));
+        assertThat(classPath.toString(), not(containsString("hamcrest-core-1.3.jar")));
+        assertThat(classPath.toString(), not(containsString("hamcrest-core-2.1.jar")));
     }
 }
