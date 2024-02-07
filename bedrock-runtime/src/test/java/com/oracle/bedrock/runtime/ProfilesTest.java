@@ -25,7 +25,9 @@
 
 package com.oracle.bedrock.runtime;
 
+import com.oracle.bedrock.Option;
 import com.oracle.bedrock.OptionsByType;
+import org.junit.AfterClass;
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -43,6 +45,12 @@ import static org.hamcrest.MatcherAssert.assertThat;
  */
 public class ProfilesTest
 {
+    @AfterClass
+    public static void cleanup()
+    {
+        System.getProperties().remove("bedrock.profile.example");
+    }
+
     /**
      * Ensure that we can load and instantiate Profiles.
      */
@@ -55,14 +63,58 @@ public class ProfilesTest
         OptionsByType optionsByType = Profiles.getProfiles();
 
         assertThat(optionsByType, is(not(nullValue())));
-        assertThat(optionsByType.asArray().length, is(1));
+        assertThat(optionsByType.asArray().length, is(2));
 
         ExampleProfile profile = optionsByType.get(ExampleProfile.class);
-
         assertThat(profile, is(not(nullValue())));
-
         assertThat(profile.getParameters(), is("hello"));
 
-        System.getProperties().remove("bedrock.profile.example");
+        CustomProfile customProfile = optionsByType.get(CustomProfile.class);
+        assertThat(customProfile, is(not(nullValue())));
     }
+
+    /**
+     * A custom profile which will be loaded via the ServiceLoader.
+     */
+    public static class CustomProfile
+            implements Profile, Option
+        {
+        @Override
+        public void onLaunching(Platform platform, MetaClass metaClass, OptionsByType optionsByType)
+            {
+            }
+
+        @Override
+        public void onLaunched(Platform platform, Application application, OptionsByType optionsByType)
+            {
+            }
+
+        @Override
+        public void onClosing(Platform platform, Application application, OptionsByType optionsByType)
+            {
+            }
+        }
+
+    /**
+     * A custom profile which will be loaded via the ServiceLoader, but is not an Option.
+     */
+    public static class NonOptionCustomProfile
+            implements Profile
+        {
+        @Override
+        public void onLaunching(Platform platform, MetaClass metaClass, OptionsByType optionsByType)
+            {
+            }
+
+        @Override
+        public void onLaunched(Platform platform, Application application, OptionsByType optionsByType)
+            {
+            }
+
+        @Override
+        public void onClosing(Platform platform, Application application, OptionsByType optionsByType)
+            {
+            }
+        }
+
 }

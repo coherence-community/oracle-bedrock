@@ -28,6 +28,8 @@ package com.oracle.bedrock.runtime;
 import com.oracle.bedrock.Option;
 import com.oracle.bedrock.OptionsByType;
 
+import java.util.ServiceLoader;
+
 /**
  * Helpers for {@link Profile}s.
  * <p>
@@ -38,16 +40,17 @@ import com.oracle.bedrock.OptionsByType;
  */
 public class Profiles
 {
+    public static final String  ORACLE_TOOLS_PROFILE = "bedrock.profile.";
+
     /**
      * Auto-detect, instantiate and configure the set of {@link Profile}s.
      *
      * @return an {@link Iterable}
      */
+    @SuppressWarnings("unchecked")
     public static OptionsByType getProfiles()
     {
-        final String  ORACLE_TOOLS_PROFILE = "bedrock.profile.";
-
-        OptionsByType profiles             = OptionsByType.empty();
+        OptionsByType profiles = OptionsByType.empty();
 
         for (String name : System.getProperties().stringPropertyNames())
         {
@@ -60,7 +63,7 @@ public class Profiles
                 String profileValue = System.getProperty(name);
 
                 // when the profile name contains a "." we don't process this system property
-                if (profileName.indexOf(".") < 0)
+                if (!profileName.contains("."))
                 {
                     String profileClassName = System.getProperty(name + ".classname");
                     if (profileClassName == null)
@@ -92,6 +95,15 @@ public class Profiles
                     {
                         // TODO: failed to load the specified profile
                     }
+                }
+            }
+
+            ServiceLoader<Profile> loader = ServiceLoader.load(Profile.class);
+            for (Profile profile : loader)
+            {
+                if (profile instanceof Option)
+                {
+                    profiles.add((Option) profile);
                 }
             }
         }

@@ -20,4 +20,6 @@ open module com.oracle.bedrock.runtime {
     requires java.logging;
     requires java.management;
     requires java.rmi;
+
+    uses com.oracle.bedrock.runtime.Profile;
 }
