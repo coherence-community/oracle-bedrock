@@ -41,3 +41,9 @@ jobs:
       run: |
         export MAVEN_ARGS="-P coherence-ce"
         sh ./etc/dependency-check.sh
+
+    - uses: actions/upload-artifact@v1
+      if: failure()
+      with:
+        name: build-output
+        path: "target/*.*"

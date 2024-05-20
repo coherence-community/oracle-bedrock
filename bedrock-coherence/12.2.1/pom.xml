@@ -12,11 +12,11 @@
 
     <packaging>pom</packaging>
 
-    <name>Bedrock for Coherence 12.2.1 Project</name>
+    <name>Bedrock for Coherence 12.2.1.4 Project</name>
 
     <properties>
         <!-- the version of coherence -->
-        <coherence.version>12.2.1-0-4</coherence.version>
+        <coherence.version>12.2.1-4-21</coherence.version>
         <coherence.groupId>com.oracle.coherence</coherence.groupId>
     </properties>
 

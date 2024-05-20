@@ -117,7 +117,7 @@
         <maven.dependency-check.plugin.version>8.2.1</maven.dependency-check.plugin.version>
 
         <!-- dependency versions -->
-        <maven.resolver.version>1.9.18</maven.resolver.version>
+        <maven.resolver.version>1.9.20</maven.resolver.version>
         <glassfish.el.version>5.0.0-M1</glassfish.el.version>
         <hamcrest.version>2.2</hamcrest.version>
         <jakarta.el.version>5.0.1</jakarta.el.version>
@@ -125,7 +125,7 @@
         <jsch.version>0.1.55</jsch.version>
         <junit.version>4.13.2</junit.version>
         <junit.five.version>5.8.1</junit.five.version>
-        <maven.settings.version>3.9.1</maven.settings.version>
+        <maven.settings.version>3.9.6</maven.settings.version>
         <mockito.version>4.4.0</mockito.version>
         <p4.version>2019.1.1889202</p4.version>
     </properties>
@@ -235,17 +235,6 @@
                 <groupId>jakarta.el</groupId>
                  <artifactId>jakarta.el-api</artifactId>
                 <version>${jakarta.el.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.glassfish</groupId>
-                <artifactId>jakarta.el</artifactId>
-                <version>${glassfish.el.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>jakarta.el</groupId>
-                        <artifactId>jakarta.el-api</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
 
             <dependency>
@@ -497,7 +486,7 @@
                         <skip>${dependency-check.skip}</skip>
                         <skipTestScope>true</skipTestScope>
                         <skipProvidedScope>true</skipProvidedScope>
-                        <failBuildOnAnyVulnerability>false</failBuildOnAnyVulnerability>
+                        <failBuildOnCVSS>0</failBuildOnCVSS>
                         <assemblyAnalyzerEnabled>false</assemblyAnalyzerEnabled>
                         <excludes>
                             <!-- Exclude stuff we do not deploy -->
@@ -509,8 +498,7 @@
                         </formats>
                         <suppressionFiles>
                             <!--suppress UnresolvedMavenProperty -->
-                            <suppressionFile>${top.parent.basedir}/etc/dependency-check-suppression.xml
-                            </suppressionFile>
+                            <suppressionFile>etc/dependency-check-suppression.xml</suppressionFile>
                         </suppressionFiles>
                     </configuration>
                 </plugin>
