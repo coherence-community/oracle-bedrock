@@ -40,6 +40,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
@@ -842,6 +843,26 @@ public class ClassPath implements Iterable<String>, Tabular, Option
         else
         {
             return new ClassPath(file.toString());
+        }
+    }
+
+
+    /**
+     * Obtains a {@link ClassPath} containing only absolute path of the specified File
+     *
+     * @param path the Path to the artifact
+     *
+     * @return a {@link ClassPath} of a file
+     */
+    public static ClassPath ofPath(Path path)
+    {
+        if (path == null)
+        {
+            throw new NullPointerException("Path must not be null");
+        }
+        else
+        {
+            return new ClassPath(path.toString());
         }
     }
 

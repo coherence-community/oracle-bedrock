@@ -35,7 +35,6 @@ import com.oracle.bedrock.runtime.Profile;
 import com.oracle.bedrock.runtime.java.ClassPath;
 import com.oracle.bedrock.runtime.java.JavaApplication;
 import com.oracle.bedrock.runtime.options.PlatformSeparators;
-import org.apache.maven.repository.internal.MavenRepositorySystemUtils;
 import org.apache.maven.settings.Repository;
 import org.apache.maven.settings.Settings;
 import org.apache.maven.settings.building.DefaultSettingsBuilderFactory;
@@ -43,33 +42,35 @@ import org.apache.maven.settings.building.DefaultSettingsBuildingRequest;
 import org.apache.maven.settings.building.SettingsBuilder;
 import org.apache.maven.settings.building.SettingsBuildingException;
 import org.eclipse.aether.DefaultRepositoryCache;
-import org.eclipse.aether.DefaultRepositorySystemSession;
 import org.eclipse.aether.RepositoryException;
 import org.eclipse.aether.RepositorySystem;
 import org.eclipse.aether.RepositorySystemSession;
 import org.eclipse.aether.artifact.Artifact;
 import org.eclipse.aether.artifact.DefaultArtifact;
 import org.eclipse.aether.collection.CollectRequest;
-import org.eclipse.aether.connector.basic.BasicRepositoryConnectorFactory;
 import org.eclipse.aether.graph.Dependency;
 import org.eclipse.aether.graph.DependencyFilter;
-import org.eclipse.aether.impl.DefaultServiceLocator;
 import org.eclipse.aether.repository.LocalRepository;
 import org.eclipse.aether.repository.RemoteRepository;
+import org.eclipse.aether.resolution.ArtifactDescriptorResult;
+import org.eclipse.aether.resolution.ArtifactRequest;
 import org.eclipse.aether.resolution.ArtifactResult;
 import org.eclipse.aether.resolution.DependencyRequest;
 import org.eclipse.aether.resolution.VersionRangeRequest;
 import org.eclipse.aether.resolution.VersionRangeResult;
-import org.eclipse.aether.spi.connector.RepositoryConnectorFactory;
+import org.eclipse.aether.spi.artifact.decorator.ArtifactDecorator;
+import org.eclipse.aether.spi.artifact.decorator.ArtifactDecoratorFactory;
 import org.eclipse.aether.spi.connector.transport.TransporterFactory;
-import org.eclipse.aether.transport.file.FileTransporterFactory;
-import org.eclipse.aether.transport.http.HttpTransporterFactory;
+import org.eclipse.aether.supplier.RepositorySystemSupplier;
+import org.eclipse.aether.supplier.SessionBuilderSupplier;
+import org.eclipse.aether.transport.jdk.JdkTransporterFactory;
 import org.eclipse.aether.util.artifact.JavaScopes;
 import org.eclipse.aether.util.filter.DependencyFilterUtils;
 import org.eclipse.aether.version.Version;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -230,32 +231,44 @@ public class Maven implements Profile, ComposableOption<Maven>
      */
     private RepositorySystem newRepositorySystem()
     {
-        /*
-         * Aether's components implement org.eclipse.aether.spi.locator.Service to ease manual wiring and using the
-         * pre-populated DefaultServiceLocator, we only need to register the repository connector and transporter
-         * factories.
-         */
-        DefaultServiceLocator locator = MavenRepositorySystemUtils.newServiceLocator();
+        return new RepositorySystemSupplier() {
+            @Override
+            protected Map<String, ArtifactDecoratorFactory> createArtifactDecoratorFactories() {
+                Map<String, ArtifactDecoratorFactory> result = super.createArtifactDecoratorFactories();
+                result.put("color", new ArtifactDecoratorFactory() {
+                    @Override
+                    public ArtifactDecorator newInstance(RepositorySystemSession session) {
+                        return new ArtifactDecorator() {
+                            @Override
+                            public Artifact decorateArtifact(ArtifactDescriptorResult artifactDescriptorResult) {
+                                Map<String, String> properties = new HashMap<>(
+                                        artifactDescriptorResult.getArtifact().getProperties());
+                                properties.put("color", "red");
+                                return artifactDescriptorResult.getArtifact().setProperties(properties);
+                            }
+                        };
+                    }
 
-        locator.addService(RepositoryConnectorFactory.class, BasicRepositoryConnectorFactory.class);
-        locator.addService(TransporterFactory.class, FileTransporterFactory.class);
-        locator.addService(TransporterFactory.class, HttpTransporterFactory.class);
+                    @Override
+                    public float getPriority() {
+                        return 0;
+                    }
+                });
+                return result;
+            }
 
-        locator.setErrorHandler(new DefaultServiceLocator.ErrorHandler()
-                                {
-                                    @Override
-                                    public void serviceCreationFailed(Class<?>  type,
-                                                                      Class<?>  impl,
-                                                                      Throwable exception)
-                                    {
-                                        exception.printStackTrace();
-                                    }
-                                });
-
-        return locator.getService(RepositorySystem.class);
+            @Override
+            protected Map<String, TransporterFactory> createTransporterFactories() {
+                Map<String, TransporterFactory> result = super.createTransporterFactories();
+                result.put(
+                        JdkTransporterFactory.NAME,
+                        new JdkTransporterFactory(getChecksumExtractor(), getPathProcessor()));
+                return result;
+            }
+        }.get();
     }
 
-
+    @SuppressWarnings("deprecation")
     @Override
     public void onLaunching(Platform      platform,
                             MetaClass     metaClass,
@@ -267,7 +280,7 @@ public class Maven implements Profile, ComposableOption<Maven>
             perform(
                 (system, session, repositories, scope) -> {
 
-                // we only filter based on the scope
+                    // we only filter based on the scope
                     DependencyFilter filter = DependencyFilterUtils.classpathFilter(scope);
 
                     // collect class paths for each resolved artifact
@@ -275,6 +288,14 @@ public class Maven implements Profile, ComposableOption<Maven>
 
                     for (Artifact artifact : artifacts.values())
                     {
+                        ArtifactRequest artifactRequest = new ArtifactRequest();
+                        artifactRequest.setArtifact(artifact);
+                        artifactRequest.setRepositories(repositories);
+
+                        ArtifactResult artifactResult = system.resolveArtifact(session, artifactRequest);
+                        Artifact actualArtifact = artifactResult.getArtifact();
+                        artifactPaths.add(ClassPath.ofPath(actualArtifact.getPath()));
+
                         CollectRequest collectRequest = new CollectRequest();
 
                         collectRequest.setRoot(new Dependency(artifact, scope));
@@ -285,10 +306,10 @@ public class Maven implements Profile, ComposableOption<Maven>
                         List<ArtifactResult> artifactResults = system.resolveDependencies(session,
                                                                                           dependencyRequest)
                                                                                           .getArtifactResults();
-
-                        for (ArtifactResult artifactResult : artifactResults)
+                        //artifactPaths.add(ClassPath.ofPath(artifact.getPath()));
+                        for (ArtifactResult dependencyResult : artifactResults)
                         {
-                            artifactPaths.add(ClassPath.ofFile(artifactResult.getArtifact().getFile()));
+                            artifactPaths.add(ClassPath.ofPath(dependencyResult.getArtifact().getPath()));
                         }
                     }
 
@@ -753,11 +774,11 @@ public class Maven implements Profile, ComposableOption<Maven>
         RepositorySystem system = newRepositorySystem();
 
         // ----- establish the session for the repository system -----
-        DefaultRepositorySystemSession session = MavenRepositorySystemUtils.newSession();
+        RepositorySystemSession.SessionBuilder sessionBuilder = new SessionBuilderSupplier(system).get();
 
-        session.setOffline(isOffline == null ? false : isOffline);
+        sessionBuilder.setOffline(isOffline == null ? false : isOffline);
 
-        session.setCache(new DefaultRepositoryCache());
+        sessionBuilder.setCache(new DefaultRepositoryCache());
 
         // define the local repository
         File localRepositoryLocation = new File(System.getProperty("user.home") + separators.getFileSeparator() + ".m2"
@@ -765,7 +786,12 @@ public class Maven implements Profile, ComposableOption<Maven>
 
         LocalRepository localRepo = new LocalRepository(localRepositoryLocation);
 
-        session.setLocalRepositoryManager(system.newLocalRepositoryManager(session, localRepo));
+
+        sessionBuilder.withLocalRepositoryBaseDirectories(localRepositoryLocation.toPath());
+        RepositorySystemSession.CloseableSession session = sessionBuilder.build();
+
+
+        sessionBuilder.setLocalRepositoryManager(system.newLocalRepositoryManager(session, localRepo));
 
         // ----- establish the remote repositories to use from the settings -----
 

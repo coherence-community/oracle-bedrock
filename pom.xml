@@ -117,7 +117,7 @@
         <maven.dependency-check.plugin.version>8.2.1</maven.dependency-check.plugin.version>
 
         <!-- dependency versions -->
-        <maven.resolver.version>1.9.8</maven.resolver.version>
+        <maven.resolver.version>2.0.0-alpha-11</maven.resolver.version>
         <glassfish.el.version>5.0.0-M1</glassfish.el.version>
         <hamcrest.version>2.2</hamcrest.version>
         <jakarta.el.version>5.0.0-RC1</jakarta.el.version>
