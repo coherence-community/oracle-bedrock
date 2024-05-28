@@ -13,7 +13,8 @@ open module com.oracle.bedrock.maven {
     requires org.apache.maven.resolver.impl;
     requires org.apache.maven.resolver.spi;
     requires org.apache.maven.resolver.transport.file;
-    requires org.apache.maven.resolver.transport.http;
+    requires org.apache.maven.resolver.transport.jdk;
     requires org.apache.maven.resolver.util;
 requires maven.resolver.provider;
+requires org.apache.maven.resolver.supplier;
 }
