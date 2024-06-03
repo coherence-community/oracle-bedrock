@@ -125,7 +125,7 @@
         <jsch.version>0.1.55</jsch.version>
         <junit.version>4.13.2</junit.version>
         <junit.five.version>5.8.1</junit.five.version>
-        <maven.settings.version>3.9.1</maven.settings.version>
+        <maven.settings.version>3.9.6</maven.settings.version>
         <mockito.version>4.4.0</mockito.version>
         <p4.version>2019.1.1889202</p4.version>
     </properties>
