@@ -11,6 +11,5 @@ open module com.oracle.bedrock.runtime.remote {
     requires java.logging;
 
     requires jdk.httpserver;
-
-    requires jsch;
+    requires com.jcraft.jsch;
 }
