@@ -127,7 +127,7 @@
         <javax.xml.bind.version>2.3.0</javax.xml.bind.version>
         <javax.xml.ws.version>2.3.0</javax.xml.ws.version>
         <jprofiler.version>9.1.1</jprofiler.version>
-        <jsch.version>0.1.54</jsch.version>
+        <jsch.version>0.2.18</jsch.version>
         <junit.version>4.13.1</junit.version>
         <junit.five.version>5.7.1</junit.five.version>
         <junit.jupiter.version>5.7.0</junit.jupiter.version>
@@ -200,7 +200,7 @@
             </dependency>
 
             <dependency>
-                <groupId>com.jcraft</groupId>
+                <groupId>com.github.mwiede</groupId>
                 <artifactId>jsch</artifactId>
                 <version>${jsch.version}</version>
             </dependency>
