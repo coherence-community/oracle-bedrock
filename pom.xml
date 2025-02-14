@@ -122,7 +122,7 @@
         <hamcrest.version>2.2</hamcrest.version>
         <jakarta.el.version>5.0.0-RC1</jakarta.el.version>
         <jacoco.version>0.8.7</jacoco.version>
-        <jsch.version>0.2.18</jsch.version>
+        <jsch.version>0.2.23</jsch.version>
         <junit.version>4.13.2</junit.version>
         <junit.five.version>5.8.1</junit.five.version>
         <maven.settings.version>3.9.6</maven.settings.version>
