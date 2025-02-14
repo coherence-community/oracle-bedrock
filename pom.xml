@@ -96,6 +96,7 @@
 
         <!-- the version of java required to build -->
         <java.version>1.8</java.version>
+        <java.version.release>1.8</java.version.release> <!-- maven-compiler-plugin "release" version -->
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
@@ -127,7 +128,7 @@
         <javax.xml.bind.version>2.3.0</javax.xml.bind.version>
         <javax.xml.ws.version>2.3.0</javax.xml.ws.version>
         <jprofiler.version>9.1.1</jprofiler.version>
-        <jsch.version>0.2.18</jsch.version>
+        <jsch.version>0.2.23</jsch.version>
         <junit.version>4.13.1</junit.version>
         <junit.five.version>5.7.1</junit.five.version>
         <junit.jupiter.version>5.7.0</junit.jupiter.version>
