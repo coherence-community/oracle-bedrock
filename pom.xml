@@ -3,7 +3,7 @@
 
     <groupId>com.oracle.bedrock</groupId>
     <artifactId>project</artifactId>
-    <version>6.0.8-SNAPSHOT</version>
+    <version>6.0.8</version>
 
     <packaging>pom</packaging>
 
@@ -38,7 +38,7 @@
         <connection>scm:git:https://github.com/coherence-community/oracle-bedrock.git</connection>
         <developerConnection>scm:git:https://github.com/coherence-community/oracle-bedrock.git</developerConnection>
         <url>https://github.com/coherence-community/oracle-bedrock.git</url>
-      <tag>4.0.0</tag>
+      <tag>project-6.0.8</tag>
     </scm>
 
     <modules>

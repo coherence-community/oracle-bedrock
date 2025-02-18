@@ -4,7 +4,7 @@
     <parent>
         <groupId>com.oracle.bedrock.coherence</groupId>
         <artifactId>3.7.1</artifactId>
-        <version>6.0.8-SNAPSHOT</version>
+        <version>6.0.8</version>
     </parent>
 
     <artifactId>coherence-3.7.1</artifactId>
@@ -63,4 +63,8 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+
+  <scm>
+    <tag>project-6.0.8</tag>
+  </scm>
 </project>
