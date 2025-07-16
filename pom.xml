@@ -85,6 +85,7 @@
             when generating the latest project documentation valid options: snapshots, releases
           -->
         <repository>snapshots</repository>
+        <sonatype.auto.publish>false</sonatype.auto.publish>
 
         <!-- the version of java required to build -->
         <java.version.enforcer>11</java.version.enforcer>
@@ -270,6 +271,18 @@
 
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.sonatype.central</groupId>
+                <artifactId>central-publishing-maven-plugin</artifactId>
+                <version>0.8.0</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <publishingServerId>sonatype</publishingServerId>
+                    <autoPublish>${sonatype.auto.publish}</autoPublish>
+                    <waitUntil>published</waitUntil>
+                </configuration>
+            </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>

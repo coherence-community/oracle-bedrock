@@ -14,4 +14,4 @@ if [ -z $(echo "${CURRENT_VERSION}" | grep SNAPSHOT) ]; then
 fi
 
 echo "Building version ${CURRENT_VERSION}"
-mvn -s ./.mvn/settings.xml -B clean deploy -DskipTests -Pcoherence-ce -Dgithub.build=true
+mvn -s ./.mvn/settings.xml -B clean deploy -DskipTests -Dsonatype.auto.publish=true -Pcoherence-ce -Dgithub.build=true
