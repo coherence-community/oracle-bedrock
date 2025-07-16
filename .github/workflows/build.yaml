@@ -49,8 +49,8 @@ jobs:
     - name: Set up JDK
       uses: actions/setup-java@v4
       with:
-        distribution: 'temurin'
-        release: ${{ matrix.jvmVersion }}
+        distribution: 'oracle'
+        java-version: ${{ matrix.jvmVersion }}
 
     - name: Cache Maven packages
       uses: actions/cache@v4
