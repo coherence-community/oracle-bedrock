@@ -30,7 +30,7 @@ jobs:
         release: 21
 
     - name: Cache Maven packages
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ~/.m2
         key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
@@ -42,8 +42,10 @@ jobs:
         export MAVEN_ARGS="-P coherence-ce"
         sh ./etc/dependency-check.sh
 
-    - uses: actions/upload-artifact@v1
-      if: failure()
+    - name: Upload
+      uses: actions/upload-artifact@v4
+      if: ${{ failure() || cancelled() }}
       with:
         name: build-output
         path: "target/*.*"
+        if-no-files-found: ignore
