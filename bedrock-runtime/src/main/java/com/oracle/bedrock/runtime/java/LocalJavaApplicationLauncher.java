@@ -126,6 +126,7 @@ public class LocalJavaApplicationLauncher<A extends JavaApplication> implements 
         return new SimpleLocalProcessBuilder(executable);
     }
 
+    @SuppressWarnings({"rawtypes", "unchecked"})
     @Override
     public A launch(Platform      platform,
                     MetaClass<A>  metaClass,
@@ -244,128 +245,23 @@ public class LocalJavaApplicationLauncher<A extends JavaApplication> implements 
             processBuilder.environment().put(variableName, variables.getProperty(variableName));
         }
 
-        if (variables.size() > 0)
+        if (!variables.isEmpty())
         {
             Table table = Tabularize.tabularize(variables);
 
             diagnosticsTable.addRow("", table.toString());
         }
 
-        // ----- establish java specific environment variables -----
-
-        // by default we use the java home defined by the schema.  if that's not
-        // defined we'll attempt to use the java home defined by this builder.
-        JavaHome javaHome = launchOptions.get(JavaHome.class);
-
-        // when we still don't have a java home we use what this process defines
-        // (using the system property)
-        if (javaHome == null)
-        {
-            javaHome = JavaHome.at(System.getProperty("java.home", null));
-        }
-
-        if (javaHome != null)
-        {
-            processBuilder.environment().put("JAVA_HOME", StringHelper.doubleQuoteIfNecessary(javaHome.get()));
-        }
-
         // ----- establish the command to start java -----
-
-        String javaExecutable;
-
-        if (javaHome == null)
-        {
-            // when we don't have a java home we just use the defined executable
-            javaExecutable = StringHelper.doubleQuoteIfNecessary(executable.getName());
-        }
-        else
-        {
-            // when we have a java home, we prefix the executable name with the java.home/bin/
-            String javaHomePath = javaHome.get();
-
-            javaHomePath = javaHomePath.trim();
-
-            diagnosticsTable.addRow("Java Home", javaHomePath);
-
-            if (!javaHomePath.endsWith(File.separator))
-            {
-                javaHomePath = javaHomePath + File.separator;
-            }
-
-            javaExecutable = StringHelper.doubleQuoteIfNecessary(javaHomePath + "bin" + File.separator
-                                                                 + executable.getName());
-
-        }
+        JavaHome javaHome       = processJavaHome(processBuilder, launchOptions);
+        String   javaExecutable = getJavaExecutableName(javaHome, executable, diagnosticsTable);
 
         processBuilder.command(javaExecutable);
 
         diagnosticsTable.addRow("Java Executable", javaExecutable);
 
         // ----- establish the class path -----
-
-        JavaModules modular    = launchOptions.get(JavaModules.class);
-        boolean     useModules = modular.isEnabled();
-
-        // determine the predefined class path based on the launch options
-        ClassPath classPath = launchOptions.get(ClassPath.class);
-
-        try
-        {
-            // include the ClassPath of the Platform
-            classPath = new ClassPath(classPath, ClassPath.ofClass(platform.getClass()));
-
-            // include the ClassPath of each of the Options
-            for (Option option : launchOptions.getInstancesOf(Option.class))
-            {
-                classPath = new ClassPath(classPath, ClassPath.ofClass(option.getClass()));
-            }
-
-            // include the application runner (if defined)
-            BedrockRunner bedrockRunner = optionsByType.get(BedrockRunner.class);
-
-            if (bedrockRunner != null && bedrockRunner.isEnabled())
-            {
-                // include the JavaApplicationLauncher
-                classPath = new ClassPath(classPath, ClassPath.ofClass(bedrockRunner.getClassOfRunner()));
-            }
-
-            // add the updated ClassPath back into the launch options
-            launchOptions.add(classPath);
-        }
-        catch (IOException e)
-        {
-            throw new RuntimeException("Failed to locate required classes for the class path", e);
-        }
-
-        processBuilder.command().add(useModules ? "--module-path" : "-cp");
-        processBuilder.command().add(classPath.toString(launchOptions.asArray()));
-
-        if (useModules)
-        {
-            Table modulePathTable = classPath.getTable();
-
-            modulePathTable.getOptions().add(Cell.Separator.of(""));
-            diagnosticsTable.addRow("Module Path", modulePathTable.toString());
-
-            ClassPath path = modular.getClassPath();
-
-            if (path != null && !path.isEmpty())
-            {
-                processBuilder.command().add("-cp");
-                processBuilder.command().add(path.toString(launchOptions.asArray()));
-
-                Table classPathTable  = path.getTable();
-                classPathTable.getOptions().add(Cell.Separator.of(""));
-                diagnosticsTable.addRow("Class Path", classPathTable.toString());
-            }
-        }
-        else
-        {
-            Table classPathTable = classPath.getTable();
-
-            classPathTable.getOptions().add(Cell.Separator.of(""));
-            diagnosticsTable.addRow("Class Path", classPathTable.toString());
-        }
+        processClasspath(platform, optionsByType, launchOptions, processBuilder, diagnosticsTable);
 
         String applicationName = displayName.resolve(launchOptions);
 
@@ -378,8 +274,7 @@ public class LocalJavaApplicationLauncher<A extends JavaApplication> implements 
         // the listeners can immediately start receiving RemoteEvents
         RemoteEvents remoteEvents = launchOptions.get(RemoteEvents.class);
 
-        remoteEvents.forEach((remoteEventListener, listenerOptions) -> server.addListener(remoteEventListener,
-                                                                                          listenerOptions));
+        remoteEvents.forEach(server::addListener);
 
         try
         {
@@ -428,7 +323,7 @@ public class LocalJavaApplicationLauncher<A extends JavaApplication> implements 
         // establish the URI for this (parent) process
         String parentURI = "//" + parentAddress.getHostAddress() + ":" + server.getPort();
 
-        systemPropertiesTable.addRow(Settings.PARENT_URI, parentURI.toString());
+        systemPropertiesTable.addRow(Settings.PARENT_URI, parentURI);
 
         processBuilder.command().add("-D" + Settings.PARENT_URI + "=" + parentURI);
 
@@ -504,22 +399,7 @@ public class LocalJavaApplicationLauncher<A extends JavaApplication> implements 
         }
 
         // ----- establish the application command line to execute -----
-
-        // use the launcher to launch the application
-        // (we don't start the application directly itself)
-        String applicationLauncherClassName = JavaApplicationRunner.class.getName();
-
-        if (useModules)
-        {
-            
-            applicationLauncherClassName = "com.oracle.bedrock.runtime/" + applicationLauncherClassName;
-            processBuilder.command().add("-m");
-            processBuilder.command().add(applicationLauncherClassName);
-        }
-        else
-        {
-            processBuilder.command().add(applicationLauncherClassName);
-        }
+        processApplicationLauncherClassName(processBuilder, launchOptions, diagnosticsTable);
 
         // set the Java application class name we need to launch
         ClassName className = launchOptions.get(ClassName.class);
@@ -533,7 +413,6 @@ public class LocalJavaApplicationLauncher<A extends JavaApplication> implements 
 
         processBuilder.command().add(applicationClassName);
 
-        diagnosticsTable.addRow("Application Launcher", applicationLauncherClassName);
         diagnosticsTable.addRow("Application Class", applicationClassName);
         diagnosticsTable.addRow("Application", applicationName);
 
@@ -544,18 +423,18 @@ public class LocalJavaApplicationLauncher<A extends JavaApplication> implements 
         // Set the actual arguments used back into the options
         launchOptions.add(Arguments.of(argList));
 
-        String arguments = "";
+        StringBuilder arguments = new StringBuilder();
 
         for (String argument : argList)
         {
             processBuilder.command().add(argument);
 
-            arguments += argument + " ";
+            arguments.append(argument).append(" ");
         }
 
         if (arguments.length() > 0)
         {
-            diagnosticsTable.addRow("Application Arguments", arguments);
+            diagnosticsTable.addRow("Application Arguments", arguments.toString());
         }
 
         // should the standard error be redirected to the standard out?
@@ -580,7 +459,7 @@ public class LocalJavaApplicationLauncher<A extends JavaApplication> implements 
             LOGGER.log(Level.INFO,
                        "Oracle Bedrock " + Bedrock.getVersion() + ": Starting Application...\n"
                        + "------------------------------------------------------------------------\n"
-                       + diagnosticsTable.toString() + "\n"
+                       + diagnosticsTable + "\n"
                        + "------------------------------------------------------------------------\n");
         }
 
@@ -691,12 +570,12 @@ public class LocalJavaApplicationLauncher<A extends JavaApplication> implements 
         /**
          * The {@link RemoteChannel} for the {@link LocalJavaApplicationProcess}.
          */
-        private ControllableRemoteChannel remoteExecutor;
+        private final ControllableRemoteChannel remoteExecutor;
 
         /**
          * The resolved System {@link Properties} provided to the {@link JavaApplicationProcess} when it was launched.
          */
-        private Properties systemProperties;
+        private final Properties systemProperties;
 
 
         /**
@@ -772,5 +651,148 @@ public class LocalJavaApplicationLauncher<A extends JavaApplication> implements 
 
             remoteExecutor.close();
         }
+    }
+
+    /**
+     * Process the application class path or module path.
+     *
+     * @param platform          the current platform
+     * @param optionsByType     the application options
+     * @param launchOptions     the launcher options
+     * @param processBuilder    the {@link ProcessBuilder} fir the process
+     * @param diagnosticsTable  the {@link Table} to use to log configuration to
+     */
+    protected void processClasspath(Platform platform,  OptionsByType optionsByType, OptionsByType launchOptions,
+                                        LocalProcessBuilder processBuilder, Table diagnosticsTable)
+    {
+        // determine the predefined class path based on the launch options
+        ClassPath classPath    = launchOptions.get(ClassPath.class);
+        JavaModules modular    = launchOptions.get(JavaModules.class);
+        boolean     useModules = modular.isEnabled();
+
+        try
+        {
+            // include the ClassPath of the Platform
+            classPath = new ClassPath(classPath, ClassPath.ofClass(platform.getClass()));
+
+            // include the ClassPath of each of the Options
+            for (Option option : launchOptions.getInstancesOf(Option.class))
+            {
+                classPath = new ClassPath(classPath, ClassPath.ofClass(option.getClass()));
+            }
+
+            // include the application runner (if defined)
+            BedrockRunner bedrockRunner = optionsByType.get(BedrockRunner.class);
+
+            if (bedrockRunner != null && bedrockRunner.isEnabled())
+            {
+                // include the JavaApplicationLauncher
+                classPath = new ClassPath(classPath, ClassPath.ofClass(bedrockRunner.getClassOfRunner()));
+            }
+
+            // add the updated ClassPath back into the launch options
+            launchOptions.add(classPath);
+        }
+        catch (IOException e)
+        {
+            throw new RuntimeException("Failed to locate required classes for the class path", e);
+        }
+
+        processBuilder.command().add(useModules ? "--module-path" : "-cp");
+        processBuilder.command().add(classPath.toString(launchOptions.asArray()));
+
+        if (useModules)
+        {
+            Table modulePathTable = classPath.getTable();
+
+            modulePathTable.getOptions().add(Cell.Separator.of(""));
+            diagnosticsTable.addRow("Module Path", modulePathTable.toString());
+
+            ClassPath path = modular.getClassPath();
+
+            if (path != null && !path.isEmpty())
+            {
+                processBuilder.command().add("-cp");
+                processBuilder.command().add(path.toString(launchOptions.asArray()));
+
+                Table classPathTable  = path.getTable();
+                classPathTable.getOptions().add(Cell.Separator.of(""));
+                diagnosticsTable.addRow("Class Path", classPathTable.toString());
+            }
+        }
+        else
+        {
+            Table classPathTable = classPath.getTable();
+
+            classPathTable.getOptions().add(Cell.Separator.of(""));
+            diagnosticsTable.addRow("Class Path", classPathTable.toString());
+        }
+    }
+
+
+    protected JavaHome processJavaHome(LocalProcessBuilder processBuilder, OptionsByType launchOptions)
+    {
+        // by default we use the java home defined by the schema.  if that's not
+        // defined we'll attempt to use the java home defined by this builder.
+        JavaHome javaHome = launchOptions.get(JavaHome.class);
+
+        // when we still don't have a java home we use what this process defines
+        // (using the system property)
+        if (javaHome == null)
+        {
+            javaHome = JavaHome.at(System.getProperty("java.home", null));
+        }
+
+        processBuilder.environment().put("JAVA_HOME", StringHelper.doubleQuoteIfNecessary(javaHome.get()));
+
+        return javaHome;
+    }
+
+
+    protected String getJavaExecutableName(JavaHome javaHome, Executable executable, Table diagnosticsTable)
+    {
+        // ----- establish the command to start java -----
+
+        String javaExecutable;
+
+        // when we have a java home, we prefix the executable name with the java.home/bin/
+        String javaHomePath = javaHome.get();
+
+        javaHomePath = javaHomePath.trim();
+
+        diagnosticsTable.addRow("Java Home", javaHomePath);
+
+        if (!javaHomePath.endsWith(File.separator))
+        {
+            javaHomePath = javaHomePath + File.separator;
+        }
+
+        javaExecutable = StringHelper.doubleQuoteIfNecessary(javaHomePath + "bin" + File.separator
+                + executable.getName());
+
+        return javaExecutable;
+    }
+
+    protected void processApplicationLauncherClassName(LocalProcessBuilder processBuilder, OptionsByType launchOptions,
+                                                       Table diagnosticsTable)
+    {
+        // use the launcher to launch the application
+        // (we don't start the application directly itself)
+        String      applicationLauncherClassName = JavaApplicationRunner.class.getName();
+        JavaModules modular                      = launchOptions.get(JavaModules.class);
+        boolean     useModules                   = modular.isEnabled();
+
+        if (useModules)
+        {
+            applicationLauncherClassName = "com.oracle.bedrock.runtime/" + applicationLauncherClassName;
+            processBuilder.command().add("-m");
+            processBuilder.command().add(applicationLauncherClassName);
+        }
+        else
+        {
+            processBuilder.command().add(applicationLauncherClassName);
+        }
+
+        diagnosticsTable.addRow("Application Launcher", applicationLauncherClassName);
     }
 }

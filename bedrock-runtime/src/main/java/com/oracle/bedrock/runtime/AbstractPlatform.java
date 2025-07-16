@@ -30,6 +30,8 @@ import com.oracle.bedrock.OptionsByType;
 import com.oracle.bedrock.annotations.Internal;
 import com.oracle.bedrock.extensible.AbstractExtensible;
 
+import java.util.List;
+
 /**
  * An abstract implementation of a {@link Platform}.
  * <p>
@@ -83,6 +85,7 @@ public abstract class AbstractPlatform extends AbstractExtensible implements Pla
 
 
     @Override
+    @SuppressWarnings("unchecked")
     public <A extends Application> A launch(MetaClass<A> metaClass,
                                             Option...    options)
     {
@@ -93,9 +96,27 @@ public abstract class AbstractPlatform extends AbstractExtensible implements Pla
         launchOptions.addAll(options);
 
         // obtain the application launcher for the class of application
-        ApplicationLauncher<A> launcher = getApplicationLauncher(metaClass, launchOptions);
+        // first, check the options to see if a launcher was specified
+        ApplicationLauncher<A> launcher = launchOptions.get(ApplicationLauncher.class);
 
         if (launcher == null)
+            {
+            // no launcher option, sp check the Profiles to see if a launcher was specified
+            // the first profile that specifies an option is the one we use
+            List<Profile> profiles = Profiles.getOrderedProfiles();
+            for (Profile profile : profiles)
+                {
+                launcher = profile.getLauncher(metaClass);
+                if (launcher != null)
+                    {
+                    break;
+                    }
+                }
+            }
+
+        launcher = getApplicationLauncher(metaClass, launchOptions);
+
+    if (launcher == null)
         {
             throw new IllegalArgumentException("Can't determine ApplicationLauncher for " + metaClass + " using "
                                                + launchOptions);

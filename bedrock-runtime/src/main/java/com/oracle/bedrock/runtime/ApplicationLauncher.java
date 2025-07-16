@@ -51,6 +51,7 @@ import com.oracle.bedrock.runtime.options.DisplayName;
  */
 @Internal
 public interface ApplicationLauncher<A extends Application>
+        extends Option
 {
     /**
      * Launches an {@link Application} on the {@link Platform} using the provided {@link OptionsByType}s.

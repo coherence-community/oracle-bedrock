@@ -28,6 +28,9 @@ package com.oracle.bedrock.runtime;
 import com.oracle.bedrock.Option;
 import com.oracle.bedrock.OptionsByType;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 import java.util.ServiceLoader;
 
 /**
@@ -47,10 +50,31 @@ public class Profiles
      *
      * @return an {@link Iterable}
      */
-    @SuppressWarnings("unchecked")
     public static OptionsByType getProfiles()
     {
-        OptionsByType profiles = OptionsByType.empty();
+        OptionsByType options = OptionsByType.empty();
+        List<Profile> profiles = getOrderedProfiles();
+        for (Profile profile : profiles)
+        {
+            if (profile instanceof Option)
+            {
+            options.add((Option) profile);
+            }
+        }
+        return options;
+    }
+
+    /**
+     * Auto-detect, instantiate and configure the list of {@link Profile}s
+     * in priority order (the highest priority comes first).
+     *
+     * @return a {@link List} of {@link Profile} instances in priority order
+     */
+    @SuppressWarnings("unchecked")
+    public static List<Profile> getOrderedProfiles()
+    {
+        OptionsByType options  = OptionsByType.empty();
+        List<Profile> profiles = new ArrayList<>();
 
         for (String name : System.getProperties().stringPropertyNames())
         {
@@ -84,16 +108,18 @@ public class Profiles
                         {
                             // by attempting to request the Profile from the Profiles collection
                             // it will be instantiated using the appropriate default constructor / factory method
-                            Profile profile = (Profile) profiles.get((Class<Option>) profileClass, profileValue);
+                            Profile profile = (Profile) options.get((Class<Option>) profileClass, profileValue);
+                            profiles.add(profile);
                         }
                         else
                         {
-                            // TODO: the specified profile is not an Option
+                            Profile profile = (Profile) profileClass.getDeclaredConstructor().newInstance();
+                            profiles.add(profile);
                         }
                     }
                     catch (Exception e)
                     {
-                        // TODO: failed to load the specified profile
+                        throw new RuntimeException("Unable to instantiate profile '" + profileName + "'", e);
                     }
                 }
             }
@@ -101,13 +127,11 @@ public class Profiles
             ServiceLoader<Profile> loader = ServiceLoader.load(Profile.class);
             for (Profile profile : loader)
             {
-                if (profile instanceof Option)
-                {
-                    profiles.add((Option) profile);
-                }
+                profiles.add(profile);
             }
         }
 
+        profiles.sort(Profile.ProfileOrderer.INSTANCE);
         return profiles;
     }
 }

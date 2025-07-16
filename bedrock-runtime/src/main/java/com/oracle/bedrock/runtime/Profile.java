@@ -28,6 +28,8 @@ package com.oracle.bedrock.runtime;
 import com.oracle.bedrock.Option;
 import com.oracle.bedrock.OptionsByType;
 
+import java.util.Comparator;
+
 /**
  * Often implemented by {@link Option} classes, {@link Profile}s provide a mechanism to
  * intercept and dynamically modify the behavior of {@link Platform}s prior to and after
@@ -40,6 +42,11 @@ import com.oracle.bedrock.OptionsByType;
  */
 public interface Profile
 {
+    /**
+     * The default priority to use.
+     */
+    int DEFAULT_PRIORITY = 0;
+
     /**
      * Invoked by a {@link Platform} prior to an {@link Application} being launched,
      * allowing a {@link Profile} to prepare and customize the specified {@link OptionsByType}, based
@@ -79,4 +86,44 @@ public interface Profile
     void onClosing(Platform      platform,
                    Application   application,
                    OptionsByType optionsByType);
+
+    /**
+     * Return an optional {@link ApplicationLauncher} to use to launch
+     * the application.
+     *
+     * @param metaClass  the {@link MetaClass} of the {@link Application}
+     * @param <A>        the type of the application to launch
+     *
+     * @return an optional {@link ApplicationLauncher} to use to launch
+     *         the application
+     */
+    default <A extends Application> ApplicationLauncher<A> getLauncher(MetaClass<A> metaClass)
+    {
+        return null;
+    }
+
+    /**
+     * Return the priority of this profile in the processing order.
+     *
+     * @return the priority of this profile in the processing order
+     */
+    default int priority()
+    {
+        return DEFAULT_PRIORITY;
+    }
+
+    /**
+     * A {@link Comparator} to sort profiles by priority (highest priority first).
+     */
+    class ProfileOrderer
+            implements Comparator<Profile>
+    {
+    @Override
+    public int compare(Profile p1, Profile p2)
+        {
+        return Integer.compare(p2.priority(), p1.priority());
+        }
+
+        public static final ProfileOrderer INSTANCE = new ProfileOrderer();
+    }
 }
