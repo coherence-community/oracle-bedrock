@@ -48,6 +48,7 @@ import com.oracle.bedrock.runtime.Settings;
 import com.oracle.bedrock.runtime.concurrent.ControllableRemoteChannel;
 import com.oracle.bedrock.runtime.concurrent.RemoteCallable;
 import com.oracle.bedrock.runtime.concurrent.RemoteChannel;
+import com.oracle.bedrock.runtime.concurrent.RemoteChannelSerializer;
 import com.oracle.bedrock.runtime.concurrent.RemoteEvent;
 import com.oracle.bedrock.runtime.concurrent.RemoteEventListener;
 import com.oracle.bedrock.runtime.concurrent.RemoteRunnable;
@@ -268,7 +269,8 @@ public class LocalJavaApplicationLauncher<A extends JavaApplication> implements 
         // ----- establish Bedrock specific system properties -----
 
         // configure a server channel to communicate with the native process
-        final SocketBasedRemoteChannelServer server = new SocketBasedRemoteChannelServer(applicationName);
+        RemoteChannelSerializer serializer = launchOptions.get(RemoteChannelSerializer.class);
+        final SocketBasedRemoteChannelServer server = new SocketBasedRemoteChannelServer(applicationName, serializer);
 
         // register the defined RemoteEventListeners with the server so that when the application starts
         // the listeners can immediately start receiving RemoteEvents
@@ -333,6 +335,13 @@ public class LocalJavaApplicationLauncher<A extends JavaApplication> implements 
         processBuilder.command().add("-D" + Settings.ORPHANABLE + "=" + orphanable.isOrphanable());
 
         systemPropertiesTable.addRow(Settings.ORPHANABLE, Boolean.toString(orphanable.isOrphanable()));
+
+        if (serializer != null)
+            {
+            Class<?> clz = serializer.getClass();
+            systemPropertiesTable.addRow(Settings.CHANNEL_SERIALIZER, clz.getName());
+            processBuilder.command().add("-D" + Settings.CHANNEL_SERIALIZER + "=" + clz.getName());
+            }
 
         // ----- establish the system properties for the java application -----
 

@@ -33,6 +33,7 @@ import com.oracle.bedrock.runtime.concurrent.AbstractRemoteChannel;
 import com.oracle.bedrock.runtime.concurrent.ControllableRemoteChannel;
 import com.oracle.bedrock.runtime.concurrent.RemoteCallable;
 import com.oracle.bedrock.runtime.concurrent.RemoteChannel;
+import com.oracle.bedrock.runtime.concurrent.RemoteChannelSerializer;
 import com.oracle.bedrock.runtime.concurrent.RemoteEvent;
 import com.oracle.bedrock.runtime.concurrent.RemoteEventListener;
 import com.oracle.bedrock.runtime.concurrent.RemoteRunnable;
@@ -108,6 +109,11 @@ public class SocketBasedRemoteChannelServer extends AbstractControllableRemoteCh
     private final int port;
 
     /**
+     * An optional serializer to use.
+     */
+    private final RemoteChannelSerializer serializer;
+
+    /**
      * Constructs a {@link SocketBasedRemoteChannelServer} that will accept
      * and process {@link Callable}s from {@link SocketBasedRemoteChannelClient}s.
      *
@@ -115,7 +121,18 @@ public class SocketBasedRemoteChannelServer extends AbstractControllableRemoteCh
      */
     public SocketBasedRemoteChannelServer(String name)
     {
-        this(name, 0);
+        this(name, 0, null);
+    }
+
+    /**
+     * Constructs a {@link SocketBasedRemoteChannelServer} that will accept
+     * and process {@link Callable}s from {@link SocketBasedRemoteChannelClient}s.
+     *
+     * @param name  the name of this server
+     */
+    public SocketBasedRemoteChannelServer(String name, RemoteChannelSerializer serializer)
+    {
+        this(name, 0, serializer);
     }
 
     /**
@@ -127,6 +144,18 @@ public class SocketBasedRemoteChannelServer extends AbstractControllableRemoteCh
      */
     public SocketBasedRemoteChannelServer(String name, int port)
     {
+        this(name, port, null);
+    }
+
+    /**
+     * Constructs a {@link SocketBasedRemoteChannelServer} that will accept
+     * and process {@link Callable}s from {@link SocketBasedRemoteChannelClient}s.
+     *
+     * @param name  the name of this server
+     * @param port  the port to bind to
+     */
+    public SocketBasedRemoteChannelServer(String name, int port, RemoteChannelSerializer serializer)
+    {
         super();
         this.name           = name;
         this.port           = port;
@@ -134,6 +163,7 @@ public class SocketBasedRemoteChannelServer extends AbstractControllableRemoteCh
         this.serverThread   = null;
         this.remoteChannels = new ConcurrentHashMap<>();
         this.isTerminating  = new AtomicBoolean(false);
+        this.serializer     = serializer;
     }
 
 
@@ -405,7 +435,7 @@ public class SocketBasedRemoteChannelServer extends AbstractControllableRemoteCh
                     try
                     {
                         Socket                   socket  = serverSocket.accept();
-                        SocketBasedRemoteChannel channel = new SocketBasedRemoteChannel(socket);
+                        SocketBasedRemoteChannel channel = new SocketBasedRemoteChannel(socket, serializer);
 
                         // add all of the RemoteChannelServer RemoteEventListeners to the RemoteChannel
                         eventListenersByStreamName.forEach((streamName,

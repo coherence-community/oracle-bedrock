@@ -94,7 +94,7 @@ public class SystemProperty implements Option.Collectable
     public static SystemProperty of(String    name,
                                     Option... options)
     {
-        return new SystemProperty(name, "", options);
+        return new SystemProperty(name, true, options);
     }
 
 

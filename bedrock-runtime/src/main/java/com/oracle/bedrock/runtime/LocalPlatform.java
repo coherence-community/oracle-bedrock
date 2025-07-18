@@ -30,6 +30,7 @@ import com.oracle.bedrock.io.NetworkHelper;
 import com.oracle.bedrock.runtime.concurrent.RemoteCallable;
 import com.oracle.bedrock.runtime.concurrent.RemoteChannel;
 import com.oracle.bedrock.runtime.concurrent.RemoteChannelListener;
+import com.oracle.bedrock.runtime.concurrent.RemoteChannelSerializer;
 import com.oracle.bedrock.runtime.concurrent.socket.SocketBasedRemoteChannel;
 import com.oracle.bedrock.runtime.concurrent.socket.SocketBasedRemoteChannelClient;
 import com.oracle.bedrock.runtime.concurrent.socket.SocketBasedRemoteChannelServer;
@@ -324,7 +325,7 @@ public class LocalPlatform extends AbstractPlatform
                                     int         port,
                                     String      description)
     {
-        try (SocketBasedRemoteChannelClient client = new SocketBasedRemoteChannelClient(inetAddress, port))
+        try (SocketBasedRemoteChannelClient client = new SocketBasedRemoteChannelClient(inetAddress, port, null))
         {
             System.out.println("Connection Validation For : " + description);
             System.out.println("---------------------------");

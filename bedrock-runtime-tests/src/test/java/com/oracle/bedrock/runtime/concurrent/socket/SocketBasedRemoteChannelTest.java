@@ -70,7 +70,7 @@ public class SocketBasedRemoteChannelTest
 
             InetAddress address = server.open();
 
-            client = new SocketBasedRemoteChannelClient(address, server.getPort());
+            client = new SocketBasedRemoteChannelClient(address, server.getPort(), null);
 
             client.open();
 
@@ -117,7 +117,7 @@ public class SocketBasedRemoteChannelTest
 
             InetAddress address = server.open();
 
-            client = new SocketBasedRemoteChannelClient(address, server.getPort());
+            client = new SocketBasedRemoteChannelClient(address, server.getPort(), null);
 
             client.open();
 
@@ -221,7 +221,7 @@ public class SocketBasedRemoteChannelTest
 
             InetAddress address = server.open();
 
-            client = new SocketBasedRemoteChannelClient(address, server.getPort());
+            client = new SocketBasedRemoteChannelClient(address, server.getPort(), null);
 
             client.open();
 
@@ -289,7 +289,7 @@ public class SocketBasedRemoteChannelTest
 
             server.addListener(listener, streamName);
 
-            try (SocketBasedRemoteChannelClient client = new SocketBasedRemoteChannelClient(address, server.getPort()))
+            try (SocketBasedRemoteChannelClient client = new SocketBasedRemoteChannelClient(address, server.getPort(), null))
             {
                 client.open();
 
@@ -325,7 +325,7 @@ public class SocketBasedRemoteChannelTest
 
             server.addListener(listener, streamName);
 
-            try (SocketBasedRemoteChannelClient client = new SocketBasedRemoteChannelClient(address, server.getPort()))
+            try (SocketBasedRemoteChannelClient client = new SocketBasedRemoteChannelClient(address, server.getPort(), null))
             {
                 client.open();
 

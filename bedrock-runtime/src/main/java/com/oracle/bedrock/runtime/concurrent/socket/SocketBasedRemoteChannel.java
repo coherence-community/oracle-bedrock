@@ -28,6 +28,7 @@ package com.oracle.bedrock.runtime.concurrent.socket;
 import com.oracle.bedrock.annotations.Internal;
 import com.oracle.bedrock.runtime.concurrent.AbstractRemoteChannel;
 import com.oracle.bedrock.runtime.concurrent.RemoteChannel;
+import com.oracle.bedrock.runtime.concurrent.RemoteChannelSerializer;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -54,15 +55,16 @@ public class SocketBasedRemoteChannel extends AbstractRemoteChannel
     /**
      * Constructs a {@link SocketBasedRemoteChannel} to submit and accept {@link Callable}s.
      *
-     * @param socket  the {@link Socket} over which {@link Callable}s
-     *                will be submit and accepted
+     * @param socket     the {@link Socket} over which {@link Callable}s
+     *                   will be submitted and accepted
+     * @param serializer an optional serializer to use
      *
      * @throws IOException when the {@link SocketBasedRemoteChannel} can't connect
      *                     using the {@link Socket}
      */
-    public SocketBasedRemoteChannel(Socket socket) throws IOException
+    public SocketBasedRemoteChannel(Socket socket, RemoteChannelSerializer serializer) throws IOException
     {
-        super(socket.getOutputStream(), socket.getInputStream());
+        super(socket.getOutputStream(), socket.getInputStream(), serializer);
 
         // remember the socket so we can close it
         this.socket = socket;

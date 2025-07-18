@@ -25,6 +25,8 @@
 
 package classloader.applications;
 
+import com.oracle.bedrock.runtime.Settings;
+import com.oracle.bedrock.runtime.concurrent.RemoteChannelSerializer;
 import com.oracle.bedrock.runtime.concurrent.socket.SocketBasedRemoteChannelClient;
 
 import java.io.IOException;
@@ -49,18 +51,28 @@ public class ChildApplication
      *
      * @param arguments
      */
-    public static void main(String[] arguments) throws UnknownHostException, IOException, InterruptedException
+    public static void main(String[] arguments) throws UnknownHostException, Exception
     {
         System.out.printf("%s started\n", ChildApplication.class.getName());
 
+        String serializerName = System.getProperty(Settings.CHANNEL_SERIALIZER);
+
         System.out.printf("server.address: %s\n", System.getProperty("server.address"));
         System.out.printf("server.port   : %s\n", System.getProperty("server.port"));
+        System.out.printf("serializer    : %s\n", serializerName);
+
+        RemoteChannelSerializer serializer = null;
+        if (serializerName != null)
+        {
+            Class<?> clz = Class.forName(serializerName);
+            serializer = (RemoteChannelSerializer) clz.getDeclaredConstructor().newInstance();
+        }
 
         System.out.printf("Connecting to the specified server");
 
         SocketBasedRemoteChannelClient channel =
             new SocketBasedRemoteChannelClient(InetAddress.getByName(System.getProperty("server.address")),
-                                    Integer.getInteger("server.port"));
+                                    Integer.getInteger("server.port"), serializer);
 
         channel.open();
 

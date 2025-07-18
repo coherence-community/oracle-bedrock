@@ -29,6 +29,7 @@ import com.oracle.bedrock.annotations.Internal;
 import com.oracle.bedrock.runtime.Settings;
 import com.oracle.bedrock.runtime.concurrent.RemoteChannel;
 import com.oracle.bedrock.runtime.concurrent.RemoteChannelListener;
+import com.oracle.bedrock.runtime.concurrent.RemoteChannelSerializer;
 import com.oracle.bedrock.runtime.concurrent.socket.SocketBasedRemoteChannelClient;
 
 import java.io.IOException;
@@ -102,13 +103,21 @@ public class JavaApplicationRunner
             // attempt to connect to the parent application
             try
             {
+                RemoteChannelSerializer serializer = null;
+                String  serializerName = System.getProperty(Settings.CHANNEL_SERIALIZER);
+                if (serializerName != null)
+                {
+                    Class<?> clz = Class.forName(serializerName);
+                    serializer = (RemoteChannelSerializer) clz.getDeclaredConstructor().newInstance();
+                }
+
                 URI parentURI = new URI(parent);
 
                 // find the InetAddress of the host on which the parent is running
                 InetAddress inetAddress = InetAddress.getByName(parentURI.getHost());
 
                 // establish a RemoteExecutorClient to handle and send requests to the parent
-                channel = new SocketBasedRemoteChannelClient(inetAddress, parentURI.getPort());
+                channel = new SocketBasedRemoteChannelClient(inetAddress, parentURI.getPort(), serializer);
 
                 channel.addListener(new RemoteChannelListener()
                                     {
@@ -154,8 +163,12 @@ public class JavaApplicationRunner
                     channel = null;
                 }
             }
+            catch (Exception e)
+            {
+                e.printStackTrace(System.out);
+            }
 
-            if (channel != null)
+        if (channel != null)
             {
                 // start the application
                 try

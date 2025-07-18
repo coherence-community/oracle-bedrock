@@ -57,7 +57,7 @@ public class SocketBasedRemoteChannelServerTest
             }
 
             // Connect to the server with a real client - this should succeed.
-            try (SocketBasedRemoteChannelClient client = new SocketBasedRemoteChannelClient(address, port))
+            try (SocketBasedRemoteChannelClient client = new SocketBasedRemoteChannelClient(address, port, null))
             {
                 client.addListener(clientListener);
                 client.open();
@@ -95,7 +95,7 @@ public class SocketBasedRemoteChannelServerTest
             JMXServiceURL url     = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://:" + port + "/jmxrmi");
 
             // Connect to the server with a real client - this should succeed.
-            try (SocketBasedRemoteChannelClient client = new SocketBasedRemoteChannelClient(address, port))
+            try (SocketBasedRemoteChannelClient client = new SocketBasedRemoteChannelClient(address, port, null))
             {
                 client.addListener(clientListener);
                 client.open();
@@ -166,7 +166,7 @@ public class SocketBasedRemoteChannelServerTest
                     server.addListener(serverListener);
 
                     // Connect to the server with a real client - this should succeed.
-                    try (SocketBasedRemoteChannelClient client = new SocketBasedRemoteChannelClient(address, port))
+                    try (SocketBasedRemoteChannelClient client = new SocketBasedRemoteChannelClient(address, port, null))
                     {
                         client.addListener(clientListener);
                         client.open();

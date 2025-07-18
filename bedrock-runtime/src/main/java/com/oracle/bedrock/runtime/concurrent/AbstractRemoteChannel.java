@@ -166,6 +166,10 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
      */
     private final ConcurrentHashMap<Callable<?>, Pair<Object, Instant>> cache;
 
+    /**
+     * The {@link RemoteChannelSerializer} to use.
+     */
+    private RemoteChannelSerializer serializer;
 
     /**
      * Constructs a {@link AbstractRemoteChannel} to submit and accept {@link Callable}s.
@@ -178,9 +182,25 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
     public AbstractRemoteChannel(OutputStream outputStream,
                                  InputStream  inputStream) throws IOException
     {
+        this(outputStream, inputStream, null);
+    }
+
+    /**
+     * Constructs a {@link AbstractRemoteChannel} to submit and accept {@link Callable}s.
+     *
+     * @param outputStream  the {@link OutputStream} from the {@link RemoteChannel}
+     * @param inputStream   the {@link InputStream} into the {@link RemoteChannel}
+     *
+     * @throws IOException when the {@link RemoteChannel} can't connect provided streams
+     */
+    public AbstractRemoteChannel(OutputStream outputStream,
+                                 InputStream  inputStream,
+                                 RemoteChannelSerializer serializer) throws IOException
+    {
         // remember the underlying streams as we may have to interact with them later
         this.underlyingOutput = outputStream;
         this.underlyingInput  = inputStream;
+        this.serializer       = serializer;
 
         // establish the object output stream
         this.output = underlyingOutput instanceof ObjectOutputStream
@@ -209,7 +229,12 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
         protocol.put("EVENT", EventOperation.class);
     }
 
-    /**
+    public void setSerializer(RemoteChannelSerializer serializer)
+    {
+        this.serializer = serializer;
+    }
+
+/**
      * Get netstats information from OS.
      *
      * @return the netstat information as an {@link ArrayList}
@@ -763,7 +788,16 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
             try
             {
                 // read the callable or the name of the callable class
-                Object object = input.readObject();
+                Object object;
+                if (serializer == null)
+                {
+                    object = input.readObject();
+                }
+                else
+                {
+                    int len = input.readInt();
+                    object = serializer.deserialize(input.readNBytes(len));
+                }
 
                 if (object instanceof String)
                 {
@@ -780,6 +814,7 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
             catch (ClassNotFoundException | InstantiationException | IllegalAccessException
                     | NoSuchMethodException | InvocationTargetException e)
             {
+                LOGGER.log(Level.SEVERE, e, () -> "Error reading CallableOperation");
                 throw new IOException(e);
             }
         }
@@ -793,7 +828,16 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
             // serialize the Callable (if it is!)
             if (callable instanceof Serializable)
             {
-                output.writeObject(callable);
+                if (serializer == null)
+                {
+                    output.writeObject(callable);
+                }
+                else
+                {
+                    byte[] bytes = serializer.serialize(callable);
+                    output.writeInt(bytes.length);
+                    output.write(bytes);
+                }
             }
             else
             {
@@ -962,9 +1006,18 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
                 isAckRequired = input.readBoolean();
 
                 // read the callable or the name of the callable class
-                Object object = input.readObject();
+                Object object;
+                if (serializer == null)
+                {
+                    object = input.readObject();
+                }
+                else
+                {
+                    int len = input.readInt();
+                    object = serializer.deserialize(input.readNBytes(len));
+                }
 
-                if (object instanceof String)
+            if (object instanceof String)
                 {
                     String className = (String) object;
 
@@ -995,7 +1048,16 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
             // serialize the Runnable (if it is!)
             if (event instanceof Serializable)
             {
-                output.writeObject(event);
+                if (serializer == null)
+                {
+                    output.writeObject(event);
+                }
+                else
+                {
+                    byte[] bytes = serializer.serialize(event);
+                    output.writeInt(bytes.length);
+                    output.write(bytes);
+                }
             }
             else
             {
@@ -1152,7 +1214,15 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
         {
             try
             {
-                response = (T) input.readObject();
+                if (serializer == null)
+                {
+                    response = (T) input.readObject();
+                }
+                else
+                {
+                    int len = input.readInt();
+                    response = serializer.deserialize(input.readNBytes(len));
+                }
             }
             catch (ClassNotFoundException e)
             {
@@ -1164,7 +1234,17 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
         @Override
         public void write(ObjectOutputStream output) throws IOException
         {
-            output.writeObject(response);
+            System.err.println("****** JK: sending response " + response);
+            if (serializer == null)
+            {
+                output.writeObject(response);
+            }
+            else
+            {
+                byte[] bytes = serializer.serialize(response);
+                output.writeInt(bytes.length);
+                output.write(bytes);
+            }
         }
 
 
@@ -1314,7 +1394,16 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
             try
             {
                 // read the callable or the name of the callable class
-                Object object = input.readObject();
+                Object object;
+                if (serializer == null)
+                {
+                    object = input.readObject();
+                }
+                else
+                {
+                    int len = input.readInt();
+                    object = serializer.deserialize(input.readNBytes(len));
+                }
 
                 if (object instanceof String)
                 {
@@ -1330,6 +1419,7 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
             catch (ClassNotFoundException | InvocationTargetException | NoSuchMethodException
                     | IllegalAccessException | InstantiationException e)
             {
+                LOGGER.log(Level.SEVERE, e, () -> "Error reading RunnableOperation");
                 throw new IOException(e);
             }
         }
@@ -1343,7 +1433,16 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
             // serialize the Runnable (if it is!)
             if (runnable instanceof Serializable)
             {
-                output.writeObject(runnable);
+                if (serializer == null)
+                {
+                    output.writeObject(runnable);
+                }
+                else
+                {
+                    byte[] bytes = serializer.serialize(runnable);
+                    output.writeInt(bytes.length);
+                    output.write(bytes);
+                }
             }
             else
             {
@@ -1439,6 +1538,7 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
                 }
                 catch (NotSerializableException e)
                 {
+                    LOGGER.log(Level.SEVERE, e, () -> "Sender: could not send " + operation);
                     // determine if the operation required acknowledgement (we can acknowledge failure here)
                     Operation operation = pendingOperations.remove(sequence);
 
@@ -1453,7 +1553,7 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
                         buffer.reset();
                         stream    = new ObjectOutputStream(buffer);
 
-                        operation = new ResponseOperation<>(e);
+                        operation = new ResponseOperation<>(new Exception(e.getMessage()));
                         operation.write(stream);
                     }
                     else
@@ -1491,7 +1591,7 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
             }
             catch (IOException e)
             {
-                e.printStackTrace();
+                LOGGER.log(Level.SEVERE, e, () -> "Caught exception sending operation " + operation);
             }
         }
     }

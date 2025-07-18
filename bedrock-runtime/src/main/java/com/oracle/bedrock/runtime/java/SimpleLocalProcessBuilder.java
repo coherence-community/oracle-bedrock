@@ -6,6 +6,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * A simple {@link LocalProcessBuilder} implementation that
@@ -14,6 +16,11 @@ import java.util.Map;
 public class SimpleLocalProcessBuilder
         implements LocalProcessBuilder
 {
+    /**
+     * The {@link java.util.logging.Logger} for this class.
+     */
+    private static final Logger LOGGER = Logger.getLogger(SimpleLocalProcessBuilder.class.getName());
+
     private final ProcessBuilder processBuilder;
 
     public SimpleLocalProcessBuilder(String executable) {
@@ -49,6 +56,9 @@ public class SimpleLocalProcessBuilder
 
     @Override
     public Process start(OptionsByType options) throws IOException {
+        String cmd = String.join(" ", processBuilder.command());
+        LOGGER.log(Level.INFO, "ProcessBuilder: command line: " + cmd);
+
         return processBuilder.start();
     }
 

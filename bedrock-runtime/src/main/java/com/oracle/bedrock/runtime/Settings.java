@@ -59,6 +59,11 @@ public class Settings
      */
     public static final String PARENT_URI = "bedrock.runtime.parent";
 
+    /**
+     * The Java System (String) Property that specifies the name of the serializer class to use.
+     */
+    public static final String CHANNEL_SERIALIZER = "bedrock.runtime.channel.serializer";
+
 
     /**
      * Determines if diagnostics are enabled.

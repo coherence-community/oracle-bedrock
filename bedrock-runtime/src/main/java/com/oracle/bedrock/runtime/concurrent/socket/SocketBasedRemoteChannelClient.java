@@ -27,6 +27,7 @@ package com.oracle.bedrock.runtime.concurrent.socket;
 
 import com.oracle.bedrock.annotations.Internal;
 import com.oracle.bedrock.runtime.concurrent.RemoteChannel;
+import com.oracle.bedrock.runtime.concurrent.RemoteChannelSerializer;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -52,8 +53,9 @@ public class SocketBasedRemoteChannelClient extends SocketBasedRemoteChannel
      * @throws IOException  should the {@link SocketBasedRemoteChannelClient} fail to connect
      */
     public SocketBasedRemoteChannelClient(InetAddress address,
-                                          int         port) throws IOException
+                                          int         port,
+                                          RemoteChannelSerializer serializer) throws IOException
     {
-        super(new Socket(address, port));
+        super(new Socket(address, port), serializer);
     }
 }
