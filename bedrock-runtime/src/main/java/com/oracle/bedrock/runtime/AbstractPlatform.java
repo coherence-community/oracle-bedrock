@@ -100,23 +100,26 @@ public abstract class AbstractPlatform extends AbstractExtensible implements Pla
         ApplicationLauncher<A> launcher = launchOptions.get(ApplicationLauncher.class);
 
         if (launcher == null)
-            {
+        {
             // no launcher option, sp check the Profiles to see if a launcher was specified
             // the first profile that specifies an option is the one we use
             List<Profile> profiles = Profiles.getOrderedProfiles();
             for (Profile profile : profiles)
-                {
+            {
                 launcher = profile.getLauncher(metaClass);
                 if (launcher != null)
-                    {
+                {
                     break;
-                    }
                 }
             }
+        }
 
-        launcher = getApplicationLauncher(metaClass, launchOptions);
+        if (launcher == null)
+        {
+            launcher = getApplicationLauncher(metaClass, launchOptions);
+        }
 
-    if (launcher == null)
+        if (launcher == null)
         {
             throw new IllegalArgumentException("Can't determine ApplicationLauncher for " + metaClass + " using "
                                                + launchOptions);
