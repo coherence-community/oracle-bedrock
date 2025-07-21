@@ -1234,7 +1234,6 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
         @Override
         public void write(ObjectOutputStream output) throws IOException
         {
-            System.err.println("****** JK: sending response " + response);
             if (serializer == null)
             {
                 output.writeObject(response);
