@@ -16,6 +16,18 @@ import static org.junit.Assert.fail;
  */
 public class MavenProjectFileUtils
 {
+    public static final String PROP_TEST_OUTPUT_FOLDER = "bedrock.test.output.directory";
+
+    public static final String DEFAULT_TEST_OUTPUT_FOLDER = "test-output";
+
+    public static final String TEST_OUTPUT_FOLDER = System.getProperty(PROP_TEST_OUTPUT_FOLDER, DEFAULT_TEST_OUTPUT_FOLDER);
+
+    public static final String PROP_TEST_OUTPUT_SUBFOLDER = "bedrock.test.output.subdirectory";
+
+    public static final String DEFAULT_TEST_OUTPUT_SUBFOLDER = "functional";
+
+    public static final String TEST_OUTPUT_SUBFOLDER = System.getProperty(PROP_TEST_OUTPUT_SUBFOLDER, DEFAULT_TEST_OUTPUT_SUBFOLDER);
+
     /**
      * This method is to locate the build folder.
      * <p>
@@ -86,9 +98,9 @@ public class MavenProjectFileUtils
     public static File ensureTestOutputBaseFolder(Class classTest)
     {
         File fileBuild = ensureFolders(locateBuildFolder(classTest));
-        File fileTestOut = ensureFolders(new File(fileBuild, "test-output"));
+        File fileTestOut = ensureFolders(new File(fileBuild, TEST_OUTPUT_FOLDER));
 
-        return ensureFolders(new File(fileTestOut, "functional"));
+        return ensureFolders(new File(fileTestOut, TEST_OUTPUT_SUBFOLDER));
     }
 
 
@@ -105,8 +117,8 @@ public class MavenProjectFileUtils
     public static File ensureTestOutputFolder(Class classTest, String sSuffix)
     {
         File fileBuild = ensureFolders(locateBuildFolder(classTest));
-        File fileTestOut = ensureFolders(new File(fileBuild, "test-output"));
-        File fileTestOutFunctional = ensureFolders(new File(fileTestOut, "functional"));
+        File fileTestOut = ensureFolders(new File(fileBuild, TEST_OUTPUT_FOLDER));
+        File fileTestOutFunctional = ensureFolders(new File(fileTestOut, TEST_OUTPUT_SUBFOLDER));
         File fileTest = new File(fileTestOutFunctional, classTest.getSimpleName());
 
         if (sSuffix != null && !sSuffix.trim().isEmpty())
