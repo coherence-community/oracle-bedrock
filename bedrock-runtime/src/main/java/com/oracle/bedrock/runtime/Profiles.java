@@ -119,7 +119,8 @@ public class Profiles
                     }
                     catch (Exception e)
                     {
-                        throw new RuntimeException("Unable to instantiate profile '" + profileName + "'", e);
+                        System.err.println("Unable to instantiate profile '" + profileName + "' "
+                                + e.getClass().getSimpleName() + " " + e.getMessage());
                     }
                 }
             }
