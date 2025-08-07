@@ -362,6 +362,33 @@ public class JmxFeature extends AbstractFeature
 
 
     /**
+     * Obtains a the result of an MBeans Query against the JMX infrastructure
+     * of the {@link JmxFeature}.
+     *
+     * @param name   the object name pattern identifying the MBeans to be retrieved.
+     *               If <code>null</code> or no domain and key properties are
+     *               specified, all the MBeans registered will be retrieved
+     * @param query  the query expression to be applied for selecting MBeans
+     *               If <code>null</code> no query expression will be applied
+     *               for selecting MBeans
+     *
+     * @return a {@link Set} of {@link ObjectName}s
+     */
+    public Set<ObjectName> queryNames(ObjectName name, QueryExp   query)
+    {
+        try
+        {
+            return ensured(getDeferredJMXConnector(),
+                           within(getDefaultTimeout())).get().getMBeanServerConnection().queryNames(name, query);
+        }
+        catch (IOException e)
+        {
+            throw new PermanentlyUnavailableException(getDeferredJMXConnector(), e);
+        }
+    }
+
+
+    /**
      * Obtains a {@link JmxProfile} that configures Remote Java Management Extensions (JMX)
      * for the current platform, <strong>without</strong> authentication and ssl.
      *
