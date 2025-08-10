@@ -1130,6 +1130,8 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
         @Override
         public void run()
         {
+        try
+            {
             // execute the operation
             Operation resultingOperation = operation.execute(sequence);
 
@@ -1137,6 +1139,12 @@ public abstract class AbstractRemoteChannel extends AbstractControllableRemoteCh
             if (resultingOperation != null)
             {
                 sequentialExecutionService.submit(new Sender(sequence, resultingOperation));
+            }
+            }
+        catch (Exception e)
+            {
+            LOGGER.log(Level.SEVERE, "Exception while executing remote operation", e);
+            throw new RuntimeException("Bedrock failed to execute remote operation", e);
             }
         }
     }
