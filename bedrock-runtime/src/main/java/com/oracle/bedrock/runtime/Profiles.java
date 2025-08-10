@@ -124,13 +124,13 @@ public class Profiles
                     }
                 }
             }
-
-            ServiceLoader<Profile> loader = ServiceLoader.load(Profile.class);
-            for (Profile profile : loader)
-            {
-                profiles.add(profile);
-            }
         }
+
+        ServiceLoader<Profile> loader = ServiceLoader.load(Profile.class);
+        for (Profile profile : loader)
+            {
+            profiles.add(profile);
+            }
 
         profiles.sort(Profile.ProfileOrderer.INSTANCE);
         return profiles;
